@@ -65,17 +65,13 @@ public:
         boss_high_king_maulgarAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            ArcingSmash_Timer = 0;
+            MightyBlow_Timer = 0;
+            Whirlwind_Timer = 0;
+            Charging_Timer = 0;
+            Roar_Timer = 0;
+            Phase2 = false;
         }
-
-        InstanceScript* instance;
-
-        uint32 ArcingSmash_Timer;
-        uint32 MightyBlow_Timer;
-        uint32 Whirlwind_Timer;
-        uint32 Charging_Timer;
-        uint32 Roar_Timer;
-
-        bool Phase2;
 
         void Reset() OVERRIDE
         {
@@ -179,6 +175,15 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+        uint32 ArcingSmash_Timer;
+        uint32 MightyBlow_Timer;
+        uint32 Whirlwind_Timer;
+        uint32 Charging_Timer;
+        uint32 Roar_Timer;
+        bool Phase2;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -197,13 +202,10 @@ public:
         boss_olm_the_summonerAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            DarkDecay_Timer = 0;
+            Summon_Timer = 0;
+            DeathCoil_Timer = 0;
         }
-
-        uint32 DarkDecay_Timer;
-        uint32 Summon_Timer;
-           uint32 DeathCoil_Timer;
-
-        InstanceScript* instance;
 
         void Reset() OVERRIDE
         {
@@ -274,6 +276,12 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+        uint32 DarkDecay_Timer;
+        uint32 Summon_Timer;
+        uint32 DeathCoil_Timer;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -293,14 +301,11 @@ public:
         boss_kiggler_the_crazedAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            GreaterPolymorph_Timer = 0;
+            LightningBolt_Timer = 0;
+            ArcaneShock_Timer = 0;
+            ArcaneExplosion_Timer = 0;
         }
-
-        uint32 GreaterPolymorph_Timer;
-        uint32 LightningBolt_Timer;
-        uint32 ArcaneShock_Timer;
-        uint32 ArcaneExplosion_Timer;
-
-        InstanceScript* instance;
 
         void Reset() OVERRIDE
         {
@@ -337,7 +342,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_GREATER_POLYMORPH);
 
-                GreaterPolymorph_Timer = urand(15000, 20000);
+                GreaterPolymorph_Timer = std::rand() % 20000 + 15000;
             } else GreaterPolymorph_Timer -= diff;
 
             //LightningBolt_Timer
@@ -363,6 +368,13 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+        uint32 GreaterPolymorph_Timer;
+        uint32 LightningBolt_Timer;
+        uint32 ArcaneShock_Timer;
+        uint32 ArcaneExplosion_Timer;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -381,19 +393,16 @@ public:
         boss_blindeye_the_seerAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            GreaterPowerWordShield_Timer = 0;
+            Heal_Timer = 0;
+            PrayerofHealing_Timer = 0;
         }
-
-        uint32 GreaterPowerWordShield_Timer;
-        uint32 Heal_Timer;
-        uint32 PrayerofHealing_Timer;
-
-        InstanceScript* instance;
 
         void Reset() OVERRIDE
         {
             GreaterPowerWordShield_Timer = 5000;
-            Heal_Timer = urand(25000, 40000);
-            PrayerofHealing_Timer = urand(45000, 55000);
+            Heal_Timer = std::rand() % 40000 + 25000;
+            PrayerofHealing_Timer = std::rand() % 55000 + 45000;
 
             instance->SetBossState(DATA_MAULGAR, NOT_STARTED);
         }
@@ -412,7 +421,7 @@ public:
             instance->SetBossState(DATA_MAULGAR, DONE);
         }
 
-         void UpdateAI(uint32 diff) OVERRIDE
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             if (!UpdateVictim())
                 return;
@@ -428,18 +437,24 @@ public:
             if (Heal_Timer <= diff)
             {
                 DoCast(me, SPELL_HEAL);
-                Heal_Timer = urand(15000, 40000);
+                Heal_Timer = std::rand() % 40000 + 15000;
             } else Heal_Timer -= diff;
 
             //PrayerofHealing_Timer
             if (PrayerofHealing_Timer <= diff)
             {
                 DoCast(me, SPELL_PRAYER_OH);
-                PrayerofHealing_Timer = urand(35000, 50000);
+                PrayerofHealing_Timer = std::rand() % 50000 + 35000;
             } else PrayerofHealing_Timer -= diff;
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+        uint32 GreaterPowerWordShield_Timer;
+        uint32 Heal_Timer;
+        uint32 PrayerofHealing_Timer;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -458,13 +473,10 @@ public:
         boss_krosh_firehandAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            GreaterFireball_Timer = 0;
+            SpellShield_Timer = 0;
+            BlastWave_Timer = 0;
         }
-
-        uint32 GreaterFireball_Timer;
-        uint32 SpellShield_Timer;
-        uint32 BlastWave_Timer;
-
-        InstanceScript* instance;
 
         void Reset() OVERRIDE
         {
@@ -531,6 +543,12 @@ public:
                 BlastWave_Timer = 60000;
             } else BlastWave_Timer -= diff;
         }
+
+    private:
+        InstanceScript* instance;
+        uint32 GreaterFireball_Timer;
+        uint32 SpellShield_Timer;
+        uint32 BlastWave_Timer;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

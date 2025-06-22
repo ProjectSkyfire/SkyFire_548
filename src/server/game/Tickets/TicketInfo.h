@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_TICKETINFO_H
 #define SF_TICKETINFO_H
 
-#include <string>
 #include <ace/Singleton.h>
+#include <string>
 
 #include "ObjectMgr.h"
 
@@ -91,10 +91,10 @@ public:
     Player* GetPlayer() const { return ObjectAccessor::FindPlayer(_playerGuid); }
     Player* GetAssignedPlayer() const { return ObjectAccessor::FindPlayer(_assignedTo); }
 
-    void SetComment(std::string comment){ _comment = comment; }
+    void SetComment(std::string comment) { _comment = comment; }
     void SetPosition(uint32 MapID, G3D::Vector3 pos);
     void SetClosedBy(uint64 closer) { _closedBy = closer; }
-    void SetComment(std::string &comment) { _comment = comment; }
+    void SetComment(std::string& comment) { _comment = comment; }
 
     void TeleportTo(Player* player) const;
 
@@ -137,7 +137,7 @@ public:
     void SetGmAction(bool needResponse, bool haveTicket);
 
     bool IsCompleted() const { return _completed; }
-    bool GetViewed(){ return _viewed; }
+    bool GetViewed() const { return _viewed; }
 
     void  LoadFromDB(Field* fields) OVERRIDE;
     void  SaveToDB(SQLTransaction& trans) const OVERRIDE;

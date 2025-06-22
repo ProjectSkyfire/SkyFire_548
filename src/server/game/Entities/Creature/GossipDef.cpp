@@ -1,15 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "QuestDef.h"
+#include "Formulas.h"
 #include "GossipDef.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
+#include "QuestDef.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Formulas.h"
 
 void GossipMenu::AddMenuItem(int32 menuItemId, uint8 icon, std::string const& message, uint32 sender, uint32 action, std::string const& boxMessage, uint32 boxMoney, bool coded /*= false*/)
 {
@@ -33,13 +33,13 @@ void GossipMenu::AddMenuItem(int32 menuItemId, uint8 icon, std::string const& me
 
     GossipMenuItem& menuItem = _menuItems[menuItemId];
 
-    menuItem.MenuItemIcon    = icon;
-    menuItem.Message         = message;
-    menuItem.IsCoded         = coded;
-    menuItem.Sender          = sender;
-    menuItem.OptionType      = action;
-    menuItem.BoxMessage      = boxMessage;
-    menuItem.BoxMoney        = boxMoney;
+    menuItem.MenuItemIcon = icon;
+    menuItem.Message = message;
+    menuItem.IsCoded = coded;
+    menuItem.Sender = sender;
+    menuItem.OptionType = action;
+    menuItem.BoxMessage = boxMessage;
+    menuItem.BoxMoney = boxMoney;
 }
 
 /**
@@ -88,8 +88,8 @@ void GossipMenu::AddGossipMenuItemData(uint32 menuItemId, uint32 gossipActionMen
 {
     GossipMenuItemData& itemData = _menuItemData[menuItemId];
 
-    itemData.GossipActionMenuId  = gossipActionMenuId;
-    itemData.GossipActionPoi     = gossipActionPoi;
+    itemData.GossipActionMenuId = gossipActionMenuId;
+    itemData.GossipActionPoi = gossipActionPoi;
 }
 
 uint32 GossipMenu::GetMenuItemSender(uint32 menuItemId) const
@@ -162,8 +162,8 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
 
         int32 locale = _session->GetSessionDbLocaleIndex();
         if (locale >= 0)
-        if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(questId))
-            ObjectMgr::GetLocaleString(localeData->Title, locale, title);
+            if (QuestLocale const* localeData = sObjectMgr->GetQuestLocale(questId))
+                ObjectMgr::GetLocaleString(localeData->Title, locale, title);
 
         if (questLevelInTitle)
             AddQuestLevelToTitle(title, quest->GetQuestLevel());
@@ -281,8 +281,8 @@ void QuestMenu::AddMenuItem(uint32 QuestId, uint8 Icon)
 
     QuestMenuItem questMenuItem;
 
-    questMenuItem.QuestId        = QuestId;
-    questMenuItem.QuestIcon      = Icon;
+    questMenuItem.QuestId = QuestId;
+    questMenuItem.QuestIcon = Icon;
 
     _questMenuItems.push_back(questMenuItem);
 }
@@ -393,13 +393,13 @@ void PlayerMenu::SendQuestGiverStatus(uint32 questStatus, uint64 npcGUID) const
 
 void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, bool activateAccept) const
 {
-    std::string questTitle           = quest->GetTitle();
-    std::string questDetails         = quest->GetDetails();
-    std::string questObjectives      = quest->GetObjectives();
+    std::string questTitle = quest->GetTitle();
+    std::string questDetails = quest->GetDetails();
+    std::string questObjectives = quest->GetObjectives();
     std::string questGiverTextWindow = quest->GetQuestGiverTextWindow();
     std::string questGiverTargetName = quest->GetQuestGiverTargetName();
-    std::string questTurnTextWindow  = quest->GetQuestTurnTextWindow();
-    std::string questTurnTargetName  = quest->GetQuestTurnTargetName();
+    std::string questTurnTextWindow = quest->GetQuestTurnTextWindow();
+    std::string questTurnTargetName = quest->GetQuestTurnTargetName();
 
     int32 locale = _session->GetSessionDbLocaleIndex();
     if (locale >= 0)
@@ -1065,7 +1065,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGuid, 
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%u, questid=%u", GUID_LOPART(npcGuid), quest->GetQuestId());
 }
 
-void PlayerMenu::AddQuestLevelToTitle(std::string &title, int32 level)
+void PlayerMenu::AddQuestLevelToTitle(std::string& title, int32 level)
 {
     // Adds the quest level to the front of the quest title
     // example: [13] Westfall Stew

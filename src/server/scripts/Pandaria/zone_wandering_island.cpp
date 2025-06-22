@@ -500,7 +500,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
             while (uint32 eventId = events.ExecuteEvent())
@@ -600,6 +600,7 @@ public:
                     {
                         me->HandleEmoteCommand(EMOTE_ONESHOT_KNEEL);
                         events.ScheduleEvent(EVENT_MASTER_SHANG_XI_WOODS_CREDIT, 2000);
+                        break;
                     }
                     case EVENT_MASTER_SHANG_XI_WOODS_CREDIT:
                     {
@@ -653,7 +654,7 @@ public:
                 }
             }
         }
-        void UpdateAI(uint32 /*diff*/)
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
         {
             DoMeleeAttackIfReady();
         }
@@ -755,7 +756,7 @@ public:
                     break;
             }
         }
-        void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
             while (uint32 eventId = events.ExecuteEvent())
@@ -1433,7 +1434,7 @@ public:
                     players.push_back(player);
         }
         
-        void MoveInLineOfSight(Unit* who)
+        void MoveInLineOfSight(Unit* who) OVERRIDE
         {
             Player* const player = who->ToPlayer();
             if (!player)
@@ -1479,7 +1480,7 @@ public:
                 {
                     uint8 newPlace = 0;
 
-                    newPlace = urand(0, 3);
+                    newPlace = std::rand() % 3;
 
                     switch (newPlace)
                     {
@@ -1748,13 +1749,12 @@ public:
 
         npc_master_shang_xi_templeAI(Creature* creature) : CreatureAI(creature) { }
 
-
-
         void Reset() OVERRIDE
         {
             started = false;
         }
-        void MoveInLineOfSight(Unit* who)
+
+        void MoveInLineOfSight(Unit* who) OVERRIDE
         {
             Player* const player = who->ToPlayer();
             if (!player)
@@ -2037,6 +2037,7 @@ public:
                     me->MonsterTextEmote("Master Li Fei's voice echoes, \"If you find these things and bring them to his cave, on the far side of Wu - Song Village, you will face a challenge within.\"", me, false);
                     me->GetMotionMaster()->MovePoint(5, LiFeiMovePos5);
                     events.ScheduleEvent(EVENT_LI_FEI_MOVE_POS_6, 10000);
+                    break;
                 case EVENT_LI_FEI_MOVE_POS_6:
                     me->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                     me->MonsterTextEmote("Master Li Fei's voice echoes, \"Overcome that challenge, and you shall be graced by Huo's presence. Rekindle his flame, and if your spirit is pure, he shall follow you.\"", me, false);
@@ -2099,23 +2100,6 @@ public:
             started = false;
         }
 
-        void MoveInLineOfSight(Unit* who)
-        {
-            Player* const player = who->ToPlayer();
-            if (!player)
-                return;
-
-            if (player->GetQuestStatus(29414) != QUEST_STATUS_INCOMPLETE || started)
-                return;
-
-            if (me->GetAreaId() == 5848) // Cave of Meditation Area
-            {
-                started = true;
-                events.ScheduleEvent(EVENT_POWER, 1000);
-                events.ScheduleEvent(EVENT_ADDS, 1000);
-            }
-        }
-
         void UpdatePlayerList()
         {
             playersParticipate.clear();
@@ -2130,14 +2114,33 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            if (playersParticipate.empty())
+            {
+                UpdatePlayerList();
+                return;
+            }
+            else
+            {
+                for (auto&& player : playersParticipate)
+                {
+                    if (!started && player->GetQuestStatus(29414) == QUEST_STATUS_INCOMPLETE)
+                    {
+                        if (me->GetAreaId() == 5848) // Cave of Meditation Area
+                        {
+                            started = true;
+                            events.ScheduleEvent(EVENT_POWER, 1000);
+                            events.ScheduleEvent(EVENT_ADDS, 1000);
+                        }
+                    }
+                }
+            }
+
             events.Update(diff);
             while (uint32 eventId = events.ExecuteEvent())
             {
-                switch (eventId) {
-                case EVENT_POWER:
+                switch (eventId)
                 {
-                    UpdatePlayerList();
-                    if (!playersParticipate.empty())
+                    case EVENT_POWER:
                     {
                         Power++;
 
@@ -2155,38 +2158,38 @@ public:
 
                         if (Power >= 90)
                             events.ScheduleEvent(EVENT_FINISHED, 100);
+
+                        events.ScheduleEvent(EVENT_POWER, 1000);
+                        break;
                     }
-                    events.ScheduleEvent(EVENT_POWER, 1000);
-                    break;
-                }
-                case EVENT_ADDS:
-                {
-                    for (uint8 i = 0; i < 2; ++i)
+                    case EVENT_ADDS:
                     {
-                        if (Creature* troublemaker = me->SummonCreature(61801, AddSpawnPos[i], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                        for (uint8 i = 0; i < 2; ++i)
                         {
-                            troublemaker->GetMotionMaster()->MovePoint(0, AddPointPos[i]);
+                            if (Creature* troublemaker = me->SummonCreature(61801, AddSpawnPos[i], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                            {
+                                troublemaker->GetMotionMaster()->MovePoint(0, AddPointPos[i]);
+                            }
                         }
+                        events.ScheduleEvent(EVENT_ADDS, 60000);
+                        break;
                     }
-                    events.ScheduleEvent(EVENT_ADDS, 60000);
-                    break;
-                }
-                case EVENT_FINISHED:
-                {
-                    Talk(1);
-                    events.CancelEvent(EVENT_POWER);
-                    events.CancelEvent(EVENT_ADDS);
-                    for (auto&& player : playersParticipate)
+                    case EVENT_FINISHED:
                     {
-                        player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
-                        player->KilledMonsterCredit(54856, 0);
-                        player->RemoveAura(116421);
+                        Talk(1);
+                        events.CancelEvent(EVENT_POWER);
+                        events.CancelEvent(EVENT_ADDS);
+                        for (auto&& player : playersParticipate)
+                        {
+                            player->CastSpell(player, SPELL_SEE_QUEST_INVIS_7);
+                            player->KilledMonsterCredit(54856, 0);
+                            player->RemoveAura(116421);
+                        }
+                        Reset();
+                        break;
                     }
-                    Reset();
-                    break;
-                }
-                default:
-                    break;
+                    default:
+                        break;
                 }
             }
         }
@@ -2294,6 +2297,179 @@ public:
     }
 };
 
+class npc_jaomin_ro : public CreatureScript
+{
+    public:
+        npc_jaomin_ro() : CreatureScript("npc_jaomin_ro") { }
+ 
+        struct npc_jaomin_roAI : public ScriptedAI
+        {
+            npc_jaomin_roAI(Creature* creature) : ScriptedAI(creature) { }
+ 
+            enum eEvents
+            {
+                EVENT_JAOMIN_JUMP   = 1,
+                EVENT_JAOMIN_JUMP_DAMAGE = 2,
+                EVENT_FALCON        = 3,
+                EVENT_FALCON_VEHICLE = 4,
+                EVENT_FALCON_VEHICLE_EXIT = 5,
+                EVENT_FALCON_STUN = 6,
+                EVENT_FALCON_STOP  =7,
+                EVENT_END_OF_COMBAT = 8
+            };
+ 
+            EventMap events;
+ 
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_JAOMIN_JUMP, 2000);
+            }
+ 
+            void Reset() OVERRIDE
+            {
+                events.Reset();
+            }
+ 
+            void MoveInLineOfSight(Unit*  who) OVERRIDE
+            {
+                Player * const player = who->ToPlayer();
+                if (!player)
+                    return;
+ 
+                if (player->GetQuestStatus(29409) != QUEST_STATUS_INCOMPLETE)
+                    return;
+ 
+                if (who->GetDistance(me) < 15.f)
+                {
+                    if (me->getStandState() != UNIT_STAND_STATE_STAND)
+                    {
+                        Talk(0);
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                    }
+                }
+            }
+ 
+            void DamageTaken(Unit* attacker, uint32& damage) OVERRIDE
+            {
+                if (HealthBelowPct(10))
+                {
+                    std::list<Player*> playerList;
+                    GetPlayerListInGrid(playerList, me, 10.0f);
+                    for (auto&& player: playerList)
+                        player->KilledMonsterCredit(me->GetEntry(), 0);
+ 
+                    me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+                    Talk(1);
+                    
+                    if (damage > me->GetHealth())
+                        damage = 0;
+                    
+                    events.CancelEvent(EVENT_JAOMIN_JUMP);
+                    events.CancelEvent(EVENT_JAOMIN_JUMP_DAMAGE);
+                    events.CancelEvent(EVENT_FALCON);
+                    events.CancelEvent(EVENT_FALCON_VEHICLE);
+                    events.CancelEvent(EVENT_FALCON_VEHICLE_EXIT);
+                    events.CancelEvent(EVENT_FALCON_STUN);
+                    events.CancelEvent(EVENT_FALCON_STOP);
+
+                    events.ScheduleEvent(EVENT_END_OF_COMBAT, 1000);
+                }
+ 
+            }
+ 
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                if (!UpdateVictim())
+                    return;
+                
+                events.Update(diff);
+ 
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_JAOMIN_JUMP:
+                        {
+                            me->CastSpell(me->GetVictim(), 108938);
+                            events.ScheduleEvent(EVENT_JAOMIN_JUMP_DAMAGE, 2500);
+                            break;
+                        }
+                        case EVENT_JAOMIN_JUMP_DAMAGE:
+                        {
+                            me->GetMotionMaster()->MoveJump(me->GetVictim()->GetPositionX(),me->GetVictim()->GetPositionY(),me->GetVictim()->GetPositionZ(), 20.0f, 20.0f);
+                            me->CastSpell(me->GetVictim(), 108937);
+                            std::list<Player*> playerList;
+                            GetPlayerListInGrid(playerList, me, 5.0f);
+                            for (auto&& player : playerList)
+                            {
+                                float horizontalSpeed = 10.0f;
+                                float verticalSpeed = 8.0f;
+                                player->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), horizontalSpeed, verticalSpeed);
+                            }
+                            events.ScheduleEvent(EVENT_FALCON, 10000);
+                            break;
+                        }
+                        case EVENT_FALCON:
+                        {
+                                
+                            me->CastSpell(me, 108955);
+                            if (Creature* hawk = me->SummonCreature(57750, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0.0f, TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 3000))
+                            {
+                                hawk->SetDisplayId(39796);
+                                me->EnterVehicle(hawk, 0);
+                            }
+                            events.ScheduleEvent(EVENT_FALCON_VEHICLE, 1000);
+                            break;
+                        }
+                        case EVENT_FALCON_VEHICLE:
+                        {
+                            if (Creature* hawk = me->FindNearestCreature(57750, 25.0f))
+                            {
+                                float x, y, z;
+                                me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 20.0f);
+                                hawk->GetMotionMaster()->MoveCharge(x,y,z);
+                            }
+                            events.ScheduleEvent(EVENT_FALCON_VEHICLE_EXIT, 1000);
+                            break;
+                        }
+                        case EVENT_FALCON_VEHICLE_EXIT:
+                        {
+                            me->ExitVehicle();
+                            events.ScheduleEvent(EVENT_FALCON_STUN, 1000);
+                            break;
+                        }
+                        case EVENT_FALCON_STUN:
+                        {
+                            me->CastSpell(me->GetVictim(), 108971);
+                            events.ScheduleEvent(EVENT_FALCON_STOP, 2000);
+                            break;
+                        }
+                        case EVENT_FALCON_STOP:
+                        {
+                            me->RemoveAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                            events.ScheduleEvent(EVENT_JAOMIN_JUMP, 10000);
+                            break;
+                        }
+                        case EVENT_END_OF_COMBAT:
+                        {
+                            EnterEvadeMode();
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+ 
+                DoMeleeAttackIfReady();
+            }
+        };
+ 
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_jaomin_roAI(creature);
+        }
+};
+
 void AddSC_wandering_island()
 {
     new npc_hot_air_balloon_vehicle();
@@ -2315,4 +2491,5 @@ void AddSC_wandering_island()
     new npc_li_fei();
     new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
+    new npc_jaomin_ro();
 }

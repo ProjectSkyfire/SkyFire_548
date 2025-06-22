@@ -1,3 +1,6 @@
+#ifndef ACE_UPIPE_STREAM_CPP
+#define ACE_UPIPE_STREAM_CPP
+
 #include "ace/UPIPE_Stream.h"
 
 #if defined (ACE_HAS_THREADS)
@@ -228,3 +231,5 @@ ACE_UPIPE_Stream::recv_n (char *buf,
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* ACE_HAS_THREADS */
+
+#endif /* ACE_UPIPE_STREAM_CPP */

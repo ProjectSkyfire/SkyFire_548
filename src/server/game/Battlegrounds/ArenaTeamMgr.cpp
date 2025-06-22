@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Define.h"
 #include "ArenaTeamMgr.h"
-#include "World.h"
-#include "Log.h"
 #include "DatabaseEnv.h"
+#include "Define.h"
 #include "Language.h"
+#include "Log.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "World.h"
 
 ArenaTeamMgr::~ArenaTeamMgr()
 {

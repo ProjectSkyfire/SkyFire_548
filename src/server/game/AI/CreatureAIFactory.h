@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,9 +7,9 @@
 #define SKYFIRE_CREATUREAIFACTORY_H
 
 //#include "Policies/Singleton.h"
-#include "ObjectRegistry.h"
 #include "FactoryHolder.h"
 #include "GameObjectAI.h"
+#include "ObjectRegistry.h"
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
 {

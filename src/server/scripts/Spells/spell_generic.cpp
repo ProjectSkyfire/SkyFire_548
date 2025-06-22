@@ -25,6 +25,35 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
+// 125122 - Rice Pudding
+class spell_gen_rice_pudding : public SpellScriptLoader
+{
+public:
+    spell_gen_rice_pudding() : SpellScriptLoader("spell_gen_rice_pudding") { }
+
+    class spell_gen_rice_pudding_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_rice_pudding_SpellScript)
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            GetCaster()->ToPlayer()->KilledMonsterCredit(npcRicePudding);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectLaunch += SpellEffectFn(spell_gen_rice_pudding_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_CREATE_ITEM);
+        }
+    private:
+        const uint32 npcRicePudding = 64234;
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_gen_rice_pudding_SpellScript();
+    }
+};
+
 const Position jumpPosC = { 1063.56f, 2843.46f, 95.2332, 0.0f };
 class spell_gen_rock_jump_c : public SpellScriptLoader
 {
@@ -1580,7 +1609,7 @@ class spell_gen_elune_candle : public SpellScriptLoader
 
                 if (GetHitUnit()->GetEntry() == NPC_OMEN)
                 {
-                    switch (urand(0, 3))
+                    switch (std::rand() % 3)
                     {
                         case 0:
                             spellId = SPELL_ELUNE_CANDLE_OMEN_HEAD;
@@ -1642,7 +1671,7 @@ class spell_gen_gadgetzan_transporter_backfire : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                int32 r = irand(0, 119);
+                int32 r = std::rand() % 119;
                 if (r < 20)                           // Transporter Malfunction - 1/6 polymorph
                     caster->CastSpell(caster, SPELL_TRANSPORTER_MALFUNCTION_POLYMORPH, true);
                 else if (r < 100)                     // Evil Twin               - 4/6 evil twin
@@ -1881,35 +1910,6 @@ class spell_gen_launch : public SpellScriptLoader
         SpellScript* GetSpellScript() const OVERRIDE
         {
             return new spell_gen_launch_SpellScript();
-        }
-};
-
-class spell_gen_increase_stats_buff : public SpellScriptLoader
-{
-    public:
-        spell_gen_increase_stats_buff(char const* scriptName) : SpellScriptLoader(scriptName) { }
-
-        class spell_gen_increase_stats_buff_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_gen_increase_stats_buff_SpellScript);
-
-            void HandleDummy(SpellEffIndex /*effIndex*/)
-            {
-                if (GetHitUnit()->IsInRaidWith(GetCaster()))
-                    GetCaster()->CastSpell(GetCaster(), GetEffectValue() + 1, true); // raid buff
-                else
-                    GetCaster()->CastSpell(GetHitUnit(), GetEffectValue(), true); // single-target buff
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHitTarget += SpellEffectFn(spell_gen_increase_stats_buff_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_gen_increase_stats_buff_SpellScript();
         }
 };
 
@@ -2174,7 +2174,7 @@ class spell_gen_netherbloom : public SpellScriptLoader
                         if (target->HasAura(SPELL_NETHERBLOOM_POLLEN_1 + i))
                             return;
 
-                    target->CastSpell(target, SPELL_NETHERBLOOM_POLLEN_1 + urand(0, 4), true);
+                    target->CastSpell(target, SPELL_NETHERBLOOM_POLLEN_1 + (std::rand() % 4), true);
                 }
             }
 
@@ -2776,7 +2776,7 @@ class spell_gen_pet_summoned : public SpellScriptLoader
                 Player* player = GetCaster()->ToPlayer();
                 if (player->GetLastPetNumber())
                 {
-                    PetType newPetType = (player->getClass() == CLASS_HUNTER) ? HUNTER_PET : SUMMON_PET;
+                    PetType newPetType = (player->getClass() == CLASS_HUNTER) ? PetType::HUNTER_PET : PetType::SUMMON_PET;
                     if (Pet* newPet = new Pet(player, newPetType))
                     {
                         if (newPet->LoadPetFromDB(player, 0, player->GetLastPetNumber(), true))
@@ -3070,7 +3070,7 @@ class spell_gen_spectator_cheer_trigger : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                GetCaster()->HandleEmoteCommand(EmoteArray[urand(0, 2)]);
+                GetCaster()->HandleEmoteCommand(EmoteArray[std::rand() % 2]);
             }
 
             void Register() OVERRIDE
@@ -3462,7 +3462,7 @@ class spell_gen_upper_deck_create_foam_sword : public SpellScriptLoader
                             return;
                     }
 
-                    CreateItem(effIndex, itemId[urand(0, 4)]);
+                    CreateItem(effIndex, itemId[std::rand() % 4]);
                 }
             }
 
@@ -3684,6 +3684,7 @@ class spell_gen_override_display_power : public SpellScriptLoader
 
 void AddSC_generic_spell_scripts()
 {
+    new spell_gen_rice_pudding();
     new spell_gen_rock_jump_a();
     new spell_gen_rock_jump_b();
     new spell_gen_rock_jump_c();
@@ -3723,12 +3724,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_gift_of_naaru();
     new spell_gen_gnomish_transporter();
     new spell_gen_gunship_portal();
-    new spell_gen_increase_stats_buff("spell_pal_blessing_of_kings");
-    new spell_gen_increase_stats_buff("spell_pal_blessing_of_might");
-    new spell_gen_increase_stats_buff("spell_dru_mark_of_the_wild");
-    new spell_gen_increase_stats_buff("spell_pri_power_word_fortitude");
-    new spell_gen_increase_stats_buff("spell_mage_arcane_brilliance");
-    new spell_gen_increase_stats_buff("spell_mage_dalaran_brilliance");
     new spell_gen_interrupt();
     new spell_gen_launch();
     new spell_gen_lifebloom("spell_hexlord_lifebloom", SPELL_HEXLORD_MALACRASS_LIFEBLOOM_FINAL_HEAL);

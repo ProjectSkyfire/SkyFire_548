@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -12,9 +12,9 @@ EndScriptData */
 
 #include "AchievementMgr.h"
 #include "Chat.h"
-#include "Language.h"
 #include "Guild.h"
 #include "GuildMgr.h"
+#include "Language.h"
 #include "ObjectAccessor.h"
 #include "ScriptMgr.h"
 
@@ -187,7 +187,7 @@ public:
         if (!*_args)
             return false;
 
-        char *args = (char *)_args;
+        char* args = (char*)_args;
 
         char const* oldGuildStr = handler->extractQuotedArg(args);
         if (!oldGuildStr)

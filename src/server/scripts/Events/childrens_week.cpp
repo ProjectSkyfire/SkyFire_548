@@ -962,7 +962,7 @@ class npc_cw_area_trigger : public CreatureScript
                                             if (Creature* samuro = me->FindNearestCreature(25151, 20.0f))
                                             {
                                                 uint32 emote = 0;
-                                                switch (urand(1, 5))
+                                                switch (std::rand() % 5 + 1)
                                                 {
                                                     case 1:
                                                         emote = EMOTE_ONESHOT_WAVE;

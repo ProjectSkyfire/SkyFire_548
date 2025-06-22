@@ -1,21 +1,21 @@
 
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Chat.h"
 #include "Common.h"
+#include "DatabaseEnv.h"
+#include "Language.h"
+#include "Log.h"
+#include "Opcodes.h"
+#include "Player.h"
 #include "TicketInfo.h"
 #include "TicketMgr.h"
-#include "DatabaseEnv.h"
-#include "Log.h"
-#include "Language.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Chat.h"
-#include "World.h"
-#include "Player.h"
-#include "Opcodes.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // @ TicketInfo
@@ -29,7 +29,7 @@ TicketInfo::~TicketInfo() { }
 
 void TicketInfo::TeleportTo(Player* player) const
 {
-   player->TeleportTo(_mapId, _pos.x, _pos.y, _pos.z, 0.0f, 0);
+    player->TeleportTo(_mapId, _pos.x, _pos.y, _pos.z, 0.0f, 0);
 }
 
 std::string TicketInfo::GetAssignedToName() const
@@ -55,7 +55,7 @@ _openedByGmStatus(GMTicketOpenedByGMStatus::GMTICKET_OPENEDBYGM_STATUS_NOT_OPENE
 _needResponse(false), _haveTicket(false) { }
 
 GmTicket::GmTicket(Player* player) : TicketInfo(player), _lastModifiedTime(time(NULL)),
-_escalatedStatus(TICKET_UNASSIGNED),_openedByGmStatus(GMTicketOpenedByGMStatus::GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED),
+_escalatedStatus(TICKET_UNASSIGNED), _openedByGmStatus(GMTicketOpenedByGMStatus::GMTICKET_OPENEDBYGM_STATUS_NOT_OPENED),
 _completed(false), _viewed(false), _needResponse(false), _haveTicket(false)
 {
     _ticketId = sTicketMgr->GenerateGmTicketId();
@@ -344,8 +344,8 @@ void SuggestTicket::LoadFromDB(Field* fields)
     int64 closedBy = fields[++index].GetInt64();
     int64 assignedTo = fields[++index].GetUInt64();
 
-    _closedBy = closedBy < 0 ? 0: MAKE_NEW_GUID(uint64(closedBy), 0, HIGHGUID_PLAYER);
-    _assignedTo = assignedTo < 0? 0: MAKE_NEW_GUID(assignedTo, 0, HIGHGUID_PLAYER);
+    _closedBy = closedBy < 0 ? 0 : MAKE_NEW_GUID(uint64(closedBy), 0, HIGHGUID_PLAYER);
+    _assignedTo = assignedTo < 0 ? 0 : MAKE_NEW_GUID(assignedTo, 0, HIGHGUID_PLAYER);
     _comment = fields[++index].GetString();
 }
 

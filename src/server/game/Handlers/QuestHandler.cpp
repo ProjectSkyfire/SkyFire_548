@@ -1,23 +1,23 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Battleground.h"
 #include "Common.h"
+#include "GameObjectAI.h"
+#include "GossipDef.h"
+#include "Group.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "QuestDef.h"
+#include "ScriptMgr.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "Player.h"
-#include "GossipDef.h"
-#include "QuestDef.h"
-#include "ObjectAccessor.h"
-#include "Group.h"
-#include "Battleground.h"
-#include "ScriptMgr.h"
-#include "GameObjectAI.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
 {
@@ -44,7 +44,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
     uint32 questStatus = DIALOG_STATUS_NONE;
     uint32 defstatus = DIALOG_STATUS_NONE;
 
-    Object* questgiver = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+    Object* questgiver = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT);
     if (!questgiver)
     {
         SF_LOG_INFO("network", "Error in CMSG_QUEST_GIVER_STATUS_QUERY, called for non-existing questgiver (Typeid: %u GUID: %u)", uint8(GuidHigh2TypeId(GUID_HIPART(guid))), GUID_LOPART(guid));
@@ -53,10 +53,10 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
 
     switch (questgiver->GetTypeId())
     {
-    case TypeID::TYPEID_UNIT:
+        case TypeID::TYPEID_UNIT:
         {
             SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_GIVER_STATUS_QUERY for npc, guid = %u", uint32(GUID_LOPART(guid)));
-            Creature* cr_questgiver=questgiver->ToCreature();
+            Creature* cr_questgiver = questgiver->ToCreature();
             if (!cr_questgiver->IsHostileTo(_player))       // do not show quest status to enemies
             {
                 questStatus = sScriptMgr->GetDialogStatus(_player, cr_questgiver);
@@ -65,18 +65,18 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recvData)
             }
             break;
         }
-    case TypeID::TYPEID_GAMEOBJECT:
+        case TypeID::TYPEID_GAMEOBJECT:
         {
             SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_GIVER_STATUS_QUERY for GameObject guid = %u", uint32(GUID_LOPART(guid)));
-            GameObject* go_questgiver=(GameObject*)questgiver;
+            GameObject* go_questgiver = (GameObject*)questgiver;
             questStatus = sScriptMgr->GetDialogStatus(_player, go_questgiver);
             if (questStatus > 6)
                 questStatus = getDialogStatus(_player, go_questgiver, defstatus);
             break;
         }
-    default:
-        SF_LOG_ERROR("network", "QuestGiver called for unexpected type %u", uint8(questgiver->GetTypeId()));
-        break;
+        default:
+            SF_LOG_ERROR("network", "QuestGiver called for unexpected type %u", uint8(questgiver->GetTypeId()));
+            break;
     }
 
     //inform client about status of quest
@@ -158,7 +158,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_GIVER_ACCEPT_QUEST npc = %u, quest = %u", uint32(GUID_LOPART(guid)), questId);
 
-    Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT|TYPEMASK_ITEM|TYPEMASK_PLAYER);
+    Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT | TYPEMASK_ITEM | TYPEMASK_PLAYER);
 
 #define CLOSE_GOSSIP_CLEAR_DIVIDER() \
     do { \
@@ -247,11 +247,11 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
             switch (object->GetTypeId())
             {
-            case TypeID::TYPEID_UNIT:
-                object->ToCreature()->AI()->sQuestAccept(_player, quest);
-                break;
-            case TypeID::TYPEID_ITEM:
-            case TypeID::TYPEID_CONTAINER:
+                case TypeID::TYPEID_UNIT:
+                    object->ToCreature()->AI()->sQuestAccept(_player, quest);
+                    break;
+                case TypeID::TYPEID_ITEM:
+                case TypeID::TYPEID_CONTAINER:
                 {
                     Item* item = (Item*)object;
 
@@ -275,11 +275,11 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
 
                     break;
                 }
-            case TypeID::TYPEID_GAMEOBJECT:
-                object->ToGameObject()->AI()->QuestAccept(_player, quest);
-                break;
-            default:
-                break;
+                case TypeID::TYPEID_GAMEOBJECT:
+                    object->ToGameObject()->AI()->QuestAccept(_player, quest);
+                    break;
+                default:
+                    break;
             }
             _player->PlayerTalkClass->SendCloseGossip();
 
@@ -428,24 +428,24 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvData)
             return;
         }
     }
-    
+
     // QUEST_FLAGS_AUTO_SUBMIT
     if (!quest->HasFlag(QUEST_FLAGS_PLAYER_CAST_ACCEPT))
     {
-        object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+        object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT);
         if (!object || !object->hasInvolvedQuest(questId))
             return;
 
         // some kind of WPE protection
         if (!_player->CanInteractWithQuestGiver(object))
             return;
-	}
+    }
 
-    if ((!_player->CanSeeStartQuest(quest) &&  _player->GetQuestStatus(questId) == QUEST_STATUS_NONE) ||
+    if ((!_player->CanSeeStartQuest(quest) && _player->GetQuestStatus(questId) == QUEST_STATUS_NONE) ||
         (_player->GetQuestStatus(questId) != QUEST_STATUS_COMPLETE && !quest->IsAutoComplete()))
     {
         SF_LOG_ERROR("network", "Error in QUEST_STATUS_COMPLETE: player %s (guid %u) tried to complete quest %u, but is not allowed to do so (possible packet-hacking or high latency)",
-                        _player->GetName().c_str(), _player->GetGUIDLow(), questId);
+            _player->GetName().c_str(), _player->GetGUIDLow(), questId);
         return;
     }
     if (_player->CanRewardQuest(quest, reward, true))
@@ -532,7 +532,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode(WorldPacket& recvData)
 
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_GIVER_REQUEST_REWARD npc = %u, quest = %u", uint32(GUID_LOPART(guid)), questId);
 
-    Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+    Object* object = ObjectAccessor::GetObjectByTypeMask(*_player, guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT);
     if (!object || !object->hasInvolvedQuest(questId))
         return;
 
@@ -734,7 +734,7 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
     if (!quest)
         return;
 
-    Player * const sender = GetPlayer();
+    Player* const sender = GetPlayer();
 
     Group* group = sender->GetGroup();
     if (!group)
@@ -798,24 +798,21 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
 
 void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 {
-    uint64 guid;
-    uint32 questId;
-    uint8 msg;
-    recvPacket >> guid >> questId >> msg;
+    ObjectGuid guid;
+    uint32 questId = recvPacket.read<uint32>();
+    uint8 msg = recvPacket.read<uint8>();
+    recvPacket.ReadGuidMask(guid, 5, 3, 0, 6, 1, 2, 7, 4);
+    recvPacket.ReadGuidBytes(guid, 1, 2, 0, 5, 6, 4, 7, 3);
 
-    SF_LOG_DEBUG("network", "WORLD: Received MSG_QUEST_PUSH_RESULT");
+    SF_LOG_DEBUG("network", "WORLD: Received CMSG_QUEST_PUSH_RESULT");
 
-    if (_player->GetDivider() && _player->GetDivider() == guid)
+    if (_player->GetDivider())
     {
-        Player* player = ObjectAccessor::FindPlayer(_player->GetDivider());
-        if (player)
-        {
-            WorldPacket data(CMSG_QUEST_PUSH_RESULT, 8 + 4 + 1);
-            data << uint64(_player->GetGUID());
-            data << uint8(msg);                             // valid values: 0-8
-            player->SendDirectMessage(&data);
-            _player->SetDivider(0);
-        }
+        if (_player->GetDivider() == guid)
+            if (Player* player = ObjectAccessor::FindPlayerInOrOutOfWorld(_player->GetDivider()))
+                player->SendPushToPartyResponse(_player, msg);
+
+        _player->SetDivider(0);
     }
 }
 
@@ -828,22 +825,22 @@ uint32 WorldSession::getDialogStatus(Player* player, Object* questgiver, uint32 
 
     switch (questgiver->GetTypeId())
     {
-    case TypeID::TYPEID_GAMEOBJECT:
+        case TypeID::TYPEID_GAMEOBJECT:
         {
-            qr  = sObjectMgr->GetGOQuestRelationBounds(questgiver->GetEntry());
+            qr = sObjectMgr->GetGOQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetGOQuestInvolvedRelationBounds(questgiver->GetEntry());
             break;
         }
-    case TypeID::TYPEID_UNIT:
+        case TypeID::TYPEID_UNIT:
         {
-            qr  = sObjectMgr->GetCreatureQuestRelationBounds(questgiver->GetEntry());
+            qr = sObjectMgr->GetCreatureQuestRelationBounds(questgiver->GetEntry());
             qir = sObjectMgr->GetCreatureQuestInvolvedRelationBounds(questgiver->GetEntry());
             break;
         }
-    default:
-        //its imposible, but check ^)
-        SF_LOG_ERROR("network", "Warning: GetDialogStatus called for unexpected type %u", uint8(questgiver->GetTypeId()));
-        return DIALOG_STATUS_NONE;
+        default:
+            //its imposible, but check ^)
+            SF_LOG_ERROR("network", "Warning: GetDialogStatus called for unexpected type %u", uint8(questgiver->GetTypeId()));
+            return DIALOG_STATUS_NONE;
     }
 
     for (QuestRelations::const_iterator i = qir.first; i != qir.second; ++i)
@@ -1019,7 +1016,7 @@ void WorldSession::HandleQueryQuestsCompleted(WorldPacket& /*recvData*/)
     WorldPacket data(SMSG_QUERY_QUESTS_COMPLETED_RESPONSE, 4 + 4 * rew_count);
     data << uint32(rew_count);
 
-    const RewardedQuestSet &rewQuests = _player->getRewardedQuests();
+    const RewardedQuestSet& rewQuests = _player->getRewardedQuests();
     for (RewardedQuestSet::const_iterator itr = rewQuests.begin(); itr != rewQuests.end(); ++itr)
         data << uint32(*itr);
 

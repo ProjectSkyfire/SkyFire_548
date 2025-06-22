@@ -1,12 +1,12 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Opcodes.h"
-#include "WorldSession.h"
-#include "WorldPacket.h"
 #include "Config.h"
+#include "Opcodes.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 #define PLAYABLE_RACES_COUNT 15
 #define PLAYABLE_CLASSES_COUNT 11
@@ -47,12 +47,6 @@ uint8 classExpansion[PLAYABLE_CLASSES_COUNT][2] =
 
 void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queuePos)
 {
-    std::map<uint32, std::string> realmNamesToSend;
-
-    RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
-    if (iter != realmNameStore.end()) // Add local realm
-        realmNamesToSend[realmID] = iter->second;
-
     SF_LOG_DEBUG("network", "SMSG_AUTH_RESPONSE");
     WorldPacket packet(SMSG_AUTH_RESPONSE, 113);
 
@@ -60,15 +54,15 @@ void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queu
 
     if (code == ResponseCodes::AUTH_OK)
     {
-        packet.WriteBits(realmNamesToSend.size(), 21); // Send current realmId
+        packet.WriteBits(realmNameStore.size(), 21); // Send current realmId
 
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
         {
             packet.WriteBits(itr->second.size(), 8);
             std::string normalized = itr->second;
             normalized.erase(std::remove_if(normalized.begin(), normalized.end(), ::isspace), normalized.end());
             packet.WriteBits(normalized.size(), 8);
-            packet.WriteBit(itr->first == realmID); // Home realm
+            packet.WriteBit(itr->first == GetVirtualRealmID()); // Home realm
         }
 
         packet.WriteBits(PLAYABLE_CLASSES_COUNT, 23);
@@ -93,7 +87,7 @@ void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queu
 
     if (code == ResponseCodes::AUTH_OK)
     {
-        for (std::map<uint32, std::string>::const_iterator itr = realmNamesToSend.begin(); itr != realmNamesToSend.end(); ++itr)
+        for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
         {
             packet << uint32(itr->first);
             packet.WriteString(itr->second);
@@ -117,7 +111,7 @@ void WorldSession::SendAuthResponse(ResponseCodes code, bool queued, uint32 queu
         packet << uint32(0);
         packet << uint8(Expansion()); // Active Expansion
         packet << uint32(0);
-        packet << uint32(0);          // unk time in ms
+        packet << uint32(0);          // "Your playtime expires in %u minutes." Gossip Code Box Warning, 1 = 1min
         packet << uint8(Expansion()); // Server Expansion
         packet << uint32(0);
         packet << uint32(0);

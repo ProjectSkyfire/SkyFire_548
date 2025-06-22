@@ -1,9 +1,9 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
- /*
+/*
 #include "Player.h"
 #include "World.h"
 #include "WorldPacket.h"

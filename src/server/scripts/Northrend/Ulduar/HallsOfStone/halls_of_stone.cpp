@@ -223,7 +223,7 @@ public:
                             summon->CastSpell(target, DUNGEON_MODE(SPELL_DARK_MATTER, H_SPELL_DARK_MATTER), true);
                         }
                     }
-                    uiMarnakEncounterTimer = urand(30000, 31000);
+                    uiMarnakEncounterTimer = std::rand() % 31000 + 30000;
                 } else uiMarnakEncounterTimer -= diff;
             }
             if (bAbedneumActivated)
@@ -239,7 +239,7 @@ public:
                             summon->CastSpell(target, DUNGEON_MODE(SPELL_SEARING_GAZE, H_SPELL_SEARING_GAZE), true);
                         }
                     }
-                    uiAbedneumEncounterTimer = urand(30000, 31000);
+                    uiAbedneumEncounterTimer = std::rand() % 31000 + 30000;
                 } else uiAbedneumEncounterTimer -= diff;
             }
         }

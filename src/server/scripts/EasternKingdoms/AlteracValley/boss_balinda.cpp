@@ -100,7 +100,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            arcaneExplosionTimer      = urand(5 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+            arcaneExplosionTimer      = std::rand() % (15 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS);
             coneOfColdTimer           = 8 * IN_MILLISECONDS;
             fireBoltTimer             = 1 * IN_MILLISECONDS;
             frostboltTimer            = 4 * IN_MILLISECONDS;
@@ -148,25 +148,25 @@ public:
             if (arcaneExplosionTimer < diff)
             {
                 DoCastVictim(SPELL_ARCANE_EXPLOSION);
-                arcaneExplosionTimer =  urand(5 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+                arcaneExplosionTimer =  std::rand() % (15 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS);
             } else arcaneExplosionTimer -= diff;
 
             if (coneOfColdTimer < diff)
             {
                 DoCastVictim(SPELL_CONE_OF_COLD);
-                coneOfColdTimer = urand(10 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
+                coneOfColdTimer = std::rand() % (20 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS);
             } else coneOfColdTimer -= diff;
 
             if (fireBoltTimer < diff)
             {
                 DoCastVictim(SPELL_FIREBALL);
-                fireBoltTimer = urand(5 * IN_MILLISECONDS, 9 * IN_MILLISECONDS);
+                fireBoltTimer = std::rand() % (9 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS);
             } else fireBoltTimer -= diff;
 
             if (frostboltTimer < diff)
             {
                 DoCastVictim(SPELL_FROSTBOLT);
-                frostboltTimer = urand(4 * IN_MILLISECONDS, 12 * IN_MILLISECONDS);
+                frostboltTimer = std::rand() % (12 * IN_MILLISECONDS) + (4 * IN_MILLISECONDS);
             } else frostboltTimer -= diff;
 
             // check if creature is not outside of building

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -35,11 +35,11 @@ const std::string* GetRandomCharacterName(uint8 race, uint8 gender);
 
 enum ContentLevels
 {
-    CONTENT_1_60    = 0,
-    CONTENT_61_70   = 1,
-    CONTENT_71_80   = 2,
-    CONTENT_81_85   = 3,
-    CONTENT_86_90   = 4,
+    CONTENT_1_60 = 0,
+    CONTENT_61_70 = 1,
+    CONTENT_71_80 = 2,
+    CONTENT_81_85 = 3,
+    CONTENT_86_90 = 4,
     MAX_CONTENT
 };
 
@@ -49,8 +49,8 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId);
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
-void Zone2MapCoordinates(float &x, float &y, uint32 zone);
-void Map2ZoneCoordinates(float &x, float &y, uint32 zone);
+void Zone2MapCoordinates(float& x, float& y, uint32 zone);
+void Map2ZoneCoordinates(float& x, float& y, uint32 zone);
 uint32 GetClassBySkillId(uint32 skillId);
 uint32 GetSkillIdByClass(uint32 classId);
 std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 specializationId, uint32 minLevel, uint32 maxLevel);
@@ -59,7 +59,7 @@ std::vector<uint32> const* GetSpecializationSpells(uint32 specializationId);
 typedef std::unordered_map<uint32, std::unordered_map<uint32, MapDifficulty>> MapDifficultyMap;
 MapDifficulty const* GetDefaultMapDifficulty(uint32 mapId);
 MapDifficulty const* GetMapDifficultyData(uint32 mapId, DifficultyID difficulty);
-MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, DifficultyID &difficulty);
+MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, DifficultyID& difficulty);
 
 uint32 const* /*[MAX_TALENT_TABS]*/ GetClassSpecializations(uint8 classId);
 

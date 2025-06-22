@@ -89,20 +89,10 @@ class netherspite_infernal : public CreatureScript
 public:
     netherspite_infernal() : CreatureScript("netherspite_infernal") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new netherspite_infernalAI(creature);
-    }
-
     struct netherspite_infernalAI : public ScriptedAI
     {
         netherspite_infernalAI(Creature* creature) : ScriptedAI(creature),
             HellfireTimer(0), CleanupTimer(0), malchezaar(0), point(NULL) { }
-
-        uint32 HellfireTimer;
-        uint32 CleanupTimer;
-        uint64 malchezaar;
-        InfernalPoint *point;
 
         void Reset() OVERRIDE { }
         void EnterCombat(Unit* /*who*/) OVERRIDE { }
@@ -156,7 +146,19 @@ public:
         }
 
         void Cleanup();
+
+    public:
+        InfernalPoint* point;
+        uint64 malchezaar;
+    private:
+        uint32 HellfireTimer;
+        uint32 CleanupTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new netherspite_infernalAI(creature);
+    }
 };
 
 class boss_malchezaar : public CreatureScript
@@ -164,39 +166,40 @@ class boss_malchezaar : public CreatureScript
 public:
     boss_malchezaar() : CreatureScript("boss_malchezaar") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_malchezaarAI(creature);
-    }
-
     struct boss_malchezaarAI : public ScriptedAI
     {
         boss_malchezaarAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
             memset(axes, 0, sizeof(axes));
+
+            EnfeebleTimer = 0;
+            EnfeebleResetTimer = 0;
+            ShadowNovaTimer = 0;
+            SWPainTimer = 0;
+            SunderArmorTimer = 0;
+            AmplifyDamageTimer = 0;
+            Cleave_Timer = 0;
+            InfernalTimer = 0;
+            AxesTargetSwitchTimer = 0;
+            InfernalCleanupTimer = 0;
+
+            infernals = { };
+            positions = { };
+
+            for (uint8 i = 0; i < 2; i++)
+            {
+                axes[i] = 0;
+            }
+
+            for (uint8 j = 0; j < 5; j++)
+            {
+                enfeeble_targets[j] = 0;
+                enfeeble_health[j] = 0;
+            }
+
+            phase = 0;
         }
-
-        InstanceScript* instance;
-        uint32 EnfeebleTimer;
-        uint32 EnfeebleResetTimer;
-        uint32 ShadowNovaTimer;
-        uint32 SWPainTimer;
-        uint32 SunderArmorTimer;
-        uint32 AmplifyDamageTimer;
-        uint32 Cleave_Timer;
-        uint32 InfernalTimer;
-        uint32 AxesTargetSwitchTimer;
-        uint32 InfernalCleanupTimer;
-
-        std::vector<uint64> infernals;
-        std::vector<InfernalPoint*> positions;
-
-        uint64 axes[2];
-        uint64 enfeeble_targets[5];
-        uint32 enfeeble_health[5];
-
-        uint32 phase;
 
         void Reset() OVERRIDE
         {
@@ -222,8 +225,8 @@ public:
             Cleave_Timer = 8000;
             InfernalTimer = 40000;
             InfernalCleanupTimer = 47000;
-            AxesTargetSwitchTimer = urand(7500, 20000);
-            SunderArmorTimer = urand(5000, 10000);
+            AxesTargetSwitchTimer = std::rand() % 20000 + 7500;
+            SunderArmorTimer = std::rand() % 10000 + 5000;
             phase = 1;
 
             if (instance)
@@ -467,20 +470,20 @@ public:
                 if (SunderArmorTimer <= diff)
                 {
                     DoCastVictim(SPELL_SUNDER_ARMOR);
-                    SunderArmorTimer = urand(10000, 18000);
+                    SunderArmorTimer = std::rand() % 18000 + 10000;
                 } else SunderArmorTimer -= diff;
 
                 if (Cleave_Timer <= diff)
                 {
                     DoCastVictim(SPELL_CLEAVE);
-                    Cleave_Timer = urand(6000, 12000);
+                    Cleave_Timer = std::rand() % 12000 + 6000;
                 } else Cleave_Timer -= diff;
             }
             else
             {
                 if (AxesTargetSwitchTimer <= diff)
                 {
-                    AxesTargetSwitchTimer = urand(7500, 20000);
+                    AxesTargetSwitchTimer = std::rand() % 20000 + 7500;
 
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     {
@@ -503,7 +506,7 @@ public:
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                         DoCast(target, SPELL_AMPLIFY_DAMAGE);
-                    AmplifyDamageTimer = urand(20000, 30000);
+                    AmplifyDamageTimer = std::rand() % 30000 + 20000;
                 } else AmplifyDamageTimer -= diff;
             }
 
@@ -584,7 +587,34 @@ public:
 
             positions.push_back(point);
         }
+
+    private:
+        InstanceScript* instance;
+        uint32 EnfeebleTimer;
+        uint32 EnfeebleResetTimer;
+        uint32 ShadowNovaTimer;
+        uint32 SWPainTimer;
+        uint32 SunderArmorTimer;
+        uint32 AmplifyDamageTimer;
+        uint32 Cleave_Timer;
+        uint32 InfernalTimer;
+        uint32 AxesTargetSwitchTimer;
+        uint32 InfernalCleanupTimer;
+
+        std::vector<uint64> infernals;
+        std::vector<InfernalPoint*> positions;
+
+        uint64 axes[2];
+        uint64 enfeeble_targets[5];
+        uint32 enfeeble_health[5];
+
+        uint32 phase;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_malchezaarAI(creature);
+    }
 };
 
 void netherspite_infernal::netherspite_infernalAI::Cleanup()

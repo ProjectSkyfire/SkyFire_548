@@ -1,35 +1,36 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Cryptography/HMACSHA1.h"
-#include "Cryptography/WardenKeyGeneration.h"
+#include "AccountMgr.h"
+#include "ByteBuffer.h"
 #include "Common.h"
+#include "CryptoRandom.h"
+#include "Database/DatabaseEnv.h"
+#include "HMAC.h"
+#include "Log.h"
+#include "MD5.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "SessionKeyGenerator.h"
+#include "Util.h"
+#include "WardenCheckMgr.h"
+#include "WardenModuleWin.h"
+#include "WardenWin.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Log.h"
-#include "Opcodes.h"
-#include "ByteBuffer.h"
-#include "MD5.h"
-#include "Database/DatabaseEnv.h"
-#include "World.h"
-#include "Player.h"
-#include "Util.h"
-#include "WardenWin.h"
-#include "WardenModuleWin.h"
-#include "WardenCheckMgr.h"
-#include "AccountMgr.h"
 
 WardenWin::WardenWin() : Warden() { }
 
 WardenWin::~WardenWin() { }
 
-void WardenWin::Init(WorldSession* session, BigNumber* k)
+void WardenWin::Init(WorldSession* session, SessionKey const& k)
 {
     _session = session;
     // Generate Warden Key
-    SHA1Randx WK(k->AsByteArray(), k->GetNumBytes());
+    SessionKeyGenerator<SkyFire::Crypto::SHA1> WK(k);
     WK.Generate(_inputKey, 16);
     WK.Generate(_outputKey, 16);
 
@@ -38,21 +39,21 @@ void WardenWin::Init(WorldSession* session, BigNumber* k)
     _inputCrypto.Init(_inputKey, 16);
     _outputCrypto.Init(_outputKey, 16);
     SF_LOG_DEBUG("warden", "Server side warden for client %u initializing...", session->GetAccountId());
-    SF_LOG_DEBUG("warden", "C->S Key: %s", ByteArrayToHexStr(_inputKey, 16).c_str());
-    SF_LOG_DEBUG("warden", "S->C Key: %s", ByteArrayToHexStr(_outputKey, 16).c_str());
-    SF_LOG_DEBUG("warden", "  Seed: %s", ByteArrayToHexStr(_seed, 16).c_str());
+    SF_LOG_DEBUG("warden", "C->S Key: %s", SkyFire::Impl::ByteArrayToHexStr(_inputKey, 16).c_str());
+    SF_LOG_DEBUG("warden", "S->C Key: %s", SkyFire::Impl::ByteArrayToHexStr(_outputKey, 16).c_str());
+    SF_LOG_DEBUG("warden", "  Seed: %s", SkyFire::Impl::ByteArrayToHexStr(_seed, 16).c_str());
     SF_LOG_DEBUG("warden", "Loading Module...");
 
     _module = GetModuleForClient();
 
-    SF_LOG_DEBUG("warden", "Module Key: %s", ByteArrayToHexStr(_module->Key, 16).c_str());
-    SF_LOG_DEBUG("warden", "Module ID: %s", ByteArrayToHexStr(_module->Id, 16).c_str());
+    SF_LOG_DEBUG("warden", "Module Key: %s", SkyFire::Impl::ByteArrayToHexStr(_module->Key, 16).c_str());
+    SF_LOG_DEBUG("warden", "Module ID: %s", SkyFire::Impl::ByteArrayToHexStr(_module->Id, 16).c_str());
     RequestModule();
 }
 
 ClientWardenModule* WardenWin::GetModuleForClient()
 {
-    ClientWardenModule *mod = new ClientWardenModule;
+    ClientWardenModule* mod = new ClientWardenModule;
 
     uint32 length = sizeof(Module.Module);
 
@@ -130,7 +131,7 @@ void WardenWin::RequestHash()
     _session->SendPacket(&pkt);
 }
 
-void WardenWin::HandleHashResult(ByteBuffer &buff)
+void WardenWin::HandleHashResult(ByteBuffer& buff)
 {
     buff.rpos(buff.wpos());
 
@@ -247,7 +248,8 @@ void WardenWin::RequestData()
             case PAGE_CHECK_A:
             case PAGE_CHECK_B:
             {
-                buff.append(wd->Data.AsByteArray(0, false), wd->Data.GetNumBytes());
+                std::vector<uint8> data = wd->Data.ToByteVector(0, false);
+                buff.append(data.data(), data.size());
                 buff << uint32(wd->Address);
                 buff << uint8(wd->Length);
                 break;
@@ -260,18 +262,16 @@ void WardenWin::RequestData()
             }
             case DRIVER_CHECK:
             {
-                buff.append(wd->Data.AsByteArray(0, false), wd->Data.GetNumBytes());
+                std::vector<uint8> data = wd->Data.ToByteVector(0, false);
+                buff.append(data.data(), data.size());
                 buff << uint8(index++);
                 break;
             }
             case MODULE_CHECK:
             {
-                uint32 seed = static_cast<uint32>(rand32());
-                buff << uint32(seed);
-                HmacHash hmac(4, (uint8*)&seed);
-                hmac.UpdateData(wd->Str);
-                hmac.Finalize();
-                buff.append(hmac.GetDigest(), hmac.GetLength());
+                std::array<uint8, 4> seed = SkyFire::Crypto::GetRandomBytes<4>();
+                buff.append(seed);
+                buff.append(SkyFire::Crypto::HMAC_SHA1::GetDigestOf(seed, wd->Str));
                 break;
             }
             /*case PROC_CHECK:
@@ -307,7 +307,7 @@ void WardenWin::RequestData()
     SF_LOG_DEBUG("warden", "%s", stream.str().c_str());
 }
 
-void WardenWin::HandleData(ByteBuffer &buff)
+void WardenWin::HandleData(ByteBuffer& buff)
 {
     SF_LOG_DEBUG("warden", "Handle data");
 
@@ -350,7 +350,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     }
 
     WardenCheckResult* rs;
-    WardenCheck *rd;
+    WardenCheck* rd;
     uint8 type;
     uint16 checkFailed = 0;
 
@@ -376,7 +376,8 @@ void WardenWin::HandleData(ByteBuffer &buff)
                     continue;
                 }
 
-                if (memcmp(buff.contents() + buff.rpos(), rs->Result.AsByteArray(0, false), rd->Length) != 0)
+                std::vector<uint8> result = rs->Result.ToByteVector(0, false);
+                if (memcmp(buff.contents() + buff.rpos(), result.data(), rd->Length) != 0)
                 {
                     SF_LOG_DEBUG("warden", "RESULT MEM_CHECK fail CheckId %u account Id %u", *itr, _session->GetAccountId());
                     checkFailed = *itr;
@@ -433,11 +434,11 @@ void WardenWin::HandleData(ByteBuffer &buff)
 
                 if (luaStrLen != 0)
                 {
-                    char *str = new char[luaStrLen + 1];
+                    char* str = new char[luaStrLen + 1];
                     memcpy(str, buff.contents() + buff.rpos(), luaStrLen);
                     str[luaStrLen] = '\0'; // null terminator
                     SF_LOG_DEBUG("warden", "Lua string: %s", str);
-                    delete [] str;
+                    delete[] str;
                 }
                 buff.rpos(buff.rpos() + luaStrLen);         // Skip string
                 SF_LOG_DEBUG("warden", "RESULT LUA_STR_CHECK passed, CheckId %u account Id %u", *itr, _session->GetAccountId());
@@ -455,15 +456,15 @@ void WardenWin::HandleData(ByteBuffer &buff)
                     continue;
                 }
 
-                if (memcmp(buff.contents() + buff.rpos(), rs->Result.AsByteArray(0, false), 20) != 0) // SHA1
+                if (memcmp(buff.contents() + buff.rpos(), rs->Result.ToByteArray<20>(false).data(), SkyFire::Crypto::Constants::SHA1_DIGEST_LENGTH_BYTES) != 0) // SHA1
                 {
                     SF_LOG_DEBUG("warden", "RESULT MPQ_CHECK fail, CheckId %u account Id %u", *itr, _session->GetAccountId());
                     checkFailed = *itr;
-                    buff.rpos(buff.rpos() + 20);            // 20 bytes SHA1
+                    buff.rpos(buff.rpos() + SkyFire::Crypto::Constants::SHA1_DIGEST_LENGTH_BYTES);            // 20 bytes SHA1
                     continue;
                 }
 
-                buff.rpos(buff.rpos() + 20);                // 20 bytes SHA1
+                buff.rpos(buff.rpos() + SkyFire::Crypto::Constants::SHA1_DIGEST_LENGTH_BYTES);                // 20 bytes SHA1
                 SF_LOG_DEBUG("warden", "RESULT MPQ_CHECK passed, CheckId %u account Id %u", *itr, _session->GetAccountId());
                 break;
             }

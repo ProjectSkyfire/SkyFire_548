@@ -409,7 +409,7 @@ public:
                 pet = true;
                 //uint32 spell_id;
                 uint32 pet_id;
-                if (!urand(0, 1))
+                if (!(std::rand() % 1))
                 {
                     //spell_id = SPELL_SUMMON_FATHOM_LURKER;
                     pet_id = CREATURE_FATHOM_LURKER;

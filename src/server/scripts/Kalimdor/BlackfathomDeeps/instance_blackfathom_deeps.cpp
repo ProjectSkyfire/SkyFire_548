@@ -90,7 +90,7 @@ public:
                     twilightLordKelrisGUID = creature->GetGUID();
                     break;
                 case NPC_LORGUS_JETT:
-                    creature->SetHomePosition(LorgusPosition[urand(0, 3)]);
+                    creature->SetHomePosition(LorgusPosition[std::rand() % 3]);
                     break;
             }
         }

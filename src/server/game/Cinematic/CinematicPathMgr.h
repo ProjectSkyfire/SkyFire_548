@@ -37,7 +37,7 @@ public:
 class CinematicSequenceMgr
 {
     /// Singleton access
-    friend class ACE_Singleton < CinematicSequenceMgr, ACE_Null_Mutex > ;
+    friend class ACE_Singleton < CinematicSequenceMgr, ACE_Null_Mutex >;
     /// Constructor
     CinematicSequenceMgr() { }
     /// Destructor

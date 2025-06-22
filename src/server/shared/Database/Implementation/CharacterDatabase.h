@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,13 +11,13 @@
 
 class CharacterDatabaseConnection : public MySQLConnection
 {
-    public:
-        //- Constructors for sync and async connections
-        CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        CharacterDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+public:
+    //- Constructors for sync and async connections
+    CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
+    CharacterDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
 
-        //- Loads database type specific prepared statements
-        void DoPrepareStatements();
+    //- Loads database type specific prepared statements
+    void DoPrepareStatements();
 };
 
 typedef DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabaseWorkerPool;
@@ -257,7 +257,7 @@ enum CharacterDatabaseStatements
     CHAR_DEL_ALL_PETITION_SIGNATURES,
     CHAR_DEL_PETITION_SIGNATURE,
     CHAR_SEL_PETITION_BY_OWNER,
-    CHAR_SEL_PETITION_TYPE,
+
     CHAR_SEL_PETITION_SIGNATURES,
     CHAR_SEL_PETITION_SIG_BY_ACCOUNT,
     CHAR_SEL_PETITION_OWNER_BY_GUID,

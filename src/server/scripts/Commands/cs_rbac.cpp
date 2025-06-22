@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,15 +11,15 @@ Category: commandscripts
 EndScriptData */
 
 #include "AccountMgr.h"
-#include "Config.h"
 #include "Chat.h"
+#include "Config.h"
 #include "Language.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 
 struct RBACCommandData
 {
-    RBACCommandData(): id(0), realmId(0), rbac(NULL), needDelete(false) { }
+    RBACCommandData() : id(0), realmId(0), rbac(NULL), needDelete(false) { }
     ~RBACCommandData()
     {
         if (needDelete)
@@ -327,7 +327,7 @@ public:
     {
         uint32 id = 0;
         if (char* param1 = strtok((char*)args, " "))
-          id = atoi(param1);
+            id = atoi(param1);
 
         if (!id)
         {

@@ -94,7 +94,7 @@ class boss_grandmaster_vorpil : public CreatureScript
 
             void spawnVoidTraveler()
             {
-                uint8 pos = urand(0, 4);
+                uint8 pos = std::rand() % 4;
                 me->SummonCreature(NPC_VOID_TRAVELER, VoidPortalCoords[pos][0], VoidPortalCoords[pos][1], VoidPortalCoords[pos][2], 0, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
                 if (!_helpYell)
                 {
@@ -118,7 +118,7 @@ class boss_grandmaster_vorpil : public CreatureScript
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
-                events.ScheduleEvent(EVENT_SHADOWBOLT_VOLLEY, urand(7000, 14000));
+                events.ScheduleEvent(EVENT_SHADOWBOLT_VOLLEY, std::rand() % 14000 + 7000);
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_BANISH, 17000);
                 events.ScheduleEvent(EVENT_DRAW_SHADOWS, 45000);
@@ -155,7 +155,7 @@ class boss_grandmaster_vorpil : public CreatureScript
                     {
                         case EVENT_SHADOWBOLT_VOLLEY:
                             DoCast(me, SPELL_SHADOWBOLT_VOLLEY);
-                            events.ScheduleEvent(EVENT_SHADOWBOLT_VOLLEY, urand(15000, 30000));
+                            events.ScheduleEvent(EVENT_SHADOWBOLT_VOLLEY, std::rand() % 30000 + 15000);
                             break;
                         case EVENT_BANISH:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, false))

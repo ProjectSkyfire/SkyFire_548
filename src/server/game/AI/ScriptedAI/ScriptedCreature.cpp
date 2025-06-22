@@ -1,21 +1,21 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ScriptedCreature.h"
-#include "Item.h"
-#include "Spell.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Item.h"
 #include "ObjectMgr.h"
+#include "ScriptedCreature.h"
 #include "ScriptMgr.h"
+#include "Spell.h"
 #include "TemporarySummon.h"
 
 // Spell summary for ScriptedAI::SelectSpell
-extern struct TSpellSummary *SpellSummary;
+extern struct TSpellSummary* SpellSummary;
 
 void SummonList::DoZoneInCombat(uint32 entry)
 {
@@ -24,7 +24,7 @@ void SummonList::DoZoneInCombat(uint32 entry)
         Creature* summon = Unit::GetCreature(*me, *i);
         ++i;
         if (summon && summon->IsAIEnabled
-                && (!entry || summon->GetEntry() == entry))
+            && (!entry || summon->GetEntry() == entry))
         {
             summon->AI()->DoZoneInCombat();
         }
@@ -83,10 +83,10 @@ bool SummonList::HasEntry(uint32 entry) const
 }
 
 ScriptedAI::ScriptedAI(Creature* creature) : CreatureAI(creature),
-    me(creature),
-    IsFleeing(false),
-    _evadeCheckCooldown(2500),
-    _isCombatMovementAllowed(true)
+me(creature),
+IsFleeing(false),
+_evadeCheckCooldown(2500),
+_isCombatMovementAllowed(true)
 {
     _isHeroic = me->GetMap()->IsHeroic();
     _difficulty = DifficultyID(me->GetMap()->GetSpawnMode());
@@ -102,7 +102,7 @@ bool ScriptedAI::Is25ManRaid() const
             return true;
         default:
             break;
-    } 
+    }
     return false;
 }
 
@@ -209,11 +209,11 @@ SpellInfo const* ScriptedAI::SelectSpell(Unit* target, uint32 school, uint32 mec
 
         // Targets and Effects checked first as most used restrictions
         //Check the spell targets if specified
-        if (targets && !(SpellSummary[me->m_spells[i]].Targets & (1 << (targets-1))))
+        if (targets && !(SpellSummary[me->m_spells[i]].Targets & (1 << (targets - 1))))
             continue;
 
         //Check the type of spell if we are looking for a specific spell type
-        if (effects && !(SpellSummary[me->m_spells[i]].Effects & (1 << (effects-1))))
+        if (effects && !(SpellSummary[me->m_spells[i]].Effects & (1 << (effects - 1))))
             continue;
 
         //Check for school if specified
@@ -254,7 +254,7 @@ SpellInfo const* ScriptedAI::SelectSpell(Unit* target, uint32 school, uint32 mec
     if (!spellCount)
         return NULL;
 
-    return apSpell[urand(0, spellCount - 1)];
+    return apSpell[std::rand() % spellCount];
 }
 
 void ScriptedAI::DoResetThreat()
@@ -398,10 +398,10 @@ void ScriptedAI::SetCombatMovement(bool allowMovement)
 
 enum NPCs
 {
-    NPC_BROODLORD   = 12017,
+    NPC_BROODLORD = 12017,
     NPC_VOID_REAVER = 19516,
-    NPC_JAN_ALAI    = 23578,
-    NPC_SARTHARION  = 28860
+    NPC_JAN_ALAI = 23578,
+    NPC_SARTHARION = 28860
 };
 
 // Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
@@ -454,10 +454,10 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(uint32 const diff)
 
 // BossAI - for instanced bosses
 BossAI::BossAI(Creature* creature, uint32 bossId) : ScriptedAI(creature),
-    instance(creature->GetInstanceScript()),
-    summons(creature),
-    _boundary(instance ? instance->GetBossBoundary(bossId) : NULL),
-    _bossId(bossId) { }
+instance(creature->GetInstanceScript()),
+summons(creature),
+_boundary(instance ? instance->GetBossBoundary(bossId) : NULL),
+_bossId(bossId) { }
 
 void BossAI::_Reset()
 {

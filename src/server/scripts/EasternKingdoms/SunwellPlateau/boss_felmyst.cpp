@@ -240,10 +240,10 @@ public:
                 me->StopMoving();
                 me->SetSpeed(MOVE_RUN, 2.0f);
 
-                events.ScheduleEvent(EVENT_CLEAVE, urand(5000, 10000));
-                events.ScheduleEvent(EVENT_CORROSION, urand(10000, 20000));
-                events.ScheduleEvent(EVENT_GAS_NOVA, urand(15000, 20000));
-                events.ScheduleEvent(EVENT_ENCAPSULATE, urand(20000, 25000));
+                events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 10000 + 5000);
+                events.ScheduleEvent(EVENT_CORROSION, std::rand() % 20000 + 10000);
+                events.ScheduleEvent(EVENT_GAS_NOVA, std::rand() % 20000 + 15000);
+                events.ScheduleEvent(EVENT_ENCAPSULATE, std::rand() % 25000 + 20000);
                 events.ScheduleEvent(EVENT_FLIGHT, 60000);
                 break;
             case PHASE_FLIGHT:
@@ -418,20 +418,20 @@ public:
                         break;
                     case EVENT_CLEAVE:
                         DoCastVictim(SPELL_CLEAVE, false);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand(5000, 10000));
+                        events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 10000 + 5000);
                         break;
                     case EVENT_CORROSION:
                         DoCastVictim(SPELL_CORROSION, false);
-                        events.ScheduleEvent(EVENT_CORROSION, urand(20000, 30000));
+                        events.ScheduleEvent(EVENT_CORROSION, std::rand() % 30000 + 20000);
                         break;
                     case EVENT_GAS_NOVA:
                         DoCast(me, SPELL_GAS_NOVA, false);
-                        events.ScheduleEvent(EVENT_GAS_NOVA, urand(20000, 25000));
+                        events.ScheduleEvent(EVENT_GAS_NOVA, std::rand() % 25000 + 20000);
                         break;
                     case EVENT_ENCAPSULATE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150, true))
                             DoCast(target, SPELL_ENCAPSULATE_CHANNEL, false);
-                        events.ScheduleEvent(EVENT_ENCAPSULATE, urand(25000, 30000));
+                        events.ScheduleEvent(EVENT_ENCAPSULATE, std::rand() % 30000 + 25000);
                         break;
                     case EVENT_FLIGHT:
                         EnterPhase(PHASE_FLIGHT);

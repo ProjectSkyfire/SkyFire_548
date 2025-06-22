@@ -127,7 +127,7 @@ public:
                 SetCombatMovement(true);
 
             Phase = PHASE_START;
-            MovePoint = urand(0, 5);
+            MovePoint = std::rand() % 5;
             PointData = GetMoveData();
             Summons.DespawnAll();
             SummonWhelpCount = 0;
@@ -146,10 +146,10 @@ public:
             Talk(SAY_AGGRO);
             me->SetInCombatWithZone();
 
-            events.ScheduleEvent(EVENT_FLAME_BREATH, urand (10000, 20000));
-            events.ScheduleEvent(EVENT_TAIL_SWEEP, urand (15000, 20000));
-            events.ScheduleEvent(EVENT_CLEAVE, urand (2000, 5000));
-            events.ScheduleEvent(EVENT_WING_BUFFET, urand (10000, 20000));
+            events.ScheduleEvent(EVENT_FLAME_BREATH, std::rand() % 20000 + 10000);
+            events.ScheduleEvent(EVENT_TAIL_SWEEP, std::rand() % 20000 + 15000);
+            events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 5000 + 2000);
+            events.ScheduleEvent(EVENT_WING_BUFFET, std::rand() % 20000 + 10000);
 
             if (instance)
             {
@@ -292,7 +292,7 @@ public:
         {
             uint8 MaxCount = sizeof(MoveData)/sizeof(OnyxMove);
 
-            uint8 iTemp = urand(0, MaxCount-1);
+            uint8 iTemp = std::rand() % (MaxCount-1);
 
             if (iTemp >= MovePoint)
                 ++iTemp;
@@ -346,19 +346,19 @@ public:
                         }
                         case EVENT_FLAME_BREATH:   // Phase PHASE_START and PHASE_END
                             DoCastVictim(SPELL_FLAME_BREATH);
-                            events.ScheduleEvent(EVENT_FLAME_BREATH, urand (10000, 20000));
+                            events.ScheduleEvent(EVENT_FLAME_BREATH, std::rand() % 20000 + 10000);
                             break;
                         case EVENT_TAIL_SWEEP:     // Phase PHASE_START and PHASE_END
                             DoCastAOE(SPELL_TAIL_SWEEP);
-                            events.ScheduleEvent(EVENT_TAIL_SWEEP, urand (15000, 20000));
+                            events.ScheduleEvent(EVENT_TAIL_SWEEP, std::rand() % 20000 + 15000);
                             break;
                         case EVENT_CLEAVE:         // Phase PHASE_START and PHASE_END
                             DoCastVictim(SPELL_CLEAVE);
-                            events.ScheduleEvent(EVENT_CLEAVE, urand (2000, 5000));
+                            events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 5000 + 2000);
                             break;
                         case EVENT_WING_BUFFET:    // Phase PHASE_START and PHASE_END
                             DoCastVictim(SPELL_WING_BUFFET);
-                            events.ScheduleEvent(EVENT_WING_BUFFET, urand (15000, 30000));
+                            events.ScheduleEvent(EVENT_WING_BUFFET, std::rand() % 30000 + 15000);
                             break;
                         default:
                             break;

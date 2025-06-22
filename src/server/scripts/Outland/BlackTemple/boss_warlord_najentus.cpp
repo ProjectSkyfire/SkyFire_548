@@ -62,22 +62,13 @@ class boss_najentus : public CreatureScript
 public:
     boss_najentus() : CreatureScript("boss_najentus") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_najentusAI(creature);
-    }
-
     struct boss_najentusAI : public ScriptedAI
     {
         boss_najentusAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            SpineTargetGUID = 0;
         }
-
-        InstanceScript* instance;
-        EventMap events;
-
-        uint64 SpineTargetGUID;
 
         void Reset() OVERRIDE
         {
@@ -188,13 +179,13 @@ public:
                         SelectTargetList(targets, 3, SELECT_TARGET_RANDOM, 80, true);
                         for (std::list<Unit*>::const_iterator i = targets.begin(); i != targets.end(); ++i)
                             DoCast(*i, 39835, true);
-                        events.ScheduleEvent(EVENT_NEEDLE, urand(15000, 25000), GCD_CAST);
+                        events.ScheduleEvent(EVENT_NEEDLE, std::rand() % 25000 + 15000, GCD_CAST);
                         events.DelayEvents(1500, GCD_CAST);
                         return;
                     }
                     case EVENT_YELL:
                         Talk(SAY_SPECIAL);
-                        events.ScheduleEvent(EVENT_YELL, urand(25000, 100000), GCD_YELL);
+                        events.ScheduleEvent(EVENT_YELL, std::rand() % 100000 + 25000, GCD_YELL);
                         events.DelayEvents(15000, GCD_YELL);
                         break;
                 }
@@ -202,7 +193,17 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        InstanceScript* instance;
+        EventMap events;
+
+        uint64 SpineTargetGUID;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_najentusAI(creature);
+    }
 };
 
 class go_najentus_spine : public GameObjectScript

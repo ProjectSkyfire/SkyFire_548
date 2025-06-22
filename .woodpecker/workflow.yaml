@@ -1,0 +1,14 @@
+when:
+  - event: push
+    branch: main
+
+steps:
+  - name: build
+    image: ubuntu:24.10
+    commands:
+      - apt-get update
+      - apt-get install -y build-essential libstdc++-14-dev gcc-14 g++-14 autoconf libtool make cmake git-core patch wget links zip unzip unrar libmysqlclient-dev libmysql++-dev libreadline6-dev zlib1g-dev libbz2-dev libncurses5-dev libace-dev
+      - echo "Building project..."
+      - mkdir build && cd build
+      - cmake ../ -DSCRIPTS=1 -DTOOLS=1 -DCMAKE_BUILD_TYPE=Release
+      - make -j$(nproc)

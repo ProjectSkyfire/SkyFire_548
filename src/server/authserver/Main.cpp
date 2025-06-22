@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,22 +11,23 @@
 * authentication server
 */
 #pragma comment (lib, "Crypt32")
-#include <ace/Dev_Poll_Reactor.h>
-#include <ace/TP_Reactor.h>
 #include <ace/ACE.h>
+#include <ace/Dev_Poll_Reactor.h>
 #include <ace/Sig_Handler.h>
-#include <openssl/opensslv.h>
+#include <ace/TP_Reactor.h>
 #include <openssl/crypto.h>
+#include <openssl/opensslv.h>
+#include <openssl/provider.h>
 
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
 #include "Configuration/Config.h"
+#include "Database/DatabaseEnv.h"
 #include "Log.h"
+#include "RealmAcceptor.h"
+#include "RealmList.h"
+#include "SignalHandler.h"
 #include "SystemConfig.h"
 #include "Util.h"
-#include "SignalHandler.h"
-#include "RealmList.h"
-#include "RealmAcceptor.h"
 
 #ifdef __linux__
 #include <sched.h>
@@ -38,12 +39,32 @@
 # define _SKYFIRE_REALM_CONFIG  "authserver.conf"
 #endif
 
-bool StartDB();
+bool StartDB(const char* host, const char* port, const char* user, const char* pass, const char* database, bool noUseConfigDatabaseInfo);
 void StopDB();
 
 bool stopEvent = false;                                     // Setting it to true stops the server
 
 LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the authserver database
+
+#ifndef _SKYFIRE_AUTH_DATABASE_HOST
+# define _SKYFIRE_AUTH_DATABASE_HOST  ""
+#endif
+
+#ifndef _SKYFIRE_AUTH_DATABASE_PORT
+# define _SKYFIRE_AUTH_DATABASE_PORT  ""
+#endif
+
+#ifndef _SKYFIRE_AUTH_DATABASE_USER
+# define _SKYFIRE_AUTH_DATABASE_USER  ""
+#endif
+
+#ifndef _SKYFIRE_AUTH_DATABASE_PASS
+# define _SKYFIRE_AUTH_DATABASE_PASS  ""
+#endif
+
+#ifndef _SKYFIRE_AUTH_DATABASE
+# define _SKYFIRE_AUTH_DATABASE  ""
+#endif
 
 /// Handle authserver's termination signals
 class AuthServerSignalHandler : public Skyfire::SignalHandler
@@ -53,10 +74,10 @@ public:
     {
         switch (sigNum)
         {
-        case SIGINT:
-        case SIGTERM:
-            stopEvent = true;
-            break;
+            case SIGINT:
+            case SIGTERM:
+                stopEvent = true;
+                break;
         }
     }
 };
@@ -64,19 +85,108 @@ public:
 /// Print out the usage string for this program on the console.
 void usage(const char* prog)
 {
-    SF_LOG_INFO("server.authserver", "Usage: \n %s [<options>]\n"
-        "    -c config_file           use config_file as configuration file\n\r",
-        prog);
+    printf("Usage:\n");
+    printf(" %s [<options>]\n");
+    printf("    -c config_file                   use config_file as configuration file\n");
+    printf("    --no_use_config_database_info    dont use database login info from config file\n");
+    printf("    --db_host                        sets the database host, requires: --no_use_config_database_info\n");
+    printf("    --db_port                        sets the database port, requires: --no_use_config_database_info\n");
+    printf("    --db_user                        sets the database user, requires: --no_use_config_database_info\n");
+    printf("    --db_password                    sets the database password, requires: --no_use_config_database_info\n");
+    printf("    --db_auth                        sets the auth database, requires: --no_use_config_database_info\n");
 }
 
 /// Launch the auth server
 extern int main(int argc, char** argv)
 {
+    bool noUseConfigDatabaseInfo = 0;
+    const char* db_Host = _SKYFIRE_AUTH_DATABASE_HOST;
+    const char* db_Port = _SKYFIRE_AUTH_DATABASE_PORT;
+    const char* db_User = _SKYFIRE_AUTH_DATABASE_USER;
+    const char* db_Password = _SKYFIRE_AUTH_DATABASE_PASS;
+    const char* authDB = _SKYFIRE_AUTH_DATABASE;
+
     // Command line parsing to get the configuration file name
     char const* configFile = _SKYFIRE_REALM_CONFIG;
     int count = 1;
     while (count < argc)
     {
+        if (strcmp(argv[count], "--help") == 0)
+        {
+            usage(argv[0]);
+            return 1;
+        }
+        if (strcmp(argv[count], "--no_use_config_database_info") == 0)
+        {
+            noUseConfigDatabaseInfo = argv[count];
+        }
+
+        if (noUseConfigDatabaseInfo == 1)
+        {
+            if (strcmp(argv[count], "--db_host") == 0)
+            {
+                if (++count >= argc)
+                {
+                    printf("Runtime-Error: --db_host option requires an input argument\n");
+                    usage(argv[0]);
+                    return 1;
+                }
+                else
+                {
+
+                    db_Host = argv[count];
+                }
+            }
+
+            if (strcmp(argv[count], "--db_port") == 0)
+            {
+                if (++count >= argc)
+                {
+                    printf("Runtime-Error: --db_port option requires an input argument\n");
+                    usage(argv[0]);
+                    return 1;
+                }
+                else
+                    db_Port = argv[count];
+            }
+
+            if (strcmp(argv[count], "--db_user") == 0)
+            {
+                if (++count >= argc)
+                {
+                    printf("Runtime-Error: --db_user option requires an input argument\n");
+                    usage(argv[0]);
+                    return 1;
+                }
+                else
+                    db_User = argv[count];
+            }
+
+            if (strcmp(argv[count], "--db_password") == 0)
+            {
+                if (++count >= argc)
+                {
+                    printf("Runtime-Error: --db_password option requires an input argument\n");
+                    usage(argv[0]);
+                    return 1;
+                }
+                else
+                    db_Password = argv[count];
+            }
+
+            if (strcmp(argv[count], "--db_auth") == 0)
+            {
+                if (++count >= argc)
+                {
+                    printf("Runtime-Error: --db_auth option requires an input argument\n");
+                    usage(argv[0]);
+                    return 1;
+                }
+                else
+                    authDB = argv[count];
+            }
+        }
+
         if (strcmp(argv[count], "-c") == 0)
         {
             if (++count >= argc)
@@ -98,15 +208,16 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
-    SF_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
+    //TODO: FIX ME revision.
+    //SF_LOG_INFO("server.authserver", "%s (authserver)", _FULLVERSION);
     SF_LOG_INFO("server.authserver", "<Ctrl-C> to stop.\n");
-    
+
     SF_LOG_INFO("server.authserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
     SF_LOG_INFO("server.authserver", "  /\\  ___\\/\\ \\/ / /\\ \\_\\ \\/\\  ___/\\ \\/\\  == \\/\\  ___\\ ");
     SF_LOG_INFO("server.authserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
     SF_LOG_INFO("server.authserver", "   \\/\\_____\\ \\_\\ \\_\\/\\_____\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_____\\ ");
     SF_LOG_INFO("server.authserver", "    \\/_____/\\/_/\\/_/\\/_____/\\/_/   \\/_/\\/_/ /_/\\/_____/ ");
-    SF_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2024(c) Open-sourced Game Emulation ");
+    SF_LOG_INFO("server.authserver", "  Project SkyFireEmu 2011 - 2025(c) Open-sourced Game Emulation ");
     SF_LOG_INFO("server.authserver", "           <http://www.projectskyfire.org/> \n");
 
     SF_LOG_INFO("server.authserver", "Using configuration file %s.", configFile);
@@ -123,6 +234,24 @@ extern int main(int argc, char** argv)
     }
 
     SF_LOG_WARN("server.authserver", "%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
+
+    OSSL_PROVIDER *default_provider = OSSL_PROVIDER_try_load(NULL, "default", 1);
+    OSSL_PROVIDER* legacy_provider = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
+
+    if (legacy_provider == NULL)
+    {
+        SF_LOG_INFO("server.authserver", "Failed loading legacy provider, Try to load legacy provider again.");
+        legacy_provider = OSSL_PROVIDER_try_load(NULL, "legacy", 1);
+    }
+
+    SF_LOG_INFO("server.authserver", "Loading default provider: (%s)", (default_provider == NULL || !OSSL_PROVIDER_available(NULL, "default")) ? "failed" : "succeeded");
+    SF_LOG_INFO("server.authserver", "Loading legacy provider: (%s)", (legacy_provider == NULL || !OSSL_PROVIDER_available(NULL, "legacy")) ? "failed" : "succeeded");
+
+    // recheck 
+    if (legacy_provider == NULL)
+        return 1;
+
+    OSSL_PROVIDER_unload(legacy_provider);
 
 #if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
     ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
@@ -146,7 +275,7 @@ extern int main(int argc, char** argv)
     }
 
     // Initialize the database connection
-    if (!StartDB())
+    if (!StartDB(db_Host, db_Port, db_User, db_Password, authDB, noUseConfigDatabaseInfo))
         return 1;
 
     // Get the list of realms for the server
@@ -279,15 +408,19 @@ extern int main(int argc, char** argv)
 }
 
 /// Initialize connection to the database
-bool StartDB()
+bool StartDB(const char* host, const char* port, const char* user, const char* pass, const char* database, bool noUseConfigDatabaseInfo)
 {
     MySQL::Library_Init();
-
-    std::string dbstring = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
-    if (dbstring.empty())
+    std::string dbstring;
+    if (noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.authserver", "Database not specified");
-        return false;
+        dbstring = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
+
+        if (dbstring.empty())
+        {
+            SF_LOG_ERROR("server.authserver", "Database not specified");
+            return false;
+        }
     }
 
     int32 worker_threads = sConfigMgr->GetIntDefault("LoginDatabase.WorkerThreads", 1);
@@ -305,10 +438,21 @@ bool StartDB()
     }
 
     // NOTE: While authserver is singlethreaded you should keep synch_threads == 1. Increasing it is just silly since only 1 will be used ever.
-    if (!LoginDatabase.Open(dbstring, uint8(worker_threads), uint8(synch_threads)))
+    if (noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.authserver", "Cannot connect to database");
-        return false;
+        if (!LoginDatabase.Open(dbstring, uint8(worker_threads), uint8(synch_threads)))
+        {
+            SF_LOG_ERROR("server.authserver", "Cannot connect to database");
+            return false;
+        }
+    }
+    else
+    {
+        if (!LoginDatabase.Open(host, port, user, pass, database, uint8(worker_threads), uint8(synch_threads)))
+        {
+            SF_LOG_ERROR("server.authserver", "Cannot connect to database");
+            return false;
+        }
     }
 
     SF_LOG_INFO("server.authserver", "Started auth database connection pool.");

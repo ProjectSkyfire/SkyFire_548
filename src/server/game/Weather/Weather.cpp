@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,15 +7,15 @@
     \ingroup world
 */
 
-#include "Weather.h"
-#include "WorldPacket.h"
-#include "Player.h"
-#include "World.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include "Util.h"
-#include "ScriptMgr.h"
 #include "Opcodes.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "Util.h"
+#include "Weather.h"
+#include "World.h"
+#include "WorldPacket.h"
 #include "WorldSession.h"
 
 /// Create the Weather object
@@ -26,7 +26,7 @@ Weather::Weather(uint32 zone, WeatherData const* weatherChances)
     m_type = WEATHER_TYPE_FINE;
     m_grade = 0;
 
-    SF_LOG_INFO("misc", "WORLD: Starting weather system for zone %u (change every %u minutes).", m_zone, (uint32)(m_timer.GetInterval() / (MINUTE*IN_MILLISECONDS)));
+    SF_LOG_INFO("misc", "WORLD: Starting weather system for zone %u (change every %u minutes).", m_zone, (uint32)(m_timer.GetInterval() / (MINUTE * IN_MILLISECONDS)));
 }
 
 /// Launch a weather update
@@ -69,7 +69,7 @@ bool Weather::ReGenerate()
     ///- 30% - weather gets better (if not fine) or change weather type
     ///- 30% - weather worsens (if not fine)
     ///- 10% - radical change (if not fine)
-    uint32 u = urand(0, 99);
+    uint32 u = std::rand() % 99;
 
     if (u < 30)
         return false;
@@ -83,7 +83,7 @@ bool Weather::ReGenerate()
     time_t gtime = sWorld->GetGameTime();
     struct tm ltime;
     ACE_OS::localtime_r(&gtime, &ltime);
-    uint32 season = ((ltime.tm_yday - 78 + 365)/91)%4;
+    uint32 season = ((ltime.tm_yday - 78 + 365) / 91) % 4;
 
     static char const* seasonName[WEATHER_SEASONS] = { "spring", "summer", "fall", "winter" };
 
@@ -123,8 +123,8 @@ bool Weather::ReGenerate()
         {
             if (m_grade > 0.6666667f)
             {
-                                                            // Severe change, but how severe?
-                uint32 rnd = urand(0, 99);
+                // Severe change, but how severe?
+                uint32 rnd = std::rand() % 99;
                 if (rnd < 50)
                 {
                     m_grade -= 0.6666667f;
@@ -138,10 +138,10 @@ bool Weather::ReGenerate()
 
     // At this point, only weather that isn't doing anything remains but that have weather data
     uint32 chance1 = m_weatherChances->data[season].rainChance;
-    uint32 chance2 = chance1+ m_weatherChances->data[season].snowChance;
-    uint32 chance3 = chance2+ m_weatherChances->data[season].stormChance;
+    uint32 chance2 = chance1 + m_weatherChances->data[season].snowChance;
+    uint32 chance3 = chance2 + m_weatherChances->data[season].stormChance;
 
-    uint32 rnd = urand(0, 99);
+    uint32 rnd = std::rand() % 99;
     if (rnd <= chance1)
         m_type = WEATHER_TYPE_RAIN;
     else if (rnd <= chance2)
@@ -168,7 +168,7 @@ bool Weather::ReGenerate()
     else
     {
         // Severe change, but how severe?
-        rnd = urand(0, 99);
+        rnd = std::rand() % 99;
         if (rnd < 50)
             m_grade = (float)rand_norm() * 0.3333f + 0.3334f;
         else
@@ -276,29 +276,29 @@ void Weather::SetWeather(WeatherType type, float grade)
 /// Get the sound number associated with the current weather
 WeatherState Weather::GetWeatherState() const
 {
-    if (m_grade<0.27f)
+    if (m_grade < 0.27f)
         return WEATHER_STATE_FINE;
 
     switch (m_type)
     {
         case WEATHER_TYPE_RAIN:
-            if (m_grade<0.40f)
+            if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_RAIN;
-            else if (m_grade<0.70f)
+            else if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_RAIN;
             else
                 return WEATHER_STATE_HEAVY_RAIN;
         case WEATHER_TYPE_SNOW:
-            if (m_grade<0.40f)
+            if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_SNOW;
-            else if (m_grade<0.70f)
+            else if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_SNOW;
             else
                 return WEATHER_STATE_HEAVY_SNOW;
         case WEATHER_TYPE_STORM:
-            if (m_grade<0.40f)
+            if (m_grade < 0.40f)
                 return WEATHER_STATE_LIGHT_SANDSTORM;
-            else if (m_grade<0.70f)
+            else if (m_grade < 0.70f)
                 return WEATHER_STATE_MEDIUM_SANDSTORM;
             else
                 return WEATHER_STATE_HEAVY_SANDSTORM;

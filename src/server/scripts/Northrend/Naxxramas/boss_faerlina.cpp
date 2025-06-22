@@ -59,9 +59,9 @@ class boss_faerlina : public CreatureScript
             {
                 _EnterCombat();
                 Talk(SAY_AGGRO);
-                events.ScheduleEvent(EVENT_POISON, urand(10000, 15000));
-                events.ScheduleEvent(EVENT_FIRE, urand(6000, 18000));
-                events.ScheduleEvent(EVENT_FRENZY, urand(60000, 80000));
+                events.ScheduleEvent(EVENT_POISON, std::rand() % 15000 + 10000);
+                events.ScheduleEvent(EVENT_FIRE, std::rand() % 18000 + 6000);
+                events.ScheduleEvent(EVENT_FRENZY, std::rand() % 80000 + 60000);
             }
 
             void Reset() OVERRIDE
@@ -85,7 +85,7 @@ class boss_faerlina : public CreatureScript
 
             void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
-                if (!urand(0, 2))
+                if (!(std::rand() % 2))
                     Talk(SAY_SLAY);
             }
 
@@ -137,12 +137,12 @@ class boss_faerlina : public CreatureScript
                         case EVENT_POISON:
                             if (!me->HasAura(SPELL_WIDOWS_EMBRACE_HELPER))
                                 DoCastAOE(RAID_MODE(SPELL_POISON_BOLT_VOLLEY, H_SPELL_POISON_BOLT_VOLLEY));
-                            events.ScheduleEvent(EVENT_POISON, urand(8000, 15000));
+                            events.ScheduleEvent(EVENT_POISON, std::rand() % 15000 + 8000);
                             break;
                         case EVENT_FIRE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, RAID_MODE(SPELL_RAIN_OF_FIRE, H_SPELL_RAIN_OF_FIRE));
-                            events.ScheduleEvent(EVENT_FIRE, urand(6000, 18000));
+                            events.ScheduleEvent(EVENT_FIRE, std::rand() % 18000 + 6000);
                             break;
                         case EVENT_FRENZY:
                             /// @todo Add Text
@@ -151,7 +151,7 @@ class boss_faerlina : public CreatureScript
                             else
                                 _delayFrenzy = true;
 
-                            events.ScheduleEvent(EVENT_FRENZY, urand(60000, 80000));
+                            events.ScheduleEvent(EVENT_FRENZY, std::rand() % 80000 + 60000);
                             break;
                     }
                 }

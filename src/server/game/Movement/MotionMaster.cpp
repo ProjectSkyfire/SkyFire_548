@@ -1,25 +1,25 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "MotionMaster.h"
-#include "CreatureAISelector.h"
 #include "Creature.h"
+#include "CreatureAISelector.h"
+#include "MotionMaster.h"
 
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
 #include "HomeMovementGenerator.h"
 #include "IdleMovementGenerator.h"
-#include "PointMovementGenerator.h"
-#include "TargetedMovementGenerator.h"
-#include "WaypointMovementGenerator.h"
-#include "RandomMovementGenerator.h"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
+#include "PointMovementGenerator.h"
+#include "RandomMovementGenerator.h"
+#include "TargetedMovementGenerator.h"
+#include "WaypointMovementGenerator.h"
 #include <cassert>
 
-inline bool isStatic(MovementGenerator *mv)
+inline bool isStatic(MovementGenerator* mv)
 {
     return (mv == &si_idleMovement);
 }
@@ -29,7 +29,7 @@ void MotionMaster::Initialize()
     // clear ALL movement generators (including default)
     while (!empty())
     {
-        MovementGenerator *curr = top();
+        MovementGenerator* curr = top();
         pop();
         if (curr)
             DirectDelete(curr);
@@ -57,7 +57,7 @@ MotionMaster::~MotionMaster()
     // clear ALL movement generators (including default)
     while (!empty())
     {
-        MovementGenerator *curr = top();
+        MovementGenerator* curr = top();
         pop();
         if (curr) DirectDelete(curr);
     }
@@ -111,7 +111,7 @@ void MotionMaster::DirectClean(bool reset)
 {
     while (size() > 1)
     {
-        MovementGenerator *curr = top();
+        MovementGenerator* curr = top();
         pop();
         if (curr) DirectDelete(curr);
     }
@@ -126,7 +126,7 @@ void MotionMaster::DelayedClean()
 {
     while (size() > 1)
     {
-        MovementGenerator *curr = top();
+        MovementGenerator* curr = top();
         pop();
         if (curr)
             DelayedDelete(curr);
@@ -137,7 +137,7 @@ void MotionMaster::DirectExpire(bool reset)
 {
     if (size() > 1)
     {
-        MovementGenerator *curr = top();
+        MovementGenerator* curr = top();
         pop();
         DirectDelete(curr);
     }
@@ -157,7 +157,7 @@ void MotionMaster::DelayedExpire()
 {
     if (size() > 1)
     {
-        MovementGenerator *curr = top();
+        MovementGenerator* curr = top();
         pop();
         DelayedDelete(curr);
     }
@@ -493,7 +493,7 @@ void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
         else
         {
             SF_LOG_ERROR("misc", "%s attempt taxi to (not existed Path %u node %u)",
-            _owner->GetName().c_str(), path, pathnode);
+                _owner->GetName().c_str(), path, pathnode);
         }
     }
     else
@@ -522,9 +522,9 @@ void MotionMaster::MoveDistract(uint32 timer)
     Mutate(mgen, MOTION_SLOT_CONTROLLED);
 }
 
-void MotionMaster::Mutate(MovementGenerator *m, MovementSlot slot)
+void MotionMaster::Mutate(MovementGenerator* m, MovementSlot slot)
 {
-    if (MovementGenerator *curr = Impl[slot])
+    if (MovementGenerator* curr = Impl[slot])
     {
         Impl[slot] = NULL; // in case a new one is generated in this slot during directdelete
         if (_top == slot && (_cleanFlag & MMCF_UPDATE))
@@ -595,10 +595,10 @@ void MotionMaster::propagateSpeedChange()
 
 MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
 {
-   if (empty())
-       return IDLE_MOTION_TYPE;
+    if (empty())
+        return IDLE_MOTION_TYPE;
 
-   return top()->GetMovementGeneratorType();
+    return top()->GetMovementGeneratorType();
 }
 
 MovementGeneratorType MotionMaster::GetMotionSlotType(int slot) const
@@ -633,7 +633,7 @@ void MotionMaster::DelayedDelete(_Ty curr)
     _expList->push_back(curr);
 }
 
-bool MotionMaster::GetDestination(float &x, float &y, float &z)
+bool MotionMaster::GetDestination(float& x, float& y, float& z)
 {
     if (_owner->movespline->Finalized())
         return false;

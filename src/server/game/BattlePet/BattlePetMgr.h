@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -18,39 +18,39 @@ typedef std::set<BattlePet*> BattlePetSet;
 
 enum BattlePetLoadoutSlots
 {
-    BATTLE_PET_LOADOUT_SLOT_1                   = 0,
-    BATTLE_PET_LOADOUT_SLOT_2                   = 1,
-    BATTLE_PET_LOADOUT_SLOT_3                   = 2,
+    BATTLE_PET_LOADOUT_SLOT_1 = 0,
+    BATTLE_PET_LOADOUT_SLOT_2 = 1,
+    BATTLE_PET_LOADOUT_SLOT_3 = 2,
     BATTLE_PET_LOADOUT_SLOT_NONE
 };
 
 // custom flags used in 'account_battle_pet_slots' db table
 enum BattlePetLoadoutFlags
 {
-    BATTLE_PET_LOADOUT_SLOT_FLAG_NONE           = 0x0,
-    BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_1         = 0x1,
-    BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_2         = 0x2,
-    BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_3         = 0x4
+    BATTLE_PET_LOADOUT_SLOT_FLAG_NONE = 0x0,
+    BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_1 = 0x1,
+    BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_2 = 0x2,
+    BATTLE_PET_LOADOUT_SLOT_FLAG_SLOT_3 = 0x4
 };
 
 // flags used in 'account_battle_pet' db table
 enum BattlePetJournalFlags
 {
-    BATTLE_PET_JOURNAL_FLAG_NONE                = 0x00,
-    BATTLE_PET_JOURNAL_FLAG_FAVORITES           = 0x01,
-    BATTLE_PET_JOURNAL_FLAG_COLLECTED           = 0x02, // name dumped from client, use unknown
-    BATTLE_PET_JOURNAL_FLAG_NOT_COLLECTED       = 0x04,
-    BATTLE_PET_JOURNAL_FLAG_UNKNOWN_1           = 0x08,
-    BATTLE_PET_JOURNAL_FLAG_ABILITY_1           = 0x10, // ability flags are set if the second ability for that slot is selected
-    BATTLE_PET_JOURNAL_FLAG_ABILITY_2           = 0x20, // ...
-    BATTLE_PET_JOURNAL_FLAG_ABILITY_3           = 0x40  // ...
+    BATTLE_PET_JOURNAL_FLAG_NONE = 0x00,
+    BATTLE_PET_JOURNAL_FLAG_FAVORITES = 0x01,
+    BATTLE_PET_JOURNAL_FLAG_COLLECTED = 0x02, // name dumped from client, use unknown
+    BATTLE_PET_JOURNAL_FLAG_NOT_COLLECTED = 0x04,
+    BATTLE_PET_JOURNAL_FLAG_UNKNOWN_1 = 0x08,
+    BATTLE_PET_JOURNAL_FLAG_ABILITY_1 = 0x10, // ability flags are set if the second ability for that slot is selected
+    BATTLE_PET_JOURNAL_FLAG_ABILITY_2 = 0x20, // ...
+    BATTLE_PET_JOURNAL_FLAG_ABILITY_3 = 0x40  // ...
 };
 
 enum BattlePetSpells
 {
-    SPELL_BATTLE_PET_TRAINING_PASSIVE           = 119467,
-    SPELL_TRACK_PETS                            = 122026,
-    SPELL_REVIVE_BATTLE_PETS                    = 125439
+    SPELL_BATTLE_PET_TRAINING_PASSIVE = 119467,
+    SPELL_TRACK_PETS = 122026,
+    SPELL_REVIVE_BATTLE_PETS = 125439
 };
 
 class BattlePetMgr

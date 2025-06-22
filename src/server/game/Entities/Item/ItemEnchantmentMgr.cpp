@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include <stdlib.h>
-#include <functional>
-#include "ItemEnchantmentMgr.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
+#include "ItemEnchantmentMgr.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include <list>
-#include <vector>
 #include "Util.h"
-#include "DBCStores.h"
+#include <functional>
+#include <list>
+#include <stdlib.h>
+#include <vector>
 
 struct EnchStoreItem
 {
@@ -91,7 +91,7 @@ uint32 GetItemEnchantMod(int32 entry)
     }
 
     //we could get here only if sum of all enchantment chances is lower than 100%
-    dRoll = (irand(0, (int)floor(fCount * 100) + 1)) / 100;
+    dRoll = (std::rand() % ((int)floor(fCount * 100) + 1)) / 100;
     fCount = 0;
 
     for (EnchStoreList::const_iterator ench_iter = tab->second.begin(); ench_iter != tab->second.end(); ++ench_iter)

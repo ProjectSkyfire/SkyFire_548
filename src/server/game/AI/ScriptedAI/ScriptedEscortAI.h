@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SC_ESCORTAI_H
 #define SC_ESCORTAI_H
 
-#include "ScriptSystem.h"
 #include "ScriptedCreature.h"
+#include "ScriptSystem.h"
 
 #define DEFAULT_MAX_PLAYER_DISTANCE 50
 
@@ -31,10 +31,10 @@ struct Escort_Waypoint
 
 enum eEscortState
 {
-    STATE_ESCORT_NONE       = 0x000,                        //nothing in progress
-    STATE_ESCORT_ESCORTING  = 0x001,                        //escort are in progress
-    STATE_ESCORT_RETURNING  = 0x002,                        //escort is returning after being in combat
-    STATE_ESCORT_PAUSED     = 0x004                         //will not proceed with waypoints before state is removed
+    STATE_ESCORT_NONE = 0x000,                        //nothing in progress
+    STATE_ESCORT_ESCORTING = 0x001,                        //escort are in progress
+    STATE_ESCORT_RETURNING = 0x002,                        //escort is returning after being in combat
+    STATE_ESCORT_PAUSED = 0x004                         //will not proceed with waypoints before state is removed
 };
 
 struct npc_escortAI : public ScriptedAI
@@ -81,17 +81,17 @@ public:
     void SetRun(bool on = true);
     void SetEscortPaused(bool on);
 
-    bool HasEscortState(uint32 escortState) { return (m_uiEscortState & escortState); }
+    bool HasEscortState(uint32 escortState) const { return (m_uiEscortState & escortState); }
     virtual bool IsEscorted() OVERRIDE { return (m_uiEscortState & STATE_ESCORT_ESCORTING); }
 
     void SetMaxPlayerDistance(float newMax) { MaxPlayerDistance = newMax; }
-    float GetMaxPlayerDistance() { return MaxPlayerDistance; }
+    float GetMaxPlayerDistance() const { return MaxPlayerDistance; }
 
     void SetDespawnAtEnd(bool despawn) { DespawnAtEnd = despawn; }
     void SetDespawnAtFar(bool despawn) { DespawnAtFar = despawn; }
-    bool GetAttack() { return m_bIsActiveAttacker; }//used in EnterEvadeMode override
+    bool GetAttack() const { return m_bIsActiveAttacker; }//used in EnterEvadeMode override
     void SetCanAttack(bool attack) { m_bIsActiveAttacker = attack; }
-    uint64 GetEventStarterGUID() { return m_uiPlayerGUID; }
+    uint64 GetEventStarterGUID() const { return m_uiPlayerGUID; }
 
 protected:
     Player* GetPlayerForEscort() { return ObjectAccessor::GetPlayer(*me, m_uiPlayerGUID); }

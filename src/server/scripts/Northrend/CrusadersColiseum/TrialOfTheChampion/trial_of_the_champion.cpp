@@ -320,18 +320,18 @@ public:
 
         void SetGrandChampionsForEncounter()
         {
-            uiFirstBoss = urand(0, 4);
+            uiFirstBoss = std::rand() % 4;
 
             while (uiSecondBoss == uiFirstBoss || uiThirdBoss == uiFirstBoss || uiThirdBoss == uiSecondBoss)
             {
-                uiSecondBoss = urand(0, 4);
-                uiThirdBoss = urand(0, 4);
+                uiSecondBoss = std::rand() % 4;
+                uiThirdBoss = std::rand() % 4;
             }
         }
 
         void SetArgentChampion()
         {
-           uint8 uiTempBoss = urand(0, 1);
+           uint8 uiTempBoss = std::rand() % 1;
 
            switch (uiTempBoss)
            {

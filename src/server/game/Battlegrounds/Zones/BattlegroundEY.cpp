@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "BattlegroundEY.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "WorldPacket.h"
 #include "BattlegroundMgr.h"
 #include "Creature.h"
 #include "Language.h"
 #include "Object.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Util.h"
+#include "World.h"
+#include "WorldPacket.h"
 
 // these variables aren't used outside of this file, so declare them only here
 uint32 BG_EY_HonorScoreTicks[BG_HONOR_MODE_NUM] =
@@ -31,9 +31,9 @@ BattlegroundEY::BattlegroundEY()
     m_Points_Trigger[DRAENEI_RUINS] = TR_DRAENEI_RUINS_BUFF;
     m_Points_Trigger[MAGE_TOWER] = TR_MAGE_TOWER_BUFF;
 
-    StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_EY_START_TWO_MINUTES;
+    StartMessageIds[BG_STARTING_EVENT_FIRST] = LANG_BG_EY_START_TWO_MINUTES;
     StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_EY_START_ONE_MINUTE;
-    StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_EY_START_HALF_MINUTE;
+    StartMessageIds[BG_STARTING_EVENT_THIRD] = LANG_BG_EY_START_HALF_MINUTE;
     StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_EY_HAS_BEGUN;
 }
 
@@ -102,7 +102,7 @@ void BattlegroundEY::StartingEventOpenDoors()
     for (uint32 i = 0; i < EY_POINTS_MAX; ++i)
     {
         //randomly spawn buff
-        uint8 buff = urand(0, 2);
+        uint8 buff = std::rand() % 2;
         SpawnBGObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REAVER + buff + i * 3, RESPAWN_IMMEDIATELY);
     }
 
@@ -163,7 +163,7 @@ void BattlegroundEY::CheckSomeoneJoinedPoint()
 void BattlegroundEY::CheckSomeoneLeftPoint()
 {
     //reset current point counts
-    for (uint8 i = 0; i < 2*EY_POINTS_MAX; ++i)
+    for (uint8 i = 0; i < 2 * EY_POINTS_MAX; ++i)
         m_CurrentPointPlayersCount[i] = 0;
     GameObject* obj = NULL;
     for (uint8 i = 0; i < EY_POINTS_MAX; ++i)
@@ -411,7 +411,7 @@ void BattlegroundEY::HandleAreaTrigger(Player* player, uint32 trigger)
 
 bool BattlegroundEY::SetupBattleground()
 {
-        // doors
+    // doors
     if (!AddObject(BG_EY_OBJECT_DOOR_A, BG_OBJECT_A_DOOR_EY_ENTRY, 2527.6f, 1596.91f, 1240.7f, -3.12414f, -0.173642f, -0.001515f, 0.98477f, -0.008594f, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_EY_OBJECT_DOOR_H, BG_OBJECT_H_DOOR_EY_ENTRY, 1803.21f, 1539.49f, 1242.19f, 3.14159f, 0.173648f, 0, 0.984808f, 0, RESPAWN_IMMEDIATELY)
         // banners (alliance)
@@ -464,7 +464,7 @@ bool BattlegroundEY::SetupBattleground()
         || !AddObject(BG_EY_OBJECT_TOWER_CAP_BLOOD_ELF, BG_OBJECT_BE_TOWER_CAP_EY_ENTRY, 2050.493164f, 1372.235962f, 1194.563477f, 1.710423f, 0, 0, 0.754710f, 0.656059f, RESPAWN_ONE_DAY)
         || !AddObject(BG_EY_OBJECT_TOWER_CAP_DRAENEI_RUINS, BG_OBJECT_DR_TOWER_CAP_EY_ENTRY, 2301.010498f, 1386.931641f, 1197.183472f, 1.570796f, 0, 0, 0.707107f, 0.707107f, RESPAWN_ONE_DAY)
         || !AddObject(BG_EY_OBJECT_TOWER_CAP_MAGE_TOWER, BG_OBJECT_HU_TOWER_CAP_EY_ENTRY, 2282.121582f, 1760.006958f, 1189.707153f, 1.919862f, 0, 0, 0.819152f, 0.573576f, RESPAWN_ONE_DAY)
-)
+        )
     {
         SF_LOG_ERROR("sql.sql", "BatteGroundEY: Failed to spawn some object Battleground not created!");
         return false;
@@ -482,7 +482,7 @@ bool BattlegroundEY::SetupBattleground()
         if (!AddObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REAVER + i * 3, Buff_Entries[0], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
             || !AddObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REAVER + i * 3 + 1, Buff_Entries[1], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
             || !AddObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REAVER + i * 3 + 2, Buff_Entries[2], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
-)
+            )
             SF_LOG_ERROR("bg.battleground", "BattlegroundEY: Cannot spawn buff");
     }
 
@@ -688,8 +688,8 @@ void BattlegroundEY::EventTeamLostPoint(Player* player, uint32 Point)
     UpdatePointsCount(Team);
 
     //remove bonus honor aura trigger creature when node is lost
-     if (Point < EY_POINTS_MAX)
-         DelCreature(Point + 6);//NULL checks are in DelCreature! 0-5 spirit guides
+    if (Point < EY_POINTS_MAX)
+        DelCreature(Point + 6);//NULL checks are in DelCreature! 0-5 spirit guides
 }
 
 void BattlegroundEY::EventTeamCapturedPoint(Player* player, uint32 Point)
@@ -737,7 +737,7 @@ void BattlegroundEY::EventTeamCapturedPoint(Player* player, uint32 Point)
         SF_LOG_ERROR("bg.battleground", "BatteGroundEY: Failed to spawn spirit guide! point: %u, team: %u, graveyard_id: %u",
             Point, Team, m_CapturingPointTypes[Point].GraveYardId);
 
-//    SpawnBGCreature(Point, RESPAWN_IMMEDIATELY);
+    //    SpawnBGCreature(Point, RESPAWN_IMMEDIATELY);
 
     UpdatePointsIcons(Team, Point);
     UpdatePointsCount(Team);
@@ -747,7 +747,7 @@ void BattlegroundEY::EventTeamCapturedPoint(Player* player, uint32 Point)
 
     Creature* trigger = GetBGCreature(Point + 6);//0-5 spirit guides
     if (!trigger)
-       trigger = AddCreature(WORLD_TRIGGER, Point+6, Team, BG_EY_TriggerPositions[Point][0], BG_EY_TriggerPositions[Point][1], BG_EY_TriggerPositions[Point][2], BG_EY_TriggerPositions[Point][3]);
+        trigger = AddCreature(WORLD_TRIGGER, Point + 6, Team, BG_EY_TriggerPositions[Point][0], BG_EY_TriggerPositions[Point][1], BG_EY_TriggerPositions[Point][2], BG_EY_TriggerPositions[Point][3]);
 
     //add bonus honor aura trigger creature when node is accupied
     //cast bonus aura (+50% honor in 25yards)
@@ -829,31 +829,31 @@ void BattlegroundEY::FillInitialWorldStates(WorldStateBuilder& builder)
     builder.AppendState(0xab0, 0x0);
     builder.AppendState(0xaaf, 0x0);
 
-    builder.AppendState(DRAENEI_RUINS_HORDE_CONTROL,      m_PointOwnedByTeam[DRAENEI_RUINS] == HORDE && m_PointState[DRAENEI_RUINS] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(DRAENEI_RUINS_HORDE_CONTROL, m_PointOwnedByTeam[DRAENEI_RUINS] == HORDE && m_PointState[DRAENEI_RUINS] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(DRAENEI_RUINS_ALLIANCE_CONTROL,   m_PointOwnedByTeam[DRAENEI_RUINS] == ALLIANCE && m_PointState[DRAENEI_RUINS] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(DRAENEI_RUINS_ALLIANCE_CONTROL, m_PointOwnedByTeam[DRAENEI_RUINS] == ALLIANCE && m_PointState[DRAENEI_RUINS] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(DRAENEI_RUINS_UNCONTROL,          m_PointState[DRAENEI_RUINS] != EY_POINT_UNDER_CONTROL);
+    builder.AppendState(DRAENEI_RUINS_UNCONTROL, m_PointState[DRAENEI_RUINS] != EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(MAGE_TOWER_ALLIANCE_CONTROL,      m_PointOwnedByTeam[MAGE_TOWER] == ALLIANCE && m_PointState[MAGE_TOWER] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(MAGE_TOWER_ALLIANCE_CONTROL, m_PointOwnedByTeam[MAGE_TOWER] == ALLIANCE && m_PointState[MAGE_TOWER] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(MAGE_TOWER_HORDE_CONTROL,         m_PointOwnedByTeam[MAGE_TOWER] == HORDE && m_PointState[MAGE_TOWER] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(MAGE_TOWER_HORDE_CONTROL, m_PointOwnedByTeam[MAGE_TOWER] == HORDE && m_PointState[MAGE_TOWER] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(MAGE_TOWER_UNCONTROL,             m_PointState[MAGE_TOWER] != EY_POINT_UNDER_CONTROL);
+    builder.AppendState(MAGE_TOWER_UNCONTROL, m_PointState[MAGE_TOWER] != EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(FEL_REAVER_HORDE_CONTROL,         m_PointOwnedByTeam[FEL_REAVER] == HORDE && m_PointState[FEL_REAVER] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(FEL_REAVER_HORDE_CONTROL, m_PointOwnedByTeam[FEL_REAVER] == HORDE && m_PointState[FEL_REAVER] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(FEL_REAVER_ALLIANCE_CONTROL,      m_PointOwnedByTeam[FEL_REAVER] == ALLIANCE && m_PointState[FEL_REAVER] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(FEL_REAVER_ALLIANCE_CONTROL, m_PointOwnedByTeam[FEL_REAVER] == ALLIANCE && m_PointState[FEL_REAVER] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(FEL_REAVER_UNCONTROL,             m_PointState[FEL_REAVER] != EY_POINT_UNDER_CONTROL);
+    builder.AppendState(FEL_REAVER_UNCONTROL, m_PointState[FEL_REAVER] != EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(BLOOD_ELF_HORDE_CONTROL,          m_PointOwnedByTeam[BLOOD_ELF] == HORDE && m_PointState[BLOOD_ELF] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(BLOOD_ELF_HORDE_CONTROL, m_PointOwnedByTeam[BLOOD_ELF] == HORDE && m_PointState[BLOOD_ELF] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(BLOOD_ELF_ALLIANCE_CONTROL,       m_PointOwnedByTeam[BLOOD_ELF] == ALLIANCE && m_PointState[BLOOD_ELF] == EY_POINT_UNDER_CONTROL);
+    builder.AppendState(BLOOD_ELF_ALLIANCE_CONTROL, m_PointOwnedByTeam[BLOOD_ELF] == ALLIANCE && m_PointState[BLOOD_ELF] == EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(BLOOD_ELF_UNCONTROL,              m_PointState[BLOOD_ELF] != EY_POINT_UNDER_CONTROL);
+    builder.AppendState(BLOOD_ELF_UNCONTROL, m_PointState[BLOOD_ELF] != EY_POINT_UNDER_CONTROL);
 
-    builder.AppendState(NETHERSTORM_FLAG,                 m_FlagState == BG_EY_FLAG_STATE_ON_BASE);
+    builder.AppendState(NETHERSTORM_FLAG, m_FlagState == BG_EY_FLAG_STATE_ON_BASE);
 
     builder.AppendState(0xad2, 0x1);
     builder.AppendState(0xad1, 0x1);
@@ -894,7 +894,7 @@ WorldSafeLocsEntry const* BattlegroundEY::GetClosestGraveYard(Player* player)
     float plr_y = player->GetPositionY();
     float plr_z = player->GetPositionZ();
 
-    distance = (entry->x - plr_x)*(entry->x - plr_x) + (entry->y - plr_y)*(entry->y - plr_y) + (entry->z - plr_z)*(entry->z - plr_z);
+    distance = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y) + (entry->z - plr_z) * (entry->z - plr_z);
     nearestDistance = distance;
 
     for (uint8 i = 0; i < EY_POINTS_MAX; ++i)
@@ -906,7 +906,7 @@ WorldSafeLocsEntry const* BattlegroundEY::GetClosestGraveYard(Player* player)
                 SF_LOG_ERROR("bg.battleground", "BattlegroundEY: Not found graveyard: %u", m_CapturingPointTypes[i].GraveYardId);
             else
             {
-                distance = (entry->x - plr_x)*(entry->x - plr_x) + (entry->y - plr_y)*(entry->y - plr_y) + (entry->z - plr_z)*(entry->z - plr_z);
+                distance = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y) + (entry->z - plr_z) * (entry->z - plr_z);
                 if (distance < nearestDistance)
                 {
                     nearestDistance = distance;

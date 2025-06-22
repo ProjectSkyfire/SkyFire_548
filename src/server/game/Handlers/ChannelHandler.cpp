@@ -1,10 +1,10 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ObjectMgr.h"                                      // for normalizePlayerName
 #include "ChannelMgr.h"
+#include "ObjectMgr.h"                                      // for normalizePlayerName
 #include "Player.h"
 #include "WorldSession.h"
 
@@ -302,13 +302,13 @@ void WorldSession::HandleChannelAnnouncements(WorldPacket& recvPacket)
             channel->Announce(GetPlayer());
 }
 
-void WorldSession::HandleChannelDisplayListQuery(WorldPacket &recvPacket)
+void WorldSession::HandleChannelDisplayListQuery(WorldPacket& recvPacket)
 {
     // this should be OK because the 2 function _were_ the same
     HandleChannelList(recvPacket);
 }
 
-void WorldSession::HandleGetChannelMemberCount(WorldPacket &recvPacket)
+void WorldSession::HandleGetChannelMemberCount(WorldPacket& recvPacket)
 {
     std::string channelName;
     recvPacket >> channelName;
@@ -341,10 +341,10 @@ void WorldSession::HandleSetChannelWatch(WorldPacket& recvPacket)
     SF_LOG_DEBUG("chat.system", "CMSG_SET_CHANNEL_WATCH %s Channel: %s",
         GetPlayerInfo().c_str(), channelName.c_str());
 
-    
+
     if (ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
         if (Channel* channel = cMgr->GetChannel(channelName, GetPlayer()))
             channel->JoinNotify(GetPlayer());
-    
+
 }
 */

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,13 +10,13 @@ Comment: All go related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
-#include "ObjectMgr.h"
-#include "MapManager.h"
-#include "TicketMgr.h"
 #include "Chat.h"
 #include "Language.h"
+#include "MapManager.h"
+#include "ObjectMgr.h"
 #include "Player.h"
+#include "ScriptMgr.h"
+#include "TicketMgr.h"
 
 class go_commandscript : public CommandScript
 {
@@ -101,7 +101,7 @@ public:
                 whereClause << ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name " _LIKE_ " '" << name << '\'';
             }
             else
-                whereClause <<  "WHERE guid = '" << guid << '\'';
+                whereClause << "WHERE guid = '" << guid << '\'';
         }
 
         QueryResult result = WorldDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, map, guid, id FROM creature %s", whereClause.str().c_str());

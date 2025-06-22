@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -474,6 +474,7 @@ enum Opcodes
     CMSG_SET_ACTIVE_MOVER,
     CMSG_SET_ACTIVE_VOICE_CHANNEL,
     CMSG_SET_CONTACT_NOTES,
+    CMSG_SET_CURRENCY_FLAGS,
     CMSG_SET_DUNGEON_DIFFICULTY,
     CMSG_SET_EVERYONE_IS_ASSISTANT,
     CMSG_SET_FACTION_ATWAR,
@@ -482,6 +483,7 @@ enum Opcodes
     CMSG_SET_FACTION_NOTATWAR,
     CMSG_SET_GUILD_BANK_TEXT,
     CMSG_SET_LFG_BONUS_FACTION_ID,
+    CMSG_SET_LOOT_SPECIALIZATION,
     CMSG_SET_LFG_COMMENT,
     CMSG_SET_PARTY_ASSIGNMENT,
     CMSG_SET_PET_TALENT_TREE,
@@ -587,7 +589,6 @@ enum Opcodes
     MSG_MOVE_UPDATE_MOUSE,
     MSG_MOVE_WORLDPORT_ACK,
     MSG_PVP_LOG_DATA,
-    MSG_QUERY_NEXT_MAIL_TIME,
     MSG_RAID_READY_CHECK_FINISHED,
     MSG_SAVE_GUILD_EMBLEM,
     MSG_START_MOVE_FORWARD,
@@ -883,6 +884,7 @@ enum Opcodes
     SMSG_LOOT_ROLL_WON,
     SMSG_LOOT_START_ROLL,
     SMSG_MAIL_LIST_RESULT,
+    SMSG_MAIL_QUERY_NEXT_TIME_RESULT,
     SMSG_MEETINGSTONE_MEMBER_ADDED,
     SMSG_MEETINGSTONE_SETQUEUE,
     SMSG_MESSAGECHAT,
@@ -1222,7 +1224,6 @@ enum Opcodes
     CMSG_SET_ALLOW_LOW_LEVEL_RAID2,
     CMSG_SET_CURRENCY_FLAGS,
     CMSG_SET_HIDE_ACHIEVEMENTS,
-    CMSG_SET_LOOT_SPECIALIZATION,
     CMSG_SET_PET_SLOT,
     CMSG_SET_PREFERED_CEMETERY,
     CMSG_SET_RELATIVE_POSITION,
@@ -1450,8 +1451,8 @@ enum Opcodes
     SMSG_XP_GAIN_ABORTED,
 */
 
-    NUM_OPCODES,
-    UNKNOWN_OPCODE
+NUM_OPCODES,
+UNKNOWN_OPCODE
 };
 
 /// Player state
@@ -1475,7 +1476,7 @@ enum PacketProcessing
 class WorldPacket;
 class WorldSession;
 
-typedef void(WorldSession::*pOpcodeHandler)(WorldPacket& recvPacket);
+typedef void(WorldSession::* pOpcodeHandler)(WorldPacket& recvPacket);
 
 struct OpcodeHandler
 {
@@ -1491,41 +1492,41 @@ struct OpcodeHandler
 
 class OpcodeTable
 {
-    public:
-        OpcodeTable()
-        {
-            memset(_internalTable, 0, sizeof(_internalTable));
-            memset(_opcodeTable, 0, sizeof(_opcodeTable));
-        }
+public:
+    OpcodeTable()
+    {
+        memset(_internalTable, 0, sizeof(_internalTable));
+        memset(_opcodeTable, 0, sizeof(_opcodeTable));
+    }
 
-        ~OpcodeTable()
-        {
-            for (uint16 i = 0; i < NUM_OPCODES; ++i)
-                delete _internalTable[i];
-        }
+    ~OpcodeTable()
+    {
+        for (uint16 i = 0; i < NUM_OPCODES; ++i)
+            delete _internalTable[i];
+    }
 
-        void InitializeClientTable();
-        void InitializeServerTable();
+    void InitializeClientTable();
+    void InitializeServerTable();
 
-        inline Opcodes GetOpcodeByNumber(uint16 number) { return _opcodeTable[number]; }
+    inline Opcodes GetOpcodeByNumber(uint16 number) const { return _opcodeTable[number]; }
 
-        OpcodeHandler const* operator[](uint32 index) const
-        {
-            return _internalTable[index];
-        }
+    OpcodeHandler const* operator[](uint32 index) const
+    {
+        return _internalTable[index];
+    }
 
-     private:
-        template<bool isInValidRange, bool isNonZero>
-        void ValidateAndSetOpcode(uint16 opcode, uint16 opcodeNumber, char const* name, SessionStatus status, PacketProcessing processing, pOpcodeHandler handler = 0);
+private:
+    template<bool isInValidRange, bool isNonZero>
+    void ValidateAndSetOpcode(uint16 opcode, uint16 opcodeNumber, char const* name, SessionStatus status, PacketProcessing processing, pOpcodeHandler handler = 0);
 
-        // Prevent copying this structure
-        OpcodeTable(OpcodeTable const&);
-        OpcodeTable& operator=(OpcodeTable const&);
+    // Prevent copying this structure
+    OpcodeTable(OpcodeTable const&);
+    OpcodeTable& operator=(OpcodeTable const&);
 
-        OpcodeHandler* _internalTable[NUM_OPCODES];
+    OpcodeHandler* _internalTable[NUM_OPCODES];
 
-        // Store opcode / number list - for speed
-        Opcodes _opcodeTable[NUM_OPCODE_HANDLERS];
+    // Store opcode / number list - for speed
+    Opcodes _opcodeTable[NUM_OPCODE_HANDLERS];
 };
 
 extern OpcodeTable serverOpcodeTable;

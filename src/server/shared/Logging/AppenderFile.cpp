@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,7 +10,7 @@
 # include <Windows.h>
 #endif
 
-AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, const char* _filename, const char* _logDir, const char* _mode, AppenderFlags _flags, uint64 fileSize):
+AppenderFile::AppenderFile(uint8 id, std::string const& name, LogLevel level, const char* _filename, const char* _logDir, const char* _mode, AppenderFlags _flags, uint64 fileSize) :
     Appender(id, name, AppenderType::APPENDER_FILE, level, _flags),
     logfile(NULL),
     filename(_filename),
@@ -54,7 +54,7 @@ void AppenderFile::_write(LogMessage const& message)
         CloseFile();
 }
 
-FILE* AppenderFile::OpenFile(std::string const &filename, std::string const &mode, bool backup)
+FILE* AppenderFile::OpenFile(std::string const& filename, std::string const& mode, bool backup)
 {
     std::string fullName(logDir + filename);
     if (backup)

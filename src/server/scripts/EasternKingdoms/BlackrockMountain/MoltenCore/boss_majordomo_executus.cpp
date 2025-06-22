@@ -67,7 +67,7 @@ class boss_majordomo : public CreatureScript
 
             void KilledUnit(Unit* /*victim*/) OVERRIDE
             {
-                if (urand(0, 99) < 25)
+                if ((std::rand() % 99) < 25)
                     Talk(SAY_SLAY);
             }
 

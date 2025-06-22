@@ -188,9 +188,9 @@ public:
             DoCast(me, SPELL_NEFARIANS_BARRIER);
             me->SetStandState(UNIT_STAND_STATE_STAND);
             AttackStart(target);
-            events.ScheduleEvent(EVENT_SHADOW_BOLT, urand(3000, 10000));
-            events.ScheduleEvent(EVENT_FEAR, urand(10000, 20000));
-            //events.ScheduleEvent(EVENT_MIND_CONTROL, urand(30000, 35000));
+            events.ScheduleEvent(EVENT_SHADOW_BOLT, std::rand() % 10000 + 3000);
+            events.ScheduleEvent(EVENT_FEAR, std::rand() % 20000 + 10000);
+            //events.ScheduleEvent(EVENT_MIND_CONTROL, std::rand() % 35000 + 30000);
             events.ScheduleEvent(EVENT_SPAWN_ADD, 10000);
         }
 
@@ -286,7 +286,7 @@ public:
                     switch (eventId)
                     {
                         case EVENT_SHADOW_BOLT:
-                            switch (urand(0, 1))
+                            switch (std::rand() % 1)
                             {
                                 case 0:
                                     DoCastVictim(SPELL_SHADOWBOLT_VOLLEY);
@@ -297,26 +297,26 @@ public:
                                     break;
                             }
                             DoResetThreat();
-                            events.ScheduleEvent(EVENT_SHADOW_BOLT, urand(3000, 10000));
+                            events.ScheduleEvent(EVENT_SHADOW_BOLT, std::rand() % 10000 + 3000);
                             break;
                         case EVENT_FEAR:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                                 DoCast(target, SPELL_FEAR);
-                            events.ScheduleEvent(EVENT_FEAR, urand(10000, 20000));
+                            events.ScheduleEvent(EVENT_FEAR, std::rand() % 20000 + 10000);
                             break;
                         case EVENT_MIND_CONTROL:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 40, true))
                                 DoCast(target, SPELL_SHADOW_COMMAND);
-                            events.ScheduleEvent(EVENT_MIND_CONTROL, urand(30000, 35000));
+                            events.ScheduleEvent(EVENT_MIND_CONTROL, std::rand() % 35000 + 30000);
                             break;
                         case EVENT_SPAWN_ADD:
                             for (uint8 i=0; i<2; ++i)
                             {
                                 uint32 CreatureID;
-                                if (urand(0, 2) == 0)
+                                if ((std::rand() % 2) == 0)
                                     CreatureID = NPC_CHROMATIC_DRAKANOID;
                                 else
-                                    CreatureID = Entry[urand(0, 4)];
+                                    CreatureID = Entry[std::rand() % 4];
                                 if (Creature* dragon = me->SummonCreature(CreatureID, DrakeSpawnLoc[i]))
                                 {
                                     dragon->setFaction(103);
@@ -391,11 +391,11 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             events.ScheduleEvent(EVENT_SHADOWFLAME, 12000);
-            events.ScheduleEvent(EVENT_FEAR, urand(25000, 35000));
-            events.ScheduleEvent(EVENT_VEILOFSHADOW, urand(25000, 35000));
+            events.ScheduleEvent(EVENT_FEAR, std::rand() % 35000 + 25000);
+            events.ScheduleEvent(EVENT_VEILOFSHADOW, std::rand() % 35000 + 25000);
             events.ScheduleEvent(EVENT_CLEAVE, 7000);
             //events.ScheduleEvent(EVENT_TAILLASH, 10000);
-            events.ScheduleEvent(EVENT_CLASSCALL, urand(30000, 35000));
+            events.ScheduleEvent(EVENT_CLASSCALL, std::rand() % 35000 + 30000);
             Talk(SAY_RANDOM);
         }
 
@@ -461,11 +461,11 @@ public:
                         break;
                     case EVENT_FEAR:
                         DoCastVictim(SPELL_BELLOWINGROAR);
-                        events.ScheduleEvent(EVENT_FEAR, urand(25000, 35000));
+                        events.ScheduleEvent(EVENT_FEAR, std::rand() % 35000 + 25000);
                         break;
                     case EVENT_VEILOFSHADOW:
                         DoCastVictim(SPELL_VEILOFSHADOW);
-                        events.ScheduleEvent(EVENT_VEILOFSHADOW, urand(25000, 35000));
+                        events.ScheduleEvent(EVENT_VEILOFSHADOW, std::rand() % 35000 + 25000);
                         break;
                     case EVENT_CLEAVE:
                         DoCastVictim(SPELL_CLEAVE);
@@ -523,7 +523,7 @@ public:
                             default:
                                 break;
                         }
-                        events.ScheduleEvent(EVENT_CLASSCALL, urand(30000, 35000));
+                        events.ScheduleEvent(EVENT_CLASSCALL, std::rand() % 35000 + 30000);
                         break;
                 }
             }

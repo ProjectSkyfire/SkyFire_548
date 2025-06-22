@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,12 +10,12 @@ Comment: All message related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
-#include "Chat.h"
 #include "ChannelMgr.h"
+#include "Chat.h"
 #include "Language.h"
-#include "Player.h"
 #include "ObjectMgr.h"
+#include "Player.h"
+#include "ScriptMgr.h"
 
 class message_commandscript : public CommandScript
 {
@@ -67,7 +67,7 @@ public:
             if (channcel)
                 channcel->SetOwnership(true);
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHANNEL_OWNERSHIP);
-            stmt->setUInt8 (0, 1);
+            stmt->setUInt8(0, 1);
             stmt->setString(1, channelStr);
             CharacterDatabase.Execute(stmt);
             handler->PSendSysMessage(LANG_CHANNEL_ENABLE_OWNERSHIP, channelStr);
@@ -77,7 +77,7 @@ public:
             if (channcel)
                 channcel->SetOwnership(false);
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHANNEL_OWNERSHIP);
-            stmt->setUInt8 (0, 0);
+            stmt->setUInt8(0, 0);
             stmt->setString(1, channelStr);
             CharacterDatabase.Execute(stmt);
             handler->PSendSysMessage(LANG_CHANNEL_DISABLE_OWNERSHIP, channelStr);
@@ -159,7 +159,7 @@ public:
         std::string str = handler->GetSkyFireString(LANG_GM_NOTIFY);
         str += args;
 
-        WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
+        WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
 
@@ -170,7 +170,7 @@ public:
     {
         if (!*args)
         {
-            handler->PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, handler->GetSession()->GetPlayer()->isAcceptWhispers() ?  handler->GetSkyFireString(LANG_ON) : handler->GetSkyFireString(LANG_OFF));
+            handler->PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, handler->GetSession()->GetPlayer()->isAcceptWhispers() ? handler->GetSkyFireString(LANG_ON) : handler->GetSkyFireString(LANG_OFF));
             return true;
         }
 

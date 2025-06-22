@@ -44,12 +44,12 @@ public:
 
         void Reset() OVERRIDE
         {
-            WhirlwindTimer    = urand(1 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
-            Whirlwind2Timer   = urand(1 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
+            WhirlwindTimer    = std::rand() % (20 * IN_MILLISECONDS) + (1 * IN_MILLISECONDS);
+            Whirlwind2Timer   = std::rand() % (20 * IN_MILLISECONDS) + (1 * IN_MILLISECONDS) ;
             KnockdownTimer    = 12 * IN_MILLISECONDS;
             FrenzyTimer       = 6 * IN_MILLISECONDS;
             ResetTimer        = 5 * IN_MILLISECONDS;
-            YellTimer         = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS); //20 to 30 seconds
+            YellTimer         = std::rand() % (30 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS); //20 to 30 seconds
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -71,31 +71,31 @@ public:
             if (WhirlwindTimer <= diff)
             {
                 DoCastVictim(SPELL_WHIRLWIND);
-                WhirlwindTimer =  urand(8 * IN_MILLISECONDS, 18 * IN_MILLISECONDS);
+                WhirlwindTimer =  std::rand() % (18 * IN_MILLISECONDS) + (8 * IN_MILLISECONDS);
             } else WhirlwindTimer -= diff;
 
             if (Whirlwind2Timer <= diff)
             {
                 DoCastVictim(SPELL_WHIRLWIND2);
-                Whirlwind2Timer = urand(7 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
+                Whirlwind2Timer = std::rand() % (25 * IN_MILLISECONDS) + (7 * IN_MILLISECONDS);
             } else Whirlwind2Timer -= diff;
 
             if (KnockdownTimer <= diff)
             {
                 DoCastVictim(SPELL_KNOCKDOWN);
-                KnockdownTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+                KnockdownTimer = std::rand() % (15 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS);
             } else KnockdownTimer -= diff;
 
             if (FrenzyTimer <= diff)
             {
                 DoCastVictim(SPELL_FRENZY);
-                FrenzyTimer = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS);
+                FrenzyTimer = std::rand() % (30 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS);
             } else FrenzyTimer -= diff;
 
             if (YellTimer <= diff)
             {
                 Talk(YELL_RANDOM);
-                YellTimer = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS); //20 to 30 seconds
+                YellTimer = std::rand() % (30 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS); //20 to 30 seconds
             } else YellTimer -= diff;
 
             // check if creature is not outside of building

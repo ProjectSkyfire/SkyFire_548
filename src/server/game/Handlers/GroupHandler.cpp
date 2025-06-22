@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -48,9 +48,7 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
 void WorldSession::SendGroupInviteNotification(const std::string& inviterName, const std::string& realmName, bool inGroup)
 {
     SF_LOG_DEBUG("network", "WORLD: sending SMSG_GROUP_INVITE");
-    
     ObjectGuid invitedGuid = GetPlayer()->GetGUID();
-    
 
     WorldPacket data(SMSG_GROUP_INVITE, 6 + 1 + 8 + 8 + 4 + 4 + 4 + inviterName.size() + realmName.size());
     data.WriteBits(realmName.size(), 8);
@@ -128,7 +126,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
 
     if (realmName.empty())
     {
-        RealmNameMap::const_iterator iter = realmNameStore.find(realmID);
+        CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(_player->GetGUID()));
+        RealmNameMap::const_iterator iter = realmNameStore.find(nameData->m_realm);
         if (iter != realmNameStore.end()) // Add local realm
         {
             realmName = iter->second;
@@ -136,7 +135,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     }
 
     // attempt add selected player
-
     // cheating
     if (!normalizePlayerName(memberName))
     {
@@ -144,6 +142,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
         return;
     }
 
+    memberName = memberName.substr(0, memberName.find("-"));
     Player* player = sObjectAccessor->FindPlayerByName(memberName);
 
     // no player
@@ -667,7 +666,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recvData)
     /********************/
 
     // everything's fine, do it
-    roll = urand(minimum, maximum);
+    roll = std::rand() % maximum + minimum;
 
     //SF_LOG_DEBUG("misc", "ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 
@@ -807,7 +806,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)
     if (!group->HasFreeSlotSubGroup(groupNr))
         return;
 
-    if(Player* movedPlayer = sObjectAccessor->FindPlayer(TargetGUID))
+    if (Player* movedPlayer = sObjectAccessor->FindPlayer(TargetGUID))
         group->ChangeMembersGroup(movedPlayer, groupNr);
 }
 

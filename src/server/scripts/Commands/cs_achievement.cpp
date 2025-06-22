@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,8 +11,8 @@ Category: commandscripts
 EndScriptData */
 
 #include "AchievementMgr.h"
-#include "Guild.h"
 #include "Chat.h"
+#include "Guild.h"
 #include "Language.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -63,7 +63,8 @@ public:
             {
                 if (Guild* guild = target->GetGuild())
                     guild->GetAchievementMgr().CompletedAchievement(achievementEntry, target);
-            } else
+            }
+            else
                 target->CompletedAchievement(achievementEntry);
         }
 

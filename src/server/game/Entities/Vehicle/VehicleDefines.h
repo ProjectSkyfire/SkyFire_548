@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,74 +7,74 @@
 #define SF_VEHICLEDEFINES_H
 
 #include "Define.h"
-#include <vector>
 #include <map>
+#include <vector>
 
 struct VehicleSeatEntry;
 
 enum PowerType
 {
-    POWER_STEAM                                  = 61,
-    POWER_PYRITE                                 = 41,
-    POWER_HEAT                                   = 101,
-    POWER_OOZE                                   = 121,
-    POWER_BLOOD                                  = 141,
-    POWER_WRATH                                  = 142,
-    POWER_ARCANE_ENERGY                          = 143,
-    POWER_LIFE_ENERGY                            = 144,
-    POWER_SUN_ENERGY                             = 145,
-    POWER_SWING_VELOCITY                         = 146,
-    POWER_SHADOWFLAME_ENERGY                     = 147,
-    POWER_BLUE_POWER                             = 148,
-    POWER_PURPLE_POWER                           = 149,
-    POWER_GREEN_POWER                            = 150,
-    POWER_ORANGE_POWER                           = 151,
-    POWER_ENERGY_2                               = 153,
-    POWER_ARCANEENERGY                           = 161,
-    POWER_WIND_POWER_1                           = 162,
-    POWER_WIND_POWER_2                           = 163,
-    POWER_WIND_POWER_3                           = 164,
-    POWER_FUEL                                   = 165,
-    POWER_SUN_POWER                              = 166,
-    POWER_TWILIGHT_ENERGY                        = 169,
-    POWER_VENOM                                  = 174,
-    POWER_ORANGE_POWER_2                         = 176,
-    POWER_CONSUMING_FLAME                        = 177,
-    POWER_PYROCLASTIC_FRENZY                     = 178,
-    POWER_FLASHFIRE                              = 179,
-    POWER_FEL_ENERGY                             = 181,
-    POWER_BACK_HEAT                              = 183,
-    POWER_JADE_POWER                             = 187,
-    POWER_COBALT_POWER                           = 188,
-    POWER_JASPER_POWER                           = 189,
-    POWER_AMETHYST_POWER                         = 190,
-    POWER_ARCANE_ENERGY_2                        = 191,
-    POWER_RED_POWER                              = 192,
-    POWER_RED_POWER_2                            = 196,
-    POWER_WILLPOWER                              = 198,
-    POWER_DARK_POWER                             = 199,
-    POWER_GOLD_POWER                             = 200,
-    POWER_RESONANCE                              = 201,
-    POWER_SHA_ENERGY                             = 203,
-    POWER_FOOD                                   = 206
+    POWER_STEAM = 61,
+    POWER_PYRITE = 41,
+    POWER_HEAT = 101,
+    POWER_OOZE = 121,
+    POWER_BLOOD = 141,
+    POWER_WRATH = 142,
+    POWER_ARCANE_ENERGY = 143,
+    POWER_LIFE_ENERGY = 144,
+    POWER_SUN_ENERGY = 145,
+    POWER_SWING_VELOCITY = 146,
+    POWER_SHADOWFLAME_ENERGY = 147,
+    POWER_BLUE_POWER = 148,
+    POWER_PURPLE_POWER = 149,
+    POWER_GREEN_POWER = 150,
+    POWER_ORANGE_POWER = 151,
+    POWER_ENERGY_2 = 153,
+    POWER_ARCANEENERGY = 161,
+    POWER_WIND_POWER_1 = 162,
+    POWER_WIND_POWER_2 = 163,
+    POWER_WIND_POWER_3 = 164,
+    POWER_FUEL = 165,
+    POWER_SUN_POWER = 166,
+    POWER_TWILIGHT_ENERGY = 169,
+    POWER_VENOM = 174,
+    POWER_ORANGE_POWER_2 = 176,
+    POWER_CONSUMING_FLAME = 177,
+    POWER_PYROCLASTIC_FRENZY = 178,
+    POWER_FLASHFIRE = 179,
+    POWER_FEL_ENERGY = 181,
+    POWER_BACK_HEAT = 183,
+    POWER_JADE_POWER = 187,
+    POWER_COBALT_POWER = 188,
+    POWER_JASPER_POWER = 189,
+    POWER_AMETHYST_POWER = 190,
+    POWER_ARCANE_ENERGY_2 = 191,
+    POWER_RED_POWER = 192,
+    POWER_RED_POWER_2 = 196,
+    POWER_WILLPOWER = 198,
+    POWER_DARK_POWER = 199,
+    POWER_GOLD_POWER = 200,
+    POWER_RESONANCE = 201,
+    POWER_SHA_ENERGY = 203,
+    POWER_FOOD = 206
 };
 
 enum VehicleFlags
 {
-    VEHICLE_FLAG_NO_STRAFE                       = 0x00000001,           // Sets MOVEFLAG2_NO_STRAFE
-    VEHICLE_FLAG_NO_JUMPING                      = 0x00000002,           // Sets MOVEFLAG2_NO_JUMPING
-    VEHICLE_FLAG_FULLSPEEDTURNING                = 0x00000004,           // Sets MOVEFLAG2_FULLSPEEDTURNING
-    VEHICLE_FLAG_ALLOW_PITCHING                  = 0x00000010,           // Sets MOVEFLAG2_ALLOW_PITCHING
-    VEHICLE_FLAG_FULLSPEEDPITCHING               = 0x00000020,           // Sets MOVEFLAG2_FULLSPEEDPITCHING
-    VEHICLE_FLAG_CUSTOM_PITCH                    = 0x00000040,           // If set use pitchMin and pitchMax from DBC, otherwise pitchMin = -pi/2, pitchMax = pi/2
-    VEHICLE_FLAG_ADJUST_AIM_ANGLE                = 0x00000400,           // Lua_IsVehicleAimAngleAdjustable
-    VEHICLE_FLAG_ADJUST_AIM_POWER                = 0x00000800            // Lua_IsVehicleAimPowerAdjustable
+    VEHICLE_FLAG_NO_STRAFE = 0x00000001,           // Sets MOVEFLAG2_NO_STRAFE
+    VEHICLE_FLAG_NO_JUMPING = 0x00000002,           // Sets MOVEFLAG2_NO_JUMPING
+    VEHICLE_FLAG_FULLSPEEDTURNING = 0x00000004,           // Sets MOVEFLAG2_FULLSPEEDTURNING
+    VEHICLE_FLAG_ALLOW_PITCHING = 0x00000010,           // Sets MOVEFLAG2_ALLOW_PITCHING
+    VEHICLE_FLAG_FULLSPEEDPITCHING = 0x00000020,           // Sets MOVEFLAG2_FULLSPEEDPITCHING
+    VEHICLE_FLAG_CUSTOM_PITCH = 0x00000040,           // If set use pitchMin and pitchMax from DBC, otherwise pitchMin = -pi/2, pitchMax = pi/2
+    VEHICLE_FLAG_ADJUST_AIM_ANGLE = 0x00000400,           // Lua_IsVehicleAimAngleAdjustable
+    VEHICLE_FLAG_ADJUST_AIM_POWER = 0x00000800            // Lua_IsVehicleAimPowerAdjustable
 };
 
 enum VehicleSpells
 {
-    VEHICLE_SPELL_RIDE_HARDCODED                 = 46598,
-    VEHICLE_SPELL_PARACHUTE                      = 45472
+    VEHICLE_SPELL_RIDE_HARDCODED = 46598,
+    VEHICLE_SPELL_PARACHUTE = 45472
 };
 
 struct PassengerInfo

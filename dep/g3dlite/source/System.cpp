@@ -79,7 +79,11 @@
 #endif
 
 // SIMM include
+#if defined(WIN32) || defined(__x86_64__)
 #include <xmmintrin.h>
+#else
+#include "sse2neon.h"
+#endif
 
 
 namespace G3D {
@@ -146,7 +150,7 @@ void System::init() {
         // We read the standard CPUID level 0x00000000 which should
         // be available on every x86 processor.  This fills out
         // a string with the processor vendor tag.
-        unsigned int eaxreg = 0, ebxreg = 0, ecxreg = 0, edxreg = 0;
+        int eaxreg = 0, ebxreg = 0, ecxreg = 0, edxreg = 0;
 
         cpuid(CPUID_VENDOR_ID, eaxreg, ebxreg, ecxreg, edxreg);
 
@@ -559,7 +563,7 @@ void System::getStandardProcessorExtensions() {
         return;
     }
 
-    uint32 eaxreg = 0, ebxreg = 0, ecxreg = 0, features = 0;
+    int32 eaxreg = 0, ebxreg = 0, ecxreg = 0, features = 0;
 
     cpuid(CPUID_PROCESSOR_FEATURES, eaxreg, ebxreg, ecxreg, features);
 
@@ -1688,7 +1692,7 @@ std::string System::currentTimeString() {
 #if defined(_MSC_VER)
 
 // Windows 64-bit
-void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
+void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32& edx) {
 	int regs[4] = {eax, ebx, ecx, edx};
 	__cpuid(regs, func);
 	eax = regs[0];
@@ -1702,7 +1706,7 @@ void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, ui
 // See http://sam.zoy.org/blog/2007-04-13-shlib-with-non-pic-code-have-inline-assembly-and-pic-mix-well
 // for a discussion of why the second version saves ebx; it allows 32-bit code to compile with the -fPIC option.
 // On 64-bit x86, PIC code has a dedicated rip register for PIC so there is no ebx conflict.
-void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
+void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32& edx) {
 #if ! defined(__PIC__) || defined(__x86_64__)
     // AT&T assembler syntax
     asm volatile(

@@ -49,33 +49,9 @@ public:
 
     struct instance_magisters_terrace_InstanceMapScript : public InstanceScript
     {
-        instance_magisters_terrace_InstanceMapScript(Map* map) : InstanceScript(map) { }
-
-        uint32 Encounter[MAX_ENCOUNTER];
-        uint32 DelrissaDeathCount;
-
-        std::vector<uint64> FelCrystals;
-
-        uint64 SelinGUID;
-        uint64 DelrissaGUID;
-        uint64 VexallusDoorGUID;
-        uint64 SelinDoorGUID;
-        uint64 SelinEncounterDoorGUID;
-        uint64 DelrissaDoorGUID;
-        uint64 KaelDoorGUID;
-        uint64 KaelStatue[2];
-        uint64 EscapeOrbGUID;
-        uint32 StatuesState;
-        uint8 felCristalIndex;
-
-        void Initialize() OVERRIDE
+        instance_magisters_terrace_InstanceMapScript(Map* map) : InstanceScript(map)
         {
-            memset(&Encounter, 0, sizeof(Encounter));
-
-            FelCrystals.clear();
-
             DelrissaDeathCount = 0;
-
             SelinGUID = 0;
             DelrissaGUID = 0;
             VexallusDoorGUID = 0;
@@ -83,11 +59,14 @@ public:
             SelinEncounterDoorGUID = 0;
             DelrissaDoorGUID = 0;
             KaelDoorGUID = 0;
-            KaelStatue[0] = 0;
-            KaelStatue[1] = 0;
             EscapeOrbGUID = 0;
             StatuesState = 0;
             felCristalIndex = 0;
+
+            memset(&Encounter, 0, sizeof(Encounter));
+            FelCrystals.clear();
+            KaelStatue[0] = 0;
+            KaelStatue[1] = 0;
         }
 
         bool IsEncounterInProgress() const OVERRIDE
@@ -292,6 +271,24 @@ public:
             if (identifier == DATA_FEL_CRYSTAL)
                 felCristalIndex = value;
         }
+
+    private:
+        uint32 Encounter[MAX_ENCOUNTER];
+        uint32 DelrissaDeathCount;
+
+        std::vector<uint64> FelCrystals;
+
+        uint64 SelinGUID;
+        uint64 DelrissaGUID;
+        uint64 VexallusDoorGUID;
+        uint64 SelinDoorGUID;
+        uint64 SelinEncounterDoorGUID;
+        uint64 DelrissaDoorGUID;
+        uint64 KaelDoorGUID;
+        uint64 KaelStatue[2];
+        uint64 EscapeOrbGUID;
+        uint32 StatuesState;
+        uint8 felCristalIndex;
     };
 
     InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE

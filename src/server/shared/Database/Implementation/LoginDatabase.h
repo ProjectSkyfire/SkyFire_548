@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,13 +11,13 @@
 
 class LoginDatabaseConnection : public MySQLConnection
 {
-    public:
-        //- Constructors for sync and async connections
-        LoginDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
-        LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
+public:
+    //- Constructors for sync and async connections
+    LoginDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo) { }
+    LoginDatabaseConnection(ACE_Activation_Queue* q, MySQLConnectionInfo& connInfo) : MySQLConnection(q, connInfo) { }
 
-        //- Loads database type specific prepared statements
-        void DoPrepareStatements();
+    //- Loads database type specific prepared statements
+    void DoPrepareStatements();
 };
 
 typedef DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabaseWorkerPool;
@@ -30,6 +30,7 @@ enum LoginDatabaseStatements
         name for a suiting suffix.
     */
 
+    LOGIN_SEL_AUTH_REALMLIST,
     LOGIN_SEL_REALMLIST,
     LOGIN_SEL_REALMNAME_BY_ID,
     LOGIN_DEL_EXPIRED_IP_BANS,
@@ -42,7 +43,7 @@ enum LoginDatabaseStatements
     LOGIN_INS_ACCOUNT_AUTO_BANNED,
     LOGIN_DEL_ACCOUNT_BANNED,
     LOGIN_SEL_SESSIONKEY,
-    LOGIN_UPD_VS,
+    LOGIN_UPD_LOGON,
     LOGIN_UPD_LOGONPROOF,
     LOGIN_SEL_LOGONCHALLENGE,
     LOGIN_SEL_LOGON_COUNTRY,
@@ -73,7 +74,6 @@ enum LoginDatabaseStatements
     LOGIN_UPD_ACCOUNT_LOCK_CONTRY,
     LOGIN_INS_LOG,
     LOGIN_UPD_USERNAME,
-    LOGIN_UPD_PASSWORD,
     LOGIN_UPD_EMAIL,
     LOGIN_UPD_REG_EMAIL,
     LOGIN_UPD_MUTE_TIME,
@@ -82,20 +82,13 @@ enum LoginDatabaseStatements
     LOGIN_UPD_ACCOUNT_ONLINE,
     LOGIN_UPD_UPTIME_PLAYERS,
     LOGIN_DEL_OLD_LOGS,
-    LOGIN_DEL_ACCOUNT_ACCESS,
-    LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM,
-    LOGIN_INS_ACCOUNT_ACCESS,
     LOGIN_GET_ACCOUNT_ID_BY_USERNAME,
-    LOGIN_GET_ACCOUNT_ACCESS_GMLEVEL,
-    LOGIN_GET_GMLEVEL_BY_REALMID,
     LOGIN_GET_USERNAME_BY_ID,
     LOGIN_SEL_CHECK_PASSWORD,
     LOGIN_SEL_CHECK_PASSWORD_BY_NAME,
     LOGIN_SEL_PINFO,
     LOGIN_SEL_PINFO_BANS,
-    LOGIN_SEL_GM_ACCOUNTS,
     LOGIN_SEL_ACCOUNT_INFO,
-    LOGIN_SEL_ACCOUNT_ACCESS_GMLEVEL_TEST,
     LOGIN_SEL_ACCOUNT_ACCESS,
     LOGIN_SEL_ACCOUNT_RECRUITER,
     LOGIN_SEL_BANS,
@@ -106,7 +99,6 @@ enum LoginDatabaseStatements
     LOGIN_SEL_AUTOBROADCAST,
     LOGIN_GET_EMAIL_BY_ID,
 
-    LOGIN_SEL_ACCOUNT_ACCESS_BY_ID,
     LOGIN_SEL_RBAC_ACCOUNT_PERMISSIONS,
     LOGIN_INS_RBAC_ACCOUNT_PERMISSION,
     LOGIN_DEL_RBAC_ACCOUNT_PERMISSION,

@@ -1,15 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
 #include "ByteBuffer.h"
-#include "WorldPacket.h"
-#include "UpdateData.h"
+#include "Common.h"
 #include "Log.h"
 #include "Opcodes.h"
+#include "UpdateData.h"
 #include "World.h"
+#include "WorldPacket.h"
 #include "zlib.h"
 
 UpdateData::UpdateData(uint16 map) : m_map(map), m_blockCount(0) { }
@@ -24,7 +24,7 @@ void UpdateData::AddOutOfRangeGUID(uint64 guid)
     m_outOfRangeGUIDs.insert(guid);
 }
 
-void UpdateData::AddUpdateBlock(const ByteBuffer &block)
+void UpdateData::AddUpdateBlock(const ByteBuffer& block)
 {
     m_data.append(block);
     ++m_blockCount;

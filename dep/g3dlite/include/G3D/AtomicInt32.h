@@ -77,10 +77,14 @@ public:
 #       elif defined(G3D_LINUX) || defined(G3D_FREEBSD)
 
             int32 old;
-            asm volatile ("lock; xaddl %0,%1"
+#           if defined(__x86_64__)
+                asm volatile ("lock; xaddl %0,%1"
                   : "=r"(old), "=m"(m_value) /* outputs */
                   : "0"(x), "m"(m_value)   /* inputs */
                   : "memory", "cc");
+#           else
+            // ARM64
+#           endif
             return old;
             
 #       elif defined(G3D_OSX)
@@ -117,11 +121,15 @@ public:
 #       elif defined(G3D_LINUX)  || defined(G3D_FREEBSD)
             unsigned char nz;
 
+#           if defined(__x86_64__)
             asm volatile ("lock; decl %1;\n\t"
                           "setnz %%al"
                           : "=a" (nz)
                           : "m" (m_value)
                           : "memory", "cc");
+#           else
+            // ARM64
+#           endif
             return nz;
 #       elif defined(G3D_OSX)
             // Note: returns the newly decremented value
@@ -146,10 +154,14 @@ public:
             // Based on Apache Portable Runtime
             // http://koders.com/c/fid3B6631EE94542CDBAA03E822CA780CBA1B024822.aspx
             int32 ret;
-            asm volatile ("lock; cmpxchgl %1, %2"
+#           if defined(__x86_64__)
+                asm volatile ("lock; cmpxchgl %1, %2"
                           : "=a" (ret)
                           : "r" (exchange), "m" (m_value), "0"(comperand)
                           : "memory", "cc");
+#           else
+            //ARM64
+#           endif
             return ret;
 
             // Note that OSAtomicCompareAndSwap32 does not return a useful value for us

@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "TransportMgr.h"
-#include "Transport.h"
 #include "InstanceScript.h"
-#include "MoveSpline.h"
 #include "MapManager.h"
+#include "MoveSpline.h"
+#include "Transport.h"
+#include "TransportMgr.h"
 
 TransportTemplate::~TransportTemplate()
 {
@@ -17,7 +17,7 @@ TransportTemplate::~TransportTemplate()
         splines.insert(keyFrames[i].Spline);
 
     for (std::set<TransportSpline*>::iterator itr = splines.begin(); itr != splines.end(); ++itr)
-        delete *itr;
+        delete* itr;
 }
 
 TransportMgr::TransportMgr() { }

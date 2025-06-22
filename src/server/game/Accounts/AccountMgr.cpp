@@ -1,15 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "AccountMgr.h"
+#include "CryptoHash.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "SRP6.h"
 #include "Util.h"
-#include "SHA1.h"
 #include "WorldSession.h"
 
 AccountMgr::AccountMgr() { }
@@ -34,9 +35,11 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT);
 
     stmt->setString(0, username);
-    stmt->setString(1, CalculateShaPassHash(username, password));
-    stmt->setString(2, email);
+    auto [salt, verifier] = SkyFire::Crypto::SRP6::MakeRegistrationData(username, password);
+    stmt->setBinary(1, salt);
+    stmt->setBinary(2, verifier);
     stmt->setString(3, email);
+    stmt->setString(4, email);
 
     LoginDatabase.DirectExecute(stmt); // Enforce saving, otherwise AddGroup can fail
 
@@ -110,10 +113,6 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accountId)
     stmt->setUInt32(0, accountId);
     trans->Append(stmt);
 
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS);
-    stmt->setUInt32(0, accountId);
-    trans->Append(stmt);
-
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_REALM_CHARACTERS);
     stmt->setUInt32(0, accountId);
     trans->Append(stmt);
@@ -149,7 +148,13 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accountId, std::string newUser
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_USERNAME);
 
     stmt->setString(0, newUsername);
-    stmt->setString(1, CalculateShaPassHash(newUsername, newPassword));
+    stmt->setUInt32(1, accountId);
+    LoginDatabase.Execute(stmt);
+
+    auto [salt, verifier] = SkyFire::Crypto::SRP6::MakeRegistrationData(newUsername, newPassword);
+    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGON);
+    stmt->setBinary(0, salt);
+    stmt->setBinary(1, verifier);
     stmt->setUInt32(2, accountId);
 
     LoginDatabase.Execute(stmt);
@@ -170,18 +175,12 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accountId, std::string newPass
     normalizeString(username);
     normalizeString(newPassword);
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_PASSWORD);
+    auto [salt, verifier] = SkyFire::Crypto::SRP6::MakeRegistrationData(username, newPassword);
 
-    stmt->setString(0, CalculateShaPassHash(username, newPassword));
-    stmt->setUInt32(1, accountId);
-
-    LoginDatabase.Execute(stmt);
-
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_VS);
-
-    stmt->setString(0, "");
-    stmt->setString(1, "");
-    stmt->setString(2, username);
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGON);
+    stmt->setBinary(0, salt);
+    stmt->setBinary(1, verifier);
+    stmt->setUInt32(2, accountId);;
 
     LoginDatabase.Execute(stmt);
 
@@ -245,21 +244,12 @@ uint32 AccountMgr::GetId(std::string const& username)
 
 AccountTypes AccountMgr::GetSecurity(uint32 accountId)
 {
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_ACCOUNT_ACCESS_GMLEVEL);
-    stmt->setUInt32(0, accountId);
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-    return (result) ? AccountTypes((*result)[0].GetUInt8()) : AccountTypes::SEC_PLAYER;
+    return AccountTypes::SEC_PLAYER;
 }
 
 AccountTypes AccountMgr::GetSecurity(uint32 accountId, int32 realmId)
 {
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
-    stmt->setUInt32(0, accountId);
-    stmt->setInt32(1, realmId);
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
-
-    return (result) ? AccountTypes((*result)[0].GetUInt8()) : AccountTypes::SEC_PLAYER;
+    return AccountTypes::SEC_PLAYER;
 }
 
 bool AccountMgr::GetName(uint32 accountId, std::string& name)
@@ -304,10 +294,15 @@ bool AccountMgr::CheckPassword(uint32 accountId, std::string password)
 
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_CHECK_PASSWORD);
     stmt->setUInt32(0, accountId);
-    stmt->setString(1, CalculateShaPassHash(username, password));
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (PreparedQueryResult result = LoginDatabase.Query(stmt))
+    {
+        SkyFire::Crypto::SRP6::Salt salt = (*result)[0].GetBinary<SkyFire::Crypto::SRP6::SALT_LENGTH>();
+        SkyFire::Crypto::SRP6::Verifier verifier = (*result)[1].GetBinary<SkyFire::Crypto::SRP6::VERIFIER_LENGTH>();
+        if (SkyFire::Crypto::SRP6::CheckLogin(username, password, salt, verifier))
+            return true;
+    }
 
-    return (result) ? true : false;
+    return false;
 }
 
 bool AccountMgr::CheckEmail(uint32 accountId, std::string newEmail)
@@ -339,7 +334,7 @@ uint32 AccountMgr::GetCharactersCount(uint32 accountId)
 
 bool AccountMgr::normalizeString(std::string& utf8String)
 {
-    wchar_t buffer[MAX_ACCOUNT_STR+1];
+    wchar_t buffer[MAX_ACCOUNT_STR + 1];
 
     size_t maxLength = MAX_ACCOUNT_STR;
     if (!Utf8toWStr(utf8String, buffer, maxLength))
@@ -347,24 +342,12 @@ bool AccountMgr::normalizeString(std::string& utf8String)
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif
-    std::transform(&buffer[0], buffer+maxLength, &buffer[0], wcharToUpperOnlyLatin);
+    std::transform(&buffer[0], buffer + maxLength, &buffer[0], wcharToUpperOnlyLatin);
 #ifdef _MSC_VER
 #pragma warning(default: 4996)
 #endif
 
     return WStrToUtf8(buffer, maxLength, utf8String);
-}
-
-std::string AccountMgr::CalculateShaPassHash(std::string const& name, std::string const& password)
-{
-    SHA1Hash sha;
-    sha.Initialize();
-    sha.UpdateData(name);
-    sha.UpdateData(":");
-    sha.UpdateData(password);
-    sha.Finalize();
-
-    return ByteArrayToHexStr(sha.GetDigest(), sha.GetLength());
 }
 
 bool AccountMgr::IsPlayerAccount(AccountTypes gmlevel)
@@ -406,8 +389,7 @@ void AccountMgr::LoadRBAC()
         uint32 id = field[0].GetUInt32();
         _permissions[id] = new rbac::RBACPermission(id, field[1].GetString());
         ++count1;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading linked permissions");
     result = LoginDatabase.Query("SELECT id, linkedId FROM rbac_linked_permissions ORDER BY id ASC");
@@ -438,8 +420,7 @@ void AccountMgr::LoadRBAC()
         }
         permission->AddLinkedPermission(linkedPermissionId);
         ++count2;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_DEBUG("rbac", "AccountMgr::LoadRBAC: Loading default permissions");
     result = LoginDatabase.Query("SELECT secId, permissionId FROM rbac_default_permissions ORDER BY secId ASC");
@@ -463,8 +444,7 @@ void AccountMgr::LoadRBAC()
 
         permissions->insert(field[1].GetUInt32());
         ++count3;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u permission definitions, %u linked permissions and %u default permissions in %u ms", count1, count2, count3, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -474,30 +454,6 @@ void AccountMgr::UpdateAccountAccess(rbac::RBACData* rbac, uint32 accountId, uin
     if (rbac && securityLevel == rbac->GetSecurityLevel())
         rbac->SetSecurityLevel(securityLevel);
 
-    // Delete old security level from DB
-    if (realmId == -1)
-    {
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS);
-        stmt->setUInt32(0, accountId);
-        LoginDatabase.Execute(stmt);
-    }
-    else
-    {
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_ACCESS_BY_REALM);
-        stmt->setUInt32(0, accountId);
-        stmt->setUInt32(1, realmId);
-        LoginDatabase.Execute(stmt);
-    }
-
-    // Add new security level
-    if (securityLevel)
-    {
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_ACCESS);
-        stmt->setUInt32(0, accountId);
-        stmt->setUInt8(1, securityLevel);
-        stmt->setInt32(2, realmId);
-        LoginDatabase.Execute(stmt);
-    }
 }
 
 rbac::RBACPermission const* AccountMgr::GetRBACPermission(uint32 permissionId) const
@@ -523,7 +479,7 @@ bool AccountMgr::HasPermission(uint32 accountId, uint32 permissionId, uint32 rea
     bool hasPermission = rbac.HasPermission(permissionId);
 
     SF_LOG_DEBUG("rbac", "AccountMgr::HasPermission [AccountId: %u, PermissionId: %u, realmId: %d]: %u",
-                   accountId, permissionId, realmId, hasPermission);
+        accountId, permissionId, realmId, hasPermission);
     return hasPermission;
 }
 

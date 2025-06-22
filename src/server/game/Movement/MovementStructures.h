@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_MOVEMENT_STRUCTURES_H
 #define SF_MOVEMENT_STRUCTURES_H
 
-#include "Opcodes.h"
 #include "Object.h"
+#include "Opcodes.h"
 
 class ByteBuffer;
 class Unit;
@@ -102,7 +102,7 @@ enum MovementStatusElements
     MSEOneBit,          // writes bit value 0 or skips read bit
     MSEEnd,             // marks end of parsing
     MSEExtraElement,    // Used to signalize reading into ExtraMovementStatusElement, element sequence inside it is declared as separate array
-                        // Allowed internal elements are: GUID markers (not transport), MSEExtraFloat, MSEExtraInt8
+    // Allowed internal elements are: GUID markers (not transport), MSEExtraFloat, MSEExtraInt8
     MSEExtraFloat,
     MSEExtraFloat2,
     MSEExtraInt8,

@@ -1,10 +1,10 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Threading.h"
 #include "Errors.h"
+#include "Threading.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/Sched_Params.h>
 #include <vector>
@@ -30,7 +30,7 @@ ThreadPriority::ThreadPriority()
         pr_iter.next();
     }
 
-    ASSERT (!_tmp.empty());
+    ASSERT(!_tmp.empty());
 
     if (_tmp.size() >= MAXPRIORITYNUM)
     {
@@ -58,7 +58,7 @@ ThreadPriority::ThreadPriority()
         min_pos = (norm_pos - 1);
 
         m_priority[Low] = _tmp[min_pos -= _div];
-        m_priority[Lowest] = _tmp[min_pos -= _div ];
+        m_priority[Lowest] = _tmp[min_pos -= _div];
 
         _div = (max_pos - norm_pos) / _divider;
         if (_div == 0)
@@ -84,16 +84,16 @@ int ThreadPriority::getPriority(Priority p) const
 
 #define THREADFLAG (THR_NEW_LWP | THR_SCHED_DEFAULT| THR_JOINABLE)
 
-Thread::Thread(): m_iThreadId(0), m_hThreadHandle(0), m_task(0) { }
+Thread::Thread() : m_iThreadId(0), m_hThreadHandle(0), m_task(0) { }
 
-Thread::Thread(Runnable* instance): m_iThreadId(0), m_hThreadHandle(0), m_task(instance)
+Thread::Thread(Runnable* instance) : m_iThreadId(0), m_hThreadHandle(0), m_task(instance)
 {
     // register reference to m_task to prevent it deeltion until destructor
     if (m_task)
         m_task->incReference();
 
     bool _start = start();
-    ASSERT (_start);
+    ASSERT(_start);
 }
 
 Thread::~Thread()
@@ -164,7 +164,7 @@ void Thread::resume()
     ACE_Thread::resume(m_hThreadHandle);
 }
 
-ACE_THR_FUNC_RETURN Thread::ThreadTask(void * param)
+ACE_THR_FUNC_RETURN Thread::ThreadTask(void* param)
 {
     Runnable* _task = (Runnable*)param;
     _task->run();
@@ -188,16 +188,16 @@ ACE_hthread_t Thread::currentHandle()
     return _handle;
 }
 
-Thread * Thread::current()
+Thread* Thread::current()
 {
-    Thread * _thread = m_ThreadStorage.ts_object();
+    Thread* _thread = m_ThreadStorage.ts_object();
     if (!_thread)
     {
         _thread = new Thread();
         _thread->m_iThreadId = Thread::currentId();
         _thread->m_hThreadHandle = Thread::currentHandle();
 
-        Thread * _oldValue = m_ThreadStorage.ts_object(_thread);
+        Thread* _oldValue = m_ThreadStorage.ts_object(_thread);
         if (_oldValue)
             delete _oldValue;
     }
@@ -210,7 +210,7 @@ void Thread::setPriority(Priority type)
     int _priority = m_TpEnum.getPriority(type);
     int _ok = ACE_Thread::setprio(m_hThreadHandle, _priority);
     //remove this ASSERT in case you don't want to know is thread priority change was successful or not
-    ASSERT (_ok == 0);
+    ASSERT(_ok == 0);
 }
 
 void Thread::Sleep(unsigned long msecs)

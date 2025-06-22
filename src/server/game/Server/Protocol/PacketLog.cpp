@@ -1,11 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "PacketLog.h"
-#include "Config.h"
 #include "ByteBuffer.h"
+#include "Config.h"
+#include "PacketLog.h"
 #include "WorldPacket.h"
 
 PacketLog::PacketLog() : _file(NULL)
@@ -26,7 +26,7 @@ void PacketLog::Initialize()
     std::string logsDir = sConfigMgr->GetStringDefault("LogsDir", "");
 
     if (!logsDir.empty())
-        if ((logsDir.at(logsDir.length()-1) != '/') && (logsDir.at(logsDir.length()-1) != '\\'))
+        if ((logsDir.at(logsDir.length() - 1) != '/') && (logsDir.at(logsDir.length() - 1) != '\\'))
             logsDir.push_back('/');
 
     std::string logname = sConfigMgr->GetStringDefault("PacketLogFile", "");
@@ -36,7 +36,7 @@ void PacketLog::Initialize()
 
 void PacketLog::LogPacket(WorldPacket const& packet, Direction direction)
 {
-    ByteBuffer data(4+4+4+1+packet.size());
+    ByteBuffer data(4 + 4 + 4 + 1 + packet.size());
     uint32 opcode = direction == CLIENT_TO_SERVER ? const_cast<WorldPacket&>(packet).GetReceivedOpcode() : serverOpcodeTable[packet.GetOpcode()]->OpcodeNumber;
 
     data << int32(opcode);

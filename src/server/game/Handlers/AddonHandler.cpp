@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "zlib.h"
 #include "AddonHandler.h"
 #include "DatabaseEnv.h"
-#include "Opcodes.h"
 #include "Log.h"
+#include "Opcodes.h"
+#include "zlib.h"
 
 AddonHandler::AddonHandler() { }
 
@@ -50,13 +50,13 @@ bool AddonHandler::BuildAddonPacket(WorldPacket* source, WorldPacket* target)
             uint32 crc, unk2;
 
             // check next addon data format correctness
-            if (AddOnPacked.rpos()+1 > AddOnPacked.size())
+            if (AddOnPacked.rpos() + 1 > AddOnPacked.size())
                 return false;
 
             AddOnPacked >> addonName;
 
             // recheck next addon data format correctness
-            if (AddOnPacked.rpos()+1+4+4 > AddOnPacked.size())
+            if (AddOnPacked.rpos() + 1 + 4 + 4 > AddOnPacked.size())
                 return false;
 
             AddOnPacked >> enabled >> crc >> unk2;

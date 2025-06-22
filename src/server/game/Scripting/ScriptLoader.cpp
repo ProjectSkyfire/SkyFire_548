@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -200,7 +200,8 @@ void AddSC_boss_eredar_twins();
 void AddSC_boss_muru();
 void AddSC_boss_kiljaeden();
 void AddSC_sunwell_plateau();
-void AddSC_boss_archaedas();                 //Uldaman
+void AddSC_boss_ancient_stone_keeper();      //Uldaman
+void AddSC_boss_archaedas();
 void AddSC_boss_galgann_firehammer();
 void AddSC_boss_grimlok();
 void AddSC_boss_ironaya();
@@ -864,7 +865,8 @@ void AddEasternKingdomsScripts()
     AddSC_boss_lord_overheat();
     AddSC_boss_randolph_moloch();
     AddSC_instance_the_stockade();          //The Stockade
-    AddSC_boss_archaedas();                 //Uldaman
+    AddSC_boss_ancient_stone_keeper();      //Uldaman
+    AddSC_boss_archaedas();
     AddSC_boss_galgann_firehammer();
     AddSC_boss_grimlok();
     AddSC_boss_ironaya();
@@ -890,7 +892,7 @@ void AddEasternKingdomsScripts()
     AddSC_silverpine_forest();
     AddSC_stranglethorn_vale();
     AddSC_undercity();
-	AddSC_elwynn_forest();
+    AddSC_elwynn_forest();
 #endif
 }
 

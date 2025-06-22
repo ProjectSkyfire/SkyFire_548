@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef THREADING_H
 #define THREADING_H
 
+#include <atomic>
 #include <ace/Thread.h>
 #include <ace/TSS_T.h>
-#include <ace/Atomic_Op.h>
 #include <assert.h>
 
 namespace ACE_Based
@@ -16,18 +16,19 @@ namespace ACE_Based
 
     class Runnable
     {
-        public:
-            virtual ~Runnable() { }
-            virtual void run() = 0;
+    public:
+        virtual ~Runnable() { }
+        virtual void run() = 0;
 
-            void incReference() { ++m_refs; }
-            void decReference()
-            {
-                if (!--m_refs)
-                    delete this;
-            }
-        private:
-            ACE_Atomic_Op<ACE_Thread_Mutex, long> m_refs;
+        void incReference() { ++m_refs; }
+        void decReference()
+        {
+            if (!--m_refs)
+                delete this;
+        }
+    private:
+        std::atomic<long> m_refs;
+        //ACE_Atomic_Op<ACE_Thread_Mutex, long> m_refs;
     };
 
     enum Priority
@@ -45,50 +46,50 @@ namespace ACE_Based
 
     class ThreadPriority
     {
-        public:
-            ThreadPriority();
-            int getPriority(Priority p) const;
+    public:
+        ThreadPriority();
+        int getPriority(Priority p) const;
 
-        private:
-            int m_priority[MAXPRIORITYNUM];
+    private:
+        int m_priority[MAXPRIORITYNUM];
     };
 
     class Thread
     {
-        public:
-            Thread();
-            explicit Thread(Runnable* instance);
-            ~Thread();
+    public:
+        Thread();
+        explicit Thread(Runnable* instance);
+        ~Thread();
 
-            bool start();
-            bool wait();
-            void destroy();
+        bool start();
+        bool wait();
+        void destroy();
 
-            void suspend();
-            void resume();
+        void suspend();
+        void resume();
 
-            void setPriority(Priority type);
+        void setPriority(Priority type);
 
-            static void Sleep(unsigned long msecs);
-            static ACE_thread_t currentId();
-            static ACE_hthread_t currentHandle();
-            static Thread * current();
+        static void Sleep(unsigned long msecs);
+        static ACE_thread_t currentId();
+        static ACE_hthread_t currentHandle();
+        static Thread* current();
 
-        private:
-            Thread(const Thread&);
-            Thread& operator=(const Thread&);
+    private:
+        Thread(const Thread&);
+        Thread& operator=(const Thread&);
 
-            static ACE_THR_FUNC_RETURN ThreadTask(void * param);
+        static ACE_THR_FUNC_RETURN ThreadTask(void* param);
 
-            ACE_thread_t m_iThreadId;
-            ACE_hthread_t m_hThreadHandle;
-            Runnable* m_task;
+        ACE_thread_t m_iThreadId;
+        ACE_hthread_t m_hThreadHandle;
+        Runnable* m_task;
 
-            typedef ACE_TSS<Thread> ThreadStorage;
-            //global object - container for Thread class representation of every thread
-            static ThreadStorage m_ThreadStorage;
-            //use this object to determine current OS thread priority values mapped to enum Priority{ }
-            static ThreadPriority m_TpEnum;
+        typedef ACE_TSS<Thread> ThreadStorage;
+        //global object - container for Thread class representation of every thread
+        static ThreadStorage m_ThreadStorage;
+        //use this object to determine current OS thread priority values mapped to enum Priority{ }
+        static ThreadPriority m_TpEnum;
     };
 
 }

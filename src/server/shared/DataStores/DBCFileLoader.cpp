@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -17,7 +17,7 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     uint32 header;
     if (data)
     {
-        delete [] data;
+        delete[] data;
         data = NULL;
     }
 
@@ -84,7 +84,7 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     }
 
     data = new unsigned char[recordSize * recordCount + stringSize];
-    stringTable = data + recordSize*recordCount;
+    stringTable = data + recordSize * recordCount;
 
     if (fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
     {
@@ -100,10 +100,10 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
 DBCFileLoader::~DBCFileLoader()
 {
     if (data)
-        delete [] data;
+        delete[] data;
 
     if (fieldsOffset)
-        delete [] fieldsOffset;
+        delete[] fieldsOffset;
 }
 
 DBCFileLoader::Record DBCFileLoader::getRecord(size_t id)
@@ -212,7 +212,7 @@ char* DBCFileLoader::AutoProduceData(std::string format, uint32& records, char**
         else
             indexTable[y] = &dataTable[offset];
 
-        for (uint32 x=0; x < fieldCount; ++x)
+        for (uint32 x = 0; x < fieldCount; ++x)
         {
             switch (format[x])
             {
@@ -281,19 +281,19 @@ char* DBCFileLoader::AutoProduceStrings(std::string format, char* dataTable)
                     char** slot = (char**)(&dataTable[offset]);
                     if (!*slot || !**slot)
                     {
-                        const char * st = getRecord(y).getString(x);
-                        *slot=stringPool+(st-(const char*)stringTable);
+                        const char* st = getRecord(y).getString(x);
+                        *slot = stringPool + (st - (const char*)stringTable);
                     }
                     offset += sizeof(char*);
                     break;
-                 }
-                 case FT_NA:
-                 case FT_NA_BYTE:
-                 case FT_SORT:
-                     break;
-                 default:
-                     ASSERT(false && "Unknown field format character in DBCfmt.h");
-                     break;
+                }
+                case FT_NA:
+                case FT_NA_BYTE:
+                case FT_SORT:
+                    break;
+                default:
+                    ASSERT(false && "Unknown field format character in DBCfmt.h");
+                    break;
             }
         }
     }

@@ -13,1124 +13,25 @@
 /* 03.05.03  1.00  Lad  Added compression methods                            */
 /* 19.11.03  1.01  Dan  Big endian handling                                  */
 /* 08.12.03  2.01  Dan  High-memory handling (> 0x80000000)                  */
+/* 09.01.13  3.00  Lad  Refactored, beautified, documented :-)               */
 /*****************************************************************************/
- 
+
 #include <assert.h>
 #include <string.h>
- 
+
 #include "huff.h"
 
-// Special for Mac - we have to know if normal pointer greater or less
-// than 0x80000000. This variable is used in the PTR_VALID and PTR_INVALID
-// macros
-static long mul = 1;
-
-#define PTR_VALID(ptr)           (((LONG_PTR)(ptr) * mul) > 0)
-#define PTR_INVALID(ptr)         (((LONG_PTR)(ptr) * mul) < 0)
-#define PTR_INVALID_OR_NULL(ptr) (((LONG_PTR)(ptr) * mul) <= 0)
-
- 
 //-----------------------------------------------------------------------------
-// Methods of the THTreeItem struct
- 
-// 1501DB70
-THTreeItem * THTreeItem::Call1501DB70(THTreeItem * pLast)
-{
-    if(pLast == NULL)
-        pLast = this + 1;
-    return pLast;
-}
- 
-// Gets previous Huffman tree item (?)
-THTreeItem * THTreeItem::GetPrevItem(LONG_PTR value)
-{
-    if(PTR_INVALID(prev))
-        return PTR_NOT(prev);
- 
-    if(value == -1 || PTR_INVALID(value))
-        value = (LONG_PTR)(this - next->prev);
-    return prev + value;
- 
-// OLD VERSION
-//  if(PTR_INT(value) < 0)
-//      value = PTR_INT((item - item->next->prev));
-//  return (THTreeItem *)((char *)prev + value);
-}
- 
-// 1500F5E0
-void THTreeItem::ClearItemLinks()
-{
-    next = prev = NULL;
-}
- 
-// 1500BC90
-void THTreeItem::RemoveItem()
-{
-    THTreeItem * pTemp;                // EDX
- 
-    if(next != NULL)
-    {
-        pTemp = prev;
-       
-        if(PTR_INVALID_OR_NULL(pTemp))
-            pTemp = PTR_NOT(pTemp);
-        else
-            pTemp += (this - next->prev);
- 
-        pTemp->next = next;
-        next->prev  = prev;
-        next = prev = NULL;
-    }
-}
- 
-/*
-// OLD VERSION : Removes item from the tree (?)
-static void RemoveItem(THTreeItem * item)
-{
-    THTreeItem * next = item->next;     // ESI
-    THTreeItem * prev = item->prev;     // EDX
- 
-    if(next == NULL)
-        return;
- 
-    if(PTR_INT(prev) < 0)
-        prev = PTR_NOT(prev);
-    else
-        // ??? usually item == next->prev, so what is it ?
-        prev = (THTreeItem *)((unsigned char *)prev + (unsigned long)((unsigned char *)item - (unsigned char *)(next->prev)));
- 
-    // Remove HTree item from the chain
-    prev->next = next;                  // Sets the 'first' pointer
-    next->prev = item->prev;
- 
-    // Invalidate pointers
-    item->next = NULL;
-    item->prev = NULL;
-}
-*/
- 
-//-----------------------------------------------------------------------------
-// TOutputStream functions
- 
-void TOutputStream::PutBits(unsigned long dwBuff, unsigned int nPutBits)
-{
-    dwBitBuff |= (dwBuff << nBits);
-    nBits     += nPutBits;
- 
-    // Flush completed bytes
-    while(nBits >= 8)
-    {
-        if(cbOutSize != 0)
-        {
-            *pbOutPos++ = (unsigned char)dwBitBuff;
-            cbOutSize--;
-        }
- 
-        dwBitBuff >>= 8;
-        nBits      -= 8;
-    }
-}
- 
-//-----------------------------------------------------------------------------
-// TInputStream functions
+// Local defined
 
-// Gets one bit from input stream
-unsigned long TInputStream::GetBit()
-{
-    unsigned long dwOneBit = 0;
-
-    // Ensure that the input stream is reloaded, if there are no bits left
-    if(BitCount == 0)
-    {
-        // Refill the bit buffer
-        BitBuffer = *pbInBuffer++;
-        BitCount = 8;
-    }
-
-    // Copy the bit from bit buffer to the variable
-    dwOneBit = (BitBuffer & 0x01);
-    BitBuffer >>= 1;
-    BitCount--;
-
-    return dwOneBit;
-}   
- 
-// Gets 7 bits from the stream. DOES NOT remove the bits from input stream
-unsigned long TInputStream::Get7Bits()
-{
-    unsigned long dwReloadByte = 0;
-
-    // If there is not enough bits to get the value,
-    // we have to add 8 more bits from the input buffer
-    if(BitCount < 7)
-    {
-        dwReloadByte = *pbInBuffer++;
-        BitBuffer |= dwReloadByte << BitCount;
-        BitCount += 8;
-    }
-
-    // Return the first available 7 bits. DO NOT remove them from the input stream
-    return (BitBuffer & 0x7F);
-}
- 
-// Gets the whole byte from the input stream.
-unsigned long TInputStream::Get8Bits()
-{
-    unsigned long dwReloadByte = 0;
-    unsigned long dwOneByte = 0;
-
-    // If there is not enough bits to get the value,
-    // we have to add 8 more bits from the input buffer
-    if(BitCount < 8)
-    {
-        dwReloadByte = *pbInBuffer++;
-        BitBuffer |= dwReloadByte << BitCount;
-        BitCount += 8;
-    }
-
-    // Return the lowest 8 its
-    dwOneByte = (BitBuffer & 0xFF);
-    BitBuffer >>= 8;
-    BitCount -= 8;
-    return dwOneByte;
-}
-
-void TInputStream::SkipBits(unsigned int dwBitsToSkip)
-{
-    unsigned long dwReloadByte = 0;
-
-    // If there is not enough bits in the buffer,
-    // we have to add 8 more bits from the input buffer
-    if(BitCount < dwBitsToSkip)
-    {
-        dwReloadByte = *pbInBuffer++;
-        BitBuffer |= dwReloadByte << BitCount;
-        BitCount += 8;
-    }
-
-    // Skip the remaining bits
-    BitBuffer >>= dwBitsToSkip;
-    BitCount -= dwBitsToSkip;
-}
+#define HUFF_DECOMPRESS_ERROR   0x1FF
 
 //-----------------------------------------------------------------------------
-// Functions for huffmann tree items
- 
-// Inserts item into the tree (?)
-static void InsertItem(THTreeItem ** itemPtr, THTreeItem * item, unsigned long nWhere, THTreeItem * item2)
-{
-    THTreeItem * next = item->next;     // EDI - next to the first item
-    THTreeItem * prev = item->prev;     // ESI - prev to the first item
-    THTreeItem * prev2;                 // Pointer to previous item
-    LONG_PTR next2;                     // Pointer to the next item
-   
-    // The same code like in RemoveItem(item);
-    if(next != 0)                       // If the first item already has next one
-    {
-        if(PTR_INVALID(prev))
-            prev = PTR_NOT(prev);
-        else
-            prev += (item - next->prev);
- 
-        // 150083C1
-        // Remove the item from the tree
-        prev->next = next;
-        next->prev = prev;
- 
-        // Invalidate 'prev' and 'next' pointer
-        item->next = 0;
-        item->prev = 0;
-    }
- 
-    if(item2 == NULL)                   // EDX - If the second item is not entered,
-        item2 = PTR_PTR(&itemPtr[1]);   // take the first tree item
- 
-    switch(nWhere)
-    {
-        case SWITCH_ITEMS :             // Switch the two items
-            item->next  = item2->next;  // item2->next (Pointer to pointer to first)
-            item->prev  = item2->next->prev;
-            item2->next->prev = item;
-            item2->next = item;         // Set the first item
-            return;
-       
-        case INSERT_ITEM:               // Insert as the last item
-            item->next = item2;         // Set next item (or pointer to pointer to first item)
-            item->prev = item2->prev;   // Set prev item (or last item in the tree)
- 
-            next2 = PTR_INT(itemPtr[0]);// Usually NULL
-            prev2 = item2->prev;        // Prev item to the second (or last tree item)
-           
-            if(PTR_INVALID(prev2))
-            {
-                if(prev != NULL)
-                {
-                    prev2 = PTR_NOT(prev);
-                    if(prev2 != NULL)
-                    {
-                        prev2->next = item;
-                        item2->prev = item;     // Next after last item
-                    }
-                }
-                return;
-            }
- 
-            if(PTR_INVALID(next2))
-                next2 = (LONG_PTR)(item2 - item2->next->prev);
-//              next2 = (THTreeItem *)(unsigned long)((unsigned char *)item2 - (unsigned char *)(item2->next->prev));
- 
-//          prev2 = (THTreeItem *)((char *)prev2 + (unsigned long)next2);// ???
-            prev2 += next2;
-            prev2->next = item;
-            item2->prev = item;         // Set the next/last item
-            return;
- 
-        default:
-            return;
-    }
-}
- 
-//-----------------------------------------------------------------------------
-// THuffmannTree class functions
- 
-THuffmannTree::THuffmannTree()
-{
-    // We have to check if the "this" pointer is less than zero
-    if((LONG_PTR)this < 0)
-        mul = -1;
-}
- 
-void THuffmannTree::InitTree(bool bCompression)
-{
-    THTreeItem * pItem;
-    unsigned int nCount;
- 
-    // Clear links for all the items in the tree
-    for(pItem = items0008, nCount = 0x203; nCount != 0; pItem++, nCount--)
-        pItem->ClearItemLinks();
- 
-    pItem3050 = NULL;
-    pItem3054 = PTR_PTR(&pItem3054);
-    pItem3058 = PTR_NOT(pItem3054);
-   
-    pItem305C = NULL;
-    pFirst    = PTR_PTR(&pFirst);
-    pLast     = PTR_NOT(pFirst);
- 
-    offs0004  = 1;
-    nItems    = 0;
- 
-    // Clear all TQDecompress items. Do this only if preparing for decompression
-    if(bCompression == false)
-    {
-        for(nCount = 0; nCount < sizeof(qd3474) / sizeof(TQDecompress); nCount++)
-            qd3474[nCount].offs00 = 0;
-    }
-}
- 
-// Builds Huffman tree. Called with the first 8 bits loaded from input stream
-void THuffmannTree::BuildTree(unsigned int nCmpType)
-{
-    unsigned long   maxByte;                // [ESP+10] - The greatest character found in table
-    THTreeItem   ** itemPtr;                // [ESP+14] - Pointer to Huffman tree item pointer array
-    unsigned char * byteArray;              // [ESP+1C] - Pointer to unsigned char in Table1502A630
-    THTreeItem    * child1;
-    unsigned long   i;                      // egcs in linux doesn't like multiple for loops without an explicit i
- 
-    // Loop while pointer has a valid value
-    while(PTR_VALID(pLast))                 // ESI - Last entry
-    {
-        THTreeItem * temp;                  // EAX
- 
-        if(pLast->next != NULL)             // ESI->next
-            pLast->RemoveItem();
-                                            // EDI = &offs3054
-        pItem3058   = PTR_PTR(&pItem3054);  // [EDI+4]
-        pLast->prev = pItem3058;            // EAX
- 
-        temp = PTR_PTR(&pItem3054)->GetPrevItem(PTR_INT(&pItem3050));
- 
-        temp->next = pLast;
-        pItem3054  = pLast;
-    }
- 
-    // Clear all pointers in HTree item array
-    memset(items306C, 0, sizeof(items306C));
- 
-    maxByte = 0;                            // Greatest character found init to zero.
-    itemPtr = (THTreeItem **)&items306C;    // Pointer to current entry in HTree item pointer array
- 
-    // Ensure we have low 8 bits only
-    nCmpType &= 0xFF;
-    byteArray  = Table1502A630 + nCmpType * 258; // EDI also
- 
-    for(i = 0; i < 0x100; i++, itemPtr++)
-    {
-        THTreeItem * item   = pItem3058;    // Item to be created
-        THTreeItem * pItem3 = pItem3058;
-        unsigned char         oneByte = byteArray[i];
- 
-        // Skip all the bytes which are zero.
-        if(byteArray[i] == 0)
-            continue;
- 
-        // If not valid pointer, take the first available item in the array
-        if(PTR_INVALID_OR_NULL(item))
-            item = &items0008[nItems++];
- 
-        // Insert this item as the top of the tree
-        InsertItem(&pItem305C, item, SWITCH_ITEMS, NULL);
- 
-        item->parent    = NULL;                 // Invalidate child and parent
-        item->child     = NULL;
-        *itemPtr        = item;                 // Store pointer into pointer array
- 
-        item->dcmpByte  = i;                    // Store counter
-        item->byteValue = oneByte;              // Store byte value
-        if(oneByte >= maxByte)
-        {
-            maxByte = oneByte;
-            continue;
-        }
- 
-        // Find the first item which has byte value greater than current one byte
-        if(PTR_VALID(pItem3 = pLast))           // EDI - Pointer to the last item
-        {
-            // 15006AF7
-            if(pItem3 != NULL)
-            {
-                do  // 15006AFB
-                {
-                    if(pItem3->byteValue >= oneByte)
-                        goto _15006B09;
-                    pItem3 = pItem3->prev;
-                }
-                while(PTR_VALID(pItem3));
-            }
-        }
-        pItem3 = NULL;
- 
-        // 15006B09
-        _15006B09:
-        if(item->next != NULL)
-            item->RemoveItem();
- 
-        // 15006B15
-        if(pItem3 == NULL)
-            pItem3 = PTR_PTR(&pFirst);
- 
-        // 15006B1F
-        item->next = pItem3->next;
-        item->prev = pItem3->next->prev;
-        pItem3->next->prev = item;
-        pItem3->next = item;
-    }
- 
-    // 15006B4A
-    for(; i < 0x102; i++)
-    {
-        THTreeItem ** itemPtr = &items306C[i];  // EDI
- 
-        // 15006B59
-        THTreeItem * item = pItem3058;          // ESI
-        if(PTR_INVALID_OR_NULL(item))
-            item = &items0008[nItems++];
- 
-        InsertItem(&pItem305C, item, INSERT_ITEM, NULL);
- 
-        // 15006B89
-        item->dcmpByte   = i;
-        item->byteValue  = 1;
-        item->parent     = NULL;
-        item->child      = NULL;
-        *itemPtr++ = item;
-    }
- 
-    // 15006BAA
-    if(PTR_VALID(child1 = pLast))                   // EDI - last item (first child to item
-    {
-        THTreeItem * child2;                        // EBP
-        THTreeItem * item;                          // ESI
- 
-        // 15006BB8
-        while(PTR_VALID(child2 = child1->prev))
-        {
-            if(PTR_INVALID_OR_NULL(item = pItem3058))
-                item = &items0008[nItems++];
- 
-            // 15006BE3
-            InsertItem(&pItem305C, item, SWITCH_ITEMS, NULL);
- 
-            // 15006BF3
-            item->parent = NULL;
-            item->child  = NULL;
- 
-            //EDX = child2->byteValue + child1->byteValue;
-            //EAX = child1->byteValue;
-            //ECX = maxByte;                        // The greatest character (0xFF usually)
- 
-            item->byteValue = child1->byteValue + child2->byteValue; // 0x02
-            item->child     = child1;                                // Prev item in the
-            child1->parent  = item;
-            child2->parent  = item;
- 
-            // EAX = item->byteValue;
-            if(item->byteValue >= maxByte)
-                maxByte = item->byteValue;
-            else
-            {
-                THTreeItem * pItem2 = child2->prev;   // EDI
- 
-                // 15006C2D
-                while(PTR_VALID(pItem2))
-                {
-                    if(pItem2->byteValue >= item->byteValue)
-                        goto _15006C3B;
-                    pItem2 = pItem2->prev;
-                }
-                pItem2 = NULL;
- 
-                _15006C3B:
-                if(item->next != 0)
-                {
-                    THTreeItem * temp4 = item->GetPrevItem(-1);
-                                                                   
-                    temp4->next      = item->next;                 // The first item changed
-                    item->next->prev = item->prev;                 // First->prev changed to negative value
-                    item->next = NULL;
-                    item->prev = NULL;
-                }
- 
-                // 15006C62
-                if(pItem2 == NULL)
-                    pItem2 = PTR_PTR(&pFirst);
- 
-                item->next = pItem2->next;                           // Set item with 0x100 byte value
-                item->prev = pItem2->next->prev;                     // Set item with 0x17 byte value
-                pItem2->next->prev = item;                           // Changed prev of item with
-                pItem2->next = item;
-            }
-
-            // 15006C7B
-            if(PTR_INVALID_OR_NULL(child1 = child2->prev))
-                break;
-        }
-    }
-    // 15006C88
-    offs0004 = 1;
-}
-/*
-// Modifies Huffman tree. Adds new item and changes
-void THuffmannTree::ModifyTree(unsigned long dwIndex)
-{
-    THTreeItem * pItem1 = pItem3058;                              // ESI
-    THTreeItem * pSaveLast = (PTR_INT(pLast) <= 0) ? NULL : pLast;  // EBX
-    THTreeItem * temp;                                              // EAX
- 
-    // Prepare the first item to insert to the tree
-    if(PTR_INT(pItem1) <= 0)
-        pItem1 = &items0008[nItems++];
- 
-    // If item has any next item, remove it from the chain
-    if(pItem1->next != NULL)
-    {
-        THTreeItem * temp = pItem1->GetPrevItem(-1);                  // EAX
- 
-        temp->next = pItem1->next;
-        pItem1->next->prev = pItem1->prev;
-        pItem1->next = NULL;
-        pItem1->prev = NULL;
-    }
- 
-    pItem1->next = PTR_PTR(&pFirst);
-    pItem1->prev = pLast;
-    temp = pItem1->next->GetPrevItem(PTR_INT(pItem305C));
- 
-    // 150068E9
-    temp->next = pItem1;
-    pLast  = pItem1;
- 
-    pItem1->parent = NULL;
-    pItem1->child  = NULL;
- 
-    // 150068F6
-    pItem1->dcmpByte  = pSaveLast->dcmpByte;   // Copy item index
-    pItem1->byteValue = pSaveLast->byteValue;  // Copy item byte value
-    pItem1->parent    = pSaveLast;             // Set parent to last item
-    items306C[pSaveLast->dcmpByte] = pItem1;  // Insert item into item pointer array
- 
-    // Prepare the second item to insert into the tree
-    if(PTR_INT((pItem1 = pItem3058)) <= 0)
-        pItem1 = &items0008[nItems++];
- 
-    // 1500692E
-    if(pItem1->next != NULL)
-    {
-        temp = pItem1->GetPrevItem(-1);   // EAX
- 
-        temp->next = pItem1->next;
-        pItem1->next->prev = pItem1->prev;
-        pItem1->next = NULL;
-        pItem1->prev = NULL;
-    }
-    // 1500694C
-    pItem1->next = PTR_PTR(&pFirst);
-    pItem1->prev = pLast;
-    temp = pItem1->next->GetPrevItem(PTR_INT(pItem305C));
- 
-    // 15006968
-    temp->next = pItem1;
-    pLast      = pItem1;
- 
-    // 1500696E
-    pItem1->child     = NULL;
-    pItem1->dcmpByte  = dwIndex;
-    pItem1->byteValue = 0;
-    pItem1->parent    = pSaveLast;
-    pSaveLast->child   = pItem1;
-    items306C[dwIndex] = pItem1;
- 
-    do
-    {
-        THTreeItem  * pItem2 = pItem1;
-        THTreeItem  * pItem3;
-        unsigned long byteValue;
- 
-        // 15006993
-        byteValue = ++pItem1->byteValue;
- 
-        // Pass through all previous which have its value greater than byteValue
-        while(PTR_INT((pItem3 = pItem2->prev)) > 0)  // EBX
-        {
-            if(pItem3->byteValue >= byteValue)
-                goto _150069AE;
- 
-            pItem2 = pItem2->prev;
-        }
-        // 150069AC
-        pItem3 = NULL;
- 
-        _150069AE:
-        if(pItem2 == pItem1)
-            continue;
- 
-        // 150069B2
-        // Switch pItem2 with item
-        InsertItem(&pItem305C, pItem2, SWITCH_ITEMS, pItem1);
-        InsertItem(&pItem305C, pItem1, SWITCH_ITEMS, pItem3);
- 
-        // 150069D0
-        // Switch parents of pItem1 and pItem2
-        temp = pItem2->parent->child;
-        if(pItem1 == pItem1->parent->child)
-            pItem1->parent->child = pItem2;
- 
-        if(pItem2 == temp)
-            pItem2->parent->child = pItem1;
- 
-        // 150069ED
-        // Switch parents of pItem1 and pItem3
-        temp = pItem1->parent;
-        pItem1 ->parent = pItem2->parent;
-        pItem2->parent = temp;
-        offs0004++;
-    }
-    while(PTR_INT((pItem1 = pItem1->parent)) > 0);
-}
- 
-void THuffmannTree::UninitTree()
-{
-    while(PTR_INT(pLast) > 0)
-    {
-        pItem = pItem305C->Call1501DB70(pLast);
-        pItem->RemoveItem();
-    }
- 
-    for(pItem = pFirst; PTR_INT(pItem3058) > 0; pItem = pItem3058)
-        pItem->RemoveItem();
-    PTR_PTR(&pItem3054)->RemoveItem();
- 
-    for(pItem = items0008 + 0x203, nCount = 0x203; nCount != 0; nCount--)
-    {
-        pItem--;
-        pItem->RemoveItem();
-        pItem->RemoveItem();
-    }
-}
-*/
- 
-THTreeItem * THuffmannTree::Call1500E740(unsigned int nValue)
-{
-    THTreeItem * pItem1 = pItem3058;    // EDX
-    THTreeItem * pItem2;                // EAX
-    THTreeItem * pNext;
-    THTreeItem * pPrev;
-    THTreeItem ** ppItem;
- 
-    if(PTR_INVALID_OR_NULL(pItem1) || (pItem2 = pItem1) == NULL)
-    {
-        if((pItem2 = &items0008[nItems++]) != NULL)
-            pItem1 = pItem2;
-        else
-            pItem1 = pFirst;
-    }
-    else
-        pItem1 = pItem2;
- 
-    pNext = pItem1->next;
-    if(pNext != NULL)
-    {
-        pPrev = pItem1->prev;
-        if(PTR_INVALID_OR_NULL(pPrev))
-            pPrev = PTR_NOT(pPrev);
-        else
-            pPrev += (pItem1 - pItem1->next->prev);
- 
-        pPrev->next = pNext;
-        pNext->prev = pPrev;
-        pItem1->next = NULL;
-        pItem1->prev = NULL;
-    }
- 
-    ppItem = &pFirst;       // esi
-    if(nValue > 1)
-    {
-        // ecx = pFirst->next;
-        pItem1->next = *ppItem;
-        pItem1->prev = (*ppItem)->prev;
- 
-        (*ppItem)->prev = pItem2;
-        *ppItem = pItem1;
- 
-        pItem2->parent = NULL;
-        pItem2->child  = NULL;
-    }
-    else
-    {
-        pItem1->next = (THTreeItem *)ppItem;
-        pItem1->prev = ppItem[1];
-        // edi = pItem305C;
-        pPrev = ppItem[1];      // ecx
-        if(PTR_INVALID_OR_NULL(pPrev))
-        {
-            pPrev = PTR_NOT(pPrev);
-            pPrev->next = pItem1;
-            pPrev->prev = pItem2;
- 
-            pItem2->parent = NULL;
-            pItem2->child  = NULL;
-        }
-        else
-        {
-            if(PTR_INVALID(pItem305C))
-                pPrev += (THTreeItem *)ppItem - (*ppItem)->prev;
-            else
-                pPrev += PTR_INT(pItem305C);
- 
-            pPrev->next    = pItem1;
-            ppItem[1]      = pItem2;
-            pItem2->parent = NULL;
-            pItem2->child  = NULL;
-        }
-    }
-    return pItem2;
-}
- 
-void THuffmannTree::Call1500E820(THTreeItem * pItem)
-{
-    THTreeItem * pItem1;                // edi
-    THTreeItem * pItem2 = NULL;         // eax
-    THTreeItem * pItem3;                // edx
-    THTreeItem * pPrev;                 // ebx
- 
-    for(; pItem != NULL; pItem = pItem->parent)
-    {
-        pItem->byteValue++;
-       
-        for(pItem1 = pItem; ; pItem1 = pPrev)
-        {
-            pPrev = pItem1->prev;
-            if(PTR_INVALID_OR_NULL(pPrev))
-            {
-                pPrev = NULL;
-                break;
-            }
- 
-            if(pPrev->byteValue >= pItem->byteValue)
-                break;
-        }
- 
-        if(pItem1 == pItem)
-            continue;
- 
-        if(pItem1->next != NULL)
-        {
-            pItem2 = pItem1->GetPrevItem(-1);
-            pItem2->next = pItem1->next;
-            pItem1->next->prev = pItem1->prev;
-            pItem1->next = NULL;
-            pItem1->prev = NULL;
-        }
- 
-        pItem2 = pItem->next;
-        pItem1->next = pItem2;
-        pItem1->prev = pItem2->prev;
-        pItem2->prev = pItem1;
-        pItem->next = pItem1;
-        if((pItem2 = pItem1) != NULL)
-        {
-            pItem2 = pItem->GetPrevItem(-1);
-            pItem2->next = pItem->next;
-            pItem->next->prev = pItem->prev;
-            pItem->next = NULL;
-            pItem->prev = NULL;
-        }
- 
-        if(pPrev == NULL)
-            pPrev = PTR_PTR(&pFirst);
- 
-        pItem2       = pPrev->next;
-        pItem->next  = pItem2;
-        pItem->prev  = pItem2->prev;
-        pItem2->prev = pItem;
-        pPrev->next  = pItem;
- 
-        pItem3 = pItem1->parent->child;
-        pItem2 = pItem->parent;
-        if(pItem2->child == pItem)
-            pItem2->child = pItem1;
-        if(pItem3 == pItem1)
-            pItem1->parent->child = pItem;
- 
-        pItem2 = pItem->parent;
-        pItem->parent  = pItem1->parent;
-        pItem1->parent = pItem2;
-        offs0004++;
-    }
-}
- 
-// 1500E920
-unsigned int THuffmannTree::DoCompression(TOutputStream * os, unsigned char * pbInBuffer, int nInLength, int nCmpType)
-{
-    THTreeItem  * pItem1;
-    THTreeItem  * pItem2;
-    THTreeItem  * pItem3;
-    THTreeItem  * pTemp;
-    unsigned long dwBitBuff;
-    unsigned int  nBits;
-    unsigned int  nBit;
- 
-    BuildTree(nCmpType);
-    bIsCmp0 = (nCmpType == 0);
- 
-    // Store the compression type into output buffer
-    os->dwBitBuff |= (nCmpType << os->nBits);
-    os->nBits     += 8;
- 
-    // Flush completed bytes
-    while(os->nBits >= 8)
-    {
-        if(os->cbOutSize != 0)
-        {
-            *os->pbOutPos++ = (unsigned char)os->dwBitBuff;
-            os->cbOutSize--;
-        }
- 
-        os->dwBitBuff >>= 8;
-        os->nBits      -= 8;
-    }
- 
-    for(; nInLength != 0; nInLength--)
-    {
-        unsigned char bOneByte = *pbInBuffer++;
- 
-        if((pItem1 = items306C[bOneByte]) == NULL)
-        {
-            pItem2    = items306C[0x101];  // ecx
-            pItem3    = pItem2->parent;    // eax
-            dwBitBuff = 0;
-            nBits     = 0;
- 
-            for(; pItem3 != NULL; pItem3 = pItem3->parent)
-            {
-                nBit      = (pItem3->child != pItem2) ? 1 : 0;
-                dwBitBuff = (dwBitBuff << 1) | nBit;
-                nBits++;
-                pItem2  = pItem3;
-            }
-            os->PutBits(dwBitBuff, nBits);
- 
-            // Store the loaded byte into output stream
-            os->dwBitBuff |= (bOneByte << os->nBits);
-            os->nBits     += 8;
- 
-            // Flush the whole byte(s)
-            while(os->nBits >= 8)
-            {
-                if(os->cbOutSize != 0)
-                {
-                    *os->pbOutPos++ = (unsigned char)os->dwBitBuff;
-                    os->cbOutSize--;
-                }
-                os->dwBitBuff >>= 8;
-                os->nBits -= 8;
-            }
- 
-            pItem1 = (PTR_INVALID_OR_NULL(pLast)) ? NULL : pLast;
-            pItem2 = Call1500E740(1);
-            pItem2->dcmpByte  = pItem1->dcmpByte;
-            pItem2->byteValue = pItem1->byteValue;
-            pItem2->parent    = pItem1;
-            items306C[pItem2->dcmpByte] = pItem2;
- 
-            pItem2 = Call1500E740(1);
-            pItem2->dcmpByte  = bOneByte;
-            pItem2->byteValue = 0;
-            pItem2->parent    = pItem1;
-            items306C[pItem2->dcmpByte] = pItem2;
-            pItem1->child = pItem2;
- 
-            Call1500E820(pItem2);
- 
-            if(bIsCmp0 != 0)
-            {
-                Call1500E820(items306C[bOneByte]);
-                continue;
-            }
- 
-            for(pItem1 = items306C[bOneByte]; pItem1 != NULL; pItem1 = pItem1->parent)
-            {
-                pItem1->byteValue++;
-                pItem2 = pItem1;
- 
-                for(;;)
-                {
-                    pItem3 = pItem2->prev;
-                    if(PTR_INVALID_OR_NULL(pItem3))
-                    {
-                        pItem3 = NULL;
-                        break;
-                    }
-                    if(pItem3->byteValue >= pItem1->byteValue)
-                        break;
-                    pItem2 = pItem3;
-                }
- 
-                if(pItem2 != pItem1)
-                {
-                    InsertItem(&pItem305C, pItem2, SWITCH_ITEMS, pItem1);
-                    InsertItem(&pItem305C, pItem1, SWITCH_ITEMS, pItem3);
- 
-                    pItem3 = pItem2->parent->child;
-                    if(pItem1->parent->child == pItem1)
-                        pItem1->parent->child = pItem2;
- 
-                    if(pItem3 == pItem2)
-                        pItem2->parent->child = pItem1;
- 
-                    pTemp = pItem1->parent;
-                    pItem1->parent = pItem2->parent;
-                    pItem2->parent = pTemp;
-                    offs0004++;
-                }
-            }
-        }
-// 1500EB62
-        else
-        {
-            dwBitBuff = 0;
-            nBits = 0;
-            for(pItem2 = pItem1->parent; pItem2 != NULL; pItem2 = pItem2->parent)
-            {
-                nBit      = (pItem2->child != pItem1) ? 1 : 0;
-                dwBitBuff = (dwBitBuff << 1) | nBit;
-                nBits++;
-                pItem1    = pItem2;
-            }
-            os->PutBits(dwBitBuff, nBits);
-        }
- 
-// 1500EB98
-        if(bIsCmp0 != 0)
-            Call1500E820(items306C[bOneByte]);  // 1500EB9D
-// 1500EBAF
-    } // for(; nInLength != 0; nInLength--)
- 
-// 1500EBB8
-    pItem1 = items306C[0x100];
-    dwBitBuff = 0;
-    nBits = 0;
-    for(pItem2 = pItem1->parent; pItem2 != NULL; pItem2 = pItem2->parent)
-    {
-        nBit      = (pItem2->child != pItem1) ? 1 : 0;
-        dwBitBuff = (dwBitBuff << 1) | nBit;
-        nBits++;
-        pItem1    = pItem2;
-    }
- 
-// 1500EBE6
-    os->PutBits(dwBitBuff, nBits);
- 
-// 1500EBEF
-    // Flush the remaining bits
-    while(os->nBits != 0)
-    {
-        if(os->cbOutSize != 0)
-        {
-            *os->pbOutPos++ = (unsigned char)os->dwBitBuff;
-            os->cbOutSize--;
-        }
-        os->dwBitBuff >>= 8;
-        os->nBits -= ((os->nBits > 8) ? 8 : os->nBits);
-    }
- 
-    return (unsigned int)(os->pbOutPos - os->pbOutBuffer);
-}
- 
-// Decompression using Huffman tree (1500E450)
-unsigned int THuffmannTree::DoDecompression(unsigned char * pbOutBuffer, unsigned int dwOutLength, TInputStream * is)
-{
-    TQDecompress  * qd;
-    THTreeItem    * pItem1;
-    THTreeItem    * pItem2;
-    unsigned char * pbOutPos = pbOutBuffer;
-    unsigned long nBitCount;
-    unsigned int nDcmpByte = 0;
-    unsigned int n8Bits;                // 8 bits loaded from input stream
-    unsigned int n7Bits;                // 7 bits loaded from input stream
-    bool bHasQdEntry;
-   
-    // Test the output length. Must not be NULL.
-    if(dwOutLength == 0)
-        return 0;
- 
-    // Get the compression type from the input stream
-    n8Bits = is->Get8Bits();
- 
-    // Build the Huffman tree
-    BuildTree(n8Bits);    
-    bIsCmp0 = (n8Bits == 0) ? 1 : 0;
- 
-    for(;;)
-    {
-        // Security check: If we are at the end of the input buffer,
-        // it means that the data is corrupt
-        if(is->BitCount == 0 && is->pbInBuffer >= is->pbInBufferEnd)
-            return 0;
-
-        // Get 7 bits from input stream
-        n7Bits = is->Get7Bits();
- 
-        // Try to use quick decompression. Check TQDecompress array for corresponding item.
-        // If found, ise the result byte instead.
-        qd = &qd3474[n7Bits];
- 
-        // If there is a quick-pass possible (ebx)
-        bHasQdEntry = (qd->offs00 >= offs0004) ? true : false;
- 
-        // If we can use quick decompress, use it.
-        if(bHasQdEntry)
-        {
-            if(qd->nBits > 7)
-            {
-                is->SkipBits(7);
-                pItem1 = qd->pItem;
-                goto _1500E549;
-            }
-            is->SkipBits(qd->nBits);
-            nDcmpByte = qd->dcmpByte;
-        }
-        else
-        {
-            pItem1 = pFirst->next->prev;
-            if(PTR_INVALID_OR_NULL(pItem1))
-                pItem1 = NULL;
-_1500E549:           
-            nBitCount = 0;
-            pItem2 = NULL;
- 
-            do
-            {
-                if(pItem1 == NULL)
-                    return 0;
-
-                pItem1 = pItem1->child;     // Move down by one level
-                if(is->GetBit())            // If current bit is set, move to previous
-                    pItem1 = pItem1->prev;
- 
-                if(++nBitCount == 7)        // If we are at 7th bit, save current HTree item.
-                    pItem2 = pItem1;
-            }
-            while(pItem1->child != NULL);   // Walk until tree has no deeper level
- 
-            if(bHasQdEntry == false)
-            {
-                if(nBitCount > 7)
-                {
-                    qd->offs00 = offs0004;
-                    qd->nBits  = nBitCount;
-                    qd->pItem  = pItem2;
-                }
-                else
-                {
-                    unsigned long nIndex = n7Bits & (0xFFFFFFFF >> (32 - nBitCount));
-                    unsigned long nAdd   = (1 << nBitCount);
-                   
-                    for(qd = &qd3474[nIndex]; nIndex <= 0x7F; nIndex += nAdd, qd += nAdd)
-                    {
-                        qd->offs00   = offs0004;
-                        qd->nBits    = nBitCount;
-                        qd->dcmpByte = pItem1->dcmpByte;
-                    }
-                }
-            }
-            nDcmpByte = pItem1->dcmpByte;
-        }
- 
-        if(nDcmpByte == 0x101)          // Huffman tree needs to be modified
-        {
-            n8Bits = is->Get8Bits();
-            pItem1 = (PTR_INVALID_OR_NULL(pLast)) ? NULL : pLast;
- 
-            pItem2 = Call1500E740(1);
-            pItem2->parent    = pItem1;
-            pItem2->dcmpByte  = pItem1->dcmpByte;
-            pItem2->byteValue = pItem1->byteValue;
-            items306C[pItem2->dcmpByte] = pItem2;
- 
-            pItem2 = Call1500E740(1);
-            pItem2->parent    = pItem1;
-            pItem2->dcmpByte  = n8Bits;
-            pItem2->byteValue = 0;
-            items306C[pItem2->dcmpByte] = pItem2;
- 
-            pItem1->child = pItem2;
-            Call1500E820(pItem2);
-            if(bIsCmp0 == 0)
-                Call1500E820(items306C[n8Bits]);
- 
-            nDcmpByte = n8Bits;
-        }
- 
-        if(nDcmpByte == 0x100)
-            break;
- 
-        *pbOutPos++ = (unsigned char)nDcmpByte;
-        if(--dwOutLength == 0)
-            break;
- 
-        if(bIsCmp0)
-            Call1500E820(items306C[nDcmpByte]);
-    }
- 
-    return (unsigned int)(pbOutPos - pbOutBuffer);
-}
-
+// Table of byte-to-weight values
 
 // Table for (de)compression. Every compression type has 258 entries
-unsigned char THuffmannTree::Table1502A630[] =
+static unsigned char ByteToWeight_00[] =
 {
-    // Data for compression type 0x00
     0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1147,9 +48,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
-    0x00, 0x00,
-   
-    // Data for compression type 0x01
+    0x00, 0x00
+};
+
+// Data for compression type 0x01
+static unsigned char ByteToWeight_01[] =
+{
     0x54, 0x16, 0x16, 0x0D, 0x0C, 0x08, 0x06, 0x05, 0x06, 0x05, 0x06, 0x03, 0x04, 0x04, 0x03, 0x05,
     0x0E, 0x0B, 0x14, 0x13, 0x13, 0x09, 0x0B, 0x06, 0x05, 0x04, 0x03, 0x02, 0x03, 0x02, 0x02, 0x02,
     0x0D, 0x07, 0x09, 0x06, 0x06, 0x04, 0x03, 0x02, 0x04, 0x03, 0x03, 0x03, 0x03, 0x03, 0x02, 0x02,
@@ -1166,9 +70,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x04, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x01, 0x02, 0x02, 0x02, 0x06, 0x4B,
-    0x00, 0x00,
-   
-    // Data for compression type 0x02
+    0x00, 0x00
+};
+
+// Data for compression type 0x02
+static unsigned char ByteToWeight_02[] =
+{
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x27, 0x00, 0x00, 0x23, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0xFF, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x01, 0x01, 0x06, 0x0E, 0x10, 0x04,
@@ -1185,9 +92,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00,
-   
-    // Data for compression type 0x03
+    0x00, 0x00
+};
+
+// Data for compression type 0x03
+static unsigned char ByteToWeight_03[] =
+{
     0xFF, 0x0B, 0x07, 0x05, 0x0B, 0x02, 0x02, 0x02, 0x06, 0x02, 0x02, 0x01, 0x04, 0x02, 0x01, 0x03,
     0x09, 0x01, 0x01, 0x01, 0x03, 0x04, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01,
     0x05, 0x01, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
@@ -1204,9 +114,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x07, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x01,
     0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x11,
-    0x00, 0x00,
-   
-    // Data for compression type 0x04
+    0x00, 0x00
+};
+
+// Data for compression type 0x04
+static unsigned char ByteToWeight_04[] =
+{
     0xFF, 0xFB, 0x98, 0x9A, 0x84, 0x85, 0x63, 0x64, 0x3E, 0x3E, 0x22, 0x22, 0x13, 0x13, 0x18, 0x17,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1223,9 +136,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00,
-   
-    // Data for compression type 0x05
+    0x00, 0x00
+};
+
+// Data for compression type 0x05
+static unsigned char ByteToWeight_05[] =
+{
     0xFF, 0xF1, 0x9D, 0x9E, 0x9A, 0x9B, 0x9A, 0x97, 0x93, 0x93, 0x8C, 0x8E, 0x86, 0x88, 0x80, 0x82,
     0x7C, 0x7C, 0x72, 0x73, 0x69, 0x6B, 0x5F, 0x60, 0x55, 0x56, 0x4A, 0x4B, 0x40, 0x41, 0x37, 0x37,
     0x2F, 0x2F, 0x27, 0x27, 0x21, 0x21, 0x1B, 0x1C, 0x17, 0x17, 0x13, 0x13, 0x10, 0x10, 0x0D, 0x0D,
@@ -1242,9 +158,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00,
-   
+    0x00, 0x00
+};
+
     // Data for compression type 0x06
+static unsigned char ByteToWeight_06[] =
+{
     0xC3, 0xCB, 0xF5, 0x41, 0xFF, 0x7B, 0xF7, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1261,9 +180,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00,
-   
-    // Data for compression type 0x07
+    0x00, 0x00
+};
+
+// Data for compression type 0x07
+static unsigned char ByteToWeight_07[] =
+{
     0xC3, 0xD9, 0xEF, 0x3D, 0xF9, 0x7C, 0xE9, 0x1E, 0xFD, 0xAB, 0xF1, 0x2C, 0xFC, 0x5B, 0xFE, 0x17,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1280,9 +202,12 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00,
-   
-    // Data for compression type 0x08
+    0x00, 0x00
+};
+
+// Data for compression type 0x08
+static unsigned char ByteToWeight_08[] =
+{
     0xBA, 0xC5, 0xDA, 0x33, 0xE3, 0x6D, 0xD8, 0x18, 0xE5, 0x94, 0xDA, 0x23, 0xDF, 0x4A, 0xD1, 0x10,
     0xEE, 0xAF, 0xE4, 0x2C, 0xEA, 0x5A, 0xDE, 0x15, 0xF4, 0x87, 0xE9, 0x21, 0xF6, 0x43, 0xFC, 0x12,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -1301,3 +226,690 @@ unsigned char THuffmannTree::Table1502A630[] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00
 };
+
+static unsigned char * WeightTables[0x09] =
+{
+    ByteToWeight_00,
+    ByteToWeight_01,
+    ByteToWeight_02,
+    ByteToWeight_03,
+    ByteToWeight_04,
+    ByteToWeight_05,
+    ByteToWeight_06,
+    ByteToWeight_07,
+    ByteToWeight_08
+};
+
+//-----------------------------------------------------------------------------
+// Debug/diagnostics
+
+#ifdef _DEBUG
+void DumpHuffmannTree(THTreeItem * pItem)
+{
+    THTreeItem * pChildLo;                          // Item with the lower weight
+    THTreeItem * pChildHi;                          // Item with the higher weight
+
+    // Get the lower-weight branch
+    pChildLo = pItem->pChildLo;
+    if(pChildLo != NULL)
+    {
+        // Get the higher-weight branch
+        pChildHi = pChildLo->pPrev;
+
+        // Parse the lower-weight branch
+        DumpHuffmannTree(pChildHi);
+        DumpHuffmannTree(pChildLo);
+    }
+}
+#endif
+
+//-----------------------------------------------------------------------------
+// TInputStream functions
+
+TInputStream::TInputStream(void * pvInBuffer, size_t cbInBuffer)
+{
+    pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
+    pbInBuffer = (unsigned char *)pvInBuffer;
+    BitBuffer = 0;
+    BitCount = 0;
+}
+
+// Gets one bit from input stream
+bool TInputStream::Get1Bit(unsigned int & BitValue)
+{
+    // Ensure that the input stream is reloaded, if there are no bits left
+    if(BitCount == 0)
+    {
+        // Buffer overflow check
+        if(pbInBuffer >= pbInBufferEnd)
+            return false;
+
+        // Refill the bit buffer
+        BitBuffer = *pbInBuffer++;
+        BitCount = 8;
+    }
+
+    // Copy the bit from bit buffer to the variable
+    BitValue = (BitBuffer & 0x01);
+    BitBuffer >>= 1;
+    BitCount--;
+    return true;
+}
+
+// Gets the whole byte from the input stream.
+bool TInputStream::Get8Bits(unsigned int & ByteValue)
+{
+    unsigned int dwReloadByte = 0;
+
+    // If there is not enough bits to get the value,
+    // we have to add 8 more bits from the input buffer
+    if(BitCount < 8)
+    {
+        // Buffer overflow check
+        if(pbInBuffer >= pbInBufferEnd)
+            return false;
+
+        dwReloadByte = *pbInBuffer++;
+        BitBuffer |= dwReloadByte << BitCount;
+        BitCount += 8;
+    }
+
+    // Return the lowest 8 its
+    ByteValue = (BitBuffer & 0xFF);
+    BitBuffer >>= 8;
+    BitCount -= 8;
+    return true;
+}
+
+// Gets 7 bits from the stream. DOES NOT remove the bits from input stream
+bool TInputStream::Peek7Bits(unsigned int & Value)
+{
+    unsigned int Value8Bits = 0;
+
+    // If there is not enough bits to get the value,
+    // we have to add 8 more bits from the input buffer
+    if(BitCount < 7)
+    {
+        // Load additional 8 bits. Be careful if we have no more data
+        if(pbInBuffer >= pbInBufferEnd)
+            return false;
+        Value8Bits = *pbInBuffer++;
+
+        // Add these 8 bits to the bit buffer
+        BitBuffer |= Value8Bits << BitCount;
+        BitCount += 8;
+    }
+
+    // Return 7 bits of data. DO NOT remove them from the input stream
+    Value = (BitBuffer & 0x7F);
+    return true;
+}
+
+void TInputStream::SkipBits(unsigned int dwBitsToSkip)
+{
+    unsigned int dwReloadByte = 0;
+
+    // If there is not enough bits in the buffer,
+    // we have to add 8 more bits from the input buffer
+    if(BitCount < dwBitsToSkip)
+    {
+        // Buffer overflow check
+        if(pbInBuffer >= pbInBufferEnd)
+            return;
+
+        dwReloadByte = *pbInBuffer++;
+        BitBuffer |= dwReloadByte << BitCount;
+        BitCount += 8;
+    }
+
+    // Skip the remaining bits
+    BitBuffer >>= dwBitsToSkip;
+    BitCount -= dwBitsToSkip;
+}
+
+//-----------------------------------------------------------------------------
+// TOutputStream functions
+
+TOutputStream::TOutputStream(void * pvOutBuffer, size_t cbOutLength)
+{
+    pbOutBufferEnd = (unsigned char *)pvOutBuffer + cbOutLength;
+    pbOutBuffer = (unsigned char *)pvOutBuffer;
+    BitBuffer = 0;
+    BitCount = 0;
+}
+
+void TOutputStream::PutBits(unsigned int dwValue, unsigned int nBitCount)
+{
+    BitBuffer |= (dwValue << BitCount);
+    BitCount += nBitCount;
+
+    // Flush completed bytes
+    while(BitCount >= 8)
+    {
+        if(pbOutBuffer < pbOutBufferEnd)
+            *pbOutBuffer++ = (unsigned char)BitBuffer;
+
+        BitBuffer >>= 8;
+        BitCount -= 8;
+    }
+}
+
+void TOutputStream::Flush()
+{
+    while(BitCount != 0)
+    {
+        if(pbOutBuffer < pbOutBufferEnd)
+            *pbOutBuffer++ = (unsigned char)BitBuffer;
+
+        BitBuffer >>= 8;
+        BitCount -= ((BitCount > 8) ? 8 : BitCount);
+    }
+}
+
+//-----------------------------------------------------------------------------
+// Methods of the THTreeItem struct
+
+void THTreeItem::RemoveItem()
+{
+    if(pNext != NULL)
+    {
+        pPrev->pNext = pNext;
+        pNext->pPrev = pPrev;
+        pNext = pPrev = NULL;
+    }
+}
+
+//-----------------------------------------------------------------------------
+// THuffmannTree class functions
+
+THuffmannTree::THuffmannTree(bool bCompression)
+{
+    pFirst = pLast = LIST_HEAD();
+    MinValidValue = 1;
+    ItemsUsed = 0;
+    bIsCmp0 = 0;
+
+    memset(ItemsByByte, 0, sizeof(ItemsByByte));
+
+    // If we are going to decompress data, we need to invalidate all item links
+    // We do so by zeroing their ValidValue, so it becomes lower MinValidValue
+    if(bCompression == false)
+    {
+        memset(QuickLinks, 0, sizeof(QuickLinks));
+    }
+}
+
+THuffmannTree::~THuffmannTree()
+{
+    // Our Huffmann tree does not use any memory allocations,
+    // so we don't need to do eny code in the destructor
+}
+
+void THuffmannTree::LinkTwoItems(THTreeItem * pItem1, THTreeItem * pItem2)
+{
+    pItem2->pNext = pItem1->pNext;
+    pItem2->pPrev = pItem1->pNext->pPrev;
+    pItem1->pNext->pPrev = pItem2;
+    pItem1->pNext = pItem2;
+}
+
+// Inserts item into the tree (?)
+void THuffmannTree::InsertItem(THTreeItem * pNewItem, TInsertPoint InsertPoint, THTreeItem * pInsertPoint)
+{
+    // Remove the item from the tree
+    pNewItem->RemoveItem();
+
+    if(pInsertPoint == NULL)
+        pInsertPoint = LIST_HEAD();
+
+    switch(InsertPoint)
+    {
+        case InsertAfter:
+            LinkTwoItems(pInsertPoint, pNewItem);
+            return;
+
+        case InsertBefore:
+            pNewItem->pNext = pInsertPoint;             // Set next item (or pointer to pointer to first item)
+            pNewItem->pPrev = pInsertPoint->pPrev;      // Set prev item (or last item in the tree)
+            pInsertPoint->pPrev->pNext = pNewItem;
+            pInsertPoint->pPrev = pNewItem;             // Set the next/last item
+            return;
+    }
+}
+
+THTreeItem * THuffmannTree::FindHigherOrEqualItem(THTreeItem * pItem, unsigned int Weight)
+{
+    // Parse all existing items
+    if(pItem != NULL)
+    {
+        while(pItem != LIST_HEAD())
+        {
+            if(pItem->Weight >= Weight)
+                return pItem;
+
+            pItem = pItem->pPrev;
+        }
+    }
+
+    // If not found, we just get the first item
+    return LIST_HEAD();
+}
+
+THTreeItem * THuffmannTree::CreateNewItem(unsigned int DecompressedValue, unsigned int Weight, TInsertPoint InsertPoint)
+{
+    THTreeItem * pNewItem = NULL;
+
+    // Don't let the item buffer run out of space
+    if(ItemsUsed < HUFF_ITEM_COUNT)
+    {
+        // Allocate new item from the item pool
+        pNewItem = &ItemBuffer[ItemsUsed++];
+
+        // Insert this item to the top of the tree
+        InsertItem(pNewItem, InsertPoint, NULL);
+
+        // Fill the rest of the item
+        pNewItem->DecompressedValue = DecompressedValue;
+        pNewItem->Weight = Weight;
+        pNewItem->pParent = NULL;
+        pNewItem->pChildLo = NULL;
+    }
+
+    return pNewItem;
+}
+
+unsigned int THuffmannTree::FixupItemPosByWeight(THTreeItem * pNewItem, unsigned int MaxWeight)
+{
+    THTreeItem * pHigherItem;
+
+    if(pNewItem->Weight < MaxWeight)
+    {
+        // Find an item that has higher weight than this one
+        pHigherItem = FindHigherOrEqualItem(pLast, pNewItem->Weight);
+
+        // Remove the item and put it to the new position
+        pNewItem->RemoveItem();
+        LinkTwoItems(pHigherItem, pNewItem);
+    }
+    else
+    {
+        MaxWeight = pNewItem->Weight;
+    }
+
+    // Return the (updated) maximum weight
+    return MaxWeight;
+}
+
+// Builds Huffman tree. Called with the first 8 bits loaded from input stream
+bool THuffmannTree::BuildTree(unsigned int CompressionType)
+{
+    THTreeItem * pNewItem;
+    THTreeItem * pChildLo;
+    THTreeItem * pChildHi;
+    unsigned char * WeightTable;
+    unsigned int MaxWeight;                     // [ESP+10] - The greatest character found in table
+
+    // Clear all pointers in HTree item array
+    memset(ItemsByByte, 0, sizeof(ItemsByByte));
+    MaxWeight = 0;
+
+    // Ensure that the compression type is in range
+    if((CompressionType & 0x0F) > 0x08)
+        return false;
+    WeightTable  = WeightTables[CompressionType & 0x0F];
+
+    // Build the linear list of entries that is sorted by byte weight
+    for(unsigned int i = 0; i < 0x100; i++)
+    {
+        // Skip all the bytes which are zero.
+        if(WeightTable[i] != 0)
+        {
+            // Create new tree item
+            ItemsByByte[i] = pNewItem = CreateNewItem(i, WeightTable[i], InsertAfter);
+
+            // We need to put the item to the right place in the list
+            MaxWeight = FixupItemPosByWeight(pNewItem, MaxWeight);
+        }
+    }
+
+    // Insert termination entries at the end of the list
+    ItemsByByte[0x100] = CreateNewItem(0x100, 1, InsertBefore);
+    ItemsByByte[0x101] = CreateNewItem(0x101, 1, InsertBefore);
+
+    // Now we need to build the tree. We start at the last entry
+    // and go backwards to the first one
+    pChildLo = pLast;
+
+    // Work as long as both children are valid
+    // pChildHi is child with higher weight, pChildLo is the one with lower weight
+    while(pChildLo != LIST_HEAD())
+    {
+        // Also get and verify the higher-weight child
+        pChildHi = pChildLo->pPrev;
+        if(pChildHi == LIST_HEAD())
+            break;
+
+        // Create new parent item for the children
+        pNewItem = CreateNewItem(0, pChildHi->Weight + pChildLo->Weight, InsertAfter);
+        if(pNewItem == NULL)
+            return false;
+
+        // Link both child items to their new parent
+        pChildLo->pParent = pNewItem;
+        pChildHi->pParent = pNewItem;
+        pNewItem->pChildLo = pChildLo;
+
+        // Fixup the item's position by its weight
+        MaxWeight = FixupItemPosByWeight(pNewItem, MaxWeight);
+
+        // Get the previous lower-weight child
+        pChildLo = pChildHi->pPrev;
+    }
+
+    // Initialize the MinValidValue to 1, which invalidates all quick-link items
+    MinValidValue = 1;
+    return true;
+}
+
+void THuffmannTree::IncWeightsAndRebalance(THTreeItem * pItem)
+{
+    THTreeItem * pHigherItem;           // A previous item with greater or equal weight
+    THTreeItem * pChildHi;              // The higher-weight child
+    THTreeItem * pChildLo;              // The lower-weight child
+    THTreeItem * pParent;
+
+    // Climb up the tree and increment weight of each tree item
+    for(; pItem != NULL; pItem = pItem->pParent)
+    {
+        // Increment the item's weight
+        pItem->Weight++;
+
+        // Find a previous item with equal or greater weight, which is not equal to this item
+        pHigherItem = FindHigherOrEqualItem(pItem->pPrev, pItem->Weight);
+        pChildHi = pHigherItem->pNext;
+
+        // If the item is not equal to the tree item, we need to rebalance the tree
+        if(pChildHi != pItem)
+        {
+            // Move the previous item to the RIGHT from the given item
+            pChildHi->RemoveItem();
+            LinkTwoItems(pItem, pChildHi);
+
+            // Move the given item AFTER the greater-weight tree item
+            pItem->RemoveItem();
+            LinkTwoItems(pHigherItem, pItem);
+
+            // We need to maintain the tree so that pChildHi->Weight is >= pChildLo->Weight.
+            // Rebalance the tree accordingly.
+            pChildLo = pChildHi->pParent->pChildLo;
+            pParent = pItem->pParent;
+            if(pParent->pChildLo == pItem)
+                pParent->pChildLo = pChildHi;
+            if(pChildLo == pChildHi)
+                pChildHi->pParent->pChildLo = pItem;
+            pParent = pItem->pParent;
+            pItem->pParent = pChildHi->pParent;
+            pChildHi->pParent = pParent;
+
+            // Increment the global valid value. This invalidates all quick-link items.
+            MinValidValue++;
+        }
+    }
+}
+
+bool THuffmannTree::InsertNewBranchAndRebalance(unsigned int Value1, unsigned int Value2)
+{
+    THTreeItem * pLastItem = pLast;
+    THTreeItem * pChildHi;
+    THTreeItem * pChildLo;
+
+    // Create higher-weight child
+    pChildHi = CreateNewItem(Value1, pLastItem->Weight, InsertBefore);
+    if(pChildHi != NULL)
+    {
+        pChildHi->pParent = pLastItem;
+        ItemsByByte[Value1] = pChildHi;
+
+        // Create lower-weight child
+        pChildLo = CreateNewItem(Value2, 0, InsertBefore);
+        if(pChildLo != NULL)
+        {
+            pChildLo->pParent = pLastItem;
+            pLastItem->pChildLo = pChildLo;
+            ItemsByByte[Value2] = pChildLo;
+
+            IncWeightsAndRebalance(pChildLo);
+            return true;
+        }
+    }
+
+    // No more space in the tree buffer
+    return false;
+}
+
+void THuffmannTree::EncodeOneByte(TOutputStream * os, THTreeItem * pItem)
+{
+    THTreeItem * pParent = pItem->pParent;
+    unsigned int BitBuffer = 0;
+    unsigned int BitCount = 0;
+
+    // Put 1's as long as there is parent
+    while(pParent != NULL)
+    {
+        // Fill the bit buffer
+        BitBuffer = (BitBuffer << 1) | ((pParent->pChildLo != pItem) ? 1 : 0);
+        BitCount++;
+
+        // Move to the parent
+        pItem = pParent;
+        pParent = pParent->pParent;
+    }
+
+    // Write the bits to the output stream
+    os->PutBits(BitBuffer, BitCount);
+}
+
+unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
+{
+    THTreeItem * pItemLink = NULL;
+    THTreeItem * pItem;
+    unsigned int ItemLinkIndex;
+    unsigned int BitCount = 0;
+    bool bHasItemLinkIndex;
+
+    // Try to retrieve quick link index
+    bHasItemLinkIndex = is->Peek7Bits(ItemLinkIndex);
+
+    // Is the quick-link item valid?
+    if(bHasItemLinkIndex && QuickLinks[ItemLinkIndex].ValidValue > MinValidValue)
+    {
+        // If that item needs less than 7 bits, we can get decompressed value directly
+        if(QuickLinks[ItemLinkIndex].ValidBits <= 7)
+        {
+            is->SkipBits(QuickLinks[ItemLinkIndex].ValidBits);
+            return QuickLinks[ItemLinkIndex].DecompressedValue;
+        }
+
+        // Otherwise we cannot get decompressed value directly
+        // but we can skip 7 levels of tree parsing
+        pItem = QuickLinks[ItemLinkIndex].pItem;
+        is->SkipBits(7);
+    }
+    else
+    {
+        // Just a sanity check
+        if(pFirst == LIST_HEAD())
+            return HUFF_DECOMPRESS_ERROR;
+
+        // We don't have the quick-link item, we need to parse the tree from its root
+        pItem = pFirst;
+    }
+
+    // Step down the tree until we find a terminal item
+    while(pItem->pChildLo != NULL)
+    {
+        unsigned int BitValue = 0;
+
+        // If the next bit in the compressed stream is set, we get the higher-weight
+        // child. Otherwise, get the lower-weight child.
+        if(!is->Get1Bit(BitValue))
+            return HUFF_DECOMPRESS_ERROR;
+
+        pItem = BitValue ? pItem->pChildLo->pPrev : pItem->pChildLo;
+        BitCount++;
+
+        // If the number of loaded bits reached 7,
+        // remember the current item for storing into quick-link item array
+        if(BitCount == 7)
+            pItemLink = pItem;
+    }
+
+    // If we didn't get the item from the quick-link array,
+    // set the entry in it
+    if(bHasItemLinkIndex && QuickLinks[ItemLinkIndex].ValidValue < MinValidValue)
+    {
+        // If the current compressed byte was more than 7 bits,
+        // set a quick-link item with pointer to tree item
+        if(BitCount > 7)
+        {
+            QuickLinks[ItemLinkIndex].ValidValue = MinValidValue;
+            QuickLinks[ItemLinkIndex].ValidBits = BitCount;
+            QuickLinks[ItemLinkIndex].pItem = pItemLink;
+        }
+        else
+        {
+            // Limit the quick-decompress item to lower amount of bits
+            // Coverity fix 84457: (x >> 32) has undefined behavior
+            ItemLinkIndex = (BitCount != 0) ? ItemLinkIndex & (0xFFFFFFFF >> (32 - BitCount)) : 0;
+            while(ItemLinkIndex < LINK_ITEM_COUNT)
+            {
+                // Fill the quick-decompress item
+                QuickLinks[ItemLinkIndex].ValidValue = MinValidValue;
+                QuickLinks[ItemLinkIndex].ValidBits  = BitCount;
+                QuickLinks[ItemLinkIndex].DecompressedValue = pItem->DecompressedValue;
+
+                // Increment the index
+                ItemLinkIndex += (1 << BitCount);
+            }
+        }
+    }
+
+    // Return the decompressed value from the found item
+    return pItem->DecompressedValue;
+}
+
+unsigned int THuffmannTree::Compress(TOutputStream * os, void * pvInBuffer, int cbInBuffer, int CompressionType)
+{
+    unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
+    unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
+    unsigned char * pbOutBuff = os->pbOutBuffer;
+    unsigned char InputByte;
+
+    if(!BuildTree(CompressionType))
+        return 0;
+    bIsCmp0 = (CompressionType == 0);
+
+    // Store the compression type into output buffer
+    os->PutBits(CompressionType, 8);
+
+    // Process the entire input buffer
+    while(pbInBuffer < pbInBufferEnd)
+    {
+        // Get the (next) byte from the input buffer
+        InputByte = *pbInBuffer++;
+
+        // Do we have an item for such input value?
+        if(ItemsByByte[InputByte] == NULL)
+        {
+            // Encode the relationship
+            EncodeOneByte(os, ItemsByByte[0x101]);
+
+            // Store the loaded byte into output stream
+            os->PutBits(InputByte, 8);
+
+            if(!InsertNewBranchAndRebalance(pLast->DecompressedValue, InputByte))
+                return 0;
+
+            if(bIsCmp0)
+            {
+                IncWeightsAndRebalance(ItemsByByte[InputByte]);
+                continue;
+            }
+
+            IncWeightsAndRebalance(ItemsByByte[InputByte]);
+        }
+        else
+        {
+            EncodeOneByte(os, ItemsByByte[InputByte]);
+        }
+
+        if(bIsCmp0)
+        {
+            IncWeightsAndRebalance(ItemsByByte[InputByte]);
+        }
+    }
+
+    // Put the termination mark to the compressed stream
+    EncodeOneByte(os, ItemsByByte[0x100]);
+
+    // Flush the remaining bits
+    os->Flush();
+    return (unsigned int)(os->pbOutBuffer - pbOutBuff);
+}
+
+// Decompression using Huffman tree (1500E450)
+unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLength, TInputStream * is)
+{
+    unsigned char * pbOutBufferEnd = (unsigned char *)pvOutBuffer + cbOutLength;
+    unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
+    unsigned int DecompressedValue = 0;
+    unsigned int CompressionType = 0;
+
+    // Test the output length. Must not be NULL.
+    if(cbOutLength == 0)
+        return 0;
+
+    // Get the compression type from the input stream
+    if(!is->Get8Bits(CompressionType))
+        return 0;
+    bIsCmp0 = (CompressionType == 0) ? 1 : 0;
+
+    // Build the Huffman tree
+    if(!BuildTree(CompressionType))
+        return 0;
+
+    // Process the entire input buffer until end of the stream
+    while((DecompressedValue = DecodeOneByte(is)) != 0x100)
+    {
+        // Did an error occur?
+        if(DecompressedValue == HUFF_DECOMPRESS_ERROR)
+            return 0;
+
+        // Huffman tree needs to be modified
+        if(DecompressedValue == 0x101)
+        {
+            // The decompressed byte is stored in the next 8 bits
+            if(!is->Get8Bits(DecompressedValue))
+                return 0;
+
+            if(!InsertNewBranchAndRebalance(pLast->DecompressedValue, DecompressedValue))
+                return 0;
+
+            if(bIsCmp0 == 0)
+                IncWeightsAndRebalance(ItemsByByte[DecompressedValue]);
+        }
+
+        // Store the byte to the output stream
+        if(pbOutBuffer >= pbOutBufferEnd)
+            break;
+        *pbOutBuffer++ = (unsigned char)DecompressedValue;
+
+        if(bIsCmp0)
+        {
+            IncWeightsAndRebalance(ItemsByByte[DecompressedValue]);
+        }
+    }
+
+    return (unsigned int)(pbOutBuffer - (unsigned char *)pvOutBuffer);
+}
+

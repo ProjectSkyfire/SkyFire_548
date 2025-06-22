@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -11,9 +11,9 @@
 namespace Skyfire
 {
 
-/// Handle termination signals
-class SignalHandler : public ACE_Event_Handler
-{
+    /// Handle termination signals
+    class SignalHandler : public ACE_Event_Handler
+    {
     public:
         int handle_signal(int SigNum, siginfo_t* = NULL, ucontext_t* = NULL)
         {
@@ -21,7 +21,7 @@ class SignalHandler : public ACE_Event_Handler
             return 0;
         }
         virtual void HandleSignal(int /*SigNum*/) { };
-};
+    };
 
 }
 

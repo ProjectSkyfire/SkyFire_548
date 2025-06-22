@@ -166,8 +166,8 @@ class boss_viscidus : public CreatureScript
             void InitSpells()
             {
                 DoCast(me, SPELL_TOXIN);
-                events.ScheduleEvent(EVENT_POISONBOLT_VOLLEY, urand(10000, 15000));
-                events.ScheduleEvent(EVENT_POISON_SHOCK, urand(7000, 12000));
+                events.ScheduleEvent(EVENT_POISONBOLT_VOLLEY, std::rand() % 15000 + 10000);
+                events.ScheduleEvent(EVENT_POISON_SHOCK, std::rand() % 12000 + 7000);
             }
 
             void EnterEvadeMode() OVERRIDE
@@ -209,11 +209,11 @@ class boss_viscidus : public CreatureScript
                     {
                         case EVENT_POISONBOLT_VOLLEY:
                             DoCast(me, SPELL_POISONBOLT_VOLLEY);
-                            events.ScheduleEvent(EVENT_POISONBOLT_VOLLEY, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_POISONBOLT_VOLLEY, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_POISON_SHOCK:
                             DoCast(me, SPELL_POISON_SHOCK);
-                            events.ScheduleEvent(EVENT_POISON_SHOCK, urand(7000, 12000));
+                            events.ScheduleEvent(EVENT_POISON_SHOCK, std::rand() % 12000 + 7000);
                             break;
                         case EVENT_RESET_PHASE:
                             _hitcounter = 0;

@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_WARDEN_WIN_H
 #define SF_WARDEN_WIN_H
 
-#include <map>
+#include "ByteBuffer.h"
 #include "Cryptography/ARC4.h"
 #include "Cryptography/BigNumber.h"
-#include "ByteBuffer.h"
 #include "Warden.h"
+#include <map>
 
 #if defined(__GNUC__)
 #pragma pack(1)
@@ -59,23 +59,23 @@ class Warden;
 
 class WardenWin : public Warden
 {
-    public:
-        WardenWin();
-        ~WardenWin();
+public:
+    WardenWin();
+    ~WardenWin();
 
-        void Init(WorldSession* session, BigNumber* K);
-        ClientWardenModule* GetModuleForClient();
-        void InitializeModule();
-        void RequestHash();
-        void HandleHashResult(ByteBuffer &buff);
-        void RequestData();
-        void HandleData(ByteBuffer &buff);
+    void Init(WorldSession* session, SessionKey const& K);
+    ClientWardenModule* GetModuleForClient();
+    void InitializeModule();
+    void RequestHash();
+    void HandleHashResult(ByteBuffer& buff);
+    void RequestData();
+    void HandleData(ByteBuffer& buff);
 
-    private:
-        uint32 _serverTicks;
-        std::list<uint16> _otherChecksTodo;
-        std::list<uint16> _memChecksTodo;
-        std::list<uint16> _currentChecks;
+private:
+    uint32 _serverTicks;
+    std::list<uint16> _otherChecksTodo;
+    std::list<uint16> _memChecksTodo;
+    std::list<uint16> _currentChecks;
 };
 
 #endif

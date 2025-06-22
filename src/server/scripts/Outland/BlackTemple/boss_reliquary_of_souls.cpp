@@ -91,16 +91,12 @@ class npc_enslaved_soul : public CreatureScript
 public:
     npc_enslaved_soul() : CreatureScript("npc_enslaved_soul") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_enslaved_soulAI(creature);
-    }
-
     struct npc_enslaved_soulAI : public ScriptedAI
     {
-        npc_enslaved_soulAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint64 ReliquaryGUID;
+        npc_enslaved_soulAI(Creature* creature) : ScriptedAI(creature)
+        {
+            ReliquaryGUID = 0;
+        }
 
         void Reset() OVERRIDE { ReliquaryGUID = 0; }
 
@@ -111,7 +107,15 @@ public:
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE;
+
+    public:
+        uint64 ReliquaryGUID;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_enslaved_soulAI(creature);
+    }
 };
 
 class boss_reliquary_of_souls : public CreatureScript
@@ -119,29 +123,19 @@ class boss_reliquary_of_souls : public CreatureScript
 public:
     boss_reliquary_of_souls() : CreatureScript("boss_reliquary_of_souls") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_reliquary_of_soulsAI(creature);
-    }
-
     struct boss_reliquary_of_soulsAI : public ScriptedAI
     {
         boss_reliquary_of_soulsAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
             EssenceGUID = 0;
+            Phase = 0;
+            Counter = 0;
+            Timer = 0;
+
+            SoulCount = 0;
+            SoulDeathCount = 0;
         }
-
-        InstanceScript* instance;
-
-        uint64 EssenceGUID;
-
-        uint32 Phase;
-        uint32 Counter;
-        uint32 Timer;
-
-        uint32 SoulCount;
-        uint32 SoulDeathCount;
 
         void Reset() OVERRIDE
         {
@@ -356,7 +350,25 @@ public:
                 ++Counter;
             } else Timer -= diff;
         }
+
+    public:
+        uint32 SoulDeathCount;
+    private:
+        InstanceScript* instance;
+
+        uint64 EssenceGUID;
+
+        uint32 Phase;
+        uint32 Counter;
+        uint32 Timer;
+
+        uint32 SoulCount;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_reliquary_of_soulsAI(creature);
+    }
 };
 
 void npc_enslaved_soul::npc_enslaved_soulAI::JustDied(Unit* /*killer*/)
@@ -373,22 +385,18 @@ class boss_essence_of_suffering : public CreatureScript
 public:
     boss_essence_of_suffering() : CreatureScript("boss_essence_of_suffering") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_essence_of_sufferingAI(creature);
-    }
-
     struct boss_essence_of_sufferingAI : public ScriptedAI
     {
-        boss_essence_of_sufferingAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_essence_of_sufferingAI(Creature* creature) : ScriptedAI(creature)
+        {
+            StatAuraGUID = 0;
 
-        uint64 StatAuraGUID;
-
-        uint32 AggroYellTimer;
-        uint32 FixateTimer;
-        uint32 EnrageTimer;
-        uint32 SoulDrainTimer;
-        uint32 AuraTimer;
+            AggroYellTimer = 0;
+            FixateTimer = 0;
+            EnrageTimer = 0;
+            SoulDrainTimer = 0;
+            AuraTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -488,7 +496,21 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint64 StatAuraGUID;
+
+        uint32 AggroYellTimer;
+        uint32 FixateTimer;
+        uint32 EnrageTimer;
+        uint32 SoulDrainTimer;
+        uint32 AuraTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_essence_of_sufferingAI(creature);
+    }
 };
 
 class boss_essence_of_desire : public CreatureScript
@@ -496,18 +518,14 @@ class boss_essence_of_desire : public CreatureScript
 public:
     boss_essence_of_desire() : CreatureScript("boss_essence_of_desire") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_essence_of_desireAI(creature);
-    }
-
     struct boss_essence_of_desireAI : public ScriptedAI
     {
-        boss_essence_of_desireAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 RuneShieldTimer;
-        uint32 DeadenTimer;
-        uint32 SoulShockTimer;
+        boss_essence_of_desireAI(Creature* creature) : ScriptedAI(creature)
+        {
+            RuneShieldTimer = 0;
+            DeadenTimer = 0;
+            SoulShockTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -582,7 +600,7 @@ public:
             {
                 me->InterruptNonMeleeSpells(false);
                 DoCastVictim(SPELL_DEADEN);
-                DeadenTimer = urand(25000, 35000);
+                DeadenTimer = std::rand() % 35000 + 25000;
                 if (!(rand()%2))
                 {
                     Talk(DESI_SAY_SPEC);
@@ -591,7 +609,17 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 RuneShieldTimer;
+        uint32 DeadenTimer;
+        uint32 SoulShockTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_essence_of_desireAI(creature);
+    }
 };
 
 class boss_essence_of_anger : public CreatureScript
@@ -599,24 +627,18 @@ class boss_essence_of_anger : public CreatureScript
 public:
     boss_essence_of_anger() : CreatureScript("boss_essence_of_anger") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_essence_of_angerAI(creature);
-    }
-
     struct boss_essence_of_angerAI : public ScriptedAI
     {
-        boss_essence_of_angerAI(Creature* creature) : ScriptedAI(creature) { }
+        boss_essence_of_angerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            AggroTargetGUID = 0;
 
-        uint64 AggroTargetGUID;
+            CheckTankTimer = 0;
+            SoulScreamTimer = 0;
+            SpiteTimer = 0;
 
-        uint32 CheckTankTimer;
-        uint32 SoulScreamTimer;
-        uint32 SpiteTimer;
-
-        std::list<uint64> SpiteTargetGUID;
-
-        bool CheckedAggro;
+            CheckedAggro = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -675,7 +697,7 @@ public:
             if (SoulScreamTimer <= diff)
             {
                 DoCastVictim(SPELL_SOUL_SCREAM);
-                SoulScreamTimer = urand(9000, 11000);
+                SoulScreamTimer = std::rand() % 11000 + 9000;
                 if (!(rand()%3))
                 {
                     Talk(ANGER_SAY_SPEC);
@@ -691,7 +713,23 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint64 AggroTargetGUID;
+
+        uint32 CheckTankTimer;
+        uint32 SoulScreamTimer;
+        uint32 SpiteTimer;
+
+        std::list<uint64> SpiteTargetGUID;
+
+        bool CheckedAggro;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_essence_of_angerAI(creature);
+    }
 };
 
 void AddSC_boss_reliquary_of_souls()

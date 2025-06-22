@@ -115,15 +115,15 @@ public:
                 {
                     case EVENT_CLEAVE:
                         DoCastVictim(SPELL_CLEAVE);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand(7000, 10000));
+                        events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 10000 + 7000);
                         break;
                     case EVENT_STOMP:
                         DoCastVictim(SPELL_WARSTOMP);
-                        events.ScheduleEvent(EVENT_STOMP, urand(15000, 25000));
+                        events.ScheduleEvent(EVENT_STOMP, std::rand() % 25000 + 15000);
                         break;
                     case EVENT_FIREBALL:
                         DoCastVictim(SPELL_FIREBALLVOLLEY);
-                        events.ScheduleEvent(EVENT_FIREBALL, urand(12000, 15000));
+                        events.ScheduleEvent(EVENT_FIREBALL, std::rand() % 15000 + 12000);
                         break;
                     case EVENT_CONFLAGRATION:
                         DoCastVictim(SPELL_CONFLAGRATION);

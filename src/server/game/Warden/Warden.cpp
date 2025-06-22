@@ -1,27 +1,27 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AccountMgr.h"
+#include "ByteBuffer.h"
 #include "Common.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
 #include "Log.h"
 #include "Opcodes.h"
-#include "ByteBuffer.h"
-#include <openssl/md5.h>
-#include <openssl/sha.h>
-#include "World.h"
 #include "Player.h"
 #include "Util.h"
 #include "Warden.h"
-#include "AccountMgr.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
+#include <openssl/md5.h>
+#include <openssl/sha.h>
 
-Warden::Warden() : _session(), _inputCrypto(), _outputCrypto(), _checkTimer(10000/*10 sec*/), _clientResponseTimer(0), _dataSent(false), _previousTimestamp(), _module(), _initialized(false) { }
+Warden::Warden() : _session(), _checkTimer(10000/*10 sec*/), _clientResponseTimer(0), _dataSent(false), _previousTimestamp(), _module(), _initialized(false) { }
 
 Warden::~Warden()
 {
-    delete [] _module->CompressedData;
+    delete[] _module->CompressedData;
     delete _module;
     _module = NULL;
     _initialized = false;
@@ -91,7 +91,7 @@ void Warden::Update()
                 if (_clientResponseTimer > maxClientResponseDelay * IN_MILLISECONDS)
                 {
                     SF_LOG_WARN("warden", "%s (latency: %u, IP: %s) exceeded Warden module response delay for more than %s - disconnecting client",
-                                   _session->GetPlayerInfo().c_str(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), secsToTimeString(maxClientResponseDelay, true).c_str());
+                        _session->GetPlayerInfo().c_str(), _session->GetLatency(), _session->GetRemoteAddress().c_str(), secsToTimeString(maxClientResponseDelay, true).c_str());
                     _session->KickPlayer();
                 }
                 else
@@ -112,12 +112,12 @@ void Warden::Update()
 
 void Warden::DecryptData(uint8* buffer, uint32 length)
 {
-    _inputCrypto.UpdateData(length, buffer);
+    _inputCrypto.UpdateData(buffer, length);
 }
 
 void Warden::EncryptData(uint8* buffer, uint32 length)
 {
-    _outputCrypto.UpdateData(length, buffer);
+    _outputCrypto.UpdateData(buffer, length);
 }
 
 bool Warden::IsValidCheckSum(uint32 checksum, const uint8* data, const uint16 length)
@@ -173,14 +173,14 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/)
 
     switch (action)
     {
-    case WARDEN_ACTION_LOG:
-        return "None";
-        break;
-    case WARDEN_ACTION_KICK:
-        _session->KickPlayer();
-        return "Kick";
-        break;
-    case WARDEN_ACTION_BAN:
+        case WARDEN_ACTION_LOG:
+            return "None";
+            break;
+        case WARDEN_ACTION_KICK:
+            _session->KickPlayer();
+            return "Kick";
+            break;
+        case WARDEN_ACTION_BAN:
         {
             std::stringstream duration;
             duration << sWorld->getIntConfig(WorldIntConfigs::CONFIG_WARDEN_CLIENT_BAN_DURATION) << "s";
@@ -196,8 +196,8 @@ std::string Warden::Penalty(WardenCheck* check /*= NULL*/)
 
             return "Ban";
         }
-    default:
-        break;
+        default:
+            break;
     }
     return "Undefined";
 }

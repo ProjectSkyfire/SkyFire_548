@@ -579,7 +579,7 @@ public:
             if (m_uiFlameTsunamiTimer <= uiDiff)
             {
                 SendFlameTsunami();
-                switch (urand(0, 1))
+                switch (std::rand() % 1)
                 {
                     case 0:
                     {
@@ -611,7 +611,7 @@ public:
             {
                 Talk(SAY_SARTHARION_BREATH);
                 DoCastVictim(RAID_MODE(SPELL_FLAME_BREATH, SPELL_FLAME_BREATH_H));
-                m_uiFlameBreathTimer = urand(25000, 35000);
+                m_uiFlameBreathTimer = std::rand() % 35000 + 25000;
             }
             else
                 m_uiFlameBreathTimer -= uiDiff;
@@ -620,7 +620,7 @@ public:
             if (m_uiTailSweepTimer <= uiDiff)
             {
                 DoCastVictim(RAID_MODE(SPELL_TAIL_LASH, SPELL_TAIL_LASH_H));
-                m_uiTailSweepTimer = urand(15000, 20000);
+                m_uiTailSweepTimer = std::rand() % 20000 + 15000;
             }
             else
                 m_uiTailSweepTimer -= uiDiff;
@@ -629,7 +629,7 @@ public:
             if (m_uiCleaveTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_CLEAVE);
-                m_uiCleaveTimer = urand(7000, 10000);
+                m_uiCleaveTimer = std::rand() % 10000 + 7000;
             }
             else
                 m_uiCleaveTimer -= uiDiff;
@@ -641,10 +641,10 @@ public:
                 {
                     CastLavaStrikeOnTarget(target);
 
-                    if (urand(0, 5) == 0)
+                    if ((std::rand() % 5) == 0)
                         Talk(SAY_SARTHARION_SPECIAL);
                 }
-                m_uiLavaStrikeTimer = (m_bIsSoftEnraged ? urand(1400, 2000) : urand(5000, 20000));
+                m_uiLavaStrikeTimer = (m_bIsSoftEnraged ? std::rand() % 2000 + 1400 : std::rand() % 20000 + 5000);
             }
             else
                 m_uiLavaStrikeTimer -= uiDiff;
@@ -1023,7 +1023,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, RAID_MODE(SPELL_SHADOW_FISSURE, SPELL_SHADOW_FISSURE));
 
-                m_uiShadowFissureTimer = urand(15000, 20000);
+                m_uiShadowFissureTimer = std::rand() % 20000 + 15000;
             }
             else
                 m_uiShadowFissureTimer -= uiDiff;
@@ -1042,7 +1042,7 @@ public:
             {
                 Talk(SAY_TENEBRON_BREATH);
                 DoCastVictim(RAID_MODE(SPELL_SHADOW_BREATH, SPELL_SHADOW_BREATH_H));
-                m_uiShadowBreathTimer = urand(20000, 25000);
+                m_uiShadowBreathTimer = std::rand() % 25000 + 20000;
             }
             else
                 m_uiShadowBreathTimer -= uiDiff;
@@ -1119,7 +1119,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, RAID_MODE(SPELL_SHADOW_FISSURE, SPELL_SHADOW_FISSURE_H));
 
-                m_uiShadowFissureTimer = urand(15000, 20000);
+                m_uiShadowFissureTimer = std::rand() % 20000 + 15000;
             }
             else
                 m_uiShadowFissureTimer -= uiDiff;
@@ -1136,7 +1136,7 @@ public:
 
                     OpenPortal();
                     m_bHasPortalOpen = true;
-                    m_uiAcolyteShadronTimer = urand(60000, 65000);
+                    m_uiAcolyteShadronTimer = std::rand() % 65000 + 60000;
                 }
             }
             else
@@ -1147,7 +1147,7 @@ public:
             {
                 Talk(SAY_SHADRON_BREATH);
                 DoCastVictim(RAID_MODE(SPELL_SHADOW_BREATH, SPELL_SHADOW_BREATH_H));
-                m_uiShadowBreathTimer = urand(20000, 25000);
+                m_uiShadowBreathTimer = std::rand() % 25000 + 20000;
             }
             else
                 m_uiShadowBreathTimer -= uiDiff;
@@ -1218,7 +1218,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, RAID_MODE(SPELL_SHADOW_FISSURE, SPELL_SHADOW_FISSURE_H));
 
-                m_uiShadowFissureTimer = urand(15000, 20000);
+                m_uiShadowFissureTimer = std::rand() % 20000 + 15000;
             }
             else
                 m_uiShadowFissureTimer -= uiDiff;
@@ -1232,7 +1232,7 @@ public:
                 {
                     OpenPortal();
                     DoCastVictim(SPELL_TWILIGHT_TORMENT_VESP);
-                    m_uiAcolyteVesperonTimer = urand(60000, 70000);
+                    m_uiAcolyteVesperonTimer = std::rand() % 70000 + 60000;
                 }
             }
             else
@@ -1243,7 +1243,7 @@ public:
             {
                 Talk(SAY_VESPERON_BREATH);
                 DoCastVictim(RAID_MODE(SPELL_SHADOW_BREATH, SPELL_SHADOW_BREATH_H));
-                m_uiShadowBreathTimer = urand(20000, 25000);
+                m_uiShadowBreathTimer = std::rand() % 25000 + 20000;
             }
             else
                 m_uiShadowBreathTimer -= uiDiff;
@@ -1661,7 +1661,7 @@ public:
             if (m_uiFadeArmorTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_FADE_ARMOR);
-                m_uiFadeArmorTimer = urand(5000, 10000);
+                m_uiFadeArmorTimer = std::rand() % 10000 + 5000;
             }
             else
                 m_uiFadeArmorTimer -= uiDiff;

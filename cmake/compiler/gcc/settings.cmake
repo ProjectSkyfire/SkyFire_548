@@ -14,28 +14,11 @@ if(COMPILER_SUPPORTS_CXX23)
 else()
   message(FATAL_ERROR "Error, SkyFire requires a compiler that supports C++23!")
 endif()
-if(WITH_CXX_20_STD)
-  if(NOT WITH_CXX_DRAFT_STD AND NOT WITH_CXX_23_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20") #c++20
-    message(STATUS "GCC: C++20 Standard Enabled.")
-  else()
-    message(FATAL_ERROR "GCC: Only 1 CXX Standard can be used!")
-  endif()
-endif()
-if(WITH_CXX_23_STD)
-  if(NOT WITH_CXX_DRAFT_STD AND NOT WITH_CXX_20_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++23") #c++23
-    message(STATUS "GCC: C++23 Standard Enabled.")
-  else()
-    message(FATAL_ERROR "GCC: Only 1 CXX Standard can be used!")
-  endif()
-endif()
+
 if(WITH_CXX_DRAFT_STD)
-  if(NOT WITH_CXX_23_STD AND NOT WITH CXX_20_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2c") #c++26
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++2c") #c++26
-    message(STATUS "GCC: C++ Draft Standard Enabled.")
-  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2c") #c++26
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++2c") #c++26
+  message(STATUS "GCC: C++ Draft Standard Enabled.")
 endif()
 
 if(PLATFORM EQUAL 32)

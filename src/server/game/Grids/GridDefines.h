@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -56,13 +56,13 @@ typedef GridRefManager<AreaTrigger>     AreaTriggerMapType;
 
 enum GridMapTypeMask
 {
-    GRID_MAP_TYPE_MASK_CORPSE           = 0x01,
-    GRID_MAP_TYPE_MASK_CREATURE         = 0x02,
-    GRID_MAP_TYPE_MASK_DYNAMICOBJECT    = 0x04,
-    GRID_MAP_TYPE_MASK_GAMEOBJECT       = 0x08,
-    GRID_MAP_TYPE_MASK_PLAYER           = 0x10,
-    GRID_MAP_TYPE_MASK_AREATRIGGER      = 0x20,
-    GRID_MAP_TYPE_MASK_ALL              = 0x3F
+    GRID_MAP_TYPE_MASK_CORPSE = 0x01,
+    GRID_MAP_TYPE_MASK_CREATURE = 0x02,
+    GRID_MAP_TYPE_MASK_DYNAMICOBJECT = 0x04,
+    GRID_MAP_TYPE_MASK_GAMEOBJECT = 0x08,
+    GRID_MAP_TYPE_MASK_PLAYER = 0x10,
+    GRID_MAP_TYPE_MASK_AREATRIGGER = 0x20,
+    GRID_MAP_TYPE_MASK_ALL = 0x3F
 };
 
 typedef Grid<Player, AllWorldObjectTypes, AllGridObjectTypes> GridType;
@@ -74,15 +74,15 @@ typedef TypeMapContainer<AllWorldObjectTypes> WorldTypeMapContainer;
 template<uint32 LIMIT>
 struct CoordPair
 {
-    CoordPair(uint32 x=0, uint32 y=0)
+    CoordPair(uint32 x = 0, uint32 y = 0)
         : x_coord(x), y_coord(y)
     { }
 
-    CoordPair(const CoordPair<LIMIT> &obj)
+    CoordPair(const CoordPair<LIMIT>& obj)
         : x_coord(obj.x_coord), y_coord(obj.y_coord)
     { }
 
-    CoordPair<LIMIT> & operator=(const CoordPair<LIMIT> &obj)
+    CoordPair<LIMIT>& operator=(const CoordPair<LIMIT>& obj)
     {
         x_coord = obj.x_coord;
         y_coord = obj.y_coord;
@@ -143,13 +143,13 @@ struct CoordPair
 };
 
 template<uint32 LIMIT>
-bool operator==(const CoordPair<LIMIT> &p1, const CoordPair<LIMIT> &p2)
+bool operator==(const CoordPair<LIMIT>& p1, const CoordPair<LIMIT>& p2)
 {
     return (p1.x_coord == p2.x_coord && p1.y_coord == p2.y_coord);
 }
 
 template<uint32 LIMIT>
-bool operator!=(const CoordPair<LIMIT> &p1, const CoordPair<LIMIT> &p2)
+bool operator!=(const CoordPair<LIMIT>& p1, const CoordPair<LIMIT>& p2)
 {
     return !(p1 == p2);
 }
@@ -163,8 +163,8 @@ namespace Skyfire
     inline RET_TYPE Compute(float x, float y, float center_offset, float size)
     {
         // calculate and store temporary values in double format for having same result as same mySQL calculations
-        double x_offset = (double(x) - center_offset)/size;
-        double y_offset = (double(y) - center_offset)/size;
+        double x_offset = (double(x) - center_offset) / size;
+        double y_offset = (double(y) - center_offset) / size;
 
         int x_val = int(x_offset + CENTER_VAL + 0.5f);
         int y_val = int(y_offset + CENTER_VAL + 0.5f);
@@ -181,10 +181,10 @@ namespace Skyfire
         return Compute<CellCoord, CENTER_GRID_CELL_ID>(x, y, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL);
     }
 
-    inline CellCoord ComputeCellCoord(float x, float y, float &x_off, float &y_off)
+    inline CellCoord ComputeCellCoord(float x, float y, float& x_off, float& y_off)
     {
-        double x_offset = (double(x) - CENTER_GRID_CELL_OFFSET)/SIZE_OF_GRID_CELL;
-        double y_offset = (double(y) - CENTER_GRID_CELL_OFFSET)/SIZE_OF_GRID_CELL;
+        double x_offset = (double(x) - CENTER_GRID_CELL_OFFSET) / SIZE_OF_GRID_CELL;
+        double y_offset = (double(y) - CENTER_GRID_CELL_OFFSET) / SIZE_OF_GRID_CELL;
 
         int x_val = int(x_offset + CENTER_GRID_CELL_ID + 0.5f);
         int y_val = int(y_offset + CENTER_GRID_CELL_ID + 0.5f);
@@ -193,7 +193,7 @@ namespace Skyfire
         return CellCoord(x_val, y_val);
     }
 
-    inline void NormalizeMapCoord(float &c)
+    inline void NormalizeMapCoord(float& c)
     {
         if (c > MAP_HALFSIZE - 0.5f)
             c = MAP_HALFSIZE - 0.5f;

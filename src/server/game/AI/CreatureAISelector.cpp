@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,11 +7,11 @@
 #include "CreatureAISelector.h"
 #include "PassiveAI.h"
 
+#include "CreatureAIFactory.h"
 #include "MovementGenerator.h"
 #include "Pet.h"
-#include "TemporarySummon.h"
-#include "CreatureAIFactory.h"
 #include "ScriptMgr.h"
+#include "TemporarySummon.h"
 
 namespace FactorySelector
 {
@@ -29,7 +29,7 @@ namespace FactorySelector
                 return scriptedAI;
 
         // AIname in db
-        std::string ainame=creature->GetAIName();
+        std::string ainame = creature->GetAIName();
         if (!ai_factory && !ainame.empty())
             ai_factory = ai_registry.GetRegistryItem(ainame);
 

@@ -118,9 +118,9 @@ class boss_general_vezax : public CreatureScript
                 DoCast(me, SPELL_AURA_OF_DESPAIR);
                 CheckShamanisticRage();
 
-                events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(8000, 10000));
+                events.ScheduleEvent(EVENT_SHADOW_CRASH, std::rand() % 10000 + 8000);
                 events.ScheduleEvent(EVENT_SEARING_FLAMES, 12000);
-                events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 40000));
+                events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, std::rand() % 40000 + 35000);
                 events.ScheduleEvent(EVENT_SARONITE_VAPORS, 30000);
                 events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, 60000);
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
@@ -147,12 +147,12 @@ class boss_general_vezax : public CreatureScript
                                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true);
                             if (target)
                                 DoCast(target, SPELL_SHADOW_CRASH);
-                            events.ScheduleEvent(EVENT_SHADOW_CRASH, urand(8000, 12000));
+                            events.ScheduleEvent(EVENT_SHADOW_CRASH, std::rand() % 12000 + 8000);
                             break;
                         }
                         case EVENT_SEARING_FLAMES:
                             DoCastAOE(SPELL_SEARING_FLAMES);
-                            events.ScheduleEvent(EVENT_SEARING_FLAMES, urand(14000, 17500));
+                            events.ScheduleEvent(EVENT_SEARING_FLAMES, std::rand() % 17500 + 14000);
                             break;
                         case EVENT_MARK_OF_THE_FACELESS:
                         {
@@ -161,18 +161,18 @@ class boss_general_vezax : public CreatureScript
                                 target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true);
                             if (target)
                                 DoCast(target, SPELL_MARK_OF_THE_FACELESS);
-                            events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, urand(35000, 45000));
+                            events.ScheduleEvent(EVENT_MARK_OF_THE_FACELESS, std::rand() % 45000 + 35000);
                             break;
                         }
                         case EVENT_SURGE_OF_DARKNESS:
                             Talk(EMOTE_SURGE_OF_DARKNESS);
                             Talk(SAY_SURGE_OF_DARKNESS);
                             DoCast(me, SPELL_SURGE_OF_DARKNESS);
-                            events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, urand(50000, 70000));
+                            events.ScheduleEvent(EVENT_SURGE_OF_DARKNESS, std::rand() % 70000 + 50000);
                             break;
                         case EVENT_SARONITE_VAPORS:
                             DoCast(SPELL_SUMMON_SARONITE_VAPORS);
-                            events.ScheduleEvent(EVENT_SARONITE_VAPORS, urand(30000, 35000));
+                            events.ScheduleEvent(EVENT_SARONITE_VAPORS, std::rand() % 35000 + 30000);
                             if (++vaporCount == 6 && smellSaronite)
                             {
                                 Talk(SAY_HARDMODE);
@@ -250,7 +250,7 @@ class boss_general_vezax : public CreatureScript
                         break;
                     case ACTION_ANIMUS_DIE:
                         me->RemoveAurasDueToSpell(SPELL_SARONITE_BARRIER);
-                        events.ScheduleEvent(EVENT_SEARING_FLAMES, urand(7000, 12000));
+                        events.ScheduleEvent(EVENT_SEARING_FLAMES, std::rand() % 12000 + 7000);
                         animusDead = true;
                         break;
                 }
@@ -380,7 +380,7 @@ class npc_saronite_vapors : public CreatureScript
             void Reset() OVERRIDE
             {
                 events.Reset();
-                events.ScheduleEvent(EVENT_RANDOM_MOVE, urand(5000, 7500));
+                events.ScheduleEvent(EVENT_RANDOM_MOVE, std::rand() % 7500 + 5000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -393,7 +393,7 @@ class npc_saronite_vapors : public CreatureScript
                     {
                         case EVENT_RANDOM_MOVE:
                             me->GetMotionMaster()->MoveRandom(30.0f);
-                            events.ScheduleEvent(EVENT_RANDOM_MOVE, urand(5000, 7500));
+                            events.ScheduleEvent(EVENT_RANDOM_MOVE, std::rand() % 7500 + 5000);
                             break;
                         default:
                             break;

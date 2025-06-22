@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ScriptMgr.h"
 #include "Chat.h"
+#include "Group.h"
 #include "Language.h"
 #include "LFGMgr.h"
-#include "Group.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 
 void GetPlayerInfo(ChatHandler* handler, Player* player)
 {

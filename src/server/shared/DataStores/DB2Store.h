@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef DB2STORE_H
 #define DB2STORE_H
 
-#include "DB2FileLoader.h"
-#include "Common.h"
 #include "ByteBuffer.h"
+#include "Common.h"
+#include "DB2FileLoader.h"
 #include <vector>
 
 /// Interface class for common access
@@ -121,7 +121,7 @@ public:
         if (id >= nCount)
         {
             // reallocate index table
-            char** tmpIdxTable = new char*[id + 1];
+            char** tmpIdxTable = new char* [id + 1];
             memset(tmpIdxTable, 0, (id + 1) * sizeof(char*));
             memcpy(tmpIdxTable, indexTable.asChar, nCount * sizeof(char*));
             delete[] reinterpret_cast<char*>(indexTable.asT);
@@ -189,7 +189,7 @@ public:
         m_dataTable = NULL;
 
         for (typename DataTableEx::iterator itr = m_dataTableEx.begin(); itr != m_dataTableEx.end(); ++itr)
-            delete *itr;
+            delete* itr;
         m_dataTableEx.clear();
 
         while (!m_stringPoolList.empty())

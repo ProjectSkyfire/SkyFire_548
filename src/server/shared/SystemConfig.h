@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -16,7 +16,7 @@
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
 #ifndef SKYFIREWORLD_CONFIG_VERSION
-# define SKYFIREWORLD_CONFIG_VERSION 2020012200
+# define SKYFIREWORLD_CONFIG_VERSION 2024050400
 #endif
 #ifndef SKYFIREAUTH_CONFIG_VERSION
 # define SKYFIREAUTH_CONFIG_VERSION 2017021900

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -14,8 +14,8 @@ EndScriptData */
 #include "Chat.h"
 #include "Language.h"
 #include "ObjectAccessor.h"
-#include "Player.h"
 #include "Pet.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 
 class reset_commandscript : public CommandScript
@@ -266,7 +266,7 @@ public:
             atLogin = AtLoginFlags(AT_LOGIN_RESET_TALENTS | AT_LOGIN_RESET_PET_TALENTS);
             sWorld->SendWorldText(LANG_RESETALL_TALENTS);
             if (!handler->GetSession())
-               handler->SendSysMessage(LANG_RESETALL_TALENTS);
+                handler->SendSysMessage(LANG_RESETALL_TALENTS);
         }
         else
         {

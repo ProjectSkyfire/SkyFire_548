@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_TICKETMGR_H
 #define SF_TICKETMGR_H
 
-#include <string>
 #include <ace/Singleton.h>
+#include <string>
 
 #include "ObjectMgr.h"
 #include "TicketInfo.h"
@@ -63,13 +63,13 @@ public:
         return NULL;
     }
 
-    bool GetFeedBackSystemStatus() { return _feedbackSystemStatus; }
-    bool GetGmTicketSystemStatus() { return _gmTicketSystemStatus; }
+    bool GetFeedBackSystemStatus() const { return _feedbackSystemStatus; }
+    bool GetGmTicketSystemStatus() const { return _gmTicketSystemStatus; }
 
     uint64 GetLastChange() const { return _lastChange; }
 
-    void SetFeedBackSystemStatus(bool status){ _feedbackSystemStatus = status; }
-    void SetGmTicketSystemStatus(bool status){ _gmTicketSystemStatus = status; }
+    void SetFeedBackSystemStatus(bool status) { _feedbackSystemStatus = status; }
+    void SetGmTicketSystemStatus(bool status) { _gmTicketSystemStatus = status; }
 
     void LoadGmTickets();
     void LoadBugTickets();

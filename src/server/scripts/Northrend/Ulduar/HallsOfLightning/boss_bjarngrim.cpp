@@ -135,7 +135,7 @@ public:
             m_uiChargingStatus = 0;
             m_uiCharge_Timer = 1000;
 
-            m_uiChangeStance_Timer = urand(20000, 25000);
+            m_uiChangeStance_Timer = std::rand() % 25000 + 20000;
 
             m_uiReflection_Timer = 8000;
             m_uiKnockAway_Timer = 20000;
@@ -266,7 +266,7 @@ public:
                         break;
                 }
 
-                m_uiChangeStance_Timer = urand(20000, 25000);
+                m_uiChangeStance_Timer = std::rand() % 25000 + 20000;
                 return;
             }
             else
@@ -279,7 +279,7 @@ public:
                     if (m_uiReflection_Timer <= uiDiff)
                     {
                         DoCast(me, SPELL_SPELL_REFLECTION);
-                        m_uiReflection_Timer = urand(8000, 9000);
+                        m_uiReflection_Timer = std::rand() % 9000 + 8000;
                     }
                     else
                         m_uiReflection_Timer -= uiDiff;
@@ -287,7 +287,7 @@ public:
                     if (m_uiKnockAway_Timer <= uiDiff)
                     {
                         DoCast(me, SPELL_KNOCK_AWAY);
-                        m_uiKnockAway_Timer = urand(20000, 21000);
+                        m_uiKnockAway_Timer = std::rand() % 21000 + 20000;
                     }
                     else
                         m_uiKnockAway_Timer -= uiDiff;
@@ -295,7 +295,7 @@ public:
                     if (m_uiPummel_Timer <= uiDiff)
                     {
                         DoCastVictim(SPELL_PUMMEL);
-                        m_uiPummel_Timer = urand(10000, 11000);
+                        m_uiPummel_Timer = std::rand() % 11000 + 10000;
                     }
                     else
                         m_uiPummel_Timer -= uiDiff;
@@ -303,7 +303,7 @@ public:
                     if (m_uiIronform_Timer <= uiDiff)
                     {
                         DoCast(me, SPELL_IRONFORM);
-                        m_uiIronform_Timer = urand(25000, 26000);
+                        m_uiIronform_Timer = std::rand() % 26000 + 25000;
                     }
                     else
                         m_uiIronform_Timer -= uiDiff;
@@ -316,7 +316,7 @@ public:
                     {
                         //not much point is this, better random target and more often?
                         DoCastVictim(SPELL_INTERCEPT);
-                        m_uiIntercept_Timer = urand(45000, 46000);
+                        m_uiIntercept_Timer = std::rand() % 46000 + 45000;
                     }
                     else
                         m_uiIntercept_Timer -= uiDiff;
@@ -324,7 +324,7 @@ public:
                     if (m_uiWhirlwind_Timer <= uiDiff)
                     {
                         DoCast(me, SPELL_WHIRLWIND);
-                        m_uiWhirlwind_Timer = urand(10000, 11000);
+                        m_uiWhirlwind_Timer = std::rand() % 11000 + 10000;
                     }
                     else
                         m_uiWhirlwind_Timer -= uiDiff;
@@ -332,7 +332,7 @@ public:
                     if (m_uiCleave_Timer <= uiDiff)
                     {
                         DoCastVictim(SPELL_CLEAVE);
-                        m_uiCleave_Timer = urand(8000, 9000);
+                        m_uiCleave_Timer = std::rand() % 9000 + 8000;
                     }
                     else
                         m_uiCleave_Timer -= uiDiff;
@@ -344,7 +344,7 @@ public:
                     if (m_uiMortalStrike_Timer <= uiDiff)
                     {
                         DoCastVictim(SPELL_MORTAL_STRIKE);
-                        m_uiMortalStrike_Timer = urand(20000, 21000);
+                        m_uiMortalStrike_Timer = std::rand() % 21000 + 20000;
                     }
                     else
                         m_uiMortalStrike_Timer -= uiDiff;
@@ -352,7 +352,7 @@ public:
                     if (m_uiSlam_Timer <= uiDiff)
                     {
                         DoCastVictim(SPELL_SLAM);
-                        m_uiSlam_Timer = urand(15000, 16000);
+                        m_uiSlam_Timer = std::rand() % 16000 + 15000;
                     }
                     else
                         m_uiSlam_Timer -= uiDiff;
@@ -394,8 +394,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            m_uiArcWeld_Timer = urand(20000, 21000);
-            m_uiRenewSteel_Timer = urand(10000, 11000);
+            m_uiArcWeld_Timer = std::rand() % 21000 + 20000;
+            m_uiRenewSteel_Timer = std::rand() % 11000 + 10000;
         }
 
         void EnterCombat(Unit* who) OVERRIDE
@@ -419,7 +419,7 @@ public:
             if (m_uiArcWeld_Timer <= uiDiff)
             {
                 DoCastVictim(SPELL_ARC_WELD);
-                m_uiArcWeld_Timer = urand(20000, 21000);
+                m_uiArcWeld_Timer = std::rand() % 21000 + 20000;
             }
             else
                 m_uiArcWeld_Timer -= uiDiff;
@@ -434,7 +434,7 @@ public:
                             DoCast(pBjarngrim, SPELL_RENEW_STEEL_N);
                     }
                 }
-                m_uiRenewSteel_Timer = urand(10000, 14000);
+                m_uiRenewSteel_Timer = std::rand() % 14000 + 10000;
             }
             else
                 m_uiRenewSteel_Timer -= uiDiff;

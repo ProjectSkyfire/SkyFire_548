@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Chat.h"
+#include "GroupMgr.h"
 #include "Language.h"
 #include "LFG.h"
-#include "Player.h"
 #include "ObjectMgr.h"
-#include "GroupMgr.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 
 class group_commandscript : public CommandScript
@@ -347,9 +347,9 @@ public:
             else
             {
                 // ... else, everything is set to offline or neutral values.
-                zoneName    = "<ERROR>";
+                zoneName = "<ERROR>";
                 onlineState = "Offline";
-                phase       = 0;
+                phase = 0;
             }
 
             // Now we can print those informations for every single member of each group!

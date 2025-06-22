@@ -3,14 +3,6 @@
 # See COPYRIGHT file for Copyright information
 #
 
-# Package overloads - Linux
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-  if (NOT NOJEM)
-    set(JEMALLOC_LIBRARY "jemalloc")
-    message(STATUS "UNIX: Using jemalloc")
-  endif()
-endif()
-
 # set default configuration directory
 if( NOT CONF_DIR )
   set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
@@ -40,15 +32,16 @@ message(STATUS "UNIX: Created uninstall target")
 message(STATUS "UNIX: Detected compiler: ${CMAKE_C_COMPILER}")
 if(CMAKE_C_COMPILER MATCHES "gcc" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
   execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-  if (NOT (GCC_VERSION VERSION_GREATER 8.0 OR GCC_VERSION VERSION_EQUAL 8.0))
-    message(FATAL_ERROR "GCC: Compiler doesnt support c++17, requires g++ 8.0 or greater.")
-  elseif(GCC_VERSION VERSION_GREATER 8.0 OR GCC_VERSION VERSION_EQUAL 8.0)
+  if (NOT (GCC_VERSION VERSION_GREATER 14.0 OR GCC_VERSION VERSION_EQUAL 14.0))
+    message(FATAL_ERROR "GCC: Compiler doesnt support c++23, requires g++ 14.0 or greater.")
+  elseif(GCC_VERSION VERSION_GREATER 14.0 OR GCC_VERSION VERSION_EQUAL 14.0)
     include(${CMAKE_SOURCE_DIR}/cmake/compiler/gcc/settings.cmake)
   endif()
 elseif(CMAKE_C_COMPILER MATCHES "icc")
   include(${CMAKE_SOURCE_DIR}/cmake/compiler/icc/settings.cmake)
-elseif(CMAKE_C_COMPILER MATCHES "clang")
+elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
   include(${CMAKE_SOURCE_DIR}/cmake/compiler/clang/settings.cmake)
+  message(STATUS "CLANG: Using Clang on Unix.")
 else()
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 endif()

@@ -1,47 +1,39 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "ARC4.h"
-#include <openssl/sha.h>
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 3)
+#include "Errors.h"
 #include <openssl/provider.h>
-#endif
 
-ARC4::ARC4() : m_ctx(EVP_CIPHER_CTX_new())
+SkyFire::Crypto::ARC4::ARC4()
+    : _ctx(EVP_CIPHER_CTX_new())
 {
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR >= 3)
     OSSL_PROVIDER_load(NULL, "legacy");
-#endif
-
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && (OPENSSL_VERSION_MINOR < 3)
-#error "UNSUPORTED OPENSSL VERSION, SKYFIRE REQUIRES 3.3 or newer."
-#endif
-
-    EVP_CIPHER_CTX_reset(m_ctx);
-    EVP_CipherInit(m_ctx, EVP_rc4(), NULL, NULL, 0);
+    EVP_CIPHER_CTX_init(_ctx);
+    int result = EVP_EncryptInit_ex(_ctx, EVP_rc4(), nullptr, nullptr, nullptr);
+    ASSERT(result == 1);
 }
 
-ARC4::~ARC4()
+SkyFire::Crypto::ARC4::~ARC4()
 {
-    EVP_CIPHER_CTX_free(m_ctx);
+    EVP_CIPHER_CTX_free(_ctx);
 }
 
-void ARC4::Init(uint8* seed, uint32 len)
+void SkyFire::Crypto::ARC4::Init(uint8 const* seed, size_t len)
 {
-    EVP_CIPHER_CTX_set_key_length(m_ctx, len);
-    EVP_CipherInit(m_ctx, NULL, seed, NULL, 0);
+    int result1 = EVP_CIPHER_CTX_set_key_length(_ctx, len);
+    ASSERT(result1 == 1);
+    int result2 = EVP_EncryptInit_ex(_ctx, nullptr, nullptr, seed, nullptr);
+    ASSERT(result2 == 1);
 }
 
-void ARC4::UpdateData(int len, uint8 *data)
+void SkyFire::Crypto::ARC4::UpdateData(uint8* data, size_t len)
 {
     int outlen = 0;
-    EVP_CipherUpdate(m_ctx, data, &outlen, data, len);
-    Finalize(outlen, data);
-}
-
-void ARC4::Finalize(int outlen, uint8* data)
-{
-    EVP_CipherFinal_ex(m_ctx, data, &outlen);
+    int result1 = EVP_EncryptUpdate(_ctx, data, &outlen, data, len);
+    ASSERT(result1 == 1);
+    int result2 = EVP_EncryptFinal_ex(_ctx, data, &outlen);
+    ASSERT(result2 == 1);
 }

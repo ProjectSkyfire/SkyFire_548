@@ -79,11 +79,6 @@ class npc_freed_soul : public CreatureScript
 public:
     npc_freed_soul() : CreatureScript("npc_freed_soul") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_freed_soulAI(creature);
-    }
-
     struct npc_freed_soulAI : public ScriptedAI
     {
         npc_freed_soulAI(Creature* creature) : ScriptedAI(creature) { }
@@ -95,6 +90,11 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE { }
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_freed_soulAI(creature);
+    }
 };
 
 /*######
@@ -120,18 +120,14 @@ class npc_restless_soul : public CreatureScript
 public:
     npc_restless_soul() : CreatureScript("npc_restless_soul") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_restless_soulAI(creature);
-    }
-
     struct npc_restless_soulAI : public ScriptedAI
     {
-        npc_restless_soulAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint64 Tagger;
-        uint32 Die_Timer;
-        bool Tagged;
+        npc_restless_soulAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Tagger = 0;
+            Die_Timer = 0;
+            Tagged = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -183,7 +179,16 @@ public:
                     Die_Timer -= diff;
             }
         }
+    private:
+        uint64 Tagger;
+        uint32 Die_Timer;
+        bool Tagged;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_restless_soulAI(creature);
+    }
 };
 
 /*######
@@ -201,17 +206,13 @@ class npc_spectral_ghostly_citizen : public CreatureScript
 public:
     npc_spectral_ghostly_citizen() : CreatureScript("npc_spectral_ghostly_citizen") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_spectral_ghostly_citizenAI(creature);
-    }
-
     struct npc_spectral_ghostly_citizenAI : public ScriptedAI
     {
-        npc_spectral_ghostly_citizenAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 Die_Timer;
-        bool Tagged;
+        npc_spectral_ghostly_citizenAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Die_Timer = 0;
+            Tagged = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -234,7 +235,7 @@ public:
                 for (uint32 i = 1; i <= 4; ++i)
                 {
                      //100%, 50%, 33%, 25% chance to spawn
-                     if (urand(1, i) == 1)
+                     if ((std::rand() % i + 1) == 1)
                          DoSummon(NPC_RESTLESS, me, 20.0f, 600000);
                 }
             }
@@ -279,7 +280,16 @@ public:
                     break;
             }
         }
+
+    private:
+        uint32 Die_Timer;
+        bool Tagged;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_spectral_ghostly_citizenAI(creature);
+    }
 };
 
 void AddSC_stratholme()

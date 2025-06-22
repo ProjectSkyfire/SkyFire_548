@@ -510,7 +510,7 @@ class boss_the_lich_king : public CreatureScript
                 events.ScheduleEvent(EVENT_SUMMON_SHAMBLING_HORROR, 20000, 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_SUMMON_DRUDGE_GHOUL, 10000, 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_INFEST, 5000, 0, PHASE_ONE);
-                events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
+                events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, std::rand() % 33000 + 30000, 0, PHASE_ONE);
                 events.ScheduleEvent(EVENT_BERSERK, 900000, EVENT_GROUP_BERSERK);
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_SHADOW_TRAP, 15500, 0, PHASE_ONE);
@@ -896,7 +896,7 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_INFEST:
                             DoCast(me, SPELL_INFEST);
-                            events.ScheduleEvent(EVENT_INFEST, urand(21000, 24000), 0, events.IsInPhase(PHASE_ONE) ? PHASE_ONE : PHASE_TWO);
+                            events.ScheduleEvent(EVENT_INFEST, std::rand() % 24000 + 21000, 0, events.IsInPhase(PHASE_ONE) ? PHASE_ONE : PHASE_TWO);
                             break;
                         case EVENT_NECROTIC_PLAGUE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, NecroticPlagueTargetCheck(me, NECROTIC_PLAGUE_LK, NECROTIC_PLAGUE_PLR)))
@@ -904,7 +904,7 @@ class boss_the_lich_king : public CreatureScript
                                 Talk(EMOTE_NECROTIC_PLAGUE_WARNING, target);
                                 DoCast(target, SPELL_NECROTIC_PLAGUE);
                             }
-                            events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, urand(30000, 33000), 0, PHASE_ONE);
+                            events.ScheduleEvent(EVENT_NECROTIC_PLAGUE, std::rand() % 33000 + 30000, 0, PHASE_ONE);
                             break;
                         case EVENT_SHADOW_TRAP:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
@@ -913,7 +913,7 @@ class boss_the_lich_king : public CreatureScript
                             break;
                         case EVENT_SOUL_REAPER:
                             DoCastVictim(SPELL_SOUL_REAPER);
-                            events.ScheduleEvent(EVENT_SOUL_REAPER, urand(33000, 35000), 0, PHASE_TWO_THREE);
+                            events.ScheduleEvent(EVENT_SOUL_REAPER, std::rand() % 35000 + 33000, 0, PHASE_TWO_THREE);
                             break;
                         case EVENT_DEFILE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_HARVEST_SOUL_VALKYR))
@@ -921,7 +921,7 @@ class boss_the_lich_king : public CreatureScript
                                 Talk(EMOTE_DEFILE_WARNING);
                                 DoCast(target, SPELL_DEFILE);
                             }
-                            events.ScheduleEvent(EVENT_DEFILE, urand(32000, 35000), 0, PHASE_TWO_THREE);
+                            events.ScheduleEvent(EVENT_DEFILE, std::rand() % 35000 + 32000, 0, PHASE_TWO_THREE);
                             break;
                         case EVENT_HARVEST_SOUL:
                             Talk(SAY_LK_HARVEST_SOUL);
@@ -932,16 +932,16 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_PAIN_AND_SUFFERING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 me->CastSpell(target, SPELL_PAIN_AND_SUFFERING, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, urand(1500, 4000), 0, PHASE_TRANSITION);
+                            events.ScheduleEvent(EVENT_PAIN_AND_SUFFERING, std::rand() % 4000 + 1000, 0, PHASE_TRANSITION);
                             break;
                         case EVENT_SUMMON_ICE_SPHERE:
                             DoCastAOE(SPELL_SUMMON_ICE_SPHERE);
-                            events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, urand(7500, 8500), 0, PHASE_TRANSITION);
+                            events.ScheduleEvent(EVENT_SUMMON_ICE_SPHERE, std::rand() % 8500 + 7500, 0, PHASE_TRANSITION);
                             break;
                         case EVENT_SUMMON_RAGING_SPIRIT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 me->CastSpell(target, SPELL_RAGING_SPIRIT, TRIGGERED_NONE);
-                            events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, urand(22000, 23000), 0, PHASE_TRANSITION);
+                            events.ScheduleEvent(EVENT_SUMMON_RAGING_SPIRIT, std::rand() % 23000 + 22000, 0, PHASE_TRANSITION);
                             break;
                         case EVENT_QUAKE:
                             events.SetPhase(PHASE_TWO);
@@ -961,7 +961,7 @@ class boss_the_lich_king : public CreatureScript
                             SendMusicToPlayers(MUSIC_SPECIAL);
                             Talk(SAY_LK_SUMMON_VALKYR);
                             DoCastAOE(SUMMON_VALKYR);
-                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, urand(45000, 50000), 0, PHASE_TWO);
+                            events.ScheduleEvent(EVENT_SUMMON_VALKYR, std::rand() % 50000 + 45000, 0, PHASE_TWO);
                             break;
                         case EVENT_START_ATTACK:
                             me->SetReactState(REACT_AGGRESSIVE);
@@ -971,18 +971,18 @@ class boss_the_lich_king : public CreatureScript
                         case EVENT_VILE_SPIRITS:
                             SendMusicToPlayers(MUSIC_SPECIAL);
                             DoCastAOE(SPELL_VILE_SPIRITS);
-                            events.ScheduleEvent(EVENT_VILE_SPIRITS, urand(35000, 40000), EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
+                            events.ScheduleEvent(EVENT_VILE_SPIRITS, std::rand() % 40000 + 35000, EVENT_GROUP_VILE_SPIRITS, PHASE_THREE);
                             break;
                         case EVENT_HARVEST_SOULS:
                             Talk(SAY_LK_HARVEST_SOUL);
                             DoCastAOE(SPELL_HARVEST_SOULS);
-                            events.ScheduleEvent(EVENT_HARVEST_SOULS, urand(100000, 110000), 0, PHASE_THREE);
+                            events.ScheduleEvent(EVENT_HARVEST_SOULS, std::rand() % 110000 + 100000, 0, PHASE_THREE);
                             events.SetPhase(PHASE_FROSTMOURNE); // will stop running UpdateVictim (no evading)
                             me->SetReactState(REACT_PASSIVE);
                             me->AttackStop();
                             events.DelayEvents(50000, EVENT_GROUP_VILE_SPIRITS);
                             events.RescheduleEvent(EVENT_DEFILE, 50000, 0, PHASE_THREE);
-                            events.RescheduleEvent(EVENT_SOUL_REAPER, urand(57000, 62000), 0, PHASE_THREE);
+                            events.RescheduleEvent(EVENT_SOUL_REAPER, std::rand() % 62000 + 57000, 0, PHASE_THREE);
                             events.ScheduleEvent(EVENT_START_ATTACK, 49000);
                             events.ScheduleEvent(EVENT_FROSTMOURNE_HEROIC, 6500);
                             break;
@@ -1295,8 +1295,8 @@ class npc_shambling_horror_icc : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SHOCKWAVE, urand(20000, 25000));
-                _events.ScheduleEvent(EVENT_ENRAGE, urand(11000, 14000));
+                _events.ScheduleEvent(EVENT_SHOCKWAVE, std::rand() % 25000 + 20000);
+                _events.ScheduleEvent(EVENT_ENRAGE, std::rand() % 14000 + 11000);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
@@ -1324,11 +1324,11 @@ class npc_shambling_horror_icc : public CreatureScript
                     {
                         case EVENT_SHOCKWAVE:
                             DoCast(me, SPELL_SHOCKWAVE);
-                            _events.ScheduleEvent(EVENT_SHOCKWAVE, urand(20000, 25000));
+                            _events.ScheduleEvent(EVENT_SHOCKWAVE, std::rand() % 25000 + 20000);
                             break;
                         case EVENT_ENRAGE:
                             DoCast(me, SPELL_ENRAGE);
-                            _events.ScheduleEvent(EVENT_ENRAGE, urand(20000, 25000));
+                            _events.ScheduleEvent(EVENT_ENRAGE, std::rand() % 25000 + 20000);
                             break;
                         default:
                             break;
@@ -1364,7 +1364,7 @@ class npc_raging_spirit : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SOUL_SHRIEK, urand(12000, 15000));
+                _events.ScheduleEvent(EVENT_SOUL_SHRIEK, std::rand() % 15000 + 12000);
                 DoCast(me, SPELL_PLAGUE_AVOIDANCE, true);
                 DoCast(me, SPELL_RAGING_SPIRIT_VISUAL, true);
                 if (TempSummon* summon = me->ToTempSummon())
@@ -1404,7 +1404,7 @@ class npc_raging_spirit : public CreatureScript
                     {
                         case EVENT_SOUL_SHRIEK:
                             DoCastAOE(SPELL_SOUL_SHRIEK);
-                            _events.ScheduleEvent(EVENT_SOUL_SHRIEK, urand(12000, 15000));
+                            _events.ScheduleEvent(EVENT_SOUL_SHRIEK, std::rand() % 15000 + 12000);
                             break;
                         default:
                             break;
@@ -1847,7 +1847,7 @@ class npc_spirit_warden : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SOUL_RIP, urand(12000, 15000));
+                _events.ScheduleEvent(EVENT_SOUL_RIP, std::rand() % 15000 + 12000);
                 DoCast(SPELL_DARK_HUNGER);
             }
 
@@ -1870,7 +1870,7 @@ class npc_spirit_warden : public CreatureScript
                     {
                         case EVENT_SOUL_RIP:
                             DoCastVictim(SPELL_SOUL_RIP);
-                            _events.ScheduleEvent(EVENT_SOUL_RIP, urand(23000, 27000));
+                            _events.ScheduleEvent(EVENT_SOUL_RIP, std::rand() % 27000 + 23000);
                             break;
                         default:
                             break;

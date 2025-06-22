@@ -86,8 +86,8 @@ public:
              Phase = COMBAT;
              uiCarrionSwarmTimer = 6000;
              uiMindBlastTimer = 11000;
-             uiVampiricTouchTimer = urand(10000, 15000);
-             uiSleepTimer = urand(15000, 20000);
+             uiVampiricTouchTimer = std::rand() % 15000 + 10000;
+             uiSleepTimer = std::rand() % 20000 + 15000;
              uiOutroTimer = 1000;
 
              if (instance)
@@ -170,7 +170,7 @@ public:
                         Talk(SAY_SLEEP);
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                             DoCast(target, SPELL_SLEEP);
-                        uiSleepTimer = urand(15000, 20000);
+                        uiSleepTimer = std::rand() % 20000 + 15000;
                     } else uiSleepTimer -= diff;
 
                     DoMeleeAttackIfReady();

@@ -117,7 +117,7 @@ class boss_mechano_lord_capacitus : public CreatureScript
                             break;
                         case EVENT_POSITIVE_SHIFT:
                             DoCastAOE(SPELL_POLARITY_SHIFT);
-                            events.ScheduleEvent(EVENT_POSITIVE_SHIFT, urand(45, 60) * IN_MILLISECONDS);
+                            events.ScheduleEvent(EVENT_POSITIVE_SHIFT, std::rand() % (60 * IN_MILLISECONDS) + (45 * IN_MILLISECONDS));
                             break;
                         case EVENT_SUMMON_NETHER_CHARGE:
                             Position pos;

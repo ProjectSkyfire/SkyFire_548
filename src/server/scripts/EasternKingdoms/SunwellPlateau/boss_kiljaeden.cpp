@@ -302,7 +302,7 @@ public:
             }
             else
             {
-                if (GameObject* pOrb = GetOrb(urand(0, 3)))
+                if (GameObject* pOrb = GetOrb(std::rand() % 3))
                 {
                     pOrb->CastSpell(me, SPELL_RING_OF_BLUE_FLAMES);
                     pOrb->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, 35);
@@ -632,7 +632,7 @@ public:
             TimerIsDeactivated[TIMER_SHADOW_SPIKE] = false;
             Timer[TIMER_SHADOW_SPIKE]     = 100;
             // empowered orbs before darkness
-            Timer[TIMER_DARKNESS] = (Phase == PHASE_SACRIFICE) ? 15000 : urand(10000, 40000);
+            Timer[TIMER_DARKNESS] = (Phase == PHASE_SACRIFICE) ? 15000 : std::rand() % 40000 + 10000;
             Timer[TIMER_ORBS_EMPOWER] = (Phase == PHASE_SACRIFICE) ? 10000 : 5000;
         }
 
@@ -759,7 +759,7 @@ public:
                                 sy = ShieldOrbLocations[0][1] + std::sin(ShieldOrbLocations[i][1]);
                                 me->SummonCreature(CREATURE_SHIELD_ORB, sx, sy, SHIELD_ORB_Z, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 45000);
                             }
-                            Timer[TIMER_SUMMON_SHILEDORB] = urand(30000, 60000); // 30-60seconds cooldown
+                            Timer[TIMER_SUMMON_SHILEDORB] = std::rand() % 60000 + 30000; // 30-60seconds cooldown
                             Timer[TIMER_SOUL_FLAY] = 2000;
                             break;
                         case TIMER_SHADOW_SPIKE: //Phase 3
@@ -793,7 +793,7 @@ public:
                                 }
                                 else
                                 {
-                                    Timer[TIMER_DARKNESS] = (Phase == PHASE_SACRIFICE) ? 15000 : urand(40000, 70000);
+                                    Timer[TIMER_DARKNESS] = (Phase == PHASE_SACRIFICE) ? 15000 : std::rand() % 70000 + 40000;
                                     IsInDarkness = false;
                                     DoCastAOE(SPELL_DARKNESS_OF_A_THOUSAND_SOULS_DAMAGE);
                                     Talk(SAY_KJ_DARKNESS);
@@ -909,7 +909,7 @@ public:
         void Reset() OVERRIDE
         {
             /// @todo Timers!
-            ShadowBoltVolleyTimer = urand(8000, 14000); // So they don't all cast it in the same moment.
+            ShadowBoltVolleyTimer = std::rand() % 14000 + 8000; // So they don't all cast it in the same moment.
             FelfirePortalTimer = 20000;
             if (instance)
                 instance->SetData(DATA_KILJAEDEN_EVENT, NOT_STARTED);
@@ -1024,7 +1024,7 @@ public:
             {
                 if (Creature* pFiend = DoSpawnCreature(CREATURE_VOLATILE_FELFIRE_FIEND, 0, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 20000))
                     pFiend->AddThreat(SelectTarget(SELECT_TARGET_RANDOM, 0), 100000.0f);
-                uiSpawnFiendTimer = urand(4000, 8000);
+                uiSpawnFiendTimer = std::rand() % 8000 + 4000;
             } else uiSpawnFiendTimer -= diff;
         }
     };
@@ -1174,13 +1174,13 @@ public:
         {
             me->SetDisableGravity(true);
             bPointReached = true;
-            uiTimer = urand(500, 1000);
+            uiTimer = std::rand() % 1000 + 500;
             uiCheckTimer = 1000;
             r = 17;
             c = 0;
             mx = ShieldOrbLocations[0][0];
             my = ShieldOrbLocations[0][1];
-            bClockwise = urand(0, 1);
+            bClockwise = std::rand() % 1;
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -1217,7 +1217,7 @@ public:
             {
                 if (Unit* random = Unit::GetUnit(*me, instance ? instance->GetData64(DATA_PLAYER_GUID) : 0))
                     DoCast(random, SPELL_SHADOW_BOLT, false);
-                uiTimer = urand(500, 1000);
+                uiTimer = std::rand() % 1000 + 500;
             } else uiTimer -= diff;
         }
 
@@ -1297,7 +1297,7 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_MOONFIRE, false);
-                        uiTimer[1] = urand(2000, 4000);
+                        uiTimer[1] = std::rand() % 4000 + 2000;
                     }
                     DoMeleeAttackIfReady();
                     break;
@@ -1305,19 +1305,19 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_MULTI_SHOT, false);
-                        uiTimer[1] = urand(8000, 10000);
+                        uiTimer[1] = std::rand() % 10000 + 8000;
                     }
                     if (uiTimer[2] <= diff)
                     {
                         DoCastVictim(SPELL_SR_SHOOT, false);
-                        uiTimer[2] = urand(4000, 6000);
+                        uiTimer[2] = std::rand() % 6000 + 4000;
                     }
                     if (me->IsWithinMeleeRange(me->GetVictim(), 6))
                     {
                         if (uiTimer[0] <= diff)
                         {
                             DoCastVictim(SPELL_SR_MULTI_SHOT, false);
-                            uiTimer[0] = urand(6000, 8000);
+                            uiTimer[0] = std::rand() % 8000 + 6000;
                         }
                         DoMeleeAttackIfReady();
                     }
@@ -1326,7 +1326,7 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_FIREBALL, false);
-                        uiTimer[1] = urand(2000, 4000);
+                        uiTimer[1] = std::rand() % 4000 + 2000;
                     }
                     DoMeleeAttackIfReady();
                     break;
@@ -1334,12 +1334,12 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_SHADOW_BOLT, false);
-                        uiTimer[1] = urand(3000, 5000);
+                        uiTimer[1] = std::rand() % 5000 + 3000;
                     }
                     if (uiTimer[2] <= diff)
                     {
                         DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), SPELL_SR_CURSE_OF_AGONY, true);
-                        uiTimer[2] = urand(2000, 4000);
+                        uiTimer[2] = std::rand() % 4000 + 2000;
                     }
                     DoMeleeAttackIfReady();
                     break;
@@ -1347,7 +1347,7 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_WHIRLWIND, false);
-                        uiTimer[1] = urand(9000, 11000);
+                        uiTimer[1] = std::rand() % 11000 + 9000;
                     }
                     DoMeleeAttackIfReady();
                     break;
@@ -1355,12 +1355,12 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_HAMMER_OF_JUSTICE, false);
-                        uiTimer[1] = urand(6000, 8000);
+                        uiTimer[1] = std::rand() % 8000 + 6000;
                     }
                     if (uiTimer[2] <= diff)
                     {
                         DoCastVictim(SPELL_SR_HOLY_SHOCK, false);
-                        uiTimer[2] = urand(2000, 4000);
+                        uiTimer[2] = std::rand() % 4000 + 2000;
                     }
                     DoMeleeAttackIfReady();
                     break;
@@ -1368,12 +1368,12 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_HOLY_SMITE, false);
-                        uiTimer[1] = urand(4000, 6000);
+                        uiTimer[1] = std::rand() % 6000 + 4000;
                     }
                     if (uiTimer[2] <= diff)
                     {
                         DoCast(me, SPELL_SR_RENEW, false);
-                        uiTimer[2] = urand(6000, 8000);
+                        uiTimer[2] = std::rand() % 8000 + 6000;
                     }
                     DoMeleeAttackIfReady();
                     break;
@@ -1381,7 +1381,7 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_EARTH_SHOCK, false);
-                        uiTimer[1] = urand(4000, 6000);
+                        uiTimer[1] = std::rand() % 6000 + 4000;
                     }
                     DoMeleeAttackIfReady();
                     break;
@@ -1389,7 +1389,7 @@ public:
                     if (uiTimer[1] <= diff)
                     {
                         DoCastVictim(SPELL_SR_HEMORRHAGE, true);
-                        uiTimer[1] = urand(4000, 6000);
+                        uiTimer[1] = std::rand() % 6000 + 4000;
                     }
                     DoMeleeAttackIfReady();
                     break;

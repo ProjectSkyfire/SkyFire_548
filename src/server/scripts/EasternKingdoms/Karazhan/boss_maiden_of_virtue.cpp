@@ -62,7 +62,7 @@ public:
 
         void KilledUnit(Unit* /*Victim*/) OVERRIDE
         {
-            if (urand(0, 1) == 0)
+            if ((std::rand() % 1) == 0)
                 Talk(SAY_SLAY);
         }
 
@@ -98,7 +98,7 @@ public:
                 DoCastVictim(SPELL_REPENTANCE);
                 Talk(SAY_REPENTANCE);
 
-                Repentance_Timer = urand(25000, 35000);        //A little randomness on that spell
+                Repentance_Timer = std::rand() % 35000 + 25000;        //A little randomness on that spell
             } else Repentance_Timer -= diff;
 
             if (Holyfire_Timer <= diff)
@@ -106,7 +106,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_HOLYFIRE);
 
-                Holyfire_Timer = urand(8000, 23000);      //Anywhere from 8 to 23 seconds, good luck having several of those in a row!
+                Holyfire_Timer = std::rand() % 23000 + 8000;      //Anywhere from 8 to 23 seconds, good luck having several of those in a row!
             } else Holyfire_Timer -= diff;
 
             if (Holywrath_Timer <= diff)
@@ -114,7 +114,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_HOLYWRATH);
 
-                Holywrath_Timer = urand(20000, 25000);        //20-30 secs sounds nice
+                Holywrath_Timer = std::rand() % 25000 + 20000;        //20-30 secs sounds nice
             } else Holywrath_Timer -= diff;
 
             DoMeleeAttackIfReady();

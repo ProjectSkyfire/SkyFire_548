@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -22,7 +22,7 @@ enum creaturesIC
     NPC_OVERLORD_AGMAR = 34922, // Horde Boss
     NPC_KOR_KRON_GUARD = 34918, // horde guard
     NPC_SEVEN_TH_LEGION_INFANTRY = 34919, // alliance guard
-    NPC_KEEP_CANNON  = 34944,
+    NPC_KEEP_CANNON = 34944,
     NPC_DEMOLISHER = 34775,
     NPC_SIEGE_ENGINE_H = 35069,
     NPC_SIEGE_ENGINE_A = 34776,
@@ -139,7 +139,7 @@ enum gameobjectsIC
     GO_HORDE_BANNER_HANGAR = 195130,
     GO_HORDE_BANNER_HANGAR_CONT = 195145,
     GO_ALLIANCE_BANNER_HANGAR = 195132,
-    GO_ALLIANCE_BANNER_HANGAR_CONT= 195144,
+    GO_ALLIANCE_BANNER_HANGAR_CONT = 195144,
 
     GO_ALLIANCE_BANNER_QUARRY = 195334,
     GO_ALLIANCE_BANNER_QUARRY_CONT = 195335,
@@ -174,12 +174,12 @@ enum gameobjectsIC
 
 enum Times
 {
-    WORKSHOP_UPDATE_TIME     = 180000, // 3 minutes
-    DOCKS_UPDATE_TIME        = 180000, // not sure if it is 3 minutes
-    IC_RESOURCE_TIME         = 45000, // not sure, need more research
-    CLOSE_DOORS_TIME         = 20000,
+    WORKSHOP_UPDATE_TIME = 180000, // 3 minutes
+    DOCKS_UPDATE_TIME = 180000, // not sure if it is 3 minutes
+    IC_RESOURCE_TIME = 45000, // not sure, need more research
+    CLOSE_DOORS_TIME = 20000,
     BANNER_STATE_CHANGE_TIME = 60000,
-    TRANSPORT_PERIOD_TIME    = 120000
+    TRANSPORT_PERIOD_TIME = 120000
 };
 
 enum Actions
@@ -413,8 +413,8 @@ enum BannersTypes
 
 enum BG_IC_MaxSpawns
 {
-    MAX_NORMAL_GAMEOBJECTS_SPAWNS = BG_IC_GO_DOODAD_ND_WINTERORC_WALL_GATEFX_DOOR01+1,
-    MAX_NORMAL_NPCS_SPAWNS = BG_IC_NPC_KEEP_CANNON_25+1,
+    MAX_NORMAL_GAMEOBJECTS_SPAWNS = BG_IC_GO_DOODAD_ND_WINTERORC_WALL_GATEFX_DOOR01 + 1,
+    MAX_NORMAL_NPCS_SPAWNS = BG_IC_NPC_KEEP_CANNON_25 + 1,
     MAX_WORKSHOP_SPAWNS = 10,
     MAX_DOCKS_SPAWNS = 12,
     MAX_SPIRIT_GUIDES_SPAWNS = 7,
@@ -432,7 +432,7 @@ enum BG_IC_MaxSpawns
     MAX_WORKSHOP_BOMBS_SPAWNS_PER_FACTION = 2
 };
 
-const ICNpc BG_IC_NpcSpawnlocs[MAX_NORMAL_NPCS_SPAWNS]=
+const ICNpc BG_IC_NpcSpawnlocs[MAX_NORMAL_NPCS_SPAWNS] =
 {
     {BG_IC_NPC_OVERLORD_AGMAR, NPC_OVERLORD_AGMAR, TEAM_HORDE, 1295.44f, -765.733f, 70.0541f, 0.0f}, //Overlord Agmar 1
     {BG_IC_NPC_HIGH_COMMANDER_HALFORD_WYRMBANE, NPC_HIGH_COMMANDER_HALFORD_WYRMBANE, TEAM_ALLIANCE, 224.983f, -831.573f, 60.9034f, 0.0f}, //High Commander Halford Wyrmbane 2
@@ -643,42 +643,42 @@ const Position workshopBombs[2] =
 
 enum Spells
 {
-    SPELL_OIL_REFINERY                     = 68719,
-    SPELL_QUARRY                           = 68720,
-    SPELL_PARACHUTE                        = 66656,
-    SPELL_SLOW_FALL                        = 12438,
-    SPELL_DESTROYED_VEHICLE_ACHIEVEMENT    = 68357,
-    SPELL_BACK_DOOR_JOB_ACHIEVEMENT        = 68502,
-    SPELL_DRIVING_CREDIT_DEMOLISHER        = 68365,
-    SPELL_DRIVING_CREDIT_GLAIVE            = 68363,
-    SPELL_DRIVING_CREDIT_SIEGE             = 68364,
-    SPELL_DRIVING_CREDIT_CATAPULT          = 68362,
+    SPELL_OIL_REFINERY = 68719,
+    SPELL_QUARRY = 68720,
+    SPELL_PARACHUTE = 66656,
+    SPELL_SLOW_FALL = 12438,
+    SPELL_DESTROYED_VEHICLE_ACHIEVEMENT = 68357,
+    SPELL_BACK_DOOR_JOB_ACHIEVEMENT = 68502,
+    SPELL_DRIVING_CREDIT_DEMOLISHER = 68365,
+    SPELL_DRIVING_CREDIT_GLAIVE = 68363,
+    SPELL_DRIVING_CREDIT_SIEGE = 68364,
+    SPELL_DRIVING_CREDIT_CATAPULT = 68362,
 };
 
 enum BG_IC_Objectives
 {
-    IC_OBJECTIVE_ASSAULT_BASE   = 245,
-    IC_OBJECTIVE_DEFEND_BASE    = 246
+    IC_OBJECTIVE_ASSAULT_BASE = 245,
+    IC_OBJECTIVE_DEFEND_BASE = 246
 };
 
 enum ICWorldStates
 {
-    BG_IC_ALLIANCE_RENFORT_SET      = 4221,
-    BG_IC_HORDE_RENFORT_SET         = 4222,
-    BG_IC_ALLIANCE_RENFORT          = 4226,
-    BG_IC_HORDE_RENFORT             = 4227,
-    BG_IC_GATE_FRONT_H_WS_CLOSED    = 4317,
-    BG_IC_GATE_WEST_H_WS_CLOSED     = 4318,
-    BG_IC_GATE_EAST_H_WS_CLOSED     = 4319,
-    BG_IC_GATE_FRONT_A_WS_CLOSED    = 4328,
-    BG_IC_GATE_WEST_A_WS_CLOSED     = 4327,
-    BG_IC_GATE_EAST_A_WS_CLOSED     = 4326,
-    BG_IC_GATE_FRONT_H_WS_OPEN      = 4322,
-    BG_IC_GATE_WEST_H_WS_OPEN       = 4321,
-    BG_IC_GATE_EAST_H_WS_OPEN       = 4320,
-    BG_IC_GATE_FRONT_A_WS_OPEN      = 4323,
-    BG_IC_GATE_WEST_A_WS_OPEN       = 4324,
-    BG_IC_GATE_EAST_A_WS_OPEN       = 4325,
+    BG_IC_ALLIANCE_RENFORT_SET = 4221,
+    BG_IC_HORDE_RENFORT_SET = 4222,
+    BG_IC_ALLIANCE_RENFORT = 4226,
+    BG_IC_HORDE_RENFORT = 4227,
+    BG_IC_GATE_FRONT_H_WS_CLOSED = 4317,
+    BG_IC_GATE_WEST_H_WS_CLOSED = 4318,
+    BG_IC_GATE_EAST_H_WS_CLOSED = 4319,
+    BG_IC_GATE_FRONT_A_WS_CLOSED = 4328,
+    BG_IC_GATE_WEST_A_WS_CLOSED = 4327,
+    BG_IC_GATE_EAST_A_WS_CLOSED = 4326,
+    BG_IC_GATE_FRONT_H_WS_OPEN = 4322,
+    BG_IC_GATE_WEST_H_WS_OPEN = 4321,
+    BG_IC_GATE_EAST_H_WS_OPEN = 4320,
+    BG_IC_GATE_FRONT_A_WS_OPEN = 4323,
+    BG_IC_GATE_WEST_A_WS_OPEN = 4324,
+    BG_IC_GATE_EAST_A_WS_OPEN = 4325,
 
     BG_IC_DOCKS_UNCONTROLLED = 4301,
     BG_IC_DOCKS_CONFLICT_A = 4305,
@@ -765,12 +765,12 @@ enum ICNodeState
     NODE_STATE_CONTROLLED_H
 };
 
-const uint32 BG_IC_GraveyardIds[MAX_NODE_TYPES+2] = {0, 0, 1480, 1481, 1482, 1485, 1486, 1483, 1484};
+const uint32 BG_IC_GraveyardIds[MAX_NODE_TYPES + 2] = { 0, 0, 1480, 1481, 1482, 1485, 1486, 1483, 1484 };
 
-const Position TransportMovementInfo = {7.305609f, -0.095246f, 34.51022f, 0.0f};
-const Position TeleportToTransportPosition = {661.0f, -1244.0f, 288.0f, 0.0f};
+const Position TransportMovementInfo = { 7.305609f, -0.095246f, 34.51022f, 0.0f };
+const Position TeleportToTransportPosition = { 661.0f, -1244.0f, 288.0f, 0.0f };
 
-const float BG_IC_SpiritGuidePos[MAX_NODE_TYPES+2][4] =
+const float BG_IC_SpiritGuidePos[MAX_NODE_TYPES + 2][4] =
 {
     {0.0f, 0.0f, 0.0f, 0.0f},                     // no grave
     {0.0f, 0.0f, 0.0f, 0.0f},                     // no grave
@@ -844,105 +844,105 @@ struct BattlegroundICScore : public BattlegroundScore
 
 class BattlegroundIC : public Battleground
 {
-    public:
-        BattlegroundIC();
-        ~BattlegroundIC();
+public:
+    BattlegroundIC();
+    ~BattlegroundIC();
 
-        /* inherited from BattlegroundClass */
-        void AddPlayer(Player* player) OVERRIDE;
-        void StartingEventCloseDoors() OVERRIDE;
-        void StartingEventOpenDoors() OVERRIDE;
-        void PostUpdateImpl(uint32 diff) OVERRIDE;
+    /* inherited from BattlegroundClass */
+    void AddPlayer(Player* player) OVERRIDE;
+    void StartingEventCloseDoors() OVERRIDE;
+    void StartingEventOpenDoors() OVERRIDE;
+    void PostUpdateImpl(uint32 diff) OVERRIDE;
 
-        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
-        void HandleAreaTrigger(Player* player, uint32 trigger) OVERRIDE;
-        bool SetupBattleground() OVERRIDE;
-        void SpawnLeader(uint32 teamid);
-        void HandleKillUnit(Creature* unit, Player* killer) OVERRIDE;
-        void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
-        void EndBattleground(uint32 winner);
-        void EventPlayerClickedOnFlag(Player* source, GameObject* /*target_obj*/) OVERRIDE;
+    void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
+    void HandleAreaTrigger(Player* player, uint32 trigger) OVERRIDE;
+    bool SetupBattleground() OVERRIDE;
+    void SpawnLeader(uint32 teamid);
+    void HandleKillUnit(Creature* unit, Player* killer) OVERRIDE;
+    void HandleKillPlayer(Player* player, Player* killer) OVERRIDE;
+    void EndBattleground(uint32 winner);
+    void EventPlayerClickedOnFlag(Player* source, GameObject* /*target_obj*/) OVERRIDE;
 
-        void EventPlayerDamagedGO(Player* /*player*/, GameObject* go, uint32 eventType) OVERRIDE;
-        void DestroyGate(Player* player, GameObject* go) OVERRIDE;
+    void EventPlayerDamagedGO(Player* /*player*/, GameObject* go, uint32 eventType) OVERRIDE;
+    void DestroyGate(Player* player, GameObject* go) OVERRIDE;
 
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
+    WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
 
-        /* Scorekeeping */
-        void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
+    /* Scorekeeping */
+    void UpdatePlayerScore(Player* player, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
 
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+    void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
 
-        void DoAction(uint32 action, uint64 var) OVERRIDE;
+    void DoAction(uint32 action, uint64 var) OVERRIDE;
 
-        void HandlePlayerResurrect(Player* player) OVERRIDE;
+    void HandlePlayerResurrect(Player* player) OVERRIDE;
 
-        uint32 GetNodeState(uint8 nodeType) const { return (uint8)nodePoint[nodeType].nodeState; }
+    uint32 GetNodeState(uint8 nodeType) const { return (uint8)nodePoint[nodeType].nodeState; }
 
-        bool IsAllNodesControlledByTeam(uint32 team) const OVERRIDE;
+    bool IsAllNodesControlledByTeam(uint32 team) const OVERRIDE;
 
-        bool IsSpellAllowed(uint32 spellId, Player const* player) const OVERRIDE;
-    private:
-        uint32 closeFortressDoorsTimer;
-        bool doorsClosed;
-        uint32 docksTimer;
-        uint32 resourceTimer;
-        uint32 siegeEngineWorkshopTimer;
-        uint16 factionReinforcements[2];
-        BG_IC_GateState GateStatus[6];
-        ICNodePoint nodePoint[7];
+    bool IsSpellAllowed(uint32 spellId, Player const* player) const OVERRIDE;
+private:
+    uint32 closeFortressDoorsTimer;
+    bool doorsClosed;
+    uint32 docksTimer;
+    uint32 resourceTimer;
+    uint32 siegeEngineWorkshopTimer;
+    uint16 factionReinforcements[2];
+    BG_IC_GateState GateStatus[6];
+    ICNodePoint nodePoint[7];
 
-        Transport* gunshipAlliance;
-        Transport* gunshipHorde;
+    Transport* gunshipAlliance;
+    Transport* gunshipHorde;
 
-        uint32 GetNextBanner(ICNodePoint* nodePoint, uint32 team, bool returnDefinitve);
+    uint32 GetNextBanner(ICNodePoint* nodePoint, uint32 team, bool returnDefinitve);
 
-        uint32 GetGateIDFromEntry(uint32 id)
+    uint32 GetGateIDFromEntry(uint32 id)
+    {
+        uint32 i = 0;
+        switch (id)
         {
-            uint32 i = 0;
-            switch (id)
-            {
-                case GO_HORDE_GATE_1: i = BG_IC_H_FRONT; break;
-                case GO_HORDE_GATE_2: i = BG_IC_H_WEST; break;
-                case GO_HORDE_GATE_3: i = BG_IC_H_EAST; break;
-                case GO_ALLIANCE_GATE_3: i = BG_IC_A_FRONT; break;
-                case GO_ALLIANCE_GATE_1: i = BG_IC_A_WEST; break;
-                case GO_ALLIANCE_GATE_2: i = BG_IC_A_EAST; break;
-            }
-            return i;
+            case GO_HORDE_GATE_1: i = BG_IC_H_FRONT; break;
+            case GO_HORDE_GATE_2: i = BG_IC_H_WEST; break;
+            case GO_HORDE_GATE_3: i = BG_IC_H_EAST; break;
+            case GO_ALLIANCE_GATE_3: i = BG_IC_A_FRONT; break;
+            case GO_ALLIANCE_GATE_1: i = BG_IC_A_WEST; break;
+            case GO_ALLIANCE_GATE_2: i = BG_IC_A_EAST; break;
         }
+        return i;
+    }
 
-        uint32 GetWorldStateFromGateEntry(uint32 id, bool open)
+    uint32 GetWorldStateFromGateEntry(uint32 id, bool open)
+    {
+        uint32 uws = 0;
+
+        switch (id)
         {
-            uint32 uws = 0;
-
-            switch (id)
-            {
-                case GO_HORDE_GATE_1:
-                    uws = (open ? BG_IC_GATE_FRONT_H_WS_OPEN : BG_IC_GATE_FRONT_H_WS_CLOSED);
-                    break;
-                case GO_HORDE_GATE_2:
-                    uws = (open ? BG_IC_GATE_WEST_H_WS_OPEN : BG_IC_GATE_WEST_H_WS_CLOSED);
-                    break;
-                case GO_HORDE_GATE_3:
-                    uws = (open ? BG_IC_GATE_EAST_H_WS_OPEN : BG_IC_GATE_EAST_H_WS_CLOSED);
-                    break;
-                case GO_ALLIANCE_GATE_3:
-                    uws = (open ? BG_IC_GATE_FRONT_A_WS_OPEN : BG_IC_GATE_FRONT_A_WS_CLOSED);
-                    break;
-                case GO_ALLIANCE_GATE_1:
-                    uws = (open ? BG_IC_GATE_WEST_A_WS_OPEN : BG_IC_GATE_WEST_A_WS_CLOSED);
-                    break;
-                case GO_ALLIANCE_GATE_2:
-                    uws = (open ? BG_IC_GATE_EAST_A_WS_OPEN : BG_IC_GATE_EAST_A_WS_CLOSED);
-                    break;
-            }
-            return uws;
+            case GO_HORDE_GATE_1:
+                uws = (open ? BG_IC_GATE_FRONT_H_WS_OPEN : BG_IC_GATE_FRONT_H_WS_CLOSED);
+                break;
+            case GO_HORDE_GATE_2:
+                uws = (open ? BG_IC_GATE_WEST_H_WS_OPEN : BG_IC_GATE_WEST_H_WS_CLOSED);
+                break;
+            case GO_HORDE_GATE_3:
+                uws = (open ? BG_IC_GATE_EAST_H_WS_OPEN : BG_IC_GATE_EAST_H_WS_CLOSED);
+                break;
+            case GO_ALLIANCE_GATE_3:
+                uws = (open ? BG_IC_GATE_FRONT_A_WS_OPEN : BG_IC_GATE_FRONT_A_WS_CLOSED);
+                break;
+            case GO_ALLIANCE_GATE_1:
+                uws = (open ? BG_IC_GATE_WEST_A_WS_OPEN : BG_IC_GATE_WEST_A_WS_CLOSED);
+                break;
+            case GO_ALLIANCE_GATE_2:
+                uws = (open ? BG_IC_GATE_EAST_A_WS_OPEN : BG_IC_GATE_EAST_A_WS_CLOSED);
+                break;
         }
+        return uws;
+    }
 
-        void UpdateNodeWorldState(ICNodePoint* nodePoint);
-        void HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture);
-        void HandleContestedNodes(ICNodePoint* nodePoint);
+    void UpdateNodeWorldState(ICNodePoint* nodePoint);
+    void HandleCapturedNodes(ICNodePoint* nodePoint, bool recapture);
+    void HandleContestedNodes(ICNodePoint* nodePoint);
 };
 
 #endif

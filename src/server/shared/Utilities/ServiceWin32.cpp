@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -24,7 +24,7 @@
 #endif
 #endif
 
-extern int main(int argc, char ** argv);
+extern int main(int argc, char** argv);
 extern char serviceLongName[];
 extern char serviceName[];
 extern char serviceDescription[];
@@ -35,7 +35,7 @@ SERVICE_STATUS serviceStatus;
 
 SERVICE_STATUS_HANDLE serviceStatusHandle = 0;
 
-typedef WINADVAPI BOOL (WINAPI *CSD_T)(SC_HANDLE, DWORD, LPCVOID);
+typedef WINADVAPI BOOL(WINAPI* CSD_T)(SC_HANDLE, DWORD, LPCVOID);
 
 bool WinServiceInstall()
 {
@@ -44,7 +44,7 @@ bool WinServiceInstall()
     if (serviceControlManager)
     {
         char path[_MAX_PATH + 10];
-        if (GetModuleFileName( 0, path, sizeof(path)/sizeof(path[0]) ) > 0)
+        if (GetModuleFileName(0, path, sizeof(path) / sizeof(path[0])) > 0)
         {
             SC_HANDLE service;
             std::strcat(path, " --service");
@@ -52,7 +52,7 @@ bool WinServiceInstall()
                 serviceName,                                // name of service
                 serviceLongName,                            // service name to display
                 SERVICE_ALL_ACCESS,                         // desired access
-                                                            // service type
+                // service type
                 SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
                 SERVICE_AUTO_START,                         // start type
                 SERVICE_ERROR_IGNORE,                       // error control type
@@ -72,7 +72,7 @@ bool WinServiceInstall()
                     return false;
                 }
 
-                CSD_T ChangeService_Config2 = (CSD_T) GetProcAddress(advapi32, "ChangeServiceConfig2A");
+                CSD_T ChangeService_Config2 = (CSD_T)GetProcAddress(advapi32, "ChangeServiceConfig2A");
                 if (!ChangeService_Config2)
                 {
                     CloseServiceHandle(service);
@@ -94,7 +94,7 @@ bool WinServiceInstall()
                 ZeroMemory(&sfa, sizeof(SERVICE_FAILURE_ACTIONS));
                 sfa.lpsaActions = _action;
                 sfa.cActions = 1;
-                sfa.dwResetPeriod =INFINITE;
+                sfa.dwResetPeriod = INFINITE;
                 ChangeService_Config2(
                     service,                                // handle to service
                     SERVICE_CONFIG_FAILURE_ACTIONS,         // information level
@@ -136,42 +136,42 @@ void WINAPI ServiceControlHandler(DWORD controlCode)
 {
     switch (controlCode)
     {
-        case SERVICE_CONTROL_INTERROGATE:
+    case SERVICE_CONTROL_INTERROGATE:
+        break;
+
+    case SERVICE_CONTROL_SHUTDOWN:
+    case SERVICE_CONTROL_STOP:
+        serviceStatus.dwCurrentState = SERVICE_STOP_PENDING;
+        SetServiceStatus(serviceStatusHandle, &serviceStatus);
+
+        m_ServiceStatus = 0;
+        return;
+
+    case SERVICE_CONTROL_PAUSE:
+        m_ServiceStatus = 2;
+        serviceStatus.dwCurrentState = SERVICE_PAUSED;
+        SetServiceStatus(serviceStatusHandle, &serviceStatus);
+        break;
+
+    case SERVICE_CONTROL_CONTINUE:
+        serviceStatus.dwCurrentState = SERVICE_RUNNING;
+        SetServiceStatus(serviceStatusHandle, &serviceStatus);
+        m_ServiceStatus = 1;
+        break;
+
+    default:
+        if (controlCode >= 128 && controlCode <= 255)
+            // user defined control code
             break;
-
-        case SERVICE_CONTROL_SHUTDOWN:
-        case SERVICE_CONTROL_STOP:
-            serviceStatus.dwCurrentState = SERVICE_STOP_PENDING;
-            SetServiceStatus(serviceStatusHandle, &serviceStatus);
-
-            m_ServiceStatus = 0;
-            return;
-
-        case SERVICE_CONTROL_PAUSE:
-            m_ServiceStatus = 2;
-            serviceStatus.dwCurrentState = SERVICE_PAUSED;
-            SetServiceStatus(serviceStatusHandle, &serviceStatus);
+        else
+            // unrecognized control code
             break;
-
-        case SERVICE_CONTROL_CONTINUE:
-            serviceStatus.dwCurrentState = SERVICE_RUNNING;
-            SetServiceStatus(serviceStatusHandle, &serviceStatus);
-            m_ServiceStatus = 1;
-            break;
-
-        default:
-            if ( controlCode >= 128 && controlCode <= 255 )
-                // user defined control code
-                break;
-            else
-                // unrecognized control code
-                break;
     }
 
     SetServiceStatus(serviceStatusHandle, &serviceStatus);
 }
 
-void WINAPI ServiceMain(DWORD argc, char *argv[])
+void WINAPI ServiceMain(DWORD argc, char* argv[])
 {
     // initialise service status
     serviceStatus.dwServiceType = SERVICE_WIN32;
@@ -184,12 +184,12 @@ void WINAPI ServiceMain(DWORD argc, char *argv[])
 
     serviceStatusHandle = RegisterServiceCtrlHandler(serviceName, ServiceControlHandler);
 
-    if ( serviceStatusHandle )
+    if (serviceStatusHandle)
     {
         char path[_MAX_PATH + 1];
         unsigned int i, last_slash = 0;
 
-        GetModuleFileName(0, path, sizeof(path)/sizeof(path[0]));
+        GetModuleFileName(0, path, sizeof(path) / sizeof(path[0]));
 
         for (i = 0; i < std::strlen(path); i++)
         {
@@ -208,7 +208,7 @@ void WINAPI ServiceMain(DWORD argc, char *argv[])
         // running
         serviceStatus.dwControlsAccepted |= (SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_SHUTDOWN);
         serviceStatus.dwCurrentState = SERVICE_RUNNING;
-        SetServiceStatus( serviceStatusHandle, &serviceStatus );
+        SetServiceStatus(serviceStatusHandle, &serviceStatus);
 
         ////////////////////////
         // service main cycle //

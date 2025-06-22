@@ -61,10 +61,10 @@ public:
         {
             _Reset();
 
-            events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, urand(20, 25) * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, std::rand() % (25 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS));
             events.ScheduleEvent(EVENT_ENERGIZE_CORES_VISUAL, 5000);
             // not sure if this is handled by a timer or hp percentage
-            events.ScheduleEvent(EVENT_CALL_AZURE, urand(15, 30) * IN_MILLISECONDS);
+            events.ScheduleEvent(EVENT_CALL_AZURE, std::rand() % (30 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS));
 
             firstCoreEnergize = false;
             coreEnergizeOrientation = 0.0f;
@@ -118,11 +118,11 @@ public:
                         DoCast(me, SPELL_CALL_AZURE_RING_CAPTAIN);
                         Talk(SAY_AZURE);
                         Talk(SAY_AZURE_EMOTE);
-                        events.ScheduleEvent(EVENT_CALL_AZURE, urand(20, 25) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_CALL_AZURE, std::rand() % (25 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS));
                         break;
                     case EVENT_AMPLIFY_MAGIC:
                         DoCastVictim(SPELL_CALL_AMPLIFY_MAGIC);
-                        events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, urand(17, 20) * IN_MILLISECONDS);
+                        events.ScheduleEvent(EVENT_AMPLIFY_MAGIC, std::rand() % (20 * IN_MILLISECONDS) + (17 * IN_MILLISECONDS));
                         break;
                 }
             }

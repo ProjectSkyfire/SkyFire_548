@@ -164,11 +164,11 @@ class boss_saviana_ragefire : public CreatureScript
                         case EVENT_ENRAGE:
                             DoCast(me, SPELL_ENRAGE);
                             Talk(EMOTE_ENRAGED);
-                            events.ScheduleEvent(EVENT_ENRAGE, urand(15000, 20000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_ENRAGE, std::rand() % 20000 + 15000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_FLAME_BREATH:
                             DoCastVictim(SPELL_FLAME_BREATH);
-                            events.ScheduleEvent(EVENT_FLAME_BREATH, urand(20000, 30000), EVENT_GROUP_LAND_PHASE);
+                            events.ScheduleEvent(EVENT_FLAME_BREATH, std::rand() % 30000 + 20000, EVENT_GROUP_LAND_PHASE);
                             break;
                         case EVENT_AIR_MOVEMENT:
                             me->GetMotionMaster()->MovePoint(POINT_FLIGHT, SavianaRagefireFlyOutPos);

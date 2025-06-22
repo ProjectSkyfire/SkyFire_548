@@ -236,7 +236,7 @@ class ActivateLivingConstellation : public BasicEvent
                 return true;    // delete event
 
             _owner->CastSpell((Unit*)NULL, SPELL_TRIGGER_3_ADDS, TRIGGERED_FULL_MASK);
-            _owner->m_Events.AddEvent(this, execTime + urand(45000, 50000));
+            _owner->m_Events.AddEvent(this, execTime + std::rand() % 50000 + 45000);
             return false;
         }
 
@@ -579,13 +579,13 @@ class boss_algalon_the_observer : public CreatureScript
                             if (!stalkers.empty())
                             {
                                 Unit* stalker = Skyfire::Containers::SelectRandomContainerElement(stalkers);
-                                stalker->m_Events.AddEvent(new ActivateLivingConstellation(stalker), stalker->m_Events.CalculateTime(urand(45000, 50000)));
+                                stalker->m_Events.AddEvent(new ActivateLivingConstellation(stalker), stalker->m_Events.CalculateTime(std::rand() % 50000 + 45000));
                             }
                             break;
                         }
                         case EVENT_QUANTUM_STRIKE:
                             DoCastVictim(SPELL_QUANTUM_STRIKE);
-                            events.ScheduleEvent(EVENT_QUANTUM_STRIKE, urand(3000, 5000));
+                            events.ScheduleEvent(EVENT_QUANTUM_STRIKE, std::rand() % 5000 + 3000);
                             break;
                         case EVENT_PHASE_PUNCH:
                             DoCastVictim(SPELL_PHASE_PUNCH);

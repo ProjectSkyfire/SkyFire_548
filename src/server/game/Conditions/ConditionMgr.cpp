@@ -1,10 +1,10 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ConditionMgr.h"
 #include "AchievementMgr.h"
+#include "ConditionMgr.h"
 #include "GameEventMgr.h"
 #include "InstanceScript.h"
 #include "ObjectMgr.h"
@@ -12,9 +12,9 @@
 #include "ReputationMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
+#include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
-#include "Spell.h"
 
 // Checks if object meets the condition
 // Can have CONDITION_SOURCE_TYPE_NONE && !mReferenceId if called from a special event (ie: SmartAI)
@@ -640,25 +640,25 @@ bool ConditionMgr::IsObjectMeetToConditions(ConditionSourceInfo& sourceInfo, Con
 bool ConditionMgr::CanHaveSourceGroupSet(ConditionSourceType sourceType) const
 {
     return (sourceType == CONDITION_SOURCE_TYPE_CREATURE_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_DISENCHANT_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_FISHING_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_GAMEOBJECT_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_ITEM_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_MAIL_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_MILLING_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_PICKPOCKETING_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_PROSPECTING_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_REFERENCE_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_SKINNING_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_SPELL_LOOT_TEMPLATE ||
-            sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU ||
-            sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION ||
-            sourceType == CONDITION_SOURCE_TYPE_VEHICLE_SPELL ||
-            sourceType == CONDITION_SOURCE_TYPE_SPELL_IMPLICIT_TARGET ||
-            sourceType == CONDITION_SOURCE_TYPE_SPELL_CLICK_EVENT ||
-            sourceType == CONDITION_SOURCE_TYPE_SMART_EVENT ||
-            sourceType == CONDITION_SOURCE_TYPE_NPC_VENDOR ||
-            sourceType == CONDITION_SOURCE_TYPE_PHASE);
+        sourceType == CONDITION_SOURCE_TYPE_DISENCHANT_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_FISHING_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_GAMEOBJECT_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_ITEM_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_MAIL_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_MILLING_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_PICKPOCKETING_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_PROSPECTING_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_REFERENCE_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_SKINNING_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_SPELL_LOOT_TEMPLATE ||
+        sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU ||
+        sourceType == CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION ||
+        sourceType == CONDITION_SOURCE_TYPE_VEHICLE_SPELL ||
+        sourceType == CONDITION_SOURCE_TYPE_SPELL_IMPLICIT_TARGET ||
+        sourceType == CONDITION_SOURCE_TYPE_SPELL_CLICK_EVENT ||
+        sourceType == CONDITION_SOURCE_TYPE_SMART_EVENT ||
+        sourceType == CONDITION_SOURCE_TYPE_NPC_VENDOR ||
+        sourceType == CONDITION_SOURCE_TYPE_PHASE);
 }
 
 bool ConditionMgr::CanHaveSourceIdSet(ConditionSourceType sourceType) const
@@ -793,7 +793,7 @@ void ConditionMgr::LoadConditions(bool isReload)
     }
 
     QueryResult result = WorldDatabase.Query("SELECT SourceTypeOrReferenceId, SourceGroup, SourceEntry, SourceId, ElseGroup, ConditionTypeOrReference, ConditionTarget, "
-                                             " ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ErrorTextId, ScriptName FROM conditions");
+        " ConditionValue1, ConditionValue2, ConditionValue3, NegativeCondition, ErrorType, ErrorTextId, ScriptName FROM conditions");
 
     if (!result)
     {
@@ -808,20 +808,20 @@ void ConditionMgr::LoadConditions(bool isReload)
         Field* fields = result->Fetch();
 
         Condition* cond = new Condition();
-        int32 iSourceTypeOrReferenceId  = fields[0].GetInt32();
-        cond->SourceGroup               = fields[1].GetUInt32();
-        cond->SourceEntry               = fields[2].GetInt32();
-        cond->SourceId                  = fields[3].GetInt32();
-        cond->ElseGroup                 = fields[4].GetUInt32();
+        int32 iSourceTypeOrReferenceId = fields[0].GetInt32();
+        cond->SourceGroup = fields[1].GetUInt32();
+        cond->SourceEntry = fields[2].GetInt32();
+        cond->SourceId = fields[3].GetInt32();
+        cond->ElseGroup = fields[4].GetUInt32();
         int32 iConditionTypeOrReference = fields[5].GetInt32();
-        cond->ConditionTarget           = fields[6].GetUInt8();
-        cond->ConditionValue1           = fields[7].GetUInt32();
-        cond->ConditionValue2           = fields[8].GetUInt32();
-        cond->ConditionValue3           = fields[9].GetUInt32();
-        cond->NegativeCondition         = fields[10].GetUInt8();
-        cond->ErrorType                 = SpellCastResult(fields[11].GetUInt32());
-        cond->ErrorTextId               = fields[12].GetUInt32();
-        cond->ScriptId                  = sObjectMgr->GetScriptId(fields[13].GetCString());
+        cond->ConditionTarget = fields[6].GetUInt8();
+        cond->ConditionValue1 = fields[7].GetUInt32();
+        cond->ConditionValue2 = fields[8].GetUInt32();
+        cond->ConditionValue3 = fields[9].GetUInt32();
+        cond->NegativeCondition = fields[10].GetUInt8();
+        cond->ErrorType = SpellCastResult(fields[11].GetUInt32());
+        cond->ErrorTextId = fields[12].GetUInt32();
+        cond->ScriptId = sObjectMgr->GetScriptId(fields[13].GetCString());
 
         if (iConditionTypeOrReference >= 0)
             cond->ConditionType = ConditionTypes(iConditionTypeOrReference);
@@ -1042,8 +1042,7 @@ void ConditionMgr::LoadConditions(bool isReload)
         //add new Condition to storage based on Type/Entry
         ConditionStore[cond->SourceType][cond->SourceEntry].push_back(cond);
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u conditions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -1114,7 +1113,7 @@ bool ConditionMgr::addToSpellImplicitTargetConditions(Condition* cond)
         bool found = false;
         for (std::list<uint32>::iterator itr = sharedMasks.begin(); itr != sharedMasks.end(); ++itr)
         {
-            if ((1<<i) & *itr)
+            if ((1 << i) & *itr)
             {
                 found = true;
                 break;
@@ -1124,12 +1123,12 @@ bool ConditionMgr::addToSpellImplicitTargetConditions(Condition* cond)
             continue;
 
         // build new shared mask with found effect
-        uint32 sharedMask = (1<<i);
+        uint32 sharedMask = (1 << i);
         ConditionList* cmp = spellInfo->Effects[i].ImplicitTargetConditions;
-        for (uint8 effIndex = i+1; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
+        for (uint8 effIndex = i + 1; effIndex < MAX_SPELL_EFFECTS; ++effIndex)
         {
             if (spellInfo->Effects[effIndex].ImplicitTargetConditions == cmp)
-                sharedMask |= 1<<effIndex;
+                sharedMask |= 1 << effIndex;
         }
         sharedMasks.push_back(sharedMask);
     }
@@ -1141,7 +1140,7 @@ bool ConditionMgr::addToSpellImplicitTargetConditions(Condition* cond)
         {
             uint8 firstEffIndex = 0;
             for (; firstEffIndex < MAX_SPELL_EFFECTS; ++firstEffIndex)
-                if ((1<<firstEffIndex) & *itr)
+                if ((1 << firstEffIndex) & *itr)
                     break;
 
             if (firstEffIndex >= MAX_SPELL_EFFECTS)
@@ -1169,7 +1168,7 @@ bool ConditionMgr::addToSpellImplicitTargetConditions(Condition* cond)
                 bool assigned = false;
                 for (uint8 i = firstEffIndex; i < MAX_SPELL_EFFECTS; ++i)
                 {
-                    if ((1<<i) & commonMask)
+                    if ((1 << i) & commonMask)
                     {
                         spellInfo->Effects[i].ImplicitTargetConditions = sharedList;
                         assigned = true;
@@ -1475,7 +1474,7 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
 
             for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             {
-                if (!((1<<i) & cond->SourceGroup))
+                if (!((1 << i) & cond->SourceGroup))
                     continue;
 
                 switch (spellInfo->Effects[i].TargetA.GetSelectionCategory())
@@ -1499,7 +1498,7 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
                 }
 
                 SF_LOG_ERROR("sql.sql", "SourceEntry %u SourceGroup %u in `condition` table - spell %u does not have implicit targets of types: _AREA_, _CONE_, _NEARBY_ for effect %u, SourceGroup needs correction, ignoring.", cond->SourceEntry, origGroup, cond->SourceEntry, uint32(i));
-                cond->SourceGroup &= ~(1<<i);
+                cond->SourceGroup &= ~(1 << i);
             }
             // all effects were removed, no need to add the condition at all
             if (!cond->SourceGroup)
@@ -1760,7 +1759,7 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
         case CONDITION_ACTIVE_EVENT:
         {
             GameEventMgr::GameEventDataMap const& events = sGameEventMgr->GetEventMap();
-            if (cond->ConditionValue1 >=events.size() || !events[cond->ConditionValue1].isValid())
+            if (cond->ConditionValue1 >= events.size() || !events[cond->ConditionValue1].isValid())
             {
                 SF_LOG_ERROR("sql.sql", "ActiveEvent condition has non existing event id (%u), skipped", cond->ConditionValue1);
                 return false;
@@ -2130,7 +2129,7 @@ void ConditionMgr::Clean()
     for (ConditionReferenceContainer::iterator itr = ConditionReferenceStore.begin(); itr != ConditionReferenceStore.end(); ++itr)
     {
         for (ConditionList::const_iterator it = itr->second.begin(); it != itr->second.end(); ++it)
-            delete *it;
+            delete* it;
         itr->second.clear();
     }
 
@@ -2141,7 +2140,7 @@ void ConditionMgr::Clean()
         for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
         {
             for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
+                delete* i;
             it->second.clear();
         }
         itr->second.clear();
@@ -2154,7 +2153,7 @@ void ConditionMgr::Clean()
         for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
         {
             for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
+                delete* i;
             it->second.clear();
         }
         itr->second.clear();
@@ -2167,7 +2166,7 @@ void ConditionMgr::Clean()
         for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
         {
             for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
+                delete* i;
             it->second.clear();
         }
         itr->second.clear();
@@ -2180,7 +2179,7 @@ void ConditionMgr::Clean()
         for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
         {
             for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
+                delete* i;
             it->second.clear();
         }
         itr->second.clear();
@@ -2193,7 +2192,7 @@ void ConditionMgr::Clean()
         for (ConditionTypeContainer::iterator it = itr->second.begin(); it != itr->second.end(); ++it)
         {
             for (ConditionList::const_iterator i = it->second.begin(); i != it->second.end(); ++i)
-                delete *i;
+                delete* i;
             it->second.clear();
         }
         itr->second.clear();
@@ -2203,7 +2202,7 @@ void ConditionMgr::Clean()
 
     // this is a BIG hack, feel free to fix it if you can figure out the ConditionMgr ;)
     for (std::list<Condition*>::const_iterator itr = AllocatedMemoryStore.begin(); itr != AllocatedMemoryStore.end(); ++itr)
-        delete *itr;
+        delete* itr;
 
     AllocatedMemoryStore.clear();
 }

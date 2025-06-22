@@ -59,11 +59,6 @@ class npc_blackfathom_deeps_event : public CreatureScript
 public:
     npc_blackfathom_deeps_event() : CreatureScript("npc_blackfathom_deeps_event") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_blackfathom_deeps_eventAI(creature);
-    }
-
     struct npc_blackfathom_deeps_eventAI : public ScriptedAI
     {
         npc_blackfathom_deeps_eventAI(Creature* creature) : ScriptedAI(creature)
@@ -75,23 +70,20 @@ public:
             }
 
             instance = creature->GetInstanceScript();
+            ravageTimer = 0;
+            frostNovaTimer = 0;
+            frostBoltVolleyTimer = 0;
+            Flee = false;
         }
 
-        InstanceScript* instance;
-
-        uint32 ravageTimer;
-        uint32 frostNovaTimer;
-        uint32 frostBoltVolleyTimer;
-
-        bool Flee;
 
         void Reset() OVERRIDE
         {
             Flee = false;
 
-            ravageTimer           = urand(5000, 8000);
-            frostNovaTimer        = urand(9000, 12000);
-            frostBoltVolleyTimer  = urand(2000, 4000);
+            ravageTimer = std::rand() % 8000 + 5000;
+            frostNovaTimer = std::rand() % 12000 + 9000;
+            frostBoltVolleyTimer = std::rand() % 4000 + 2000;
         }
 
         void AttackPlayer()
@@ -130,7 +122,7 @@ public:
                     if (ravageTimer <= diff)
                     {
                         DoCastVictim(SPELL_RAVAGE);
-                        ravageTimer = urand(9000, 14000);
+                        ravageTimer = std::rand() % 14000 + 9000;
                     } else ravageTimer -= diff;
                     break;
                 }
@@ -150,14 +142,14 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_FROST_BOLT_VOLLEY);
-                        frostBoltVolleyTimer = urand(5000, 8000);
+                        frostBoltVolleyTimer = std::rand() % 8000 + 5000;
                     }
                     else frostBoltVolleyTimer -= diff;
 
                     if (frostNovaTimer <= diff)
                     {
                         DoCastAOE(SPELL_FROST_NOVA, false);
-                        frostNovaTimer = urand(25000, 30000);
+                        frostNovaTimer = std::rand() % 30000 + 25000;
                     }
                     else frostNovaTimer -= diff;
                     break;
@@ -173,7 +165,20 @@ public:
                 if (instance)
                     instance->SetData(DATA_EVENT, instance->GetData(DATA_EVENT) + 1);
         }
+    private:
+        InstanceScript* instance;
+
+        uint32 ravageTimer;
+        uint32 frostNovaTimer;
+        uint32 frostBoltVolleyTimer;
+
+        bool Flee;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_blackfathom_deeps_eventAI(creature);
+    }
 };
 
 enum Morridune

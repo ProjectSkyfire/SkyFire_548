@@ -232,13 +232,13 @@ public:
                     case EVENT_ANRAPHET_ALPHA_BEAMS:
                         DoCast(me, SPELL_ALPHA_BEAMS);
                         events.ScheduleEvent(EVENT_ANRAPHET_CRUMBLING_RUIN, 12500, 0, PHASE_COMBAT);
-                        events.ScheduleEvent(EVENT_ANRAPHET_ALPHA_BEAMS, urand(40000, 45000), 0, PHASE_COMBAT);
+                        events.ScheduleEvent(EVENT_ANRAPHET_ALPHA_BEAMS, std::rand() % 45000 + 40000, 0, PHASE_COMBAT);
                         break;
                     case EVENT_ANRAPHET_OMEGA_STANCE:
                         DoCast(me, SPELL_OMEGA_STANCE_SUMMON);
                         DoCast(me, SPELL_OMEGA_STANCE);
                         Talk(ANRAPHET_SAY_OMEGA_STANCE);
-                        events.ScheduleEvent(EVENT_ANRAPHET_OMEGA_STANCE, urand(45000, 50000), 0, PHASE_COMBAT);
+                        events.ScheduleEvent(EVENT_ANRAPHET_OMEGA_STANCE, std::rand() % 50000 + 45000, 0, PHASE_COMBAT);
                         events.ScheduleEvent(EVENT_ANRAPHET_CRUMBLING_RUIN, 13000, 0, PHASE_COMBAT);
                         break;
                     case EVENT_ANRAPHET_CRUMBLING_RUIN:

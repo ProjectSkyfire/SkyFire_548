@@ -80,11 +80,11 @@ class boss_sulfuron : public CreatureScript
                     {
                         case EVENT_DARK_STRIKE:
                             DoCast(me, SPELL_DARK_STRIKE);
-                            events.ScheduleEvent(EVENT_DARK_STRIKE, urand(15000, 18000));
+                            events.ScheduleEvent(EVENT_DARK_STRIKE, std::rand() % 18000 + 15000);
                             break;
                         case EVENT_DEMORALIZING_SHOUT:
                             DoCastVictim(SPELL_DEMORALIZING_SHOUT);
-                            events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, urand(15000, 20000));
+                            events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, std::rand() % 20000 + 15000);
                             break;
                         case EVENT_INSPIRE:
                         {
@@ -93,17 +93,17 @@ class boss_sulfuron : public CreatureScript
                                 DoCast(Skyfire::Containers::SelectRandomContainerElement(healers), SPELL_INSPIRE);
 
                             DoCast(me, SPELL_INSPIRE);
-                            events.ScheduleEvent(EVENT_INSPIRE, urand(20000, 26000));
+                            events.ScheduleEvent(EVENT_INSPIRE, std::rand() % 26000 + 20000);
                             break;
                         }
                         case EVENT_KNOCKDOWN:
                             DoCastVictim(SPELL_KNOCKDOWN);
-                            events.ScheduleEvent(EVENT_KNOCKDOWN, urand(12000, 15000));
+                            events.ScheduleEvent(EVENT_KNOCKDOWN, std::rand() % 15000 + 12000);
                             break;
                         case EVENT_FLAMESPEAR:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 DoCast(target, SPELL_FLAMESPEAR);
-                            events.ScheduleEvent(EVENT_FLAMESPEAR, urand(12000, 16000));
+                            events.ScheduleEvent(EVENT_FLAMESPEAR, std::rand() % 16000 + 12000);
                             break;
                         default:
                             break;
@@ -144,7 +144,7 @@ class npc_flamewaker_priest : public CreatureScript
             void EnterCombat(Unit* victim) OVERRIDE
             {
                 ScriptedAI::EnterCombat(victim);
-                events.ScheduleEvent(EVENT_HEAL, urand(15000, 30000));
+                events.ScheduleEvent(EVENT_HEAL, std::rand() % 30000 + 15000);
                 events.ScheduleEvent(EVENT_SHADOW_WORD_PAIN, 2000);
                 events.ScheduleEvent(EVENT_IMMOLATE, 8000);
             }
@@ -166,17 +166,17 @@ class npc_flamewaker_priest : public CreatureScript
                         case EVENT_HEAL:
                             if (Unit* target = DoSelectLowestHpFriendly(60.0f, 1))
                                 DoCast(target, SPELL_HEAL);
-                            events.ScheduleEvent(EVENT_HEAL, urand(15000, 20000));
+                            events.ScheduleEvent(EVENT_HEAL, std::rand() % 20000 + 15000);
                             break;
                         case EVENT_SHADOW_WORD_PAIN:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_SHADOWWORDPAIN))
                                 DoCast(target, SPELL_SHADOWWORDPAIN);
-                            events.ScheduleEvent(EVENT_SHADOW_WORD_PAIN, urand(18000, 26000));
+                            events.ScheduleEvent(EVENT_SHADOW_WORD_PAIN, std::rand() % 26000 + 18000);
                             break;
                         case EVENT_IMMOLATE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_IMMOLATE))
                                 DoCast(target, SPELL_IMMOLATE);
-                            events.ScheduleEvent(EVENT_IMMOLATE, urand(15000, 25000));
+                            events.ScheduleEvent(EVENT_IMMOLATE, std::rand() % 25000 + 15000);
                             break;
                         default:
                             break;

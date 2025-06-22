@@ -1,15 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef TRANSPORTMGR_H
 #define TRANSPORTMGR_H
 
+#include "DBCStores.h"
+#include "Spline.h"
 #include <ace/Singleton.h>
 #include <G3D/Quat.h>
-#include "Spline.h"
-#include "DBCStores.h"
 
 struct KeyFrame;
 struct GameObjectTemplate;
@@ -72,7 +72,7 @@ typedef std::map<uint32, TransportRotationEntry const*> TransportPathRotationCon
 struct TransportAnimation
 {
     TransportAnimation() : TotalTime(0) { }
-    
+
     TransportPathContainer Path;
     TransportPathRotationContainer Rotations;
     uint32 TotalTime;
@@ -85,63 +85,63 @@ typedef std::map<uint32, TransportAnimation> TransportAnimationContainer;
 
 class TransportMgr
 {
-        friend class ACE_Singleton<TransportMgr, ACE_Thread_Mutex>;
-        friend void LoadDBCStores(std::string const&);
+    friend class ACE_Singleton<TransportMgr, ACE_Thread_Mutex>;
+    friend void LoadDBCStores(std::string const&);
 
-    public:
-        void Unload();
+public:
+    void Unload();
 
-        void LoadTransportTemplates();
+    void LoadTransportTemplates();
 
-        // Creates a transport using given GameObject template entry
-        Transport* CreateTransport(uint32 entry, uint32 guid = 0, Map* map = NULL);
+    // Creates a transport using given GameObject template entry
+    Transport* CreateTransport(uint32 entry, uint32 guid = 0, Map* map = NULL);
 
-        // Spawns all continent transports, used at core startup
-        void SpawnContinentTransports();
+    // Spawns all continent transports, used at core startup
+    void SpawnContinentTransports();
 
-        // creates all transports for instance
-        void CreateInstanceTransports(Map* map);
+    // creates all transports for instance
+    void CreateInstanceTransports(Map* map);
 
-        TransportTemplate const* GetTransportTemplate(uint32 entry) const
-        {
-            TransportTemplates::const_iterator itr = _transportTemplates.find(entry);
-            if (itr != _transportTemplates.end())
-                return &itr->second;
-            return NULL;
-        }
+    TransportTemplate const* GetTransportTemplate(uint32 entry) const
+    {
+        TransportTemplates::const_iterator itr = _transportTemplates.find(entry);
+        if (itr != _transportTemplates.end())
+            return &itr->second;
+        return NULL;
+    }
 
-        TransportAnimation const* GetTransportAnimInfo(uint32 entry) const
-        {
-            TransportAnimationContainer::const_iterator itr = _transportAnimations.find(entry);
-            if (itr != _transportAnimations.end())
-                return &itr->second;
+    TransportAnimation const* GetTransportAnimInfo(uint32 entry) const
+    {
+        TransportAnimationContainer::const_iterator itr = _transportAnimations.find(entry);
+        if (itr != _transportAnimations.end())
+            return &itr->second;
 
-            return NULL;
-        }
+        return NULL;
+    }
 
-    private:
-        TransportMgr();
-        ~TransportMgr();
-        TransportMgr(TransportMgr const&);
-        TransportMgr& operator=(TransportMgr const&);
+private:
+    TransportMgr();
+    ~TransportMgr();
+    TransportMgr(TransportMgr const&);
+    TransportMgr& operator=(TransportMgr const&);
 
-        // Generates and precaches a path for transport to avoid generation each time transport instance is created
-        void GeneratePath(GameObjectTemplate const* goInfo, TransportTemplate* transport);
+    // Generates and precaches a path for transport to avoid generation each time transport instance is created
+    void GeneratePath(GameObjectTemplate const* goInfo, TransportTemplate* transport);
 
-        void AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg, TransportAnimationEntry const* node);
+    void AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg, TransportAnimationEntry const* node);
 
-        void AddPathRotationToTransport(uint32 transportEntry, uint32 timeSeg, TransportRotationEntry const* node)
-        {
-            _transportAnimations[transportEntry].Rotations[timeSeg] = node;
-        }
+    void AddPathRotationToTransport(uint32 transportEntry, uint32 timeSeg, TransportRotationEntry const* node)
+    {
+        _transportAnimations[transportEntry].Rotations[timeSeg] = node;
+    }
 
-        // Container storing transport templates
-        TransportTemplates _transportTemplates;
+    // Container storing transport templates
+    TransportTemplates _transportTemplates;
 
-        // Container storing transport entries to create for instanced maps
-        TransportInstanceMap _instanceTransports;
+    // Container storing transport entries to create for instanced maps
+    TransportInstanceMap _instanceTransports;
 
-        TransportAnimationContainer _transportAnimations;
+    TransportAnimationContainer _transportAnimations;
 };
 
 #define sTransportMgr ACE_Singleton<TransportMgr, ACE_Thread_Mutex>::instance()

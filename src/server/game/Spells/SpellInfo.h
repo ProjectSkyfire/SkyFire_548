@@ -1,17 +1,17 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_SPELLINFO_H
 #define SF_SPELLINFO_H
 
-#include "SharedDefines.h"
-#include "Util.h"
+#include "DB2Structure.h"
 #include "DBCStructure.h"
 #include "Object.h"
+#include "SharedDefines.h"
 #include "SpellAuraDefines.h"
-#include "DB2Structure.h"
+#include "Util.h"
 
 class Unit;
 class Player;
@@ -31,31 +31,31 @@ struct Condition;
 
 enum SpellCastTargetFlags
 {
-    TARGET_FLAG_NONE            = 0x00000000,
-    TARGET_FLAG_UNUSED_1        = 0x00000001,               // not used
-    TARGET_FLAG_UNIT            = 0x00000002,               // pguid
-    TARGET_FLAG_UNIT_RAID       = 0x00000004,               // not sent, used to validate target (if raid member)
-    TARGET_FLAG_UNIT_PARTY      = 0x00000008,               // not sent, used to validate target (if party member)
-    TARGET_FLAG_ITEM            = 0x00000010,               // pguid
+    TARGET_FLAG_NONE = 0x00000000,
+    TARGET_FLAG_UNUSED_1 = 0x00000001,               // not used
+    TARGET_FLAG_UNIT = 0x00000002,               // pguid
+    TARGET_FLAG_UNIT_RAID = 0x00000004,               // not sent, used to validate target (if raid member)
+    TARGET_FLAG_UNIT_PARTY = 0x00000008,               // not sent, used to validate target (if party member)
+    TARGET_FLAG_ITEM = 0x00000010,               // pguid
     TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // pguid, 3 float
-    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // pguid, 3 float
-    TARGET_FLAG_UNIT_ENEMY      = 0x00000080,               // not sent, used to validate target (if enemy)
-    TARGET_FLAG_UNIT_ALLY       = 0x00000100,               // not sent, used to validate target (if ally)
-    TARGET_FLAG_CORPSE_ENEMY    = 0x00000200,               // pguid
-    TARGET_FLAG_UNIT_DEAD       = 0x00000400,               // not sent, used to validate target (if dead creature)
-    TARGET_FLAG_GAMEOBJECT      = 0x00000800,               // pguid, used with TARGET_GAMEOBJECT_TARGET
-    TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid
-    TARGET_FLAG_STRING          = 0x00002000,               // string
+    TARGET_FLAG_DEST_LOCATION = 0x00000040,               // pguid, 3 float
+    TARGET_FLAG_UNIT_ENEMY = 0x00000080,               // not sent, used to validate target (if enemy)
+    TARGET_FLAG_UNIT_ALLY = 0x00000100,               // not sent, used to validate target (if ally)
+    TARGET_FLAG_CORPSE_ENEMY = 0x00000200,               // pguid
+    TARGET_FLAG_UNIT_DEAD = 0x00000400,               // not sent, used to validate target (if dead creature)
+    TARGET_FLAG_GAMEOBJECT = 0x00000800,               // pguid, used with TARGET_GAMEOBJECT_TARGET
+    TARGET_FLAG_TRADE_ITEM = 0x00001000,               // pguid
+    TARGET_FLAG_STRING = 0x00002000,               // string
     TARGET_FLAG_GAMEOBJECT_ITEM = 0x00004000,               // not sent, used with TARGET_GAMEOBJECT_ITEM_TARGET
-    TARGET_FLAG_CORPSE_ALLY     = 0x00008000,               // pguid
-    TARGET_FLAG_UNIT_MINIPET    = 0x00010000,               // pguid, used to validate target (if non combat pet)
-    TARGET_FLAG_GLYPH_SLOT      = 0x00020000,               // used in glyph spells
-    TARGET_FLAG_DEST_TARGET     = 0x00040000,               // sometimes appears with DEST_TARGET spells (may appear or not for a given spell)
-    TARGET_FLAG_EXTRA_TARGETS   = 0x00080000,               // uint32 counter, loop { vec3 - screen position (?), guid }, not used so far
-    TARGET_FLAG_UNIT_PASSENGER  = 0x00100000,               // guessed, used to validate target (if vehicle passenger)
+    TARGET_FLAG_CORPSE_ALLY = 0x00008000,               // pguid
+    TARGET_FLAG_UNIT_MINIPET = 0x00010000,               // pguid, used to validate target (if non combat pet)
+    TARGET_FLAG_GLYPH_SLOT = 0x00020000,               // used in glyph spells
+    TARGET_FLAG_DEST_TARGET = 0x00040000,               // sometimes appears with DEST_TARGET spells (may appear or not for a given spell)
+    TARGET_FLAG_EXTRA_TARGETS = 0x00080000,               // uint32 counter, loop { vec3 - screen position (?), guid }, not used so far
+    TARGET_FLAG_UNIT_PASSENGER = 0x00100000,               // guessed, used to validate target (if vehicle passenger)
 
     TARGET_FLAG_UNIT_MASK = TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_RAID | TARGET_FLAG_UNIT_PARTY
-        | TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_UNIT_MINIPET | TARGET_FLAG_UNIT_PASSENGER,
+    | TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_UNIT_MINIPET | TARGET_FLAG_UNIT_PASSENGER,
     TARGET_FLAG_GAMEOBJECT_MASK = TARGET_FLAG_GAMEOBJECT | TARGET_FLAG_GAMEOBJECT_ITEM,
     TARGET_FLAG_CORPSE_MASK = TARGET_FLAG_CORPSE_ALLY | TARGET_FLAG_CORPSE_ENEMY,
     TARGET_FLAG_ITEM_MASK = TARGET_FLAG_TRADE_ITEM | TARGET_FLAG_ITEM | TARGET_FLAG_GAMEOBJECT_ITEM
@@ -134,52 +134,52 @@ enum SpellEffectImplicitTargetTypes
 // Spell clasification
 enum SpellSpecificType
 {
-    SPELL_SPECIFIC_NORMAL                        = 0,
-    SPELL_SPECIFIC_SEAL                          = 1,
-    SPELL_SPECIFIC_AURA                          = 3,
-    SPELL_SPECIFIC_STING                         = 4,
-    SPELL_SPECIFIC_CURSE                         = 5,
-    SPELL_SPECIFIC_ASPECT                        = 6,
-    SPELL_SPECIFIC_TRACKER                       = 7,
-    SPELL_SPECIFIC_WARLOCK_ARMOR                 = 8,
-    SPELL_SPECIFIC_MAGE_ARMOR                    = 9,
-    SPELL_SPECIFIC_ELEMENTAL_SHIELD              = 10,
-    SPELL_SPECIFIC_MAGE_POLYMORPH                = 11,
-    SPELL_SPECIFIC_JUDGEMENT                     = 13,
-    SPELL_SPECIFIC_WARLOCK_CORRUPTION            = 17,
-    SPELL_SPECIFIC_FOOD                          = 19,
-    SPELL_SPECIFIC_DRINK                         = 20,
-    SPELL_SPECIFIC_FOOD_AND_DRINK                = 21,
-    SPELL_SPECIFIC_PRESENCE                      = 22,
-    SPELL_SPECIFIC_CHARM                         = 23,
-    SPELL_SPECIFIC_SCROLL                        = 24,
-    SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE         = 25,
-    SPELL_SPECIFIC_WARRIOR_ENRAGE                = 26,
-    SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT          = 27,
-    SPELL_SPECIFIC_HAND                          = 28,
-    SPELL_SPECIFIC_PHASE                         = 29,
-    SPELL_SPECIFIC_BANE                          = 30
+    SPELL_SPECIFIC_NORMAL = 0,
+    SPELL_SPECIFIC_SEAL = 1,
+    SPELL_SPECIFIC_AURA = 3,
+    SPELL_SPECIFIC_STING = 4,
+    SPELL_SPECIFIC_CURSE = 5,
+    SPELL_SPECIFIC_ASPECT = 6,
+    SPELL_SPECIFIC_TRACKER = 7,
+    SPELL_SPECIFIC_WARLOCK_ARMOR = 8,
+    SPELL_SPECIFIC_MAGE_ARMOR = 9,
+    SPELL_SPECIFIC_ELEMENTAL_SHIELD = 10,
+    SPELL_SPECIFIC_MAGE_POLYMORPH = 11,
+    SPELL_SPECIFIC_JUDGEMENT = 13,
+    SPELL_SPECIFIC_WARLOCK_CORRUPTION = 17,
+    SPELL_SPECIFIC_FOOD = 19,
+    SPELL_SPECIFIC_DRINK = 20,
+    SPELL_SPECIFIC_FOOD_AND_DRINK = 21,
+    SPELL_SPECIFIC_PRESENCE = 22,
+    SPELL_SPECIFIC_CHARM = 23,
+    SPELL_SPECIFIC_SCROLL = 24,
+    SPELL_SPECIFIC_MAGE_ARCANE_BRILLANCE = 25,
+    SPELL_SPECIFIC_WARRIOR_ENRAGE = 26,
+    SPELL_SPECIFIC_PRIEST_DIVINE_SPIRIT = 27,
+    SPELL_SPECIFIC_HAND = 28,
+    SPELL_SPECIFIC_PHASE = 29,
+    SPELL_SPECIFIC_BANE = 30
 };
 
 enum SpellCustomAttributes
 {
-    SPELL_ATTR0_CU_ENCHANT_PROC                  = 0x00000001,
-    SPELL_ATTR0_CU_CONE_BACK                     = 0x00000002,
-    SPELL_ATTR0_CU_CONE_LINE                     = 0x00000004,
-    SPELL_ATTR0_CU_SHARE_DAMAGE                  = 0x00000008,
-    SPELL_ATTR0_CU_NO_INITIAL_THREAT             = 0x00000010,
-    SPELL_ATTR0_CU_AURA_CC                       = 0x00000040,
-    SPELL_ATTR0_CU_DIRECT_DAMAGE                 = 0x00000100,
-    SPELL_ATTR0_CU_CHARGE                        = 0x00000200,
-    SPELL_ATTR0_CU_PICKPOCKET                    = 0x00000400,
-    SPELL_ATTR0_CU_NEGATIVE_EFF0                 = 0x00001000,
-    SPELL_ATTR0_CU_NEGATIVE_EFF1                 = 0x00002000,
-    SPELL_ATTR0_CU_NEGATIVE_EFF2                 = 0x00004000,
-    SPELL_ATTR0_CU_IGNORE_ARMOR                  = 0x00008000,
-    SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER      = 0x00010000,
-    SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET      = 0x00020000,
+    SPELL_ATTR0_CU_ENCHANT_PROC = 0x00000001,
+    SPELL_ATTR0_CU_CONE_BACK = 0x00000002,
+    SPELL_ATTR0_CU_CONE_LINE = 0x00000004,
+    SPELL_ATTR0_CU_SHARE_DAMAGE = 0x00000008,
+    SPELL_ATTR0_CU_NO_INITIAL_THREAT = 0x00000010,
+    SPELL_ATTR0_CU_AURA_CC = 0x00000040,
+    SPELL_ATTR0_CU_DIRECT_DAMAGE = 0x00000100,
+    SPELL_ATTR0_CU_CHARGE = 0x00000200,
+    SPELL_ATTR0_CU_PICKPOCKET = 0x00000400,
+    SPELL_ATTR0_CU_NEGATIVE_EFF0 = 0x00001000,
+    SPELL_ATTR0_CU_NEGATIVE_EFF1 = 0x00002000,
+    SPELL_ATTR0_CU_NEGATIVE_EFF2 = 0x00004000,
+    SPELL_ATTR0_CU_IGNORE_ARMOR = 0x00008000,
+    SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER = 0x00010000,
+    SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET = 0x00020000,
 
-    SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2
+    SPELL_ATTR0_CU_NEGATIVE = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2
 };
 
 uint32 GetTargetFlagMask(SpellTargetObjectTypes objType);
@@ -248,7 +248,7 @@ public:
     float     ComboScalingMultiplier;
 
     SpellEffectInfo() : _spellInfo(NULL), _effIndex(0), Effect(0), ApplyAuraName(0), ApplyAuraTickCount(0), DieSides(0), RealPointsPerLevel(0.0f), BasePoints(0), PointsPerComboPoint(0.0f),
-        ValueMultiplier(0.0f), DamageMultiplier(0.0f), BonusMultiplier(0), MiscValue(0), MiscValueB(0), Mechanic(MECHANIC_NONE), ChainTarget(0), ItemType(0), 
+        ValueMultiplier(0.0f), DamageMultiplier(0.0f), BonusMultiplier(0), MiscValue(0), MiscValueB(0), Mechanic(MECHANIC_NONE), ChainTarget(0), ItemType(0),
         TriggerSpell(0), ScalingMultiplier(0.0f), DeltaScalingMultiplier(0.0f), ComboScalingMultiplier(0.0f) { }
 
     SpellEffectInfo(SpellEntry const* spellEntry, SpellInfo const* spellInfo, uint8 effIndex, SpellEffectEntry const* effect);
@@ -389,7 +389,7 @@ public:
     SpellEffectInfo Effects[MAX_SPELL_EFFECTS];
     uint32 ExplicitTargetMask;
     SpellChainNode const* ChainEntry;
-    
+
     // SpecializationSpellsEntry
     std::list<uint32> SpecializationIdList;
     std::list<uint32> OverrideSpellList;

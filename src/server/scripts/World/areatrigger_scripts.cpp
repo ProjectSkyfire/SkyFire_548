@@ -32,6 +32,37 @@ EndContentData */
 #include "ScriptedCreature.h"
 #include "Player.h"
 
+//5777
+class AreaTrigger_at_darkspear_isle : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_darkspear_isle() : AreaTriggerScript("at_darkspear_isle") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->GetQuestStatus(24622) == QUEST_STATUS_COMPLETE)
+        {
+            if (player->FindNearestCreature(38930, 15.0f, true))
+            {
+                return false;
+            }
+            else
+            {
+                float x, y, z;
+                player->GetClosePoint(x, y, z, player->GetObjectSize() / 3, -10.0f);
+                if (Creature* zuni = player->SummonCreature(38930, x, y, z, 0.0f, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+                {
+                    zuni->GetMotionMaster()->MoveFollow(player, 2.5f, M_PI);
+                    zuni->MonsterSay("Wait up, mon!", Language::LANG_UNIVERSAL, zuni);
+                    zuni->SendPlaySound(21368, false);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
 class AreaTrigger_at_dawning_span : public AreaTriggerScript
 {
 public:
@@ -252,7 +283,7 @@ public:
         {
             if (Creature* aysa = player->FindNearestCreature(NPC_AYSA, 15.0f, true))
             {
-                aysa->AI()->Talk(0);
+                aysa->AI()->Talk(0, player);
                 return true;
             }
         }
@@ -767,6 +798,7 @@ private:
 
 void AddSC_areatrigger_scripts()
 {
+    new AreaTrigger_at_darkspear_isle();
     new AreaTrigger_at_dawning_span();
     new AreaTrigger_at_chamber_of_whispers_entrance();
     new AreaTrigger_at_mandori_village_wugou();

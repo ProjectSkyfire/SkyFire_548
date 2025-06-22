@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "WorldSession.h"
-#include "Player.h"
+#include "Log.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
-#include "Log.h"
+#include "Player.h"
+#include "WorldSession.h"
 
 void WorldSession::HandleGrantLevel(WorldPacket& recvData)
 {

@@ -112,7 +112,7 @@ public:
                         info = SelectSpell(me->GetVictim(), 0, 0, SELECT_TARGET_ANY_ENEMY, 0, 0, 0, 0, SELECT_EFFECT_DONTCARE);
 
                     //20% chance to replace our white hit with a spell
-                    if (info && urand(0, 99) < 20 && !globalCooldown)
+                    if (info && (std::rand() % 99) < 20 && !globalCooldown)
                     {
                         //Cast the spell
                         if (healing)
@@ -138,7 +138,7 @@ public:
                     SpellInfo const* info = NULL;
 
                     //Select a healing spell if less than 30% hp ONLY 33% of the time
-                    if (me->HealthBelowPct(30) && 33 > urand(0, 99))
+                    if (me->HealthBelowPct(30) && 33 > (std::rand() % 99))
                         info = SelectSpell(me, 0, 0, SELECT_TARGET_ANY_FRIEND, 0, 0, 0, 0, SELECT_EFFECT_HEALING);
 
                     //No healing spell available, See if we can cast a ranged spell (Range must be greater than ATTACK_DISTANCE)

@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Log.h"
+#include "AppenderConsole.h"
+#include "AppenderDB.h"
+#include "AppenderFile.h"
 #include "Common.h"
 #include "Config.h"
-#include "Util.h"
-#include "AppenderConsole.h"
-#include "AppenderFile.h"
-#include "AppenderDB.h"
+#include "Log.h"
 #include "LogOperation.h"
+#include "Util.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -325,7 +325,7 @@ void Log::outCharDump(char const* str, uint32 accountId, uint32 guid, char const
     write(msg);
 }
 
-void Log::outCommand(uint32 account, const char * str, ...)
+void Log::outCommand(uint32 account, const char* str, ...)
 {
     if (!str || !ShouldLog("commands.gm", LogLevel::LOG_LEVEL_INFO))
         return;
@@ -349,7 +349,7 @@ void Log::SetRealmId(uint32 id)
 {
     for (AppenderMap::iterator it = appenders.begin(); it != appenders.end(); ++it)
         if (it->second && it->second->getType() == AppenderType::APPENDER_DB)
-            ((AppenderDB *)it->second)->setRealmId(id);
+            ((AppenderDB*)it->second)->setRealmId(id);
 }
 
 void Log::Close()

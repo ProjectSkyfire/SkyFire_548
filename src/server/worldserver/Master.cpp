@@ -1,34 +1,34 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 /** \file
-    \ingroup Trinityd
+    \ingroup Skyfired
 */
 
 #include <ace/Sig_Handler.h>
 
 #include "Common.h"
-#include "SystemConfig.h"
+#include "Configuration/Config.h"
+#include "Database/DatabaseEnv.h"
+#include "Database/DatabaseWorkerPool.h"
 #include "SignalHandler.h"
+#include "SystemConfig.h"
 #include "World.h"
 #include "WorldRunnable.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
-#include "Configuration/Config.h"
-#include "Database/DatabaseEnv.h"
-#include "Database/DatabaseWorkerPool.h"
 
+#include "AuthSocket.h"
 #include "CliRunnable.h"
 #include "Log.h"
 #include "Master.h"
 #include "RARunnable.h"
+#include "RealmList.h"
 #include "SFSoap.h"
 #include "Timer.h"
 #include "Util.h"
-#include "AuthSocket.h"
-#include "RealmList.h"
 
 #include "BigNumber.h"
 
@@ -46,23 +46,23 @@ extern int m_ServiceStatus;
 /// Handle worldservers's termination signals
 class WorldServerSignalHandler : public Skyfire::SignalHandler
 {
-    public:
-        virtual void HandleSignal(int sigNum)
+public:
+    virtual void HandleSignal(int sigNum)
+    {
+        switch (sigNum)
         {
-            switch (sigNum)
-            {
-                case SIGINT:
-                    World::StopNow(RESTART_EXIT_CODE);
-                    break;
-                case SIGTERM:
+            case SIGINT:
+                World::StopNow(RESTART_EXIT_CODE);
+                break;
+            case SIGTERM:
 #ifdef _WIN32
-                case SIGBREAK:
-                    if (m_ServiceStatus != 1)
+            case SIGBREAK:
+                if (m_ServiceStatus != 1)
 #endif
                     World::StopNow(SHUTDOWN_EXIT_CODE);
-                    break;
-            }
+                break;
         }
+    }
 };
 
 class FreezeDetectorRunnable : public ACE_Based::Runnable
@@ -81,7 +81,7 @@ public:
         if (!_delaytime)
             return;
 
-        SF_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime/1000);
+        SF_LOG_INFO("server.worldserver", "Starting up anti-freeze thread (%u seconds max stuck time)...", _delaytime / 1000);
         _loops = 0;
         _lastChange = 0;
         while (!World::IsStopped())
@@ -89,7 +89,7 @@ public:
             ACE_Based::Thread::Sleep(1000);
             uint32 curtime = getMSTime();
             // normal work
-            uint32 worldLoopCounter = World::m_worldLoopCounter.value();
+            uint32 worldLoopCounter = World::m_worldLoopCounter;
             if (_loops != worldLoopCounter)
             {
                 _lastChange = curtime;
@@ -112,7 +112,8 @@ int Master::Run()
     BigNumber seed1;
     seed1.SetRand(16 * 8);
 
-    SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
+    //TODO: FIX ME revision
+    //SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon)", _FULLVERSION);
     SF_LOG_INFO("server.worldserver", "<Ctrl-C> to stop.\n");
 
     SF_LOG_INFO("server.worldserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
@@ -120,18 +121,18 @@ int Master::Run()
     SF_LOG_INFO("server.worldserver", "  \\ \\___  \\ \\  _'-\\ \\____ \\ \\  __\\ \\ \\ \\  __<\\ \\  __\\ ");
     SF_LOG_INFO("server.worldserver", "   \\/\\_____\\ \\_\\ \\_\\/\\_____\\ \\_\\  \\ \\_\\ \\_\\ \\_\\ \\_____\\ ");
     SF_LOG_INFO("server.worldserver", "    \\/_____/\\/_/\\/_/\\/_____/\\/_/   \\/_/\\/_/ /_/\\/_____/ ");
-    SF_LOG_INFO("server.worldserver", "  Project SkyFireEmu 2011 - 2024(c) Open-sourced Game Emulation ");
+    SF_LOG_INFO("server.worldserver", "  Project SkyFireEmu 2011 - 2025(c) Open-sourced Game Emulation ");
     SF_LOG_INFO("server.worldserver", "           <http://www.projectskyfire.org/> \n");
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
     if (confVersion < SKYFIREWORLD_CONFIG_VERSION)
     {
-         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
-         SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");
-         SF_LOG_INFO("server.worldserver", "          Please check for updates, as your current default values may cause");
-         SF_LOG_INFO("server.worldserver", "          strange behavior.");
-         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
+        SF_LOG_INFO("server.worldserver", "*****************************************************************************");
+        SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");
+        SF_LOG_INFO("server.worldserver", "          Please check for updates, as your current default values may cause");
+        SF_LOG_INFO("server.worldserver", "          strange behavior.");
+        SF_LOG_INFO("server.worldserver", "*****************************************************************************");
     }
 
     /// worldserver PID file creation
@@ -152,16 +153,19 @@ int Master::Run()
         return 1;
 
     // set server offline (not connectable)
-    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = (flag & ~%u) | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, REALM_FLAG_INVALID, realmID);
+    for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
+    {
+        LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = (flag & ~%u) | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, REALM_FLAG_INVALID, itr->first);
+    }
 
     ///- Initialize the World
     sWorld->SetInitialWorldSettings();
 
     ///- Initialize the signal handlers
     WorldServerSignalHandler signalINT, signalTERM;
-    #ifdef _WIN32
+#ifdef _WIN32
     WorldServerSignalHandler signalBREAK;
-    #endif /* _WIN32 */
+#endif /* _WIN32 */
 
     ///- Register worldserver's signal handlers
     ACE_Sig_Handler handle;
@@ -286,9 +290,13 @@ int Master::Run()
     }
 
     // set server online (allow connecting now)
-    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_INVALID, realmID);
+    for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
+    {
+        LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_INVALID, itr->first);
+    }
 
-    SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon) ready...", _FULLVERSION);
+    //TODO: FIX ME revision.
+    //SF_LOG_INFO("server.worldserver", "%s (worldserver-daemon) ready...", _FULLVERSION);
 
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
@@ -303,7 +311,10 @@ int Master::Run()
     }
 
     // set server offline
-    LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, realmID);
+    for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
+    {
+        LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, itr->first);
+    }
 
     ///- Clean database before leaving
     ClearOnlineAccounts();
@@ -314,7 +325,7 @@ int Master::Run()
 
     if (cliThread)
     {
-        #ifdef _WIN32
+#ifdef _WIN32
 
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
         //_exit(1);
@@ -353,11 +364,12 @@ int Master::Run()
 
         cliThread->wait();
 
-        #else
+#else
 
+        cliThread->wait();
         cliThread->destroy();
 
-        #endif
+#endif
 
         delete cliThread;
     }
@@ -378,11 +390,14 @@ bool Master::_StartDB()
     std::string dbString;
     uint8 asyncThreads, synchThreads;
 
-    dbString = sConfigMgr->GetStringDefault("WorldDatabaseInfo", "");
-    if (dbString.empty())
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "World database not specified in configuration file");
-        return false;
+        dbString = sConfigMgr->GetStringDefault("WorldDatabaseInfo", "");
+        if (dbString.empty())
+        {
+            SF_LOG_ERROR("server.worldserver", "World database not specified in configuration file");
+            return false;
+        }
     }
 
     asyncThreads = uint8(sConfigMgr->GetIntDefault("WorldDatabase.WorkerThreads", 1));
@@ -394,19 +409,35 @@ bool Master::_StartDB()
     }
 
     synchThreads = uint8(sConfigMgr->GetIntDefault("WorldDatabase.SynchThreads", 1));
-    ///- Initialize the world database
-    if (!WorldDatabase.Open(dbString, asyncThreads, synchThreads))
+
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s", dbString.c_str());
-        return false;
+
+        ///- Initialize the world database
+        if (!WorldDatabase.Open(dbString, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s", dbString.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        if (!WorldDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _worldDB, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s, %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _worldDB);
+            return false;
+        }
     }
 
-    ///- Get character database info from configuration file
-    dbString = sConfigMgr->GetStringDefault("CharacterDatabaseInfo", "");
-    if (dbString.empty())
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Character database not specified in configuration file");
-        return false;
+        ///- Get character database info from configuration file
+        dbString = sConfigMgr->GetStringDefault("CharacterDatabaseInfo", "");
+        if (dbString.empty())
+        {
+            SF_LOG_ERROR("server.worldserver", "Character database not specified in configuration file");
+            return false;
+        }
     }
 
     asyncThreads = uint8(sConfigMgr->GetIntDefault("CharacterDatabase.WorkerThreads", 1));
@@ -419,19 +450,34 @@ bool Master::_StartDB()
 
     synchThreads = uint8(sConfigMgr->GetIntDefault("CharacterDatabase.SynchThreads", 2));
 
-    ///- Initialize the Character database
-    if (!CharacterDatabase.Open(dbString, asyncThreads, synchThreads))
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database %s", dbString.c_str());
-        return false;
+        ///- Initialize the Character database
+        if (!CharacterDatabase.Open(dbString, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database%s, %s", dbString.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        ///- Initialize the Character database
+        if (!CharacterDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database%s, %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB);
+            return false;
+        }
     }
 
-    ///- Get login database info from configuration file
-    dbString = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
-    if (dbString.empty())
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Login database not specified in configuration file");
-        return false;
+        ///- Get login database info from configuration file
+        dbString = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
+        if (dbString.empty())
+        {
+            SF_LOG_ERROR("server.worldserver", "Login database not specified in configuration file");
+            return false;
+        }
     }
 
     asyncThreads = uint8(sConfigMgr->GetIntDefault("LoginDatabase.WorkerThreads", 1));
@@ -443,23 +489,28 @@ bool Master::_StartDB()
     }
 
     synchThreads = uint8(sConfigMgr->GetIntDefault("LoginDatabase.SynchThreads", 1));
-    ///- Initialise the login database
-    if (!LoginDatabase.Open(dbString, asyncThreads, synchThreads))
-    {
-        SF_LOG_ERROR("server.worldserver", "Cannot connect to login database %s", dbString.c_str());
-        return false;
-    }
 
-    ///- Get the realm Id from the configuration file
-    realmID = sConfigMgr->GetIntDefault("RealmID", 0);
-    if (!realmID)
+    if (_noUseConfigDatabaseInfo == false)
     {
-        SF_LOG_ERROR("server.worldserver", "Realm ID not defined in configuration file");
-        return false;
+        ///- Initialise the login database
+        if (!LoginDatabase.Open(dbString, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to login database %s", dbString.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        if (!LoginDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _authDB, asyncThreads, synchThreads))
+        {
+            SF_LOG_ERROR("server.worldserver", "Cannot connect to database%s %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _authDB);
+            return false;
+        }
     }
 
     // Load realm names into a store
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMLIST);
+    stmt->setInt32(0, sConfigMgr->GetIntDefault("WorldServerPort", 8085));
     PreparedQueryResult result = LoginDatabase.Query(stmt);
     if (result)
     {
@@ -467,17 +518,19 @@ bool Master::_StartDB()
         {
             Field* fields = result->Fetch();
             realmNameStore[fields[0].GetUInt32()] = fields[1].GetString(); // Store the realm name into the store
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
     }
-
-    SF_LOG_INFO("server.worldserver", "Realm running as realm ID %d", realmID);
+    for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
+    {
+        SF_LOG_INFO("server.worldserver", "World running as realm ID %d", itr->first);
+    }
 
     ///- Clean the database before starting
     ClearOnlineAccounts();
 
     ///- Insert version info into DB
-    WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", _FULLVERSION, _HASH);        // One-time query
+    //TODO: FIX ME revision
+    //WorldDatabase.PExecute("UPDATE version SET core_version = '%s', core_revision = '%s'", _FULLVERSION, _HASH);        // One-time query
 
     sWorld->LoadDBVersion();
 
@@ -498,7 +551,10 @@ void Master::_StopDB()
 void Master::ClearOnlineAccounts()
 {
     // Reset online status for all accounts with characters on the current realm
-    LoginDatabase.DirectPExecute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = %d)", realmID);
+    for (std::map<uint32, std::string>::const_iterator itr = realmNameStore.begin(); itr != realmNameStore.end(); ++itr)
+    {
+        LoginDatabase.DirectPExecute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = %d)", itr->first);
+    }
 
     // Reset online status for all characters
     CharacterDatabase.DirectExecute("UPDATE characters SET online = 0 WHERE online <> 0");

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -7,13 +7,13 @@
 #define SC_SCRIPTMGR_H
 
 #include "Common.h"
+#include <atomic>
 #include <ace/Singleton.h>
-#include <ace/Atomic_Op.h>
 
 #include "DBCStores.h"
 #include "SharedDefines.h"
-#include "World.h"
 #include "Weather.h"
+#include "World.h"
 
 class AuctionHouseObject;
 class AuraScript;
@@ -978,7 +978,8 @@ private:
     uint32 _scriptCount;
 
     //atomic op counter for active scripts amount
-    ACE_Atomic_Op<ACE_Thread_Mutex, long> _scheduledScripts;
+    std::atomic<long> _scheduledScripts;
+    //ACE_Atomic_Op<ACE_Thread_Mutex, long> _scheduledScripts;
 };
 
 template <class S>

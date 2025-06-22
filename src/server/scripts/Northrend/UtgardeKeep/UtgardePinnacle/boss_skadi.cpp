@@ -412,7 +412,7 @@ public:
         {
             for (uint8 i = 0; i < DUNGEON_MODE(5, 6); ++i)
             {
-                switch (urand(0, 2))
+                switch (std::rand() % 2)
                 {
                     case 0:
                         me->SummonCreature(NPC_YMIRJAR_WARRIOR, SpawnLoc.GetPositionX()+rand()%5, SpawnLoc.GetPositionY()+rand()%5, SpawnLoc.GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
@@ -432,7 +432,7 @@ public:
         void SpawnTrigger()
         {
             uint8 iStart = 0, iEnd = 0;
-            switch (urand(0, 1))
+            switch (std::rand() % 1)
             {
                 case 0:
                     iStart = 8;

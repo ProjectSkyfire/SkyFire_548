@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -23,7 +23,7 @@ char const* localeNames[TOTAL_LOCALES] = {
 LocaleConstant GetLocaleByName(const std::string& name)
 {
     for (uint32 i = 0; i < TOTAL_LOCALES; ++i)
-        if (name==localeNames[i])
+        if (name == localeNames[i])
             return LocaleConstant(i);
 
     return LOCALE_enUS;                                     // including enGB case

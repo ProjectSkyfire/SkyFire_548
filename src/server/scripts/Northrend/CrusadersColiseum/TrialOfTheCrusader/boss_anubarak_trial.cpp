@@ -209,7 +209,7 @@ class boss_anubarak_trial : public CreatureScript
                     instance->SetBossState(BOSS_ANUBARAK, FAIL);
                 //Summon Scarab Swarms neutral at random places
                 for (int i = 0; i < 10; i++)
-                    if (Creature* temp = me->SummonCreature(NPC_SCARAB, AnubarakLoc[1].GetPositionX()+urand(0, 50)-25, AnubarakLoc[1].GetPositionY()+urand(0, 50)-25, AnubarakLoc[1].GetPositionZ()))
+                    if (Creature* temp = me->SummonCreature(NPC_SCARAB, AnubarakLoc[1].GetPositionX()+(std::rand() % 50)-25, AnubarakLoc[1].GetPositionY()+(std::rand() % 50)-25, AnubarakLoc[1].GetPositionZ()))
                     {
                         temp->setFaction(31);
                         temp->GetMotionMaster()->MoveRandom(10);
@@ -328,7 +328,7 @@ class boss_anubarak_trial : public CreatureScript
                             * - The correct implementation is more likely the comment below but it needs spell knowledge
                             */
                             std::list<uint64>::iterator i = _burrowGUID.begin();
-                            uint32 at = urand(0, _burrowGUID.size()-1);
+                            uint32 at = std::rand() % (_burrowGUID.size()-1);
                             for (uint32 k = 0; k < at; k++)
                                 ++i;
                             if (Creature* pBurrow = Unit::GetCreature(*me, *i))
@@ -360,7 +360,7 @@ class boss_anubarak_trial : public CreatureScript
                             return;
                         case EVENT_SUMMON_FROST_SPHERE:
                         {
-                            uint8 startAt = urand(0, 5);
+                            uint8 startAt = std::rand() % 5;
                             uint8 i = startAt;
                             do
                             {
@@ -377,7 +377,7 @@ class boss_anubarak_trial : public CreatureScript
                             }
                             while
                                 (i != startAt);
-                            events.ScheduleEvent(EVENT_SUMMON_FROST_SPHERE, urand(20*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_SUMMON_FROST_SPHERE, std::rand() % (30 * IN_MILLISECONDS) + (20*IN_MILLISECONDS));
                             break;
                         }
                         case EVENT_BERSERK:
@@ -428,7 +428,7 @@ class npc_swarm_scarab : public CreatureScript
             void Reset() OVERRIDE
             {
                 me->SetCorpseDelay(0);
-                _determinationTimer = urand(5*IN_MILLISECONDS, 60*IN_MILLISECONDS);
+                _determinationTimer = std::rand() % (60 * IN_MILLISECONDS) + (5*IN_MILLISECONDS);
                 DoCast(me, SPELL_ACID_MANDIBLE);
                 me->SetInCombatWithZone();
                 if (me->IsInCombat())
@@ -466,7 +466,7 @@ class npc_swarm_scarab : public CreatureScript
                 if (_determinationTimer <= diff)
                 {
                     DoCast(me, SPELL_DETERMINATION);
-                    _determinationTimer = urand(10*IN_MILLISECONDS, 60*IN_MILLISECONDS);
+                    _determinationTimer = std::rand() % (60 * IN_MILLISECONDS) + (10*IN_MILLISECONDS);
                 }
                 else
                     _determinationTimer -= diff;

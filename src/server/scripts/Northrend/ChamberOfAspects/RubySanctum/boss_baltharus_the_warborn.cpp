@@ -225,9 +225,9 @@ class npc_baltharus_the_warborn_clone : public CreatureScript
             {
                 DoZoneInCombat();
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_CLEAVE, urand(5000, 10000));
-                _events.ScheduleEvent(EVENT_BLADE_TEMPEST, urand(18000, 25000));
-                _events.ScheduleEvent(EVENT_ENERVATING_BRAND, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 10000 + 5000);
+                _events.ScheduleEvent(EVENT_BLADE_TEMPEST, std::rand() % 25000 + 18000);
+                _events.ScheduleEvent(EVENT_ENERVATING_BRAND, std::rand() % 15000 + 10000);
             }
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE

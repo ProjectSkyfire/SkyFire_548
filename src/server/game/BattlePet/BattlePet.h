@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -60,17 +60,17 @@ enum BattlePetEvent
 
 enum BattlePetStates
 {
-    BATTLE_PET_STATE_STAT_POWER         = 18,
-    BATTLE_PET_STATE_STAT_STAMINA       = 19,
-    BATTLE_PET_STATE_STAT_SPEED         = 20,
-    BATTLE_PET_STATE_STAT_GENDER        = 78  // currently not used by Blizzard
+    BATTLE_PET_STATE_STAT_POWER = 18,
+    BATTLE_PET_STATE_STAT_STAMINA = 19,
+    BATTLE_PET_STATE_STAT_SPEED = 20,
+    BATTLE_PET_STATE_STAT_GENDER = 78  // currently not used by Blizzard
 };
 
 enum class BattlePetDbState
 {
-    BATTLE_PET_DB_STATE_NONE            = 0,
-    BATTLE_PET_DB_STATE_DELETE          = 1,
-    BATTLE_PET_DB_STATE_SAVE            = 2
+    BATTLE_PET_DB_STATE_NONE = 0,
+    BATTLE_PET_DB_STATE_DELETE = 1,
+    BATTLE_PET_DB_STATE_SAVE = 2
 };
 
 class BattlePet

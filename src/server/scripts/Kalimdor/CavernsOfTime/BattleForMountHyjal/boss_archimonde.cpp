@@ -272,9 +272,9 @@ public:
             DrainNordrassilTimer = 0;
             FearTimer = 42000;
             AirBurstTimer = 30000;
-            GripOfTheLegionTimer = urand(5000, 25000);
+            GripOfTheLegionTimer = std::rand() % 25000 + 5000;
             DoomfireTimer = 20000;
-            SoulChargeTimer = urand(2000, 30000);
+            SoulChargeTimer = std::rand() % 30000 + 2000;
             SoulChargeCount = 0;
             MeleeRangeCheckTimer = 15000;
             HandOfDeathTimer = 2000;
@@ -328,7 +328,7 @@ public:
                     break;
             }
 
-            SoulChargeTimer = urand(2000, 30000);
+            SoulChargeTimer = std::rand() % 30000 + 2000;
             ++SoulChargeCount;
         }
 
@@ -426,7 +426,7 @@ public:
             uint32 chargeSpell = 0;
             uint32 unleashSpell = 0;
 
-            switch (urand(0, 2))
+            switch (std::rand() % 2)
             {
                 case 0:
                     chargeSpell = SPELL_SOUL_CHARGE_RED;
@@ -451,7 +451,7 @@ public:
             }
 
             if (HasCast)
-                SoulChargeTimer = urand(2000, 30000);
+                SoulChargeTimer = std::rand() % 30000 + 2000;
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -582,14 +582,14 @@ public:
             if (GripOfTheLegionTimer <= diff)
             {
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0), SPELL_GRIP_OF_THE_LEGION);
-                GripOfTheLegionTimer = urand(5000, 25000);
+                GripOfTheLegionTimer = std::rand() % 25000 + 5000;
             } else GripOfTheLegionTimer -= diff;
 
             if (AirBurstTimer <= diff)
             {
                 Talk(SAY_AIR_BURST);
                 DoCast(SelectTarget(SELECT_TARGET_RANDOM, 1), SPELL_AIR_BURST);//not on tank
-                AirBurstTimer = urand(25000, 40000);
+                AirBurstTimer = std::rand() % 40000 + 25000;
             } else AirBurstTimer -= diff;
 
             if (FearTimer <= diff)

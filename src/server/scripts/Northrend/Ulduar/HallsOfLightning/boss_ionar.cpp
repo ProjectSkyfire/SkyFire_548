@@ -91,10 +91,10 @@ public:
 
             uiSplitTimer = 25*IN_MILLISECONDS;
 
-            uiStaticOverloadTimer = urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS);
-            uiBallLightningTimer = urand(10*IN_MILLISECONDS, 11*IN_MILLISECONDS);
+            uiStaticOverloadTimer = std::rand() % (6 * IN_MILLISECONDS) + (5*IN_MILLISECONDS);
+            uiBallLightningTimer = std::rand() % (11 * IN_MILLISECONDS) + (10*IN_MILLISECONDS);
 
-            uiDisperseHealth = 45 + urand(0, 10);
+            uiDisperseHealth = 45 + (std::rand() % 10);
 
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE|UNIT_FLAG_DISABLE_MOVE);
 
@@ -244,7 +244,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_STATIC_OVERLOAD);
 
-                uiStaticOverloadTimer = urand(5*IN_MILLISECONDS, 6*IN_MILLISECONDS);
+                uiStaticOverloadTimer = std::rand() % (6 * IN_MILLISECONDS) + (5*IN_MILLISECONDS);
             }
             else
                 uiStaticOverloadTimer -= uiDiff;
@@ -252,7 +252,7 @@ public:
             if (uiBallLightningTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_BALL_LIGHTNING);
-                uiBallLightningTimer = urand(10*IN_MILLISECONDS, 11*IN_MILLISECONDS);
+                uiBallLightningTimer = std::rand() % (11 * IN_MILLISECONDS) + (10*IN_MILLISECONDS);
             }
             else
                 uiBallLightningTimer -= uiDiff;

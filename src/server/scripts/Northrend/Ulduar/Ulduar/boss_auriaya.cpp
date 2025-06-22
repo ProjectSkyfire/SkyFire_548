@@ -111,11 +111,11 @@ class boss_auriaya : public CreatureScript
                 _EnterCombat();
                 Talk(SAY_AGGRO);
 
-                events.ScheduleEvent(EVENT_SCREECH, urand(45000, 65000));
-                events.ScheduleEvent(EVENT_BLAST, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_TERRIFYING, urand(20000, 30000));
-                events.ScheduleEvent(EVENT_DEFENDER, urand(40000, 55000));
-                events.ScheduleEvent(EVENT_SUMMON, urand(45000, 55000));
+                events.ScheduleEvent(EVENT_SCREECH, std::rand() % 65000 + 45000);
+                events.ScheduleEvent(EVENT_BLAST, std::rand() % 25000 + 20000);
+                events.ScheduleEvent(EVENT_TERRIFYING, std::rand() % 30000 + 20000);
+                events.ScheduleEvent(EVENT_DEFENDER, std::rand() % 55000 + 40000);
+                events.ScheduleEvent(EVENT_SUMMON, std::rand() % 55000 + 45000);
                 events.ScheduleEvent(EVENT_BERSERK, 600000);
             }
 
@@ -215,16 +215,16 @@ class boss_auriaya : public CreatureScript
                     {
                         case EVENT_SCREECH:
                             DoCast(SPELL_SONIC_SCREECH);
-                            events.ScheduleEvent(EVENT_SCREECH, urand(40000, 60000));
+                            events.ScheduleEvent(EVENT_SCREECH, std::rand() % 60000 + 40000);
                             break;
                         case EVENT_TERRIFYING:
                             Talk(EMOTE_FEAR);
                             DoCast(SPELL_TERRIFYING_SCREECH);
-                            events.ScheduleEvent(EVENT_TERRIFYING, urand(20000, 30000));
+                            events.ScheduleEvent(EVENT_TERRIFYING, std::rand() % 30000 + 20000);
                             break;
                         case EVENT_BLAST:
                             DoCastAOE(SPELL_SENTINEL_BLAST);
-                            events.ScheduleEvent(EVENT_BLAST, urand(25000, 35000));
+                            events.ScheduleEvent(EVENT_BLAST, std::rand() % 35000 + 25000);
                             break;
                         case EVENT_DEFENDER:
                             Talk(EMOTE_DEFENDER);
@@ -247,7 +247,7 @@ class boss_auriaya : public CreatureScript
                         case EVENT_SUMMON:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                                 DoCast(target, SPELL_SUMMON_SWARMING_GUARDIAN);
-                            events.ScheduleEvent(EVENT_SUMMON, urand(30000, 45000));
+                            events.ScheduleEvent(EVENT_SUMMON, std::rand() % 45000 + 30000);
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK, true);
@@ -321,8 +321,8 @@ class npc_sanctum_sentry : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                events.ScheduleEvent(EVENT_RIP, urand(4000, 8000));
-                events.ScheduleEvent(EVENT_POUNCE, urand(12000, 15000));
+                events.ScheduleEvent(EVENT_RIP, std::rand() % 8000 + 4000);
+                events.ScheduleEvent(EVENT_POUNCE, std::rand() % 15000 + 12000);
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -346,7 +346,7 @@ class npc_sanctum_sentry : public CreatureScript
                     {
                         case EVENT_RIP:
                             DoCastVictim(SPELL_RIP_FLESH);
-                            events.ScheduleEvent(EVENT_RIP, urand(12000, 15000));
+                            events.ScheduleEvent(EVENT_RIP, std::rand() % 15000 + 12000);
                             break;
                         case EVENT_POUNCE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
@@ -355,7 +355,7 @@ class npc_sanctum_sentry : public CreatureScript
                                 me->AI()->AttackStart(target);
                                 DoCast(target, SPELL_SAVAGE_POUNCE);
                             }
-                            events.ScheduleEvent(EVENT_POUNCE, urand(12000, 17000));
+                            events.ScheduleEvent(EVENT_POUNCE, std::rand() % 17000 + 12000);
                             break;
                         default:
                             break;
@@ -421,7 +421,7 @@ class npc_feral_defender : public CreatureScript
                                 me->AI()->AttackStart(target);
                                 DoCast(target, SPELL_FERAL_POUNCE);
                             }
-                            events.ScheduleEvent(EVENT_FERAL_POUNCE, urand(10000, 12000));
+                            events.ScheduleEvent(EVENT_FERAL_POUNCE, std::rand() % 12000 + 10000);
                             break;
                         case EVENT_RUSH:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
@@ -430,7 +430,7 @@ class npc_feral_defender : public CreatureScript
                                 me->AI()->AttackStart(target);
                                 DoCast(target, SPELL_FERAL_RUSH);
                             }
-                            events.ScheduleEvent(EVENT_RUSH, urand(10000, 12000));
+                            events.ScheduleEvent(EVENT_RUSH, std::rand() % 12000 + 10000);
                             break;
                     default:
                         break;

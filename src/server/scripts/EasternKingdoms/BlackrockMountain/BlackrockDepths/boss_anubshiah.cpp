@@ -20,20 +20,16 @@ class boss_anubshiah : public CreatureScript
 public:
     boss_anubshiah() : CreatureScript("boss_anubshiah") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_anubshiahAI(creature);
-    }
-
     struct boss_anubshiahAI : public ScriptedAI
     {
-        boss_anubshiahAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 ShadowBolt_Timer;
-        uint32 CurseOfTongues_Timer;
-        uint32 CurseOfWeakness_Timer;
-        uint32 DemonArmor_Timer;
-        uint32 EnvelopingWeb_Timer;
+        boss_anubshiahAI(Creature* creature) : ScriptedAI(creature)
+        {
+            ShadowBolt_Timer = 0;
+            CurseOfTongues_Timer = 0;
+            CurseOfWeakness_Timer = 0;
+            DemonArmor_Timer = 0;
+            EnvelopingWeb_Timer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -91,7 +87,19 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 ShadowBolt_Timer;
+        uint32 CurseOfTongues_Timer;
+        uint32 CurseOfWeakness_Timer;
+        uint32 DemonArmor_Timer;
+        uint32 EnvelopingWeb_Timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_anubshiahAI(creature);
+    }
 };
 
 void AddSC_boss_anubshiah()

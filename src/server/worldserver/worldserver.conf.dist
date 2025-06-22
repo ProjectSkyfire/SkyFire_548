@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2021081800
+ConfVersion=2024050400
 
 ###################################################################################################
 # SECTION INDEX
@@ -54,14 +54,6 @@ ConfVersion=2021081800
 
 ###################################################################################################
 # CONNECTIONS AND DIRECTORIES
-#
-#    RealmID
-#        Description: ID of the Realm using this config.
-#        Important:   RealmID must match the realmlist inside the auth database.
-#        Default:     1
-
-RealmID = 1
-
 #
 #    DataDir
 #        Description: Data directory setting.
@@ -2966,14 +2958,6 @@ Currency.MaxJusticePoints = 4000
 #
 
 Currency.StartConquestPoints = 0
-
-#
-#    Currency.ConquestPointsDefaultWeekCap
-#        Amount of conquest points that player can earn per week
-#        Default: 1350
-#
-
-Currency.ConquestPointsDefaultWeekCap = 1350
 
 #
 #    Currency.ConquestPointsArenaReward

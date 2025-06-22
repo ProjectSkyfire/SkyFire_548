@@ -1,17 +1,17 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "PointMovementGenerator.h"
-#include "Errors.h"
 #include "Creature.h"
 #include "CreatureAI.h"
-#include "World.h"
-#include "MoveSplineInit.h"
-#include "MoveSpline.h"
-#include "Player.h"
 #include "CreatureGroups.h"
+#include "Errors.h"
+#include "MoveSpline.h"
+#include "MoveSplineInit.h"
+#include "Player.h"
+#include "PointMovementGenerator.h"
+#include "World.h"
 
 //----- Point Movement Generator
 template<class T>
@@ -20,7 +20,7 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
     if (!unit->IsStopped())
         unit->StopMoving();
 
-    unit->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
+    unit->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
 
     if (id == EVENT_CHARGE_PREPATH)
         return;
@@ -85,7 +85,7 @@ void PointMovementGenerator<T>::DoReset(T* unit)
     if (!unit->IsStopped())
         unit->StopMoving();
 
-    unit->AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
+    unit->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
 }
 
 template<class T>

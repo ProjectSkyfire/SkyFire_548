@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "BattlefieldMgr.h"
-#include "Zones/BattlefieldWG.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "Zones/BattlefieldWG.h"
 
 BattlefieldMgr::~BattlefieldMgr()
 {
     //SF_LOG_DEBUG("bg.battlefield", "Deleting BattlefieldMgr");
     for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
-        delete *itr;
+        delete* itr;
 }
 
 void BattlefieldMgr::InitBattlefield()
@@ -45,7 +45,7 @@ void BattlefieldMgr::InitBattlefield()
        } */
 }
 
-void BattlefieldMgr::AddZone(uint32 zoneid, Battlefield *handle)
+void BattlefieldMgr::AddZone(uint32 zoneid, Battlefield* handle)
 {
     m_BattlefieldMap[zoneid] = handle;
 }
@@ -77,7 +77,7 @@ void BattlefieldMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneid)
     SF_LOG_DEBUG("bg.battlefield", "Player %u left outdoorpvp id %u", player->GetGUIDLow(), itr->second->GetTypeId());
 }
 
-Battlefield *BattlefieldMgr::GetBattlefieldToZoneId(uint32 zoneid)
+Battlefield* BattlefieldMgr::GetBattlefieldToZoneId(uint32 zoneid)
 {
     BattlefieldMap::iterator itr = m_BattlefieldMap.find(zoneid);
     if (itr == m_BattlefieldMap.end())
@@ -90,7 +90,7 @@ Battlefield *BattlefieldMgr::GetBattlefieldToZoneId(uint32 zoneid)
     return itr->second;
 }
 
-Battlefield *BattlefieldMgr::GetBattlefieldByBattleId(uint32 battleid)
+Battlefield* BattlefieldMgr::GetBattlefieldByBattleId(uint32 battleid)
 {
     for (BattlefieldSet::iterator itr = m_BattlefieldSet.begin(); itr != m_BattlefieldSet.end(); ++itr)
     {

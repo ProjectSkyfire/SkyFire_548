@@ -36,7 +36,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_POISON_CLOUD, urand(5000, 9000));
+            events.ScheduleEvent(EVENT_POISON_CLOUD, std::rand() % 9000 + 5000);
             _EnterCombat();
         }
 
@@ -61,7 +61,7 @@ public:
                 {
                     case EVENT_POISON_CLOUD:
                         DoCastVictim(SPELL_POISON_CLOUD);
-                        events.ScheduleEvent(EVENT_POISON_CLOUD, urand(25000, 50000));
+                        events.ScheduleEvent(EVENT_POISON_CLOUD, std::rand() % 50000 + 25000);
                         break;
                     case EVENT_FRENZIED_RAGE:
                         DoCast(me, SPELL_FRENZIED_RAGE);

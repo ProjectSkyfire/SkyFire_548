@@ -1,22 +1,22 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AccountMgr.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
+#include "GuildMgr.h"
+#include "Item.h"
+#include "Language.h"
+#include "Log.h"
 #include "Mail.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "Player.h"
-#include "Language.h"
-#include "DBCStores.h"
-#include "Item.h"
-#include "AccountMgr.h"
-#include "GuildMgr.h"
 
 void WorldSession::HandleSendMail(WorldPacket& recvData)
 {
@@ -907,19 +907,21 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recvData)
 /// @todo Fix me! ... this void has probably bad condition, but good data are sent
 void WorldSession::HandleQueryNextMailTime(WorldPacket& /*recvData*/)
 {
-    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
+    WorldPacket data(SMSG_MAIL_QUERY_NEXT_TIME_RESULT);
 
     if (!_player->m_mailsLoaded)
         _player->_LoadMail();
 
     if (_player->unReadMails > 0)
     {
-        data << float(0);                                  // float
-        data << uint32(0);                                 // count
-
-        uint32 count = 0;
+        ByteBuffer dataBuffer;
+        uint8 count = 0;
         time_t now = time(NULL);
-        std::set<uint32> sentSenders;
+        bool hasVirtualRealmAddress = false, hasNativeRealmAddress = false;
+
+        size_t pos = data.bitwpos();
+        data.WriteBits(count, 20);
+
         for (PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)
         {
             Mail* m = (*itr);
@@ -931,28 +933,52 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /*recvData*/)
             if (now < m->deliver_time)
                 continue;
 
-            // only send each mail sender once
-            if (sentSenders.count(m->sender))
-                continue;
+            ObjectGuid senderGuid = (m->messageType == MAIL_NORMAL) ? MAKE_NEW_GUID(m->sender, 0, HIGHGUID_PLAYER) : 0;
 
-            data << uint64(m->messageType == MAIL_NORMAL ? m->sender : 0);  // player guid
-            data << uint32(m->messageType != MAIL_NORMAL ? m->sender : 0);  // non-player entries
-            data << uint32(m->messageType);
-            data << uint32(m->stationery);
-            data << float(m->deliver_time - now);
+            data.WriteBit(senderGuid[3]);
+            data.WriteBit(hasVirtualRealmAddress);
+            data.WriteBit(senderGuid[2]);
+            data.WriteBit(hasNativeRealmAddress);
+            data.WriteBit(senderGuid[6]);
+            data.WriteBit(senderGuid[1]);
+            data.WriteBit(senderGuid[4]);
+            data.WriteBit(senderGuid[0]);
+            data.WriteBit(senderGuid[5]);
+            data.WriteBit(senderGuid[7]);
 
-            sentSenders.insert(m->sender);
-            ++count;
-            if (count == 2)                                  // do not display more than 2 mails
+            dataBuffer << uint32(m->messageType != MAIL_NORMAL ? m->sender : 0);  // non-player entries
+            dataBuffer.WriteByteSeq(senderGuid[5]);
+            dataBuffer.WriteByteSeq(senderGuid[4]);
+            dataBuffer.WriteByteSeq(senderGuid[6]);
+            dataBuffer.WriteByteSeq(senderGuid[1]);
+            dataBuffer << uint8(m->messageType);
+            dataBuffer.WriteByteSeq(senderGuid[0]);
+            dataBuffer << float(m->deliver_time - now);
+            if (hasNativeRealmAddress)
+                dataBuffer << uint32(realmID);
+            dataBuffer << uint32(m->stationery);
+            dataBuffer.WriteByteSeq(senderGuid[3]);
+            dataBuffer.WriteByteSeq(senderGuid[2]);
+            if (hasVirtualRealmAddress)
+                dataBuffer << uint32(realmID);
+            dataBuffer.WriteByteSeq(senderGuid[7]);
+
+            count++;
+            if (count == 3)                                  // do not display more than 3 mails
                 break;
         }
 
-        data.put<uint32>(4, count);
+        data.FlushBits();
+        data.PutBits(pos, count, 20);
+        data.append(dataBuffer);
+
+        data << float(0);
     }
     else
     {
-        data << float(-DAY);
-        data << uint32(0);
+        data.WriteBits(0, 20);
+        data.FlushBits();
+        data << float(-1);
     }
 
     SendPacket(&data);

@@ -28,20 +28,14 @@ class boss_hungarfen : public CreatureScript
 public:
     boss_hungarfen() : CreatureScript("boss_hungarfen") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_hungarfenAI(creature);
-    }
-
     struct boss_hungarfenAI : public ScriptedAI
     {
         boss_hungarfenAI(Creature* creature) : ScriptedAI(creature)
         {
+            Root = false;
+            Mushroom_Timer = 0;
+            AcidGeyser_Timer = 0;
         }
-
-        bool Root;
-        uint32 Mushroom_Timer;
-        uint32 AcidGeyser_Timer;
 
         void Reset() OVERRIDE
         {
@@ -50,9 +44,7 @@ public:
             AcidGeyser_Timer = 10000;
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE
-        {
-        }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -87,7 +79,16 @@ public:
 
             DoMeleeAttackIfReady();
         }
+    private:
+        bool Root;
+        uint32 Mushroom_Timer;
+        uint32 AcidGeyser_Timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_hungarfenAI(creature);
+    }
 };
 
 class npc_underbog_mushroom : public CreatureScript
@@ -95,18 +96,14 @@ class npc_underbog_mushroom : public CreatureScript
 public:
     npc_underbog_mushroom() : CreatureScript("npc_underbog_mushroom") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_underbog_mushroomAI(creature);
-    }
-
     struct npc_underbog_mushroomAI : public ScriptedAI
     {
-        npc_underbog_mushroomAI(Creature* creature) : ScriptedAI(creature) { }
-
-        bool Stop;
-        uint32 Grow_Timer;
-        uint32 Shrink_Timer;
+        npc_underbog_mushroomAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Stop = false;
+            Grow_Timer = 0;
+            Shrink_Timer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -142,7 +139,16 @@ public:
                 Stop = true;
             } else Shrink_Timer -= diff;
         }
+    private:
+        bool Stop;
+        uint32 Grow_Timer;
+        uint32 Shrink_Timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_underbog_mushroomAI(creature);
+    }
 };
 
 void AddSC_boss_hungarfen()

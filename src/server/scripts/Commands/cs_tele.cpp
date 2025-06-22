@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -59,12 +59,12 @@ public:
         }
 
         GameTele tele;
-        tele.position_x  = player->GetPositionX();
-        tele.position_y  = player->GetPositionY();
-        tele.position_z  = player->GetPositionZ();
+        tele.position_x = player->GetPositionX();
+        tele.position_y = player->GetPositionY();
+        tele.position_z = player->GetPositionZ();
         tele.orientation = player->GetOrientation();
-        tele.mapId       = player->GetMapId();
-        tele.name        = name;
+        tele.mapId = player->GetMapId();
+        tele.name = name;
 
         if (sObjectMgr->AddGameTele(tele))
         {
@@ -85,7 +85,7 @@ public:
         if (!*args)
             return false;
 
-         // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
+        // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
         GameTele const* tele = handler->extractGameTeleFromLink((char*)args);
         if (!tele)
         {

@@ -50,10 +50,10 @@ class boss_doomwalker : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_ENRAGE, 0);
-                _events.ScheduleEvent(EVENT_ARMOR, urand(5000, 13000));
-                _events.ScheduleEvent(EVENT_CHAIN, urand(10000, 30000));
-                _events.ScheduleEvent(EVENT_QUAKE, urand(25000, 35000));
-                _events.ScheduleEvent(EVENT_OVERRUN, urand(30000, 45000));
+                _events.ScheduleEvent(EVENT_ARMOR, std::rand() % 13000 + 5000);
+                _events.ScheduleEvent(EVENT_CHAIN, std::rand() % 30000 + 10000);
+                _events.ScheduleEvent(EVENT_QUAKE, std::rand() % 35000 + 25000);
+                _events.ScheduleEvent(EVENT_OVERRUN, std::rand() % 45000 + 30000);
                 _inEnrage = false;
             }
 
@@ -61,7 +61,7 @@ class boss_doomwalker : public CreatureScript
             {
                 victim->CastSpell(victim, SPELL_MARK_DEATH, 0);
 
-                if (urand(0, 4))
+                if (std::rand() % 4)
                     return;
 
                 Talk(SAY_SLAY);
@@ -110,10 +110,10 @@ class boss_doomwalker : public CreatureScript
                         case EVENT_OVERRUN:
                             Talk(SAY_OVERRUN);
                             DoCastVictim(SPELL_OVERRUN);
-                            _events.ScheduleEvent(EVENT_OVERRUN, urand(25000, 40000));
+                            _events.ScheduleEvent(EVENT_OVERRUN, std::rand() % 40000 + 25000);
                             break;
                         case EVENT_QUAKE:
-                            if (urand(0, 1))
+                            if (std::rand() % 1)
                                 return;
 
                             Talk(SAY_EARTHQUAKE);
@@ -123,16 +123,16 @@ class boss_doomwalker : public CreatureScript
                                 me->RemoveAurasDueToSpell(SPELL_ENRAGE);
 
                             DoCast(me, SPELL_EARTHQUAKE);
-                            _events.ScheduleEvent(EVENT_QUAKE, urand(30000, 55000));
+                            _events.ScheduleEvent(EVENT_QUAKE, std::rand() % 55000 + 30000);
                             break;
                         case EVENT_CHAIN:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_CHAIN_LIGHTNING);
-                            _events.ScheduleEvent(EVENT_CHAIN, urand(7000, 27000));
+                            _events.ScheduleEvent(EVENT_CHAIN, std::rand() % 27000 + 7000);
                             break;
                         case EVENT_ARMOR:
                             DoCastVictim(SPELL_SUNDER_ARMOR);
-                            _events.ScheduleEvent(EVENT_ARMOR, urand(10000, 25000));
+                            _events.ScheduleEvent(EVENT_ARMOR, std::rand() % 25000 + 10000);
                             break;
                         default:
                             break;

@@ -1,29 +1,29 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Chat.h"
-#include "ScriptMgr.h"
 #include "AccountMgr.h"
+#include "ace/INET_Addr.h"
 #include "ArenaTeamMgr.h"
 #include "CellImpl.h"
+#include "Chat.h"
 #include "GridNotifiers.h"
 #include "Group.h"
+#include "GroupMgr.h"
 #include "InstanceSaveMgr.h"
 #include "Language.h"
+#include "LFG.h"
+#include "MMapFactory.h"
 #include "MovementGenerator.h"
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
+#include "Pet.h"
+#include "Player.h"
+#include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "TargetedMovementGenerator.h"
 #include "WeatherMgr.h"
-#include "ace/INET_Addr.h"
-#include "Player.h"
-#include "Pet.h"
-#include "LFG.h"
-#include "GroupMgr.h"
-#include "MMapFactory.h"
 
 class misc_commandscript : public CommandScript
 {
@@ -713,7 +713,7 @@ public:
         {
             uint64 guid = handler->extractGuidFromLink((char*)args);
             if (guid)
-                obj = (WorldObject*)ObjectAccessor::GetObjectByTypeMask(*handler->GetSession()->GetPlayer(), guid, TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+                obj = (WorldObject*)ObjectAccessor::GetObjectByTypeMask(*handler->GetSession()->GetPlayer(), guid, TYPEMASK_UNIT | TYPEMASK_GAMEOBJECT);
 
             if (!obj)
             {
@@ -924,7 +924,7 @@ public:
         uint32 zoneId = player->GetZoneId();
 
         AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(zoneId);
-        if (!areaEntry || areaEntry->m_ParentAreaID !=0)
+        if (!areaEntry || areaEntry->m_ParentAreaID != 0)
         {
             handler->PSendSysMessage(LANG_COMMAND_GRAVEYARDWRONGZONE, graveyardId, zoneId);
             handler->SetSentErrorMessage(true);
@@ -1018,7 +1018,7 @@ public:
         int32 offset = area / 32;
         uint32 val = uint32((1 << (area % 32)));
 
-        if (area<0 || offset >= PLAYER_EXPLORED_ZONES_SIZE)
+        if (area < 0 || offset >= PLAYER_EXPLORED_ZONES_SIZE)
         {
             handler->SendSysMessage(LANG_BAD_VALUE);
             handler->SetSentErrorMessage(true);
@@ -1076,7 +1076,7 @@ public:
 
             if (itemNameStr && itemNameStr[0])
             {
-                std::string itemName = itemNameStr+1;
+                std::string itemName = itemNameStr + 1;
                 WorldDatabase.EscapeString(itemName);
 
                 PreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_ITEM_TEMPLATE_BY_NAME);
@@ -1085,7 +1085,7 @@ public:
 
                 if (!result)
                 {
-                    handler->PSendSysMessage(LANG_COMMAND_COULDNOTFIND, itemNameStr+1);
+                    handler->PSendSysMessage(LANG_COMMAND_COULDNOTFIND, itemNameStr + 1);
                     handler->SetSentErrorMessage(true);
                     return false;
                 }
@@ -1349,7 +1349,7 @@ public:
             return false;
         }
 
-        uint16 max = maxPureSkill ? atol (maxPureSkill) : target->GetPureMaxSkillValue(skill);
+        uint16 max = maxPureSkill ? atol(maxPureSkill) : target->GetPureMaxSkillValue(skill);
 
         if (level <= 0 || level > max || max <= 0)
             return false;
@@ -1430,54 +1430,54 @@ public:
          * For a cleaner overview, I segment each output in Roman numerals
          */
 
-        // Account data print variables
-        std::string userName          = handler->GetSkyFireString(LANG_ERROR);
-        uint32 accId                  = 0;
-        uint32 lowguid                = GUID_LOPART(targetGuid);
-        std::string eMail             = handler->GetSkyFireString(LANG_ERROR);
-        std::string regMail           = handler->GetSkyFireString(LANG_ERROR);
-        uint32 security               = 0;
-        std::string lastIp            = handler->GetSkyFireString(LANG_ERROR);
-        uint8 locked                  = 0;
-        std::string lastLogin         = handler->GetSkyFireString(LANG_ERROR);
-        uint32 failedLogins           = 0;
-        uint32 latency                = 0;
-        std::string OS                = "None";
+         // Account data print variables
+        std::string userName = handler->GetSkyFireString(LANG_ERROR);
+        uint32 accId = 0;
+        uint32 lowguid = GUID_LOPART(targetGuid);
+        std::string eMail = handler->GetSkyFireString(LANG_ERROR);
+        std::string regMail = handler->GetSkyFireString(LANG_ERROR);
+        uint32 security = 0;
+        std::string lastIp = handler->GetSkyFireString(LANG_ERROR);
+        uint8 locked = 0;
+        std::string lastLogin = handler->GetSkyFireString(LANG_ERROR);
+        uint32 failedLogins = 0;
+        uint32 latency = 0;
+        std::string OS = "None";
 
         // Mute data print variables
-        int64 muteTime                = -1;
-        std::string muteReason        = "unknown";
-        std::string muteBy            = "unknown";
+        int64 muteTime = -1;
+        std::string muteReason = "unknown";
+        std::string muteBy = "unknown";
 
         // Ban data print variables
-        int64 banTime                 = -1;
-        std::string banType           = "None";
-        std::string banReason         = "Unknown";
-        std::string bannedBy          = "Unknown";
+        int64 banTime = -1;
+        std::string banType = "None";
+        std::string banReason = "Unknown";
+        std::string bannedBy = "Unknown";
 
         // Character data print variables
-        uint8 raceid, classid           = 0; //RACE_NONE, CLASS_NONE
-        std::string raceStr, classStr   = "None";
-        uint8 gender                    = 0;
-        int8 locale                     = handler->GetSessionDbcLocale();
-        std::string genderStr           = handler->GetSkyFireString(LANG_ERROR);
-        uint32 totalPlayerTime          = 0;
-        uint8 level                     = 0;
-        std::string alive               = handler->GetSkyFireString(LANG_ERROR);
-        uint32 money                    = 0;
-        uint32 xp                       = 0;
-        uint32 xptotal                  = 0;
+        uint8 raceid, classid = 0; //RACE_NONE, CLASS_NONE
+        std::string raceStr, classStr = "None";
+        uint8 gender = 0;
+        int8 locale = handler->GetSessionDbcLocale();
+        std::string genderStr = handler->GetSkyFireString(LANG_ERROR);
+        uint32 totalPlayerTime = 0;
+        uint8 level = 0;
+        std::string alive = handler->GetSkyFireString(LANG_ERROR);
+        uint32 money = 0;
+        uint32 xp = 0;
+        uint32 xptotal = 0;
 
         // Position data print
         uint32 mapId;
         uint32 areaId;
-        uint32 phase            = 0;
-        std::string areaName    = "<unknown>";
-        std::string zoneName    = "<unknown>";
+        uint32 phase = 0;
+        std::string areaName = "<unknown>";
+        std::string zoneName = "<unknown>";
 
         // Guild data print variables defined so that they exist, but are not necessarily used
-        uint32 guildId           = 0;
-        uint8 guildRankId        = 0;
+        uint32 guildId = 0;
+        uint8 guildRankId = 0;
         std::string guildName;
         std::string guildRank;
         std::string note;
@@ -1491,19 +1491,19 @@ public:
             if (handler->HasLowerSecurity(target, 0))
                 return false;
 
-            accId             = target->GetSession()->GetAccountId();
-            money             = target->GetMoney();
-            totalPlayerTime   = target->GetTotalPlayedTime();
-            level             = target->getLevel();
-            latency           = target->GetSession()->GetLatency();
-            raceid            = target->getRace();
-            classid           = target->getClass();
-            muteTime          = target->GetSession()->m_muteTime;
-            mapId             = target->GetMapId();
-            areaId            = target->GetAreaId();
-            alive             = target->IsAlive() ? "Yes" : "No";
-            gender            = target->getGender();
-            phase             = target->GetPhaseMask();
+            accId = target->GetSession()->GetAccountId();
+            money = target->GetMoney();
+            totalPlayerTime = target->GetTotalPlayedTime();
+            level = target->getLevel();
+            latency = target->GetSession()->GetLatency();
+            raceid = target->getRace();
+            classid = target->getClass();
+            muteTime = target->GetSession()->m_muteTime;
+            mapId = target->GetMapId();
+            areaId = target->GetAreaId();
+            alive = target->IsAlive() ? "Yes" : "No";
+            gender = target->getGender();
+            phase = target->GetPhaseMask();
         }
         // get additional information from DB
         else
@@ -1520,17 +1520,17 @@ public:
             if (!result)
                 return false;
 
-            Field* fields      = result->Fetch();
-            totalPlayerTime    = fields[0].GetUInt32();
-            level              = fields[1].GetUInt8();
-            money              = fields[2].GetUInt32();
-            accId              = fields[3].GetUInt32();
-            raceid             = fields[4].GetUInt8();
-            classid            = fields[5].GetUInt8();
-            mapId              = fields[6].GetUInt16();
-            areaId             = fields[7].GetUInt16();
-            gender             = fields[8].GetUInt8();
-            uint32 health      = fields[9].GetUInt32();
+            Field* fields = result->Fetch();
+            totalPlayerTime = fields[0].GetUInt32();
+            level = fields[1].GetUInt8();
+            money = fields[2].GetUInt32();
+            accId = fields[3].GetUInt32();
+            raceid = fields[4].GetUInt8();
+            classid = fields[5].GetUInt8();
+            mapId = fields[6].GetUInt16();
+            areaId = fields[7].GetUInt16();
+            gender = fields[8].GetUInt8();
+            uint32 health = fields[9].GetUInt32();
             uint32 playerFlags = fields[10].GetUInt32();
 
             if (!health || playerFlags & PLAYER_FLAGS_GHOST)
@@ -1548,16 +1548,16 @@ public:
         if (result)
         {
             Field* fields = result->Fetch();
-            userName      = fields[0].GetString();
-            security      = fields[1].GetUInt8();
+            userName = fields[0].GetString();
+            security = fields[1].GetUInt8();
 
             // Only fetch these fields if commander has sufficient rights)
             if (handler->HasPermission(rbac::RBAC_PERM_COMMANDS_PINFO_CHECK_PERSONAL_DATA) && // RBAC Perm. 48, Role 39
-               (!handler->GetSession() || handler->GetSession()->GetSecurity() >= AccountTypes(security)))
+                (!handler->GetSession() || handler->GetSession()->GetSecurity() >= AccountTypes(security)))
             {
-                eMail     = fields[2].GetString();
-                regMail   = fields[3].GetString();
-                lastIp    = fields[4].GetString();
+                eMail = fields[2].GetString();
+                regMail = fields[3].GetString();
+                lastIp = fields[4].GetString();
                 lastLogin = fields[5].GetString();
 
                 uint32 ip = inet_addr(lastIp.c_str());
@@ -1576,16 +1576,16 @@ public:
             }
             else
             {
-                eMail     = "Unauthorized";
-                lastIp    = "Unauthorized";
+                eMail = "Unauthorized";
+                lastIp = "Unauthorized";
                 lastLogin = "Unauthorized";
             }
-            muteTime      = fields[6].GetUInt64();
-            muteReason    = fields[7].GetString();
-            muteBy        = fields[8].GetString();
-            failedLogins  = fields[9].GetUInt32();
-            locked        = fields[10].GetUInt8();
-            OS            = fields[11].GetString();
+            muteTime = fields[6].GetUInt64();
+            muteReason = fields[7].GetString();
+            muteBy = fields[8].GetString();
+            failedLogins = fields[9].GetUInt32();
+            locked = fields[10].GetUInt8();
+            OS = fields[11].GetString();
         }
 
         // Creates a chat link to the character. Returns nameLink
@@ -1606,9 +1606,9 @@ public:
         if (result2)
         {
             Field* fields = result2->Fetch();
-            banTime       = int64(fields[1].GetUInt64() ? 0 : fields[0].GetUInt32());
-            bannedBy      = fields[2].GetString();
-            banReason     = fields[3].GetString();
+            banTime = int64(fields[1].GetUInt64() ? 0 : fields[0].GetUInt32());
+            bannedBy = fields[2].GetString();
+            banReason = fields[3].GetString();
         }
 
         // Can be used to query data from World database
@@ -1619,7 +1619,7 @@ public:
         if (result3)
         {
             Field* fields = result3->Fetch();
-            xptotal       = fields[0].GetUInt32();
+            xptotal = fields[0].GetUInt32();
         }
 
         // Can be used to query data from Characters database
@@ -1630,8 +1630,8 @@ public:
         if (result4)
         {
             Field* fields = result4->Fetch();
-            xp            = fields[0].GetUInt32(); // Used for "current xp" output and "%u XP Left" calculation
-            uint32 gguid  = fields[1].GetUInt32(); // We check if have a guild for the person, so we might not require to query it at all
+            xp = fields[0].GetUInt32(); // Used for "current xp" output and "%u XP Left" calculation
+            uint32 gguid = fields[1].GetUInt32(); // We check if have a guild for the person, so we might not require to query it at all
 
             if (gguid != 0)
             {
@@ -1641,13 +1641,13 @@ public:
                 PreparedQueryResult result5 = CharacterDatabase.Query(stmt3);
                 if (result5)
                 {
-                    Field* fields  = result5->Fetch();
-                    guildId        = fields[0].GetUInt32();
-                    guildName      = fields[1].GetString();
-                    guildRank      = fields[2].GetString();
-                    guildRankId    = fields[3].GetUInt8();
-                    note           = fields[4].GetString();
-                    officeNote     = fields[5].GetString();
+                    Field* fields = result5->Fetch();
+                    guildId = fields[0].GetUInt32();
+                    guildName = fields[1].GetString();
+                    guildRank = fields[2].GetString();
+                    guildRankId = fields[3].GetUInt8();
+                    note = fields[4].GetString();
+                    officeNote = fields[5].GetString();
                 }
             }
         }
@@ -1690,7 +1690,7 @@ public:
             handler->PSendSysMessage(LANG_PINFO_CHR_LEVEL_HIGH, level);
 
         // Output XI. LANG_PINFO_CHR_RACE
-        raceStr  = GetRaceName(raceid, locale);
+        raceStr = GetRaceName(raceid, locale);
         classStr = GetClassName(classid, locale);
         handler->PSendSysMessage(LANG_PINFO_CHR_RACE, (gender == 0 ? handler->GetSkyFireString(LANG_CHARACTER_GENDER_MALE) : handler->GetSkyFireString(LANG_CHARACTER_GENDER_FEMALE)), raceStr.c_str(), classStr.c_str());
 
@@ -1700,11 +1700,11 @@ public:
         // Output XIII. LANG_PINFO_CHR_PHASE if player is not in GM mode (GM is in every phase)
         if (target && !target->IsGameMaster())                            // IsInWorld() returns false on loadingscreen, so it's more
             handler->PSendSysMessage(LANG_PINFO_CHR_PHASE, phase);        // precise than just target (safer ?).
-                                                                          // However, as we usually just require a target here, we use target instead.
-        // Output XIV. LANG_PINFO_CHR_MONEY
-        uint32 gold                   = money / GOLD;
-        uint32 silv                   = (money % GOLD) / SILVER;
-        uint32 copp                   = (money % GOLD) % SILVER;
+        // However, as we usually just require a target here, we use target instead.
+// Output XIV. LANG_PINFO_CHR_MONEY
+        uint32 gold = money / GOLD;
+        uint32 silv = (money % GOLD) / SILVER;
+        uint32 copp = (money % GOLD) % SILVER;
         handler->PSendSysMessage(LANG_PINFO_CHR_MONEY, gold, silv, copp);
 
         // Position data
@@ -1748,16 +1748,16 @@ public:
 
             // Fetch the fields - readmail is a SUM(x) and given out as char! Thus...
             // ... while totalmail is a COUNT(x), which is given out as INt64, which we just convert on fetch...
-            Field* fields         = result6->Fetch();
-            std::string readmail  = fields[0].GetString();
-            uint32 totalmail      = uint32(fields[1].GetUInt64());
+            Field* fields = result6->Fetch();
+            std::string readmail = fields[0].GetString();
+            uint32 totalmail = uint32(fields[1].GetUInt64());
 
             // ... we have to convert it from Char to int. We can use totalmail as it is
             rmailint = atol(readmail.c_str());
 
             // Output XXI. LANG_INFO_CHR_MAILS if at least one mail is given
             if (totalmail >= 1)
-               handler->PSendSysMessage(LANG_PINFO_CHR_MAILS, rmailint, totalmail);
+                handler->PSendSysMessage(LANG_PINFO_CHR_MAILS, rmailint, totalmail);
         }
 
         return true;
@@ -1826,7 +1826,7 @@ public:
         uint32 notSpeakTime = uint32(atoi(delayStr));
 
         // must have strong lesser security level
-        if (handler->HasLowerSecurity (target, targetGuid, true))
+        if (handler->HasLowerSecurity(target, targetGuid, true))
             return false;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
@@ -1879,7 +1879,7 @@ public:
                 target = session->GetPlayer();
 
         // must have strong lesser security level
-        if (handler->HasLowerSecurity (target, targetGuid, true))
+        if (handler->HasLowerSecurity(target, targetGuid, true))
             return false;
 
         if (target)
@@ -2175,7 +2175,7 @@ public:
 
             handler->GetSession()->GetPlayer()->DealDamageMods(target, damage, &absorb);
             handler->GetSession()->GetPlayer()->DealDamage(target, damage, NULL, DIRECT_DAMAGE, schoolmask, NULL, false);
-            handler->GetSession()->GetPlayer()->SendAttackStateUpdate (HITINFO_AFFECTS_VICTIM, target, 1, schoolmask, damage, absorb, resist, VictimState::VICTIMSTATE_WOUND, 0);
+            handler->GetSession()->GetPlayer()->SendAttackStateUpdate(HITINFO_AFFECTS_VICTIM, target, 1, schoolmask, damage, absorb, resist, VictimState::VICTIMSTATE_WOUND, 0);
             return true;
         }
 
@@ -2251,13 +2251,23 @@ public:
             if (player) //prevent crash with creature as target
             {
                 name = player->GetName();
-                normalizePlayerName(name);
+                if (!normalizePlayerName(name))
+                {
+                    handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                    handler->SetSentErrorMessage(true);
+                    return false;
+                }
             }
         }
         else // if name entered
         {
             name = TargetName;
-            normalizePlayerName(name);
+            if (!normalizePlayerName(name))
+            {
+                handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
             player = sObjectAccessor->FindPlayerByName(name);
         }
 
@@ -2307,7 +2317,7 @@ public:
         return true;
     }
 
-    static bool HandleUnFreezeCommand(ChatHandler* handler, char const*args)
+    static bool HandleUnFreezeCommand(ChatHandler* handler, char const* args)
     {
         std::string name;
         Player* player;
@@ -2316,7 +2326,12 @@ public:
         if (targetName)
         {
             name = targetName;
-            normalizePlayerName(name);
+            if (!normalizePlayerName(name))
+            {
+                handler->SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
             player = sObjectAccessor->FindPlayerByName(name);
         }
         else // If no name was entered - use target
@@ -2396,8 +2411,7 @@ public:
             Field* fields = result->Fetch();
             std::string player = fields[0].GetString();
             handler->PSendSysMessage(LANG_COMMAND_FROZEN_PLAYERS, player.c_str());
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         return true;
     }

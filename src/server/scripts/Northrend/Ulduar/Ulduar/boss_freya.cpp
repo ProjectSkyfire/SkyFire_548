@@ -333,19 +333,19 @@ class boss_freya : public CreatureScript
                 if (Elder[0] && Elder[0]->IsAlive())
                 {
                     Elder[0]->CastSpell(me, SPELL_BRIGHTLEAF_ESSENCE, true);
-                    events.ScheduleEvent(EVENT_UNSTABLE_ENERGY, urand(10000, 20000));
+                    events.ScheduleEvent(EVENT_UNSTABLE_ENERGY, std::rand() % 20000 + 10000);
                 }
 
                 if (Elder[1] && Elder[1]->IsAlive())
                 {
                     Elder[1]->CastSpell(me, SPELL_STONEBARK_ESSENCE, true);
-                    events.ScheduleEvent(EVENT_GROUND_TREMOR, urand(10000, 20000));
+                    events.ScheduleEvent(EVENT_GROUND_TREMOR, std::rand() % 20000 + 10000);
                 }
 
                 if (Elder[2] && Elder[2]->IsAlive())
                 {
                     Elder[2]->CastSpell(me, SPELL_IRONBRANCH_ESSENCE, true);
-                    events.ScheduleEvent(EVENT_STRENGTHENED_IRON_ROOTS, urand(10000, 20000));
+                    events.ScheduleEvent(EVENT_STRENGTHENED_IRON_ROOTS, std::rand() % 20000 + 10000);
                 }
 
                 if (elderCount == 0)
@@ -358,7 +358,7 @@ class boss_freya : public CreatureScript
                 events.ScheduleEvent(EVENT_WAVE, 10000);
                 events.ScheduleEvent(EVENT_EONAR_GIFT, 25000);
                 events.ScheduleEvent(EVENT_ENRAGE, 600000);
-                events.ScheduleEvent(EVENT_SUNBEAM, urand(5000, 15000));
+                events.ScheduleEvent(EVENT_SUNBEAM, std::rand() % 15000 + 5000);
             }
 
             uint32 GetData(uint32 type) const OVERRIDE
@@ -395,39 +395,39 @@ class boss_freya : public CreatureScript
                         case EVENT_SUNBEAM:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_SUNBEAM);
-                            events.ScheduleEvent(EVENT_SUNBEAM, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_SUNBEAM, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_NATURE_BOMB:
                             DoCastAOE(SPELL_SUMMON_NATURE_BOMB, true);
-                            events.ScheduleEvent(EVENT_NATURE_BOMB, urand(10000, 12000));
+                            events.ScheduleEvent(EVENT_NATURE_BOMB, std::rand() % 12000 + 10000);
                             break;
                         case EVENT_UNSTABLE_ENERGY:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                                 DoCast(target, SPELL_FREYA_UNSTABLE_SUNBEAM, true);
-                            events.ScheduleEvent(EVENT_UNSTABLE_ENERGY, urand(15000, 20000));
+                            events.ScheduleEvent(EVENT_UNSTABLE_ENERGY, std::rand() % 20000 + 15000);
                             break;
                         case EVENT_WAVE:
                             SpawnWave();
                             if (waveCount <= 6) // If set to 6 The Bombs appear during the Final Add wave
                                 events.ScheduleEvent(EVENT_WAVE, WAVE_TIME);
                             else
-                                events.ScheduleEvent(EVENT_NATURE_BOMB, urand(10000, 20000));
+                                events.ScheduleEvent(EVENT_NATURE_BOMB, std::rand() % 20000 + 10000);
                             break;
                         case EVENT_EONAR_GIFT:
                             Talk(EMOTE_LIFEBINDERS_GIFT);
                             DoCast(me, SPELL_SUMMON_EONAR_GIFT);
-                            events.ScheduleEvent(EVENT_EONAR_GIFT, urand(40000, 50000));
+                            events.ScheduleEvent(EVENT_EONAR_GIFT, std::rand() % 50000 + 40000);
                             break;
                         case EVENT_STRENGTHENED_IRON_ROOTS:
                             Talk(EMOTE_IRON_ROOTS);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_ROOTS_FREYA))
                                 target->CastSpell(target, SPELL_ROOTS_FREYA, true); // This must be casted by Target self
-                            events.ScheduleEvent(EVENT_STRENGTHENED_IRON_ROOTS, urand(12000, 20000));
+                            events.ScheduleEvent(EVENT_STRENGTHENED_IRON_ROOTS, std::rand() % 20000 + 12000);
                             break;
                         case EVENT_GROUND_TREMOR:
                             Talk(EMOTE_GROUND_TREMOR);
                             DoCastAOE(SPELL_FREYA_GROUND_TREMOR);
-                            events.ScheduleEvent(EVENT_GROUND_TREMOR, urand(25000, 28000));
+                            events.ScheduleEvent(EVENT_GROUND_TREMOR, std::rand() % 28000 + 25000);
                             break;
                     }
                 }
@@ -534,10 +534,10 @@ class boss_freya : public CreatureScript
                     for (uint8 n = 0; n < 3; ++n)
                         random[n] = false;
 
-                uint8 randomId = urand(0, 2);
+                uint8 randomId = std::rand() % 2;
 
                 while (random[randomId])
-                    randomId = urand(0, 2);
+                    randomId = std::rand() % 2;
 
                 random[randomId] = true;
                 return randomId;
@@ -674,8 +674,8 @@ class boss_elder_brightleaf : public CreatureScript
                 _Reset();
                 if (me->HasAura(SPELL_DRAINED_OF_POWER))
                     me->RemoveAurasDueToSpell(SPELL_DRAINED_OF_POWER);
-                events.ScheduleEvent(EVENT_SOLAR_FLARE, urand(5000, 7000));
-                events.ScheduleEvent(EVENT_UNSTABLE_SUN_BEAM, urand(7000, 12000));
+                events.ScheduleEvent(EVENT_SOLAR_FLARE, std::rand() % 7000 + 5000);
+                events.ScheduleEvent(EVENT_UNSTABLE_SUN_BEAM, std::rand() % 12000 + 7000);
                 events.ScheduleEvent(EVENT_FLUX, 5000);
                 elderCount = 0;
                 lumberjack = false;
@@ -725,7 +725,7 @@ class boss_elder_brightleaf : public CreatureScript
                     {
                         case EVENT_UNSTABLE_SUN_BEAM:
                             me->CastSpell(me, SPELL_UNSTABLE_SUN_BEAM_SUMMON, true);
-                            events.ScheduleEvent(EVENT_UNSTABLE_SUN_BEAM, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_UNSTABLE_SUN_BEAM, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_SOLAR_FLARE:
                         {
@@ -733,14 +733,14 @@ class boss_elder_brightleaf : public CreatureScript
                             if (me->GetAura(SPELL_FLUX_AURA))
                                 stackAmount = me->GetAura(SPELL_FLUX_AURA)->GetStackAmount();
                             me->CastCustomSpell(SPELL_SOLAR_FLARE, SPELLVALUE_MAX_TARGETS, stackAmount, me, false);
-                            events.ScheduleEvent(EVENT_SOLAR_FLARE, urand(5000, 10000));
+                            events.ScheduleEvent(EVENT_SOLAR_FLARE, std::rand() % 10000 + 5000);
                             break;
                         }
                         case EVENT_FLUX:
                             me->RemoveAurasDueToSpell(SPELL_FLUX_AURA);
                             me->AddAura(SPELL_FLUX_AURA, me);
                             if (Aura* Flux = me->GetAura(SPELL_FLUX_AURA))
-                                Flux->SetStackAmount(urand(1, 8));
+                                Flux->SetStackAmount(std::rand() % 8 + 1);
                             events.ScheduleEvent(EVENT_FLUX, 7500);
                             break;
                     }
@@ -788,6 +788,9 @@ class boss_elder_stonebark : public CreatureScript
         {
             boss_elder_stonebarkAI(Creature* creature) : BossAI(creature, BOSS_STONEBARK)
             {
+                elderCount = 0;
+                lumberjack = false;
+                lumberjackTimer = 0;
             }
 
             void Reset() OVERRIDE
@@ -795,9 +798,9 @@ class boss_elder_stonebark : public CreatureScript
                 _Reset();
                 if (me->HasAura(SPELL_DRAINED_OF_POWER))
                     me->RemoveAurasDueToSpell(SPELL_DRAINED_OF_POWER);
-                events.ScheduleEvent(EVENT_TREMOR, urand(10000, 12000));
-                events.ScheduleEvent(EVENT_FISTS, urand(25000, 35000));
-                events.ScheduleEvent(EVENT_BARK, urand(37500, 40000));
+                events.ScheduleEvent(EVENT_TREMOR, std::rand() % 12000 + 10000);
+                events.ScheduleEvent(EVENT_FISTS, std::rand() % 35000 + 25000);
+                events.ScheduleEvent(EVENT_BARK, std::rand() % 40000 + 37500);
                 elderCount = 0;
                 lumberjack = false;
             }
@@ -859,16 +862,16 @@ class boss_elder_stonebark : public CreatureScript
                     {
                         case EVENT_BARK:
                             DoCast(me, SPELL_PETRIFIED_BARK);
-                            events.ScheduleEvent(EVENT_BARK, urand(30000, 50000));
+                            events.ScheduleEvent(EVENT_BARK, std::rand() % 50000 + 30000);
                             break;
                         case EVENT_FISTS:
                             DoCastVictim(SPELL_FISTS_OF_STONE);
-                            events.ScheduleEvent(EVENT_FISTS, urand(20000, 30000));
+                            events.ScheduleEvent(EVENT_FISTS, std::rand() % 30000 + 20000);
                             break;
                         case EVENT_TREMOR:
                             if (!me->HasAura(SPELL_FISTS_OF_STONE))
                                 DoCastVictim(SPELL_GROUND_TREMOR);
-                            events.ScheduleEvent(EVENT_TREMOR, urand(10000, 20000));
+                            events.ScheduleEvent(EVENT_TREMOR, std::rand() % 20000 + 10000);
                             break;
                     }
                 }
@@ -922,9 +925,9 @@ class boss_elder_ironbranch : public CreatureScript
                 _Reset();
                 if (me->HasAura(SPELL_DRAINED_OF_POWER))
                     me->RemoveAurasDueToSpell(SPELL_DRAINED_OF_POWER);
-                events.ScheduleEvent(EVENT_IMPALE, urand(18000, 22000));
-                events.ScheduleEvent(EVENT_IRON_ROOTS, urand(12000, 17000));
-                events.ScheduleEvent(EVENT_THORN_SWARM, urand(7500, 12500));
+                events.ScheduleEvent(EVENT_IMPALE, std::rand() % 22000 + 18000);
+                events.ScheduleEvent(EVENT_IRON_ROOTS, std::rand() % 17000 + 12000);
+                events.ScheduleEvent(EVENT_THORN_SWARM, std::rand() % 12500 + 7500);
                 elderCount = 0;
                 lumberjack = false;
             }
@@ -973,16 +976,16 @@ class boss_elder_ironbranch : public CreatureScript
                     {
                         case EVENT_IMPALE:
                             DoCastVictim(SPELL_IMPALE);
-                            events.ScheduleEvent(EVENT_IMPALE, urand(15000, 25000));
+                            events.ScheduleEvent(EVENT_IMPALE, std::rand() % 25000 + 15000);
                             break;
                         case EVENT_IRON_ROOTS:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true, -SPELL_ROOTS_IRONBRANCH))
                                 target->CastSpell(target, SPELL_ROOTS_IRONBRANCH, true);
-                            events.ScheduleEvent(EVENT_IRON_ROOTS, urand(10000, 20000));
+                            events.ScheduleEvent(EVENT_IRON_ROOTS, std::rand() % 20000 + 10000);
                             break;
                         case EVENT_THORN_SWARM:
                             DoCastVictim(SPELL_THORN_SWARM);
-                            events.ScheduleEvent(EVENT_THORN_SWARM, urand(8000, 13000));
+                            events.ScheduleEvent(EVENT_THORN_SWARM, std::rand() % 13000 + 8000);
                             break;
                     }
                 }
@@ -1046,7 +1049,7 @@ class npc_detonating_lasher : public CreatureScript
                 if (lashTimer <= diff)
                 {
                     DoCast(SPELL_FLAME_LASH);
-                    lashTimer = urand(5000, 10000);
+                    lashTimer = std::rand() % 10000 + 5000;
                 }
                 else
                     lashTimer -= diff;
@@ -1059,7 +1062,7 @@ class npc_detonating_lasher : public CreatureScript
                         me->AddThreat(target, me->getThreatManager().getThreat(me->GetVictim(), false) * 1.2f);
                         me->AI()->AttackStart(target);
                     }
-                    changeTargetTimer = urand(5000, 10000);
+                    changeTargetTimer = std::rand() % 10000 + 5000;
                 }
                 else
                     changeTargetTimer -= diff;
@@ -1109,7 +1112,7 @@ class npc_ancient_water_spirit : public CreatureScript
                         DoCast(target, SPELL_TIDAL_WAVE);
                         DoCast(target, SPELL_TIDAL_WAVE_EFFECT, true);
                     }
-                    tidalWaveTimer = urand(12000, 25000);
+                    tidalWaveTimer = std::rand() % 25000 + 12000;
                 }
                 else
                     tidalWaveTimer -= diff;
@@ -1166,7 +1169,7 @@ class npc_storm_lasher : public CreatureScript
                 if (lightningLashTimer <= diff)
                 {
                     DoCast(SPELL_LIGHTNING_LASH);
-                    lightningLashTimer = urand(7000, 14000);
+                    lightningLashTimer = std::rand() % 14000 + 7000;
                 }
                 else
                     lightningLashTimer -= diff;
@@ -1175,7 +1178,7 @@ class npc_storm_lasher : public CreatureScript
                 {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
                         DoCast(target, SPELL_STORMBOLT);
-                    stormboltTimer = urand(8000, 12000);
+                    stormboltTimer = std::rand() % 12000 + 8000;
                 }
                 else
                     stormboltTimer -= diff;
@@ -1292,7 +1295,7 @@ class npc_ancient_conservator : public CreatureScript
                 if (healthySporeTimer <= diff)
                 {
                     SummonHealthySpores(1);
-                    healthySporeTimer = urand(15000, 17500);
+                    healthySporeTimer = std::rand() % 17500 + 15000;
                 }
                 else
                     healthySporeTimer -= diff;
@@ -1358,7 +1361,7 @@ class npc_healthy_spore : public CreatureScript
                 DoCast(me, SPELL_HEALTHY_SPORE_VISUAL);
                 DoCast(me, SPELL_POTENT_PHEROMONES);
                 DoCast(me, SPELL_GROW);
-                lifeTimer = urand(22000, 30000);
+                lifeTimer = std::rand() % 30000 + 22000;
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -1367,7 +1370,7 @@ class npc_healthy_spore : public CreatureScript
                 {
                     me->RemoveAurasDueToSpell(SPELL_GROW);
                     me->DespawnOrUnsummon(2200);
-                    lifeTimer = urand(22000, 30000);
+                    lifeTimer = std::rand() % 30000 + 22000;
                 }
                 else
                     lifeTimer -= diff;
@@ -1434,7 +1437,7 @@ class npc_nature_bomb : public CreatureScript
             {
                 SetCombatMovement(false);
 
-                bombTimer = urand(8000, 10000);
+                bombTimer = std::rand() % 10000 + 8000;
                 DoCast(SPELL_OBJECT_BOMB);
             }
 
@@ -1476,7 +1479,7 @@ class npc_unstable_sun_beam : public CreatureScript
             {
                 SetCombatMovement(false);
 
-                despawnTimer = urand(7000, 12000);
+                despawnTimer = std::rand() % 12000 + 7000;
                 instance = me->GetInstanceScript();
                 DoCast(me, SPELL_PHOTOSYNTHESIS);
                 DoCast(me, SPELL_UNSTABLE_SUN_BEAM);

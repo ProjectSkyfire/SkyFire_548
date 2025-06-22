@@ -39,9 +39,9 @@ public:
             }
             _EnterCombat();
 
-            events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
+            events.ScheduleEvent(EVENT_SHADOWFLAME, std::rand() % 20000 + 10000);
             events.ScheduleEvent(EVENT_WINGBUFFET, 30000);
-            events.ScheduleEvent(EVENT_SHADOWOFEBONROC, urand(8000, 10000));
+            events.ScheduleEvent(EVENT_SHADOWOFEBONROC, std::rand() % 10000 + 8000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -60,7 +60,7 @@ public:
                 {
                     case EVENT_SHADOWFLAME:
                         DoCastVictim(SPELL_SHADOWFLAME);
-                        events.ScheduleEvent(EVENT_SHADOWFLAME, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_SHADOWFLAME, std::rand() % 20000 + 10000);
                         break;
                     case EVENT_WINGBUFFET:
                         DoCastVictim(SPELL_WINGBUFFET);
@@ -68,7 +68,7 @@ public:
                         break;
                     case EVENT_SHADOWOFEBONROC:
                         DoCastVictim(SPELL_SHADOWOFEBONROC);
-                        events.ScheduleEvent(EVENT_SHADOWOFEBONROC, urand(8000, 10000));
+                        events.ScheduleEvent(EVENT_SHADOWOFEBONROC, std::rand() % 10000 + 8000);
                         break;
                 }
             }

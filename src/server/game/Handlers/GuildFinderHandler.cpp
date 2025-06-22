@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "WorldSession.h"
-#include "WorldPacket.h"
-#include "Object.h"
-#include "SharedDefines.h"
 #include "GuildFinderMgr.h"
 #include "GuildMgr.h"
+#include "Object.h"
+#include "SharedDefines.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 void WorldSession::HandleGuildFinderAddApplication(WorldPacket& recvPacket)
 {
@@ -154,7 +154,7 @@ void WorldSession::HandleGuildFinderDeclineRecruit(WorldPacket& recvPacket)
 
     recvPacket.ReadGuidMask(RecruitGUID, 6, 7, 3, 1, 2, 0, 4, 5);
     recvPacket.ReadGuidBytes(RecruitGUID, 0, 7, 1, 6, 4, 3, 5, 2);
-    
+
     if (!IS_PLAYER_GUID(RecruitGUID))
         return;
 
@@ -358,7 +358,7 @@ void WorldSession::HandleGuildFinderSetGuildPost(WorldPacket& recvPacket)
 
     uint32 classRoles = 0;
     uint32 availability = 0;
-    uint32 guildInterests =  0;
+    uint32 guildInterests = 0;
     uint32 level = 0;
 
     recvPacket >> level >> availability >> classRoles >> guildInterests;

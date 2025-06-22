@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,11 +10,11 @@ namespace CharacterDatabaseCleaner
 {
     enum CleaningFlags
     {
-        CLEANING_FLAG_ACHIEVEMENT_PROGRESS  = 0x1,
-        CLEANING_FLAG_SKILLS                = 0x2,
-        CLEANING_FLAG_SPELLS                = 0x4,
-        CLEANING_FLAG_TALENTS               = 0x8,
-        CLEANING_FLAG_QUESTSTATUS           = 0x10
+        CLEANING_FLAG_ACHIEVEMENT_PROGRESS = 0x1,
+        CLEANING_FLAG_SKILLS = 0x2,
+        CLEANING_FLAG_SPELLS = 0x4,
+        CLEANING_FLAG_TALENTS = 0x8,
+        CLEANING_FLAG_QUESTSTATUS = 0x10
     };
 
     void CleanDatabase();

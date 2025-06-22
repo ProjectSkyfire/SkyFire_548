@@ -218,7 +218,7 @@ class npc_harbinger_of_flame : public CreatureScript
                             break;
                         case EVENT_FIEROCLAST_BARRAGE:
                             DoCastAOE(SPELL_FIEROCLAST_BARRAGE);
-                            _events.ScheduleEvent(EVENT_FIEROCLAST_BARRAGE, urand(9000, 12000));
+                            _events.ScheduleEvent(EVENT_FIEROCLAST_BARRAGE, std::rand() % 12000 + 9000);
                             break;
                     }
                 }
@@ -459,7 +459,7 @@ class npc_egg_pile : public CreatureScript
 
                             if (_callHatchlingSpell)
                                 DoCastAOE(_callHatchlingSpell, true);
-                            _events.ScheduleEvent(EVENT_SUMMON_SMOULDERING_HATCHLING, urand(6000, 10000));
+                            _events.ScheduleEvent(EVENT_SUMMON_SMOULDERING_HATCHLING, std::rand() % 10000 + 6000);
                             break;
                         }
                         default:

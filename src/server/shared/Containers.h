@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -9,29 +9,26 @@
 #include "Define.h"
 #include <list>
 
-//! Because circular includes are bad
-extern uint32 urand(uint32 min, uint32 max);
-
 namespace Skyfire
 {
     namespace Containers
     {
         template<class T>
-        void RandomResizeList(std::list<T> &list, uint32 size)
+        void RandomResizeList(std::list<T>& list, uint32 size)
         {
             size_t list_size = list.size();
 
             while (list_size > size)
             {
                 typename std::list<T>::iterator itr = list.begin();
-                std::advance(itr, urand(0, list_size - 1));
+                std::advance(itr, std::rand() % (list_size - 1));
                 list.erase(itr);
                 --list_size;
             }
         }
 
         template<class T, class Predicate>
-        void RandomResizeList(std::list<T> &list, Predicate& predicate, uint32 size)
+        void RandomResizeList(std::list<T>& list, Predicate& predicate, uint32 size)
         {
             //! First use predicate filter
             std::list<T> listCopy;
@@ -49,7 +46,7 @@ namespace Skyfire
         template <class C> typename C::value_type const& SelectRandomContainerElement(C const& container)
         {
             typename C::const_iterator it = container.begin();
-            std::advance(it, urand(0, container.size() - 1));
+            std::advance(it, std::rand() % (container.size() - 1));
             return *it;
         }
 

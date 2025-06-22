@@ -245,7 +245,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                     {
                         for (uint8 i = 0; i < summoned; ++i)
                         {
-                            switch (urand(0, 2))
+                            switch (std::rand() % 2)
                             {
                                 case 0:
                                     me->SummonCreature(NPC_HEARTHEN_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
@@ -258,9 +258,9 @@ class boss_warchief_kargath_bladefist : public CreatureScript
                                     break;
                             }
                         }
-                        if (urand(0, 9) < 2)
+                        if ((std::rand() % 9) < 2)
                             ++summoned;
-                        Summon_Assistant_Timer = urand(25000, 35000);
+                        Summon_Assistant_Timer = std::rand() % 35000 + 25000;
                     }
                     else
                         Summon_Assistant_Timer -= diff;

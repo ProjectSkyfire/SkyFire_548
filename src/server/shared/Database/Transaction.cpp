@@ -1,10 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "DatabaseEnv.h"
 #include "Transaction.h"
+#include "CompilerDefs.h"
 
 //- Append a raw ad-hoc query to the transaction
 void Transaction::Append(const char* sql)
@@ -18,7 +19,7 @@ void Transaction::Append(const char* sql)
 void Transaction::PAppend(const char* sql, ...)
 {
     va_list ap;
-    char szQuery [MAX_QUERY_LEN];
+    char szQuery[MAX_QUERY_LEN];
     va_start(ap, sql);
     vsnprintf(szQuery, MAX_QUERY_LEN, sql, ap);
     va_end(ap);
@@ -43,15 +44,15 @@ void Transaction::Cleanup()
 
     while (!m_queries.empty())
     {
-        SQLElementData const &data = m_queries.front();
+        SQLElementData const& data = m_queries.front();
         switch (data.type)
         {
             case SQL_ELEMENT_PREPARED:
                 delete data.element.stmt;
-            break;
+                break;
             case SQL_ELEMENT_RAW:
                 free((void*)(data.element.query));
-            break;
+                break;
         }
 
         m_queries.pop_front();

@@ -44,7 +44,7 @@ public:
             ThunderclapTimer   = 4 * IN_MILLISECONDS;
             StormboltTimer     = 6 * IN_MILLISECONDS;
             ResetTimer         = 5 * IN_MILLISECONDS;
-            YellTimer = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS);
+            YellTimer = std::rand() % (30 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -60,25 +60,25 @@ public:
             if (AvatarTimer <= diff)
             {
                 DoCastVictim(SPELL_AVATAR);
-                AvatarTimer =  urand(15 * IN_MILLISECONDS, 20 * IN_MILLISECONDS);
+                AvatarTimer =  std::rand() % (20 * IN_MILLISECONDS) + (15 * IN_MILLISECONDS);
             } else AvatarTimer -= diff;
 
             if (ThunderclapTimer <= diff)
             {
                 DoCastVictim(SPELL_THUNDERCLAP);
-                ThunderclapTimer = urand(5 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
+                ThunderclapTimer = std::rand() % (15 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS);
             } else ThunderclapTimer -= diff;
 
             if (StormboltTimer <= diff)
             {
                 DoCastVictim(SPELL_STORMBOLT);
-                StormboltTimer = urand(10 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
+                StormboltTimer = std::rand() % (25 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS);
             } else StormboltTimer -= diff;
 
             if (YellTimer <= diff)
             {
                 Talk(YELL_RANDOM);
-                YellTimer = urand(20 * IN_MILLISECONDS, 30 * IN_MILLISECONDS); //20 to 30 seconds
+                YellTimer = std::rand() % (30 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS); //20 to 30 seconds
             } else YellTimer -= diff;
 
             // check if creature is not outside of building

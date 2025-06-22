@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -8,8 +8,8 @@
 
 #include "Common.h"
 #include "Config.h"
-#include <ace/Singleton.h>
 #include "WorldPacket.h"
+#include <ace/Singleton.h>
 
 class AddonHandler
 {
@@ -17,10 +17,10 @@ class AddonHandler
     friend class ACE_Singleton<AddonHandler, ACE_Null_Mutex>;
     AddonHandler();
 
-    public:
-        ~AddonHandler();
-                                                            //build addon packet
-        bool BuildAddonPacket(WorldPacket* Source, WorldPacket* Target);
+public:
+    ~AddonHandler();
+    //build addon packet
+    bool BuildAddonPacket(WorldPacket* Source, WorldPacket* Target);
 };
 #define sAddOnHandler ACE_Singleton<AddonHandler, ACE_Null_Mutex>::instance()
 #endif

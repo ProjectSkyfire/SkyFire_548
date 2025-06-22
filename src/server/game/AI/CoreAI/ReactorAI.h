@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -12,12 +12,12 @@ class Unit;
 
 class ReactorAI : public CreatureAI
 {
-    public:
-        explicit ReactorAI(Creature* c) : CreatureAI(c) { }
+public:
+    explicit ReactorAI(Creature* c) : CreatureAI(c) { }
 
-        void MoveInLineOfSight(Unit*) OVERRIDE { }
-        void UpdateAI(uint32 diff) OVERRIDE;
+    void MoveInLineOfSight(Unit*) OVERRIDE { }
+    void UpdateAI(uint32 diff) OVERRIDE;
 
-        static int Permissible(const Creature*);
+    static int Permissible(const Creature*);
 };
 #endif

@@ -1,23 +1,23 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
-#include "ObjectAccessor.h"
-#include "ObjectMgr.h"
-#include "Map.h"
-#include "MapManager.h"
-#include "Group.h"
-#include "WorldPacket.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "CreatureTextMgr.h"
+#include "GridNotifiers.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "GroupMgr.h"
+#include "Map.h"
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "WorldPacket.h"
 
 Battlefield::~Battlefield()
 {
@@ -25,7 +25,7 @@ Battlefield::~Battlefield()
         delete itr->second;
 
     for (GraveyardVect::const_iterator itr = m_GraveyardList.begin(); itr != m_GraveyardList.end(); ++itr)
-        delete *itr;
+        delete* itr;
 }
 
 // Called when a player enters the zone
@@ -404,123 +404,11 @@ void Battlefield::BroadcastPacketToWar(WorldPacket& data) const
                 player->GetSession()->SendPacket(&data);
 }
 
-WorldPacket Battlefield::BuildWarningAnnPacket(std::string const& msg)
-{
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-
-    ObjectGuid target = 0;
-    ObjectGuid source = 0;
-    ObjectGuid unkGuid = 0;
-    ObjectGuid unkGuid2 = 0;
-
-    data.WriteBit(1);
-    data.WriteBit(0);
-    data.WriteBit(0);
-    data.WriteBit(1);
-    data.WriteBit(0);
-    data.WriteBit(1);
-    data.WriteBit(1);
-    data.WriteBit(1);
-
-    data.WriteBit(unkGuid[0]);
-    data.WriteBit(unkGuid[1]);
-    data.WriteBit(unkGuid[5]);
-    data.WriteBit(unkGuid[4]);
-    data.WriteBit(unkGuid[3]);
-    data.WriteBit(unkGuid[2]);
-    data.WriteBit(unkGuid[6]);
-    data.WriteBit(unkGuid[7]);
-
-    data.WriteBit(0);
-
-    data.WriteBit(source[7]);
-    data.WriteBit(source[6]);
-    data.WriteBit(source[1]);
-    data.WriteBit(source[4]);
-    data.WriteBit(source[0]);
-    data.WriteBit(source[2]);
-    data.WriteBit(source[3]);
-    data.WriteBit(source[5]);
-
-    data.WriteBit(0);
-    data.WriteBit(0); // Send Language
-    data.WriteBit(1);
-
-    data.WriteBit(target[0]);
-    data.WriteBit(target[3]);
-    data.WriteBit(target[7]);
-    data.WriteBit(target[2]);
-    data.WriteBit(target[1]);
-    data.WriteBit(target[5]);
-    data.WriteBit(target[4]);
-    data.WriteBit(target[6]);
-
-    data.WriteBit(1);
-    data.WriteBit(0);
-    data.WriteBits(msg.length(), 12);
-    data.WriteBit(1);
-    data.WriteBit(1);
-    data.WriteBit(0);
-
-    data.WriteBit(unkGuid2[2]);
-    data.WriteBit(unkGuid2[5]);
-    data.WriteBit(unkGuid2[7]);
-    data.WriteBit(unkGuid2[4]);
-    data.WriteBit(unkGuid2[0]);
-    data.WriteBit(unkGuid2[1]);
-    data.WriteBit(unkGuid2[3]);
-    data.WriteBit(unkGuid2[6]);
-
-    data.FlushBits();
-
-    data.WriteByteSeq(unkGuid2[4]);
-    data.WriteByteSeq(unkGuid2[5]);
-    data.WriteByteSeq(unkGuid2[7]);
-    data.WriteByteSeq(unkGuid2[3]);
-    data.WriteByteSeq(unkGuid2[2]);
-    data.WriteByteSeq(unkGuid2[6]);
-    data.WriteByteSeq(unkGuid2[0]);
-    data.WriteByteSeq(unkGuid2[1]);
-
-    data.WriteByteSeq(target[4]);
-    data.WriteByteSeq(target[7]);
-    data.WriteByteSeq(target[1]);
-    data.WriteByteSeq(target[5]);
-    data.WriteByteSeq(target[0]);
-    data.WriteByteSeq(target[6]);
-    data.WriteByteSeq(target[2]);
-    data.WriteByteSeq(target[3]);
-
-    data << uint8(ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE);
-
-    data.WriteByteSeq(unkGuid[1]);
-    data.WriteByteSeq(unkGuid[3]);
-    data.WriteByteSeq(unkGuid[4]);
-    data.WriteByteSeq(unkGuid[6]);
-    data.WriteByteSeq(unkGuid[0]);
-    data.WriteByteSeq(unkGuid[2]);
-    data.WriteByteSeq(unkGuid[5]);
-    data.WriteByteSeq(unkGuid[7]);
-
-    data.WriteByteSeq(source[2]);
-    data.WriteByteSeq(source[5]);
-    data.WriteByteSeq(source[3]);
-    data.WriteByteSeq(source[6]);
-    data.WriteByteSeq(source[7]);
-    data.WriteByteSeq(source[4]);
-    data.WriteByteSeq(source[1]);
-    data.WriteByteSeq(source[0]);
-
-    data << uint8(Language::LANG_UNIVERSAL);
-    data.WriteString(msg);
-    return data;
-}
-
 void Battlefield::SendWarningToAllInZone(uint32 entry)
 {
     if (Creature* stalker = GetCreature(StalkerGuid))
         // FIXME: replaced CHAT_TYPE_END with CHAT_MSG_BG_SYSTEM_NEUTRAL to fix compile, it's a guessed change :/
-        sCreatureTextMgr->SendChat(stalker, (uint8) entry, 0, ChatMsg::CHAT_MSG_BG_SYSTEM_NEUTRAL, Language::LANG_ADDON, TEXT_RANGE_ZONE);
+        sCreatureTextMgr->SendChat(stalker, (uint8)entry, 0, ChatMsg::CHAT_MSG_BG_SYSTEM_NEUTRAL, Language::LANG_ADDON, TEXT_RANGE_ZONE);
 }
 
 void Battlefield::SendWarningToPlayer(Player* player, uint32 entry)
@@ -986,7 +874,7 @@ void BfCapturePoint::SendChangePhase()
         // send this too, sometimes the slider disappears, dunno why :(
         SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldState1, 1);
         // send these updates to only the ones in this objective
-        SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldstate2, (uint32) ceil((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
+        SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldstate2, (uint32)ceil((m_value + m_maxValue) / (2 * m_maxValue) * 100.0f));
         // send this too, sometimes it resets :S
         SendUpdateWorldState(capturePoint->GetGOInfo()->capturePoint.worldstate3, m_neutralValuePct);
     }
@@ -1086,7 +974,7 @@ bool BfCapturePoint::Update(uint32 diff)
     }
 
     // get the difference of numbers
-    float fact_diff = ((float) m_activePlayers[0].size() - (float) m_activePlayers[1].size()) * diff / float(BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL);
+    float fact_diff = ((float)m_activePlayers[0].size() - (float)m_activePlayers[1].size()) * diff / float(BATTLEFIELD_OBJECTIVE_UPDATE_INTERVAL);
     if (G3D::fuzzyEq(fact_diff, 0.0f))
         return false;
 

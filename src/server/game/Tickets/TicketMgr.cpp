@@ -1,19 +1,19 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Chat.h"
 #include "Common.h"
-#include "TicketMgr.h"
 #include "DatabaseEnv.h"
-#include "Log.h"
 #include "Language.h"
+#include "Log.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "TicketMgr.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Chat.h"
-#include "World.h"
-#include "Player.h"
-#include "Opcodes.h"
 
 inline float GetAge(uint64 t) { return float(time(NULL) - t) / float(DAY); }
 
@@ -473,6 +473,6 @@ void TicketMgr::SendGmTicketUpdate(Opcodes opcode, GMTicketResponse response, Pl
     {
         WorldPacket data(opcode, 4);
         data << uint32(response);
-        player->GetSession()-> SendPacket(&data);
+        player->GetSession()->SendPacket(&data);
     }
 }

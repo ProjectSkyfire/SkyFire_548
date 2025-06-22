@@ -49,29 +49,26 @@ enum Misc
     TELEPORTTIME                  = 30000
 };
 
-
-
 struct boss_twinemperorsAI : public ScriptedAI
 {
-    boss_twinemperorsAI(Creature* creature): ScriptedAI(creature)
-    {
-        instance = creature->GetInstanceScript();
-    }
-
-    InstanceScript* instance;
-
-    uint32 Heal_Timer;
-    uint32 Teleport_Timer;
-    bool AfterTeleport;
-    uint32 AfterTeleportTimer;
-    bool DontYellWhenDead;
-    uint32 Abuse_Bug_Timer, BugsTimer;
-    bool tspellcasted;
-    uint32 EnrageTimer;
-
     virtual bool IAmVeklor() = 0;
     virtual void Reset() = 0;
     virtual void CastSpellOnBug(Creature* target) = 0;
+
+    boss_twinemperorsAI(Creature* creature): ScriptedAI(creature)
+    {
+        instance = creature->GetInstanceScript();
+
+        Heal_Timer = 0;
+        Teleport_Timer = 0;
+        AfterTeleport = false;
+        AfterTeleportTimer = 0;
+        DontYellWhenDead = 0;
+        Abuse_Bug_Timer = 0;
+        BugsTimer = 0;
+        tspellcasted = false;
+        EnrageTimer = 0;
+    }
 
     void TwinReset()
     {
@@ -80,7 +77,7 @@ struct boss_twinemperorsAI : public ScriptedAI
         AfterTeleport = false;
         tspellcasted = false;
         AfterTeleportTimer = 0;
-        Abuse_Bug_Timer = urand(10000, 17000);
+        Abuse_Bug_Timer = std::rand() % 17000 + 10000;
         BugsTimer = 2000;
         me->ClearUnitState(UNIT_STATE_STUNNED);
         DontYellWhenDead = false;
@@ -340,7 +337,7 @@ struct boss_twinemperorsAI : public ScriptedAI
                 if (c)
                 {
                     CastSpellOnBug(c);
-                    Abuse_Bug_Timer = urand(10000, 17000);
+                    Abuse_Bug_Timer = std::rand() % 17000 + 10000;
                 }
                 else
                 {
@@ -371,6 +368,17 @@ struct boss_twinemperorsAI : public ScriptedAI
             } else EnrageTimer = 0;
         } else EnrageTimer-=diff;
     }
+
+    InstanceScript* instance;
+
+    uint32 Heal_Timer;
+    uint32 Teleport_Timer;
+    bool AfterTeleport;
+    uint32 AfterTeleportTimer;
+    bool DontYellWhenDead;
+    uint32 Abuse_Bug_Timer, BugsTimer;
+    bool tspellcasted;
+    uint32 EnrageTimer;
 };
 
 class boss_veknilash : public CreatureScript
@@ -378,33 +386,29 @@ class boss_veknilash : public CreatureScript
 public:
     boss_veknilash() : CreatureScript("boss_veknilash") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_veknilashAI(creature);
-    }
-
     struct boss_veknilashAI : public boss_twinemperorsAI
     {
         bool IAmVeklor() OVERRIDE {return false;}
-        boss_veknilashAI(Creature* creature) : boss_twinemperorsAI(creature) { }
 
-        uint32 UpperCut_Timer;
-        uint32 UnbalancingStrike_Timer;
-        uint32 Scarabs_Timer;
-        int Rand;
-        int RandX;
-        int RandY;
-
-        Creature* Summoned;
+        boss_veknilashAI(Creature* creature) : boss_twinemperorsAI(creature)
+        {
+            UpperCut_Timer = 0;
+            UnbalancingStrike_Timer = 0;
+            Scarabs_Timer = 0;
+            Rand = 0;
+            RandX = 0;
+            RandY = 0;
+            Summoned = NULL;
+        }
 
         void Reset() OVERRIDE
         {
             TwinReset();
-            UpperCut_Timer = urand(14000, 29000);
-            UnbalancingStrike_Timer = urand(8000, 18000);
-            Scarabs_Timer = urand(7000, 14000);
+            UpperCut_Timer = std::rand() % 29000 + 14000;
+            UnbalancingStrike_Timer = std::rand() % 18000 + 8000;
+            Scarabs_Timer = std::rand() % 14000 + 7000;
 
-                                                                //Added. Can be removed if its included in DB.
+            //Added. Can be removed if its included in DB.
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_MAGIC, true);
         }
 
@@ -455,7 +459,20 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+        Creature* Summoned;
+        uint32 UpperCut_Timer;
+        uint32 UnbalancingStrike_Timer;
+        uint32 Scarabs_Timer;
+        int Rand;
+        int RandX;
+        int RandY;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_veknilashAI(creature);
+    }
 };
 
 class boss_veklor : public CreatureScript
@@ -463,33 +480,29 @@ class boss_veklor : public CreatureScript
 public:
     boss_veklor() : CreatureScript("boss_veklor") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_veklorAI(creature);
-    }
-
     struct boss_veklorAI : public boss_twinemperorsAI
     {
         bool IAmVeklor() OVERRIDE {return true;}
-        boss_veklorAI(Creature* creature) : boss_twinemperorsAI(creature) { }
 
-        uint32 ShadowBolt_Timer;
-        uint32 Blizzard_Timer;
-        uint32 ArcaneBurst_Timer;
-        uint32 Scorpions_Timer;
-        int Rand;
-        int RandX;
-        int RandY;
-
-        Creature* Summoned;
+        boss_veklorAI(Creature* creature) : boss_twinemperorsAI(creature)
+        {
+            ShadowBolt_Timer = 0;
+            Blizzard_Timer = 0;
+            ArcaneBurst_Timer = 0;
+            Scorpions_Timer = 0;
+            Rand = 0;
+            RandX = 0;
+            RandY = 0;
+            Summoned = NULL;
+        }
 
         void Reset() OVERRIDE
         {
             TwinReset();
             ShadowBolt_Timer = 0;
-            Blizzard_Timer = urand(15000, 20000);
+            Blizzard_Timer = std::rand() % 20000 + 15000;
             ArcaneBurst_Timer = 1000;
-            Scorpions_Timer = urand(7000, 14000);
+            Scorpions_Timer = std::rand() % 14000 + 7000;
 
             //Added. Can be removed if its included in DB.
             me->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, true);
@@ -580,7 +593,21 @@ public:
                 }
             }
         }
+
+        Creature* Summoned;
+        uint32 ShadowBolt_Timer;
+        uint32 Blizzard_Timer;
+        uint32 ArcaneBurst_Timer;
+        uint32 Scorpions_Timer;
+        int Rand;
+        int RandX;
+        int RandY;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_veklorAI(creature);
+    }
 };
 
 void AddSC_boss_twinemperors()

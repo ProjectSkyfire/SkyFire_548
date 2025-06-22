@@ -1,9 +1,9 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-/// \addtogroup Trinityd
+/// \addtogroup SkyFired
 /// @{
 /// \file
 
@@ -13,8 +13,8 @@
 /// Command Line Interface handling thread
 class CliRunnable : public ACE_Based::Runnable
 {
-    public:
-        void run() OVERRIDE;
+public:
+    void run() OVERRIDE;
 };
 
 #endif

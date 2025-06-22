@@ -198,7 +198,7 @@ class boss_ignis : public CreatureScript
                         case EVENT_JET:
                             Talk(EMOTE_JETS);
                             DoCast(me, SPELL_FLAME_JETS);
-                            events.ScheduleEvent(EVENT_JET, urand(35000, 40000));
+                            events.ScheduleEvent(EVENT_JET, std::rand() % 40000 + 35000);
                             break;
                         case EVENT_SLAG_POT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
@@ -246,7 +246,7 @@ class boss_ignis : public CreatureScript
                             break;
                         case EVENT_CONSTRUCT:
                             Talk(SAY_SUMMON);
-                            DoSummon(NPC_IRON_CONSTRUCT, ConstructSpawnPosition[urand(0, CONSTRUCT_SPAWN_POINTS - 1)], 30000, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
+                            DoSummon(NPC_IRON_CONSTRUCT, ConstructSpawnPosition[std::rand() % (CONSTRUCT_SPAWN_POINTS - 1)], 30000, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT);
                             DoCast(SPELL_STRENGHT);
                             DoCast(me, SPELL_ACTIVATE_CONSTRUCT);
                             events.ScheduleEvent(EVENT_CONSTRUCT, RAID_MODE(40000, 30000));

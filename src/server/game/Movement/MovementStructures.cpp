@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -1776,7 +1776,7 @@ MovementStatusElements const MovementStartPitchUp[] = // 5.4.8 18414
     MSEEnd
 };
 
-MovementStatusElements const MoveChngTransport[]= // 5.4.8 18414
+MovementStatusElements const MoveChngTransport[] = // 5.4.8 18414
 {
     MSEPositionX,
     MSEPositionY,
@@ -3317,7 +3317,7 @@ MovementStatusElements const MovementForceSwimBackSpeedChangeAck[] = // 5.4.8 18
     MSEEnd
 };
 
-MovementStatusElements const MovementSetCollisionHeightAck[] =
+MovementStatusElements const MovementSetCollisionHeightAck[] = // 5.4.8 18414
 {
     MSEMountDisplayIdWithoutCheck,
     MSEPositionZ,
@@ -3354,7 +3354,7 @@ MovementStatusElements const MovementSetCollisionHeightAck[] =
     MSEHasTransportGuidByte5,
     MSEHasTransportGuidByte2,
     MSEHasTransportGuidByte3,
-    MSEHasTransportVehicleId,
+    MSEHasTransportTime3,
     MSEHasTransportTime2,
     MSEHasTransportGuidByte7,
     MSEMovementFlags,
@@ -3381,7 +3381,7 @@ MovementStatusElements const MovementSetCollisionHeightAck[] =
     MSETransportGuidByte4,
     MSETransportGuidByte0,
     MSETransportTime2,
-    MSETransportVehicleId,
+    MSETransportTime3,
     MSETransportGuidByte6,
     MSETransportGuidByte7,
     MSETransportGuidByte2,
@@ -6433,7 +6433,7 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
         case MSEGuidByte5:
         case MSEGuidByte6:
         case MSEGuidByte7:
-            packet.ReadByteSeq(Data.guid [element - MSEGuidByte0]);
+            packet.ReadByteSeq(Data.guid[element - MSEGuidByte0]);
             break;
         case MSEExtraFloat:
             packet >> Data.floatData;
@@ -6565,9 +6565,9 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         case MSG_MOVE_SET_PITCH:
             return MovementSetPitch;
         case MSG_MOVE_START_ASCEND:
-           return MovementStartAscend;
+            return MovementStartAscend;
         case MSG_MOVE_START_BACKWARD:
-           return MovementStartBackward;
+            return MovementStartBackward;
         case MSG_MOVE_START_DESCEND:
             return MovementStartDescend;
         case MSG_MOVE_START_FORWARD:
@@ -6604,14 +6604,14 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MoveChngTransport;
         case CMSG_MOVE_SPLINE_DONE:
             return MoveSplineDone;
-        //case CMSG_MOVE_NOT_ACTIVE_MOVER:
-        //    return MoveNotActiveMover;
+            //case CMSG_MOVE_NOT_ACTIVE_MOVER:
+            //    return MoveNotActiveMover;
         case CMSG_DISMISS_CONTROLLED_VEHICLE:
             return DismissControlledVehicle;
         case SMSG_MOVE_TELEPORT:
             return MoveTeleport;
-        //case SMSG_MOVE_UPDATE_TELEPORT:
-        //    return MoveUpdateTeleport;
+            //case SMSG_MOVE_UPDATE_TELEPORT:
+            //    return MoveUpdateTeleport;
         case CMSG_FORCE_MOVE_ROOT_ACK:
             return ForceMoveRootAck;
         case CMSG_FORCE_MOVE_UNROOT_ACK:
@@ -6644,16 +6644,16 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MovementGravityEnableAck;
         case CMSG_MOVE_HOVER_ACK:
             return MovementHoverAck;
-        //case CMSG_MOVE_KNOCK_BACK_ACK:
-        //    return MovementKnockBackAck;
-        //case CMSG_MOVE_SET_CAN_FLY:
-        //    return MovementSetCanFly;
+            //case CMSG_MOVE_KNOCK_BACK_ACK:
+            //    return MovementKnockBackAck;
+            //case CMSG_MOVE_SET_CAN_FLY:
+            //    return MovementSetCanFly;
         case CMSG_MOVE_SET_FLY:
             return MovementSetFly;
         case CMSG_MOVE_SET_CAN_FLY_ACK:
             return MovementSetCanFlyAck;
-        //case CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK:
-        //    return MovementSetCanTransitionBetweenSwimAndFlyAck;
+            //case CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK:
+            //    return MovementSetCanTransitionBetweenSwimAndFlyAck;
         case CMSG_MOVE_APPLY_MOVEMENT_FORCE_ACK:
             return MovementApplyMovementForceAck;
         case CMSG_MOVE_REMOVE_MOVEMENT_FORCE_ACK:
@@ -6676,8 +6676,8 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MovementUpdateFlightSpeed;
         case SMSG_MOVE_UPDATE_RUN_SPEED:
             return MovementUpdateRunSpeed;
-        //case SMSG_MOVE_UPDATE_KNOCK_BACK:
-        //    return MovementUpdateKnockBack;
+            //case SMSG_MOVE_UPDATE_KNOCK_BACK:
+            //    return MovementUpdateKnockBack;
         case SMSG_MOVE_UPDATE_PITCH_RATE:
             return MovementUpdatePitchBack;
         case SMSG_MOVE_UPDATE_RUN_BACK_SPEED:
@@ -6721,7 +6721,7 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
         case SMSG_MOVE_SET_TURN_RATE:
             return MoveSetTurnRate;
         case SMSG_MOVE_SET_FLIGHT_SPEED:
-           return MoveSetFlightSpeed;
+            return MoveSetFlightSpeed;
         case SMSG_MOVE_SET_FLIGHT_BACK_SPEED:
             return MoveSetFlightBackSpeed;
         case SMSG_MOVE_SET_PITCH_RATE:
@@ -6784,10 +6784,10 @@ MovementStatusElements const* GetMovementStatusElementsSequence(Opcodes opcode)
             return MoveUnroot;
         case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
             return ChangeSeatsOnControlledVehicle;
-        //case CMSG_CAST_SPELL:
-        //case CMSG_PET_CAST_SPELL:
-        //case CMSG_USE_ITEM:
-        //    return CastSpellEmbeddedMovement;*/
+            //case CMSG_CAST_SPELL:
+            //case CMSG_PET_CAST_SPELL:
+            //case CMSG_USE_ITEM:
+            //    return CastSpellEmbeddedMovement;*/
         default:
             break;
     }

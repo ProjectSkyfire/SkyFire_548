@@ -68,8 +68,8 @@ public:
             enraged = false;
             events.ScheduleEvent(EVENT_WRAP, 20000);
             events.ScheduleEvent(EVENT_SPRAY, 40000);
-            events.ScheduleEvent(EVENT_SHOCK, urand(5000, 10000));
-            events.ScheduleEvent(EVENT_POISON, urand(10000, 15000));
+            events.ScheduleEvent(EVENT_SHOCK, std::rand() % 10000 + 5000);
+            events.ScheduleEvent(EVENT_POISON, std::rand() % 15000 + 10000);
             events.ScheduleEvent(EVENT_SUMMON, 30000);
         }
 
@@ -111,11 +111,11 @@ public:
                         break;
                     case EVENT_SHOCK:
                         DoCastAOE(RAID_MODE(SPELL_POISON_SHOCK_10, SPELL_POISON_SHOCK_25));
-                        events.ScheduleEvent(EVENT_SHOCK, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_SHOCK, std::rand() % 20000 + 10000);
                         break;
                     case EVENT_POISON:
                         DoCastVictim(RAID_MODE(SPELL_NECROTIC_POISON_10, SPELL_NECROTIC_POISON_25));
-                        events.ScheduleEvent(EVENT_POISON, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_POISON, std::rand() % 20000 + 10000);
                         break;
                     case EVENT_FRENZY:
                         DoCast(me, RAID_MODE(SPELL_FRENZY_10, SPELL_FRENZY_25), true);
@@ -123,7 +123,7 @@ public:
                         break;
                     case EVENT_SUMMON:
                         /// @todo Add missing text
-                        uint8 amount = urand(8, 10);
+                        uint8 amount = std::rand() % 10 + 8;
                         for (uint8 i = 0; i < amount; ++i)
                             DoSummon(NPC_SPIDERLING, me, 0, 30000, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                         events.ScheduleEvent(EVENT_SUMMON, 40000);

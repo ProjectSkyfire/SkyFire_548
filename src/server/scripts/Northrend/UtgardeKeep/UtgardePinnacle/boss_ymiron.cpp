@@ -155,9 +155,9 @@ public:
             m_bIsActiveWithTORGYN = false;
             kingsBane = true;
 
-            m_uiFetidRot_Timer            = urand(8000, 13000);
-            m_uiBane_Timer                = urand(18000, 23000);
-            m_uiDarkSlash_Timer           = urand(28000, 33000);
+            m_uiFetidRot_Timer = std::rand() % 13000 + 8000;
+            m_uiBane_Timer = std::rand() % 23000 + 18000;
+            m_uiDarkSlash_Timer = std::rand() % 33000 + 28000;
             m_uiAncestors_Vengeance_Timer = DUNGEON_MODE(60000, 45000);
             m_uiPause_Timer               = 0;
 
@@ -253,25 +253,25 @@ public:
                 if (m_uiBane_Timer <= diff)
                 {
                     DoCast(me, SPELL_BANE);
-                    m_uiBane_Timer = urand(20000, 25000);
+                    m_uiBane_Timer = std::rand() % 25000 + 20000;
                 } else m_uiBane_Timer -= diff;
 
                 if (m_uiFetidRot_Timer <= diff)
                 {
                     DoCastVictim(SPELL_FETID_ROT);
-                    m_uiFetidRot_Timer = urand(10000, 15000);
+                    m_uiFetidRot_Timer = std::rand() % 15000 + 10000;
                 } else m_uiFetidRot_Timer -= diff;
 
                 if (m_uiDarkSlash_Timer <= diff)
                 {
                     DoCastVictim(SPELL_DARK_SLASH);
-                    m_uiDarkSlash_Timer = urand(30000, 35000);
+                    m_uiDarkSlash_Timer = std::rand() % 35000 + 30000;
                 } else m_uiDarkSlash_Timer -= diff;
 
                 if (m_uiAncestors_Vengeance_Timer <= diff)
                 {
                     DoCast(me, SPELL_ANCESTORS_VENGEANCE);
-                    m_uiAncestors_Vengeance_Timer = DUNGEON_MODE(urand(60000, 65000), urand(45000, 50000));
+                    m_uiAncestors_Vengeance_Timer = DUNGEON_MODE(std::rand() % 65000 + 60000, std::rand() % 50000 + 45000);
                 } else m_uiAncestors_Vengeance_Timer -= diff;
 
                 // Abilities ------------------------------------------------------------------------------

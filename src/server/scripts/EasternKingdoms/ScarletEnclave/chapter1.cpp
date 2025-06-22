@@ -972,7 +972,7 @@ class npc_scarlet_miner : public CreatureScript
                 AddWaypoint(11, 2202.595947f, -6061.325684f, 5.882018f);
                 AddWaypoint(12, 2188.974609f, -6080.866699f, 3.370027f);
 
-                if (urand(0, 1))
+                if (std::rand() % 1)
                 {
                     AddWaypoint(13, 2176.483887f, -6110.407227f, 1.855181f);
                     AddWaypoint(14, 2172.516602f, -6146.752441f, 1.074235f);
@@ -1100,7 +1100,7 @@ public:
 
         EventMap events;
 
-        void InitializeAI()
+        void InitializeAI() OVERRIDE
         {
             events.Reset();
             events.ScheduleEvent(EVENT_REMOVE_CONTROL, 500);
@@ -1111,7 +1111,7 @@ public:
             DoCast(SPELL_EYE_FLIGHT);
         }
 
-        void OnCharmed(bool apply) override
+        void OnCharmed(bool apply) OVERRIDE
         {
             if (!apply)
             {
@@ -1120,19 +1120,19 @@ public:
             }
         }
 
-        void MovementInform(uint32 type, uint32 point)
+        void MovementInform(uint32 type, uint32 point) OVERRIDE
         {
             if (type == POINT_MOTION_TYPE && point == EYE_POINT_DESTINATION_2)
                 events.ScheduleEvent(EVENT_REGAIN_CONTROL, 1000);
         }
 
-        void JustSummoned(Creature* creature)
+        void JustSummoned(Creature* creature) OVERRIDE
         {
             if (Unit* target = creature->SelectNearbyTarget())
                 creature->AI()->AttackStart(target);
         }
 
-        void UpdateAI(uint32 diff) override
+        void UpdateAI(uint32 diff) OVERRIDE
         {
             events.Update(diff);
             switch (events.ExecuteEvent())

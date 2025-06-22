@@ -60,10 +60,10 @@ public:
 
         void Reset() OVERRIDE
         {
-            PartingSorrowTimer = urand(25000, 30000);
+            PartingSorrowTimer = std::rand() % 30000 + 25000;
             StormOfGriefTimer = 10000;
             ShockOfSorrowTimer = 20000+rand()%5000;
-            PillarOfWoeTimer = urand(5000, 15000);
+            PillarOfWoeTimer = std::rand() % 15000 + 5000;
 
             if (instance)
             {
@@ -96,14 +96,14 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_PARTING_SORROW);
 
-                    PartingSorrowTimer = urand(30000, 40000);
+                    PartingSorrowTimer = std::rand() % 40000 + 30000;
                 } else PartingSorrowTimer -= diff;
             }
 
             if (StormOfGriefTimer <= diff)
             {
                 DoCastVictim(SPELL_STORM_OF_GRIEF_N, true);
-                StormOfGriefTimer = urand(15000, 20000);
+                StormOfGriefTimer = std::rand() % 20000 + 15000;
             } else StormOfGriefTimer -= diff;
 
             if (ShockOfSorrowTimer <= diff)
@@ -111,7 +111,7 @@ public:
                 DoResetThreat();
                 Talk(SAY_STUN);
                 DoCast(me, SPELL_SHOCK_OF_SORROW_N);
-                ShockOfSorrowTimer = urand(20000, 30000);
+                ShockOfSorrowTimer = std::rand() % 30000 + 20000;
             } else ShockOfSorrowTimer -= diff;
 
             if (PillarOfWoeTimer <= diff)
@@ -123,7 +123,7 @@ public:
                 else
                     DoCastVictim(SPELL_PILLAR_OF_WOE_N);
 
-                PillarOfWoeTimer = urand(5000, 25000);
+                PillarOfWoeTimer = std::rand() % 25000 + 5000;
             } else PillarOfWoeTimer -= diff;
 
             DoMeleeAttackIfReady();

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -14,7 +14,7 @@ enum UsedPosType { USED_POS_PLUS, USED_POS_MINUS };
 
 inline UsedPosType operator ~(UsedPosType uptype)
 {
-    return uptype==USED_POS_PLUS ? USED_POS_MINUS : USED_POS_PLUS;
+    return uptype == USED_POS_PLUS ? USED_POS_MINUS : USED_POS_PLUS;
 }
 
 struct ObjectPosSelector
@@ -42,15 +42,15 @@ struct ObjectPosSelector
 
     bool NextPosibleAngle(float& angle);
 
-    bool CheckAngle(UsedPosList::value_type const& nextUsedPos, float sign, float angle ) const
+    bool CheckAngle(UsedPosList::value_type const& nextUsedPos, float sign, float angle) const
     {
-        float angle_step2  = GetAngle(nextUsedPos.second);
+        float angle_step2 = GetAngle(nextUsedPos.second);
 
         float next_angle = nextUsedPos.first;
         if (nextUsedPos.second.sign * sign < 0)              // last node from diff. list (-pi+alpha)
-            next_angle = 2*M_PI-next_angle;                 // move to positive
+            next_angle = 2 * M_PI - next_angle;                 // move to positive
 
-        return fabs(angle)+angle_step2 <= next_angle;
+        return fabs(angle) + angle_step2 <= next_angle;
     }
 
     bool CheckOriginal() const
@@ -61,12 +61,12 @@ struct ObjectPosSelector
 
     bool IsNonBalanced() const { return m_UsedPosLists[USED_POS_PLUS].empty() != m_UsedPosLists[USED_POS_MINUS].empty(); }
 
-    bool NextAngleFor(UsedPosList::value_type const& usedPos, float sign, UsedPosType uptype, float &angle)
+    bool NextAngleFor(UsedPosList::value_type const& usedPos, float sign, UsedPosType uptype, float& angle)
     {
-        float angle_step  = GetAngle(usedPos.second);
+        float angle_step = GetAngle(usedPos.second);
 
         // next possible angle
-        angle  = usedPos.first * usedPos.second.sign + angle_step * sign;
+        angle = usedPos.first * usedPos.second.sign + angle_step * sign;
 
         UsedPosList::value_type const* nextNode = nextUsedPos(uptype);
         if (nextNode)
@@ -87,10 +87,10 @@ struct ObjectPosSelector
         return true;
     }
 
-    bool NextSmallStepAngle(float sign, UsedPosType uptype, float &angle)
+    bool NextSmallStepAngle(float sign, UsedPosType uptype, float& angle)
     {
         // next possible angle
-        angle  = m_smallStepAngle[uptype] + m_anglestep * sign;
+        angle = m_smallStepAngle[uptype] + m_anglestep * sign;
 
         if (fabs(angle) > M_PI)
         {
@@ -123,7 +123,7 @@ struct ObjectPosSelector
     UsedPosList::value_type const* nextUsedPos(UsedPosType uptype);
 
     // angle from used pos to next possible free pos
-    float GetAngle(UsedPos const& usedPos) const { return acos(m_dist/(usedPos.dist+usedPos.size+m_size)); }
+    float GetAngle(UsedPos const& usedPos) const { return acos(m_dist / (usedPos.dist + usedPos.size + m_size)); }
 
     float m_center_x;
     float m_center_y;

@@ -57,6 +57,8 @@ public:
     {
         boss_vaelAI(Creature* creature) : BossAI(creature, BOSS_VAELASTRAZ)
         {
+            PlayerGUID = 0;
+            HasYelled = false;
             creature->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             creature->setFaction(35);
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -154,7 +156,7 @@ public:
                         break;
                     case EVENT_FLAMEBREATH:
                         DoCastVictim(SPELL_FLAMEBREATH);
-                        events.ScheduleEvent(EVENT_FLAMEBREATH, urand(8000, 14000));
+                        events.ScheduleEvent(EVENT_FLAMEBREATH, std::rand() % 14000 + 8000);
                         break;
                     case EVENT_FIRENOVA:
                         DoCastVictim(SPELL_FIRENOVA);
@@ -212,9 +214,9 @@ public:
             }
         }
 
-        private:
-            uint64 PlayerGUID;
-            bool HasYelled;
+    private:
+        uint64 PlayerGUID;
+        bool HasYelled;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

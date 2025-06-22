@@ -544,11 +544,11 @@ class boss_razorscale : public CreatureScript
             {
                 // Adds will come in waves from mole machines. One mole can spawn a Dark Rune Watcher
                 // with 1-2 Guardians, or a lone Sentinel. Up to 4 mole machines can spawn adds at any given time.
-                uint8 random = urand(2, 4);
+                uint8 random = std::rand() % 4 + 2;
                 for (uint8 n = 0; n < random; n++)
                 {
-                    float x = float(irand(540, 640));       // Safe range is between 500 and 650
-                    float y = float(irand(-230, -195));     // Safe range is between -235 and -145
+                    float x = float(std::rand() % 640 + 540); // Safe range is between 500 and 650
+                    float y = float(std::rand() % -195 + -230); // Safe range is between -235 and -145
                     float z = GROUND_Z;                     // Ground level
                     me->SummonCreature(MOLE_MACHINE_TRIGGER, x, y, z, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 15000);
                 }
@@ -767,7 +767,7 @@ class npc_mole_machine_trigger : public CreatureScript
 
                 if (!NpcSummoned && SummonNpcTimer <= Diff)
                 {
-                    switch (urand(0, 1 ))
+                    switch (std::rand() % 1)
                     {
                         case 0:
                             DoCast(SPELL_SUMMON_IRON_DWARVES);
@@ -846,8 +846,8 @@ class npc_darkrune_watcher : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                ChainTimer = urand(10000, 15000);
-                LightTimer = urand(1000, 3000);
+                ChainTimer = std::rand() % 15000 + 10000;
+                LightTimer = std::rand() % 3000 + 1000;
             }
 
             void UpdateAI(uint32 Diff) OVERRIDE
@@ -858,7 +858,7 @@ class npc_darkrune_watcher : public CreatureScript
                 if (ChainTimer <= Diff)
                 {
                     DoCastVictim(SPELL_CHAIN_LIGHTNING);
-                    ChainTimer = urand(10000, 15000);
+                    ChainTimer = std::rand() % 15000 + 10000;
                 }
                 else
                     ChainTimer -= Diff;
@@ -866,7 +866,7 @@ class npc_darkrune_watcher : public CreatureScript
                 if (LightTimer <= Diff)
                 {
                     DoCastVictim(SPELL_LIGHTNING_BOLT);
-                    LightTimer = urand(5000, 7000);
+                    LightTimer = std::rand() % 7000 + 5000;
                 }
                 else
                     LightTimer -= Diff;
@@ -894,7 +894,7 @@ class npc_darkrune_guardian : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                StormTimer = urand(3000, 6000);
+                StormTimer = std::rand() % 6000 + 3000;
                 killedByBreath = false;
             }
 
@@ -918,7 +918,7 @@ class npc_darkrune_guardian : public CreatureScript
                 if (StormTimer <= Diff)
                 {
                     DoCastVictim(SPELL_STORMSTRIKE);
-                    StormTimer = urand(4000, 8000);
+                    StormTimer = std::rand() % 8000 + 4000;
                 }
                 else
                     StormTimer -= Diff;
@@ -951,9 +951,9 @@ class npc_darkrune_sentinel : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                HeroicTimer = urand(4000, 8000);
-                WhirlTimer = urand(20000, 25000);
-                ShoutTimer = urand(15000, 30000);
+                HeroicTimer = std::rand() % 8000 + 4000;
+                WhirlTimer = std::rand() % 25000 + 20000;
+                ShoutTimer = std::rand() % 30000 + 15000;
             }
 
             void UpdateAI(uint32 Diff) OVERRIDE
@@ -964,7 +964,7 @@ class npc_darkrune_sentinel : public CreatureScript
                 if (HeroicTimer <= Diff)
                 {
                     DoCastVictim(SPELL_HEROIC_STRIKE);
-                    HeroicTimer = urand(4000, 6000);
+                    HeroicTimer = std::rand() % 6000 + 4000;
                 }
                 else
                     HeroicTimer -= Diff;
@@ -972,7 +972,7 @@ class npc_darkrune_sentinel : public CreatureScript
                 if (WhirlTimer <= Diff)
                 {
                     DoCastVictim(SPELL_WHIRLWIND);
-                    WhirlTimer = urand(20000, 25000);
+                    WhirlTimer = std::rand() % 25000 + 20000;
                 }
                 else
                     WhirlTimer -= Diff;
@@ -980,7 +980,7 @@ class npc_darkrune_sentinel : public CreatureScript
                 if (ShoutTimer <= Diff)
                 {
                     DoCast(me, SPELL_BATTLE_SHOUT);
-                    ShoutTimer = urand(30000, 40000);
+                    ShoutTimer = std::rand() % 40000 + 30000;
                 }
                 else
                     ShoutTimer -= Diff;

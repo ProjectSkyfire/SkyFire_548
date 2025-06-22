@@ -126,7 +126,7 @@ private:
     /** The Real-World time of System::getTick() time 0.  Set by initTime */
     RealTime       m_realWorldGetTickTime0;
 
-    uint32         m_highestCPUIDFunction;
+    int32         m_highestCPUIDFunction;
 
     /** @brief Used for the singleton instance only. */
     System();
@@ -139,6 +139,7 @@ private:
      */
     static System& instance();
 
+public:
     enum CPUIDFunction {
         CPUID_VENDOR_ID              = 0x00000000,
         CPUID_PROCESSOR_FEATURES     = 0x00000001,
@@ -146,6 +147,7 @@ private:
         CPUID_GET_HIGHEST_FUNCTION   = 0x80000000,
         CPUID_EXTENDED_FEATURES      = 0x80000001};
 
+private:
     /** Helper macro to call cpuid functions and return all values 
 
        See http://software.intel.com/en-us/articles/intel-64-architecture-processor-topology-enumeration/
@@ -153,7 +155,7 @@ private:
 
        for description of the arguments.
     */
-    static void cpuid(CPUIDFunction func, uint32& areg, uint32& breg, uint32& creg, uint32& dreg);
+    static void cpuid(CPUIDFunction func, int32& areg, int32& breg, int32& creg, int32& dreg);
 
 
     /** Called from init() */

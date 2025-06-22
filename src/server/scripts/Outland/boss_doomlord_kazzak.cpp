@@ -59,9 +59,9 @@ class boss_doomlord_kazzak : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SHADOW_VOLLEY, urand(6000, 10000));
+                _events.ScheduleEvent(EVENT_SHADOW_VOLLEY, std::rand() % 10000 + 6000);
                 _events.ScheduleEvent(EVENT_CLEAVE, 7000);
-                _events.ScheduleEvent(EVENT_THUNDERCLAP, urand(14000, 18000));
+                _events.ScheduleEvent(EVENT_THUNDERCLAP, std::rand() % 18000 + 14000);
                 _events.ScheduleEvent(EVENT_VOID_BOLT, 30000);
                 _events.ScheduleEvent(EVENT_MARK_OF_KAZZAK, 25000);
                 _events.ScheduleEvent(EVENT_ENRAGE, 60000);
@@ -112,19 +112,19 @@ class boss_doomlord_kazzak : public CreatureScript
                     {
                         case EVENT_SHADOW_VOLLEY:
                             DoCastVictim(SPELL_SHADOW_VOLLEY);
-                            _events.ScheduleEvent(EVENT_SHADOW_VOLLEY, urand(4000, 6000));
+                            _events.ScheduleEvent(EVENT_SHADOW_VOLLEY, std::rand() % 6000 + 4000);
                             break;
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE);
-                            _events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 12000));
+                            _events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 12000 + 8000);
                             break;
                         case EVENT_THUNDERCLAP:
                             DoCastVictim(SPELL_THUNDERCLAP);
-                            _events.ScheduleEvent(EVENT_THUNDERCLAP, urand(10000, 14000));
+                            _events.ScheduleEvent(EVENT_THUNDERCLAP, std::rand() % 14000 + 10000);
                             break;
                         case EVENT_VOID_BOLT:
                             DoCastVictim(SPELL_VOID_BOLT);
-                            _events.ScheduleEvent(EVENT_VOID_BOLT, urand(15000, 18000));
+                            _events.ScheduleEvent(EVENT_VOID_BOLT, std::rand() % 18000 + 15000);
                             break;
                         case EVENT_MARK_OF_KAZZAK:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))

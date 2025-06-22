@@ -92,7 +92,7 @@ class boss_drakkari_colossus : public CreatureScript
                 }
 
                 //events.Reset(); -> done in _Reset();
-                events.ScheduleEvent(EVENT_MIGHTY_BLOW, urand(10000, 30000));
+                events.ScheduleEvent(EVENT_MIGHTY_BLOW, std::rand() % 30000 + 10000);
 
                 phase = COLOSSUS_PHASE_NORMAL;
 
@@ -211,7 +211,7 @@ class boss_drakkari_colossus : public CreatureScript
                     {
                         case EVENT_MIGHTY_BLOW:
                             DoCastVictim(SPELL_MIGHTY_BLOW);
-                            events.ScheduleEvent(EVENT_MIGHTY_BLOW, urand(5000, 15000));
+                            events.ScheduleEvent(EVENT_MIGHTY_BLOW, std::rand() % 15000 + 5000);
                             break;
                     }
                 }
@@ -255,7 +255,7 @@ class boss_drakkari_elemental : public CreatureScript
             void Reset() OVERRIDE
             {
                 events.Reset();
-                events.ScheduleEvent(EVENT_SURGE, urand(5000, 15000));
+                events.ScheduleEvent(EVENT_SURGE, std::rand() % 15000 + 5000);
 
                 me->AddAura(SPELL_MOJO_VOLLEY, me);
             }
@@ -290,7 +290,7 @@ class boss_drakkari_elemental : public CreatureScript
                             DoCast(SPELL_SURGE_VISUAL);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 DoCast(target, SPELL_SURGE);
-                            events.ScheduleEvent(EVENT_SURGE, urand(5000, 15000));
+                            events.ScheduleEvent(EVENT_SURGE, std::rand() % 15000 + 5000);
                             break;
                     }
                 }

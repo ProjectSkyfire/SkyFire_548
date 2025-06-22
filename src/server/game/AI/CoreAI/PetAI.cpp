@@ -1,21 +1,21 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "PetAI.h"
-#include "Errors.h"
-#include "Pet.h"
-#include "Player.h"
-#include "DBCStores.h"
-#include "Spell.h"
-#include "ObjectAccessor.h"
-#include "SpellMgr.h"
 #include "Creature.h"
-#include "World.h"
-#include "Util.h"
+#include "DBCStores.h"
+#include "Errors.h"
 #include "Group.h"
+#include "ObjectAccessor.h"
+#include "Pet.h"
+#include "PetAI.h"
+#include "Player.h"
+#include "Spell.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "Util.h"
+#include "World.h"
 
 int PetAI::Permissible(const Creature* creature)
 {
@@ -208,10 +208,10 @@ void PetAI::UpdateAI(uint32 diff)
         //found units to cast on to
         if (!targetSpellStore.empty())
         {
-            uint32 index = urand(0, targetSpellStore.size() - 1);
+            uint32 index = std::rand() % targetSpellStore.size();
 
-            Spell* spell  = targetSpellStore[index].second;
-            Unit*  target = targetSpellStore[index].first;
+            Spell* spell = targetSpellStore[index].second;
+            Unit* target = targetSpellStore[index].first;
 
             targetSpellStore.erase(targetSpellStore.begin() + index);
 
@@ -387,7 +387,7 @@ Unit* PetAI::SelectNextTarget(bool allowAutoSelect) const
     // Check owner victim
     // 3.0.2 - Pets now start attacking their owners victim in defensive mode as soon as the hunter does
     if (Unit* ownerVictim = me->GetCharmerOrOwner()->GetVictim())
-            return ownerVictim;
+        return ownerVictim;
 
     // Neither pet or owner had a target and aggressive pets can pick any target
     // To prevent aggressive pets from chain selecting targets and running off, we

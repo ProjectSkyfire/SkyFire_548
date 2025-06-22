@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,23 +10,23 @@ SDComment: This AI is under development
 SDCategory: Npc
 EndScriptData */
 
-#include "ScriptedCreature.h"
-#include "ScriptedFollowerAI.h"
 #include "Group.h"
 #include "Player.h"
+#include "ScriptedCreature.h"
+#include "ScriptedFollowerAI.h"
 
 const float MAX_PLAYER_DISTANCE = 100.0f;
 
 enum Points
 {
-    POINT_COMBAT_START  = 0xFFFFFF
+    POINT_COMBAT_START = 0xFFFFFF
 };
 
 FollowerAI::FollowerAI(Creature* creature) : ScriptedAI(creature),
-    m_uiLeaderGUID(0),
-    m_uiUpdateFollowTimer(2500),
-    m_uiFollowState(STATE_FOLLOW_NONE),
-    m_pQuestForFollow(NULL)
+m_uiLeaderGUID(0),
+m_uiUpdateFollowTimer(2500),
+m_uiFollowState(STATE_FOLLOW_NONE),
+m_pQuestForFollow(NULL)
 { }
 
 void FollowerAI::AttackStart(Unit* who)

@@ -228,18 +228,18 @@ endif
 #resource_files:
 #ACE_ETCL.rc
 #
+#pkgconfig_files:
+#ACE_ETCL.pc.in
+#
 #inline_files:
 #ETCL_Constraint.inl
+#
+#build_files:
+#ETCL.mpc
 #
 #source_files:
 #ETCL_Constraint.cpp
 #ETCL_Constraint_Visitor.cpp
-#
-#pkgconfig_files:
-#ACE_ETCL.pc.in
-#
-#build_files:
-#ETCL.mpc
 #
 #lib_output:
 #../../lib ACE_ETCL

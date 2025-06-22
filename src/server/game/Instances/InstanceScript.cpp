@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -12,10 +12,10 @@
 #include "LFGMgr.h"
 #include "Log.h"
 #include "Map.h"
-#include "Player.h"
-#include "Pet.h"
-#include "WorldSession.h"
 #include "Opcodes.h"
+#include "Pet.h"
+#include "Player.h"
+#include "WorldSession.h"
 
 void InstanceScript::SaveToDB()
 {
@@ -216,7 +216,7 @@ bool InstanceScript::SetBossState(uint32 id, EncounterState state)
     return false;
 }
 
-void InstanceScript::LoadBossState(const char * data)
+void InstanceScript::LoadBossState(const char* data)
 {
     if (!data)
     {
@@ -317,7 +317,7 @@ void InstanceScript::DoSendNotifyToInstance(char const* format, ...)
 // Update Achievement Criteria for all players in instance
 void InstanceScript::DoUpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 /*= 0*/, uint32 miscValue2 /*= 0*/, Unit* unit /*= NULL*/)
 {
-    Map::PlayerList const &PlayerList = instance->GetPlayers();
+    Map::PlayerList const& PlayerList = instance->GetPlayers();
 
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
@@ -328,7 +328,7 @@ void InstanceScript::DoUpdateAchievementCriteria(AchievementCriteriaTypes type, 
 // Start timed achievement for all players in instance
 void InstanceScript::DoStartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry)
 {
-    Map::PlayerList const &PlayerList = instance->GetPlayers();
+    Map::PlayerList const& PlayerList = instance->GetPlayers();
 
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
@@ -339,7 +339,7 @@ void InstanceScript::DoStartTimedAchievement(AchievementCriteriaTimedTypes type,
 // Stop timed achievement for all players in instance
 void InstanceScript::DoStopTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry)
 {
-    Map::PlayerList const &PlayerList = instance->GetPlayers();
+    Map::PlayerList const& PlayerList = instance->GetPlayers();
 
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
@@ -368,7 +368,7 @@ void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
 // Cast spell on all players in instance
 void InstanceScript::DoCastSpellOnPlayers(uint32 spell)
 {
-    Map::PlayerList const &PlayerList = instance->GetPlayers();
+    Map::PlayerList const& PlayerList = instance->GetPlayers();
 
     if (!PlayerList.isEmpty())
         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)

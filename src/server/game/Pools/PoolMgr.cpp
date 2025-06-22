@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "PoolMgr.h"
 #include "Containers.h"
-#include "ObjectMgr.h"
 #include "Log.h"
 #include "MapManager.h"
+#include "ObjectMgr.h"
+#include "PoolMgr.h"
 
 ////////////////////////////////////////////////////////////
 // template class ActivePoolData
@@ -152,16 +152,16 @@ PoolObject* PoolGroup<T>::RollOne(ActivePoolData& spawns, uint32 triggerFrom)
             // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
             // so this need explicit check for this case
             if (roll < 0 && (ExplicitlyChanced[i].guid == triggerFrom || !spawns.IsActiveObject<T>(ExplicitlyChanced[i].guid)))
-               return &ExplicitlyChanced[i];
+                return &ExplicitlyChanced[i];
         }
     }
     if (!EqualChanced.empty())
     {
-        int32 index = irand(0, EqualChanced.size()-1);
+        int32 index = std::rand() % EqualChanced.size();
         // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
         // so this need explicit check for this case
         if (EqualChanced[index].guid == triggerFrom || !spawns.IsActiveObject<T>(EqualChanced[index].guid))
-           return &EqualChanced[index];
+            return &EqualChanced[index];
     }
 
     return NULL;
@@ -173,7 +173,7 @@ PoolObject* PoolGroup<T>::RollOne(ActivePoolData& spawns, uint32 triggerFrom)
 template<class T>
 void PoolGroup<T>::DespawnObject(ActivePoolData& spawns, uint32 guid)
 {
-    for (size_t i=0; i < EqualChanced.size(); ++i)
+    for (size_t i = 0; i < EqualChanced.size(); ++i)
     {
         // if spawned
         if (spawns.IsActiveObject<T>(EqualChanced[i].guid))
@@ -565,11 +565,10 @@ void PoolMgr::LoadFromDB()
             uint32 pool_id = fields[0].GetUInt32();
 
             PoolTemplateData& pPoolTemplate = mPoolTemplate[pool_id];
-            pPoolTemplate.MaxLimit  = fields[1].GetUInt32();
+            pPoolTemplate.MaxLimit = fields[1].GetUInt32();
 
             ++count;
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         SF_LOG_INFO("server.loading", ">> Loaded %u objects pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
     }
@@ -594,9 +593,9 @@ void PoolMgr::LoadFromDB()
             {
                 Field* fields = result->Fetch();
 
-                uint32 guid    = fields[0].GetUInt32();
+                uint32 guid = fields[0].GetUInt32();
                 uint32 pool_id = fields[1].GetUInt32();
-                float chance   = fields[2].GetFloat();
+                float chance = fields[2].GetFloat();
 
                 CreatureData const* data = sObjectMgr->GetCreatureData(guid);
                 if (!data)
@@ -623,8 +622,7 @@ void PoolMgr::LoadFromDB()
                 mCreatureSearchMap.insert(p);
 
                 ++count;
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
 
             SF_LOG_INFO("server.loading", ">> Loaded %u creatures in pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         }
@@ -650,9 +648,9 @@ void PoolMgr::LoadFromDB()
             {
                 Field* fields = result->Fetch();
 
-                uint32 guid    = fields[0].GetUInt32();
+                uint32 guid = fields[0].GetUInt32();
                 uint32 pool_id = fields[1].GetUInt32();
-                float chance   = fields[2].GetFloat();
+                float chance = fields[2].GetFloat();
 
                 GameObjectData const* data = sObjectMgr->GetGOData(guid);
                 if (!data)
@@ -691,8 +689,7 @@ void PoolMgr::LoadFromDB()
                 mGameobjectSearchMap.insert(p);
 
                 ++count;
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
 
             SF_LOG_INFO("server.loading", ">> Loaded %u gameobject in pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         }
@@ -718,9 +715,9 @@ void PoolMgr::LoadFromDB()
             {
                 Field* fields = result->Fetch();
 
-                uint32 child_pool_id  = fields[0].GetUInt32();
+                uint32 child_pool_id = fields[0].GetUInt32();
                 uint32 mother_pool_id = fields[1].GetUInt32();
-                float chance          = fields[2].GetFloat();
+                float chance = fields[2].GetFloat();
 
                 if (mother_pool_id > max_pool_id)
                 {
@@ -751,11 +748,10 @@ void PoolMgr::LoadFromDB()
                 mPoolSearchMap.insert(p);
 
                 ++count;
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
 
             // Now check for circular reference
-            for (uint32 i=0; i < max_pool_id; ++i)
+            for (uint32 i = 0; i < max_pool_id; ++i)
             {
                 std::set<uint32> checkedPools;
                 for (SearchMap::iterator poolItr = mPoolSearchMap.find(i); poolItr != mPoolSearchMap.end(); poolItr = mPoolSearchMap.find(poolItr->second))
@@ -764,8 +760,8 @@ void PoolMgr::LoadFromDB()
                     if (checkedPools.find(poolItr->second) != checkedPools.end())
                     {
                         std::ostringstream ss;
-                        ss<< "The pool(s) ";
-                        for (std::set<uint32>::const_iterator itr=checkedPools.begin(); itr != checkedPools.end(); ++itr)
+                        ss << "The pool(s) ";
+                        for (std::set<uint32>::const_iterator itr = checkedPools.begin(); itr != checkedPools.end(); ++itr)
                             ss << *itr << ' ';
                         ss << "create(s) a circular reference, which can cause the server to freeze.\nRemoving the last link between mother pool "
                             << poolItr->first << " and child pool " << poolItr->second;
@@ -800,8 +796,8 @@ void PoolMgr::LoadFromDB()
 
             enum eQuestTypes
             {
-                QUEST_NONE   = 0,
-                QUEST_DAILY  = 1,
+                QUEST_NONE = 0,
+                QUEST_DAILY = 1,
                 QUEST_WEEKLY = 2
             };
 
@@ -811,7 +807,7 @@ void PoolMgr::LoadFromDB()
             {
                 Field* fields = result->Fetch();
 
-                uint32 entry   = fields[0].GetUInt32();
+                uint32 entry = fields[0].GetUInt32();
                 uint32 pool_id = fields[1].GetUInt32();
 
                 Quest const* quest = sObjectMgr->GetQuestTemplate(entry);
@@ -841,7 +837,7 @@ void PoolMgr::LoadFromDB()
                 if (poolTypeMap[pool_id] != currType)
                 {
                     SF_LOG_ERROR("sql.sql", "`pool_quest` quest %u is %s but pool (%u) is specified for %s, mixing not allowed, skipped.",
-                                     entry, currType == QUEST_DAILY ? "QUEST_DAILY" : "QUEST_WEEKLY", pool_id, poolTypeMap[pool_id] == QUEST_DAILY ? "QUEST_DAILY" : "QUEST_WEEKLY");
+                        entry, currType == QUEST_DAILY ? "QUEST_DAILY" : "QUEST_WEEKLY", pool_id, poolTypeMap[pool_id] == QUEST_DAILY ? "QUEST_DAILY" : "QUEST_WEEKLY");
                     continue;
                 }
 
@@ -863,8 +859,7 @@ void PoolMgr::LoadFromDB()
                 mQuestSearchMap.insert(p);
 
                 ++count;
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
 
             SF_LOG_INFO("server.loading", ">> Loaded %u quests in pools in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         }
@@ -909,8 +904,7 @@ void PoolMgr::LoadFromDB()
                     SpawnPool(pool_entry);
                     count++;
                 }
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
 
             SF_LOG_DEBUG("pool", "Pool handling system initialized, %u pools spawned in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
         }

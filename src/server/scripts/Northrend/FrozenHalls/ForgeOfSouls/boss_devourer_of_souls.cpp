@@ -152,7 +152,7 @@ class boss_devourer_of_souls : public CreatureScript
                 events.ScheduleEvent(EVENT_MIRRORED_SOUL, 8000);
                 events.ScheduleEvent(EVENT_WELL_OF_SOULS, 30000);
                 events.ScheduleEvent(EVENT_UNLEASHED_SOULS, 20000);
-                events.ScheduleEvent(EVENT_WAILING_SOULS, urand(60000, 70000));
+                events.ScheduleEvent(EVENT_WAILING_SOULS, std::rand() % 70000 + 60000);
 
                 instance->SetData(DATA_DEVOURER_EVENT, IN_PROGRESS);
             }
@@ -247,7 +247,7 @@ class boss_devourer_of_souls : public CreatureScript
                         case EVENT_MIRRORED_SOUL:
                             DoCastAOE(SPELL_MIRRORED_SOUL_TARGET_SELECTOR);
                             Talk(EMOTE_MIRRORED_SOUL);
-                            events.ScheduleEvent(EVENT_MIRRORED_SOUL, urand(15000, 30000));
+                            events.ScheduleEvent(EVENT_MIRRORED_SOUL, std::rand() % 30000 + 15000);
                             break;
                         case EVENT_WELL_OF_SOULS:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
@@ -313,7 +313,7 @@ class boss_devourer_of_souls : public CreatureScript
                                 me->SetDisplayId(DISPLAY_ANGER);
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                                 me->GetMotionMaster()->MoveChase(me->GetVictim());
-                                events.ScheduleEvent(EVENT_WAILING_SOULS, urand(60000, 70000));
+                                events.ScheduleEvent(EVENT_WAILING_SOULS, std::rand() % 70000 + 60000);
                             }
                             break;
                     }

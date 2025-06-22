@@ -39,7 +39,6 @@ set(ace_STAT_SRCS
   Auto_Event.cpp
   Auto_Functor.cpp
   Auto_IncDec_T.cpp
-  Auto_Ptr.cpp
   Barrier.cpp
   Base_Thread_Adapter.cpp
   Based_Pointer_Repository.cpp
@@ -150,8 +149,8 @@ set(ace_STAT_SRCS
   LOCK_SOCK_Acceptor.cpp
   Log_Category.cpp
   Log_Msg.cpp
-  Log_Msg_Backend.cpp
-  Log_Msg_Callback.cpp
+
+
   Log_Msg_IPC.cpp
   Log_Msg_NT_Event_Log.cpp
   Log_Msg_UNIX_Syslog.cpp

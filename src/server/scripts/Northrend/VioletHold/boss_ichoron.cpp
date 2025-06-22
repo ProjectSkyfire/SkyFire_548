@@ -93,7 +93,7 @@ public:
             bIsFrenzy = false;
             dehydration = true;
             uiBubbleCheckerTimer = 1000;
-            uiWaterBoltVolleyTimer = urand(10000, 15000);
+            uiWaterBoltVolleyTimer = std::rand() % 15000 + 10000;
 
             me->SetVisible(true);
             DespawnWaterElements();
@@ -225,7 +225,7 @@ public:
                             me->SetVisible(false);
                             for (uint8 i = 0; i < 10; i++)
                             {
-                                int tmp = urand(0, MAX_SPAWN_LOC-1);
+                                int tmp = std::rand() % (MAX_SPAWN_LOC-1);
                                 me->SummonCreature(NPC_ICHOR_GLOBULE, SpawnLoc[tmp], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
                             }
                         }
@@ -257,7 +257,7 @@ public:
                 if (uiWaterBoltVolleyTimer <= uiDiff)
                 {
                     DoCast(me, SPELL_WATER_BOLT_VOLLEY);
-                    uiWaterBoltVolleyTimer = urand(10000, 15000);
+                    uiWaterBoltVolleyTimer = std::rand() % 15000 + 10000;
                 }
                 else uiWaterBoltVolleyTimer -= uiDiff;
 

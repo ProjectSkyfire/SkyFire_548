@@ -1,8 +1,8 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
- 
+
 #ifndef BLACK_MARKET_H
 #define BLACK_MARKET_H
 
@@ -70,7 +70,7 @@ public:
 
     void SetNumBids(uint32 numBids) { _numBids = numBids; }
     uint32 GetNumBids() const { return _numBids; }
-    
+
     BlackMarketAuctionTemplate* GetTemplate() const;
 
     void DeleteFromDB(SQLTransaction& trans);
@@ -78,10 +78,10 @@ public:
     bool LoadFromDB(Field* fields);
     void UpdateToDB(SQLTransaction& trans);
 
-    uint32 GetEndTime() { return GetStartTime() + GetTemplate()->Duration; }
+    uint32 GetEndTime() const { return GetStartTime() + GetTemplate()->Duration; }
     uint32 TimeLeft();
-    bool IsActive() { return (time(NULL) >= GetStartTime()); }
-    bool IsExpired() { return GetEndTime() < time(NULL); }
+    bool IsActive() const { return (time(NULL) >= GetStartTime()); }
+    bool IsExpired() const { return GetEndTime() < time(NULL); }
 
     std::string BuildAuctionMailSubject(BMMailAuctionAnswers response);
     std::string BuildAuctionMailBody(uint32 lowGuid);
@@ -136,7 +136,7 @@ public:
 
     void SendAuctionWon(BlackMarketAuction* auction, SQLTransaction& trans);
     void SendAuctionOutbidded(BlackMarketAuction* auction, SQLTransaction& trans);
-    
+
     bool isBlackMarketOpen() { return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_BLACK_MARKET_OPEN); }
 };
 

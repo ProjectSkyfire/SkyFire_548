@@ -213,9 +213,9 @@ struct generic_halionAI : public BossAI
         _EnterCombat();
         me->AddAura(SPELL_TWILIGHT_PRECISION, me);
         _canEvade = false;
-        events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 10000));
+        events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 10000 + 8000);
         events.ScheduleEvent(EVENT_TAIL_LASH, 10000);
-        events.ScheduleEvent(EVENT_BREATH, urand(10000, 15000));
+        events.ScheduleEvent(EVENT_BREATH, std::rand() % 15000 + 10000);
     }
 
     void Reset() OVERRIDE
@@ -236,7 +236,7 @@ struct generic_halionAI : public BossAI
         {
             case EVENT_CLEAVE:
                 DoCastVictim(SPELL_CLEAVE);
-                events.ScheduleEvent(EVENT_CLEAVE, urand(8000, 10000));
+                events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 10000 + 8000);
                 break;
             case EVENT_TAIL_LASH:
                 DoCastAOE(SPELL_TAIL_LASH);
@@ -244,7 +244,7 @@ struct generic_halionAI : public BossAI
                 break;
             case EVENT_BREATH:
                 DoCast(me, me->GetEntry() == NPC_HALION ? SPELL_FLAME_BREATH : SPELL_DARK_BREATH);
-                events.ScheduleEvent(EVENT_BREATH, urand(10000, 12000));
+                events.ScheduleEvent(EVENT_BREATH, std::rand() % 12000 + 10000);
                 break;
         }
     }
@@ -324,8 +324,8 @@ class boss_halion : public CreatureScript
                 instance->SetBossState(DATA_HALION, IN_PROGRESS);
 
                 events.ScheduleEvent(EVENT_ACTIVATE_FIREWALL, 5000);
-                events.ScheduleEvent(EVENT_METEOR_STRIKE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_FIERY_COMBUSTION, urand(15000, 18000));
+                events.ScheduleEvent(EVENT_METEOR_STRIKE, std::rand() % 25000 + 20000);
+                events.ScheduleEvent(EVENT_FIERY_COMBUSTION, std::rand() % 18000 + 15000);
 
                 if (Creature* controller = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_HALION_CONTROLLER)))
                     controller->AI()->SetData(DATA_FIGHT_PHASE, PHASE_ONE);

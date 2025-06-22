@@ -58,10 +58,10 @@ class boss_nethermancer_sepethrea : public CreatureScript
             void EnterCombat(Unit* who) OVERRIDE
             {
                 _EnterCombat();
-                events.ScheduleEvent(EVENT_FROST_ATTACK, urand(7000, 10000));
-                events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(12000, 18000));
-                events.ScheduleEvent(EVENT_DRAGONS_BREATH, urand(18000, 22000));
-                events.ScheduleEvent(EVENT_KNOCKBACK, urand(22000, 28000));
+                events.ScheduleEvent(EVENT_FROST_ATTACK, std::rand() % 10000 + 7000);
+                events.ScheduleEvent(EVENT_ARCANE_BLAST, std::rand() % 18000 + 12000);
+                events.ScheduleEvent(EVENT_DRAGONS_BREATH, std::rand() % 22000 + 18000);
+                events.ScheduleEvent(EVENT_KNOCKBACK, std::rand() % 28000 + 22000);
                 events.ScheduleEvent(EVENT_SOLARBURN, 30000);
                 Talk(SAY_AGGRO);
                 DoCast(who, SPELL_SUMMON_RAGIN_FLAMES);
@@ -95,7 +95,7 @@ class boss_nethermancer_sepethrea : public CreatureScript
                     {
                         case EVENT_FROST_ATTACK:
                             DoCastVictim(SPELL_FROST_ATTACK, true);
-                            events.ScheduleEvent(EVENT_FROST_ATTACK, urand(7000, 10000));
+                            events.ScheduleEvent(EVENT_FROST_ATTACK, std::rand() % 10000 + 7000);
                             break;
                         case EVENT_ARCANE_BLAST:
                             DoCastVictim(SPELL_ARCANE_BLAST, true);
@@ -103,13 +103,13 @@ class boss_nethermancer_sepethrea : public CreatureScript
                             break;
                         case EVENT_DRAGONS_BREATH:
                             DoCastVictim(SPELL_DRAGONS_BREATH, true);
-                            events.ScheduleEvent(EVENT_DRAGONS_BREATH, urand(12000, 22000));
+                            events.ScheduleEvent(EVENT_DRAGONS_BREATH, std::rand() % 22000 + 12000);
                             if (roll_chance_i(50))
                                 Talk(SAY_DRAGONS_BREATH);
                             break;
                         case EVENT_KNOCKBACK:
                             DoCastVictim(SPELL_KNOCKBACK, true);
-                            events.ScheduleEvent(EVENT_KNOCKBACK, urand(15000, 25000));
+                            events.ScheduleEvent(EVENT_KNOCKBACK, std::rand() % 25000 + 15000);
                             break;
                         case EVENT_SOLARBURN:
                             DoCastVictim(SPELL_SOLARBURN, true);

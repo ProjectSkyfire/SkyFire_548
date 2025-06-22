@@ -268,8 +268,8 @@ class boss_lady_deathwhisper : public CreatureScript
                 events.ScheduleEvent(EVENT_DEATH_AND_DECAY, 10000);
                 // phase one only
                 events.ScheduleEvent(EVENT_P1_SUMMON_WAVE, 5000, 0, PHASE_ONE);
-                events.ScheduleEvent(EVENT_P1_SHADOW_BOLT, urand(5500, 6000), 0, PHASE_ONE);
-                events.ScheduleEvent(EVENT_P1_EMPOWER_CULTIST, urand(20000, 30000), 0, PHASE_ONE);
+                events.ScheduleEvent(EVENT_P1_SHADOW_BOLT, std::rand() % 6000 + 5500, 0, PHASE_ONE);
+                events.ScheduleEvent(EVENT_P1_EMPOWER_CULTIST, std::rand() % 30000 + 20000, 0, PHASE_ONE);
                 if (GetDifficulty() != DIFFICULTY_10MAN_NORMAL)
                     events.ScheduleEvent(EVENT_DOMINATE_MIND_H, 27000);
 
@@ -353,10 +353,10 @@ class boss_lady_deathwhisper : public CreatureScript
                     me->SetPower(POWER_MANA, 0);
                     me->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
                     events.SetPhase(PHASE_TWO);
-                    events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 12000), 0, PHASE_TWO);
-                    events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(19000, 21000), 0, PHASE_TWO);
-                    events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(6000, 9000), 0, PHASE_TWO);
-                    events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(12000, 15000), 0, PHASE_TWO);
+                    events.ScheduleEvent(EVENT_P2_FROSTBOLT, std::rand() % 12000 + 10000, 0, PHASE_TWO);
+                    events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, std::rand() % 21000 + 19000, 0, PHASE_TWO);
+                    events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, std::rand() % 9000 + 6000, 0, PHASE_TWO);
+                    events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, std::rand() % 15000 + 12000, 0, PHASE_TWO);
                     // on heroic mode Lady Deathwhisper is immune to taunt effects in phase 2 and continues summoning adds
                     if (IsHeroic())
                     {
@@ -425,14 +425,14 @@ class boss_lady_deathwhisper : public CreatureScript
                         case EVENT_DEATH_AND_DECAY:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                                 DoCast(target, SPELL_DEATH_AND_DECAY);
-                            events.ScheduleEvent(EVENT_DEATH_AND_DECAY, urand(22000, 30000));
+                            events.ScheduleEvent(EVENT_DEATH_AND_DECAY, std::rand() % 30000 + 22000);
                             break;
                         case EVENT_DOMINATE_MIND_H:
                             Talk(SAY_DOMINATE_MIND);
                             for (uint8 i = 0; i < _dominateMindCount; i++)
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_DOMINATE_MIND_H))
                                     DoCast(target, SPELL_DOMINATE_MIND_H);
-                            events.ScheduleEvent(EVENT_DOMINATE_MIND_H, urand(40000, 45000));
+                            events.ScheduleEvent(EVENT_DOMINATE_MIND_H, std::rand() % 45000 + 40000);
                             break;
                         case EVENT_P1_SUMMON_WAVE:
                             SummonWaveP1();
@@ -441,26 +441,26 @@ class boss_lady_deathwhisper : public CreatureScript
                         case EVENT_P1_SHADOW_BOLT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                                 DoCast(target, SPELL_SHADOW_BOLT);
-                            events.ScheduleEvent(EVENT_P1_SHADOW_BOLT, urand(5000, 8000), 0, PHASE_ONE);
+                            events.ScheduleEvent(EVENT_P1_SHADOW_BOLT, std::rand() % 8000 + 5000, 0, PHASE_ONE);
                             break;
                         case EVENT_P1_REANIMATE_CULTIST:
                             ReanimateCultist();
                             break;
                         case EVENT_P1_EMPOWER_CULTIST:
                             EmpowerCultist();
-                            events.ScheduleEvent(EVENT_P1_EMPOWER_CULTIST, urand(18000, 25000));
+                            events.ScheduleEvent(EVENT_P1_EMPOWER_CULTIST, std::rand() % 25000 + 18000);
                             break;
                         case EVENT_P2_FROSTBOLT:
                             DoCastVictim(SPELL_FROSTBOLT);
-                            events.ScheduleEvent(EVENT_P2_FROSTBOLT, urand(10000, 11000), 0, PHASE_TWO);
+                            events.ScheduleEvent(EVENT_P2_FROSTBOLT, std::rand() % 11000 + 10000, 0, PHASE_TWO);
                             break;
                         case EVENT_P2_FROSTBOLT_VOLLEY:
                             DoCastAOE(SPELL_FROSTBOLT_VOLLEY);
-                            events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, urand(13000, 15000), 0, PHASE_TWO);
+                            events.ScheduleEvent(EVENT_P2_FROSTBOLT_VOLLEY, std::rand() % 15000 + 13000, 0, PHASE_TWO);
                             break;
                         case EVENT_P2_TOUCH_OF_INSIGNIFICANCE:
                             DoCastVictim(SPELL_TOUCH_OF_INSIGNIFICANCE);
-                            events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, urand(9000, 13000), 0, PHASE_TWO);
+                            events.ScheduleEvent(EVENT_P2_TOUCH_OF_INSIGNIFICANCE, std::rand() % 13000 + 9000, 0, PHASE_TWO);
                             break;
                         case EVENT_P2_SUMMON_SHADE:
                             if (Unit* shadeTarget = SelectTarget(SELECT_TARGET_RANDOM, 1))
@@ -468,7 +468,7 @@ class boss_lady_deathwhisper : public CreatureScript
                                 _nextVengefulShadeTargetGUID = shadeTarget->GetGUID();
                                 DoCast(shadeTarget, SPELL_SUMMON_SHADE);
                             }
-                            events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, urand(18000, 23000), 0, PHASE_TWO);
+                            events.ScheduleEvent(EVENT_P2_SUMMON_SHADE, std::rand() % 23000 + 18000, 0, PHASE_TWO);
                             break;
                         case EVENT_P2_SUMMON_WAVE:
                             SummonWaveP2();
@@ -507,7 +507,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     Summon(SummonEntries[addIndexOther], SummonPositions[addIndexOther * 3]);
                     Summon(SummonEntries[addIndex], SummonPositions[addIndexOther * 3 + 1]);
                     Summon(SummonEntries[addIndexOther], SummonPositions[addIndexOther * 3 + 2]);
-                    Summon(SummonEntries[urand(0, 1)], SummonPositions[6]);
+                    Summon(SummonEntries[std::rand() % 1], SummonPositions[6]);
                 }
 
                 ++_waveCounter;
@@ -524,7 +524,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     Summon(SummonEntries[addIndex], SummonPositions[addIndex * 3+ 2]);
                 }
                 else
-                    Summon(SummonEntries[urand(0, 1)], SummonPositions[6]);
+                    Summon(SummonEntries[std::rand() % 1], SummonPositions[6]);
 
                 ++_waveCounter;
             }
@@ -626,11 +626,11 @@ class npc_cult_fanatic : public CreatureScript
             void Reset() OVERRIDE
             {
                 Events.Reset();
-                Events.ScheduleEvent(EVENT_FANATIC_NECROTIC_STRIKE, urand(10000, 12000));
-                Events.ScheduleEvent(EVENT_FANATIC_SHADOW_CLEAVE, urand(14000, 16000));
-                Events.ScheduleEvent(EVENT_FANATIC_VAMPIRIC_MIGHT, urand(20000, 27000));
+                Events.ScheduleEvent(EVENT_FANATIC_NECROTIC_STRIKE, std::rand() % 12000 + 10000);
+                Events.ScheduleEvent(EVENT_FANATIC_SHADOW_CLEAVE, std::rand() % 16000 + 14000);
+                Events.ScheduleEvent(EVENT_FANATIC_VAMPIRIC_MIGHT, std::rand() % 27000 + 20000);
                 if (me->GetEntry() == NPC_CULT_FANATIC)
-                    Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(18000, 32000));
+                    Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, std::rand() % 32000 + 18000);
             }
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell) OVERRIDE
@@ -661,19 +661,19 @@ class npc_cult_fanatic : public CreatureScript
                     {
                         case EVENT_FANATIC_NECROTIC_STRIKE:
                             DoCastVictim(SPELL_NECROTIC_STRIKE);
-                            Events.ScheduleEvent(EVENT_FANATIC_NECROTIC_STRIKE, urand(11000, 13000));
+                            Events.ScheduleEvent(EVENT_FANATIC_NECROTIC_STRIKE, std::rand() % 13000 + 11000);
                             break;
                         case EVENT_FANATIC_SHADOW_CLEAVE:
                             DoCastVictim(SPELL_SHADOW_CLEAVE);
-                            Events.ScheduleEvent(EVENT_FANATIC_SHADOW_CLEAVE, urand(9500, 11000));
+                            Events.ScheduleEvent(EVENT_FANATIC_SHADOW_CLEAVE, std::rand() % 11000 + 9500);
                             break;
                         case EVENT_FANATIC_VAMPIRIC_MIGHT:
                             DoCast(me, SPELL_VAMPIRIC_MIGHT);
-                            Events.ScheduleEvent(EVENT_FANATIC_VAMPIRIC_MIGHT, urand(20000, 27000));
+                            Events.ScheduleEvent(EVENT_FANATIC_VAMPIRIC_MIGHT, std::rand() % 27000 + 20000);
                             break;
                         case EVENT_CULTIST_DARK_MARTYRDOM:
                             DoCast(me, SPELL_DARK_MARTYRDOM_FANATIC);
-                            Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(16000, 21000));
+                            Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, std::rand() % 21000 + 16000);
                             break;
                     }
                 }
@@ -703,12 +703,12 @@ class npc_cult_adherent : public CreatureScript
             void Reset() OVERRIDE
             {
                 Events.Reset();
-                Events.ScheduleEvent(EVENT_ADHERENT_FROST_FEVER, urand(10000, 12000));
-                Events.ScheduleEvent(EVENT_ADHERENT_DEATHCHILL, urand(14000, 16000));
-                Events.ScheduleEvent(EVENT_ADHERENT_CURSE_OF_TORPOR, urand(14000, 16000));
-                Events.ScheduleEvent(EVENT_ADHERENT_SHORUD_OF_THE_OCCULT, urand(32000, 39000));
+                Events.ScheduleEvent(EVENT_ADHERENT_FROST_FEVER, std::rand() % 12000 + 10000);
+                Events.ScheduleEvent(EVENT_ADHERENT_DEATHCHILL, std::rand() % 16000 + 14000);
+                Events.ScheduleEvent(EVENT_ADHERENT_CURSE_OF_TORPOR, std::rand() % 16000 + 14000);
+                Events.ScheduleEvent(EVENT_ADHERENT_SHORUD_OF_THE_OCCULT, std::rand() % 39000 + 32000);
                 if (me->GetEntry() == NPC_CULT_ADHERENT)
-                    Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(18000, 32000));
+                    Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, std::rand() % 32000 + 18000);
             }
 
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell) OVERRIDE
@@ -739,27 +739,27 @@ class npc_cult_adherent : public CreatureScript
                     {
                         case EVENT_ADHERENT_FROST_FEVER:
                             DoCastVictim(SPELL_FROST_FEVER);
-                            Events.ScheduleEvent(EVENT_ADHERENT_FROST_FEVER, urand(9000, 13000));
+                            Events.ScheduleEvent(EVENT_ADHERENT_FROST_FEVER, std::rand() % 13000 + 9000);
                             break;
                         case EVENT_ADHERENT_DEATHCHILL:
                             if (me->GetEntry() == NPC_EMPOWERED_ADHERENT)
                                 DoCastVictim(SPELL_DEATHCHILL_BLAST);
                             else
                                 DoCastVictim(SPELL_DEATHCHILL_BOLT);
-                            Events.ScheduleEvent(EVENT_ADHERENT_DEATHCHILL, urand(9000, 13000));
+                            Events.ScheduleEvent(EVENT_ADHERENT_DEATHCHILL, std::rand() % 13000 + 9000);
                             break;
                         case EVENT_ADHERENT_CURSE_OF_TORPOR:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1))
                                 DoCast(target, SPELL_CURSE_OF_TORPOR);
-                            Events.ScheduleEvent(EVENT_ADHERENT_CURSE_OF_TORPOR, urand(9000, 13000));
+                            Events.ScheduleEvent(EVENT_ADHERENT_CURSE_OF_TORPOR, std::rand() % 13000 + 9000);
                             break;
                         case EVENT_ADHERENT_SHORUD_OF_THE_OCCULT:
                             DoCast(me, SPELL_SHORUD_OF_THE_OCCULT);
-                            Events.ScheduleEvent(EVENT_ADHERENT_SHORUD_OF_THE_OCCULT, urand(27000, 32000));
+                            Events.ScheduleEvent(EVENT_ADHERENT_SHORUD_OF_THE_OCCULT, std::rand() % 32000 + 27000);
                             break;
                         case EVENT_CULTIST_DARK_MARTYRDOM:
                             DoCast(me, SPELL_DARK_MARTYRDOM_ADHERENT);
-                            Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, urand(16000, 21000));
+                            Events.ScheduleEvent(EVENT_CULTIST_DARK_MARTYRDOM, std::rand() % 21000 + 16000);
                             break;
                     }
                 }
@@ -832,9 +832,9 @@ class npc_darnavan : public CreatureScript
             {
                 _events.Reset();
                 _events.ScheduleEvent(EVENT_DARNAVAN_BLADESTORM, 10000);
-                _events.ScheduleEvent(EVENT_DARNAVAN_INTIMIDATING_SHOUT, urand(20000, 25000));
-                _events.ScheduleEvent(EVENT_DARNAVAN_MORTAL_STRIKE, urand(25000, 30000));
-                _events.ScheduleEvent(EVENT_DARNAVAN_SUNDER_ARMOR, urand(5000, 8000));
+                _events.ScheduleEvent(EVENT_DARNAVAN_INTIMIDATING_SHOUT, std::rand() % 25000 + 20000);
+                _events.ScheduleEvent(EVENT_DARNAVAN_MORTAL_STRIKE, std::rand() % 30000 + 25000);
+                _events.ScheduleEvent(EVENT_DARNAVAN_SUNDER_ARMOR, std::rand() % 8000 + 5000);
                 _canCharge = true;
                 _canShatter = true;
             }
@@ -900,25 +900,25 @@ class npc_darnavan : public CreatureScript
                     {
                         case EVENT_DARNAVAN_BLADESTORM:
                             DoCast(SPELL_BLADESTORM);
-                            _events.ScheduleEvent(EVENT_DARNAVAN_BLADESTORM, urand(90000, 100000));
+                            _events.ScheduleEvent(EVENT_DARNAVAN_BLADESTORM, std::rand() % 100000 + 90000);
                             break;
                         case EVENT_DARNAVAN_CHARGE:
                             _canCharge = true;
                             break;
                         case EVENT_DARNAVAN_INTIMIDATING_SHOUT:
                             DoCast(SPELL_INTIMIDATING_SHOUT);
-                            _events.ScheduleEvent(EVENT_DARNAVAN_INTIMIDATING_SHOUT, urand(90000, 120000));
+                            _events.ScheduleEvent(EVENT_DARNAVAN_INTIMIDATING_SHOUT, std::rand() % 120000 + 90000);
                             break;
                         case EVENT_DARNAVAN_MORTAL_STRIKE:
                             DoCastVictim(SPELL_MORTAL_STRIKE);
-                            _events.ScheduleEvent(EVENT_DARNAVAN_MORTAL_STRIKE, urand(15000, 30000));
+                            _events.ScheduleEvent(EVENT_DARNAVAN_MORTAL_STRIKE, std::rand() % 30000 + 15000);
                             break;
                         case EVENT_DARNAVAN_SHATTERING_THROW:
                             _canShatter = true;
                             break;
                         case EVENT_DARNAVAN_SUNDER_ARMOR:
                             DoCastVictim(SPELL_SUNDER_ARMOR);
-                            _events.ScheduleEvent(EVENT_DARNAVAN_SUNDER_ARMOR, urand(3000, 7000));
+                            _events.ScheduleEvent(EVENT_DARNAVAN_SUNDER_ARMOR, std::rand() % 7000 + 3000);
                             break;
                     }
                 }

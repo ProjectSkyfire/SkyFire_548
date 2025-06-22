@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -14,17 +14,17 @@ class Totem;
 
 class TotemAI : public CreatureAI
 {
-    public:
-        explicit TotemAI(Creature* c);
+public:
+    explicit TotemAI(Creature* c);
 
-        void MoveInLineOfSight(Unit* who) OVERRIDE;
-        void AttackStart(Unit* victim) OVERRIDE;
-        void EnterEvadeMode() OVERRIDE;
+    void MoveInLineOfSight(Unit* who) OVERRIDE;
+    void AttackStart(Unit* victim) OVERRIDE;
+    void EnterEvadeMode() OVERRIDE;
 
-        void UpdateAI(uint32 diff) OVERRIDE;
-        static int Permissible(Creature const* creature);
+    void UpdateAI(uint32 diff) OVERRIDE;
+    static int Permissible(Creature const* creature);
 
-    private:
-        uint64 i_victimGuid;
+private:
+    uint64 i_victimGuid;
 };
 #endif

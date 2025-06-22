@@ -76,32 +76,26 @@ class boss_morogrim_tidewalker : public CreatureScript
 public:
     boss_morogrim_tidewalker() : CreatureScript("boss_morogrim_tidewalker") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_morogrim_tidewalkerAI(creature);
-    }
-
     struct boss_morogrim_tidewalkerAI : public ScriptedAI
     {
         boss_morogrim_tidewalkerAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            TidalWave_Timer = 0;
+            WateryGrave_Timer = 0;
+            Earthquake_Timer = 0;
+            WateryGlobules_Timer = 0;
+            Playercount = 0;
+            counter = 0;
+
+            for (uint8 i = 0; i < 4; i++)
+                globulespell[4] = 0;
+
+            Earthquake = false;
+            Phase2 = false;
+
+            PlayerList = { };
         }
-
-        InstanceScript* instance;
-
-        Map::PlayerList const* PlayerList;
-
-        uint32 TidalWave_Timer;
-        uint32 WateryGrave_Timer;
-        uint32 Earthquake_Timer;
-        uint32 WateryGlobules_Timer;
-        uint32 globulespell[4];
-        int8 Playercount;
-        int8 counter;
-
-        bool Earthquake;
-        bool Phase2;
 
         void Reset() OVERRIDE
         {
@@ -153,10 +147,10 @@ public:
         {
             switch (i)
             {
-            case 0: player->CastSpell(player, SPELL_WATERY_GRAVE_1, true); break;
-            case 1: player->CastSpell(player, SPELL_WATERY_GRAVE_2, true); break;
-            case 2: player->CastSpell(player, SPELL_WATERY_GRAVE_3, true); break;
-            case 3: player->CastSpell(player, SPELL_WATERY_GRAVE_4, true); break;
+                case 0: player->CastSpell(player, SPELL_WATERY_GRAVE_1, true); break;
+                case 1: player->CastSpell(player, SPELL_WATERY_GRAVE_2, true); break;
+                case 2: player->CastSpell(player, SPELL_WATERY_GRAVE_3, true); break;
+                case 3: player->CastSpell(player, SPELL_WATERY_GRAVE_4, true); break;
             }
         }
 
@@ -270,7 +264,25 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+        Map::PlayerList const* PlayerList;
+        uint32 TidalWave_Timer;
+        uint32 WateryGrave_Timer;
+        uint32 Earthquake_Timer;
+        uint32 WateryGlobules_Timer;
+        uint32 globulespell[4];
+        int8 Playercount;
+        int8 counter;
+        bool Earthquake;
+        bool Phase2;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_morogrim_tidewalkerAI(creature);
+    }
 };
 
 class npc_water_globule : public CreatureScript
@@ -278,16 +290,12 @@ class npc_water_globule : public CreatureScript
 public:
     npc_water_globule() : CreatureScript("npc_water_globule") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_water_globuleAI(creature);
-    }
-
     struct npc_water_globuleAI : public ScriptedAI
     {
-        npc_water_globuleAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 Check_Timer;
+        npc_water_globuleAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Check_Timer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -335,7 +343,15 @@ public:
 
             //do NOT deal any melee damage to the target.
         }
+
+    private:
+        uint32 Check_Timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_water_globuleAI(creature);
+    }
 };
 
 void AddSC_boss_morogrim_tidewalker()

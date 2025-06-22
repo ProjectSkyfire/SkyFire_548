@@ -85,11 +85,51 @@ target_link_libraries(authserver
 
 if( WIN32 )
   if ( MSVC )
+    #add libcrypto-3 dll to bin Folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_CRYPTO3_DLL} ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
+    )
+
+    #add libssl-3 dll to bin Folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_SSL3_DLL} ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
+    )
+
+    #add mysql dll to bin folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MYSQL_DLL} ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
+    )
+    
     add_custom_command(TARGET authserver
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/authserver.conf.dist ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
     )
   elseif ( MINGW )
+    add_custom_command(TARGET authserver
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/authserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
+    )
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    #add libcrypto-3 dll to bin Folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_CRYPTO3_DLL} ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
+    )
+
+    #add libssl-3 dll to bin Folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${OPENSSL_SSL3_DLL} ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
+    )
+
+    #add mysql dll to bin folder
+    add_custom_command(TARGET authserver
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MYSQL_DLL} ${CMAKE_BINARY_DIR}/bin/
+    )
     add_custom_command(TARGET authserver
       POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/authserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
@@ -100,6 +140,7 @@ endif()
 if( UNIX )
   install(TARGETS authserver DESTINATION bin)
   install(FILES  authserver.conf.dist DESTINATION ${CONF_DIR})
+  install(FILES  authserverd.service.dist DESTINATION ${CONF_DIR})
 elseif( WIN32 )
   install(TARGETS authserver DESTINATION "${CMAKE_INSTALL_PREFIX}")
   install(FILES authserver.conf.dist DESTINATION "${CMAKE_INSTALL_PREFIX}")

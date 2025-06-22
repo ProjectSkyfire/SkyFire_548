@@ -49,8 +49,8 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_FATAL_BITE, urand(17000,20000));
-            events.ScheduleEvent(EVENT_INFECTED_BITE, urand(10000,12000));
+            events.ScheduleEvent(EVENT_FATAL_BITE, std::rand() % 20000 + 17000);
+            events.ScheduleEvent(EVENT_INFECTED_BITE, std::rand() % 12000 + 10000);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -74,11 +74,11 @@ public:
                 {
                     case EVENT_FATAL_BITE:
                         DoCastVictim(SPELL_FATAL_BITE);
-                        events.ScheduleEvent(EVENT_FATAL_BITE, urand(8000,10000));
+                        events.ScheduleEvent(EVENT_FATAL_BITE, std::rand() % 10000 + 8000);
                         break;
                     case EVENT_INFECTED_BITE:
                         DoCast(me, SPELL_INFECTED_BITE);
-                        events.ScheduleEvent(EVENT_FATAL_BITE, urand(8000,10000));
+                        events.ScheduleEvent(EVENT_FATAL_BITE, std::rand() % 10000 + 8000);
                         break;
                     default:
                         break;

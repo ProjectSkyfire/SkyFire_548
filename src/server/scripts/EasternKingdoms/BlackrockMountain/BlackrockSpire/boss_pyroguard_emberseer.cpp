@@ -372,8 +372,8 @@ public:
                 creatureList->SetInCombatWithZone();    // AI()->AttackStart(me->GetVictim());
             }
 
-            _events.ScheduleEvent(EVENT_STRIKE, urand(8000, 16000));
-            _events.ScheduleEvent(EVENT_ENCAGE, urand(10000, 20000));
+            _events.ScheduleEvent(EVENT_STRIKE, std::rand() % 16000 + 8000);
+            _events.ScheduleEvent(EVENT_ENCAGE, std::rand() % 20000 + 10000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -407,11 +407,11 @@ public:
                 {
                     case EVENT_STRIKE:
                         DoCastVictim(SPELL_STRIKE, true);
-                        _events.ScheduleEvent(EVENT_STRIKE, urand(14000, 23000));
+                        _events.ScheduleEvent(EVENT_STRIKE, std::rand() % 23000 + 14000);
                         break;
                     case EVENT_ENCAGE:
                         DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), EVENT_ENCAGE, true);
-                        _events.ScheduleEvent(EVENT_ENCAGE, urand(6000, 12000));
+                        _events.ScheduleEvent(EVENT_ENCAGE, std::rand() % 12000 + 6000);
                         break;
                     default:
                         break;

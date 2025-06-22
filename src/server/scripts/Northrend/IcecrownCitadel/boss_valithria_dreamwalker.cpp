@@ -312,7 +312,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                 DoCast(me, SPELL_COPY_DAMAGE);
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
                 _events.ScheduleEvent(EVENT_INTRO_TALK, 15000);
-                _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
+                _events.ScheduleEvent(EVENT_DREAM_PORTAL, std::rand() % 48000 + 45000);
                 if (IsHeroic())
                     _events.ScheduleEvent(EVENT_BERSERK, 420000);
             }
@@ -437,7 +437,7 @@ class boss_valithria_dreamwalker : public CreatureScript
                                 Talk(SAY_VALITHRIA_DREAM_PORTAL);
                             for (uint32 i = 0; i < _portalCount; ++i)
                                 DoCast(me, SUMMON_PORTAL);
-                            _events.ScheduleEvent(EVENT_DREAM_PORTAL, urand(45000, 48000));
+                            _events.ScheduleEvent(EVENT_DREAM_PORTAL, std::rand() % 48000 + 45000);
                             break;
                         case EVENT_DREAM_SLIP:
                             DoCast(me, SPELL_DREAM_SLIP);
@@ -678,9 +678,9 @@ class npc_risen_archmage : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_FROSTBOLT_VOLLEY, urand(5000, 15000));
-                _events.ScheduleEvent(EVENT_MANA_VOID, urand(20000, 25000));
-                _events.ScheduleEvent(EVENT_COLUMN_OF_FROST, urand(10000, 20000));
+                _events.ScheduleEvent(EVENT_FROSTBOLT_VOLLEY, std::rand() % 15000 + 5000);
+                _events.ScheduleEvent(EVENT_MANA_VOID, std::rand() % 25000 + 20000);
+                _events.ScheduleEvent(EVENT_COLUMN_OF_FROST, std::rand() % 20000 + 10000);
                 _canCallEnterCombat = true;
             }
 
@@ -743,17 +743,17 @@ class npc_risen_archmage : public CreatureScript
                     {
                         case EVENT_FROSTBOLT_VOLLEY:
                             DoCast(me, SPELL_FROSTBOLT_VOLLEY);
-                            _events.ScheduleEvent(EVENT_FROSTBOLT_VOLLEY, urand(8000, 15000));
+                            _events.ScheduleEvent(EVENT_FROSTBOLT_VOLLEY, std::rand() % 15000 + 8000);
                             break;
                         case EVENT_MANA_VOID:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, ManaVoidSelector(me)))
                                 DoCast(target, SPELL_MANA_VOID);
-                            _events.ScheduleEvent(EVENT_MANA_VOID, urand(20000, 25000));
+                            _events.ScheduleEvent(EVENT_MANA_VOID, std::rand() % 25000 + 20000);
                             break;
                         case EVENT_COLUMN_OF_FROST:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, -10.0f, true))
                                 DoCast(target, SPELL_COLUMN_OF_FROST);
-                            _events.ScheduleEvent(EVENT_COLUMN_OF_FROST, urand(15000, 25000));
+                            _events.ScheduleEvent(EVENT_COLUMN_OF_FROST, std::rand() % 25000 + 15000);
                             break;
                         default:
                             break;
@@ -789,8 +789,8 @@ class npc_blazing_skeleton : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
-                _events.ScheduleEvent(EVENT_LEY_WASTE, urand(15000, 20000));
+                _events.ScheduleEvent(EVENT_FIREBALL, std::rand() % 4000 + 2000);
+                _events.ScheduleEvent(EVENT_LEY_WASTE, std::rand() % 20000 + 15000);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -810,11 +810,11 @@ class npc_blazing_skeleton : public CreatureScript
                         case EVENT_FIREBALL:
                             if (!me->IsWithinMeleeRange(me->GetVictim()))
                                 DoCastVictim(SPELL_FIREBALL);
-                            _events.ScheduleEvent(EVENT_FIREBALL, urand(2000, 4000));
+                            _events.ScheduleEvent(EVENT_FIREBALL, std::rand() % 4000 + 2000);
                             break;
                         case EVENT_LEY_WASTE:
                             DoCast(me, SPELL_LEY_WASTE);
-                            _events.ScheduleEvent(EVENT_LEY_WASTE, urand(15000, 20000));
+                            _events.ScheduleEvent(EVENT_LEY_WASTE, std::rand() % 20000 + 15000);
                             break;
                         default:
                             break;
@@ -849,7 +849,7 @@ class npc_suppresser : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_SUPPRESSION, urand(10000, 15000));
+                _events.ScheduleEvent(EVENT_SUPPRESSION, std::rand() % 15000 + 10000);
                 me->SetReactState(REACT_PASSIVE);
             }
 
@@ -945,7 +945,7 @@ class npc_gluttonous_abomination : public CreatureScript
             void Reset() OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_GUT_SPRAY, urand(10000, 13000));
+                _events.ScheduleEvent(EVENT_GUT_SPRAY, std::rand() % 13000 + 10000);
             }
 
             void JustDied(Unit* /*killer*/) OVERRIDE
@@ -969,7 +969,7 @@ class npc_gluttonous_abomination : public CreatureScript
                     {
                         case EVENT_GUT_SPRAY:
                             DoCast(me, SPELL_GUT_SPRAY);
-                            _events.ScheduleEvent(EVENT_GUT_SPRAY, urand(10000, 13000));
+                            _events.ScheduleEvent(EVENT_GUT_SPRAY, std::rand() % 13000 + 10000);
                             break;
                         default:
                             break;

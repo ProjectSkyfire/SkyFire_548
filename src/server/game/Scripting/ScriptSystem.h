@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -17,22 +17,22 @@
 //ACTIVE or PASSIVE = Hostility to environment surroundings.
 enum eEscortFaction
 {
-    FACTION_ESCORT_A_NEUTRAL_PASSIVE    = 10,
-    FACTION_ESCORT_H_NEUTRAL_PASSIVE    = 33,
-    FACTION_ESCORT_N_NEUTRAL_PASSIVE    = 113,
+    FACTION_ESCORT_A_NEUTRAL_PASSIVE = 10,
+    FACTION_ESCORT_H_NEUTRAL_PASSIVE = 33,
+    FACTION_ESCORT_N_NEUTRAL_PASSIVE = 113,
 
-    FACTION_ESCORT_A_NEUTRAL_ACTIVE     = 231,
-    FACTION_ESCORT_H_NEUTRAL_ACTIVE     = 232,
-    FACTION_ESCORT_N_NEUTRAL_ACTIVE     = 250,
+    FACTION_ESCORT_A_NEUTRAL_ACTIVE = 231,
+    FACTION_ESCORT_H_NEUTRAL_ACTIVE = 232,
+    FACTION_ESCORT_N_NEUTRAL_ACTIVE = 250,
 
-    FACTION_ESCORT_N_FRIEND_PASSIVE     = 290,
-    FACTION_ESCORT_N_FRIEND_ACTIVE      = 495,
+    FACTION_ESCORT_N_FRIEND_PASSIVE = 290,
+    FACTION_ESCORT_N_FRIEND_ACTIVE = 495,
 
-    FACTION_ESCORT_A_PASSIVE            = 774,
-    FACTION_ESCORT_H_PASSIVE            = 775,
+    FACTION_ESCORT_A_PASSIVE = 774,
+    FACTION_ESCORT_H_PASSIVE = 775,
 
-    FACTION_ESCORT_N_ACTIVE             = 1986,
-    FACTION_ESCORT_H_ACTIVE             = 2046
+    FACTION_ESCORT_N_ACTIVE = 1986,
+    FACTION_ESCORT_H_ACTIVE = 2046
 };
 
 struct ScriptPointMove
@@ -49,31 +49,31 @@ typedef std::vector<ScriptPointMove> ScriptPointVector;
 
 class SystemMgr
 {
-        friend class ACE_Singleton<SystemMgr, ACE_Null_Mutex>;
-        SystemMgr() { }
-        ~SystemMgr() { }
+    friend class ACE_Singleton<SystemMgr, ACE_Null_Mutex>;
+    SystemMgr() { }
+    ~SystemMgr() { }
 
-    public:
-        typedef UNORDERED_MAP<uint32, ScriptPointVector> PointMoveMap;
+public:
+    typedef UNORDERED_MAP<uint32, ScriptPointVector> PointMoveMap;
 
-        //Database
-        void LoadScriptWaypoints();
+    //Database
+    void LoadScriptWaypoints();
 
-        ScriptPointVector const& GetPointMoveList(uint32 creatureEntry) const
-        {
-            PointMoveMap::const_iterator itr = m_mPointMoveMap.find(creatureEntry);
+    ScriptPointVector const& GetPointMoveList(uint32 creatureEntry) const
+    {
+        PointMoveMap::const_iterator itr = m_mPointMoveMap.find(creatureEntry);
 
-            if (itr == m_mPointMoveMap.end())
-                return _empty;
+        if (itr == m_mPointMoveMap.end())
+            return _empty;
 
-            return itr->second;
-        }
+        return itr->second;
+    }
 
-    protected:
-        PointMoveMap    m_mPointMoveMap;                    //coordinates for waypoints
+protected:
+    PointMoveMap    m_mPointMoveMap;                    //coordinates for waypoints
 
-    private:
-        static ScriptPointVector const _empty;
+private:
+    static ScriptPointVector const _empty;
 };
 
 #define sScriptSystemMgr ACE_Singleton<SystemMgr, ACE_Null_Mutex>::instance()

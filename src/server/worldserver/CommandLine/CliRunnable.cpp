@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -8,10 +8,10 @@
 /// \file
 
 #include "Common.h"
+#include "Configuration/Config.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "WorldSession.h"
-#include "Configuration/Config.h"
 
 #include "AccountMgr.h"
 #include "Chat.h"
@@ -69,9 +69,9 @@ char** cli_completion(const char* text, int start, int /*end*/)
 
 int cli_hook_func()
 {
-       if (World::IsStopped())
-           rl_done = 1;
-       return 0;
+    if (World::IsStopped())
+        rl_done = 1;
+    return 0;
 }
 
 #endif
@@ -80,18 +80,18 @@ void utf8print(void* /*arg*/, const char* str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
-    size_t wtemp_len = 6000-1;
+    size_t wtemp_len = 6000 - 1;
     if (!Utf8toWStr(str, strlen(str), wtemp_buf, wtemp_len))
         return;
 
     char temp_buf[6000];
-    CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len+1);
+    CharToOemBuffW(&wtemp_buf[0], &temp_buf[0], wtemp_len + 1);
     printf(temp_buf);
 #else
-{
-    printf("%s", str);
-    fflush(stdout);
-}
+    {
+        printf("%s", str);
+        fflush(stdout);
+    }
 #endif
 }
 
@@ -111,7 +111,7 @@ int kb_hit_return()
     tv.tv_usec = 0;
     FD_ZERO(&fds);
     FD_SET(STDIN_FILENO, &fds);
-    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
     return FD_ISSET(STDIN_FILENO, &fds);
 }
 #endif
@@ -138,7 +138,7 @@ void CliRunnable::run()
     {
         fflush(stdout);
 
-        char *command_str ;             // = fgets(commandbuf, sizeof(commandbuf), stdin);
+        char* command_str;             // = fgets(commandbuf, sizeof(commandbuf), stdin);
 
 #if PLATFORM == PLATFORM_WINDOWS
         char commandbuf[256];
@@ -150,7 +150,7 @@ void CliRunnable::run()
 
         if (command_str != NULL)
         {
-            for (int x=0; command_str[x]; ++x)
+            for (int x = 0; command_str[x]; ++x)
                 if (command_str[x] == '\r' || command_str[x] == '\n')
                 {
                     command_str[x] = 0;

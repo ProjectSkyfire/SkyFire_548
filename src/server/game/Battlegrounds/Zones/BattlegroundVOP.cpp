@@ -1,17 +1,17 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "BattlegroundVOP.h"
-#include "ObjectMgr.h"
-#include "World.h"
-#include "WorldPacket.h"
 #include "BattlegroundMgr.h"
+#include "BattlegroundVOP.h"
 #include "Creature.h"
 #include "Language.h"
 #include "Object.h"
+#include "ObjectMgr.h"
 #include "Player.h"
+#include "World.h"
+#include "WorldPacket.h"
 
 BattlegroundVOP::BattlegroundVOP()
 {
@@ -30,7 +30,7 @@ void BattlegroundVOP::PostUpdateImpl(uint32 diff)
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
         int team_points[BG_TEAMS_COUNT] = { 0, 0 };
-         
+
         // Accumulate points
         for (int team = 0; team < BG_TEAMS_COUNT; ++team)
         {
@@ -145,6 +145,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
     {
         case BG_VOP_OBJECT_ORB_1_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_3);
             SpawnBGObject(BG_VOP_OBJECT_ORB_1, RESPAWN_ONE_DAY);
             m_FlagKeeper[0] = player->GetGUID();
@@ -152,6 +153,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
         }
         case BG_VOP_OBJECT_ORB_2_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_2);
             SpawnBGObject(BG_VOP_OBJECT_ORB_2, RESPAWN_ONE_DAY);
             m_FlagKeeper[1] = player->GetGUID();
@@ -159,6 +161,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
         }
         case BG_VOP_OBJECT_ORB_3_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_4);
             SpawnBGObject(BG_VOP_OBJECT_ORB_3, RESPAWN_ONE_DAY);
             m_FlagKeeper[2] = player->GetGUID();
@@ -166,6 +169,7 @@ void BattlegroundVOP::EventPlayerClickedOnFlag(Player* player, GameObject* targe
         }
         case BG_VOP_OBJECT_ORB_4_ENTRY:
         {
+            PlaySoundToAll(BG_VOP_SOUND_ORB);
             player->CastSpell(player, BG_VOP_SPELL_ORB_PICKED_UP_1);
             SpawnBGObject(BG_VOP_OBJECT_ORB_4, RESPAWN_ONE_DAY);
             m_FlagKeeper[3] = player->GetGUID();
@@ -287,23 +291,37 @@ void BattlegroundVOP::HandleKillPlayer(Player* player, Player* killer)
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
+    int32 message_id = 0;
+
     if (m_FlagKeeper[0] == player->GetGUID())
     {
+        message_id = LANG_BG_VOP_DROPPED_GREEN;
+        SendMessageToAll(message_id, ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE, player);
+        PlaySoundToAll(BG_VOP_SOUND_ORB);
         SpawnBGObject(BG_VOP_OBJECT_ORB_1, RESPAWN_IMMEDIATELY);
         m_FlagKeeper[0] = 0;
     }
     if (m_FlagKeeper[1] == player->GetGUID())
     {
+        message_id = LANG_BG_VOP_DROPPED_PURPLE;
+        SendMessageToAll(message_id, ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE, player);
+        PlaySoundToAll(BG_VOP_SOUND_ORB);
         SpawnBGObject(BG_VOP_OBJECT_ORB_2, RESPAWN_IMMEDIATELY);
         m_FlagKeeper[1] = 0;
     }
     if (m_FlagKeeper[2] == player->GetGUID())
     {
+        message_id = LANG_BG_VOP_DROPPED_ORANGE;
+        SendMessageToAll(message_id, ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE, player);
+        PlaySoundToAll(BG_VOP_SOUND_ORB);
         SpawnBGObject(BG_VOP_OBJECT_ORB_3, RESPAWN_IMMEDIATELY);
         m_FlagKeeper[2] = 0;
     }
     if (m_FlagKeeper[3] == player->GetGUID())
     {
+        message_id = LANG_BG_VOP_DROPPED_BLUE;
+        SendMessageToAll(message_id, ChatMsg::CHAT_MSG_RAID_BOSS_EMOTE, player);
+        PlaySoundToAll(BG_VOP_SOUND_ORB);
         SpawnBGObject(BG_VOP_OBJECT_ORB_4, RESPAWN_IMMEDIATELY);
         m_FlagKeeper[3] = 0;
     }
@@ -328,7 +346,7 @@ void BattlegroundVOP::UpdatePlayerScore(Player* player, uint32 type, uint32 valu
     BattlegroundScoreMap::iterator itr = PlayerScores.find(player->GetGUID());
     if (itr == PlayerScores.end())                         // player not found
         return;
-    
+
     switch (type)
     {
         case SCORE_ORB_CONTROL:

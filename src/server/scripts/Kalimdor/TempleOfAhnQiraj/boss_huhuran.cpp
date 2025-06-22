@@ -52,11 +52,11 @@ public:
 
         void Reset() OVERRIDE
         {
-            Frenzy_Timer = urand(25000, 35000);
-            Wyvern_Timer = urand(18000, 28000);
+            Frenzy_Timer = std::rand() % 35000 + 25000;
+            Wyvern_Timer = std::rand() % 28000 + 18000;
             Spit_Timer = 8000;
             PoisonBolt_Timer = 4000;
-            NoxiousPoison_Timer = urand(10000, 20000);
+            NoxiousPoison_Timer = std::rand() % 20000 + 10000;
             FrenzyBack_Timer = 15000;
 
             Frenzy = false;
@@ -80,7 +80,7 @@ public:
                 Talk(EMOTE_FRENZY_KILL);
                 Frenzy = true;
                 PoisonBolt_Timer = 3000;
-                Frenzy_Timer = urand(25000, 35000);
+                Frenzy_Timer = std::rand() % 35000 + 25000;
             } else Frenzy_Timer -= diff;
 
             // Wyvern Timer
@@ -88,21 +88,21 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_WYVERNSTING);
-                Wyvern_Timer = urand(15000, 32000);
+                Wyvern_Timer = std::rand() % 32000 + 15000;
             } else Wyvern_Timer -= diff;
 
             //Spit Timer
             if (Spit_Timer <= diff)
             {
                 DoCastVictim(SPELL_ACIDSPIT);
-                Spit_Timer = urand(5000, 10000);
+                Spit_Timer = std::rand() % 10000 + 5000;
             } else Spit_Timer -= diff;
 
             //NoxiousPoison_Timer
             if (NoxiousPoison_Timer <= diff)
             {
                 DoCastVictim(SPELL_NOXIOUSPOISON);
-                NoxiousPoison_Timer = urand(12000, 24000);
+                NoxiousPoison_Timer = std::rand() % 24000 + 12000;
             } else NoxiousPoison_Timer -= diff;
 
             //PoisonBolt only if frenzy or berserk

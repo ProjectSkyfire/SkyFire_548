@@ -186,7 +186,7 @@ public:
             uiDoorIntegrity = 100;
 
             uiWaveCount = 0;
-            uiLocation = urand(0, 5);
+            uiLocation = std::rand() % 5;
             uiFirstBoss = 0;
             uiSecondBoss = 0;
             uiCountErekemGuards = 0;
@@ -462,7 +462,7 @@ public:
 
         void SpawnPortal()
         {
-            SetData(DATA_PORTAL_LOCATION, (GetData(DATA_PORTAL_LOCATION) + urand(1, 5))%6);
+            SetData(DATA_PORTAL_LOCATION, (GetData(DATA_PORTAL_LOCATION) + (std::rand() % 5 + 1))%6);
             if (Creature* pSinclari = instance->GetCreature(uiSinclari))
                 if (Creature* portal = pSinclari->SummonCreature(CREATURE_TELEPORTATION_PORTAL, PortalLocation[GetData(DATA_PORTAL_LOCATION)], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN))
                     uiTeleportationPortal = portal->GetGUID();
@@ -563,7 +563,7 @@ public:
             {
                 case 6:
                     if (uiFirstBoss == 0)
-                        uiFirstBoss = urand(1, 6);
+                        uiFirstBoss = std::rand() % 6 + 1;
                     if (Creature* pSinclari = instance->GetCreature(uiSinclari))
                     {
                         if (Creature* pPortal = pSinclari->SummonCreature(CREATURE_TELEPORTATION_PORTAL, MiddleRoomPortalSaboLocation, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN))
@@ -576,7 +576,7 @@ public:
                     if (uiSecondBoss == 0)
                         do
                         {
-                            uiSecondBoss = urand(1, 6);
+                            uiSecondBoss = std::rand() % 6 + 1;
                         } while (uiSecondBoss == uiFirstBoss);
                     if (Creature* pSinclari = instance->GetCreature(uiSinclari))
                     {

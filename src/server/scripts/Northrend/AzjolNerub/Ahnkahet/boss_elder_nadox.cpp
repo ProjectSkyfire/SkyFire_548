@@ -113,11 +113,11 @@ class boss_elder_nadox : public CreatureScript
                             break;
                         case EVENT_RAGE:
                             DoCast(H_SPELL_BROOD_RAGE);
-                            events.ScheduleEvent(EVENT_RAGE, urand(10 * IN_MILLISECONDS, 50 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_RAGE, std::rand() % (50 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                             break;
                         case EVENT_SUMMON_SWARMER:
                             DoCast(me, SPELL_SUMMON_SWARMERS);
-                            if (urand(1, 3) == 3) // 33% chance of dialog
+                            if ((std::rand() % 3 + 1) == 3) // 33% chance of dialog
                                 Talk(SAY_EGG_SAC);
                             events.ScheduleEvent(EVENT_SUMMON_SWARMER, 10 * IN_MILLISECONDS);
                             break;

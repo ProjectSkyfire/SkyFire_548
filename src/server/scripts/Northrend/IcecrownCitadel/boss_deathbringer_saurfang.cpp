@@ -464,15 +464,15 @@ class boss_deathbringer_saurfang : public CreatureScript
                             break;
                         case EVENT_BLOOD_NOVA:
                             DoCastAOE(SPELL_BLOOD_NOVA_TRIGGER);
-                            events.ScheduleEvent(EVENT_BLOOD_NOVA, urand(20000, 25000), 0, PHASE_COMBAT);
+                            events.ScheduleEvent(EVENT_BLOOD_NOVA, std::rand() % 25000 + 20000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_RUNE_OF_BLOOD:
                             DoCastVictim(SPELL_RUNE_OF_BLOOD);
-                            events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, urand(20000, 25000), 0, PHASE_COMBAT);
+                            events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, std::rand() % 25000 + 20000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_BOILING_BLOOD:
                             DoCast(me, SPELL_BOILING_BLOOD);
-                            events.ScheduleEvent(EVENT_BOILING_BLOOD, urand(15000, 20000), 0, PHASE_COMBAT);
+                            events.ScheduleEvent(EVENT_BOILING_BLOOD, std::rand() % 20000 + 15000, 0, PHASE_COMBAT);
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
@@ -1212,7 +1212,7 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
                 }
 
                 std::list<WorldObject*>::const_iterator itr = targets.begin();
-                std::advance(itr, urand(0, targetsAtRange));
+                std::advance(itr, std::rand() % (targetsAtRange));
                 target = *itr;
                 targets.clear();
                 targets.push_back(target);

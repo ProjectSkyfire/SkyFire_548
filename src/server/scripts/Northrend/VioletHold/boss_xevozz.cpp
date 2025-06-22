@@ -77,9 +77,9 @@ public:
                     instance->SetData(DATA_2ND_BOSS_EVENT, NOT_STARTED);
             }
 
-            uiSummonEtherealSphere_Timer = urand(10000, 12000);
-            uiArcaneBarrageVolley_Timer = urand(20000, 22000);
-            uiArcaneBuffet_Timer = uiSummonEtherealSphere_Timer + urand(5000, 6000);
+            uiSummonEtherealSphere_Timer = std::rand() % 12000 + 10000;
+            uiArcaneBarrageVolley_Timer = std::rand() % 22000 + 20000;
+            uiArcaneBuffet_Timer = uiSummonEtherealSphere_Timer + std::rand() % 6000 + 5000;
             DespawnSphere();
         }
 
@@ -152,7 +152,7 @@ public:
             if (uiArcaneBarrageVolley_Timer < uiDiff)
             {
                 DoCast(me, SPELL_ARCANE_BARRAGE_VOLLEY);
-                uiArcaneBarrageVolley_Timer = urand(20000, 22000);
+                uiArcaneBarrageVolley_Timer = std::rand() % 22000 + 20000;
             }
             else uiArcaneBarrageVolley_Timer -= uiDiff;
 
@@ -173,8 +173,8 @@ public:
                 if (IsHeroic()) // extra one for heroic
                     me->SummonCreature(NPC_ETHEREAL_SPHERE, me->GetPositionX()-5+rand()%10, me->GetPositionY()-5+rand()%10, me->GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 40000);
 
-                uiSummonEtherealSphere_Timer = urand(45000, 47000);
-                uiArcaneBuffet_Timer = urand(5000, 6000);
+                uiSummonEtherealSphere_Timer = std::rand() % 47000 + 45000;
+                uiArcaneBuffet_Timer = std::rand() % 6000 + 5000;
             }
             else uiSummonEtherealSphere_Timer -= uiDiff;
 
@@ -235,7 +235,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiSummonPlayers_Timer = urand(33000, 35000);
+            uiSummonPlayers_Timer = std::rand() % 35000 + 33000;
             uiRangeCheck_Timer = 1000;
         }
 
@@ -280,7 +280,7 @@ public:
                                 DoTeleportPlayer(i->GetSource(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), i->GetSource()->GetOrientation());
                 }
 
-                uiSummonPlayers_Timer = urand(33000, 35000);
+                uiSummonPlayers_Timer = std::rand() % 35000 + 33000;
             }
             else uiSummonPlayers_Timer -= uiDiff;
         }

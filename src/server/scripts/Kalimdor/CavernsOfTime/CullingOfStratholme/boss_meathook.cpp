@@ -59,9 +59,9 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiChainTimer = urand(12000, 17000);   //seen on video 13, 17, 15, 12, 16
-            uiDiseaseTimer = urand(2000, 4000);   //approx 3s
-            uiFrenzyTimer = urand(21000, 26000);  //made it up
+            uiChainTimer = std::rand() % 17000 + 12000; //seen on video 13, 17, 15, 12, 16
+            uiDiseaseTimer = std::rand() % 4000 + 2000; //approx 3s
+            uiFrenzyTimer = std::rand() % 26000 + 21000; //made it up
 
             if (instance)
                 instance->SetData(DATA_MEATHOOK_EVENT, NOT_STARTED);
@@ -84,20 +84,20 @@ public:
             if (uiDiseaseTimer <= diff)
             {
                 DoCastAOE(SPELL_DISEASE_EXPULSION);
-                uiDiseaseTimer = urand(1500, 4000);
+                uiDiseaseTimer = std::rand() % 4000 + 1500;
             } else uiDiseaseTimer -= diff;
 
             if (uiFrenzyTimer <= diff)
             {
                 DoCast(me, SPELL_FRENZY);
-                uiFrenzyTimer = urand(21000, 26000);
+                uiFrenzyTimer = std::rand() % 26000 + 21000;
             } else uiFrenzyTimer -= diff;
 
             if (uiChainTimer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_CONSTRICTING_CHAINS); //anyone but the tank
-                uiChainTimer = urand(2000, 4000);
+                uiChainTimer = std::rand() % 4000 + 2000;
             } else uiChainTimer -= diff;
 
             DoMeleeAttackIfReady();

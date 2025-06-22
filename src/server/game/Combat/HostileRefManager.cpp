@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "DBCStructure.h"
 #include "HostileRefManager.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
 #include "ThreatManager.h"
 #include "Unit.h"
-#include "DBCStructure.h"
-#include "SpellMgr.h"
-#include "SpellInfo.h"
 
 HostileRefManager::~HostileRefManager()
 {

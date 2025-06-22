@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -106,7 +106,7 @@ public:
                 // send area in "id - [name]" format
                 std::ostringstream ss;
                 if (handler->GetSession())
-                    ss << areaEntry->m_ID << " - |cffffffff|Harea:" << areaEntry->m_ID << "|h[" << name<< "]|h|r";
+                    ss << areaEntry->m_ID << " - |cffffffff|Harea:" << areaEntry->m_ID << "|h[" << name << "]|h|r";
                 else
                     ss << areaEntry->m_ID << " - " << name;
 
@@ -271,7 +271,7 @@ public:
             return false;
 
         // converting string that we try to find to lower case
-        wstrToLower (wNamePart);
+        wstrToLower(wNamePart);
 
         bool found = false;
         uint32 count = 0;
@@ -727,7 +727,7 @@ public:
                 {
                     knownStr = handler->GetSkyFireString(LANG_KNOWN);
                     uint32 curValue = target->GetPureSkillValue(id);
-                    uint32 maxValue  = target->GetPureMaxSkillValue(id);
+                    uint32 maxValue = target->GetPureMaxSkillValue(id);
                     uint32 permValue = target->GetSkillPermBonusValue(id);
                     uint32 tempValue = target->GetSkillTempBonusValue(id);
 
@@ -863,49 +863,49 @@ public:
                 return true;
             }
 
-                bool known = target && target->HasSpell(id);
-                bool learn = (spellInfo->Effects[0].Effect == SPELL_EFFECT_LEARN_SPELL);
+            bool known = target && target->HasSpell(id);
+            bool learn = (spellInfo->Effects[0].Effect == SPELL_EFFECT_LEARN_SPELL);
 
-                SpellInfo const* learnSpellInfo = sSpellMgr->GetSpellInfo(spellInfo->Effects[0].TriggerSpell);
+            SpellInfo const* learnSpellInfo = sSpellMgr->GetSpellInfo(spellInfo->Effects[0].TriggerSpell);
 
-                uint32 talentCost = GetTalentSpellCost(id);
+            uint32 talentCost = GetTalentSpellCost(id);
 
-                bool talent = (talentCost > 0);
-                bool passive = spellInfo->IsPassive();
-                bool active = target && target->HasAura(id);
+            bool talent = (talentCost > 0);
+            bool passive = spellInfo->IsPassive();
+            bool active = target && target->HasAura(id);
 
-                // unit32 used to prevent interpreting uint8 as char at output
-                // find rank of learned spell for learning spell, or talent rank
-                uint32 rank = talentCost ? talentCost : learn && learnSpellInfo ? learnSpellInfo->GetRank() : spellInfo->GetRank();
+            // unit32 used to prevent interpreting uint8 as char at output
+            // find rank of learned spell for learning spell, or talent rank
+            uint32 rank = talentCost ? talentCost : learn && learnSpellInfo ? learnSpellInfo->GetRank() : spellInfo->GetRank();
 
-                // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
-                std::ostringstream ss;
-                if (handler->GetSession())
-                    ss << id << " - |cffffffff|Hspell:" << id << "|h[" << name;
-                else
-                    ss << id << " - " << name;
+            // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
+            std::ostringstream ss;
+            if (handler->GetSession())
+                ss << id << " - |cffffffff|Hspell:" << id << "|h[" << name;
+            else
+                ss << id << " - " << name;
 
-                // include rank in link name
-                if (rank)
-                    ss << handler->GetSkyFireString(LANG_SPELL_RANK) << rank;
+            // include rank in link name
+            if (rank)
+                ss << handler->GetSkyFireString(LANG_SPELL_RANK) << rank;
 
-                if (handler->GetSession())
-                    ss << ' ' << localeNames[locale] << "]|h|r";
-                else
-                    ss << ' ' << localeNames[locale];
+            if (handler->GetSession())
+                ss << ' ' << localeNames[locale] << "]|h|r";
+            else
+                ss << ' ' << localeNames[locale];
 
-                if (talent)
-                    ss << handler->GetSkyFireString(LANG_TALENT);
-                if (passive)
-                    ss << handler->GetSkyFireString(LANG_PASSIVE);
-                if (learn)
-                    ss << handler->GetSkyFireString(LANG_LEARN);
-                if (known)
-                    ss << handler->GetSkyFireString(LANG_KNOWN);
-                if (active)
-                    ss << handler->GetSkyFireString(LANG_ACTIVE);
+            if (talent)
+                ss << handler->GetSkyFireString(LANG_TALENT);
+            if (passive)
+                ss << handler->GetSkyFireString(LANG_PASSIVE);
+            if (learn)
+                ss << handler->GetSkyFireString(LANG_LEARN);
+            if (known)
+                ss << handler->GetSkyFireString(LANG_KNOWN);
+            if (active)
+                ss << handler->GetSkyFireString(LANG_ACTIVE);
 
-                handler->SendSysMessage(ss.str().c_str());
+            handler->SendSysMessage(ss.str().c_str());
         }
         else
             handler->SendSysMessage(LANG_COMMAND_NOSPELLFOUND);
@@ -913,7 +913,7 @@ public:
         return true;
     }
 
-    static bool HandleLookupTaxiNodeCommand(ChatHandler* handler, const char * args)
+    static bool HandleLookupTaxiNodeCommand(ChatHandler* handler, const char* args)
     {
         if (!*args)
             return false;
@@ -996,7 +996,7 @@ public:
         uint32 maxResults = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_RESULTS_LOOKUP_COMMANDS);
         bool limitReached = false;
 
-        GameTeleContainer const & teleMap = sObjectMgr->GetGameTeleMap();
+        GameTeleContainer const& teleMap = sObjectMgr->GetGameTeleMap();
         for (GameTeleContainer::const_iterator itr = teleMap.begin(); itr != teleMap.end(); ++itr)
         {
             GameTele const* tele = &itr->second;
@@ -1205,7 +1205,7 @@ public:
         int32 limit = limitStr ? atoi(limitStr) : -1;
 
         if (!AccountMgr::normalizeString
-            (account))
+        (account))
             return false;
 
         PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_LIST_BY_NAME);
@@ -1252,8 +1252,8 @@ public:
                 return true;
             }
 
-            Field* fields           = result->Fetch();
-            uint32 accountId        = fields[0].GetUInt32();
+            Field* fields = result->Fetch();
+            uint32 accountId = fields[0].GetUInt32();
             std::string accountName = fields[1].GetString();
 
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_GUID_NAME_BY_ACC);
@@ -1266,17 +1266,15 @@ public:
 
                 do
                 {
-                    Field* characterFields  = result2->Fetch();
-                    uint32 guid             = characterFields[0].GetUInt32();
-                    std::string name        = characterFields[1].GetString();
+                    Field* characterFields = result2->Fetch();
+                    uint32 guid = characterFields[0].GetUInt32();
+                    std::string name = characterFields[1].GetString();
 
                     handler->PSendSysMessage(LANG_LOOKUP_PLAYER_CHARACTER, name.c_str(), guid);
                     ++counter;
-                }
-                while (result2->NextRow() && (limit == -1 || counter < limit));
+                } while (result2->NextRow() && (limit == -1 || counter < limit));
             }
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
 
         if (counter == 0) // empty accounts only
         {

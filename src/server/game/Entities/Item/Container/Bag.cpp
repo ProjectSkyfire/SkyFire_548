@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
-#include "ObjectMgr.h"
 #include "DatabaseEnv.h"
+#include "ObjectMgr.h"
 
 #include "Bag.h"
 #include "Log.h"
-#include "UpdateData.h"
 #include "Player.h"
+#include "UpdateData.h"
 
-Bag::Bag(): Item()
+Bag::Bag() : Item()
 {
     m_objectType |= TYPEMASK_CONTAINER;
     m_objectTypeId = TypeID::TYPEID_CONTAINER;
@@ -81,7 +81,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     // Cleaning 20 slots
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
     {
-        SetUInt64Value(CONTAINER_FIELD_SLOTS + (i*2), 0);
+        SetUInt64Value(CONTAINER_FIELD_SLOTS + (i * 2), 0);
         m_bagslot[i] = NULL;
     }
 
@@ -103,7 +103,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
     {
-        SetUInt64Value(CONTAINER_FIELD_SLOTS + (i*2), 0);
+        SetUInt64Value(CONTAINER_FIELD_SLOTS + (i * 2), 0);
         delete m_bagslot[i];
         m_bagslot[i] = NULL;
     }
@@ -123,7 +123,7 @@ void Bag::DeleteFromDB(SQLTransaction& trans)
 uint32 Bag::GetFreeSlots() const
 {
     uint32 slots = 0;
-    for (uint32 i=0; i < GetBagSize(); ++i)
+    for (uint32 i = 0; i < GetBagSize(); ++i)
         if (!m_bagslot[i])
             ++slots;
 
@@ -179,7 +179,7 @@ uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
 {
     Item* pItem;
     uint32 count = 0;
-    for (uint32 i=0; i < GetBagSize(); ++i)
+    for (uint32 i = 0; i < GetBagSize(); ++i)
     {
         pItem = m_bagslot[i];
         if (pItem && pItem != eItem && pItem->GetEntry() == item)
@@ -188,7 +188,7 @@ uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
 
     if (eItem && eItem->GetTemplate()->GemProperties)
     {
-        for (uint32 i=0; i < GetBagSize(); ++i)
+        for (uint32 i = 0; i < GetBagSize(); ++i)
         {
             pItem = m_bagslot[i];
             if (pItem && pItem != eItem && pItem->GetTemplate()->Socket[0].Color)

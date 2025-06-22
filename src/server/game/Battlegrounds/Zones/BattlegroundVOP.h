@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -67,6 +67,7 @@ const uint32 BG_VOP_TickIntervals[5] = { 15000, 12000, 9000, 6000, 3000 };
 const uint32 BG_VOP_TickPoints[5] = { 0, 10, 10, 10, 10 };
 
 const uint32 BG_VOP_PK_VP = 10;
+const uint32 BG_VOP_SOUND_ORB = 8174;
 
 struct BattlegroundVOPScore : public BattlegroundScore
 {
@@ -103,7 +104,7 @@ public:
 private:
     uint64 m_FlagKeeper[4] = { };
     uint32 m_HonorScoreTics[BG_TEAMS_COUNT] = { };
-    uint32 m_HonorTics; 
+    uint32 m_HonorTics;
     uint32 m_lastTick[BG_TEAMS_COUNT] = { };
     bool   m_TeamScores500Disadvantage[BG_TEAMS_COUNT] = { };
 };

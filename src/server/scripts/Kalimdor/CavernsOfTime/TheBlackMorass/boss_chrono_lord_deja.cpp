@@ -51,11 +51,11 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(18000, 23000));
-            events.ScheduleEvent(EVENT_TIME_LAPSE, urand(10000, 15000));
-            events.ScheduleEvent(EVENT_ARCANE_DISCHARGE, urand(20000, 30000));
+            events.ScheduleEvent(EVENT_ARCANE_BLAST, std::rand() % 23000 + 18000);
+            events.ScheduleEvent(EVENT_TIME_LAPSE, std::rand() % 15000 + 10000);
+            events.ScheduleEvent(EVENT_ARCANE_DISCHARGE, std::rand() % 30000 + 20000);
             if (IsHeroic())
-                events.ScheduleEvent(EVENT_ATTRACTION, urand(25000, 35000));
+                events.ScheduleEvent(EVENT_ATTRACTION, std::rand() % 35000 + 25000);
 
             Talk(SAY_AGGRO);
         }
@@ -105,21 +105,21 @@ public:
                 {
                     case EVENT_ARCANE_BLAST:
                         DoCastVictim(SPELL_ARCANE_BLAST);
-                        events.ScheduleEvent(EVENT_ARCANE_BLAST, urand(15000, 25000));
+                        events.ScheduleEvent(EVENT_ARCANE_BLAST, std::rand() % 25000 + 15000);
                         break;
                     case EVENT_TIME_LAPSE:
                         Talk(SAY_BANISH);
                         DoCast(me, SPELL_TIME_LAPSE);
-                        events.ScheduleEvent(EVENT_TIME_LAPSE, urand(15000, 25000));
+                        events.ScheduleEvent(EVENT_TIME_LAPSE, std::rand() % 25000 + 15000);
                         break;
                     case EVENT_ARCANE_DISCHARGE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_ARCANE_DISCHARGE);
-                        events.ScheduleEvent(EVENT_ARCANE_DISCHARGE, urand(20000, 30000));
+                        events.ScheduleEvent(EVENT_ARCANE_DISCHARGE, std::rand() % 30000 + 20000);
                         break;
                     case EVENT_ATTRACTION: // Only in Heroic
                         DoCast(me, SPELL_ATTRACTION);
-                        events.ScheduleEvent(EVENT_ATTRACTION, urand(25000, 35000));
+                        events.ScheduleEvent(EVENT_ATTRACTION, std::rand() % 35000 + 25000);
                         break;
                     default:
                         break;

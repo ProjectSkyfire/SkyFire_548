@@ -1,15 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
 #include "AchievementMgr.h"
 #include "CharacterDatabaseCleaner.h"
-#include "World.h"
+#include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "SpellMgr.h"
 #include "DBCStores.h"
+#include "SpellMgr.h"
+#include "World.h"
 
 void CharacterDatabaseCleaner::CleanDatabase()
 {
@@ -83,8 +83,7 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
 
             ss << id;
         }
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     if (found)
     {

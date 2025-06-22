@@ -100,19 +100,19 @@ public:
             if (uiFireboltTimer <= diff)
             {
                 DoCastVictim(SPELL_FIREBOLT);
-                uiFireboltTimer = urand(5000, 13000);
+                uiFireboltTimer = std::rand() % 13000 + 5000;
             } else uiFireboltTimer -= diff;
 
             if (uiFlameBreathTimer <= diff)
             {
                 DoCastVictim(SPELL_FLAME_BREATH);
-                uiFlameBreathTimer = urand(10000, 15000);
+                uiFlameBreathTimer = std::rand() % 15000 + 10000;
             } else uiFlameBreathTimer -= diff;
 
             if (uiLavaBurnTimer <= diff)
             {
                 DoCastVictim(SPELL_LAVA_BURN);
-                uiLavaBurnTimer = urand(15000, 23000);
+                uiLavaBurnTimer = std::rand() % 23000 + 15000;
             }
 
             if (IsHeroic())
@@ -120,7 +120,7 @@ public:
                 if (uiCauterizingFlamesTimer <= diff)
                 {
                     DoCastVictim(SPELL_CAUTERIZING_FLAMES);
-                    uiCauterizingFlamesTimer = urand(10000, 16000);
+                    uiCauterizingFlamesTimer = std::rand() % 16000 + 10000;
                 } else uiCauterizingFlamesTimer -= diff;
             }
 

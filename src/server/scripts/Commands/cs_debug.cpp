@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,17 +10,17 @@ Comment: All debug related commands
 Category: commandscripts
 EndScriptData */
 
-#include "ScriptMgr.h"
-#include "ObjectMgr.h"
 #include "BattlegroundMgr.h"
-#include "Chat.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "Chat.h"
+#include "GossipDef.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-#include "GossipDef.h"
-#include "Transport.h"
 #include "Language.h"
+#include "ObjectMgr.h"
+#include "ScriptMgr.h"
+#include "Transport.h"
 
 class debug_commandscript : public CommandScript
 {
@@ -273,7 +273,7 @@ public:
         char const* name = "test";
         uint8 code = atoi(args);
 
-        WorldPacket data(SMSG_CHANNEL_NOTIFY, (1+10));
+        WorldPacket data(SMSG_CHANNEL_NOTIFY, (1 + 10));
         data << code;                                           // notify type
         data << name;                                           // channel name
         data << uint32(0);
@@ -611,7 +611,7 @@ public:
         if (!target || target->IsTotem() || target->IsPet())
             return false;
 
-        ThreatContainer::StorageType const &threatList = target->getThreatManager().getThreatList();
+        ThreatContainer::StorageType const& threatList = target->getThreatManager().getThreatList();
         ThreatContainer::StorageType::const_iterator itr;
         uint32 count = 0;
         handler->PSendSysMessage("Threat list of %s (guid %u)", target->GetName().c_str(), target->GetGUIDLow());
@@ -1112,7 +1112,7 @@ public:
             return false;
 
         uint32 value = val ? 1 << (val - 1) : 0;
-        target->SetUInt32Value(opcode,  value);
+        target->SetUInt32Value(opcode, value);
 
         handler->PSendSysMessage(LANG_SET_32BIT_FIELD, opcode, value);
         return true;

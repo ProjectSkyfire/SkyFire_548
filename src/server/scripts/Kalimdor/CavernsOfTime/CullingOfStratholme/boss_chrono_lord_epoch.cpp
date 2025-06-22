@@ -38,27 +38,18 @@ class boss_epoch : public CreatureScript
 public:
     boss_epoch() : CreatureScript("boss_epoch") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_epochAI(creature);
-    }
-
     struct boss_epochAI : public ScriptedAI
     {
         boss_epochAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            uiStep = 0;
+            uiStepTimer = 0;
+            uiWoundingStrikeTimer = 0;
+            uiTimeWarpTimer = 0;
+            uiTimeStopTimer = 0;
+            uiCurseOfExertionTimer = 0;
         }
-
-        uint8 uiStep;
-
-        uint32 uiStepTimer;
-        uint32 uiWoundingStrikeTimer;
-        uint32 uiTimeWarpTimer;
-        uint32 uiTimeStopTimer;
-        uint32 uiCurseOfExertionTimer;
-
-        InstanceScript* instance;
 
         void Reset() OVERRIDE
         {
@@ -131,7 +122,21 @@ public:
 
             Talk(SAY_SLAY);
         }
+
+    private:
+        uint8 uiStep;
+        uint32 uiStepTimer;
+        uint32 uiWoundingStrikeTimer;
+        uint32 uiTimeWarpTimer;
+        uint32 uiTimeStopTimer;
+        uint32 uiCurseOfExertionTimer;
+        InstanceScript* instance;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_epochAI(creature);
+    }
 };
 
 void AddSC_boss_epoch()

@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Group.h"
 #include "LFGMgr.h"
 #include "ObjectMgr.h"
-#include "Group.h"
-#include "Player.h"
 #include "Opcodes.h"
+#include "Player.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -79,7 +79,7 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
 {
     if (!sLFGMgr->isOptionEnabled(lfg::LFG_OPTION_ENABLE_DUNGEON_FINDER | lfg::LFG_OPTION_ENABLE_RAID_BROWSER) ||
         (GetPlayer()->GetGroup() && GetPlayer()->GetGroup()->GetLeaderGUID() != GetPlayer()->GetGUID() &&
-        (GetPlayer()->GetGroup()->GetMembersCount() == MAXGROUPSIZE || !GetPlayer()->GetGroup()->isLFGGroup())))
+            (GetPlayer()->GetGroup()->GetMembersCount() == MAXGROUPSIZE || !GetPlayer()->GetGroup()->isLFGGroup())))
     {
         recvData.rfinish();
         return;
@@ -212,7 +212,7 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recvData)
     sLFGMgr->UpdateRoleCheck(gguid, guid, roles);
 }
 
-void WorldSession::HandleLfgSetCommentOpcode(WorldPacket&  recvData)
+void WorldSession::HandleLfgSetCommentOpcode(WorldPacket& recvData)
 {
     std::string comment;
     recvData >> comment;
@@ -287,7 +287,7 @@ void WorldSession::SendLfgPlayerLockInfo()
         data.WriteBits(0, 19);
         data.WriteBits(0, 20);
         //forloop {} // 64
-        
+
         data.WriteBits(0, 21);
     }
     // if (hasPlayerGuid) {}
@@ -594,7 +594,7 @@ void WorldSession::SendLfgJoinResult(lfg::LfgJoinResultData const& joinData)
 
     data.WriteGuidMask(guid, 7, 6, 3, 0);
     data.WriteBits(joinData.lockmap.size(), 22); // BlackList
-    
+
     for (lfg::LfgLockPartyMap::const_iterator it = joinData.lockmap.begin(); it != joinData.lockmap.end(); ++it)
     {
         ObjectGuid playerGuid = it->first;
@@ -641,7 +641,7 @@ void WorldSession::SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData)
         queueData.queuedTime, queueData.tanks, queueData.healers, queueData.dps);
 
     ObjectGuid guid = _player->GetGUID();
-    WorldPacket data(SMSG_LFD_QUEUE_STATUS, 8+(10*4)+(3*1));
+    WorldPacket data(SMSG_LFD_QUEUE_STATUS, 8 + (10 * 4) + (3 * 1));
     data.WriteGuidMask(guid, 4, 3, 5, 1, 2, 0, 6, 7);
     data << uint32(queueData.dungeonId);                   // Dungeon
     data.WriteGuidBytes(guid, 0);
@@ -759,7 +759,7 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
 
     dungeonEntry = sLFGMgr->GetLFGDungeonEntry(dungeonEntry);
 
-    WorldPacket data(SMSG_LFD_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 +1));
+    WorldPacket data(SMSG_LFD_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 + 1));
     data.WriteGuidMask(guid, 6, 0);
     data.WriteGuidMask(gguid, 1, 7, 5);
     data.WriteGuidMask(guid, 5);

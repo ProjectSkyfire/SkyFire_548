@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -15,22 +15,22 @@
 template<class T, class Key = std::string>
 class FactoryHolder
 {
-    public:
-        typedef ObjectRegistry<FactoryHolder<T, Key >, Key > FactoryHolderRegistry;
-        friend class ACE_Singleton<FactoryHolderRegistry, ACE_Null_Mutex>;
-        typedef ACE_Singleton<FactoryHolderRegistry, ACE_Null_Mutex> FactoryHolderRepository;
+public:
+    typedef ObjectRegistry<FactoryHolder<T, Key >, Key > FactoryHolderRegistry;
+    friend class ACE_Singleton<FactoryHolderRegistry, ACE_Null_Mutex>;
+    typedef ACE_Singleton<FactoryHolderRegistry, ACE_Null_Mutex> FactoryHolderRepository;
 
-        FactoryHolder(Key k) : i_key(k) { }
-        virtual ~FactoryHolder() { }
-        inline Key key() const { return i_key; }
+    FactoryHolder(Key k) : i_key(k) { }
+    virtual ~FactoryHolder() { }
+    inline Key key() const { return i_key; }
 
-        void RegisterSelf(void) { FactoryHolderRepository::instance()->InsertItem(this, i_key); }
-        void DeregisterSelf(void) { FactoryHolderRepository::instance()->RemoveItem(this, false); }
+    void RegisterSelf(void) { FactoryHolderRepository::instance()->InsertItem(this, i_key); }
+    void DeregisterSelf(void) { FactoryHolderRepository::instance()->RemoveItem(this, false); }
 
-        /// Abstract Factory create method
-        virtual T* Create(void *data = NULL) const = 0;
-    private:
-        Key i_key;
+    /// Abstract Factory create method
+    virtual T* Create(void* data = NULL) const = 0;
+private:
+    Key i_key;
 };
 
 /** Permissible is a classic way of letting the object decide
@@ -40,9 +40,9 @@ class FactoryHolder
 template<class T>
 class Permissible
 {
-    public:
-        virtual ~Permissible() { }
-        virtual int Permit(const T *) const = 0;
+public:
+    virtual ~Permissible() { }
+    virtual int Permit(const T*) const = 0;
 };
 #endif
 

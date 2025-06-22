@@ -321,7 +321,7 @@ class spell_item_deviate_fish : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
-                uint32 spellId = urand(SPELL_SLEEPY, SPELL_HEALTHY_SPIRIT);
+                uint32 spellId = std::rand() % SPELL_HEALTHY_SPIRIT + SPELL_SLEEPY;
                 caster->CastSpell(caster, spellId, true, NULL);
             }
 
@@ -392,7 +392,7 @@ class spell_item_flask_of_the_north : public SpellScriptLoader
                         break;
                 }
 
-                caster->CastSpell(caster, possibleSpells[irand(0, (possibleSpells.size() - 1))], true, NULL);
+                caster->CastSpell(caster, possibleSpells[std::rand() % possibleSpells.size()], true, NULL);
             }
 
             void Register() OVERRIDE
@@ -436,7 +436,7 @@ class spell_item_gnomish_death_ray : public SpellScriptLoader
                 Unit* caster = GetCaster();
                 if (Unit* target = GetHitUnit())
                 {
-                    if (urand(0, 99) < 15)
+                    if ((std::rand() % 99) < 15)
                         caster->CastSpell(caster, SPELL_GNOMISH_DEATH_RAY_SELF, true, NULL);    // failure
                     else
                         caster->CastSpell(target, SPELL_GNOMISH_DEATH_RAY_TARGET, true, NULL);
@@ -491,7 +491,7 @@ class spell_item_make_a_wish : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 uint32 spellId = SPELL_MR_PINCHYS_GIFT;
-                switch (urand(1, 5))
+                switch (std::rand() % 5 + 1)
                 {
                     case 1: spellId = SPELL_MR_PINCHYS_BLESSING; break;
                     case 2: spellId = SPELL_SUMMON_MIGHTY_MR_PINCHY; break;
@@ -528,7 +528,7 @@ class spell_item_mingos_fortune_generator : public SpellScriptLoader
             {
                 // Selecting one from Bloodstained Fortune item
                 uint32 newitemid;
-                switch (urand(1, 20))
+                switch (std::rand() % 20 + 1)
                 {
                     case 1:  newitemid = 32688; break;
                     case 2:  newitemid = 32689; break;
@@ -646,7 +646,7 @@ class spell_item_net_o_matic : public SpellScriptLoader
                 if (Unit* target = GetHitUnit())
                 {
                     uint32 spellId = SPELL_NET_O_MATIC_TRIGGERED3;
-                    uint32 roll = urand(0, 99);
+                    uint32 roll = std::rand() % 99;
                     if (roll < 2)                            // 2% for 30 sec self root (off-like chance unknown)
                         spellId = SPELL_NET_O_MATIC_TRIGGERED1;
                     else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like chance unknown)
@@ -702,7 +702,7 @@ class spell_item_noggenfogger_elixir : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 uint32 spellId = SPELL_NOGGENFOGGER_ELIXIR_TRIGGERED3;
-                switch (urand(1, 3))
+                switch (std::rand() % 3 + 1)
                 {
                     case 1: spellId = SPELL_NOGGENFOGGER_ELIXIR_TRIGGERED1; break;
                     case 2: spellId = SPELL_NOGGENFOGGER_ELIXIR_TRIGGERED2; break;
@@ -788,7 +788,7 @@ class spell_item_savory_deviate_delight : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 uint32 spellId = 0;
-                switch (urand(1, 2))
+                switch (std::rand() % 2 + 1)
                 {
                     // Flip Out - ninja
                     case 1: spellId = (caster->getGender() == GENDER_MALE ? SPELL_FLIP_OUT_MALE : SPELL_FLIP_OUT_FEMALE); break;
@@ -865,7 +865,7 @@ class spell_item_scroll_of_recall : public SpellScriptLoader
                     if (GetCaster()->ToPlayer()->GetTeam() == HORDE)
                         spellId = SPELL_SCROLL_OF_RECALL_FAIL_HORDE_1;
 
-                    GetCaster()->CastSpell(GetCaster(), spellId + urand(0, 7), true);
+                    GetCaster()->CastSpell(GetCaster(), spellId + std::rand() % 7, true);
 
                     PreventHitDefaultEffect(effIndex);
                 }
@@ -1113,7 +1113,7 @@ class spell_item_six_demon_bag : public SpellScriptLoader
                 if (Unit* target = GetHitUnit())
                 {
                     uint32 spellId = 0;
-                    uint32 rand = urand(0, 99);
+                    uint32 rand = std::rand() % 99;
                     if (rand < 25)                      // Fireball (25% chance)
                         spellId = SPELL_FIREBALL;
                     else if (rand < 50)                 // Frostball (25% chance)
@@ -1123,7 +1123,7 @@ class spell_item_six_demon_bag : public SpellScriptLoader
                     else if (rand < 80)                 // Polymorph (10% chance)
                     {
                         spellId = SPELL_POLYMORPH;
-                        if (urand(0, 100) <= 30)        // 30% chance to self-cast
+                        if ((std::rand() % 100) <= 30)        // 30% chance to self-cast
                             target = caster;
                     }
                     else if (rand < 95)                 // Enveloping Winds (15% chance)
@@ -1212,7 +1212,7 @@ class spell_item_underbelly_elixir : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 uint32 spellId = SPELL_UNDERBELLY_ELIXIR_TRIGGERED3;
-                switch (urand(1, 3))
+                switch (std::rand() % 3 + 1)
                 {
                     case 1: spellId = SPELL_UNDERBELLY_ELIXIR_TRIGGERED1; break;
                     case 2: spellId = SPELL_UNDERBELLY_ELIXIR_TRIGGERED2; break;
@@ -1265,7 +1265,7 @@ class spell_item_red_rider_air_rifle : public SpellScriptLoader
                     // needed because this spell shares GCD with its triggered spells (which must not be cast with triggered flag)
                     if (Player* player = caster->ToPlayer())
                         player->GetGlobalCooldownMgr().CancelGlobalCooldown(GetSpellInfo());
-                    if (urand(0, 4))
+                    if (std::rand() % 4)
                         caster->CastSpell(target, SPELL_AIR_RIFLE_SHOOT, false);
                     else
                         caster->CastSpell(caster, SPELL_AIR_RIFLE_SHOOT_SELF, false);
@@ -1319,7 +1319,7 @@ class spell_item_create_heart_candy : public SpellScriptLoader
                 if (Player* target = GetHitPlayer())
                 {
                     static const uint32 items[] = {ITEM_HEART_CANDY_1, ITEM_HEART_CANDY_2, ITEM_HEART_CANDY_3, ITEM_HEART_CANDY_4, ITEM_HEART_CANDY_5, ITEM_HEART_CANDY_6, ITEM_HEART_CANDY_7, ITEM_HEART_CANDY_8};
-                    target->AddItem(items[urand(0, 7)], 1);
+                    target->AddItem(items[std::rand() % 7], 1);
                 }
             }
 
@@ -1544,7 +1544,7 @@ class spell_item_ashbringer : public SpellScriptLoader
                                 SOUND_ASHBRINGER_7, SOUND_ASHBRINGER_8, SOUND_ASHBRINGER_9, SOUND_ASHBRINGER_10, SOUND_ASHBRINGER_11, SOUND_ASHBRINGER_12 );
 
                 // Ashbringers effect (spellID 28441) retriggers every 5 seconds, with a chance of making it say one of the above 12 sounds
-                if (urand(0, 60) < 1)
+                if ((std::rand() % 60) < 1)
                     player->PlayDirectSound(sound_id, player);
             }
 
@@ -1583,7 +1583,7 @@ class spell_magic_eater_food : public SpellScriptLoader
             {
                 PreventDefaultAction();
                 Unit* target = GetTarget();
-                switch (urand(0, 5))
+                switch (std::rand() % 5)
                 {
                     case 0:
                         target->CastSpell(target, SPELL_WILD_MAGIC, true);

@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef BATTLEFIELD_MGR_H_
 #define BATTLEFIELD_MGR_H_
 
-#include "Battlefield.h"
 #include "ace/Singleton.h"
+#include "Battlefield.h"
 
 class Player;
 class GameObject;
@@ -18,7 +18,7 @@ struct GossipMenuItems;
 // class to handle player enter / leave / areatrigger / GO use events
 class BattlefieldMgr
 {
-  public:
+public:
     // ctor
     BattlefieldMgr() : m_UpdateTimer(0) { }
     // dtor
@@ -35,11 +35,11 @@ class BattlefieldMgr
     // return assigned battlefield
     Battlefield* GetBattlefieldToZoneId(uint32 zoneid);
     Battlefield* GetBattlefieldByBattleId(uint32 battleid);
-    Battlefield *GetBattlefieldByGUID(uint64 guid);
+    Battlefield* GetBattlefieldByGUID(uint64 guid);
 
     ZoneScript* GetZoneScript(uint32 zoneId);
 
-    void AddZone(uint32 zoneid, Battlefield * handle);
+    void AddZone(uint32 zoneid, Battlefield* handle);
 
     void Update(uint32 diff);
 
@@ -49,12 +49,12 @@ class BattlefieldMgr
 
     void HandleDropFlag(Player* player, uint32 spellId);
 
-    typedef std::vector < Battlefield * >BattlefieldSet;
-    typedef std::map < uint32 /* zoneid */, Battlefield * >BattlefieldMap;
-  private:
+    typedef std::vector < Battlefield* >BattlefieldSet;
+    typedef std::map < uint32 /* zoneid */, Battlefield* >BattlefieldMap;
+private:
     // contains all initiated battlefield events
     // used when initing / cleaning up
-      BattlefieldSet m_BattlefieldSet;
+    BattlefieldSet m_BattlefieldSet;
     // maps the zone ids to an battlefield event
     // used in player event handling
     BattlefieldMap m_BattlefieldMap;

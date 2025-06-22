@@ -55,7 +55,7 @@ public:
             _EnterCombat();
             Talk(SAY_AGGRO);
             events.ScheduleEvent(EVENT_SACRIFICE, 5700);
-            events.ScheduleEvent(EVENT_HELLFIRE, IsHeroic() ? urand(17400, 19300) : 18000);
+            events.ScheduleEvent(EVENT_HELLFIRE, IsHeroic() ? std::rand() % 19300 + 17400 : 18000);
             events.ScheduleEvent(EVENT_ENRAGE, 12000);
         }
 
@@ -109,7 +109,7 @@ public:
                 case EVENT_HELLFIRE:
                     Talk(SAY_CAST_HELLFIRE);
                     DoCastVictim(DUNGEON_MODE(SPELL_HELLFIRE_NORMAL, SPELL_HELLFIRE_HEROIC), true);
-                    events.ScheduleEvent(EVENT_HELLFIRE, IsHeroic() ? urand(17400, 19300) : 18000);
+                    events.ScheduleEvent(EVENT_HELLFIRE, IsHeroic() ? std::rand() % 19300 + 17400 : 18000);
                     break;
                 case EVENT_ENRAGE:
                     Talk(EMOTE_ENRAGE);

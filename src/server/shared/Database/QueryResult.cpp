@@ -1,30 +1,30 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "DatabaseEnv.h"
 #include "Log.h"
 
-ResultSet::ResultSet(MYSQL_RES *result, MYSQL_FIELD *fields, uint64 rowCount, uint32 fieldCount) :
-_rowCount(rowCount),
-_fieldCount(fieldCount),
-_result(result),
-_fields(fields)
+ResultSet::ResultSet(MYSQL_RES* result, MYSQL_FIELD* fields, uint64 rowCount, uint32 fieldCount) :
+    _rowCount(rowCount),
+    _fieldCount(fieldCount),
+    _result(result),
+    _fields(fields)
 {
     _currentRow = new Field[_fieldCount];
     ASSERT(_currentRow);
 }
 
-PreparedResultSet::PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) :
-m_rowCount(rowCount),
-m_rowPosition(0),
-m_fieldCount(fieldCount),
-m_rBind(NULL),
-m_stmt(stmt),
-m_res(result),
-m_isNull(NULL),
-m_length(NULL)
+PreparedResultSet::PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES* result, uint64 rowCount, uint32 fieldCount) :
+    m_rowCount(rowCount),
+    m_rowPosition(0),
+    m_fieldCount(fieldCount),
+    m_rBind(NULL),
+    m_stmt(stmt),
+    m_res(result),
+    m_isNull(NULL),
+    m_length(NULL)
 {
     if (!m_res)
         return;
@@ -92,10 +92,10 @@ m_length(NULL)
         for (uint64 fIndex = 0; fIndex < m_fieldCount; ++fIndex)
         {
             if (!*m_rBind[fIndex].is_null)
-                m_rows[uint32(m_rowPosition)][fIndex].SetByteValue( m_rBind[fIndex].buffer,
-                                                            m_rBind[fIndex].buffer_length,
-                                                            m_rBind[fIndex].buffer_type,
-                                                           *m_rBind[fIndex].length );
+                m_rows[uint32(m_rowPosition)][fIndex].SetByteValue(m_rBind[fIndex].buffer,
+                    m_rBind[fIndex].buffer_length,
+                    m_rBind[fIndex].buffer_type,
+                    *m_rBind[fIndex].length);
             else
                 switch (m_rBind[fIndex].buffer_type)
                 {
@@ -105,16 +105,16 @@ m_length(NULL)
                     case MYSQL_TYPE_BLOB:
                     case MYSQL_TYPE_STRING:
                     case MYSQL_TYPE_VAR_STRING:
-                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue( "",
-                                                            m_rBind[fIndex].buffer_length,
-                                                            m_rBind[fIndex].buffer_type,
-                                                           *m_rBind[fIndex].length );
-                    break;
+                        m_rows[uint32(m_rowPosition)][fIndex].SetByteValue("",
+                            m_rBind[fIndex].buffer_length,
+                            m_rBind[fIndex].buffer_type,
+                            *m_rBind[fIndex].length);
+                        break;
                     default:
-                    m_rows[uint32(m_rowPosition)][fIndex].SetByteValue( 0,
-                                                            m_rBind[fIndex].buffer_length,
-                                                            m_rBind[fIndex].buffer_type,
-                                                           *m_rBind[fIndex].length );
+                        m_rows[uint32(m_rowPosition)][fIndex].SetByteValue(0,
+                            m_rBind[fIndex].buffer_length,
+                            m_rBind[fIndex].buffer_type,
+                            *m_rBind[fIndex].length);
                 }
         }
         m_rowPosition++;
@@ -150,8 +150,15 @@ bool ResultSet::NextRow()
         return false;
     }
 
+    unsigned long* lengths = mysql_fetch_lengths(_result);
+    if (!lengths)
+    {
+        CleanUp();
+        return false;
+    }
+
     for (uint32 i = 0; i < _fieldCount; i++)
-        _currentRow[i].SetStructuredValue(row[i], _fields[i].type);
+        _currentRow[i].SetStructuredValue(row[i], _fields[i].type, lengths[i]);
 
     return true;
 }
@@ -173,7 +180,7 @@ bool PreparedResultSet::_NextRow()
     if (m_rowPosition >= m_rowCount)
         return false;
 
-    int retval = mysql_stmt_fetch( m_stmt );
+    int retval = mysql_stmt_fetch(m_stmt);
 
     if (!retval || retval == MYSQL_DATA_TRUNCATED)
         retval = true;
@@ -188,7 +195,7 @@ void ResultSet::CleanUp()
 {
     if (_currentRow)
     {
-        delete [] _currentRow;
+        delete[] _currentRow;
         _currentRow = NULL;
     }
 
@@ -214,5 +221,5 @@ void PreparedResultSet::CleanUp()
 void PreparedResultSet::FreeBindBuffer()
 {
     for (uint32 i = 0; i < m_fieldCount; ++i)
-        free (m_rBind[i].buffer);
+        free(m_rBind[i].buffer);
 }

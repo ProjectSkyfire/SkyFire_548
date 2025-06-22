@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -530,15 +530,15 @@ SlotEquipmentMap const warriorEquipmentProtection =
 enum CharBoostMisc
 {
     // items
-    EMBERSILK_BAG_ID                    = 54443,
-    LEMON_FLAVOUR_PUDING_ID             = 108920,
-    LEMON_FLAVOUR_PUDING_COUNT          = 20,
+    EMBERSILK_BAG_ID = 54443,
+    LEMON_FLAVOUR_PUDING_ID = 108920,
+    LEMON_FLAVOUR_PUDING_COUNT = 20,
     // spells
-    PLATE_MAIL_ARMOR_SPELL              = 750,
-    SWIFT_PURPLE_WIND_RIDER_SPELL       = 32297,
-    SWIFT_PURPLE_GRYPGON_SPELL          = 32292,
+    PLATE_MAIL_ARMOR_SPELL = 750,
+    SWIFT_PURPLE_WIND_RIDER_SPELL = 32297,
+    SWIFT_PURPLE_GRYPGON_SPELL = 32292,
     // misc
-    VALE_OF_ETERNAL_BLOSSOMS_MAP_ID     = 870
+    VALE_OF_ETERNAL_BLOSSOMS_MAP_ID = 870
 };
 
 std::vector<uint32> const CharBoostSpells =

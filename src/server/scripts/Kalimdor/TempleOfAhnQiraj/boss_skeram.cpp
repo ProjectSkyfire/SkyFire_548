@@ -70,14 +70,14 @@ class boss_skeram : public CreatureScript
                 if (_flag != 0)
                 {
                     while (_flag & (1 << rand))
-                        rand = urand(0, 2);
+                        rand = std::rand() % 2;
                     DoCast(me, BlinkSpells[rand]);
                     _flag |= (1 << rand);
                     _flag |= (1 << 7);
                 }
 
                 while (_flag & (1 << rand))
-                    rand = urand(0, 2);
+                    rand = std::rand() % 2;
                 creature->CastSpell(creature, BlinkSpells[rand]);
                 _flag |= (1 << rand);
 
@@ -113,9 +113,9 @@ class boss_skeram : public CreatureScript
                 _EnterCombat();
                 events.Reset();
 
-                events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, urand(6000, 12000));
+                events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, std::rand() % 12000 + 6000);
                 events.ScheduleEvent(EVENT_FULLFILMENT, 15000);
-                events.ScheduleEvent(EVENT_BLINK, urand(30000, 45000));
+                events.ScheduleEvent(EVENT_BLINK, std::rand() % 45000 + 30000);
                 events.ScheduleEvent(EVENT_EARTH_SHOCK, 2000);
 
                 Talk(SAY_AGGRO);
@@ -134,19 +134,19 @@ class boss_skeram : public CreatureScript
                     {
                         case EVENT_ARCANE_EXPLOSION:
                             DoCastAOE(SPELL_ARCANE_EXPLOSION, true);
-                            events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, urand(8000, 18000));
+                            events.ScheduleEvent(EVENT_ARCANE_EXPLOSION, std::rand() % 18000 + 8000);
                             break;
                         case EVENT_FULLFILMENT:
                             /// @todo For some weird reason boss does not cast this
                             // Spell actually works, tested in duel
                             DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true), SPELL_TRUE_FULFILLMENT, true);
-                            events.ScheduleEvent(EVENT_FULLFILMENT, urand(20000, 30000));
+                            events.ScheduleEvent(EVENT_FULLFILMENT, std::rand() % 30000 + 20000);
                             break;
                         case EVENT_BLINK:
-                            DoCast(me, BlinkSpells[urand(0, 2)]);
+                            DoCast(me, BlinkSpells[std::rand() % 2]);
                             DoResetThreat();
                             me->SetVisible(true);
-                            events.ScheduleEvent(EVENT_BLINK, urand(10000, 30000));
+                            events.ScheduleEvent(EVENT_BLINK, std::rand() % 30000 + 10000);
                             break;
                         case EVENT_EARTH_SHOCK:
                             DoCastVictim(SPELL_EARTH_SHOCK);

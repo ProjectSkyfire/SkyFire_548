@@ -9,17 +9,15 @@ elseif( MSVC )
   add_definitions(/W0)
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-  if(SERVERS AND NOT NOJEM)
-    add_subdirectory(jemalloc)  
-  endif()
-endif()
-
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   add_subdirectory(acelite)
   if(TOOLS)
     add_subdirectory(bzip2)
   endif()
+endif()
+
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+  add_subdirectory(SFMT)
 endif()
 
 add_subdirectory(zlib)

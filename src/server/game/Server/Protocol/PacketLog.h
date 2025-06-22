@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 #ifndef SKYFIRE_PACKETLOG_H
@@ -20,17 +20,17 @@ class PacketLog
 {
     friend class ACE_Singleton<PacketLog, ACE_Thread_Mutex>;
 
-    private:
-        PacketLog();
-        ~PacketLog();
+private:
+    PacketLog();
+    ~PacketLog();
 
-    public:
-        void Initialize();
-        bool CanLogPacket() const { return (_file != NULL); }
-        void LogPacket(WorldPacket const& packet, Direction direction);
+public:
+    void Initialize();
+    bool CanLogPacket() const { return (_file != NULL); }
+    void LogPacket(WorldPacket const& packet, Direction direction);
 
-    private:
-        FILE* _file;
+private:
+    FILE* _file;
 };
 
 #define sPacketLog ACE_Singleton<PacketLog, ACE_Thread_Mutex>::instance()

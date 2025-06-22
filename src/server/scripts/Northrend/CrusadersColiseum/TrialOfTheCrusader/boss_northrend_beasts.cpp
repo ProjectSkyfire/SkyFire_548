@@ -149,9 +149,9 @@ class boss_gormok : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                events.ScheduleEvent(EVENT_IMPALE, urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_IMPALE, std::rand() % (10 * IN_MILLISECONDS) + (8*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_STAGGERING_STOMP, 15*IN_MILLISECONDS);
-                events.ScheduleEvent(EVENT_THROW, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_THROW, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
 
                 summons.DespawnAll();
             }
@@ -238,7 +238,7 @@ class boss_gormok : public CreatureScript
                     {
                         case EVENT_IMPALE:
                             DoCastVictim(SPELL_IMPALE);
-                            events.ScheduleEvent(EVENT_IMPALE, urand(8*IN_MILLISECONDS, 10*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_IMPALE, std::rand() % (10 * IN_MILLISECONDS) + (8*IN_MILLISECONDS));
                             return;
                         case EVENT_STAGGERING_STOMP:
                             DoCastVictim(SPELL_STAGGERING_STOMP);
@@ -258,7 +258,7 @@ class boss_gormok : public CreatureScript
                                     break;
                                 }
                             }
-                            events.ScheduleEvent(EVENT_THROW, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_THROW, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
                             return;
                         default:
                             return;
@@ -351,7 +351,7 @@ class npc_snobold_vassal : public CreatureScript
                 switch (action)
                 {
                     case ACTION_ENABLE_FIRE_BOMB:
-                        _events.ScheduleEvent(EVENT_FIRE_BOMB, urand(5*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                        _events.ScheduleEvent(EVENT_FIRE_BOMB, std::rand() % (30 * IN_MILLISECONDS) + (5*IN_MILLISECONDS));
                         break;
                     case ACTION_DISABLE_FIRE_BOMB:
                         _events.CancelEvent(EVENT_FIRE_BOMB);
@@ -494,11 +494,11 @@ struct boss_jormungarAI : public BossAI
     {
         Enraged = false;
 
-        events.ScheduleEvent(EVENT_SPIT, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
-        events.ScheduleEvent(EVENT_SPRAY, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
-        events.ScheduleEvent(EVENT_SWEEP, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
-        events.ScheduleEvent(EVENT_BITE, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_MOBILE);
-        events.ScheduleEvent(EVENT_SPEW, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_MOBILE);
+        events.ScheduleEvent(EVENT_SPIT, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+        events.ScheduleEvent(EVENT_SPRAY, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+        events.ScheduleEvent(EVENT_SWEEP, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+        events.ScheduleEvent(EVENT_BITE, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_MOBILE);
+        events.ScheduleEvent(EVENT_SPEW, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_MOBILE);
         events.ScheduleEvent(EVENT_SLIME_POOL, 15*IN_MILLISECONDS, 0, PHASE_MOBILE);
     }
 
@@ -576,11 +576,11 @@ struct boss_jormungarAI : public BossAI
                     return;
                 case EVENT_BITE:
                     DoCastVictim(BiteSpell);
-                    events.ScheduleEvent(EVENT_BITE, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_MOBILE);
+                    events.ScheduleEvent(EVENT_BITE, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_MOBILE);
                     return;
                 case EVENT_SPEW:
                     DoCastAOE(SpewSpell);
-                    events.ScheduleEvent(EVENT_SPEW, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_MOBILE);
+                    events.ScheduleEvent(EVENT_SPEW, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_MOBILE);
                     return;
                 case EVENT_SLIME_POOL:
                     DoCast(me, SUMMON_SLIME_POOL);
@@ -598,11 +598,11 @@ struct boss_jormungarAI : public BossAI
                 case EVENT_SPRAY:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                         DoCast(target, SpraySpell);
-                    events.ScheduleEvent(EVENT_SPRAY, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+                    events.ScheduleEvent(EVENT_SPRAY, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
                     return;
                 case EVENT_SWEEP:
                     DoCastAOE(SPELL_SWEEP_0);
-                    events.ScheduleEvent(EVENT_SWEEP, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+                    events.ScheduleEvent(EVENT_SWEEP, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
                     return;
                 default:
                     return;
@@ -642,9 +642,9 @@ struct boss_jormungarAI : public BossAI
             me->SetDisplayId(ModelStationary);
             events.SetPhase(PHASE_STATIONARY);
             events.ScheduleEvent(EVENT_SUBMERGE, 45*IN_MILLISECONDS, 0, PHASE_STATIONARY);
-            events.ScheduleEvent(EVENT_SPIT, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
-            events.ScheduleEvent(EVENT_SPRAY, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
-            events.ScheduleEvent(EVENT_SWEEP, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+            events.ScheduleEvent(EVENT_SPIT, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+            events.ScheduleEvent(EVENT_SPRAY, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
+            events.ScheduleEvent(EVENT_SWEEP, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_STATIONARY);
         }
         else
         {
@@ -654,8 +654,8 @@ struct boss_jormungarAI : public BossAI
             me->SetDisplayId(ModelMobile);
             events.SetPhase(PHASE_MOBILE);
             events.ScheduleEvent(EVENT_SUBMERGE, 45*IN_MILLISECONDS, 0, PHASE_MOBILE);
-            events.ScheduleEvent(EVENT_BITE, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_MOBILE);
-            events.ScheduleEvent(EVENT_SPEW, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS), 0, PHASE_MOBILE);
+            events.ScheduleEvent(EVENT_BITE, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_MOBILE);
+            events.ScheduleEvent(EVENT_SPEW, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS), 0, PHASE_MOBILE);
             events.ScheduleEvent(EVENT_SLIME_POOL, 15*IN_MILLISECONDS, 0, PHASE_MOBILE);
         }
     }
@@ -856,9 +856,9 @@ class boss_icehowl : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                events.ScheduleEvent(EVENT_FEROCIOUS_BUTT, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(15*IN_MILLISECONDS, 25*IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_WHIRL, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_FEROCIOUS_BUTT, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_ARCTIC_BREATH, std::rand() % (25 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_WHIRL, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_MASSIVE_CRASH, 30*IN_MILLISECONDS);
                 _movementStarted = false;
                 _movementFinish = false;
@@ -978,7 +978,7 @@ class boss_icehowl : public CreatureScript
                             {
                                 case EVENT_FEROCIOUS_BUTT:
                                     DoCastVictim(SPELL_FEROCIOUS_BUTT);
-                                    events.ScheduleEvent(EVENT_FEROCIOUS_BUTT, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                                    events.ScheduleEvent(EVENT_FEROCIOUS_BUTT, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
                                     return;
                                 case EVENT_ARCTIC_BREATH:
                                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
@@ -986,7 +986,7 @@ class boss_icehowl : public CreatureScript
                                     return;
                                 case EVENT_WHIRL:
                                     DoCastAOE(SPELL_WHIRL);
-                                    events.ScheduleEvent(EVENT_WHIRL, urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS));
+                                    events.ScheduleEvent(EVENT_WHIRL, std::rand() % (30 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
                                     return;
                                 case EVENT_MASSIVE_CRASH:
                                     me->GetMotionMaster()->MoveJump(ToCCommonLoc[1].GetPositionX(), ToCCommonLoc[1].GetPositionY(), ToCCommonLoc[1].GetPositionZ(), 20.0f, 20.0f, 0); // 1: Middle of the room
@@ -1106,7 +1106,7 @@ class boss_icehowl : public CreatureScript
                         me->GetMotionMaster()->MoveChase(me->GetVictim());
                         AttackStart(me->GetVictim());
                         events.ScheduleEvent(EVENT_MASSIVE_CRASH, 40*IN_MILLISECONDS);
-                        events.ScheduleEvent(EVENT_ARCTIC_BREATH, urand(15*IN_MILLISECONDS, 25*IN_MILLISECONDS));
+                        events.ScheduleEvent(EVENT_ARCTIC_BREATH, std::rand() % (25 * IN_MILLISECONDS) + (15*IN_MILLISECONDS));
                         _stage = 0;
                         break;
                     default:

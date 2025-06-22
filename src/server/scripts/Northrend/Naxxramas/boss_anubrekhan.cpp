@@ -100,12 +100,12 @@ public:
         {
             _EnterCombat();
             Talk(SAY_AGGRO);
-            events.ScheduleEvent(EVENT_IMPALE, urand(10000, 20000));
+            events.ScheduleEvent(EVENT_IMPALE, std::rand() % 20000 + 10000);
             events.ScheduleEvent(EVENT_LOCUST, 90000);
             events.ScheduleEvent(EVENT_BERSERK, 600000);
 
             if (GetDifficulty() == DIFFICULTY_10MAN_NORMAL)
-                events.ScheduleEvent(EVENT_SPAWN_GUARDIAN_NORMAL, urand(15000, 20000));
+                events.ScheduleEvent(EVENT_SPAWN_GUARDIAN_NORMAL, std::rand() % 20000 + 15000);
         }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
@@ -147,7 +147,7 @@ public:
                         if (!me->HasAura(RAID_MODE(SPELL_LOCUST_SWARM_10, SPELL_LOCUST_SWARM_25)))
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, RAID_MODE(SPELL_IMPALE_10, SPELL_IMPALE_25));
-                        events.ScheduleEvent(EVENT_IMPALE, urand(10000, 20000));
+                        events.ScheduleEvent(EVENT_IMPALE, std::rand() % 20000 + 10000);
                         break;
                     case EVENT_LOCUST:
                         /// @todo Add Text

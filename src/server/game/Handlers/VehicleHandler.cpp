@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Log.h"
+#include "MovementStructures.h"
+#include "ObjectAccessor.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "Vehicle.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
-#include "Vehicle.h"
-#include "Player.h"
-#include "Log.h"
-#include "ObjectAccessor.h"
-#include "MovementStructures.h"
 
-void WorldSession::HandleDismissControlledVehicle(WorldPacket &recvData)
+void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Recvd CMSG_DISMISS_CONTROLLED_VEHICLE");
 
@@ -64,7 +64,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
         {
             static MovementStatusElements const accessoryGuid[] =
             {
-                MSEExtraInt8, 
+                MSEExtraInt8,
                 MSEHasGuidByte2,
                 MSEHasGuidByte1,
                 MSEHasGuidByte7,
@@ -93,7 +93,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvData)
 
             if (vehicle_base->GetGUID() != movementInfo.guid)
                 return;
-            
+
             if (!accessory)
                 GetPlayer()->ChangeSeat(-1, seatId > 0); // prev/next
             else if (Unit* vehUnit = Unit::GetUnit(*GetPlayer(), accessory))
@@ -222,7 +222,7 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& /*recvData*/)
                 GetPlayer()->ExitVehicle();
             else
                 SF_LOG_ERROR("network", "Player %u tried to exit vehicle, but seatflags %u (ID: %u) don't permit that.",
-                GetPlayer()->GetGUIDLow(), seat->m_ID, seat->m_flags);
+                    GetPlayer()->GetGUIDLow(), seat->m_ID, seat->m_flags);
         }
     }
 }

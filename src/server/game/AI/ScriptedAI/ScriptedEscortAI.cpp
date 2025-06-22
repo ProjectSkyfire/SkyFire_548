@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,32 +10,32 @@ SDComment:
 SDCategory: Npc
 EndScriptData */
 
-#include "ScriptedCreature.h"
-#include "ScriptedEscortAI.h"
 #include "Group.h"
 #include "Player.h"
+#include "ScriptedCreature.h"
+#include "ScriptedEscortAI.h"
 
 enum Points
 {
-    POINT_LAST_POINT    = 0xFFFFFF,
-    POINT_HOME          = 0xFFFFFE
+    POINT_LAST_POINT = 0xFFFFFF,
+    POINT_HOME = 0xFFFFFE
 };
 
 npc_escortAI::npc_escortAI(Creature* creature) : ScriptedAI(creature),
-    m_uiPlayerGUID(0),
-    m_uiWPWaitTimer(2500),
-    m_uiPlayerCheckTimer(1000),
-    m_uiEscortState(STATE_ESCORT_NONE),
-    MaxPlayerDistance(DEFAULT_MAX_PLAYER_DISTANCE),
-    m_pQuestForEscort(NULL),
-    m_bIsActiveAttacker(true),
-    m_bIsRunning(false),
-    m_bCanInstantRespawn(false),
-    m_bCanReturnToStart(false),
-    DespawnAtEnd(true),
-    DespawnAtFar(true),
-    ScriptWP(false),
-    HasImmuneToNPCFlags(false)
+m_uiPlayerGUID(0),
+m_uiWPWaitTimer(2500),
+m_uiPlayerCheckTimer(1000),
+m_uiEscortState(STATE_ESCORT_NONE),
+MaxPlayerDistance(DEFAULT_MAX_PLAYER_DISTANCE),
+m_pQuestForEscort(NULL),
+m_bIsActiveAttacker(true),
+m_bIsRunning(false),
+m_bCanInstantRespawn(false),
+m_bCanReturnToStart(false),
+DespawnAtEnd(true),
+DespawnAtFar(true),
+ScriptWP(false),
+HasImmuneToNPCFlags(false)
 { }
 
 void npc_escortAI::AttackStart(Unit* who)
@@ -527,8 +527,7 @@ bool npc_escortAI::SetNextWaypoint(uint32 pointId, bool setPosition, bool resetW
             CurrentWP = WaypointList.begin();
             return true;
         }
-    }
-    while (!WaypointList.empty());
+    } while (!WaypointList.empty());
 
     // we failed.
     // we reset the waypoints in the start; if we pulled any, reset it again

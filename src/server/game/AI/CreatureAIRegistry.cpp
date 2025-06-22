@@ -1,20 +1,20 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "PassiveAI.h"
-#include "ReactorAI.h"
 #include "CombatAI.h"
-#include "GuardAI.h"
-#include "PetAI.h"
-#include "TotemAI.h"
-#include "RandomMovementGenerator.h"
-#include "MovementGeneratorImpl.h"
-#include "CreatureAIRegistry.h"
-#include "WaypointMovementGenerator.h"
 #include "CreatureAIFactory.h"
+#include "CreatureAIRegistry.h"
+#include "GuardAI.h"
+#include "MovementGeneratorImpl.h"
+#include "PassiveAI.h"
+#include "PetAI.h"
+#include "RandomMovementGenerator.h"
+#include "ReactorAI.h"
 #include "SmartAI.h"
+#include "TotemAI.h"
+#include "WaypointMovementGenerator.h"
 
 namespace AIRegistry
 {

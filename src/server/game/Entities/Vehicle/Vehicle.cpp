@@ -1,28 +1,28 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Battleground.h"
 #include "Common.h"
+#include "CreatureAI.h"
+#include "EventProcessor.h"
 #include "Log.h"
+#include "MoveSplineInit.h"
 #include "ObjectMgr.h"
-#include "Vehicle.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "TemporarySummon.h"
 #include "Unit.h"
 #include "Util.h"
+#include "Vehicle.h"
 #include "WorldPacket.h"
-#include "ScriptMgr.h"
-#include "CreatureAI.h"
 #include "ZoneScript.h"
-#include "SpellMgr.h"
-#include "SpellInfo.h"
-#include "MoveSplineInit.h"
-#include "TemporarySummon.h"
-#include "EventProcessor.h"
-#include "Player.h"
-#include "Battleground.h"
 
 Vehicle::Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry) :
-UsableSeatNum(0), _me(unit), _vehicleInfo(vehInfo), _creatureEntry(creatureEntry), _status(STATUS_NONE)
+    UsableSeatNum(0), _me(unit), _vehicleInfo(vehInfo), _creatureEntry(creatureEntry), _status(STATUS_NONE)
 {
     for (uint32 i = 0; i < MAX_VEHICLE_SEATS; ++i)
     {

@@ -1,23 +1,23 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "DatabaseEnv.h"
-#include "ObjectMgr.h"
-#include "ObjectDefines.h"
-#include "GridDefines.h"
-#include "GridNotifiers.h"
-#include "SpellMgr.h"
-#include "GridNotifiersImpl.h"
 #include "Cell.h"
 #include "CellImpl.h"
-#include "InstanceScript.h"
-#include "ScriptedCreature.h"
-#include "GameEventMgr.h"
 #include "CreatureTextMgr.h"
-#include "SpellMgr.h"
+#include "DatabaseEnv.h"
+#include "GameEventMgr.h"
+#include "GridDefines.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "InstanceScript.h"
+#include "ObjectDefines.h"
+#include "ObjectMgr.h"
+#include "ScriptedCreature.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "SpellMgr.h"
 
 #include "SmartScriptMgr.h"
 
@@ -75,8 +75,7 @@ void SmartWaypointMgr::LoadFromDB()
 
         last_entry = entry;
         total++;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u SmartAI waypoint paths (total %u waypoints) in %u ms", count, total, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -221,8 +220,7 @@ void SmartAIMgr::LoadSmartAIFromDB()
         }
         // store the new event
         mEventMap[source_type][temp.entryOrGuid].push_back(temp);
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u SmartAI scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 
@@ -661,14 +659,14 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 return false;
             break;
         case SMART_ACTION_ACTIVATE_TAXI:
+        {
+            if (!sTaxiPathStore.LookupEntry(e.action.taxi.id))
             {
-                if (!sTaxiPathStore.LookupEntry(e.action.taxi.id))
-                {
-                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses invalid Taxi path ID %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.taxi.id);
-                    return false;
-                }
-                break;
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses invalid Taxi path ID %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.taxi.id);
+                return false;
             }
+            break;
+        }
         case SMART_ACTION_RANDOM_EMOTE:
             if (e.action.randomEmote.emote1 && !IsEmoteValid(e, e.action.randomEmote.emote1))
                 return false;
@@ -732,7 +730,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_SET_EVENT_PHASE:
             if (e.action.setEventPhase.phase >= SMART_EVENT_PHASE_MAX)
             {
-                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u attempts to set phase %u. Phase mask cannot be used past phase %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.setEventPhase.phase, SMART_EVENT_PHASE_MAX-1);
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u attempts to set phase %u. Phase mask cannot be used past phase %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.setEventPhase.phase, SMART_EVENT_PHASE_MAX - 1);
                 return false;
             }
             break;
@@ -753,33 +751,33 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 return false;
             break;
         case SMART_ACTION_RANDOM_PHASE:
+        {
+            if (e.action.randomPhase.phase1 >= SMART_EVENT_PHASE_MAX ||
+                e.action.randomPhase.phase2 >= SMART_EVENT_PHASE_MAX ||
+                e.action.randomPhase.phase3 >= SMART_EVENT_PHASE_MAX ||
+                e.action.randomPhase.phase4 >= SMART_EVENT_PHASE_MAX ||
+                e.action.randomPhase.phase5 >= SMART_EVENT_PHASE_MAX ||
+                e.action.randomPhase.phase6 >= SMART_EVENT_PHASE_MAX)
             {
-                if (e.action.randomPhase.phase1 >= SMART_EVENT_PHASE_MAX ||
-                    e.action.randomPhase.phase2 >= SMART_EVENT_PHASE_MAX ||
-                    e.action.randomPhase.phase3 >= SMART_EVENT_PHASE_MAX ||
-                    e.action.randomPhase.phase4 >= SMART_EVENT_PHASE_MAX ||
-                    e.action.randomPhase.phase5 >= SMART_EVENT_PHASE_MAX ||
-                    e.action.randomPhase.phase6 >= SMART_EVENT_PHASE_MAX)
-                {
-                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u attempts to set invalid phase, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
-                    return false;
-                }
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u attempts to set invalid phase, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
+                return false;
             }
-            break;
+        }
+        break;
         case SMART_ACTION_RANDOM_PHASE_RANGE:       //PhaseMin, PhaseMax
+        {
+            if (e.action.randomPhaseRange.phaseMin >= SMART_EVENT_PHASE_MAX ||
+                e.action.randomPhaseRange.phaseMax >= SMART_EVENT_PHASE_MAX)
             {
-                if (e.action.randomPhaseRange.phaseMin >= SMART_EVENT_PHASE_MAX ||
-                    e.action.randomPhaseRange.phaseMax >= SMART_EVENT_PHASE_MAX)
-                {
-                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u attempts to set invalid phase, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
-                    return false;
-                }
-                if (!IsMinMaxValid(e, e.action.randomPhaseRange.phaseMin, e.action.randomPhaseRange.phaseMax))
-                    return false;
-                break;
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u attempts to set invalid phase, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
+                return false;
             }
+            if (!IsMinMaxValid(e, e.action.randomPhaseRange.phaseMin, e.action.randomPhaseRange.phaseMax))
+                return false;
+            break;
+        }
         case SMART_ACTION_SUMMON_CREATURE:
-            {
+        {
             if (!IsCreatureValid(e, e.action.summonCreature.creature))
                 return false;
 
@@ -794,9 +792,9 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 return false;
             }
             break;
-            }
+        }
         case SMART_ACTION_CALL_KILLEDMONSTER:
-            {
+        {
             if (!IsCreatureValid(e, e.action.killedMonster.creature))
                 return false;
 
@@ -811,7 +809,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 return false;
             }
             break;
-            }
+        }
         case SMART_ACTION_UPDATE_TEMPLATE:
             if (e.action.updateTemplate.creature && !IsCreatureValid(e, e.action.updateTemplate.creature))
                 return false;
@@ -824,14 +822,14 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
             }
             break;
         case SMART_ACTION_SET_REACT_STATE:
+        {
+            if (e.action.react.state > REACT_AGGRESSIVE)
             {
-                if (e.action.react.state > REACT_AGGRESSIVE)
-                {
-                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Creature %d Event %u Action %u uses invalid React State %u, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.action.react.state);
-                    return false;
-                }
-                break;
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Creature %d Event %u Action %u uses invalid React State %u, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.action.react.state);
+                return false;
             }
+            break;
+        }
         case SMART_ACTION_SUMMON_GO:
         {
             if (!IsGameObjectValid(e, e.action.summonGO.entry))
@@ -870,21 +868,21 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                 return false;
             break;
         case SMART_ACTION_WP_START:
+        {
+            if (!sSmartWaypointMgr->GetPath(e.action.wpStart.pathID))
             {
-                if (!sSmartWaypointMgr->GetPath(e.action.wpStart.pathID))
-                {
-                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Creature %d Event %u Action %u uses non-existent WaypointPath id %u, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.action.wpStart.pathID);
-                    return false;
-                }
-                if (e.action.wpStart.quest && !IsQuestValid(e, e.action.wpStart.quest))
-                    return false;
-                if (e.action.wpStart.reactState > REACT_AGGRESSIVE)
-                {
-                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Creature %d Event %u Action %u uses invalid React State %u, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.action.wpStart.reactState);
-                    return false;
-                }
-                break;
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Creature %d Event %u Action %u uses non-existent WaypointPath id %u, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.action.wpStart.pathID);
+                return false;
             }
+            if (e.action.wpStart.quest && !IsQuestValid(e, e.action.wpStart.quest))
+                return false;
+            if (e.action.wpStart.reactState > REACT_AGGRESSIVE)
+            {
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Creature %d Event %u Action %u uses invalid React State %u, skipped.", e.entryOrGuid, e.event_id, e.GetActionType(), e.action.wpStart.reactState);
+                return false;
+            }
+            break;
+        }
         case SMART_ACTION_CREATE_TIMED_EVENT:
         {
             if (!IsMinMaxValid(e, e.action.timeEvent.min, e.action.timeEvent.max))

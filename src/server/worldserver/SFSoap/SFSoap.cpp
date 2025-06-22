@@ -1,14 +1,14 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AccountMgr.h"
+#include "Log.h"
 #include "SFSoap.h"
 #include "soapH.h"
 #include "soapStub.h"
 #include "World.h"
-#include "AccountMgr.h"
-#include "Log.h"
 
 void SFSoapRunnable::run()
 {
@@ -34,7 +34,7 @@ void SFSoapRunnable::run()
         if (!soap_valid_socket(soap_accept(&soap)))
             continue;   // ran into an accept timeout
 
-        SF_LOG_DEBUG("network.soap", "Accepted connection from IP=%d.%d.%d.%d", (int)(soap.ip>>24)&0xFF, (int)(soap.ip>>16)&0xFF, (int)(soap.ip>>8)&0xFF, (int)soap.ip&0xFF);
+        SF_LOG_DEBUG("network.soap", "Accepted connection from IP=%d.%d.%d.%d", (int)(soap.ip >> 24) & 0xFF, (int)(soap.ip >> 16) & 0xFF, (int)(soap.ip >> 8) & 0xFF, (int)soap.ip & 0xFF);
         struct soap* thread_soap = soap_copy(&soap);// make a safe copy
 
         ACE_Message_Block* mb = new ACE_Message_Block(sizeof(struct soap*));
@@ -47,10 +47,10 @@ void SFSoapRunnable::run()
 
 void SFSoapRunnable::process_message(ACE_Message_Block* mb)
 {
-    ACE_TRACE (ACE_TEXT ("SOAPWorkingThread::process_message"));
+    ACE_TRACE(ACE_TEXT("SOAPWorkingThread::process_message"));
 
     struct soap* soap;
-    ACE_OS::memcpy(&soap, mb->rd_ptr (), sizeof(struct soap*));
+    ACE_OS::memcpy(&soap, mb->rd_ptr(), sizeof(struct soap*));
     mb->release();
 
     soap_serve(soap);
@@ -137,7 +137,7 @@ void SOAPCommand::commandFinished(void* soapconnection, bool success)
 ////////////////////////////////////////////////////////////////////////////////
 
 struct Namespace namespaces[] =
-{   { "SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/", NULL, NULL }, // must be first
+{ { "SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/", NULL, NULL }, // must be first
     { "SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/", NULL, NULL }, // must be second
     { "xsi", "http://www.w3.org/1999/XMLSchema-instance", "http://www.w3.org/*/XMLSchema-instance", NULL },
     { "xsd", "http://www.w3.org/1999/XMLSchema",          "http://www.w3.org/*/XMLSchema", NULL },

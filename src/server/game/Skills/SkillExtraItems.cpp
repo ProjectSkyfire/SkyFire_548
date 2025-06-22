@@ -1,12 +1,12 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "SkillExtraItems.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "Player.h"
+#include "SkillExtraItems.h"
 #include <map>
 
 // some type definitions
@@ -90,16 +90,15 @@ void LoadSkillExtraItemTable()
 
         skillExtraItemEntry.requiredSpecialization = requiredSpecialization;
         skillExtraItemEntry.additionalCreateChance = additionalCreateChance;
-        skillExtraItemEntry.additionalMaxNum       = additionalMaxNum;
+        skillExtraItemEntry.additionalMaxNum = additionalMaxNum;
 
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u spell specialization definitions in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
-bool CanCreateExtraItems(Player* player, uint32 spellId, float &additionalChance, uint8 &additionalMax)
+bool CanCreateExtraItems(Player* player, uint32 spellId, float& additionalChance, uint8& additionalMax)
 {
     // get the info for the specified spell
     SkillExtraItemMap::const_iterator ret = SkillExtraItemStore.find(spellId);

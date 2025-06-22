@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ObjectAccessor.h"
-#include "Unit.h"
-#include "SpellInfo.h"
-#include "Log.h"
 #include "AreaTrigger.h"
+#include "Log.h"
+#include "ObjectAccessor.h"
+#include "SpellInfo.h"
+#include "Unit.h"
 
 AreaTrigger::AreaTrigger() : WorldObject(false), _duration(0)
 {

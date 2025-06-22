@@ -110,13 +110,13 @@ class boss_watchkeeper_gargolmar : public CreatureScript
                     {
                         case EVENT_MORTAL_WOUND:
                             DoCastVictim(SPELL_MORTAL_WOUND);
-                            events.ScheduleEvent(EVENT_MORTAL_WOUND, urand (5000, 13000));
+                            events.ScheduleEvent(EVENT_MORTAL_WOUND, std::rand() % 13000 + 5000);
                             break;
                         case EVENT_SURGE:
                             Talk(SAY_SURGE);
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_SURGE);
-                            events.ScheduleEvent(EVENT_SURGE, urand (5000, 13000));
+                            events.ScheduleEvent(EVENT_SURGE, std::rand() % 13000 + 5000);
                             break;
                         case EVENT_RETALIATION:
                             DoCast(me, SPELL_RETALIATION);

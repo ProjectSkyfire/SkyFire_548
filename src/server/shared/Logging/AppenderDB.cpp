@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -13,8 +13,12 @@ AppenderDB::~AppenderDB() { }
 
 void AppenderDB::_write(LogMessage const& message)
 {
+    if (!enabled)
+        return;
+
     // Avoid infinite loop, PExecute triggers Logging with "sql.sql" type
-    if (!enabled || !message.type.find("sql"))
+    size_t pos = message.type.find("sql");
+    if (pos == std::string::npos)
         return;
 
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_LOG);

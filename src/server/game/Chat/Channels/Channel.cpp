@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "AccountMgr.h"
 #include "Channel.h"
 #include "Chat.h"
+#include "DatabaseEnv.h"
 #include "ObjectMgr.h"
+#include "Player.h"
 #include "SocialMgr.h"
 #include "World.h"
-#include "DatabaseEnv.h"
-#include "AccountMgr.h"
-#include "Player.h"
 
-Channel::Channel(std::string const& name, uint32 channelId, uint32 team):
+Channel::Channel(std::string const& name, uint32 channelId, uint32 team) :
     _announce(true),
     _ownership(true),
     _IsSaved(false),
@@ -49,7 +49,7 @@ Channel::Channel(std::string const& name, uint32 channelId, uint32 team):
         // If storing custom channels in the db is enabled either load or save the channel
         if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_PRESERVE_CUSTOM_CHANNELS))
         {
-            PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHANNEL);
+            PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHANNEL);
             stmt->setString(0, name);
             stmt->setUInt32(1, _Team);
             PreparedQueryResult result = CharacterDatabase.Query(stmt);
@@ -59,7 +59,7 @@ Channel::Channel(std::string const& name, uint32 channelId, uint32 team):
                 Field* fields = result->Fetch();
                 _announce = fields[0].GetBool();
                 _ownership = fields[1].GetBool();
-                _password  = fields[2].GetString();
+                _password = fields[2].GetString();
                 const char* db_BannedList = fields[3].GetCString();
 
                 if (db_BannedList)
@@ -354,7 +354,7 @@ void Channel::UnBan(Player const* player, std::string const& badname)
     }
 
     Player* bad = sObjectAccessor->FindPlayerByName(badname);
-    uint64 victim = bad ? bad->GetGUID(): 0;
+    uint64 victim = bad ? bad->GetGUID() : 0;
 
     if (!victim || !IsBanned(victim))
     {
@@ -431,8 +431,8 @@ void Channel::SetMode(Player const* player, std::string const& p2n, bool mod, bo
 
     if (!victim || !IsOn(victim) ||
         (player->GetTeam() != newp->GetTeam() &&
-        (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
-        !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL))))
+            (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
+                !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL))))
     {
         WorldPacket data;
         MakePlayerNotFound(&data, p2n);
@@ -479,8 +479,8 @@ void Channel::SetOwner(Player const* player, std::string const& newname)
 
     if (!victim || !IsOn(victim) ||
         (player->GetTeam() != newp->GetTeam() &&
-        (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
-        !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL))))
+            (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
+                !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL))))
     {
         WorldPacket data;
         MakePlayerNotFound(&data, newname);
@@ -517,7 +517,7 @@ void Channel::List(Player const* player)
     SF_LOG_DEBUG("chat.system", "SMSG_CHANNEL_LIST %s Channel: %s",
         player->GetSession()->GetPlayerInfo().c_str(), GetName().c_str());
 
-    WorldPacket data(SMSG_CHANNEL_LIST, 1+(GetName().size()+1)+1+4+playersStore.size()*(8+1));
+    WorldPacket data(SMSG_CHANNEL_LIST, 1 + (GetName().size() + 1) + 1 + 4 + playersStore.size() * (8 + 1));
     data << uint8(1);                                   // channel type?
     data << GetName();                                  // channel name
     data << uint8(GetFlags());                          // channel flags?
@@ -527,7 +527,7 @@ void Channel::List(Player const* player)
 
     uint32 gmLevelInWhoList = sWorld->getIntConfig(WorldIntConfigs::CONFIG_GM_LEVEL_IN_WHO_LIST);
 
-    uint32 count  = 0;
+    uint32 count = 0;
     for (PlayerContainer::const_iterator i = playersStore.begin(); i != playersStore.end(); ++i)
     {
         Player* member = ObjectAccessor::FindPlayer(i->first);
@@ -536,7 +536,7 @@ void Channel::List(Player const* player)
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
         if (member &&
             (player->GetSession()->HasPermission(rbac::RBAC_PERM_WHO_SEE_ALL_SEC_LEVELS) ||
-             member->GetSession()->GetSecurity() <= AccountTypes(gmLevelInWhoList)) &&
+                member->GetSession()->GetSecurity() <= AccountTypes(gmLevelInWhoList)) &&
             member->IsVisibleGloballyFor(player))
         {
             data << uint64(i->first);
@@ -653,7 +653,7 @@ void Channel::Invite(Player const* player, std::string const& newname)
 
     if (newp->GetTeam() != player->GetTeam() &&
         (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
-        !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL)))
+            !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL)))
     {
         WorldPacket data;
         MakeInviteWrongFaction(&data);
@@ -872,7 +872,7 @@ void Channel::MakePlayerUnbanned(WorldPacket* data, uint64 bad, uint64 good)
     *data << uint64(good);
 }
 
-void Channel::MakePlayerNotBanned(WorldPacket* data, const std::string &name)
+void Channel::MakePlayerNotBanned(WorldPacket* data, const std::string& name)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_BANNED_NOTICE);
     *data << name;
@@ -966,7 +966,7 @@ void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFla
         SendToAllButOne(&data, UserGUID);
     }
     else
-    { 
+    {
         data.WriteGuidMask(UserGUID, 2, 6, 3, 7, 5, 1, 0);
         data.WriteBits(ChannelName.size(), 7);
         data.WriteGuidMask(UserGUID, 4);

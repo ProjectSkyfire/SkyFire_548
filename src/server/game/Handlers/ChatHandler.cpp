@@ -1,31 +1,31 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
-#include "ObjectAccessor.h"
-#include "ObjectMgr.h"
-#include "GuildMgr.h"
-#include "World.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "DatabaseEnv.h"
+#include "AccountMgr.h"
 #include "CellImpl.h"
-#include "Chat.h"
 #include "ChannelMgr.h"
+#include "Chat.h"
+#include "Common.h"
+#include "DatabaseEnv.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
-#include "SpellAuras.h"
-#include "SpellAuraEffects.h"
-#include "Util.h"
 #include "ScriptMgr.h"
-#include "AccountMgr.h"
+#include "SpellAuraEffects.h"
+#include "SpellAuras.h"
+#include "Util.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 {
@@ -70,11 +70,11 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_DND:
             type = ChatMsg::CHAT_MSG_DND;
             break;
-        /*
-            case CMSG_MESSAGECHAT_BATTLEGROUND:
-            type = CHAT_MSG_BATTLEGROUND;
-            break;
-        */
+            /*
+                case CMSG_MESSAGECHAT_BATTLEGROUND:
+                type = CHAT_MSG_BATTLEGROUND;
+                break;
+            */
         default:
             SF_LOG_ERROR("network", "HandleMessagechatOpcode : Unknown chat opcode (%u)", recvData.GetOpcode());
             recvData.hexlike();
@@ -671,62 +671,62 @@ namespace Skyfire
 {
     class EmoteChatBuilder
     {
-        public:
-            EmoteChatBuilder(Player const& player, uint32 text_emote, uint32 emote_num, Unit const* target)
-                : i_player(player), i_text_emote(text_emote), i_emote_num(emote_num), i_target(target) { }
+    public:
+        EmoteChatBuilder(Player const& player, uint32 text_emote, uint32 emote_num, Unit const* target)
+            : i_player(player), i_text_emote(text_emote), i_emote_num(emote_num), i_target(target) { }
 
-            void operator()(WorldPacket& data, LocaleConstant loc_idx)
-            {
-                ObjectGuid PlayerGuid = i_player.GetGUID();
-                ObjectGuid TargetGuid = i_target ? i_target->GetGUID() : 0;
+        void operator()(WorldPacket& data, LocaleConstant loc_idx)
+        {
+            ObjectGuid PlayerGuid = i_player.GetGUID();
+            ObjectGuid TargetGuid = i_target ? i_target->GetGUID() : 0;
 
-                data.Initialize(SMSG_TEXT_EMOTE, 2 * (8 + 1) + 4 + 4);
+            data.Initialize(SMSG_TEXT_EMOTE, 2 * (8 + 1) + 4 + 4);
 
-                data.WriteBit(PlayerGuid[1]);
-                data.WriteBit(TargetGuid[7]);
-                data.WriteBit(PlayerGuid[6]);
-                data.WriteBit(TargetGuid[5]);
-                data.WriteBit(PlayerGuid[3]);
-                data.WriteBit(TargetGuid[6]);
-                data.WriteBit(TargetGuid[2]);
-                data.WriteBit(PlayerGuid[7]);
-                data.WriteBit(TargetGuid[0]);
-                data.WriteBit(TargetGuid[1]);
-                data.WriteBit(PlayerGuid[4]);
-                data.WriteBit(PlayerGuid[2]);
-                data.WriteBit(TargetGuid[3]);
-                data.WriteBit(TargetGuid[4]);
-                data.WriteBit(PlayerGuid[0]);
-                data.WriteBit(PlayerGuid[5]);
+            data.WriteBit(PlayerGuid[1]);
+            data.WriteBit(TargetGuid[7]);
+            data.WriteBit(PlayerGuid[6]);
+            data.WriteBit(TargetGuid[5]);
+            data.WriteBit(PlayerGuid[3]);
+            data.WriteBit(TargetGuid[6]);
+            data.WriteBit(TargetGuid[2]);
+            data.WriteBit(PlayerGuid[7]);
+            data.WriteBit(TargetGuid[0]);
+            data.WriteBit(TargetGuid[1]);
+            data.WriteBit(PlayerGuid[4]);
+            data.WriteBit(PlayerGuid[2]);
+            data.WriteBit(TargetGuid[3]);
+            data.WriteBit(TargetGuid[4]);
+            data.WriteBit(PlayerGuid[0]);
+            data.WriteBit(PlayerGuid[5]);
 
-                data.WriteByteSeq(TargetGuid[2]);
-                data.WriteByteSeq(TargetGuid[1]);
-                data.WriteByteSeq(PlayerGuid[7]);
-                data.WriteByteSeq(PlayerGuid[4]);
-                data.WriteByteSeq(TargetGuid[7]);
-                data.WriteByteSeq(PlayerGuid[5]);
-                data.WriteByteSeq(PlayerGuid[2]);
+            data.WriteByteSeq(TargetGuid[2]);
+            data.WriteByteSeq(TargetGuid[1]);
+            data.WriteByteSeq(PlayerGuid[7]);
+            data.WriteByteSeq(PlayerGuid[4]);
+            data.WriteByteSeq(TargetGuid[7]);
+            data.WriteByteSeq(PlayerGuid[5]);
+            data.WriteByteSeq(PlayerGuid[2]);
 
-                data << uint32(i_text_emote);
+            data << uint32(i_text_emote);
 
-                data.WriteByteSeq(PlayerGuid[6]);
-                data.WriteByteSeq(TargetGuid[0]);
-                data.WriteByteSeq(PlayerGuid[3]);
-                data.WriteByteSeq(PlayerGuid[1]);
-                data.WriteByteSeq(TargetGuid[6]);
-                data.WriteByteSeq(PlayerGuid[0]);
-                data.WriteByteSeq(TargetGuid[3]);
-                data.WriteByteSeq(TargetGuid[5]);
-                data.WriteByteSeq(TargetGuid[4]);
+            data.WriteByteSeq(PlayerGuid[6]);
+            data.WriteByteSeq(TargetGuid[0]);
+            data.WriteByteSeq(PlayerGuid[3]);
+            data.WriteByteSeq(PlayerGuid[1]);
+            data.WriteByteSeq(TargetGuid[6]);
+            data.WriteByteSeq(PlayerGuid[0]);
+            data.WriteByteSeq(TargetGuid[3]);
+            data.WriteByteSeq(TargetGuid[5]);
+            data.WriteByteSeq(TargetGuid[4]);
 
-                data << uint32(i_emote_num);
-            }
+            data << uint32(i_emote_num);
+        }
 
-        private:
-            Player const& i_player;
-            uint32        i_text_emote;
-            uint32        i_emote_num;
-            Unit const*   i_target;
+    private:
+        Player const& i_player;
+        uint32        i_text_emote;
+        uint32        i_emote_num;
+        Unit const* i_target;
     };
 }                                                           // namespace Skyfire
 
@@ -843,14 +843,14 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
     player->GetSession()->SendPacket(&data);
 }
 
-void WorldSession::HandleChannelDeclineInvite(WorldPacket &recvPacket)
+void WorldSession::HandleChannelDeclineInvite(WorldPacket& recvPacket)
 {
     SF_LOG_DEBUG("network", "Opcode %u", recvPacket.GetOpcode());
 }
 
 void WorldSession::SendPlayerNotFoundNotice(std::string const& name)
 {
-    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size()+2);
+    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size() + 2);
     data.WriteBits(name.size(), 9);
     data.FlushBits();
     data << name;
@@ -859,7 +859,7 @@ void WorldSession::SendPlayerNotFoundNotice(std::string const& name)
 
 void WorldSession::SendPlayerAmbiguousNotice(std::string const& name)
 {
-    WorldPacket data(SMSG_CHAT_PLAYER_AMBIGUOUS, name.size()+2);
+    WorldPacket data(SMSG_CHAT_PLAYER_AMBIGUOUS, name.size() + 2);
     data.WriteBits(name.size(), 9);
     data.FlushBits();
     data << name;

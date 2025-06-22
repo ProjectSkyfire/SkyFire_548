@@ -1,26 +1,26 @@
 #include "CinematicPathMgr.h"
 #include "DBCStores.h"
-#include "World.h"
-#include <fstream>
-#include <algorithm>
-#include <stdint.h>
-#include "G3D/platform.h"
-#include "G3D/CoordinateFrame.h"
-#include "G3D/Quat.h"
-#include "G3D/Matrix4.h"
-#include "G3D/Box.h"
 #include "G3D/AABox.h"
-#include "G3D/Sphere.h"
-#include "G3D/Triangle.h"
-#include "G3D/Ray.h"
-#include "G3D/Capsule.h"
-#include "G3D/Cylinder.h"
-#include "G3D/UprightFrame.h"
 #include "G3D/Any.h"
-#include "G3D/stringutils.h"
+#include "G3D/Box.h"
+#include "G3D/Capsule.h"
+#include "G3D/CoordinateFrame.h"
+#include "G3D/Cylinder.h"
+#include "G3D/Matrix4.h"
 #include "G3D/PhysicsFrame.h"
+#include "G3D/platform.h"
+#include "G3D/Quat.h"
+#include "G3D/Ray.h"
+#include "G3D/Sphere.h"
+#include "G3D/stringutils.h"
+#include "G3D/Triangle.h"
 #include "G3D/UprightFrame.h"
+#include "G3D/UprightFrame.h"
+#include "World.h"
+#include <algorithm>
+#include <fstream>
 #include <ObjectMgr.h>
+#include <stdint.h>
 
 enum
 {
@@ -34,8 +34,8 @@ enum
 
 struct Sphere
 {
-    ///*0x00*/ float Min[3];
-    ///*0x0C*/ float Max[3];
+    /*0x00*/ float Min[3];
+    /*0x0C*/ float Max[3];
     /*0x18*/ float Radius;
 };
 
@@ -132,7 +132,7 @@ struct Pair
 struct AnimationBlock
 {
     int16 interpolation_type;
-    //int16 global_sequence_id;
+    int16 global_sequence_id;
     uint32 FramePairsCount;
     uint32 FramePairsOffset;
     uint32 TransPairsCount;
@@ -142,14 +142,14 @@ struct AnimationBlock
 struct Camera
 {
     int32_t Type;
-    //float   fov;
-    //float   far_clipping;
-    //float   near_clipping;
+    float   fov;
+    float   far_clipping;
+    float   near_clipping;
     struct  AnimationBlock SourceTranslations;      // Vector
     float   SourcePosition[3];
-    //struct  AnimationBlock target_translations;     // Vector
-    //float   target_position[3];
-    //struct  AnimationBlock rotations;               // Quaternion
+    struct  AnimationBlock target_translations;     // Vector
+    float   target_position[3];
+    struct  AnimationBlock rotations;               // Quaternion
 };
 
 struct CameraV10
@@ -162,7 +162,7 @@ struct CameraV10
     struct  AnimationBlock target_translations;     // Vector
     float   target_position[3];
     struct  AnimationBlock rotations;               // Quaternion
-    //struct  AnimationBlock unknown_block_4;         // Float
+    struct  AnimationBlock unknown_block_4;         // Float
 };
 #pragma pack(pop)
 
@@ -203,9 +203,7 @@ size_t CinematicSequenceMgr::Load()
         modelFileName += "m2";
         modelFileName = sWorld->GetDataPath() + "cameras/" + modelFileName;
 
-        std::transform(modelFileName.begin(), modelFileName.end(), modelFileName.begin(), ::tolower);
-
-        FILE * modelFile = fopen(modelFileName.c_str(), "rb");
+        FILE* modelFile = fopen(modelFileName.c_str(), "rb");
         if (!modelFile)
         {
             SF_LOG_INFO("server.loading", "Cinematic camera '%s': does not exist!", modelFileName.c_str());
@@ -213,7 +211,7 @@ size_t CinematicSequenceMgr::Load()
         }
 
         size_t  fileSize = 0;
-        char *  fileBuffer = 0;
+        char* fileBuffer = 0;
         char    magicHeader[4];
 
         // Check magic
@@ -291,7 +289,7 @@ size_t CinematicSequenceMgr::Load()
             continue;
         }
 
-        CinematicSequence * cinematicSequence = new CinematicSequence();
+        CinematicSequence* cinematicSequence = new CinematicSequence();
 
         cinematicSequence->Duration = 0;
         cinematicSequence->KeyFramesCount = 0;
@@ -314,8 +312,8 @@ size_t CinematicSequenceMgr::Load()
 
             for (uint32 i = 0; i < animationBlock->FramePairsCount; i++)
             {
-                Pair * framePair = framePairs + i;
-                Pair * transPair = transPairs + i;
+                Pair* framePair = framePairs + i;
+                Pair* transPair = transPairs + i;
 
                 for (uint32 j = 0; j < framePair->Number; j++)
                 {

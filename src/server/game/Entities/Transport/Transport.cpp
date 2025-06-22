@@ -1,28 +1,28 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Common.h"
-#include "Transport.h"
-#include "MapManager.h"
-#include "ObjectMgr.h"
-#include "Path.h"
-#include "ScriptMgr.h"
-#include "WorldPacket.h"
-#include "DBCStores.h"
-#include "World.h"
-#include "GameObjectAI.h"
-#include "Vehicle.h"
-#include "MapReference.h"
-#include "Player.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "Common.h"
+#include "DBCStores.h"
+#include "GameObjectAI.h"
+#include "MapManager.h"
+#include "MapReference.h"
+#include "ObjectMgr.h"
+#include "Path.h"
+#include "Player.h"
+#include "ScriptMgr.h"
+#include "Transport.h"
+#include "Vehicle.h"
+#include "World.h"
+#include "WorldPacket.h"
 
 Transport::Transport() : GameObject(),
-    _transportInfo(NULL), _isMoving(true), _pendingStop(false), _triggeredArrivalEvent(false), _triggeredDepartureEvent(false)
+_transportInfo(NULL), _isMoving(true), _pendingStop(false), _triggeredArrivalEvent(false), _triggeredDepartureEvent(false)
 {
-    m_updateFlag = UPDATEFLAG_TRANSPORT | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION ;
+    m_updateFlag = UPDATEFLAG_TRANSPORT | UPDATEFLAG_STATIONARY_POSITION | UPDATEFLAG_ROTATION;
 }
 
 Transport::~Transport()
@@ -369,8 +369,8 @@ float Transport::CalculateSegmentPos(float now)
     KeyFrame const& frame = *_currentFrame;
     const float speed = float(m_goInfo->moTransport.moveSpeed);
     const float accel = float(m_goInfo->moTransport.accelRate);
-    float timeSinceStop = frame.TimeFrom + (now - (1.0f/float(IN_MILLISECONDS)) * frame.DepartureTime);
-    float timeUntilStop = frame.TimeTo - (now - (1.0f/float(IN_MILLISECONDS)) * frame.DepartureTime);
+    float timeSinceStop = frame.TimeFrom + (now - (1.0f / float(IN_MILLISECONDS)) * frame.DepartureTime);
+    float timeUntilStop = frame.TimeTo - (now - (1.0f / float(IN_MILLISECONDS)) * frame.DepartureTime);
     float segmentPos, dist;
     float accelTime = _transportInfo->accelTime;
     float accelDist = _transportInfo->accelDist;

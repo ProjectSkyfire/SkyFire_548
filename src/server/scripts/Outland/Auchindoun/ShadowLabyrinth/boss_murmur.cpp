@@ -55,9 +55,9 @@ class boss_murmur : public CreatureScript
             {
                 _Reset();
                 events.ScheduleEvent(EVENT_SONIC_BOOM, 30000);
-                events.ScheduleEvent(EVENT_MURMURS_TOUCH, urand(8000, 20000));
+                events.ScheduleEvent(EVENT_MURMURS_TOUCH, std::rand() % 20000 + 8000);
                 events.ScheduleEvent(EVENT_RESONANCE, 5000);
-                events.ScheduleEvent(EVENT_MAGNETIC_PULL, urand(15000, 30000));
+                events.ScheduleEvent(EVENT_MAGNETIC_PULL, std::rand() % 30000 + 15000);
                 if (IsHeroic())
                 {
                     events.ScheduleEvent(EVENT_THUNDERING_STORM, 15000);
@@ -104,7 +104,7 @@ class boss_murmur : public CreatureScript
                         case EVENT_MURMURS_TOUCH:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
                                 DoCast(target, SPELL_MURMURS_TOUCH);
-                            events.ScheduleEvent(EVENT_MURMURS_TOUCH, urand(25000, 35000));
+                            events.ScheduleEvent(EVENT_MURMURS_TOUCH, std::rand() % 35000 + 25000);
                             break;
                         case EVENT_RESONANCE:
                             if (!(me->IsWithinMeleeRange(me->GetVictim())))
@@ -117,7 +117,7 @@ class boss_murmur : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                             {
                                 DoCast(target, SPELL_MAGNETIC_PULL);
-                                events.ScheduleEvent(EVENT_MAGNETIC_PULL, urand(15000, 30000));
+                                events.ScheduleEvent(EVENT_MAGNETIC_PULL, std::rand() % 30000 + 15000);
                                 break;
                             }
                             events.ScheduleEvent(EVENT_MAGNETIC_PULL, 500);
@@ -129,7 +129,7 @@ class boss_murmur : public CreatureScript
                         case EVENT_SONIC_SHOCK:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 20.0f, false))
                                 DoCast(target, SPELL_SONIC_SHOCK);
-                            events.ScheduleEvent(EVENT_SONIC_SHOCK, urand(10000, 20000));
+                            events.ScheduleEvent(EVENT_SONIC_SHOCK, std::rand() % 20000 + 10000);
                             break;
                     }
                 }

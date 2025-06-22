@@ -22,17 +22,13 @@ class boss_magmus : public CreatureScript
 public:
     boss_magmus() : CreatureScript("boss_magmus") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_magmusAI(creature);
-    }
-
     struct boss_magmusAI : public ScriptedAI
     {
-        boss_magmusAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 FieryBurst_Timer;
-        uint32 WarStomp_Timer;
+        boss_magmusAI(Creature* creature) : ScriptedAI(creature)
+        {
+            FieryBurst_Timer = 0;
+            WarStomp_Timer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -73,7 +69,16 @@ public:
             if (InstanceScript* instance = killer->GetInstanceScript())
                 instance->HandleGameObject(instance->GetData64(DATA_THRONE_DOOR), true);
         }
+
+    private:
+        uint32 FieryBurst_Timer;
+        uint32 WarStomp_Timer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_magmusAI(creature);
+    }
 };
 
 void AddSC_boss_magmus()

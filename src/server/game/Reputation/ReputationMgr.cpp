@@ -1,25 +1,25 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "DatabaseEnv.h"
-#include "ReputationMgr.h"
 #include "DBCStores.h"
-#include "Player.h"
-#include "WorldPacket.h"
-#include "World.h"
 #include "ObjectMgr.h"
-#include "ScriptMgr.h"
 #include "Opcodes.h"
+#include "Player.h"
+#include "ReputationMgr.h"
+#include "ScriptMgr.h"
+#include "World.h"
+#include "WorldPacket.h"
 #include "WorldSession.h"
 
-const int32 ReputationMgr::PointsInRank[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
+const int32 ReputationMgr::PointsInRank[MAX_REPUTATION_RANK] = { 36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000 };
 
 ReputationRank ReputationMgr::ReputationToRank(int32 standing)
 {
     int32 limit = Reputation_Cap + 1;
-    for (int i = MAX_REPUTATION_RANK-1; i >= MIN_REPUTATION_RANK; --i)
+    for (int i = MAX_REPUTATION_RANK - 1; i >= MIN_REPUTATION_RANK; --i)
     {
         limit -= PointsInRank[i];
         if (standing >= limit)
@@ -71,13 +71,13 @@ int32 ReputationMgr::GetBaseReputation(FactionEntry const* factionEntry) const
 
     uint32 raceMask = _player->getRaceMask();
     uint32 classMask = _player->getClassMask();
-    for (int i=0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
-        if ((factionEntry->BaseRepRaceMask[i] & raceMask  ||
-            (factionEntry->BaseRepRaceMask[i] == 0  &&
-             factionEntry->BaseRepClassMask[i] != 0)) &&
+        if ((factionEntry->BaseRepRaceMask[i] & raceMask ||
+            (factionEntry->BaseRepRaceMask[i] == 0 &&
+                factionEntry->BaseRepClassMask[i] != 0)) &&
             (factionEntry->BaseRepClassMask[i] & classMask ||
-             factionEntry->BaseRepClassMask[i] == 0))
+                factionEntry->BaseRepClassMask[i] == 0))
 
             return factionEntry->BaseRepValue[i];
     }
@@ -125,13 +125,13 @@ uint32 ReputationMgr::GetDefaultStateFlags(FactionEntry const* factionEntry) con
 
     uint32 raceMask = _player->getRaceMask();
     uint32 classMask = _player->getClassMask();
-    for (int i=0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
-        if ((factionEntry->BaseRepRaceMask[i] & raceMask  ||
-            (factionEntry->BaseRepRaceMask[i] == 0  &&
-             factionEntry->BaseRepClassMask[i] != 0)) &&
+        if ((factionEntry->BaseRepRaceMask[i] & raceMask ||
+            (factionEntry->BaseRepRaceMask[i] == 0 &&
+                factionEntry->BaseRepClassMask[i] != 0)) &&
             (factionEntry->BaseRepClassMask[i] & classMask ||
-             factionEntry->BaseRepClassMask[i] == 0))
+                factionEntry->BaseRepClassMask[i] == 0))
 
             return factionEntry->ReputationFlags[i];
     }
@@ -393,8 +393,8 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         UpdateRankCounters(old_rank, new_rank);
 
         _player->ReputationChanged(factionEntry);
-        _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KNOWN_FACTIONS,          factionEntry->ID);
-        _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REPUTATION,         factionEntry->ID);
+        _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KNOWN_FACTIONS, factionEntry->ID);
+        _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REPUTATION, factionEntry->ID);
         _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_EXALTED_REPUTATION, factionEntry->ID);
         _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REVERED_REPUTATION, factionEntry->ID);
         _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_HONORED_REPUTATION, factionEntry->ID);
@@ -404,7 +404,7 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     return false;
 }
 
-void ReputationMgr::SetVisible(FactionTemplateEntry const*factionTemplateEntry)
+void ReputationMgr::SetVisible(FactionTemplateEntry const* factionTemplateEntry)
 {
     if (!factionTemplateEntry->faction)
         return;
@@ -431,7 +431,7 @@ void ReputationMgr::SetVisible(FactionState* faction)
 {
     // always invisible or hidden faction can't be make visible
     // except if faction has FACTION_FLAG_SPECIAL
-    if (faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN) && !(faction->Flags & FACTION_FLAG_SPECIAL))
+    if (faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN) && !(faction->Flags & FACTION_FLAG_SPECIAL))
         return;
 
     // already set
@@ -454,7 +454,7 @@ void ReputationMgr::SetAtWar(FactionIndex FactionIndexID)
         return;
 
     // always invisible or hidden faction can't change war state
-    if (itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN))
+    if (itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))
         return;
 
     SetAtWar(&itr->second, true);
@@ -506,7 +506,7 @@ void ReputationMgr::SetInactive(RepListID FactionIndex, bool Status)
 void ReputationMgr::SetInactive(FactionState* faction, bool inactive) const
 {
     // always invisible or hidden faction can't be inactive
-    if (inactive && ((faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN)) || !(faction->Flags & FACTION_FLAG_VISIBLE)))
+    if (inactive && ((faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN)) || !(faction->Flags & FACTION_FLAG_VISIBLE)))
         return;
 
     // already set
@@ -577,8 +577,7 @@ void ReputationMgr::LoadFromDB(PreparedQueryResult result)
                     faction->needSave = false;
                 }
             }
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
     }
 }
 

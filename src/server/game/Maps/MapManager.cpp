@@ -1,28 +1,28 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "MapManager.h"
-#include "InstanceSaveMgr.h"
-#include "DatabaseEnv.h"
-#include "Log.h"
-#include "ObjectAccessor.h"
-#include "Transport.h"
-#include "GridDefines.h"
-#include "MapInstanced.h"
-#include "InstanceScript.h"
-#include "Config.h"
-#include "World.h"
 #include "CellImpl.h"
+#include "Config.h"
 #include "Corpse.h"
-#include "ObjectMgr.h"
-#include "Language.h"
-#include "WorldPacket.h"
+#include "DatabaseEnv.h"
+#include "GridDefines.h"
 #include "Group.h"
-#include "Player.h"
-#include "WorldSession.h"
+#include "InstanceSaveMgr.h"
+#include "InstanceScript.h"
+#include "Language.h"
+#include "Log.h"
+#include "MapInstanced.h"
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Opcodes.h"
+#include "Player.h"
+#include "Transport.h"
+#include "World.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 extern GridState* si_GridStates[];                          // debugging code, should be deleted some day
 
@@ -41,7 +41,7 @@ void MapManager::Initialize()
     // debugging code, should be deleted some day
     {
         for (uint8 i = 0; i < MAX_GRID_STATE; ++i)
-             i_GridStates[i] = si_GridStates[i];
+            i_GridStates[i] = si_GridStates[i];
 
         i_GridStateErrorCount = 0;
     }
@@ -53,7 +53,7 @@ void MapManager::Initialize()
 
 void MapManager::InitializeVisibilityDistanceInfo()
 {
-    for (MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
+    for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end(); ++iter)
         (*iter).second->InitVisibilityDistance();
 }
 
@@ -61,7 +61,7 @@ void MapManager::InitializeVisibilityDistanceInfo()
 void MapManager::checkAndCorrectGridStatesArray()
 {
     bool ok = true;
-    for (int i=0; i<MAX_GRID_STATE; i++)
+    for (int i = 0; i < MAX_GRID_STATE; i++)
     {
         if (i_GridStates[i] != si_GridStates[i])
         {
@@ -69,14 +69,14 @@ void MapManager::checkAndCorrectGridStatesArray()
             ok = false;
             si_GridStates[i] = i_GridStates[i];
         }
-        #ifdef SKYFIRE_DEBUG
+#ifdef SKYFIRE_DEBUG
         // inner class checking only when compiled with debug
         if (!si_GridStates[i]->checkMagic())
         {
             ok = false;
             si_GridStates[i]->setMagic();
         }
-        #endif
+#endif
     }
     if (!ok)
         ++i_GridStateErrorCount;
@@ -170,7 +170,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
 {
     MapEntry const* entry = sMapStore.LookupEntry(mapid);
     if (!entry)
-       return false;
+        return false;
 
     if (!entry->IsInstance())
         return true;
@@ -253,16 +253,16 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player, bool loginCheck)
             if (Map* boundMap = sMapMgr->FindMap(mapid, boundInstance->save->GetInstanceId()))
                 if (!loginCheck && !boundMap->CanEnter(player))
                     return false;
-            /*
-                This check has to be moved to InstanceMap::CanEnter()
-                // Player permanently bounded to different instance than groups one
-                InstancePlayerBind* playerBoundedInstance = player->GetBoundInstance(mapid, player->GetDifficulty(entry->IsRaid()));
-                if (playerBoundedInstance && playerBoundedInstance->perm && playerBoundedInstance->save &&
-                    boundedInstance->save->GetInstanceId() != playerBoundedInstance->save->GetInstanceId())
-                {
-                    /// @todo send some kind of error message to the player
-                    return false;
-                }*/
+        /*
+            This check has to be moved to InstanceMap::CanEnter()
+            // Player permanently bounded to different instance than groups one
+            InstancePlayerBind* playerBoundedInstance = player->GetBoundInstance(mapid, player->GetDifficulty(entry->IsRaid()));
+            if (playerBoundedInstance && playerBoundedInstance->perm && playerBoundedInstance->save &&
+                boundedInstance->save->GetInstanceId() != playerBoundedInstance->save->GetInstanceId())
+            {
+                /// @todo send some kind of error message to the player
+                return false;
+            }*/
     }
 
     // players are only allowed to enter 5 instances per hour
@@ -315,8 +315,8 @@ bool MapManager::ExistMapAndVMap(uint32 mapid, float x, float y)
 {
     GridCoord p = Skyfire::ComputeGridCoord(x, y);
 
-    int gx=63-p.x_coord;
-    int gy=63-p.y_coord;
+    int gx = 63 - p.x_coord;
+    int gy = 63 - p.y_coord;
 
     return Map::ExistMap(mapid, gx, gy) && Map::ExistVMap(mapid, gx, gy);
 }
@@ -358,7 +358,7 @@ uint32 MapManager::GetNumInstances()
         Map* map = itr->second;
         if (!map->Instanceable())
             continue;
-        MapInstanced::InstancedMaps &maps = ((MapInstanced*)map)->GetInstancedMaps();
+        MapInstanced::InstancedMaps& maps = ((MapInstanced*)map)->GetInstancedMaps();
         for (MapInstanced::InstancedMaps::iterator mitr = maps.begin(); mitr != maps.end(); ++mitr)
             if (mitr->second->IsInstance()) ret++;
     }
@@ -375,7 +375,7 @@ uint32 MapManager::GetNumPlayersInInstances()
         Map* map = itr->second;
         if (!map->Instanceable())
             continue;
-        MapInstanced::InstancedMaps &maps = ((MapInstanced*)map)->GetInstancedMaps();
+        MapInstanced::InstancedMaps& maps = ((MapInstanced*)map)->GetInstancedMaps();
         for (MapInstanced::InstancedMaps::iterator mitr = maps.begin(); mitr != maps.end(); ++mitr)
             if (mitr->second->IsInstance())
                 ret += ((InstanceMap*)mitr->second)->GetPlayers().getSize();

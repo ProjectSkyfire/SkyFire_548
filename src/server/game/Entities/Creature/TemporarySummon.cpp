@@ -1,19 +1,19 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "CreatureAI.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
-#include "CreatureAI.h"
 #include "ObjectMgr.h"
-#include "TemporarySummon.h"
 #include "Pet.h"
 #include "Player.h"
+#include "TemporarySummon.h"
 
 TempSummon::TempSummon(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) :
-Creature(isWorldObject), m_Properties(properties), m_type(TempSummonType::TEMPSUMMON_MANUAL_DESPAWN),
-m_timer(0), m_lifetime(0), m_summonerGUID(owner ? owner->GetGUID() : 0)
+    Creature(isWorldObject), m_Properties(properties), m_type(TempSummonType::TEMPSUMMON_MANUAL_DESPAWN),
+    m_timer(0), m_lifetime(0), m_summonerGUID(owner ? owner->GetGUID() : 0)
 {
     m_unitTypeMask |= UNIT_MASK_SUMMON;
 }
@@ -307,7 +307,7 @@ bool Minion::IsGuardianPet() const
 
 Guardian::Guardian(SummonPropertiesEntry const* properties, Unit* owner, bool isWorldObject) : Minion(properties, owner, isWorldObject), m_bonusSpellDamage(0)
 {
-    memset(m_statFromOwner, 0, sizeof(float)*MAX_STATS);
+    memset(m_statFromOwner, 0, sizeof(float) * MAX_STATS);
     m_unitTypeMask |= UNIT_MASK_GUARDIAN;
     if (properties && properties->Type == SUMMON_TYPE_PET)
     {
@@ -333,8 +333,8 @@ void Guardian::InitSummon()
     TempSummon::InitSummon();
 
     if (GetOwner()->GetTypeId() == TypeID::TYPEID_PLAYER
-            && GetOwner()->GetMinionGUID() == GetGUID()
-            && !GetOwner()->GetCharmGUID())
+        && GetOwner()->GetMinionGUID() == GetGUID()
+        && !GetOwner()->GetCharmGUID())
     {
         GetOwner()->ToPlayer()->CharmSpellInitialize();
     }

@@ -72,8 +72,8 @@ class boss_bronjahm : public CreatureScript
                 events.Reset();
                 events.SetPhase(PHASE_1);
                 events.ScheduleEvent(EVENT_SHADOW_BOLT, 2000);
-                events.ScheduleEvent(EVENT_MAGIC_BANE, urand(8000, 20000));
-                events.ScheduleEvent(EVENT_CORRUPT_SOUL, urand(25000, 35000), 0, PHASE_1);
+                events.ScheduleEvent(EVENT_MAGIC_BANE, std::rand() % 20000 + 8000);
+                events.ScheduleEvent(EVENT_CORRUPT_SOUL, std::rand() % 35000 + 25000, 0, PHASE_1);
 
                 instance->SetBossState(DATA_BRONJAHM, NOT_STARTED);
             }
@@ -110,7 +110,7 @@ class boss_bronjahm : public CreatureScript
                 {
                     events.SetPhase(PHASE_2);
                     DoCast(me, SPELL_TELEPORT);
-                    events.ScheduleEvent(EVENT_FEAR, urand(12000, 16000), 0, PHASE_2);
+                    events.ScheduleEvent(EVENT_FEAR, std::rand() % 16000 + 12000, 0, PHASE_2);
                     events.ScheduleEvent(EVENT_SOULSTORM, 100, 0, PHASE_2);
                 }
             }
@@ -140,7 +140,7 @@ class boss_bronjahm : public CreatureScript
                     {
                         case EVENT_MAGIC_BANE:
                             DoCastVictim(SPELL_MAGIC_S_BANE);
-                            events.ScheduleEvent(EVENT_MAGIC_BANE, urand(8000, 20000));
+                            events.ScheduleEvent(EVENT_MAGIC_BANE, std::rand() % 20000 + 8000);
                             break;
                         case EVENT_SHADOW_BOLT:
                             if (!me->IsWithinMeleeRange(me->GetVictim()))
@@ -153,7 +153,7 @@ class boss_bronjahm : public CreatureScript
                                 Talk(SAY_CORRUPT_SOUL);
                                 DoCast(target, SPELL_CORRUPT_SOUL);
                             }
-                            events.ScheduleEvent(EVENT_CORRUPT_SOUL, urand(25000, 35000), 0, PHASE_1);
+                            events.ScheduleEvent(EVENT_CORRUPT_SOUL, std::rand() % 35000 + 25000, 0, PHASE_1);
                             break;
                         case EVENT_SOULSTORM:
                             Talk(SAY_SOUL_STORM);
@@ -163,7 +163,7 @@ class boss_bronjahm : public CreatureScript
                         case EVENT_FEAR:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
                                 me->CastCustomSpell(SPELL_FEAR, SPELLVALUE_MAX_TARGETS, 1, target, false);
-                            events.ScheduleEvent(EVENT_FEAR, urand(8000, 12000), 0, PHASE_2);
+                            events.ScheduleEvent(EVENT_FEAR, std::rand() % 12000 + 8000, 0, PHASE_2);
                             break;
                         default:
                             break;

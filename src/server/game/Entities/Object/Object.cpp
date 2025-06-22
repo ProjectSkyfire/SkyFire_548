@@ -1,51 +1,51 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "Object.h"
-#include "Common.h"
-#include "SharedDefines.h"
-#include "WorldPacket.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "World.h"
-#include "Creature.h"
-#include "Player.h"
-#include "Vehicle.h"
-#include "ObjectMgr.h"
-#include "UpdateData.h"
-#include "UpdateMask.h"
-#include "Util.h"
-#include "MapManager.h"
-#include "ObjectAccessor.h"
-#include "Log.h"
-#include "Transport.h"
-#include "TargetedMovementGenerator.h"
-#include "WaypointMovementGenerator.h"
-#include "VMapFactory.h"
-#include "CellImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "SpellAuraEffects.h"
-#include "UpdateFieldFlags.h"
-#include "TemporarySummon.h"
-#include "Totem.h"
-#include "OutdoorPvPMgr.h"
-#include "MovementPacketBuilder.h"
-#include "DynamicTree.h"
-#include "Unit.h"
-#include "Group.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
+#include "CellImpl.h"
 #include "Chat.h"
+#include "Common.h"
+#include "Creature.h"
+#include "DynamicTree.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Group.h"
+#include "Log.h"
+#include "Log.h"
+#include "MapManager.h"
+#include "MovementPacketBuilder.h"
+#include "Object.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "OutdoorPvPMgr.h"
+#include "Player.h"
+#include "SharedDefines.h"
+#include "SpellAuraEffects.h"
+#include "TargetedMovementGenerator.h"
+#include "TemporarySummon.h"
+#include "Totem.h"
+#include "Transport.h"
+#include "Unit.h"
+#include "UpdateData.h"
+#include "UpdateFieldFlags.h"
+#include "UpdateMask.h"
+#include "Util.h"
+#include "Vehicle.h"
+#include "VMapFactory.h"
+#include "WaypointMovementGenerator.h"
+#include "World.h"
+#include "WorldPacket.h"
 
 TypeID GuidHigh2TypeId(uint32 guid_hi)
 {
     switch (guid_hi)
     {
         case HIGHGUID_ITEM:         return TypeID::TYPEID_ITEM;
-        //case HIGHGUID_CONTAINER:    return TYPEID_CONTAINER; HIGHGUID_CONTAINER == HIGHGUID_ITEM currently
+            //case HIGHGUID_CONTAINER:    return TYPEID_CONTAINER; HIGHGUID_CONTAINER == HIGHGUID_ITEM currently
         case HIGHGUID_UNIT:         return TypeID::TYPEID_UNIT;
         case HIGHGUID_PET:          return TypeID::TYPEID_UNIT;
         case HIGHGUID_PLAYER:       return TypeID::TYPEID_PLAYER;
@@ -59,8 +59,8 @@ TypeID GuidHigh2TypeId(uint32 guid_hi)
     return TypeID::NUM_CLIENT_OBJECT_TYPES;                         // unknown
 }
 
-Object::Object() : m_PackGUID(sizeof(uint64)+1), m_objectTypeId(TypeID::TYPEID_OBJECT), m_objectType(TYPEMASK_OBJECT), m_uint32Values(NULL),
-                    m_valuesCount(0), m_fieldNotifyFlags(UF_FLAG_URGENT), m_inWorld(false), m_objectUpdated(false)
+Object::Object() : m_PackGUID(sizeof(uint64) + 1), m_objectTypeId(TypeID::TYPEID_OBJECT), m_objectType(TYPEMASK_OBJECT), m_uint32Values(NULL),
+m_valuesCount(0), m_fieldNotifyFlags(UF_FLAG_URGENT), m_inWorld(false), m_objectUpdated(false), m_updateFlag(UPDATEFLAG_NONE)
 {
     m_PackGUID.appendPackGUID(0);
 }
@@ -98,20 +98,20 @@ Object::~Object()
         sObjectAccessor->RemoveUpdateObject(this);
     }
 
-    delete [] m_uint32Values;
+    delete[] m_uint32Values;
     m_uint32Values = 0;
 
     for (size_t i = 0; i < m_dynamicTab.size(); ++i)
     {
-        delete [] m_dynamicTab[i];
-        delete [] m_dynamicChange[i];
+        delete[] m_dynamicTab[i];
+        delete[] m_dynamicChange[i];
     }
 }
 
 void Object::_InitValues()
 {
     m_uint32Values = new uint32[m_valuesCount];
-    memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
+    memset(m_uint32Values, 0, m_valuesCount * sizeof(uint32));
 
     _changesMask.SetCount(m_valuesCount);
 
@@ -173,7 +173,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         return;
 
     uint8  updateType = UPDATETYPE_CREATE_OBJECT;
-    uint16 flags      = m_updateFlag;
+    uint16 flags = m_updateFlag;
 
     /** lower flag1 **/
     if (target == this)                                      // building packet for yourself
@@ -328,14 +328,14 @@ uint8 Object::GetByteValue(uint16 index, uint8 offset) const
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, false));
     ASSERT(offset < 4);
-    return *(((uint8*)&m_uint32Values[index])+offset);
+    return *(((uint8*)&m_uint32Values[index]) + offset);
 }
 
 uint16 Object::GetUInt16Value(uint16 index, uint8 offset) const
 {
     ASSERT(index < m_valuesCount || PrintIndexError(index, false));
     ASSERT(offset < 2);
-    return *(((uint16*)&m_uint32Values[index])+offset);
+    return *(((uint16*)&m_uint32Values[index]) + offset);
 }
 
 uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
@@ -449,7 +449,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
             data->WriteBit(hasFallDirection);
 
         if (movementFlagsExtra)
-           data->WriteBits(movementFlagsExtra, 13);
+            data->WriteBits(movementFlagsExtra, 13);
     }
 
     // 1032 {}
@@ -483,14 +483,14 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(0); // 525
         data->WriteBit(0); // 664 has664
         data->WriteBit(0); // 527
-        
+
         if (664) // 664
             data->WriteBits(0, 20); // v70
-            
+
         data->WriteBit(0); // 536
         data->WriteBit(0); // 644 has644
         data->WriteBit(0); // 560
-        
+
         if (644) // 644
         {
             //v4 = sub_6652D0(v7, v6) << (13 - v3);
@@ -658,7 +658,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     /*
     if (flags & UPDATEFLAG_HAS_AREATRIGGER) // 668
     {
-        if (664) 
+        if (664)
         {
             //forloop12 162
             *data << float(0.0f); //v107 // 4
@@ -682,14 +682,14 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
                 *data << float(0.0f); //v110 // 0 // 152
                 *data << float(0.0f); //v111 // 4 // 152
             }
-            
+
             if (155)
             {
                 //forloop 155
                 *data << float(0.0f); //v112 // 0 // 156
                 *data << float(0.0f); //v113 // 4 // 156
             }
-        
+
             *data << float(0.0f); // 160
             *data << float(0.0f); // 159
         }
@@ -728,7 +728,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteByteSeq(victimGuid[0]);
         data->WriteByteSeq(victimGuid[4]);
     }
-    
+
     if (flags & UPDATEFLAG_VEHICLE)
     {
         Unit const* self = ToUnit();
@@ -793,7 +793,7 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
     for (uint16 index = 0; index < m_valuesCount; ++index)
     {
         if ((m_fieldNotifyFlags & flags[index] ||
-             ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag))))
+            ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag))))
         {
             updateMask.SetBit(index);
             fieldBuffer << m_uint32Values[index];
@@ -806,7 +806,7 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
     BuildDynamicValuesUpdate(data);
 }
 
-void Object::BuildDynamicValuesUpdate(ByteBuffer *data) const
+void Object::BuildDynamicValuesUpdate(ByteBuffer* data) const
 {
     // Only handle Item type
     // TODO: Implement Player dynamis fields
@@ -1367,12 +1367,12 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
-bool Position::operator==(Position const &a)
+bool Position::operator==(Position const& a)
 {
     return (G3D::fuzzyEq(a.m_positionX, m_positionX) &&
-            G3D::fuzzyEq(a.m_positionY, m_positionY) &&
-            G3D::fuzzyEq(a.m_positionZ, m_positionZ) &&
-            G3D::fuzzyEq(a.m_orientation, m_orientation));
+        G3D::fuzzyEq(a.m_positionY, m_positionY) &&
+        G3D::fuzzyEq(a.m_positionZ, m_positionZ) &&
+        G3D::fuzzyEq(a.m_orientation, m_orientation));
 }
 
 bool Position::HasInLine(WorldObject const* target, float width) const
@@ -1457,7 +1457,7 @@ void MovementInfo::OutDebug()
         SF_LOG_INFO("misc", "splineElevation: %f", splineElevation);
 }
 
-WorldObject::WorldObject(bool isWorldObject): WorldLocation(),
+WorldObject::WorldObject(bool isWorldObject) : WorldLocation(),
 m_name(""), m_isActive(false), m_isWorldObject(isWorldObject), m_zoneScript(NULL),
 m_transport(NULL), m_currMap(NULL), m_InstanceId(0),
 m_phaseMask(PHASEMASK_NORMAL), m_notifyflags(0), m_executed_notifies(0)
@@ -1574,7 +1574,7 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
     float sizefactor = GetObjectSize() + obj->GetObjectSize();
     float maxdist = dist2compare + sizefactor;
 
-    if (m_transport && obj->GetTransport() &&  obj->GetTransport()->GetGUIDLow() == m_transport->GetGUIDLow())
+    if (m_transport && obj->GetTransport() && obj->GetTransport()->GetGUIDLow() == m_transport->GetGUIDLow())
     {
         float dtx = m_movementInfo.transport.pos.m_positionX - obj->m_movementInfo.transport.pos.m_positionX;
         float dty = m_movementInfo.transport.pos.m_positionY - obj->m_movementInfo.transport.pos.m_positionY;
@@ -1589,11 +1589,11 @@ bool WorldObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool
 
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
-    float distsq = dx*dx + dy*dy;
+    float distsq = dx * dx + dy * dy;
     if (is3D)
     {
         float dz = GetPositionZ() - obj->GetPositionZ();
-        distsq += dz*dz;
+        distsq += dz * dz;
     }
 
     return distsq < maxdist * maxdist;
@@ -1615,7 +1615,7 @@ float WorldObject::GetDistance(const WorldObject* obj) const
     return d > 0.0f ? d : 0.0f;
 }
 
-float WorldObject::GetDistance(const Position &pos) const
+float WorldObject::GetDistance(const Position& pos) const
 {
     float d = GetExactDist(&pos) - GetObjectSize();
     return d > 0.0f ? d : 0.0f;
@@ -1690,7 +1690,7 @@ bool WorldObject::IsWithinLOS(float ox, float oy, float oz) const
     VMAP::IVMapManager* vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);*/
     if (IsInWorld())
-        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ()+2.f, ox, oy, oz+2.f, GetPhaseMask());
+        return GetMap()->isInLineOfSight(GetPositionX(), GetPositionY(), GetPositionZ() + 2.f, ox, oy, oz + 2.f, GetPhaseMask());
 
     return true;
 }
@@ -1699,20 +1699,20 @@ bool WorldObject::GetDistanceOrder(WorldObject const* obj1, WorldObject const* o
 {
     float dx1 = GetPositionX() - obj1->GetPositionX();
     float dy1 = GetPositionY() - obj1->GetPositionY();
-    float distsq1 = dx1*dx1 + dy1*dy1;
+    float distsq1 = dx1 * dx1 + dy1 * dy1;
     if (is3D)
     {
         float dz1 = GetPositionZ() - obj1->GetPositionZ();
-        distsq1 += dz1*dz1;
+        distsq1 += dz1 * dz1;
     }
 
     float dx2 = GetPositionX() - obj2->GetPositionX();
     float dy2 = GetPositionY() - obj2->GetPositionY();
-    float distsq2 = dx2*dx2 + dy2*dy2;
+    float distsq2 = dx2 * dx2 + dy2 * dy2;
     if (is3D)
     {
         float dz2 = GetPositionZ() - obj2->GetPositionZ();
-        distsq2 += dz2*dz2;
+        distsq2 += dz2 * dz2;
     }
 
     return distsq1 < distsq2;
@@ -1722,11 +1722,11 @@ bool WorldObject::IsInRange(WorldObject const* obj, float minRange, float maxRan
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
-    float distsq = dx*dx + dy*dy;
+    float distsq = dx * dx + dy * dy;
     if (is3D)
     {
         float dz = GetPositionZ() - obj->GetPositionZ();
-        distsq += dz*dz;
+        distsq += dz * dz;
     }
 
     float sizefactor = GetObjectSize() + obj->GetObjectSize();
@@ -1747,7 +1747,7 @@ bool WorldObject::IsInRange2d(float x, float y, float minRange, float maxRange) 
 {
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
-    float distsq = dx*dx + dy*dy;
+    float distsq = dx * dx + dy * dy;
 
     float sizefactor = GetObjectSize();
 
@@ -1768,7 +1768,7 @@ bool WorldObject::IsInRange3d(float x, float y, float z, float minRange, float m
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
     float dz = GetPositionZ() - z;
-    float distsq = dx*dx + dy*dy + dz*dz;
+    float distsq = dx * dx + dy * dy + dz * dz;
 
     float sizefactor = GetObjectSize();
 
@@ -1784,7 +1784,7 @@ bool WorldObject::IsInRange3d(float x, float y, float z, float minRange, float m
     return distsq < maxdist * maxdist;
 }
 
-void Position::RelocateOffset(const Position & offset)
+void Position::RelocateOffset(const Position& offset)
 {
     m_positionX = GetPositionX() + (offset.GetPositionX() * std::cos(GetOrientation()) + offset.GetPositionY() * std::sin(GetOrientation() + M_PI));
     m_positionY = GetPositionY() + (offset.GetPositionY() * std::cos(GetOrientation()) + offset.GetPositionX() * std::sin(GetOrientation()));
@@ -1792,7 +1792,7 @@ void Position::RelocateOffset(const Position & offset)
     SetOrientation(GetOrientation() + offset.GetOrientation());
 }
 
-void Position::GetPositionOffsetTo(const Position & endPos, Position & retOffset) const
+void Position::GetPositionOffsetTo(const Position& endPos, Position& retOffset) const
 {
     float dx = endPos.GetPositionX() - GetPositionX();
     float dy = endPos.GetPositionY() - GetPositionY();
@@ -1822,20 +1822,20 @@ float Position::GetAngle(const float x, const float y) const
     return ang;
 }
 
-void Position::GetSinCos(const float x, const float y, float &vsin, float &vcos) const
+void Position::GetSinCos(const float x, const float y, float& vsin, float& vcos) const
 {
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
 
     if (fabs(dx) < 0.001f && fabs(dy) < 0.001f)
     {
-        float angle = (float)rand_norm()*static_cast<float>(2*M_PI);
+        float angle = (float)rand_norm() * static_cast<float>(2 * M_PI);
         vcos = std::cos(angle);
         vsin = std::sin(angle);
     }
     else
     {
-        float dist = sqrt((dx*dx) + (dy*dy));
+        float dist = sqrt((dx * dx) + (dy * dy));
         vcos = dx / dist;
         vsin = dy / dist;
     }
@@ -1856,10 +1856,10 @@ bool Position::HasInArc(float arc, const Position* obj, float border) const
     // move angle to range -pi ... +pi
     angle = NormalizeOrientation(angle);
     if (angle > M_PI)
-        angle -= 2.0f*M_PI;
+        angle -= 2.0f * M_PI;
 
-    float lborder = -1 * (arc/border);                        // in range -pi..0
-    float rborder = (arc/border);                             // in range 0..pi
+    float lborder = -1 * (arc / border);                        // in range -pi..0
+    float rborder = (arc / border);                             // in range 0..pi
     return ((angle >= lborder) && (angle <= rborder));
 }
 
@@ -1883,7 +1883,7 @@ bool WorldObject::IsInBetween(const WorldObject* obj1, const WorldObject* obj2, 
     return (size * size) >= GetExactDist2dSq(obj1->GetPositionX() + std::cos(angle) * dist, obj1->GetPositionY() + std::sin(angle) * dist);
 }
 
-bool WorldObject::isInFront(WorldObject const* target,  float arc) const
+bool WorldObject::isInFront(WorldObject const* target, float arc) const
 {
     return HasInArc(arc, target);
 }
@@ -1893,7 +1893,7 @@ bool WorldObject::isInBack(WorldObject const* target, float arc) const
     return !HasInArc(2 * M_PI - arc, target);
 }
 
-void WorldObject::GetRandomPoint(const Position &pos, float distance, float &rand_x, float &rand_y, float &rand_z) const
+void WorldObject::GetRandomPoint(const Position& pos, float distance, float& rand_x, float& rand_y, float& rand_z) const
 {
     if (!distance)
     {
@@ -1902,8 +1902,8 @@ void WorldObject::GetRandomPoint(const Position &pos, float distance, float &ran
     }
 
     // angle to face `obj` to `this`
-    float angle = (float)rand_norm()*static_cast<float>(2*M_PI);
-    float new_dist = (float)rand_norm()*static_cast<float>(distance);
+    float angle = (float)rand_norm() * static_cast<float>(2 * M_PI);
+    float new_dist = (float)rand_norm() * static_cast<float>(distance);
 
     rand_x = pos.m_positionX + new_dist * std::cos(angle);
     rand_y = pos.m_positionY + new_dist * std::sin(angle);
@@ -1914,21 +1914,21 @@ void WorldObject::GetRandomPoint(const Position &pos, float distance, float &ran
     UpdateGroundPositionZ(rand_x, rand_y, rand_z);            // update to LOS height if available
 }
 
-void WorldObject::GetRandomPoint(const Position &srcPos, float distance, Position &pos) const
+void WorldObject::GetRandomPoint(const Position& srcPos, float distance, Position& pos) const
 {
     float x, y, z;
     GetRandomPoint(srcPos, distance, x, y, z);
     pos.Relocate(x, y, z, GetOrientation());
 }
 
-void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
+void WorldObject::UpdateGroundPositionZ(float x, float y, float& z) const
 {
     float new_z = GetBaseMap()->GetHeight(GetPhaseMask(), x, y, z, true);
     if (new_z > INVALID_HEIGHT)
-        z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
+        z = new_z + 0.05f;                                   // just to be sure that we are not a few pixel under the surface
 }
 
-void WorldObject::UpdateAllowedPositionZ(float x, float y, float &z) const
+void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z) const
 {
     switch (GetTypeId())
     {
@@ -2278,44 +2278,44 @@ namespace Skyfire
 {
     class MonsterChatBuilder
     {
-        public:
-            MonsterChatBuilder(WorldObject const* obj, ChatMsg msgtype, int32 textId, Language language, WorldObject const* target)
-                : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target) { }
+    public:
+        MonsterChatBuilder(WorldObject const* obj, ChatMsg msgtype, int32 textId, Language language, WorldObject const* target)
+            : i_object(obj), i_msgtype(msgtype), i_textId(textId), i_language(language), i_target(target) { }
 
-            void operator()(WorldPacket& data, LocaleConstant loc_idx)
-            {
-                char const* text = sObjectMgr->GetSkyFireString(i_textId, loc_idx);
+        void operator()(WorldPacket& data, LocaleConstant loc_idx)
+        {
+            char const* text = sObjectMgr->GetSkyFireString(i_textId, loc_idx);
 
-                /// @todo i_object.GetName() also must be localized?
-                ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, text, 0, "", loc_idx);
-            }
+            /// @todo i_object.GetName() also must be localized?
+            ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, text, 0, "", loc_idx);
+        }
 
-        private:
-            WorldObject const* i_object;
-            ChatMsg i_msgtype;
-            int32 i_textId;
-            Language i_language;
-            WorldObject const* i_target;
+    private:
+        WorldObject const* i_object;
+        ChatMsg i_msgtype;
+        int32 i_textId;
+        Language i_language;
+        WorldObject const* i_target;
     };
 
     class MonsterCustomChatBuilder
     {
-        public:
-            MonsterCustomChatBuilder(WorldObject const* obj, ChatMsg msgtype, const char* text, Language language, WorldObject const* target)
-                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(language), i_target(target) { }
+    public:
+        MonsterCustomChatBuilder(WorldObject const* obj, ChatMsg msgtype, const char* text, Language language, WorldObject const* target)
+            : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(language), i_target(target) { }
 
-            void operator()(WorldPacket& data, LocaleConstant loc_idx)
-            {
-                /// @todo i_object.GetName() also must be localized?
-                ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, i_text, 0, "", loc_idx);
-            }
+        void operator()(WorldPacket& data, LocaleConstant loc_idx)
+        {
+            /// @todo i_object.GetName() also must be localized?
+            ChatHandler::BuildChatPacket(data, i_msgtype, i_language, i_object, i_target, i_text, 0, "", loc_idx);
+        }
 
-        private:
-            WorldObject const* i_object;
-            ChatMsg i_msgtype;
-            const char* i_text;
-            Language i_language;
-            WorldObject const* i_target;
+    private:
+        WorldObject const* i_object;
+        ChatMsg i_msgtype;
+        const char* i_text;
+        Language i_language;
+        WorldObject const* i_target;
     };
 }                                                           // namespace Skyfire
 
@@ -2537,27 +2537,27 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
             {
                 switch (properties->Type)
                 {
-                case SUMMON_TYPE_MINION:
-                case SUMMON_TYPE_GUARDIAN:
-                case SUMMON_TYPE_GUARDIAN2:
-                    mask = UNIT_MASK_GUARDIAN;
-                    break;
-                case SUMMON_TYPE_STATUE:
-                case SUMMON_TYPE_TOTEM:
-                case SUMMON_TYPE_LIGHTWELL:
-                    mask = UNIT_MASK_TOTEM;
-                    break;
-                case SUMMON_TYPE_VEHICLE:
-                case SUMMON_TYPE_VEHICLE2:
-                    mask = UNIT_MASK_SUMMON;
-                    break;
-                case SUMMON_TYPE_MINIPET:
-                    mask = UNIT_MASK_MINION;
-                    break;
-                default:
-                    if (properties->Flags & 512) // Mirror Image, Summon Gargoyle
+                    case SUMMON_TYPE_MINION:
+                    case SUMMON_TYPE_GUARDIAN:
+                    case SUMMON_TYPE_GUARDIAN2:
                         mask = UNIT_MASK_GUARDIAN;
-                    break;
+                        break;
+                    case SUMMON_TYPE_STATUE:
+                    case SUMMON_TYPE_TOTEM:
+                    case SUMMON_TYPE_LIGHTWELL:
+                        mask = UNIT_MASK_TOTEM;
+                        break;
+                    case SUMMON_TYPE_VEHICLE:
+                    case SUMMON_TYPE_VEHICLE2:
+                        mask = UNIT_MASK_SUMMON;
+                        break;
+                    case SUMMON_TYPE_MINIPET:
+                        mask = UNIT_MASK_MINION;
+                        break;
+                    default:
+                        if (properties->Flags & 512) // Mirror Image, Summon Gargoyle
+                            mask = UNIT_MASK_GUARDIAN;
+                        break;
                 }
                 break;
             }
@@ -2654,7 +2654,7 @@ void WorldObject::SetZoneScript()
     }
 }
 
-TempSummon* WorldObject::SummonCreature(uint32 entry, const Position &pos, TempSummonType spwtype, uint32 duration, uint32 /*vehId*/) const
+TempSummon* WorldObject::SummonCreature(uint32 entry, const Position& pos, TempSummonType spwtype, uint32 duration, uint32 /*vehId*/) const
 {
     if (Map* map = FindMap())
     {
@@ -2887,7 +2887,7 @@ namespace Skyfire
 
 //===================================================================================================
 
-void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float absAngle) const
+void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const
 {
     x = GetPositionX() + (GetObjectSize() + distance2d) * std::cos(absAngle);
     y = GetPositionY() + (GetObjectSize() + distance2d) * std::sin(absAngle);
@@ -2896,9 +2896,9 @@ void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float abs
     Skyfire::NormalizeMapCoord(y);
 }
 
-void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const
+void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float& x, float& y, float& z, float searcher_size, float distance2d, float absAngle) const
 {
-    GetNearPoint2D(x, y, distance2d+searcher_size, absAngle);
+    GetNearPoint2D(x, y, distance2d + searcher_size, absAngle);
     z = GetPositionZ();
     UpdateAllowedPositionZ(x, y, z);
 
@@ -3021,31 +3021,31 @@ void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float &x, float 
     */
 }
 
-void WorldObject::GetClosePoint(float &x, float &y, float &z, float size, float distance2d /*= 0*/, float angle /*= 0*/) const
+void WorldObject::GetClosePoint(float& x, float& y, float& z, float size, float distance2d /*= 0*/, float angle /*= 0*/) const
 {
     // angle calculated from current orientation
     GetNearPoint(NULL, x, y, z, size, distance2d, GetOrientation() + angle);
 }
 
-void WorldObject::GetNearPosition(Position &pos, float dist, float angle)
+void WorldObject::GetNearPosition(Position& pos, float dist, float angle)
 {
     GetPosition(&pos);
     MovePosition(pos, dist, angle);
 }
 
-void WorldObject::GetFirstCollisionPosition(Position &pos, float dist, float angle)
+void WorldObject::GetFirstCollisionPosition(Position& pos, float dist, float angle)
 {
     GetPosition(&pos);
     MovePositionToFirstCollision(pos, dist, angle);
 }
 
-void WorldObject::GetRandomNearPosition(Position &pos, float radius)
+void WorldObject::GetRandomNearPosition(Position& pos, float radius)
 {
     GetPosition(&pos);
     MovePosition(pos, radius * (float)rand_norm(), (float)rand_norm() * static_cast<float>(2 * M_PI));
 }
 
-void WorldObject::GetContactPoint(const WorldObject* obj, float &x, float &y, float &z, float distance2d /*= CONTACT_DISTANCE*/) const
+void WorldObject::GetContactPoint(const WorldObject* obj, float& x, float& y, float& z, float distance2d /*= CONTACT_DISTANCE*/) const
 {
     // angle to face `obj` to `this` using distance includes size of `obj`
     GetNearPoint(obj, x, y, z, obj->GetObjectSize(), distance2d, GetAngle(obj));
@@ -3056,7 +3056,7 @@ float WorldObject::GetObjectSize() const
     return (m_valuesCount > UNIT_FIELD_COMBAT_REACH) ? m_floatValues[UNIT_FIELD_COMBAT_REACH] : DEFAULT_WORLD_OBJECT_SIZE;
 }
 
-void WorldObject::MovePosition(Position &pos, float dist, float angle)
+void WorldObject::MovePosition(Position& pos, float dist, float angle)
 {
     angle += GetOrientation();
     float destx, desty, destz, ground, floor;
@@ -3075,7 +3075,7 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
     floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
     destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
 
-    float step = dist/10.0f;
+    float step = dist / 10.0f;
 
     for (uint8 j = 0; j < 10; ++j)
     {
@@ -3102,7 +3102,7 @@ void WorldObject::MovePosition(Position &pos, float dist, float angle)
     pos.SetOrientation(GetOrientation());
 }
 
-void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float angle)
+void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float angle)
 {
     angle += GetOrientation();
     float destx, desty, destz, ground, floor;
@@ -3121,7 +3121,7 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
     floor = GetMap()->GetHeight(GetPhaseMask(), destx, desty, pos.m_positionZ, true);
     destz = fabs(ground - pos.m_positionZ) <= fabs(floor - pos.m_positionZ) ? ground : floor;
 
-    bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
+    bool col = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(), pos.m_positionX, pos.m_positionY, pos.m_positionZ + 0.5f, destx, desty, destz + 0.5f, destx, desty, destz, -0.5f);
 
     // collision occured
     if (col)
@@ -3129,21 +3129,21 @@ void WorldObject::MovePositionToFirstCollision(Position &pos, float dist, float 
         // move back a bit
         destx -= CONTACT_DISTANCE * std::cos(angle);
         desty -= CONTACT_DISTANCE * std::sin(angle);
-        dist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
+        dist = sqrt((pos.m_positionX - destx) * (pos.m_positionX - destx) + (pos.m_positionY - desty) * (pos.m_positionY - desty));
     }
 
     // check dynamic collision
-    col = GetMap()->getObjectHitPos(GetPhaseMask(), pos.m_positionX, pos.m_positionY, pos.m_positionZ+0.5f, destx, desty, destz+0.5f, destx, desty, destz, -0.5f);
+    col = GetMap()->getObjectHitPos(GetPhaseMask(), pos.m_positionX, pos.m_positionY, pos.m_positionZ + 0.5f, destx, desty, destz + 0.5f, destx, desty, destz, -0.5f);
 
     // Collided with a gameobject
     if (col)
     {
         destx -= CONTACT_DISTANCE * std::cos(angle);
         desty -= CONTACT_DISTANCE * std::sin(angle);
-        dist = sqrt((pos.m_positionX - destx)*(pos.m_positionX - destx) + (pos.m_positionY - desty)*(pos.m_positionY - desty));
+        dist = sqrt((pos.m_positionX - destx) * (pos.m_positionX - destx) + (pos.m_positionY - desty) * (pos.m_positionY - desty));
     }
 
-    float step = dist/10.0f;
+    float step = dist / 10.0f;
 
     for (uint8 j = 0; j < 10; ++j)
     {
@@ -3443,8 +3443,8 @@ struct WorldObjectChangeAccumulator
     UpdateDataMapType& i_updateDatas;
     WorldObject& i_object;
     std::set<uint64> plr_list;
-    WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) { }
-    void Visit(PlayerMapType &m)
+    WorldObjectChangeAccumulator(WorldObject& obj, UpdateDataMapType& d) : i_updateDatas(d), i_object(obj) { }
+    void Visit(PlayerMapType& m)
     {
         Player* source = NULL;
         for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
@@ -3462,7 +3462,7 @@ struct WorldObjectChangeAccumulator
         }
     }
 
-    void Visit(CreatureMapType &m)
+    void Visit(CreatureMapType& m)
     {
         Creature* source = NULL;
         for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
@@ -3477,7 +3477,7 @@ struct WorldObjectChangeAccumulator
         }
     }
 
-    void Visit(DynamicObjectMapType &m)
+    void Visit(DynamicObjectMapType& m)
     {
         DynamicObject* source = NULL;
         for (DynamicObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
@@ -3505,7 +3505,7 @@ struct WorldObjectChangeAccumulator
         }
     }
 
-    template<class SKIP> void Visit(GridRefManager<SKIP> &) { }
+    template<class SKIP> void Visit(GridRefManager<SKIP>&) { }
 };
 
 void WorldObject::BuildUpdate(UpdateDataMapType& data_map)

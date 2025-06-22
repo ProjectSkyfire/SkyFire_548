@@ -206,7 +206,7 @@ class npc_onyx_flamecaller : public CreatureScript
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_BLAST_NOVA, urand(20000, 30000));
+                _events.ScheduleEvent(EVENT_BLAST_NOVA, std::rand() % 30000 + 20000);
                 _events.ScheduleEvent(EVENT_LAVA_GOUT, 5000);
             }
 
@@ -261,7 +261,7 @@ class npc_onyx_flamecaller : public CreatureScript
                     {
                         case EVENT_BLAST_NOVA:
                             DoCastAOE(SPELL_BLAST_NOVA);
-                            _events.ScheduleEvent(EVENT_BLAST_NOVA, urand(20000, 30000));
+                            _events.ScheduleEvent(EVENT_BLAST_NOVA, std::rand() % 30000 + 20000);
                             break;
                         case EVENT_LAVA_GOUT:
                             if (_lavaGoutCount >= 3)

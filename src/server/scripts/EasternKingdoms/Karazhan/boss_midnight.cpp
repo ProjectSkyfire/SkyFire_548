@@ -51,9 +51,9 @@ public:
         {
             Phase = 1;
 
-            CleaveTimer = urand(10000, 15000);
+            CleaveTimer = std::rand() % 15000 + 10000;
             CurseTimer = 30000;
-            RandomYellTimer = urand(30000, 60000);              //Occasionally yell
+            RandomYellTimer = std::rand() % 60000 + 30000;              //Occasionally yell
             ChargeTimer = 20000;
             ResetTimer = 0;
         }
@@ -250,7 +250,7 @@ void boss_attumen::boss_attumenAI::UpdateAI(uint32 diff)
     if (CleaveTimer <= diff)
     {
         DoCastVictim(SPELL_SHADOWCLEAVE);
-        CleaveTimer = urand(10000, 15000);
+        CleaveTimer = std::rand() % 15000 + 10000;
     } else CleaveTimer -= diff;
 
     if (CurseTimer <= diff)
@@ -262,7 +262,7 @@ void boss_attumen::boss_attumenAI::UpdateAI(uint32 diff)
     if (RandomYellTimer <= diff)
     {
         Talk(SAY_RANDOM);
-        RandomYellTimer = urand(30000, 60000);
+        RandomYellTimer = std::rand() % 60000 + 30000;
     } else RandomYellTimer -= diff;
 
     if (me->GetUInt32Value(UNIT_FIELD_DISPLAY_ID) == MOUNTED_DISPLAYID)

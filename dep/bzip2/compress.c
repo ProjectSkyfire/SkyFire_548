@@ -8,8 +8,8 @@
    This file is part of bzip2/libbzip2, a program and library for
    lossless, block-sorting data compression.
 
-   bzip2/libbzip2 version 1.0.6 of 6 September 2010
-   Copyright (C) 1996-2010 Julian Seward <jseward@bzip.org>
+   bzip2/libbzip2 version 1.0.8 of 13 July 2019
+   Copyright (C) 1996-2019 Julian Seward <jseward@acm.org>
 
    Please read the WARNING, DISCLAIMER and PATENTS sections in the 
    README file.
@@ -321,7 +321,7 @@ void sendMTFValues ( EState* s )
    ---*/
    for (iter = 0; iter < BZ_N_ITERS; iter++) {
 
-      for (t = 0; t < nGroups; t++) fave[t] = 0;
+      for (t = 0; t < BZ_N_GROUPS; t++) fave[t] = 0;
 
       for (t = 0; t < nGroups; t++)
          for (v = 0; v < alphaSize; v++)
@@ -353,7 +353,7 @@ void sendMTFValues ( EState* s )
             Calculate the cost of this group as coded
             by each of the coding tables.
          --*/
-         for (t = 0; t < nGroups; t++) cost[t] = 0;
+         for (t = 0; t < BZ_N_GROUPS; t++) cost[t] = 0;
 
          if (nGroups == 6 && 50 == ge-gs+1) {
             /*--- fast track the common case ---*/
@@ -454,7 +454,7 @@ void sendMTFValues ( EState* s )
 
    AssertH( nGroups < 8, 3002 );
    AssertH( nSelectors < 32768 &&
-            nSelectors <= (2 + (900000 / BZ_G_SIZE)),
+            nSelectors <= BZ_MAX_SELECTORS,
             3003 );
 
 

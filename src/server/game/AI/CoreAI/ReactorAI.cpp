@@ -1,11 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "ReactorAI.h"
-#include "ObjectAccessor.h"
 #include "CreatureAIImpl.h"
+#include "ObjectAccessor.h"
+#include "ReactorAI.h"
 
 int ReactorAI::Permissible(const Creature* creature)
 {

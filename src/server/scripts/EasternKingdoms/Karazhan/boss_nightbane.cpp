@@ -56,45 +56,36 @@ class boss_nightbane : public CreatureScript
 public:
     boss_nightbane() : CreatureScript("boss_nightbane") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_nightbaneAI(creature);
-    }
-
     struct boss_nightbaneAI : public ScriptedAI
     {
         boss_nightbaneAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
             Intro = true;
+            uint32 Phase = 0;
+
+            bool RainBones = false;
+            bool Skeletons = false;
+
+            uint32 BellowingRoarTimer = 0;
+            uint32 CharredEarthTimer = 0;
+            uint32 DistractingAshTimer = 0;
+            uint32 SmolderingBreathTimer = 0;
+            uint32 TailSweepTimer = 0;
+            uint32 RainofBonesTimer = 0;
+            uint32 SmokingBlastTimer = 0;
+            uint32 FireballBarrageTimer = 0;
+            uint32 SearingCindersTimer;
+
+            uint32 FlyCount = 0;
+            uint32 FlyTimer = 0;
+
+            bool Flying = false;
+            bool Movement = false;
+
+            uint32 WaitTimer = 0;
+            uint32 MovePhase = 0;
         }
-
-        InstanceScript* instance;
-
-        uint32 Phase;
-
-        bool RainBones;
-        bool Skeletons;
-
-        uint32 BellowingRoarTimer;
-        uint32 CharredEarthTimer;
-        uint32 DistractingAshTimer;
-        uint32 SmolderingBreathTimer;
-        uint32 TailSweepTimer;
-        uint32 RainofBonesTimer;
-        uint32 SmokingBlastTimer;
-        uint32 FireballBarrageTimer;
-        uint32 SearingCindersTimer;
-
-        uint32 FlyCount;
-        uint32 FlyTimer;
-
-        bool Intro;
-        bool Flying;
-        bool Movement;
-
-        uint32 WaitTimer;
-        uint32 MovePhase;
 
         void Reset() OVERRIDE
         {
@@ -240,7 +231,7 @@ public:
 
             Flying = true;
 
-            FlyTimer = urand(45000, 60000); //timer wrong between 45 and 60 seconds
+            FlyTimer = std::rand() % 60000 + 45000; //timer wrong between 45 and 60 seconds
             ++FlyCount;
 
             RainofBonesTimer = 5000; //timer wrong (maybe)
@@ -304,7 +295,7 @@ public:
                 if (BellowingRoarTimer <= diff)
                 {
                     DoCastVictim(SPELL_BELLOWING_ROAR);
-                    BellowingRoarTimer = urand(30000, 40000);
+                    BellowingRoarTimer = std::rand() % 40000 + 30000;
                 } else BellowingRoarTimer -= diff;
 
                 if (SmolderingBreathTimer <= diff)
@@ -405,7 +396,40 @@ public:
                 } else FlyTimer -= diff;
             }
         }
+
+    private:
+        InstanceScript* instance;
+
+        uint32 Phase;
+
+        bool RainBones;
+        bool Skeletons;
+
+        uint32 BellowingRoarTimer;
+        uint32 CharredEarthTimer;
+        uint32 DistractingAshTimer;
+        uint32 SmolderingBreathTimer;
+        uint32 TailSweepTimer;
+        uint32 RainofBonesTimer;
+        uint32 SmokingBlastTimer;
+        uint32 FireballBarrageTimer;
+        uint32 SearingCindersTimer;
+
+        uint32 FlyCount;
+        uint32 FlyTimer;
+
+        bool Intro;
+        bool Flying;
+        bool Movement;
+
+        uint32 WaitTimer;
+        uint32 MovePhase;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_nightbaneAI(creature);
+    }
 };
 
 void AddSC_boss_nightbane()

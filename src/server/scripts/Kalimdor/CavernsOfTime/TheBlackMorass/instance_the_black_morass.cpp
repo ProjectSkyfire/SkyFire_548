@@ -273,7 +273,7 @@ public:
         {
             if (Creature* medivh = instance->GetCreature(_medivhGUID))
             {
-                uint8 tmp = urand(0, 2);
+                uint8 tmp = std::rand() % 2;
 
                 if (tmp >= _currentRiftId)
                     ++tmp;

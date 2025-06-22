@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "Common.h"
+#include "Log.h"
+#include "ObjectAccessor.h"
+#include "Opcodes.h"
+#include "Player.h"
+#include "UpdateData.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Log.h"
-#include "Opcodes.h"
-#include "UpdateData.h"
-#include "Player.h"
-#include "ObjectAccessor.h"
 
 #define SPELL_DUEL         7266
 #define SPELL_MOUNTED_DUEL 62875

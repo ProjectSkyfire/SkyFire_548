@@ -74,17 +74,17 @@ public:
                         break;
                     case EVENT_BLASTWAVE:
                         DoCastVictim(SPELL_BLASTWAVE);
-                        events.ScheduleEvent(EVENT_BLASTWAVE, urand(8000, 16000));
+                        events.ScheduleEvent(EVENT_BLASTWAVE, std::rand() % 16000 + 8000);
                         break;
                     case EVENT_MORTALSTRIKE:
                         DoCastVictim(SPELL_MORTALSTRIKE);
-                        events.ScheduleEvent(EVENT_MORTALSTRIKE, urand(25000, 35000));
+                        events.ScheduleEvent(EVENT_MORTALSTRIKE, std::rand() % 35000 + 25000);
                         break;
                     case EVENT_KNOCKBACK:
                         DoCastVictim(SPELL_KNOCKBACK);
                         if (DoGetThreat(me->GetVictim()))
                             DoModifyThreatPercent(me->GetVictim(), -50);
-                        events.ScheduleEvent(EVENT_KNOCKBACK, urand(15000, 30000));
+                        events.ScheduleEvent(EVENT_KNOCKBACK, std::rand() % 30000 + 15000);
                         break;
                     case EVENT_CHECK:
                         if (me->GetDistance(me->GetHomePosition()) > 150.0f)

@@ -104,7 +104,7 @@ class boss_nazan : public CreatureScript
                 {
                     if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(victim, DUNGEON_MODE(SPELL_FIREBALL, SPELL_FIREBALL_H), true);
-                    Fireball_Timer = urand(4000, 7000);
+                    Fireball_Timer = std::rand() % 7000 + 4000;
                 }
                 else
                     Fireball_Timer -= diff;
@@ -447,7 +447,7 @@ class npc_hellfire_sentry : public CreatureScript
 
             void Reset() OVERRIDE
             {
-                KidneyShot_Timer = urand(3000, 7000);
+                KidneyShot_Timer = std::rand() % 7000 + 3000;
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE { }

@@ -77,11 +77,11 @@ class npc_av_marshal_or_warmaster : public CreatureScript
             void Reset() OVERRIDE
             {
                 events.Reset();
-                events.ScheduleEvent(EVENT_CHARGE_TARGET, urand(2 * IN_MILLISECONDS, 12 * IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_CLEAVE, urand(1 * IN_MILLISECONDS, 11 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_CHARGE_TARGET, std::rand() % (12 * IN_MILLISECONDS) + (2 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_CLEAVE, std::rand() % (11 * IN_MILLISECONDS) + (1 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, 2000);
-                events.ScheduleEvent(EVENT_WHIRLWIND, urand(5 * IN_MILLISECONDS, 20 * IN_MILLISECONDS));
-                events.ScheduleEvent(EVENT_ENRAGE, urand(5 * IN_MILLISECONDS, 20 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_WHIRLWIND, std::rand() % (20 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS));
+                events.ScheduleEvent(EVENT_ENRAGE, std::rand() % (20 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS));
                 events.ScheduleEvent(EVENT_CHECK_RESET, 5000);
 
                 _hasAura = false;
@@ -118,23 +118,23 @@ class npc_av_marshal_or_warmaster : public CreatureScript
                     {
                         case EVENT_CHARGE_TARGET:
                             DoCastVictim(SPELL_CHARGE);
-                            events.ScheduleEvent(EVENT_CHARGE, urand(10 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_CHARGE, std::rand() % (25 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                             break;
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE);
-                            events.ScheduleEvent(EVENT_CLEAVE, urand(10 * IN_MILLISECONDS, 16 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_CLEAVE, std::rand() % (16 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                             break;
                         case EVENT_DEMORALIZING_SHOUT:
                             DoCast(me, SPELL_DEMORALIZING_SHOUT);
-                            events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_DEMORALIZING_SHOUT, std::rand() % (15 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                             break;
                         case EVENT_WHIRLWIND:
                             DoCast(me, SPELL_WHIRLWIND);
-                            events.ScheduleEvent(EVENT_WHIRLWIND, urand(10 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_WHIRLWIND, std::rand() % (25 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                             break;
                         case EVENT_ENRAGE:
                             DoCast(me, SPELL_ENRAGE);
-                            events.ScheduleEvent(EVENT_ENRAGE, urand(10 * IN_MILLISECONDS, 30 * IN_MILLISECONDS));
+                            events.ScheduleEvent(EVENT_ENRAGE, std::rand() % (30 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS));
                             break;
                         case EVENT_CHECK_RESET:
                         {

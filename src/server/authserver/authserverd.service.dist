@@ -1,0 +1,13 @@
+[Unit]
+Description=SkyFire Auth Daemon
+After=mysqld.service
+Wants=mysqld.service
+
+[Service]
+User=root
+WorkingDirectory=/usr/local/skyfire-server/bin
+ExecStart=/usr/local/skyfire-server/bin/authserver
+
+[Install]
+WantedBy=multi-user.target
+

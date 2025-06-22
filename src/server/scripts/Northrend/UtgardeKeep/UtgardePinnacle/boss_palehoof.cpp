@@ -189,20 +189,20 @@ public:
             if (uiArcingSmashTimer <= diff)
             {
                 DoCast(me, SPELL_ARCING_SMASH);
-                uiArcingSmashTimer = urand(13000, 17000);
+                uiArcingSmashTimer = std::rand() % 17000 + 13000;
             } else uiArcingSmashTimer -= diff;
 
             if (uiImpaleTimer <= diff)
             {
               if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                   DoCast(target, SPELL_IMPALE);
-              uiImpaleTimer = urand(8000, 12000);
+              uiImpaleTimer = std::rand() % 12000 + 8000;
             } else uiImpaleTimer -= diff;
 
             if (uiWhiteringRoarTimer <= diff)
             {
                 DoCast(me, SPELL_WITHERING_ROAR);
-                uiWhiteringRoarTimer = urand(8000, 12000);
+                uiWhiteringRoarTimer = std::rand() % 12000 + 8000;
             } else uiWhiteringRoarTimer -= diff;
 
             DoMeleeAttackIfReady();

@@ -1711,7 +1711,7 @@ class npc_wormhole : public CreatureScript
 
             void InitializeAI() OVERRIDE
             {
-                _showUnderground = urand(0, 100) == 0; // Guessed value, it is really rare though
+                _showUnderground = (std::rand() % 100) == 0; // Guessed value, it is really rare though
             }
 
             uint32 GetData(uint32 type) const OVERRIDE
@@ -1815,7 +1815,7 @@ public:
         if (player->getClass() == CLASS_HUNTER)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_PET1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-            if (player->GetPet() && player->GetPet()->getPetType() == HUNTER_PET)
+            if (player->GetPet() && player->GetPet()->getPetType() == PetType::HUNTER_PET)
                 player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_PET2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
             player->PlayerTalkClass->SendGossipMenu(TEXT_ISHUNTER, creature->GetGUID());
@@ -2272,7 +2272,7 @@ public:
                     spellId = GetFireworkSpell(NPC_FIREWORK_BIG_WHITE);
                     break;
                 case NPC_CLUSTER_ELUNE:
-                    spellId = GetFireworkSpell(urand(NPC_FIREWORK_BLUE, NPC_FIREWORK_WHITE));
+                    spellId = GetFireworkSpell(std::rand() % NPC_FIREWORK_WHITE + NPC_FIREWORK_BLUE);
                     break;
             }
 
@@ -2301,7 +2301,7 @@ public:
                 {
                     if (!me->FindNearestCreature(NPC_OMEN, 100.0f, false) && me->GetDistance2d(omenSummonPos.GetPositionX(), omenSummonPos.GetPositionY()) <= 100.0f)
                     {
-                        switch (urand(0, 9))
+                        switch (std::rand() % 9)
                         {
                             case 0:
                             case 1:
@@ -2354,28 +2354,24 @@ class npc_spring_rabbit : public CreatureScript
 public:
     npc_spring_rabbit() : CreatureScript("npc_spring_rabbit") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new npc_spring_rabbitAI(creature);
-    }
-
     struct npc_spring_rabbitAI : public ScriptedAI
     {
-        npc_spring_rabbitAI(Creature* creature) : ScriptedAI(creature) { }
-
-        bool inLove;
-        uint32 jumpTimer;
-        uint32 bunnyTimer;
-        uint32 searchTimer;
-        uint64 rabbitGUID;
+        npc_spring_rabbitAI(Creature* creature) : ScriptedAI(creature)
+        {
+            bool inLove = false;
+            uint32 jumpTimer = 0;
+            uint32 bunnyTimer = 0;
+            uint32 searchTimer = 0;
+            uint64 rabbitGUID = 0;
+        }
 
         void Reset() OVERRIDE
         {
             inLove = false;
             rabbitGUID = 0;
-            jumpTimer = urand(5000, 10000);
-            bunnyTimer = urand(10000, 20000);
-            searchTimer = urand(5000, 10000);
+            jumpTimer = std::rand() % 10000 + 5000;
+            bunnyTimer = std::rand() % 20000 + 10000;
+            searchTimer = std::rand() % 10000 + 5000;
             if (Unit* owner = me->GetOwner())
                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
@@ -2397,13 +2393,13 @@ public:
                 {
                     if (Unit* rabbit = Unit::GetUnit(*me, rabbitGUID))
                         DoCast(rabbit, SPELL_SPRING_RABBIT_JUMP);
-                    jumpTimer = urand(5000, 10000);
+                    jumpTimer = std::rand() % 10000 + 5000;
                 } else jumpTimer -= diff;
 
                 if (bunnyTimer <= diff)
                 {
                     DoCast(SPELL_SUMMON_BABY_BUNNY);
-                    bunnyTimer = urand(20000, 40000);
+                    bunnyTimer = std::rand() % 40000 + 20000;
                 } else bunnyTimer -= diff;
             }
             else
@@ -2422,11 +2418,23 @@ public:
                         rabbit->CastSpell(rabbit, SPELL_SPRING_RABBIT_JUMP, true);
                         rabbitGUID = rabbit->GetGUID();
                     }
-                    searchTimer = urand(5000, 10000);
+                    searchTimer = std::rand() % 10000 + 5000;
                 } else searchTimer -= diff;
             }
         }
+
+    private:
+        bool inLove;
+        uint32 jumpTimer;
+        uint32 bunnyTimer;
+        uint32 searchTimer;
+        uint64 rabbitGUID;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_spring_rabbitAI(creature);
+    }
 };
 
 #define GOSSIP_TEXT_EXP           14736

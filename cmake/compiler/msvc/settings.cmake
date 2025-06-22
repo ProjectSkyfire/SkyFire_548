@@ -8,11 +8,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(CheckCXXCompilerFlag)
 
-set(MSVC_EXPECTED_VERSION 19.39.33520.0)
+set(MSVC_EXPECTED_VERSION 19.37.32826.1)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
   message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2022) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
 endif()
 
+set(MSVC_UNSUPPORTED_VERSION 19.39.33521.0)
+if(CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL MSVC_UNSUPPORTED_VERSION)
+  message(FATAL_ERROR "MSVC: Unsupported version ${CMAKE_CXX_COMPILER_VERSION} found.")
+endif()
 
 # set up output paths ofr static libraries etc (commented out - shown here as an example only)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -62,24 +66,13 @@ if(NOT WITH_WARNINGS)
 endif()
 
 if(WITH_CXX_23_STD)
-    if(NOT WITH_CXX_20_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++latest is currently c++23 in msvc 2022
-    message(STATUS "MSVC: C++23 Draft Standard Enabled.")
-  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++latest is currently c++23 in msvc 2022
+  message(STATUS "MSVC: C++23 Draft Standard Enabled.")
 endif()
-if(WITH_CXX_20_STD)
-  if(NOT WITH_CXX_DRAFT_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20") #c++20
-    message(STATUS "MSVC: C++20 Standard Enabled.")
-  else()
-    message(FATAL_ERROR "MSVC: Only 1 CXX Standard can be used!")
-  endif()
-endif()
+
 if(WITH_CXX_DRAFT_STD)
-  if(NOT WITH_CXX_20_STD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++23
-    message(STATUS "MSVC: C++ Draft Standard Enabled.")
-  endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest") #c++23
+  message(STATUS "MSVC: C++ Draft Standard Enabled.")
 endif()
 
 # Specify the maximum PreCompiled Header memory allocation limit
@@ -92,3 +85,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm50" CACHE STRING "" FORCE)
 # 'function' : member function does not override any base class virtual member function
 # 'virtual_function' : no override available for virtual member function from base 'class'; function is hidden
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4263 /we4264")
+
+set(CMAKE_CXX_STANDARD_LIBRARIES "ws2_32.lib iphlpapi.lib netapi32.lib mswsock.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib")
+set(CMAKE_C_STANDARD_LIBRARIES "ws2_32.lib iphlpapi.lib netapi32.lib mswsock.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib")

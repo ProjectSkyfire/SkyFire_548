@@ -502,11 +502,11 @@ public:
                 {
                     case EVENT_CHAIN_LIGHTNING:
                         DoCastVictim(SPELL_CHAIN_LIGHTNING);
-                        events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(10000, 15000));
+                        events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, std::rand() % 15000 + 10000);
                         break;
                     case EVENT_DESTRUCTIVE_POISON:
                         DoCast(me, SPELL_DESTRUCTIVE_POISON);
-                        events.ScheduleEvent(EVENT_DESTRUCTIVE_POISON, urand(4000, 5000));
+                        events.ScheduleEvent(EVENT_DESTRUCTIVE_POISON, std::rand() % 5000 + 4000);
                         break;
                     default:
                         break;
@@ -657,12 +657,12 @@ public:
                         if (leftSide)
                         {
                             events.ScheduleEvent(EVENT_SPAWN_WAVE_B, 100);
-                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_SORCERER, urand(2000, 5000));
+                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_SORCERER, std::rand() % 5000 + 2000);
                         }
                         else
                         {
                             events.ScheduleEvent(EVENT_SPAWN_WAVE_B, 10000);
-                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_DEFENDER, urand(2000, 5000));
+                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_DEFENDER, std::rand() % 5000 + 2000);
                         }
                         break;
                     case SETDATA_STOP_SPAWNING:
@@ -690,15 +690,15 @@ public:
                     {
                         case EVENT_SPAWN_WAVE_B:
                             DoCast(me, SPELL_ASHTONGUE_WAVE_B);
-                            events.ScheduleEvent(EVENT_SPAWN_WAVE_B, urand(45000, 50000));
+                            events.ScheduleEvent(EVENT_SPAWN_WAVE_B, std::rand() % 50000 + 45000);
                             break;
                         case EVENT_SUMMON_ASHTONGUE_SORCERER: // left
                             DoCast(me, SPELL_SUMMON_ASHTONGUE_SORCERER);
-                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_SORCERER, urand(30000, 35000));
+                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_SORCERER, std::rand() % 35000 + 30000);
                             break;
                         case EVENT_SUMMON_ASHTONGUE_DEFENDER: // right
                             DoCast(me, SPELL_SUMMON_ASHTONGUE_DEFENDER);
-                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_DEFENDER, urand(30000, 35000));
+                            events.ScheduleEvent(EVENT_SUMMON_ASHTONGUE_DEFENDER, std::rand() % 35000 + 30000);
                             break;
                         default:
                             break;
@@ -880,9 +880,9 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             events.ScheduleEvent(EVENT_HEROIC_STRIKE, 5000);
-            events.ScheduleEvent(EVENT_SHIELD_BASH, urand(10000, 16000));
-            events.ScheduleEvent(EVENT_DEBILITATING_STRIKE, urand(10000, 16000));
-            events.ScheduleEvent(EVENT_WINDFURY, urand(8000, 12000));
+            events.ScheduleEvent(EVENT_SHIELD_BASH, std::rand() % 16000 + 10000);
+            events.ScheduleEvent(EVENT_DEBILITATING_STRIKE, std::rand() % 16000 + 10000);
+            events.ScheduleEvent(EVENT_WINDFURY, std::rand() % 12000 + 8000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -898,19 +898,19 @@ public:
                 {
                     case EVENT_DEBILITATING_STRIKE:
                         DoCastVictim(SPELL_DEBILITATING_STRIKE);
-                        events.ScheduleEvent(EVENT_DEBILITATING_STRIKE, urand(8000, 16000));
+                        events.ScheduleEvent(EVENT_DEBILITATING_STRIKE, std::rand() % 16000 + 8000);
                         break;
                     case EVENT_HEROIC_STRIKE:
                         DoCast(me, SPELL_HEROIC_STRIKE);
-                        events.ScheduleEvent(EVENT_HEROIC_STRIKE, urand(50000, 60000));
+                        events.ScheduleEvent(EVENT_HEROIC_STRIKE, std::rand() % 60000 + 50000);
                         break;
                     case EVENT_SHIELD_BASH:
                         DoCastVictim(SPELL_SHIELD_BASH);
-                        events.ScheduleEvent(EVENT_SHIELD_BASH, urand(8000, 16000));
+                        events.ScheduleEvent(EVENT_SHIELD_BASH, std::rand() % 16000 + 8000);
                         break;
                     case EVENT_WINDFURY:
                         DoCastVictim(SPELL_WINDFURY);
-                        events.ScheduleEvent(EVENT_WINDFURY, urand(6000 , 8000));
+                        events.ScheduleEvent(EVENT_WINDFURY, std::rand() % 8000 + 6000);
                         break;
                     default:
                         break;
@@ -969,8 +969,8 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_DEBILITATING_POISON, urand(500, 2000));
-            events.ScheduleEvent(EVENT_EVISCERATE, urand(2000, 5000));
+            events.ScheduleEvent(EVENT_DEBILITATING_POISON, std::rand() % 2000 + 500);
+            events.ScheduleEvent(EVENT_EVISCERATE, std::rand() % 5000 + 2000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -986,11 +986,11 @@ public:
                 {
                     case EVENT_DEBILITATING_POISON:
                         DoCastVictim(SPELL_DEBILITATING_POISON);
-                        events.ScheduleEvent(EVENT_DEBILITATING_POISON, urand(14000, 18000));
+                        events.ScheduleEvent(EVENT_DEBILITATING_POISON, std::rand() % 18000 + 14000);
                         break;
                     case EVENT_EVISCERATE:
                         DoCastVictim(SPELL_EVISCERATE);
-                        events.ScheduleEvent(EVENT_EVISCERATE, urand(12000, 16000));
+                        events.ScheduleEvent(EVENT_EVISCERATE, std::rand() % 16000 + 12000);
                         break;
                     default:
                         break;
@@ -1131,7 +1131,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            events.ScheduleEvent(EVENT_SPIRIT_HEAL, urand (5000, 6000));
+            events.ScheduleEvent(EVENT_SPIRIT_HEAL, std::rand() % 6000 + 5000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -1144,7 +1144,7 @@ public:
                 {
                     case EVENT_SPIRIT_HEAL:
                         DoCast(me, SPELL_SPIRITBINDER_SPIRIT_HEAL);
-                        events.ScheduleEvent(EVENT_SPIRIT_HEAL, urand (13000, 16000));
+                        events.ScheduleEvent(EVENT_SPIRIT_HEAL, std::rand() % 16000 + 13000);
                         break;
                     default:
                         break;

@@ -1,14 +1,15 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "MySQLConnection.h"
-#include "QueryHolder.h"
-#include "PreparedStatement.h"
 #include "Log.h"
+#include "MySQLConnection.h"
+#include "PreparedStatement.h"
+#include "QueryHolder.h"
+#include "CompilerDefs.h"
 
-bool SQLQueryHolder::SetQuery(size_t index, const char *sql)
+bool SQLQueryHolder::SetQuery(size_t index, const char* sql)
 {
     if (m_queries.size() <= index)
     {
@@ -28,7 +29,7 @@ bool SQLQueryHolder::SetQuery(size_t index, const char *sql)
     return true;
 }
 
-bool SQLQueryHolder::SetPQuery(size_t index, const char *format, ...)
+bool SQLQueryHolder::SetPQuery(size_t index, const char* format, ...)
 {
     if (!format)
     {
@@ -37,7 +38,7 @@ bool SQLQueryHolder::SetPQuery(size_t index, const char *format, ...)
     }
 
     va_list ap;
-    char szQuery [MAX_QUERY_LEN];
+    char szQuery[MAX_QUERY_LEN];
     va_start(ap, format);
     int res = vsnprintf(szQuery, MAX_QUERY_LEN, format, ap);
     va_end(ap);
@@ -164,7 +165,7 @@ bool SQLQueryHolderTask::Execute()
         return false;
 
     /// we can do this, we are friends
-    std::vector<SQLQueryHolder::SQLResultPair> &queries = m_holder->m_queries;
+    std::vector<SQLQueryHolder::SQLResultPair>& queries = m_holder->m_queries;
 
     for (size_t i = 0; i < queries.size(); i++)
     {

@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -10,7 +10,7 @@
 
 struct BattlegroundSAScore : public BattlegroundScore
 {
-    BattlegroundSAScore(): demolishers_destroyed(0), gates_destroyed(0) { }
+    BattlegroundSAScore() : demolishers_destroyed(0), gates_destroyed(0) { }
     ~BattlegroundSAScore() { }
     uint8 demolishers_destroyed;
     uint8 gates_destroyed;
@@ -31,78 +31,78 @@ enum BG_SA_Status
 
 enum BG_SA_GateState
 {
-    BG_SA_GATE_OK           = 1,
-    BG_SA_GATE_DAMAGED      = 2,
-    BG_SA_GATE_DESTROYED    = 3
+    BG_SA_GATE_OK = 1,
+    BG_SA_GATE_DAMAGED = 2,
+    BG_SA_GATE_DESTROYED = 3
 };
 
 enum BG_SA_EventIdGate
 {
-    BG_SA_EVENT_BLUE_GATE_DAMAGED           = 19040,
-    BG_SA_EVENT_BLUE_GATE_DESTROYED         = 19045,
+    BG_SA_EVENT_BLUE_GATE_DAMAGED = 19040,
+    BG_SA_EVENT_BLUE_GATE_DESTROYED = 19045,
 
-    BG_SA_EVENT_GREEN_GATE_DAMAGED          = 19041,
-    BG_SA_EVENT_GREEN_GATE_DESTROYED        = 19046,
+    BG_SA_EVENT_GREEN_GATE_DAMAGED = 19041,
+    BG_SA_EVENT_GREEN_GATE_DESTROYED = 19046,
 
-    BG_SA_EVENT_RED_GATE_DAMAGED            = 19042,
-    BG_SA_EVENT_RED_GATE_DESTROYED          = 19047,
+    BG_SA_EVENT_RED_GATE_DAMAGED = 19042,
+    BG_SA_EVENT_RED_GATE_DESTROYED = 19047,
 
-    BG_SA_EVENT_PURPLE_GATE_DAMAGED         = 19043,
-    BG_SA_EVENT_PURPLE_GATE_DESTROYED       = 19048,
+    BG_SA_EVENT_PURPLE_GATE_DAMAGED = 19043,
+    BG_SA_EVENT_PURPLE_GATE_DESTROYED = 19048,
 
-    BG_SA_EVENT_YELLOW_GATE_DAMAGED         = 19044,
-    BG_SA_EVENT_YELLOW_GATE_DESTROYED       = 19049,
+    BG_SA_EVENT_YELLOW_GATE_DAMAGED = 19044,
+    BG_SA_EVENT_YELLOW_GATE_DESTROYED = 19049,
 
-    BG_SA_EVENT_ANCIENT_GATE_DAMAGED        = 19836,
-    BG_SA_EVENT_ANCIENT_GATE_DESTROYED      = 19837
+    BG_SA_EVENT_ANCIENT_GATE_DAMAGED = 19836,
+    BG_SA_EVENT_ANCIENT_GATE_DESTROYED = 19837
 };
 
 enum BG_SA_Timers
 {
-    BG_SA_BOAT_START    =  60 * IN_MILLISECONDS,
-    BG_SA_WARMUPLENGTH  = 120 * IN_MILLISECONDS,
-    BG_SA_ROUNDLENGTH   = 600 * IN_MILLISECONDS
+    BG_SA_BOAT_START = 60 * IN_MILLISECONDS,
+    BG_SA_WARMUPLENGTH = 120 * IN_MILLISECONDS,
+    BG_SA_ROUNDLENGTH = 600 * IN_MILLISECONDS
 };
 
 enum BG_SA_WorldStates
 {
-    BG_SA_TIMER_MINS                = 3559,
-    BG_SA_TIMER_SEC_TENS            = 3560,
-    BG_SA_TIMER_SEC_DECS            = 3561,
-    BG_SA_ALLY_ATTACKS              = 4352,
-    BG_SA_HORDE_ATTACKS             = 4353,
-    BG_SA_PURPLE_GATEWS             = 3614,
-    BG_SA_RED_GATEWS                = 3617,
-    BG_SA_BLUE_GATEWS               = 3620,
-    BG_SA_GREEN_GATEWS              = 3623,
-    BG_SA_YELLOW_GATEWS             = 3638,
-    BG_SA_ANCIENT_GATEWS            = 3849,
-    BG_SA_LEFT_GY_ALLIANCE          = 3635,
-    BG_SA_RIGHT_GY_ALLIANCE         = 3636,
-    BG_SA_CENTER_GY_ALLIANCE        = 3637,
-    BG_SA_RIGHT_ATT_TOKEN_ALL       = 3627,
-    BG_SA_LEFT_ATT_TOKEN_ALL        = 3626,
-    BG_SA_LEFT_ATT_TOKEN_HRD        = 3629,
-    BG_SA_RIGHT_ATT_TOKEN_HRD       = 3628,
-    BG_SA_HORDE_DEFENCE_TOKEN       = 3631,
-    BG_SA_ALLIANCE_DEFENCE_TOKEN    = 3630,
-    BG_SA_RIGHT_GY_HORDE            = 3632,
-    BG_SA_LEFT_GY_HORDE             = 3633,
-    BG_SA_CENTER_GY_HORDE           = 3634,
-    BG_SA_BONUS_TIMER               = 0xdf3,
-    BG_SA_ENABLE_TIMER              = 3564
+    BG_SA_TIMER_MINS = 3559,
+    BG_SA_TIMER_SEC_TENS = 3560,
+    BG_SA_TIMER_SEC_DECS = 3561,
+    BG_SA_ALLY_ATTACKS = 4352,
+    BG_SA_HORDE_ATTACKS = 4353,
+    BG_SA_PURPLE_GATEWS = 3614,
+    BG_SA_RED_GATEWS = 3617,
+    BG_SA_BLUE_GATEWS = 3620,
+    BG_SA_GREEN_GATEWS = 3623,
+    BG_SA_YELLOW_GATEWS = 3638,
+    BG_SA_ANCIENT_GATEWS = 3849,
+    BG_SA_LEFT_GY_ALLIANCE = 3635,
+    BG_SA_RIGHT_GY_ALLIANCE = 3636,
+    BG_SA_CENTER_GY_ALLIANCE = 3637,
+    BG_SA_RIGHT_ATT_TOKEN_ALL = 3627,
+    BG_SA_LEFT_ATT_TOKEN_ALL = 3626,
+    BG_SA_LEFT_ATT_TOKEN_HRD = 3629,
+    BG_SA_RIGHT_ATT_TOKEN_HRD = 3628,
+    BG_SA_HORDE_DEFENCE_TOKEN = 3631,
+    BG_SA_ALLIANCE_DEFENCE_TOKEN = 3630,
+    BG_SA_RIGHT_GY_HORDE = 3632,
+    BG_SA_LEFT_GY_HORDE = 3633,
+    BG_SA_CENTER_GY_HORDE = 3634,
+    BG_SA_BONUS_TIMER = 0xdf3,
+    BG_SA_ENABLE_TIMER = 3564
 };
 
 enum npc
 {
-    NPC_ANTI_PERSONNAL_CANNON       = 27894,
-    NPC_DEMOLISHER_SA               = 28781,
-    NPC_RIGGER_SPARKLIGHT           = 29260,
-    NPC_GORGRIL_RIGSPARK            = 29262
+    NPC_ANTI_PERSONNAL_CANNON = 27894,
+    NPC_DEMOLISHER_SA = 28781,
+    NPC_RIGGER_SPARKLIGHT = 29260,
+    NPC_GORGRIL_RIGSPARK = 29262
 };
 
 enum BG_SA_NPCs
-  {
+{
     BG_SA_GUN_1 = 0,
     BG_SA_GUN_2,
     BG_SA_GUN_3,
@@ -127,16 +127,16 @@ enum BG_SA_NPCs
     BG_SA_DEMOLISHER_7,
     BG_SA_DEMOLISHER_8,
     BG_SA_NPC_SPARKLIGHT,
-    BG_SA_NPC_RIGSPARK,
-    BG_SA_MAXNPC
-  };
+    BG_SA_NPC_RIGSPARK
+};
+const uint8 BG_SA_MAXNPC = 25;
 
 enum BG_SA_Boat
 {
-    BG_SA_BOAT_ONE_A    = 193182,
-    BG_SA_BOAT_TWO_H    = 193183,
-    BG_SA_BOAT_ONE_H    = 193184,
-    BG_SA_BOAT_TWO_A    = 193185
+    BG_SA_BOAT_ONE_A = 193182,
+    BG_SA_BOAT_TWO_H = 193183,
+    BG_SA_BOAT_ONE_H = 193184,
+    BG_SA_BOAT_TWO_A = 193185
 };
 
 uint32 const BG_SA_NpcEntries[BG_SA_MAXNPC] =
@@ -233,9 +233,10 @@ enum BG_SA_Objects
     BG_SA_CENTRAL_FLAG,
     BG_SA_RIGHT_FLAG,
     BG_SA_LEFT_FLAG,
-    BG_SA_BOMB,
-    BG_SA_MAXOBJ = BG_SA_BOMB+68
+    BG_SA_BOMB
 };
+
+const uint8 BG_SA_MAXOBJ = 93; // BG_SA_BOMB + 68
 
 float const BG_SA_ObjSpawnlocs[BG_SA_MAXOBJ][4] =
 {
@@ -396,8 +397,8 @@ enum BG_SA_Graveyards
     BG_SA_RIGHT_CAPTURABLE_GY,
     BG_SA_LEFT_CAPTURABLE_GY,
     BG_SA_CENTRAL_CAPTURABLE_GY,
-    BG_SA_MAX_GY
 };
+const uint8 BG_SA_MAX_GY = 5;
 
 const uint32 BG_SA_GYEntries[BG_SA_MAX_GY] =
 {
@@ -426,193 +427,193 @@ struct BG_SA_RoundScore
 /// Class for manage Strand of Ancient battleground
 class BattlegroundSA : public Battleground
 {
-    public:
-        BattlegroundSA();
-        ~BattlegroundSA();
+public:
+    BattlegroundSA();
+    ~BattlegroundSA();
 
-        /**
-         * \brief Called every time for update battle data
-         * -Update timer
-         * -Round switch
-         */
-        void PostUpdateImpl(uint32 diff) OVERRIDE;
+    /**
+     * \brief Called every time for update battle data
+     * -Update timer
+     * -Round switch
+     */
+    void PostUpdateImpl(uint32 diff) OVERRIDE;
 
-        /* inherited from BattlegroundClass */
-        /// Called when a player join battle
-        void AddPlayer(Player* player) OVERRIDE;
-        /// Called when battle start
-        void StartingEventCloseDoors() OVERRIDE;
-        void StartingEventOpenDoors() OVERRIDE;
-        /// Called for ini battleground, after that the first player be entered
-        bool SetupBattleground() OVERRIDE;
-        void Reset() OVERRIDE;
-        /// Called for generate packet contain worldstate data
-        void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
-        /// Called when a player deal damage to building (door)
-        void EventPlayerDamagedGO(Player* player, GameObject* go, uint32 eventType) OVERRIDE;
-        /// Called when a player kill a unit in bg
-        void HandleKillUnit(Creature* creature, Player* killer) OVERRIDE;
-        /// Return the nearest graveyard where player can respawn
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
-        /// Called when a player click on flag (graveyard flag)
-        void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) OVERRIDE;
-        /// Called when a player use a gamobject (relic)
-        void EventPlayerUsedGO(Player* Source, GameObject* object) OVERRIDE;
-        /// Return gate id, relative to bg data, according to gameobject id
-        uint32 getGateIdFromDamagedOrDestroyEventId(uint32 id)
+    /* inherited from BattlegroundClass */
+    /// Called when a player join battle
+    void AddPlayer(Player* player) OVERRIDE;
+    /// Called when battle start
+    void StartingEventCloseDoors() OVERRIDE;
+    void StartingEventOpenDoors() OVERRIDE;
+    /// Called for ini battleground, after that the first player be entered
+    bool SetupBattleground() OVERRIDE;
+    void Reset() OVERRIDE;
+    /// Called for generate packet contain worldstate data
+    void FillInitialWorldStates(WorldStateBuilder& builder) OVERRIDE;
+    /// Called when a player deal damage to building (door)
+    void EventPlayerDamagedGO(Player* player, GameObject* go, uint32 eventType) OVERRIDE;
+    /// Called when a player kill a unit in bg
+    void HandleKillUnit(Creature* creature, Player* killer) OVERRIDE;
+    /// Return the nearest graveyard where player can respawn
+    WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) OVERRIDE;
+    /// Called when a player click on flag (graveyard flag)
+    void EventPlayerClickedOnFlag(Player* Source, GameObject* target_obj) OVERRIDE;
+    /// Called when a player use a gamobject (relic)
+    void EventPlayerUsedGO(Player* Source, GameObject* object) OVERRIDE;
+    /// Return gate id, relative to bg data, according to gameobject id
+    uint32 getGateIdFromDamagedOrDestroyEventId(uint32 id)
+    {
+        switch (id)
         {
-            switch (id)
-            {
-                // Green gate
-                case BG_SA_EVENT_GREEN_GATE_DAMAGED:
-                case BG_SA_EVENT_GREEN_GATE_DESTROYED:
-                    return BG_SA_GREEN_GATE;
-                 // Blue gate
-                case BG_SA_EVENT_BLUE_GATE_DAMAGED:
-                case BG_SA_EVENT_BLUE_GATE_DESTROYED:
-                    return BG_SA_BLUE_GATE;
+            // Green gate
+            case BG_SA_EVENT_GREEN_GATE_DAMAGED:
+            case BG_SA_EVENT_GREEN_GATE_DESTROYED:
+                return BG_SA_GREEN_GATE;
+                // Blue gate
+            case BG_SA_EVENT_BLUE_GATE_DAMAGED:
+            case BG_SA_EVENT_BLUE_GATE_DESTROYED:
+                return BG_SA_BLUE_GATE;
                 // Red gate
-                case BG_SA_EVENT_RED_GATE_DAMAGED:
-                case BG_SA_EVENT_RED_GATE_DESTROYED:
-                    return BG_SA_RED_GATE;
+            case BG_SA_EVENT_RED_GATE_DAMAGED:
+            case BG_SA_EVENT_RED_GATE_DESTROYED:
+                return BG_SA_RED_GATE;
                 // Purple gate
-                case BG_SA_EVENT_PURPLE_GATE_DAMAGED:
-                case BG_SA_EVENT_PURPLE_GATE_DESTROYED:
-                    return BG_SA_PURPLE_GATE;
+            case BG_SA_EVENT_PURPLE_GATE_DAMAGED:
+            case BG_SA_EVENT_PURPLE_GATE_DESTROYED:
+                return BG_SA_PURPLE_GATE;
                 // Yellow gate
-                case BG_SA_EVENT_YELLOW_GATE_DAMAGED:
-                case BG_SA_EVENT_YELLOW_GATE_DESTROYED:
-                    return BG_SA_YELLOW_GATE;
+            case BG_SA_EVENT_YELLOW_GATE_DAMAGED:
+            case BG_SA_EVENT_YELLOW_GATE_DESTROYED:
+                return BG_SA_YELLOW_GATE;
                 // Ancient gate
-                case BG_SA_EVENT_ANCIENT_GATE_DAMAGED:
-                case BG_SA_EVENT_ANCIENT_GATE_DESTROYED:
-                    return BG_SA_ANCIENT_GATE;
-                default:
-                    break;
-            }
-            return 0;
+            case BG_SA_EVENT_ANCIENT_GATE_DAMAGED:
+            case BG_SA_EVENT_ANCIENT_GATE_DESTROYED:
+                return BG_SA_ANCIENT_GATE;
+            default:
+                break;
         }
-        /// Return worldstate id, according to door id
-        uint32 getWorldStateFromGateId(uint32 id)
+        return 0;
+    }
+    /// Return worldstate id, according to door id
+    uint32 getWorldStateFromGateId(uint32 id)
+    {
+        switch (id)
         {
-            switch (id)
-            {
-                case BG_SA_GREEN_GATE:
-                    return BG_SA_GREEN_GATEWS;
-                case BG_SA_YELLOW_GATE:
-                    return BG_SA_YELLOW_GATEWS;
-                case BG_SA_BLUE_GATE:
-                    return BG_SA_BLUE_GATEWS;
-                case BG_SA_RED_GATE:
-                    return BG_SA_RED_GATEWS;
-                case BG_SA_PURPLE_GATE:
-                    return BG_SA_PURPLE_GATEWS;
-                case BG_SA_ANCIENT_GATE:
-                    return BG_SA_ANCIENT_GATEWS;
-                default:
-                    break;
-            }
-            return 0;
+            case BG_SA_GREEN_GATE:
+                return BG_SA_GREEN_GATEWS;
+            case BG_SA_YELLOW_GATE:
+                return BG_SA_YELLOW_GATEWS;
+            case BG_SA_BLUE_GATE:
+                return BG_SA_BLUE_GATEWS;
+            case BG_SA_RED_GATE:
+                return BG_SA_RED_GATEWS;
+            case BG_SA_PURPLE_GATE:
+                return BG_SA_PURPLE_GATEWS;
+            case BG_SA_ANCIENT_GATE:
+                return BG_SA_ANCIENT_GATEWS;
+            default:
+                break;
         }
+        return 0;
+    }
 
-        /// Called on battleground ending
-        void EndBattleground(uint32 winner);
+    /// Called on battleground ending
+    void EndBattleground(uint32 winner);
 
-        /// CAlled when a player leave battleground
-        void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
-        void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
+    /// CAlled when a player leave battleground
+    void RemovePlayer(Player* player, uint64 guid, uint32 team) OVERRIDE;
+    void HandleAreaTrigger(Player* Source, uint32 Trigger) OVERRIDE;
 
-        /* Scorekeeping */
-        /// Update score board
-        void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
+    /* Scorekeeping */
+    /// Update score board
+    void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
 
-        // Achievement: Defense of the Ancients
-        bool gateDestroyed;
+    // Achievement: Defense of the Ancients
+    bool gateDestroyed;
 
-        // Achievement: Not Even a Scratch
-        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0) OVERRIDE;
+    // Achievement: Not Even a Scratch
+    bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target = NULL, uint32 miscvalue1 = 0) OVERRIDE;
 
-        /// Id of attacker team
-        TeamId Attackers;
+    /// Id of attacker team
+    TeamId Attackers;
 
-    private:
-        /**
-         * \brief Called on setup and between the two round
-         * -Delete all gameobject / creature
-         * -Respawn all gameobject / creature to have good faction
-         */
-        bool ResetObjs();
-        /// Called for start ship movement
-        void StartShips();
-        /**
-         * \brief Called between the two round
-         * -Teleport all players to good location
-         */
-        void TeleportPlayers();
-        /**
-         * \brief Called on start and between the two round
-         * -Update faction of all vehicle
-         */
-        void OverrideGunFaction();
-        /// Set selectable or not demolisher, called on battle start, when boats arrive to dock
-        void DemolisherStartState(bool start);
-        /**
-         * \brief Called when a gate is destroy
-         * -Give honor to player witch destroy it
-         * -Update worldstate
-         * -Delete gameobject in front of door (lighting object, with different colours for each door)
-         */
-        void DestroyGate(Player* player, GameObject* go) OVERRIDE;
-        /// Update timer worldstate
-        void SendTime();
-        /**
-         * \brief Called when a graveyard is capture
-         * -Update spiritguide
-         * -Update gameobject (flag)
-         * -Update Worldstate
-         * -Send warning for announce this
-         * \param i : id of graveyard
-         * \param Source : Player who capture gy
-         */
-        void CaptureGraveyard(BG_SA_Graveyards i, Player* Source);
-        /// Switch on/off timer worldstate
-        void ToggleTimer();
+private:
+    /**
+     * \brief Called on setup and between the two round
+     * -Delete all gameobject / creature
+     * -Respawn all gameobject / creature to have good faction
+     */
+    bool ResetObjs();
+    /// Called for start ship movement
+    void StartShips();
+    /**
+     * \brief Called between the two round
+     * -Teleport all players to good location
+     */
+    void TeleportPlayers();
+    /**
+     * \brief Called on start and between the two round
+     * -Update faction of all vehicle
+     */
+    void OverrideGunFaction();
+    /// Set selectable or not demolisher, called on battle start, when boats arrive to dock
+    void DemolisherStartState(bool start);
+    /**
+     * \brief Called when a gate is destroy
+     * -Give honor to player witch destroy it
+     * -Update worldstate
+     * -Delete gameobject in front of door (lighting object, with different colours for each door)
+     */
+    void DestroyGate(Player* player, GameObject* go) OVERRIDE;
+    /// Update timer worldstate
+    void SendTime();
+    /**
+     * \brief Called when a graveyard is capture
+     * -Update spiritguide
+     * -Update gameobject (flag)
+     * -Update Worldstate
+     * -Send warning for announce this
+     * \param i : id of graveyard
+     * \param Source : Player who capture gy
+     */
+    void CaptureGraveyard(BG_SA_Graveyards i, Player* Source);
+    /// Switch on/off timer worldstate
+    void ToggleTimer();
 
-        /// Respawn dead demolisher
-        void UpdateDemolisherSpawns();
+    /// Respawn dead demolisher
+    void UpdateDemolisherSpawns();
 
-        /// Send packet to player for create boats (client part)
-        void SendTransportInit(Player* player);
-        /// Send packet to player for destroy boats (client part)
-        void SendTransportsRemove(Player* player);
+    /// Send packet to player for create boats (client part)
+    void SendTransportInit(Player* player);
+    /// Send packet to player for destroy boats (client part)
+    void SendTransportsRemove(Player* player);
 
-        /// Totale elapsed time of current round
-        uint32 TotalTime;
-        /// Max time of round
-        uint32 EndRoundTimer;
-        /// For know if boats has start moving or not yet
-        bool ShipsStarted;
-        /// Status of each gate (Destroy/Damage/Intact)
-        BG_SA_GateState GateStatus[6] = { };
-        /// Statu of battle (Start or not, and what round)
-        BG_SA_Status Status;
-        /// Team witch conntrol each graveyard
-        TeamId GraveyardStatus[BG_SA_MAX_GY] = { };
-        /// Score of each round
-        BG_SA_RoundScore RoundScores[2] = { };
-        /// used for know we are in timer phase or not (used for worldstate update)
-        bool TimerEnabled;
-        /// 5secs before starting the 1min countdown for second round
-        uint32 UpdateWaitTimer;
-        /// for know if warning about second round start has been sent
-        bool SignaledRoundTwo;
-        /// for know if warning about second round start has been sent
-        bool SignaledRoundTwoHalfMin;
-        /// for know if second round has been init
-        bool InitSecondRound;
-        std::map<uint32/*id*/, uint32/*timer*/> DemoliserRespawnList;
+    /// Totale elapsed time of current round
+    uint32 TotalTime;
+    /// Max time of round
+    uint32 EndRoundTimer;
+    /// For know if boats has start moving or not yet
+    bool ShipsStarted;
+    /// Status of each gate (Destroy/Damage/Intact)
+    BG_SA_GateState GateStatus[6] = { };
+    /// Statu of battle (Start or not, and what round)
+    BG_SA_Status Status;
+    /// Team witch conntrol each graveyard
+    TeamId GraveyardStatus[BG_SA_MAX_GY] = { };
+    /// Score of each round
+    BG_SA_RoundScore RoundScores[2] = { };
+    /// used for know we are in timer phase or not (used for worldstate update)
+    bool TimerEnabled;
+    /// 5secs before starting the 1min countdown for second round
+    uint32 UpdateWaitTimer;
+    /// for know if warning about second round start has been sent
+    bool SignaledRoundTwo;
+    /// for know if warning about second round start has been sent
+    bool SignaledRoundTwoHalfMin;
+    /// for know if second round has been init
+    bool InitSecondRound;
+    std::map<uint32/*id*/, uint32/*timer*/> DemoliserRespawnList;
 
-        // Achievement: Not Even a Scratch
-        bool _allVehiclesAlive[BG_TEAMS_COUNT] = { };
+    // Achievement: Not Even a Scratch
+    bool _allVehiclesAlive[BG_TEAMS_COUNT] = { };
 };
 #endif

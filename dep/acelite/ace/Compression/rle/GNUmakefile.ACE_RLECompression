@@ -225,11 +225,11 @@ endif
 #RLECompressor.h
 #ACE_RLECompression_export.h
 #
-#build_files:
-#ACE_RLECompression.mpc
-#
 #source_files:
 #RLECompressor.cpp
+#
+#build_files:
+#ACE_RLECompression.mpc
 #
 #lib_output:
 #../../../lib ACE_RLECompression

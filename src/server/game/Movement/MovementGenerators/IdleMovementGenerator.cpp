@@ -1,11 +1,11 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "IdleMovementGenerator.h"
-#include "CreatureAI.h"
 #include "Creature.h"
+#include "CreatureAI.h"
+#include "IdleMovementGenerator.h"
 #include <G3D/g3dmath.h>
 
 IdleMovementGenerator si_idleMovement;
@@ -56,7 +56,7 @@ void RotateMovementGenerator::Finalize(Unit* unit)
 {
     unit->ClearUnitState(UNIT_STATE_ROTATING);
     if (unit->GetTypeId() == TypeID::TYPEID_UNIT)
-      unit->ToCreature()->AI()->MovementInform(ROTATE_MOTION_TYPE, 0);
+        unit->ToCreature()->AI()->MovementInform(ROTATE_MOTION_TYPE, 0);
 }
 
 void DistractMovementGenerator::Initialize(Unit* owner)

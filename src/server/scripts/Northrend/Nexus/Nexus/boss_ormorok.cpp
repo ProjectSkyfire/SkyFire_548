@@ -245,7 +245,7 @@ class spell_crystal_spike : public SpellScriptLoader
                 if (target->GetEntry() == NPC_CRYSTAL_SPIKE_INITIAL || target->GetEntry() == NPC_CRYSTAL_SPIKE_TRIGGER)
                     if (Creature* trigger = target->ToCreature())
                     {
-                        uint32 spell = target->GetEntry() == NPC_CRYSTAL_SPIKE_INITIAL ? crystalSpikeSummon[0] : crystalSpikeSummon[urand(0, 2)];
+                        uint32 spell = target->GetEntry() == NPC_CRYSTAL_SPIKE_INITIAL ? crystalSpikeSummon[0] : crystalSpikeSummon[std::rand() % 2];
                         if (trigger->AI()->GetData(DATA_COUNT) < MAX_COUNT)
                             trigger->CastSpell(trigger, spell, true);
                     }

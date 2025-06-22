@@ -4,6 +4,7 @@
 */
 
 #include "ScriptMgr.h"
+#include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "PassiveAI.h"
 #include "blackwing_lair.h"
@@ -45,12 +46,10 @@ public:
         instance_blackwing_lair_InstanceMapScript(Map* map) : InstanceScript(map)
         {
             SetBossNumber(EncounterCount);
-        }
 
-        void Initialize() OVERRIDE
-        {
             // Razorgore
             EggCount = 0;
+            EggEvent = 0;
             RazorgoreTheUntamedGUID = 0;
             RazorgoreDoorGUID = 0;
             EggList.clear();
@@ -275,10 +274,10 @@ public:
                 switch (eventId)
                 {
                     case EVENT_RAZOR_SPAWN:
-                        for (uint8 i = urand(2, 5); i > 0 ; --i)
-                            if (Creature* summon =  instance->SummonCreature(Entry[urand(0, 4)], SummonPosition[urand(0, 7)]))
+                        for (uint8 i = std::rand() % 5 + 2; i > 0 ; --i)
+                            if (Creature* summon =  instance->SummonCreature(Entry[std::rand() % 4], SummonPosition[std::rand() % 7]))
                                 summon->SetInCombatWithZone();
-                        _events.ScheduleEvent(EVENT_RAZOR_SPAWN, urand(12, 17)*IN_MILLISECONDS);
+                        _events.ScheduleEvent(EVENT_RAZOR_SPAWN, std::rand() % (17 * IN_MILLISECONDS) + (12 * IN_MILLISECONDS));
                         break;
                     case EVENT_RAZOR_PHASE_TWO:
                         _events.CancelEvent(EVENT_RAZOR_SPAWN);

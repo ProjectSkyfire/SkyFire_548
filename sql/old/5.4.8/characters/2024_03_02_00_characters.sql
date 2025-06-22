@@ -1,0 +1,3 @@
+ALTER TABLE `characters`
+  ADD COLUMN `realm` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `guid`;
+  

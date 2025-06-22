@@ -43,16 +43,12 @@ class boss_patchwerk : public CreatureScript
 public:
     boss_patchwerk() : CreatureScript("boss_patchwerk") { }
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
-    {
-        return new boss_patchwerkAI(creature);
-    }
-
     struct boss_patchwerkAI : public BossAI
     {
-        boss_patchwerkAI(Creature* creature) : BossAI(creature, BOSS_PATCHWERK) { }
-
-        bool Enraged;
+        boss_patchwerkAI(Creature* creature) : BossAI(creature, BOSS_PATCHWERK)
+        {
+            Enraged = false;
+        }
 
         void Reset() OVERRIDE
         {
@@ -143,7 +139,15 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        bool Enraged;
     };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new boss_patchwerkAI(creature);
+    }
 };
 
 void AddSC_boss_patchwerk()

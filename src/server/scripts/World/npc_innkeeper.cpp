@@ -81,12 +81,12 @@ public:
         {
             player->CastSpell(player, SPELL_TRICK_OR_TREATED, true);
 
-            if (urand(0, 1))
+            if (std::rand() % 1)
                 player->CastSpell(player, SPELL_TREAT, true);
             else
             {
                 uint32 trickspell = 0;
-                switch (urand(0, 13))
+                switch (std::rand() % 13)
                 {
                     case 0: trickspell = 24753; break; // cannot cast, random 30sec
                     case 1: trickspell = 24713; break; // lepper gnome costume

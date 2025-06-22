@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "DatabaseEnv.h"
 #include "GridDefines.h"
-#include "WaypointManager.h"
-#include "MapManager.h"
 #include "Log.h"
+#include "MapManager.h"
+#include "WaypointManager.h"
 
 WaypointMgr::WaypointMgr() { }
 
@@ -16,7 +16,7 @@ WaypointMgr::~WaypointMgr()
     for (WaypointPathContainer::iterator itr = _waypointStore.begin(); itr != _waypointStore.end(); ++itr)
     {
         for (WaypointPath::const_iterator it = itr->second.begin(); it != itr->second.end(); ++it)
-            delete *it;
+            delete* it;
 
         itr->second.clear();
     }
@@ -67,8 +67,7 @@ void WaypointMgr::Load()
 
         path.push_back(wp);
         ++count;
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u waypoints in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
@@ -79,7 +78,7 @@ void WaypointMgr::ReloadPath(uint32 id)
     if (itr != _waypointStore.end())
     {
         for (WaypointPath::const_iterator it = itr->second.begin(); it != itr->second.end(); ++it)
-            delete *it;
+            delete* it;
 
         _waypointStore.erase(itr);
     }
@@ -119,6 +118,5 @@ void WaypointMgr::ReloadPath(uint32 id)
         wp->event_chance = fields[8].GetUInt8();
 
         path.push_back(wp);
-    }
-    while (result->NextRow());
+    } while (result->NextRow());
 }

@@ -1,40 +1,40 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "Battleground.h"
+#include "BattlegroundMgr.h"
+#include "BlackMarketMgr.h"
 #include "Common.h"
-#include "Language.h"
+#include "Creature.h"
+#include "CreatureAI.h"
 #include "DatabaseEnv.h"
+#include "GossipDef.h"
+#include "Language.h"
+#include "Log.h"
+#include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Opcodes.h"
+#include "Pet.h"
+#include "Player.h"
+#include "ReputationMgr.h"
+#include "ScriptMgr.h"
+#include "SpellInfo.h"
+#include "SpellMgr.h"
+#include "UpdateMask.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Opcodes.h"
-#include "Log.h"
-#include "ObjectMgr.h"
-#include "SpellMgr.h"
-#include "Player.h"
-#include "GossipDef.h"
-#include "UpdateMask.h"
-#include "ObjectAccessor.h"
-#include "Creature.h"
-#include "Pet.h"
-#include "ReputationMgr.h"
-#include "BattlegroundMgr.h"
-#include "Battleground.h"
-#include "ScriptMgr.h"
-#include "CreatureAI.h"
-#include "SpellInfo.h"
-#include "BlackMarketMgr.h"
 
 enum StableResultCode
 {
-    STABLE_ERR_MONEY        = 0x01,                         // "you don't have enough money"
+    STABLE_ERR_MONEY = 0x01,                         // "you don't have enough money"
     STABLE_ERR_INVALID_SLOT = 0x03,                         // "That slot is locked"
-    STABLE_SUCCESS_STABLE   = 0x08,                         // stable success
+    STABLE_SUCCESS_STABLE = 0x08,                         // stable success
     STABLE_SUCCESS_UNSTABLE = 0x09,                         // unstable/swap success
     STABLE_SUCCESS_BUY_SLOT = 0x0A,                         // buy slot success
-    STABLE_ERR_EXOTIC       = 0x0B,                         // "you are unable to control exotic creatures"
-    STABLE_ERR_STABLE       = 0x0C,                         // "Internal pet error"
+    STABLE_ERR_EXOTIC = 0x0B,                         // "you are unable to control exotic creatures"
+    STABLE_ERR_STABLE = 0x0C,                         // "Internal pet error"
 };
 
 void WorldSession::SendTabardVendorActivate(uint64 guid)
@@ -602,7 +602,7 @@ void WorldSession::SendBindPoint(Creature* npc)
 
     // send spell for homebinding (3286)
     npc->CastSpell(_player, bindspell, true);
-    
+
     _player->PlayerTalkClass->SendCloseGossip();
 }
 
@@ -649,7 +649,7 @@ void WorldSession::SendStablePetCallback(PreparedQueryResult result, uint64 guid
 
     WorldPacket data(SMSG_PET_STABLE_LIST, 200);           // guess size
 
-    data << uint64 (guid);
+    data << uint64(guid);
 
     Pet* pet = _player->GetPet();
 
@@ -661,7 +661,7 @@ void WorldSession::SendStablePetCallback(PreparedQueryResult result, uint64 guid
     uint8 num = 0;                                          // counter for place holder
 
     // not let move dead pet in slot
-    if (pet && pet->IsAlive() && pet->getPetType() == HUNTER_PET)
+    if (pet && pet->IsAlive() && pet->getPetType() == PetType::HUNTER_PET)
     {
         data << uint32(0);                                  // 4.x unknown, some kind of order?
         data << uint32(pet->GetCharmInfo()->GetPetNumber());
@@ -685,8 +685,7 @@ void WorldSession::SendStablePetCallback(PreparedQueryResult result, uint64 guid
             data << uint8(2);                               // 1 = current, 2/3 = in stable (any from 4, 5, ... create problems with proper show)
 
             ++num;
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
     }
 
     data.put<uint8>(wpos, num);                             // set real data to placeholder
@@ -726,7 +725,7 @@ void WorldSession::HandleStablePet(WorldPacket& recvData)
     Pet* pet = _player->GetPet();
 
     // can't place in stable dead pet
-    if (!pet || !pet->IsAlive() || pet->getPetType() != HUNTER_PET)
+    if (!pet || !pet->IsAlive() || pet->getPetType() != PetType::HUNTER_PET)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
@@ -761,8 +760,7 @@ void WorldSession::HandleStablePetCallback(PreparedQueryResult result)
 
             // this slot not free, skip
             ++freeSlot;
-        }
-        while (result->NextRow());
+        } while (result->NextRow());
     }
 
     if (freeSlot > 0 && freeSlot <= GetPlayer()->m_stableSlots)
@@ -843,7 +841,7 @@ void WorldSession::HandleUnstablePetCallback(PreparedQueryResult result, uint32 
     if (pet)
         _player->RemovePet(pet, PET_SAVE_AS_DELETED);
 
-    Pet* newPet = new Pet(_player, HUNTER_PET);
+    Pet* newPet = new Pet(_player, PetType::HUNTER_PET);
     if (!newPet->LoadPetFromDB(_player, petEntry, petId))
     {
         delete newPet;
@@ -888,7 +886,7 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recvData)
         SendStableResult(STABLE_ERR_STABLE);
 }
 
-void WorldSession::HandleStableRevivePet(WorldPacket &/* recvData */)
+void WorldSession::HandleStableRevivePet(WorldPacket&/* recvData */)
 {
     SF_LOG_DEBUG("network", "HandleStableRevivePet: Not implemented");
 }
@@ -913,7 +911,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recvData)
 
     Pet* pet = _player->GetPet();
 
-    if (!pet || pet->getPetType() != HUNTER_PET)
+    if (!pet || pet->getPetType() != PetType::HUNTER_PET)
     {
         SendStableResult(STABLE_ERR_STABLE);
         return;
@@ -943,7 +941,7 @@ void WorldSession::HandleStableSwapPetCallback(PreparedQueryResult result, uint3
 
     Field* fields = result->Fetch();
 
-    uint32 slot     = fields[0].GetUInt8();
+    uint32 slot = fields[0].GetUInt8();
     uint32 petEntry = fields[1].GetUInt32();
 
     if (!petEntry)

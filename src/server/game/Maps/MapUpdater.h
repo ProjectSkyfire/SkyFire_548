@@ -1,13 +1,13 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #ifndef SF_MAP_UPDATER_H_INCLUDED
 #define SF_MAP_UPDATER_H_INCLUDED
 
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 #include "DelayExecutor.h"
 

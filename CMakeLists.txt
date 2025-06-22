@@ -4,9 +4,19 @@
 #
 
 if( UNIX )
-  cmake_minimum_required(VERSION 3.16.3)
+  cmake_minimum_required(VERSION 3.27.7)
 else()
-  cmake_minimum_required(VERSION 3.28.0)
+  cmake_minimum_required(VERSION 3.31.3)
+endif()
+
+if (WIN32)
+  #set clang as compiler if not msvc or mingw set
+  if (NOT MSVC AND NOT MINGW)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    set(CMAKE_C_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
+    set(CMAKE_CXX_COMPILER "C:/Program Files/LLVM/bin/clang++.exe")
+    set(CMAKE_RC_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
+  endif()
 endif()
 
 # Set projectname (must be done AFTER setting configurationtypes)
@@ -48,8 +58,13 @@ endif()
 
 include(CheckPlatform)
 
-set(OPENSSL_EXPECTED_VERSION 3.3.0)
-set(ACE_EXPECTED_VERSION 6.4.5)
+if (MSVC)
+  set(OPENSSL_EXPECTED_VERSION 3.5.0)
+else()
+  set(OPENSSL_EXPECTED_VERSION 3.2.2)
+endif()
+
+set(ACE_EXPECTED_VERSION 8.0.1)
 
 find_package(PCHSupport)
 find_package(ACE REQUIRED)
@@ -61,6 +76,11 @@ if( UNIX )
   find_package(Readline)
   find_package(ZLIB)
   find_package(BZip2)
+  find_package(Jemalloc)
+  
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+    find_package(sse2neon)
+  endif()
 endif()
 
 if(NOT WITHOUT_GIT)

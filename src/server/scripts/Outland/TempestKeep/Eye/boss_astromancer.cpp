@@ -178,7 +178,7 @@ class boss_high_astromancer_solarian : public CreatureScript
 
             float Portal_X(float radius)
             {
-                if (urand(0, 1))
+                if (std::rand() % 1)
                     radius = -radius;
 
                 return radius * (float)(rand()%100)/100.0f + CENTER_X;
@@ -443,7 +443,7 @@ class npc_solarium_priest : public CreatureScript
                 if (healTimer <= diff)
                 {
                     Unit* target = NULL;
-                    switch (urand(0, 1))
+                    switch (std::rand() % 1)
                     {
                         case 0:
                             if (instance)

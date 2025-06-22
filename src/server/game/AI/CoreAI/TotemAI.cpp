@@ -1,18 +1,18 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "TotemAI.h"
-#include "Totem.h"
 #include "Creature.h"
 #include "DBCStores.h"
 #include "ObjectAccessor.h"
 #include "SpellMgr.h"
+#include "Totem.h"
+#include "TotemAI.h"
 
+#include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-#include "CellImpl.h"
 
 int TotemAI::Permissible(Creature const* creature)
 {

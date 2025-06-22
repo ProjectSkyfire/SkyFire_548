@@ -163,9 +163,9 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_WHIRLWIND,     urand(13000, 15000));
-            events.ScheduleEvent(EVENT_CLEAVE,        urand(15000, 17000));
-            events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(17000, 19000));
+            events.ScheduleEvent(EVENT_WHIRLWIND, std::rand() % 15000 + 13000);
+            events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 17000 + 15000);
+            events.ScheduleEvent(EVENT_MORTAL_STRIKE, std::rand() % 19000 + 17000);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -401,15 +401,15 @@ public:
                 {
                     case EVENT_WHIRLWIND:
                         DoCast(SPELL_WHIRLWIND);
-                        events.ScheduleEvent(EVENT_WHIRLWIND, urand(13000, 18000));
+                        events.ScheduleEvent(EVENT_WHIRLWIND, std::rand() % 18000 + 13000);
                         break;
                     case EVENT_CLEAVE:
                         DoCastVictim(SPELL_CLEAVE);
-                        events.ScheduleEvent(EVENT_CLEAVE, urand(10000, 14000));
+                        events.ScheduleEvent(EVENT_CLEAVE, std::rand() % 14000 + 10000);
                         break;
                     case EVENT_MORTAL_STRIKE:
                         DoCastVictim(SPELL_MORTAL_STRIKE);
-                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, urand(14000, 16000));
+                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, std::rand() % 16000 + 14000);
                         break;
                 }
             }

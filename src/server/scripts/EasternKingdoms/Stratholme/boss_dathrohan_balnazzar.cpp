@@ -122,7 +122,7 @@ public:
                 if (m_uiMindBlast_Timer <= uiDiff)
                 {
                     DoCastVictim(SPELL_MINDBLAST);
-                    m_uiMindBlast_Timer = urand(15000, 20000);
+                    m_uiMindBlast_Timer = std::rand() % 20000 + 15000;
                 } else m_uiMindBlast_Timer -= uiDiff;
 
                 //CrusadersHammer
@@ -164,7 +164,7 @@ public:
                 if (m_uiMindBlast_Timer <= uiDiff)
                 {
                     DoCastVictim(SPELL_MINDBLAST);
-                    m_uiMindBlast_Timer = urand(15000, 20000);
+                    m_uiMindBlast_Timer = std::rand() % 20000 + 15000;
                 } else m_uiMindBlast_Timer -= uiDiff;
 
                 //ShadowShock

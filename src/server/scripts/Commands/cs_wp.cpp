@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -84,7 +84,7 @@ public:
                 PreparedQueryResult result = WorldDatabase.Query(stmt);
 
                 uint32 maxpathid = result->Fetch()->GetInt32();
-                pathid = maxpathid+1;
+                pathid = maxpathid + 1;
                 handler->PSendSysMessage("%s%s|r", "|cff00ff00", "New path started.");
             }
         }
@@ -120,7 +120,7 @@ public:
 
         WorldDatabase.Execute(stmt);
 
-        handler->PSendSysMessage("%s%s%u%s%u%s|r", "|cff00ff00", "PathID: |r|cff00ffff", pathid, "|r|cff00ff00: Waypoint |r|cff00ffff", point+1, "|r|cff00ff00 created. ");
+        handler->PSendSysMessage("%s%s%u%s%u%s|r", "|cff00ff00", "PathID: |r|cff00ffff", pathid, "|r|cff00ff00: Waypoint |r|cff00ffff", point + 1, "|r|cff00ff00 created. ");
         return true;
     }                                                           // HandleWpAddCommand
 
@@ -320,7 +320,7 @@ public:
 
                 WorldDatabase.Execute(stmt);
 
-                handler->PSendSysMessage("%s%s%u|r", "|cff00ff00", "Wp Event: New waypoint event added: |r|cff00ffff", id+1);
+                handler->PSendSysMessage("%s%s%u|r", "|cff00ff00", "Wp Event: New waypoint event added: |r|cff00ffff", id + 1);
             }
 
             return true;
@@ -367,8 +367,7 @@ public:
                 a11 = fields[9].GetFloat();
 
                 handler->PSendSysMessage("|cffff33ffid:|r|cff00ffff %u|r|cff00ff00, guid: |r|cff00ffff%u|r|cff00ff00, delay: |r|cff00ffff%u|r|cff00ff00, command: |r|cff00ffff%u|r|cff00ff00, datalong: |r|cff00ffff%u|r|cff00ff00, datalong2: |r|cff00ffff%u|r|cff00ff00, datatext: |r|cff00ffff%s|r|cff00ff00, posx: |r|cff00ffff%f|r|cff00ff00, posy: |r|cff00ffff%f|r|cff00ff00, posz: |r|cff00ffff%f|r|cff00ff00, orientation: |r|cff00ffff%f|r", id, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
         }
 
         if (show == "del")
@@ -421,7 +420,7 @@ public:
                 return true;
             }
 
-            std::string arg_string  = arg_2;
+            std::string arg_string = arg_2;
 
             if ((arg_string != "setid") && (arg_string != "delay") && (arg_string != "command")
                 && (arg_string != "datalong") && (arg_string != "datalong2") && (arg_string != "dataint") && (arg_string != "posx")
@@ -614,9 +613,8 @@ public:
         {
             Field* fields = result->Fetch();
             pathid = fields[0].GetUInt32();
-            point  = fields[1].GetUInt32();
-        }
-        while (result->NextRow());
+            point = fields[1].GetUInt32();
+        } while (result->NextRow());
 
         // We have the waypoint number and the GUID of the "master npc"
         // Text is enclosed in "<>", all other arguments not
@@ -716,7 +714,7 @@ public:
             return true;
         }                                                       // move
 
-        const char *text = arg_str;
+        const char* text = arg_str;
 
         if (text == 0)
         {
@@ -809,20 +807,19 @@ public:
             do
             {
                 Field* fields = result->Fetch();
-                pathid                  = fields[0].GetUInt32();
-                uint32 point            = fields[1].GetUInt32();
-                uint32 delay            = fields[2].GetUInt32();
-                uint32 flag             = fields[3].GetUInt32();
-                uint32 ev_id            = fields[4].GetUInt32();
-                uint32 ev_chance        = fields[5].GetUInt32();
+                pathid = fields[0].GetUInt32();
+                uint32 point = fields[1].GetUInt32();
+                uint32 delay = fields[2].GetUInt32();
+                uint32 flag = fields[3].GetUInt32();
+                uint32 ev_id = fields[4].GetUInt32();
+                uint32 ev_chance = fields[5].GetUInt32();
 
                 handler->PSendSysMessage("|cff00ff00Show info: for current point: |r|cff00ffff%u|r|cff00ff00, Path ID: |r|cff00ffff%u|r", point, pathid);
                 handler->PSendSysMessage("|cff00ff00Show info: delay: |r|cff00ffff%u|r", delay);
                 handler->PSendSysMessage("|cff00ff00Show info: Move flag: |r|cff00ffff%u|r", flag);
                 handler->PSendSysMessage("|cff00ff00Show info: Waypoint event: |r|cff00ffff%u|r", ev_id);
                 handler->PSendSysMessage("|cff00ff00Show info: Event chance: |r|cff00ffff%u|r", ev_chance);
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
 
             return true;
         }
@@ -877,8 +874,7 @@ public:
                         creature->DeleteFromDB();
                         creature->AddObjectToRemoveList();
                     }
-                }
-                while (result2->NextRow());
+                } while (result2->NextRow());
 
                 if (hasError)
                 {
@@ -891,10 +887,10 @@ public:
             do
             {
                 Field* fields = result->Fetch();
-                uint32 point    = fields[0].GetUInt32();
-                float x         = fields[1].GetFloat();
-                float y         = fields[2].GetFloat();
-                float z         = fields[3].GetFloat();
+                uint32 point = fields[0].GetUInt32();
+                float x = fields[1].GetFloat();
+                float y = fields[2].GetFloat();
+                float z = fields[3].GetFloat();
 
                 uint32 id = VISUAL_WAYPOINT;
 
@@ -935,8 +931,7 @@ public:
                     wpCreature->SetObjectScale(0.5f);
                     wpCreature->SetLevel(std::min<uint32>(point, STRONG_MAX_LEVEL));
                 }
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
 
             handler->SendSysMessage("|cff00ff00Showing the current creature's path.|r");
             return true;
@@ -958,9 +953,9 @@ public:
             }
 
             Field* fields = result->Fetch();
-            float x         = fields[0].GetFloat();
-            float y         = fields[1].GetFloat();
-            float z         = fields[2].GetFloat();
+            float x = fields[0].GetFloat();
+            float y = fields[1].GetFloat();
+            float z = fields[2].GetFloat();
             uint32 id = VISUAL_WAYPOINT;
 
             Player* chr = handler->GetSession()->GetPlayer();
@@ -1082,8 +1077,7 @@ public:
                     creature->DeleteFromDB();
                     creature->AddObjectToRemoveList();
                 }
-            }
-            while (result->NextRow());
+            } while (result->NextRow());
             // set "wpguid" column to "empty" - no visual waypoint spawned
             stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_WAYPOINT_DATA_ALL_WPGUID);
 

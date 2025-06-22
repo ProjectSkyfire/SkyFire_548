@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -21,7 +21,7 @@ namespace Skyfire
 
 } // namespace Skyfire
 
-#define WPAssert(cond) do { if (!(cond)) Skyfire::Assert(__FILE__, __LINE__, __FUNCTION__, #cond); } while (0)
+#define WPAssert(cond, ...) do { if (!(cond)) Skyfire::Assert(__FILE__, __LINE__, __FUNCTION__, #cond); } while (0)
 #define WPFatal(cond, msg) do { if (!(cond)) Skyfire::Fatal(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
 #define WPError(cond, msg) do { if (!(cond)) Skyfire::Error(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)
 #define WPWarning(cond, msg) do { if (!(cond)) Skyfire::Warning(__FILE__, __LINE__, __FUNCTION__, (msg)); } while (0)

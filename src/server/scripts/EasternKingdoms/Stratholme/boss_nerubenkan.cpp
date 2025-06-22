@@ -66,7 +66,7 @@ public:
 
         void RaiseUndeadScarab(Unit* victim)
         {
-            if (Creature* pUndeadScarab = DoSpawnCreature(10876, float(irand(-9, 9)), float(irand(-9, 9)), 0, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 180000))
+            if (Creature* pUndeadScarab = DoSpawnCreature(10876, float(std::rand() % 9 + -9), float(std::rand() % 9 + -9), 0, 0, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 180000))
                 if (pUndeadScarab->AI())
                     pUndeadScarab->AI()->AttackStart(victim);
         }
@@ -86,7 +86,7 @@ public:
             //PierceArmor
             if (PierceArmor_Timer <= diff)
             {
-                if (urand(0, 3) < 2)
+                if ((std::rand() % 3) < 2)
                     DoCastVictim(SPELL_PIERCEARMOR);
                 PierceArmor_Timer = 35000;
             } else PierceArmor_Timer -= diff;

@@ -352,14 +352,14 @@ public:
 
             if (player->GetQuestStatus(11611) == QUEST_STATUS_INCOMPLETE)
             {
-                uint8 uiRand = urand(0, 99);
+                uint8 uiRand = std::rand() % 99;
                 if (uiRand < 25)
                 {
                     player->CastSpell(me, 45532, true);
                     player->KilledMonsterCredit(WARSONG_PEON, 0);
                 }
                 else if (uiRand < 75)
-                    player->CastSpell(me, nerubarVictims[urand(0, 2)], true);
+                    player->CastSpell(me, nerubarVictims[std::rand() % 2], true);
             }
         }
     };
@@ -802,10 +802,8 @@ public:
         npc_nexus_drake_hatchlingAI(Creature* creature) : FollowerAI(creature)
         {
             HarpoonerGUID = 0;
+            WithRedDragonBlood = false;
         }
-
-        uint64 HarpoonerGUID;
-        bool WithRedDragonBlood;
 
         void Reset() OVERRIDE
         {
@@ -880,6 +878,9 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+        uint64 HarpoonerGUID;
+        bool WithRedDragonBlood;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -1337,9 +1338,9 @@ public:
             leryssaGUID         = 0;
             arlosGUID           = 0;
             bCheck              = false;
-            shadowBoltTimer   = urand(5000, 12000);
-            deflectionTimer   = urand(20000, 25000);
-            soulBlastTimer    = urand(12000, 18000);
+            shadowBoltTimer = std::rand() % 12000 + 5000;
+            deflectionTimer = std::rand() % 25000 + 20000;
+            soulBlastTimer = std::rand() % 18000 + 12000;
         }
         void MovementInform(uint32 uiType, uint32 /*uiId*/) OVERRIDE
         {
@@ -1370,19 +1371,19 @@ public:
                 if (shadowBoltTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_SHADOW_BOLT);
-                    shadowBoltTimer = urand(5000, 12000);
+                    shadowBoltTimer = std::rand() % 12000 + 5000;
                 } else shadowBoltTimer -= uiDiff;
 
                 if (deflectionTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_DEFLECTION);
-                    deflectionTimer = urand(20000, 25000);
+                    deflectionTimer = std::rand() % 25000 + 20000;
                 } else deflectionTimer -= uiDiff;
 
                 if (soulBlastTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_SOUL_BLAST);
-                    soulBlastTimer  = urand(12000, 18000);
+                    soulBlastTimer = std::rand() % 18000 + 12000;
                 } else soulBlastTimer -= uiDiff;
             }
 
@@ -1862,8 +1863,10 @@ public:
 
     struct npc_bonker_togglevoltAI : public npc_escortAI
     {
-        npc_bonker_togglevoltAI(Creature* creature) : npc_escortAI(creature) { }
-        uint32 Bonker_agro;
+        npc_bonker_togglevoltAI(Creature* creature) : npc_escortAI(creature)
+        {
+            Bonker_agro = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -1904,6 +1907,9 @@ public:
                     break;
             }
         }
+
+    private:
+        uint32 Bonker_agro;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -2100,7 +2106,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiExplosionTimer = urand(5000, 10000);
+            uiExplosionTimer = std::rand() % 10000 + 5000;
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -2149,13 +2155,14 @@ public:
 
     struct npc_valiance_keep_cannoneerAI : public ScriptedAI
     {
-        npc_valiance_keep_cannoneerAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 uiTimer;
+        npc_valiance_keep_cannoneerAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
-            uiTimer = urand(13000, 18000);
+            uiTimer = std::rand() % 18000 + 13000;
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -2168,13 +2175,15 @@ public:
                     pCannon = me->FindNearestGameObject(GO_VALIANCE_KEEP_CANNON_2, 10);
                 if (pCannon)
                     pCannon->Use(me);
-                uiTimer = urand(13000, 18000);
+                uiTimer = std::rand() % 18000 + 13000;
             }
             else uiTimer -= diff;
 
             if (!UpdateVictim())
                 return;
         }
+    private:
+        uint32 uiTimer;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -2240,7 +2249,7 @@ public:
                                         DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
                             }
                         }
-                        m_uiTimer = urand(90000, 120000);
+                        m_uiTimer = std::rand() % 120000 + 90000;
                     }
                         break;
                     case NPC_WARMAGE_CALANDRA:
@@ -2254,7 +2263,7 @@ public:
                                         DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
                             }
                         }
-                        m_uiTimer = urand(90000, 120000);
+                        m_uiTimer = std::rand() % 120000 + 90000;
                     }
                         break;
                     case NPC_WARMAGE_WATKINS:
@@ -2268,7 +2277,7 @@ public:
                                         DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
                             }
                         }
-                        m_uiTimer = urand(90000, 120000);
+                        m_uiTimer = std::rand() % 120000 + 90000;
                     }
                         break;
                 }

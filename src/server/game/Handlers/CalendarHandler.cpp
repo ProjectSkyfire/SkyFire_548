@@ -1,5 +1,5 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
@@ -397,7 +397,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recvData)
         eventPackedTime, flags);
 
     if (CalendarEvent* calendarEvent = sCalendarMgr->GetEvent(eventId))
-    {        
+    {
         calendarEvent->SetType(CalendarEventType(type));
         calendarEvent->SetFlags(flags);
         calendarEvent->SetEventTime(time_t(eventPackedTime));
@@ -822,7 +822,7 @@ void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recvData)
 {
     uint32 mapId, difficulty;
     uint8 toggleExtend;
-    recvData >> mapId >> difficulty>> toggleExtend;
+    recvData >> mapId >> difficulty >> toggleExtend;
     SF_LOG_DEBUG("network", "CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, DifficultyID: %u, ToggleExtend: %s", mapId, difficulty, toggleExtend ? "On" : "Off");
 
     /*

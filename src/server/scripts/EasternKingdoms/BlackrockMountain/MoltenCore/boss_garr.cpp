@@ -67,11 +67,11 @@ class boss_garr : public CreatureScript
                     {
                         case EVENT_ANTIMAGIC_PULSE:
                             DoCast(me, SPELL_ANTIMAGIC_PULSE);
-                            events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, urand(10000, 15000));
+                            events.ScheduleEvent(EVENT_ANTIMAGIC_PULSE, std::rand() % 15000 + 10000);
                             break;
                         case EVENT_MAGMA_SHACKLES:
                             DoCast(me, SPELL_MAGMA_SHACKLES);
-                            events.ScheduleEvent(EVENT_MAGMA_SHACKLES, urand(8000, 12000));
+                            events.ScheduleEvent(EVENT_MAGMA_SHACKLES, std::rand() % 12000 + 8000);
                             break;
                         default:
                             break;
@@ -125,7 +125,7 @@ class npc_firesworn : public CreatureScript
                 {
                      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_IMMOLATE);
-                    immolateTimer = urand(5000, 10000);
+                     immolateTimer = std::rand() % 10000 + 5000;
                 }
                 else
                     immolateTimer -= diff;

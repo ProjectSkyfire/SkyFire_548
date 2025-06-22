@@ -1,19 +1,19 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "UpdateData.h"
 #include "Item.h"
 #include "Map.h"
-#include "Transport.h"
 #include "ObjectAccessor.h"
-#include "CellImpl.h"
 #include "SpellInfo.h"
+#include "Transport.h"
+#include "UpdateData.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 using namespace Skyfire;
 
@@ -22,7 +22,7 @@ void VisibleNotifier::SendToSelf()
     // at this moment i_clientGUIDs have guids that not iterate at grid level checks
     // but exist one case when this possible and object not out of range: transports
     if (Transport* transport = i_player.GetTransport())
-        for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end();++itr)
+        for (std::set<WorldObject*>::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
         {
             if (vis_guids.find((*itr)->GetGUID()) != vis_guids.end())
             {
@@ -47,7 +47,7 @@ void VisibleNotifier::SendToSelf()
             }
         }
 
-    for (Player::ClientGUIDs::const_iterator it = vis_guids.begin();it != vis_guids.end(); ++it)
+    for (Player::ClientGUIDs::const_iterator it = vis_guids.begin(); it != vis_guids.end(); ++it)
     {
         i_player.m_clientGUIDs.erase(*it);
         i_data.AddOutOfRangeGUID(*it);
@@ -71,7 +71,7 @@ void VisibleNotifier::SendToSelf()
         i_player.SendInitialVisiblePackets(*it);
 }
 
-void VisibleChangesNotifier::Visit(PlayerMapType &m)
+void VisibleChangesNotifier::Visit(PlayerMapType& m)
 {
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -92,7 +92,7 @@ void VisibleChangesNotifier::Visit(PlayerMapType &m)
     }
 }
 
-void VisibleChangesNotifier::Visit(CreatureMapType &m)
+void VisibleChangesNotifier::Visit(CreatureMapType& m)
 {
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
         if (iter->GetSource()->HasSharedVision())
@@ -102,7 +102,7 @@ void VisibleChangesNotifier::Visit(CreatureMapType &m)
                     (*i)->UpdateVisibilityOf(&i_object);
 }
 
-void VisibleChangesNotifier::Visit(DynamicObjectMapType &m)
+void VisibleChangesNotifier::Visit(DynamicObjectMapType& m)
 {
     for (DynamicObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
         if (Unit* caster = iter->GetSource()->GetCaster())
@@ -121,7 +121,7 @@ inline void CreatureUnitRelocationWorker(Creature* c, Unit* u)
             c->AI()->MoveInLineOfSight_Safe(u);
 }
 
-void PlayerRelocationNotifier::Visit(PlayerMapType &m)
+void PlayerRelocationNotifier::Visit(PlayerMapType& m)
 {
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -138,11 +138,11 @@ void PlayerRelocationNotifier::Visit(PlayerMapType &m)
     }
 }
 
-void PlayerRelocationNotifier::Visit(CreatureMapType &m)
+void PlayerRelocationNotifier::Visit(CreatureMapType& m)
 {
     bool relocated_for_ai = (&i_player == i_player.m_seer);
 
-    for (CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         Creature* c = iter->GetSource();
 
@@ -155,7 +155,7 @@ void PlayerRelocationNotifier::Visit(CreatureMapType &m)
     }
 }
 
-void CreatureRelocationNotifier::Visit(PlayerMapType &m)
+void CreatureRelocationNotifier::Visit(PlayerMapType& m)
 {
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -168,7 +168,7 @@ void CreatureRelocationNotifier::Visit(PlayerMapType &m)
     }
 }
 
-void CreatureRelocationNotifier::Visit(CreatureMapType &m)
+void CreatureRelocationNotifier::Visit(CreatureMapType& m)
 {
     if (!i_creature.IsAlive())
         return;
@@ -183,7 +183,7 @@ void CreatureRelocationNotifier::Visit(CreatureMapType &m)
     }
 }
 
-void DelayedUnitRelocation::Visit(CreatureMapType &m)
+void DelayedUnitRelocation::Visit(CreatureMapType& m)
 {
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -201,7 +201,7 @@ void DelayedUnitRelocation::Visit(CreatureMapType &m)
     }
 }
 
-void DelayedUnitRelocation::Visit(PlayerMapType &m)
+void DelayedUnitRelocation::Visit(PlayerMapType& m)
 {
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -229,7 +229,7 @@ void DelayedUnitRelocation::Visit(PlayerMapType &m)
     }
 }
 
-void AIRelocationNotifier::Visit(CreatureMapType &m)
+void AIRelocationNotifier::Visit(CreatureMapType& m)
 {
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -240,7 +240,7 @@ void AIRelocationNotifier::Visit(CreatureMapType &m)
     }
 }
 
-void MessageDistDeliverer::Visit(PlayerMapType &m)
+void MessageDistDeliverer::Visit(PlayerMapType& m)
 {
     for (PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -265,7 +265,7 @@ void MessageDistDeliverer::Visit(PlayerMapType &m)
     }
 }
 
-void MessageDistDeliverer::Visit(CreatureMapType &m)
+void MessageDistDeliverer::Visit(CreatureMapType& m)
 {
     for (CreatureMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -287,7 +287,7 @@ void MessageDistDeliverer::Visit(CreatureMapType &m)
     }
 }
 
-void MessageDistDeliverer::Visit(DynamicObjectMapType &m)
+void MessageDistDeliverer::Visit(DynamicObjectMapType& m)
 {
     for (DynamicObjectMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
@@ -320,7 +320,7 @@ MessageDistDeliverer::VisitObject(Player* player)
 */
 
 template<class T>
-void ObjectUpdater::Visit(GridRefManager<T> &m)
+void ObjectUpdater::Visit(GridRefManager<T>& m)
 {
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
         if (iter->GetSource()->IsInWorld())
@@ -360,4 +360,4 @@ bool AnyDeadUnitSpellTargetInRangeCheck::operator()(Creature* u)
 template void ObjectUpdater::Visit<Creature>(CreatureMapType&);
 template void ObjectUpdater::Visit<GameObject>(GameObjectMapType&);
 template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType&);
-template void ObjectUpdater::Visit<AreaTrigger>(AreaTriggerMapType &);
+template void ObjectUpdater::Visit<AreaTrigger>(AreaTriggerMapType&);

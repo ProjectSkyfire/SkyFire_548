@@ -60,11 +60,16 @@ public:
     {
         boss_chromaggusAI(Creature* creature) : BossAI(creature, BOSS_CHROMAGGUS)
         {
+            Breath1_Spell = 0;
+            Breath2_Spell = 0;
+            CurrentVurln_Spell = 0;
+            Enraged = false;
+
             // Select the 2 breaths that we are going to use until despawned
             // 5 possiblities for the first breath, 4 for the second, 20 total possiblites
             // This way we don't end up casting 2 of the same breath
             // TL TL would be stupid
-            switch (urand(0, 19))
+            switch (std::rand() % 19)
             {
                 // B1 - Incin
                 case 0:
@@ -244,7 +249,7 @@ public:
                         break;
                     case EVENT_FRENZY:
                         DoCast(me, SPELL_FRENZY);
-                        events.ScheduleEvent(EVENT_FRENZY, urand(10000, 15000));
+                        events.ScheduleEvent(EVENT_FRENZY, std::rand() % 15000 + 10000);
                         break;
                 }
             }

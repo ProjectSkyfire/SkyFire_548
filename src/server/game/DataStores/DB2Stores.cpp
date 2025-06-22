@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
 #include "BattlePet.h"
-#include "DB2Stores.h"
-#include "DB2fmt.h"
-#include "DB2Utility.h"
 #include "Common.h"
+#include "DB2fmt.h"
+#include "DB2Stores.h"
+#include "DB2Utility.h"
+#include "DBCStores.h"
 #include "Log.h"
 #include "World.h"
-#include "DBCStores.h"
 
 //DB2Storage<BattlePetAbilityEffectEntry>     sBattlePetAbilityEffectStore(BattlePetAbilityEffectfmt);
 //DB2Storage<BattlePetAbilityEntry>           sBattlePetAbilityStore(BattlePetAbilityfmt);
@@ -87,7 +87,7 @@ inline void LoadDB2(uint32& availableDb2Locales, DB2StoreProblemList& errlist, D
             localizedName.append(filename);
 
             if (!storage.LoadStringsFrom(localizedName.c_str(), i))
-                availableDb2Locales &= ~(1<<i);             // mark as not available for speedup next checks
+                availableDb2Locales &= ~(1 << i);             // mark as not available for speedup next checks
         }
     }
     else
@@ -120,32 +120,32 @@ void LoadDB2Stores(std::string const& dataPath)
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetAbilityStore,         db2Path, "BattlePetAbility.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetAbilityTurnStore,     db2Path, "BattlePetAbilityTurn.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetBreedQualityStore,    db2Path, "BattlePetBreedQuality.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetBreedStateStore,      db2Path, "BattlePetBreedState.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetBreedStateStore, db2Path, "BattlePetBreedState.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetEffectPropertiesStore,db2Path, "BattlePetEffectProperties.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStateStore,    db2Path, "BattlePetSpeciesState.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStore,         db2Path, "BattlePetSpecies.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStateStore, db2Path, "BattlePetSpeciesState.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesStore, db2Path, "BattlePetSpecies.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetSpeciesXAbilityStore, db2Path, "BattlePetSpeciesXAbility.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetStateStore,           db2Path, "BattlePetState.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sBattlePetVisualStore,          db2Path, "BattlePetVisual.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sBroadcastTextStore,            db2Path, "BroadcastText.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sBroadcastTextStore, db2Path, "BroadcastText.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sCreatureDifficultyStore,       db2Path, "CreatureDifficulty.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sCreatureStore,                 db2Path, "Creature.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sGameObjectsStore,              db2Path, "GameObjects.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sItemCurrencyCostStore,         db2Path, "ItemCurrencyCost.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sItemExtendedCostStore,         db2Path, "ItemExtendedCost.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sItemSparseStore,               db2Path, "Item-sparse.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sItemStore,                     db2Path, "Item.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sItemToBattlePetStore,          db2Path, "ItemToBattlePet.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemCurrencyCostStore, db2Path, "ItemCurrencyCost.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemExtendedCostStore, db2Path, "ItemExtendedCost.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemSparseStore, db2Path, "Item-sparse.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemStore, db2Path, "Item.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sItemToBattlePetStore, db2Path, "ItemToBattlePet.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sItemToMountSpellStore,         db2Path, "ItemToMountSpell.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sItemUpgradeStore,              db2Path, "ItemUpgrade.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sKeyChainStore,                 db2Path, "KeyChain.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sKeyChainStore, db2Path, "KeyChain.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sQuestPackageItemStore,         db2Path, "QuestPackageItem.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sRulesetItemUpgradeStore,       db2Path, "RulesetItemUpgrade.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sRulesetRaidLootUpgradeStore,   db2Path, "RulesetRaidLootUpgrade.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sSceneScriptPackageMemberStore, db2Path, "SceneScriptPackageMember.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sSceneScriptPackageStore,       db2Path, "SceneScriptPackage.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sSceneScriptPackageStore, db2Path, "SceneScriptPackage.db2");
     //LoadDB2(availableDb2Locales, bad_db2_files, sSceneScriptStore,              db2Path, "SceneScript.db2");
-    LoadDB2(availableDb2Locales, bad_db2_files, sSpellReagentsStore,            db2Path, "SpellReagents.db2");
+    LoadDB2(availableDb2Locales, bad_db2_files, sSpellReagentsStore, db2Path, "SpellReagents.db2");
 
     for (uint32 i = 0; i < sBattlePetBreedStateStore.GetNumRows(); i++)
         if (BattlePetBreedStateEntry const* breedStateEntry = sBattlePetBreedStateStore.LookupEntry(i))

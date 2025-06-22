@@ -91,7 +91,7 @@ public:
 
                             for (uint8 i = 0; i <= (postPull ? 3 : 0); i++)
                             {
-                                me->GetRandomNearPosition(pPosition, float(urand(0, 10)));
+                                me->GetRandomNearPosition(pPosition, float(std::rand() % 10));
                                 me->SummonCreature(NPC_UNSTABLE_SPHERE, pPosition);
                             }
                         }

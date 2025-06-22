@@ -228,11 +228,11 @@ endif
 #inline_files:
 #Compressor.inl
 #
-#source_files:
-#Compressor.cpp
-#
 #build_files:
 #ACE_Compression.mpc
+#
+#source_files:
+#Compressor.cpp
 #
 #lib_output:
 #../../lib ACE_Compression

@@ -176,10 +176,10 @@ class boss_sapphiron : public CreatureScript
                 _phase = PHASE_GROUND;
                 me->SetReactState(REACT_AGGRESSIVE);
                 events.SetPhase(PHASE_GROUND);
-                events.ScheduleEvent(EVENT_CLEAVE, urand(5, 15) * IN_MILLISECONDS, 0, PHASE_GROUND);
-                events.ScheduleEvent(EVENT_TAIL, urand(5, 15) * IN_MILLISECONDS, 0, PHASE_GROUND);
+                events.ScheduleEvent(EVENT_CLEAVE, std::rand() % (15 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS), 0, PHASE_GROUND);
+                events.ScheduleEvent(EVENT_TAIL, std::rand() % (15 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS), 0, PHASE_GROUND);
                 events.ScheduleEvent(EVENT_DRAIN, 24 * IN_MILLISECONDS, 0, PHASE_GROUND);
-                events.ScheduleEvent(EVENT_BLIZZARD, urand(5, 10) * IN_MILLISECONDS, 0, PHASE_GROUND);
+                events.ScheduleEvent(EVENT_BLIZZARD, std::rand() % (10 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS), 0, PHASE_GROUND);
                 events.ScheduleEvent(EVENT_FLIGHT, 45 * IN_MILLISECONDS);
             }
 
@@ -237,11 +237,11 @@ class boss_sapphiron : public CreatureScript
                                 return;
                             case EVENT_CLEAVE:
                                 DoCastVictim(SPELL_CLEAVE);
-                                events.ScheduleEvent(EVENT_CLEAVE, urand(5, 15) * IN_MILLISECONDS, 0, PHASE_GROUND);
+                                events.ScheduleEvent(EVENT_CLEAVE, std::rand() % (15 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS), 0, PHASE_GROUND);
                                 return;
                             case EVENT_TAIL:
                                 DoCastAOE(SPELL_TAIL_SWEEP);
-                                events.ScheduleEvent(EVENT_TAIL, urand(5, 15) * IN_MILLISECONDS, 0, PHASE_GROUND);
+                                events.ScheduleEvent(EVENT_TAIL, std::rand() % (15 * IN_MILLISECONDS) + (5 * IN_MILLISECONDS), 0, PHASE_GROUND);
                                 return;
                             case EVENT_DRAIN:
                                 DoCastAOE(SPELL_LIFE_DRAIN);
@@ -250,7 +250,7 @@ class boss_sapphiron : public CreatureScript
                             case EVENT_BLIZZARD:
                             {
                                 //DoCastAOE(SPELL_SUMMON_BLIZZARD);
-                                if (Creature* summon = DoSummon(NPC_BLIZZARD, me, 0.0f, urand(25, 30) * IN_MILLISECONDS, TempSummonType::TEMPSUMMON_TIMED_DESPAWN))
+                                if (Creature* summon = DoSummon(NPC_BLIZZARD, me, 0.0f, std::rand() % (30 * IN_MILLISECONDS) + (25 * IN_MILLISECONDS), TempSummonType::TEMPSUMMON_TIMED_DESPAWN))
                                     summon->GetMotionMaster()->MoveRandom(40);
                                 events.ScheduleEvent(EVENT_BLIZZARD, RAID_MODE(20, 7) * IN_MILLISECONDS, 0, PHASE_GROUND);
                                 break;

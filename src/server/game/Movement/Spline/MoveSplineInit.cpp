@@ -1,16 +1,16 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
-#include "MoveSplineInit.h"
-#include "MoveSpline.h"
 #include "MovementPacketBuilder.h"
-#include "Unit.h"
+#include "MoveSpline.h"
+#include "MoveSplineInit.h"
+#include "Opcodes.h"
 #include "Transport.h"
+#include "Unit.h"
 #include "Vehicle.h"
 #include "WorldPacket.h"
-#include "Opcodes.h"
 
 namespace Movement
 {

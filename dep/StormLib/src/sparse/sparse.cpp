@@ -14,22 +14,24 @@
 /* 19.11.03  1.01  Dan  Big endian handling                                  */
 /* 08.12.03  2.01  Dan  High-memory handling (> 0x80000000)                  */
 /*****************************************************************************/
- 
+
 #include <assert.h>
 #include <string.h>
- 
+
 #include "sparse.h"
 
 //-----------------------------------------------------------------------------
 // Public functions
 
-void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned char * pbInBuffer, int cbInBuffer)
+void CompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer)
 {
-    unsigned char * pbOutBufferEnd = pbOutBuffer + *pcbOutBuffer;
-    unsigned char * pbInBufferEnd = pbInBuffer + cbInBuffer;
-    unsigned char * pbLastNonZero = pbInBuffer;
-    unsigned char * pbOutBuffer0 = pbOutBuffer;
-    unsigned char * pbInBuffPtr = pbInBuffer;
+    unsigned char * pbOutBufferEnd = (unsigned char *)pvOutBuffer + *pcbOutBuffer;
+    unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
+    unsigned char * pbLastNonZero = (unsigned char *)pvInBuffer;
+    unsigned char * pbOutBuffer0 = (unsigned char *)pvOutBuffer;
+    unsigned char * pbInBuffPtr = (unsigned char *)pvInBuffer;
+    unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
+    unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
     size_t NumberOfNonZeros;
     size_t NumberOfZeros;
 
@@ -86,7 +88,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
                 // Put marker that means "0x80 of nonzeros"
                 *pbOutBuffer++ = 0xFF;
                 memcpy(pbOutBuffer, pbInBuffer, 0x80);
-                
+
                 // Adjust counter of nonzeros and both pointers
                 NumberOfNonZeros -= 0x80;
                 pbOutBuffer += 0x80;
@@ -106,7 +108,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
                 // Put marker that means "1 nonzero byte"
                 *pbOutBuffer++ = 0x80;
                 memcpy(pbOutBuffer, pbInBuffer, 1);
-                
+
                 // Adjust counter of nonzeros and both pointers
                 NumberOfNonZeros--;
                 pbOutBuffer++;
@@ -127,20 +129,6 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
                 // Adjust pointers
                 pbOutBuffer += NumberOfNonZeros;
                 pbInBuffer += NumberOfNonZeros;
-            }
-            else
-            {
-                // Verify if we still have enough space in output buffer
-                if((pbOutBuffer + 2) >= pbOutBufferEnd)
-                    return;
-
-                // Put marker that means "1 nonzero byte"
-                *pbOutBuffer++ = 0x80;
-                memcpy(pbOutBuffer, pbInBuffer, 1);
-
-                // Adjust pointers
-                pbOutBuffer++;
-                pbInBuffer++;
             }
         }
 
@@ -183,7 +171,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
 
             // Put marker that means "Several zeros"
             *pbOutBuffer++ = (unsigned char)(NumberOfZeros - 3);
-    
+
             // Adjust pointer
             pbInBuffer += NumberOfZeros;
         }
@@ -208,7 +196,7 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
                 // Terminate with a marker that means "0x80 of nonzeros"
                 *pbOutBuffer++ = 0xFF;
                 memcpy(pbOutBuffer, pbInBuffer, NumberOfNonZeros);
-                
+
                 // Adjust pointer
                 pbOutBuffer += NumberOfNonZeros;
                 break;
@@ -234,9 +222,11 @@ void CompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned ch
     *pcbOutBuffer = (int)(pbOutBuffer - pbOutBuffer0);
 }
 
-int DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned char * pbInBuffer, int cbInBuffer)
+int DecompressSparse(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, int cbInBuffer)
 {
-    unsigned char * pbInBufferEnd = pbInBuffer + cbInBuffer;
+    unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
+    unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
+    unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
     unsigned int cbChunkSize;
     unsigned int cbOutBuffer = 0;
     unsigned int OneByte;
@@ -256,7 +246,7 @@ int DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned c
     cbOutBuffer |= (OneByte << 0x00);
 
     // Verify the size of the stream against the output buffer size
-    if(cbOutBuffer > *pcbOutBuffer)
+    if(cbOutBuffer > (unsigned int)*pcbOutBuffer)
         return 0;
 
     // Put the output size to the buffer
@@ -271,7 +261,12 @@ int DecompressSparse(unsigned char * pbOutBuffer, int * pcbOutBuffer, unsigned c
         // If highest bit, it means that that normal data follow
         if(OneByte & 0x80)
         {
+            // Check the length of one chunk. Check for overflows
             cbChunkSize = (OneByte & 0x7F) + 1;
+            if((pbInBuffer + cbChunkSize) > pbInBufferEnd)
+                return 0;
+
+            // Copy the chunk. Make sure that the buffer won't overflow
             cbChunkSize = (cbChunkSize < cbOutBuffer) ? cbChunkSize : cbOutBuffer;
             memcpy(pbOutBuffer, pbInBuffer, cbChunkSize);
             pbInBuffer += cbChunkSize;

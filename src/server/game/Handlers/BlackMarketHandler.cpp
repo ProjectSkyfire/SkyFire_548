@@ -1,8 +1,9 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
+* This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
 
+#include "BlackMarketMgr.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -10,17 +11,16 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "BlackMarketMgr.h"
 
 void WorldSession::HandleBlackMarketHelloOpcode(WorldPacket& recvData)
 {
     ObjectGuid NpcGUID;
     recvData.ReadGuidMask(NpcGUID, 4, 5, 2, 7, 0, 1, 3, 6);
     recvData.ReadGuidBytes(NpcGUID, 4, 3, 0, 6, 2, 7, 5, 1);
- 
+
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
-    
+
     SendBlackMarketHello(NpcGUID, sBlackMarketMgr->isBlackMarketOpen());
 }
 
@@ -28,7 +28,7 @@ void WorldSession::SendBlackMarketHello(ObjectGuid NpcGUID, bool Open)
 {
     WorldPacket data(SMSG_BLACKMARKET_HELLO, 9);
     data.WriteGuidMask(NpcGUID, 2, 0, 4, 1, 3, 6, 5, 7);
-    data.WriteBit(Open); 
+    data.WriteBit(Open);
     data.WriteGuidBytes(NpcGUID, 6, 1, 2, 5, 0, 7, 4, 3);
     SendPacket(&data);
 }
@@ -46,7 +46,7 @@ void WorldSession::HandleBlackMarketRequestItemOpcode(WorldPacket& recvData)
 void WorldSession::SendBlackMarketRequestItemsResult()
 {
     WorldPacket data(SMSG_BLACKMARKET_REQUEST_ITEMS_RESULT);
-    
+
     sBlackMarketMgr->BuildBlackMarketRequestItemsResult(data, GetPlayer()->GetGUIDLow());
 
     SendPacket(&data);
@@ -61,13 +61,13 @@ void WorldSession::HandleBlackMarketBidOnItem(WorldPacket& recvData)
     recvData >> ItemID >> MarketID >> BidAmount;
     recvData.ReadGuidMask(NpcGUID, 0, 5, 4, 3, 7, 6, 1, 2);
     recvData.ReadGuidBytes(NpcGUID, 4, 3, 6, 5, 7, 1, 0, 2);
-    
+
     SF_LOG_DEBUG("blackMarket", ">> HandleBlackMarketBid >> MarketID : %u, BidAmount : " UI64FMTD ", ItemID : %u", MarketID, BidAmount, ItemID);
 
     if (!BidAmount)
         return;
 
-    BlackMarketAuction *auction = sBlackMarketMgr->GetAuction(MarketID);
+    BlackMarketAuction* auction = sBlackMarketMgr->GetAuction(MarketID);
     if (!auction)
     {
         SF_LOG_DEBUG("blackMarket", "HandleBlackMarketBid - Auction (MarketID: %u) not found.", MarketID);
