@@ -19,7 +19,7 @@ It is completely open source; community involvement is highly encouraged.
 
 If you wish to contribute ideas or code please visit our site linked below or
 make pull requests to our 
-[Codeberg repository](https://codeberg.org/ProjectSkyfire/SkyFire_548/pulls).
+[Github repository](https://github.com/ProjectSkyfire/SkyFire_548/pulls).
 
 For further information on the SkyFire project, please visit our project website at 
 [projectskyfire.org](http://www.projectskyfire.org).
@@ -28,7 +28,7 @@ For further information on the SkyFire project, please visit our project website
 **MoP 5.4.8 Build 18414**
 
 ## Client Patch
-[SkyFire-Community-Tools](https://codeberg.org/ProjectSkyfire/Community-Tools).
+[SkyFire-Community-Tools](https://github.com/ProjectSkyfire/SkyFire_548/Community-Tools).
 
 ## Requirements
 + Platform/Architecture:
@@ -63,12 +63,12 @@ Detailed installation guides are available in the wiki for
 
 ## Reporting issues
 Please use the search function before you report issues.
-[SkyFire Issue Tracker](https://codeberg.org/ProjectSkyfire/SkyFire_548/issues).
+[SkyFire Issue Tracker](https://github.com/ProjectSkyfire/SkyFire_548/issues).
 
 ## Submitting fixes
 Fixes are submitted as pull requests.
 
-[SkyFire Pull Request](https://codeberg.org/ProjectSkyfire/SkyFire_548/pulls)
+[SkyFire Pull Request](https://github.com/ProjectSkyfire/SkyFire_548/pulls)
 
 ## Copyright
 License: GPL 3.0
@@ -81,6 +81,6 @@ Read file [THANKS](THANKS.md)
 ## Links
 Forum: [https://www.projectskyfire.org/](https://www.projectskyfire.org/)
 
-Database Releases: [https://codeberg.org/ProjectSkyfire/database/releases] (https://codeberg.org/ProjectSkyfire/database/releases)
+Database Releases: [https://github.com/ProjectSkyfire/SkyFire_548/releases] (https://github.com/ProjectSkyfire/SkyFire_548/releases)
 
 Wiki: [https://wiki.projectskyfire.org](https://wiki.projectskyfire.org)
