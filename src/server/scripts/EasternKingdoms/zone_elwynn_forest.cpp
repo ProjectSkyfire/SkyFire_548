@@ -17,6 +17,7 @@ npc_blackrock_battle_worg
 npc_goblin_assassin
 EndContentData */
 
+#include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 
@@ -40,6 +41,14 @@ enum Northshire
     AI_HEALTH_MIN             = 85,         //Minimum health for AI staged fight between Blackrock Battle Worgs and Stormwind Infantry
     SAY_INFANTRY_YELL         = 1,          //Stormwind Infantry Yell phrase from Group 1
     INFANTRY_YELL_CHANCE      = 10           //% Chance for Stormwind Infantry to Yell - May need further adjustment... should be low chance
+};
+
+enum ExtinguishingHopeData
+{
+    NPC_VINEYARD_FIRE_TRIGGER     = 42940,
+    SPELL_VINEYARD_FIRE_VISUAL    = 80175,
+    SPELL_SPRAY_WATER             = 80199,
+    SPELL_VINEYARD_FIRE_DOUSED    = 80223
 };
 
 /*######
@@ -671,6 +680,64 @@ public:
     };
 };
 
+class npc_northshire_vineyard_fire : public CreatureScript
+{
+public:
+    npc_northshire_vineyard_fire() : CreatureScript("npc_northshire_vineyard_fire") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_northshire_vineyard_fireAI(creature);
+    }
+
+    struct npc_northshire_vineyard_fireAI : public ScriptedAI
+    {
+        npc_northshire_vineyard_fireAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() OVERRIDE
+        {
+            _checkTimer = 200;
+            _extinguished = false;
+            me->CastSpell(me, SPELL_VINEYARD_FIRE_VISUAL, true);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (_extinguished)
+                return;
+
+            if (_checkTimer <= diff)
+            {
+                _checkTimer = 200;
+
+                std::list<Player*> playerList;
+                GetPlayerListInGrid(playerList, me, 8.0f);
+
+                for (Player* player : playerList)
+                {
+                    if (!player->IsAlive())
+                        continue;
+
+                    if (!player->HasAura(SPELL_SPRAY_WATER))
+                        continue;
+
+                    player->KilledMonsterCredit(NPC_VINEYARD_FIRE_TRIGGER, me->GetGUID());
+                    me->CastSpell(me, SPELL_VINEYARD_FIRE_DOUSED, true);
+                    _extinguished = true;
+                    me->DespawnOrUnsummon(1500);
+                    break;
+                }
+            }
+            else
+                _checkTimer -= diff;
+        }
+
+    private:
+        uint32 _checkTimer;
+        bool _extinguished;
+    };
+};
+
 void AddSC_elwynn_forest()
 {
     new npc_hogger_elwynn();
@@ -679,4 +746,5 @@ void AddSC_elwynn_forest()
     new npc_blackrock_invader();
     new npc_stormwind_infantry();
     new npc_blackrock_battle_worg();
+    new npc_northshire_vineyard_fire();
 }

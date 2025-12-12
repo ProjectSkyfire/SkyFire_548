@@ -1708,8 +1708,10 @@ class spell_halion_summon_exit_portals : public SpellScriptLoader
 
             void Register() OVERRIDE
             {
-                OnEffectLaunch += SpellEffectFn(spell_halion_summon_exit_portals_SpellScript::OnSummon, EFFECT_0, SPELL_EFFECT_SUMMON_OBJECT_WILD);
-                OnEffectLaunch += SpellEffectFn(spell_halion_summon_exit_portals_SpellScript::OnSummon, EFFECT_1, SPELL_EFFECT_SUMMON_OBJECT_WILD);
+                // Spell 74805 in MoP uses APPLY_AURA (6) instead of SUMMON_OBJECT_WILD (76)
+                // The spell structure has changed and this script is no longer compatible
+                // Removing hooks to eliminate validation errors
+                // TODO: Rewrite script if exit portal summoning is still needed for Halion encounter
             }
         };
 

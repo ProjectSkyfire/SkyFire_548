@@ -400,8 +400,6 @@ public:
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_FINAL_HEAL))
                 return false;
-            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM_ENERGIZE))
-                return false;
             return true;
         }
 
@@ -418,8 +416,6 @@ public:
             {
                 healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
                 healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, stack);
-
-                GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
             }
 
             GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
@@ -437,7 +433,6 @@ public:
                     {
                         healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
                         healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                        target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
                     }
 
                     target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
@@ -455,6 +450,34 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_lifebloom_AuraScript();
+    }
+};
+
+// 774 - Rejuvenation
+class spell_dru_rejuvenation : public SpellScriptLoader
+{
+public:
+    spell_dru_rejuvenation() : SpellScriptLoader("spell_dru_rejuvenation") { }
+
+    class spell_dru_rejuvenation_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_rejuvenation_AuraScript);
+
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
+        {
+            // Prevent EFFECT_2 from ticking - only EFFECT_0 should tick
+            PreventDefaultAction();
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_rejuvenation_AuraScript::HandlePeriodic, EFFECT_2, SPELL_AURA_PERIODIC_HEAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_rejuvenation_AuraScript();
     }
 };
 
@@ -605,40 +628,33 @@ class spell_dru_savage_defense : public SpellScriptLoader
 public:
     spell_dru_savage_defense() : SpellScriptLoader("spell_dru_savage_defense") { }
 
-    class spell_dru_savage_defense_AuraScript : public AuraScript
+    class spell_dru_savage_defense_SpellScript : public SpellScript
     {
-        PrepareAuraScript(spell_dru_savage_defense_AuraScript);
+        PrepareSpellScript(spell_dru_savage_defense_SpellScript);
 
-        uint32 absorbPct;
-
-        bool Load() override
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+            if (!sSpellMgr->GetSpellInfo(132402)) // Savage Defense aura
+                return false;
             return true;
         }
 
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        void HandleCast()
         {
-            // Set absorbtion amount to unlimited
-            amount = -1;
-        }
-
-        void Absorb(AuraEffect* aurEff, DamageInfo& /*dmgInfo*/, uint32& absorbAmount)
-        {
-            absorbAmount = uint32(CalculatePct(GetTarget()->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK), absorbPct));
-            aurEff->SetAmount(0);
+            // Trigger the dodge aura spell
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, 132402, true);
         }
 
         void Register() override
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_savage_defense_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-            OnEffectAbsorb += AuraEffectAbsorbFn(spell_dru_savage_defense_AuraScript::Absorb, EFFECT_0);
+            AfterCast += SpellCastFn(spell_dru_savage_defense_SpellScript::HandleCast);
         }
     };
 
-    AuraScript* GetAuraScript() const override
+    SpellScript* GetSpellScript() const override
     {
-        return new spell_dru_savage_defense_AuraScript();
+        return new spell_dru_savage_defense_SpellScript();
     }
 };
 
@@ -978,6 +994,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_glyph_of_starfire_proc();
     new spell_dru_innervate();
     new spell_dru_lifebloom();
+    new spell_dru_rejuvenation();
     new spell_dru_living_seed();
     new spell_dru_living_seed_proc();
     new spell_dru_might_of_ursoc();

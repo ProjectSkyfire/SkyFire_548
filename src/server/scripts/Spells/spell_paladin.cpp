@@ -15,6 +15,8 @@
 #include "SpellAuraEffects.h"
 #include "Group.h"
 
+#include <list>
+
 enum PaladinSpells
 {
     SPELL_PALADIN_SELFLESS_HEALER_TALENT         = 85804,
@@ -44,7 +46,9 @@ enum PaladinSpells
     SPELL_PALADIN_HOLY_SHOCK_R1_HEALING          = 25914,
     SPELL_PALADIN_ITEM_HEALING_TRANCE            = 37706,
     SPELL_PALADIN_RIGHTEOUS_DEFENSE_TAUNT        = 31790,
-    SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 25742,
+    SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS          = 101423,
+    SPELL_PALADIN_SEAL_OF_COMMAND_AURA           = 57769,
+    SPELL_PALADIN_SEAL_OF_COMMAND_PROC           = 118215,
 };
 
 class spell_pal_holy_radiance : public SpellScriptLoader
@@ -167,9 +171,46 @@ public:
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_TALENT) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_BUFF) ||
-                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_ENERGIZE))
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_ENERGIZE) ||
+                !sSpellMgr->GetSpellInfo(SPELL_PALADIN_SEAL_OF_COMMAND_AURA))
                 return false;
             return true;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+
+            // Check if caster has any seal active (including Seal of Command)
+            bool hasSeal = false;
+            Unit::AuraApplicationMap const& auras = caster->GetAppliedAuras();
+            for (auto const& aurAppPair : auras)
+            {
+                Aura* aura = aurAppPair.second->GetBase();
+                if (!aura)
+                    continue;
+
+                // Check for standard seals
+                if (aura->GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_SEAL)
+                {
+                    hasSeal = true;
+                    break;
+                }
+
+                // Check for Seal of Command aura (57769) - may not have SPELL_SPECIFIC_SEAL flag in DBC
+                if (aura->GetId() == SPELL_PALADIN_SEAL_OF_COMMAND_AURA)
+                {
+                    hasSeal = true;
+                    break;
+                }
+            }
+
+            if (!hasSeal)
+                return SpellCastResult::SPELL_FAILED_CASTER_AURASTATE;
+
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
@@ -185,6 +226,7 @@ public:
 
         void Register() override
         {
+            OnCheckCast += SpellCheckCastFn(spell_pal_judgment_SpellScript::CheckCast);
             OnEffectHitTarget += SpellEffectFn(spell_pal_judgment_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);            
         }
     }; 
@@ -924,11 +966,8 @@ public:
         {
             PreventDefaultAction();
 
-            float ap = GetTarget()->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK);
-            int32 holy = GetTarget()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_HOLY);
-            holy += eventInfo.GetProcTarget()->SpellBaseDamageBonusTaken(SPELL_SCHOOL_MASK_HOLY);
-            int32 bp = int32((ap * 0.022f + 0.044f * holy) * GetTarget()->GetAttackTime(WeaponAttackType::BASE_ATTACK) / 1000);
-            GetTarget()->CastCustomSpell(SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, SPELLVALUE_BASE_POINT0, bp, eventInfo.GetProcTarget(), true, NULL, aurEff);
+            // Spell 101423 handles the 9% weapon damage cleave within 8 yards.
+            GetTarget()->CastSpell(eventInfo.GetProcTarget(), SPELL_PALADIN_SEAL_OF_RIGHTEOUSNESS, true, NULL, aurEff);
         }
 
         void Register() override
@@ -941,6 +980,120 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_pal_seal_of_righteousness_AuraScript();
+    }
+};
+
+// 105361 - Seal of Command
+class spell_pal_seal_of_command : public SpellScriptLoader
+{
+public:
+    spell_pal_seal_of_command() : SpellScriptLoader("spell_pal_seal_of_command") { }
+
+    class spell_pal_seal_of_command_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_pal_seal_of_command_SpellScript);
+
+        void RemoveOtherSeals(Unit* caster)
+        {
+            if (!caster)
+                return;
+
+            std::list<Aura*> toRemove;
+            Unit::AuraApplicationMap const& auras = caster->GetAppliedAuras();
+            for (auto const& aurAppPair : auras)
+            {
+                Aura* aura = aurAppPair.second->GetBase();
+                if (!aura)
+                    continue;
+
+                if (aura->GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_SEAL && aura->GetId() != SPELL_PALADIN_SEAL_OF_COMMAND_AURA)
+                    toRemove.push_back(aura);
+            }
+
+            for (Aura* aura : toRemove)
+                aura->Remove();
+        }
+
+        void HandleAfterCast()
+        {
+            if (Unit* caster = GetCaster())
+            {
+                RemoveOtherSeals(caster);
+                if (Aura* aura = caster->AddAura(SPELL_PALADIN_SEAL_OF_COMMAND_AURA, caster))
+                {
+                    aura->SetDuration(-1);
+                    aura->SetMaxDuration(-1);
+                    aura->SetNeedClientUpdateForTargets();
+                    // Set AURA_STATE_JUDGEMENT immediately so Judgment can be cast
+                    caster->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
+                }
+            }
+        }
+
+        void Register() override
+        {
+            AfterCast += SpellCastFn(spell_pal_seal_of_command_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_pal_seal_of_command_SpellScript();
+    }
+
+    class spell_pal_seal_of_command_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_seal_of_command_AuraScript);
+
+        void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            // Set AURA_STATE_JUDGEMENT so Judgment can be cast
+            if (Unit* target = GetTarget())
+                target->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
+        }
+
+        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            // Remove AURA_STATE_JUDGEMENT when seal is removed
+            if (Unit* target = GetTarget())
+                target->ModifyAuraState(AURA_STATE_JUDGEMENT, false);
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return eventInfo.GetProcTarget() && eventInfo.GetDamageInfo();
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit* caster = GetTarget();
+            DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+            Unit* target = eventInfo.GetProcTarget();
+            if (!caster || !damageInfo || !target)
+                return;
+
+            int32 damage = int32(CalculatePct(damageInfo->GetDamage(), aurEff->GetAmount()));
+            if (damage <= 0)
+                return;
+
+            caster->SpellNonMeleeDamageLog(target, SPELL_PALADIN_SEAL_OF_COMMAND_PROC, damage);
+        }
+
+        void Register() override
+        {
+            // Use EFFECT_ALL to catch any effect type
+            AfterEffectApply += AuraEffectApplyFn(spell_pal_seal_of_command_AuraScript::HandleEffectApply, EFFECT_ALL, SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_pal_seal_of_command_AuraScript::HandleEffectRemove, EFFECT_ALL, SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+            DoCheckProc += AuraCheckProcFn(spell_pal_seal_of_command_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_pal_seal_of_command_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_pal_seal_of_command_AuraScript();
     }
 };
 
@@ -966,4 +1119,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_sacred_shield();
     new spell_pal_templar_s_verdict();
     new spell_pal_seal_of_righteousness();
+    new spell_pal_seal_of_command();
 }

@@ -2253,11 +2253,25 @@ public:
         void HandleDummyEffect()
         {
             Unit* caster = GetCaster();
+            if (!caster)
+                return;
 
-            if (Creature* injuredStormwindInfantry = caster->FindNearestCreature(NPC_INJURED_STORMWIND_INFANTRY, 5.0f, true))
+            Creature* injuredStormwindInfantry = nullptr;
+
+            if (Unit* explicitTarget = GetExplTargetUnit())
+                if (explicitTarget->GetEntry() == NPC_INJURED_STORMWIND_INFANTRY)
+                    injuredStormwindInfantry = explicitTarget->ToCreature();
+
+            if (!injuredStormwindInfantry)
+                injuredStormwindInfantry = caster->FindNearestCreature(NPC_INJURED_STORMWIND_INFANTRY, 5.0f);
+
+            if (!injuredStormwindInfantry || !injuredStormwindInfantry->IsAlive())
+                return;
+
+            if (Player* playerCaster = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
             {
-                injuredStormwindInfantry->SetCreatorGUID(caster->GetGUID());
-                injuredStormwindInfantry->CastSpell(injuredStormwindInfantry, SPELL_RENEWED_LIFE, true);
+                injuredStormwindInfantry->SetCreatorGUID(playerCaster->GetGUID());
+                injuredStormwindInfantry->CastSpell(injuredStormwindInfantry, SPELL_RENEWED_LIFE, true, nullptr, nullptr, playerCaster->GetGUID());
             }
         }
 

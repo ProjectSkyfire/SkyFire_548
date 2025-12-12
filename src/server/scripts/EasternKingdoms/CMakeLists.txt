@@ -160,6 +160,7 @@ set(scripts_STAT_SRCS
   #EasternKingdoms/ZulAman/zulaman.h
   EasternKingdoms/zone_hinterlands.cpp
   EasternKingdoms/zone_silverpine_forest.cpp
+  EasternKingdoms/Gilneas/gilneas_chapter_1.cpp
   EasternKingdoms/Karazhan/instance_karazhan.cpp
   EasternKingdoms/Karazhan/boss_nightbane.cpp
   EasternKingdoms/Karazhan/karazhan.cpp

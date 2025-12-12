@@ -231,6 +231,7 @@ void AddSC_silverpine_forest();
 void AddSC_stranglethorn_vale();
 void AddSC_undercity();
 void AddSC_elwynn_forest();
+void AddSC_gilneas_chapter_1();
 
 //kalimdor
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -893,6 +894,7 @@ void AddEasternKingdomsScripts()
     AddSC_stranglethorn_vale();
     AddSC_undercity();
     AddSC_elwynn_forest();
+    AddSC_gilneas_chapter_1();
 #endif
 }
 
