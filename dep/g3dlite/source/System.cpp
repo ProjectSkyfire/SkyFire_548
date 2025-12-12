@@ -549,16 +549,17 @@ static G3DEndian checkEndian() {
 
 
 static bool checkForCPUID() {
-    // all known supported architectures have cpuid
-    // add cases for incompatible architectures if they are added
-    // e.g., if we ever support __powerpc__ being defined again
-
-    return true;
+    // CPUID is only available on x86/x86_64 architectures
+    #if (defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)) && !defined(__arm__) && !defined(__aarch64__)
+        return true;
+    #else
+        return false;
+    #endif
 }
 
 
 void System::getStandardProcessorExtensions() {
-#if ! defined(G3D_OSX) || defined(G3D_OSX_INTEL)
+#if (! defined(G3D_OSX) || defined(G3D_OSX_INTEL)) && (defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)) && !defined(__arm__) && !defined(__aarch64__)
     if (! m_hasCPUID) {
         return;
     }
@@ -1689,6 +1690,8 @@ std::string System::currentTimeString() {
     return format("%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
 }
 
+#if (defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)) && !defined(__arm__) && !defined(__aarch64__)
+
 #if defined(_MSC_VER)
 
 // Windows 64-bit
@@ -1728,5 +1731,16 @@ void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32
 }
 
 #endif
+
+#else
+// Stub implementation for non-x86 architectures (ARM, etc.)
+void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32& edx) {
+    // CPUID is not available on this architecture
+    eax = 0;
+    ebx = 0;
+    ecx = 0;
+    edx = 0;
+}
+#endif // x86/x86_64 only
 
 }  // namespace

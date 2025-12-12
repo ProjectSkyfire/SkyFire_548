@@ -57,11 +57,11 @@ if(WIN32)
 else()
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
-      ${CMAKE_SOURCE_DIR}/dep/sse2neon
-    endif()
   )
   
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+    include_directories(${CMAKE_SOURCE_DIR}/dep/sse2neon)
+  endif()
   
 endif()
 

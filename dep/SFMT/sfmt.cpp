@@ -224,22 +224,6 @@ void CRandomSFMT::Init2() {
 }
 
 
-// Subfunction for the sfmt algorithm
-static inline __m128i sfmt_recursion(__m128i const &a, __m128i const &b, 
-__m128i const &c, __m128i const &d, __m128i const &mask) {
-    __m128i a1, b1, c1, d1, z1, z2;
-    b1 = _mm_srli_epi32(b, SFMT_SR1);
-    a1 = _mm_slli_si128(a, SFMT_SL2);
-    c1 = _mm_srli_si128(c, SFMT_SR2);
-    d1 = _mm_slli_epi32(d, SFMT_SL1);
-    b1 = _mm_and_si128(b1, mask);
-    z1 = _mm_xor_si128(a, a1);
-    z2 = _mm_xor_si128(b1, d1);
-    z1 = _mm_xor_si128(z1, c1);
-    z2 = _mm_xor_si128(z1, z2);
-    return z2;
-}
-
 void CRandomSFMT::Generate() {
    // Fill state array with new random numbers
    int i;

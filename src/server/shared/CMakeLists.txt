@@ -83,6 +83,10 @@ include_directories(
   ${OPENSSL_INCLUDE_DIR}
 )
 
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+  include_directories(${CMAKE_SOURCE_DIR}/dep/sse2neon)
+endif()
+
 add_library(shared STATIC
   ${shared_STAT_SRCS}
   ${shared_STAT_PCH_SRC}
@@ -91,6 +95,10 @@ add_library(shared STATIC
 target_link_libraries(shared
   ${ACE_LIBRARY}
 )
+
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+  target_link_libraries(shared SFMT)
+endif()
 
 # Generate precompiled header
 if (USE_COREPCH)

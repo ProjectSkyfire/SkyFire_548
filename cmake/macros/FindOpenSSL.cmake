@@ -217,7 +217,7 @@ ENDIF()
 IF (OPENSSL_LIB_LEGACY)
   message( STATUS "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
 ELSE()
-  message( FATAL_ERROR "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
+  message( STATUS "Found OpenSSL legacy library: ${OPENSSL_LIB_LEGACY}")
 ENDIF()
   
 if (NOT OPENSSL_INCLUDE_DIR)
