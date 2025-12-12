@@ -94,11 +94,8 @@ add_library(shared STATIC
 
 target_link_libraries(shared
   ${ACE_LIBRARY}
+  SFMT
 )
-
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
-  target_link_libraries(shared SFMT)
-endif()
 
 # Generate precompiled header
 if (USE_COREPCH)

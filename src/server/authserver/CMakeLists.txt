@@ -81,6 +81,7 @@ target_link_libraries(authserver
   ${OPENSSL_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT}
   ${ACE_LIBRARY}
+  SFMT
 )
 
 if( WIN32 )

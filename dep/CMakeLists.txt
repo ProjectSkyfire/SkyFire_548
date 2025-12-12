@@ -16,9 +16,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   endif()
 endif()
 
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
-  add_subdirectory(SFMT)
-endif()
+add_subdirectory(SFMT)
 
 add_subdirectory(zlib)
 add_subdirectory(g3dlite)
