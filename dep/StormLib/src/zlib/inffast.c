@@ -102,7 +102,7 @@ unsigned start;         /* inflate()'s starting value for strm->avail_out */
         if (bits < 15) {
             hold += (unsigned long)(*in++) << bits;
             bits += 8;
-            hold += (unsigned long)(*in++)) << bits;
+            hold += (unsigned long)(*in++) << bits;
             bits += 8;
         }
         here = lcode[hold & lmask];
