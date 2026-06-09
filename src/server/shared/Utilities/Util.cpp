@@ -11,32 +11,43 @@
 #include "Util.h"
 
 #include <cstdarg>
+#include <random>
 
-static CRandomSFMT& SfmtRand()
+// The global RNG behind frand/rand_norm/rand_chance/rand32 was a thread_local
+// CRandomSFMT built with its empty default constructor (CRandomSFMT() {}), which
+// never seeds the generator. As a static/thread_local (zero-initialized) object
+// the SFMT state stays all-zero, so Random() always returns 0.0. That makes
+// rand_chance() == 0 and roll_chance_f(chance) (= chance > rand_chance()) always
+// true, so every chance-based roll succeeds (e.g. creatures dropping their whole
+// loot table). Seeding the existing CRandomSFMT via CRandomSFMT(seed) is not an
+// option here because CRandomSFMT::RandomInit is defined in sfmt.cpp and the SFMT
+// library is not linked into worldserver/authserver (unresolved external). Use a
+// properly seeded std::mt19937 instead (distinct seed per thread).
+static std::mt19937& RandEngine()
 {
-    static thread_local CRandomSFMT sfmtRand;
-    return sfmtRand;
+    static thread_local std::mt19937 engine(std::random_device{}() ^ uint32(time(nullptr)));
+    return engine;
 }
 
 float frand(float min, float max)
 {
     ASSERT(max >= min);
-    return float(SfmtRand().Random() * (max - min) + min);
+    return std::uniform_real_distribution<float>(min, max)(RandEngine());
 }
 
 int32 rand32()
 {
-    return int32(SfmtRand().BRandom());
+    return int32(RandEngine()());
 }
 
 double rand_norm(void)
 {
-    return SfmtRand().Random();
+    return std::uniform_real_distribution<double>(0.0, 1.0)(RandEngine());
 }
 
 double rand_chance(void)
 {
-    return SfmtRand().Random() * 100.0;
+    return std::uniform_real_distribution<double>(0.0, 100.0)(RandEngine());
 }
 
 Tokenizer::Tokenizer(const std::string& src, const char sep, uint32 vectorReserve)
