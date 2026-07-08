@@ -406,7 +406,7 @@ void Unit::UpdateSplinePosition()
         if (cInfo && !(cInfo->InhabitType & INHABIT_AIR) && !creature->CanFly()
             && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER | MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY))
         {
-            float ground = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, MAX_HEIGHT, true);
+            float ground = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z + 5.0f, true);
             float floor = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z, true);
             if (ground > INVALID_HEIGHT || floor > INVALID_HEIGHT)
             {

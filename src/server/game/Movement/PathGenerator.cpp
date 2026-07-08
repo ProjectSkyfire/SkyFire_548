@@ -470,7 +470,7 @@ float PathGenerator::ResolveTerrainZ(Unit const* unit, float x, float y, float z
 {
     Map const* map = unit->GetBaseMap();
     uint32 const phase = unit->GetPhaseMask();
-    float ground = map->GetHeight(phase, x, y, MAX_HEIGHT, true);
+    float ground = map->GetHeight(phase, x, y, z + 5.0f, true);
     float floor = map->GetHeight(phase, x, y, z, true);
 
     if (ground > INVALID_HEIGHT && floor > INVALID_HEIGHT)

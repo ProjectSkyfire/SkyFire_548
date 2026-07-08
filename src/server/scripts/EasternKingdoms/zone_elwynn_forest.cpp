@@ -19,6 +19,7 @@ EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Vehicle.h"
 
 enum Northshire
 {
@@ -671,6 +672,97 @@ public:
     };
 };
 
+#include <map>
+#include "Timer.h"
+
+static std::map<uint64, uint32> s_DughanGossipCooldowns;
+
+class npc_marshal_dughan : public CreatureScript
+{
+public:
+    npc_marshal_dughan() : CreatureScript("npc_marshal_dughan") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        player->PrepareGossipMenu(creature, creature->GetCreatureTemplate()->GossipMenuId, true);
+
+        if (player->GetQuestStatus(35) == QUEST_STATUS_COMPLETE)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I wish to ride the Stormwind charger, sir.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        }
+
+        player->SendPreparedGossip(creature);
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            player->PlayerTalkClass->SendCloseGossip();
+            
+            // Dismount the player if they are currently mounted
+            if (player->IsMounted())
+                player->Dismount();
+
+            // Use the native spell which safely summons the horse and mounts the player
+            player->CastSpell(player, 78854, true);
+        }
+        return true;
+    }
+};
+
+class npc_stormwind_charger : public CreatureScript
+{
+public:
+    npc_stormwind_charger() : CreatureScript("npc_stormwind_charger") { }
+
+    struct npc_stormwind_chargerAI : public VehicleAI
+    {
+        npc_stormwind_chargerAI(Creature* creature) : VehicleAI(creature)
+        {
+        }
+
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) OVERRIDE
+        {
+            if (Player* player = who->ToPlayer())
+            {
+                if (apply)
+                {
+                    player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->AddUnitState(UNIT_STATE_IGNORE_PATHFINDING);
+                    me->GetMotionMaster()->MovePath(42260, false);
+                }
+                else
+                {
+                    player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    me->DespawnOrUnsummon(1000);
+                }
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            VehicleAI::MovementInform(type, id);
+            if (type == WAYPOINT_MOTION_TYPE && id == 37)
+            {
+                me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
+                if (Unit* passenger = me->GetVehicleKit()->GetPassenger(0))
+                {
+                    passenger->ExitVehicle();
+                }
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_stormwind_chargerAI(creature);
+    }
+};
+
 void AddSC_elwynn_forest()
 {
     new npc_hogger_elwynn();
@@ -679,4 +771,6 @@ void AddSC_elwynn_forest()
     new npc_blackrock_invader();
     new npc_stormwind_infantry();
     new npc_blackrock_battle_worg();
+    new npc_marshal_dughan();
+    new npc_stormwind_charger();
 }
