@@ -1917,15 +1917,66 @@ public:
     }
 };
 
+enum HuoSpiritOfFire
+{
+    QUEST_HUO_THE_SPIRIT_OF_FIRE  = 29422,
+    ITEM_HUOS_OFFERINGS           = 72583,
+    NPC_HUO_LIT_FOLLOWER          = 54958,
+    NPC_HUO_UNLIT                 = 54787,
+    SPELL_REIGNITE_HUO            = 106282,
+};
+
 class npc_huo : public CreatureScript
 {
 public:
     npc_huo() : CreatureScript("npc_huo") { }
 
-    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* /*quest*/ ) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) OVERRIDE
     {
-        player->CastSpell(player, 102630); // blessing of huo
-        player->CastSpell(player, 128700);
+        if (quest->GetQuestId() == QUEST_HUO_THE_SPIRIT_OF_FIRE)
+        {
+            player->CastSpell(player, 102630); // blessing of huo
+            player->CastSpell(player, 128700);
+        }
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(QUEST_HUO_THE_SPIRIT_OF_FIRE) == QUEST_STATUS_INCOMPLETE && player->HasItemCount(ITEM_HUOS_OFFERINGS))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Offer the kindling to reignite Huo.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            player->CLOSE_GOSSIP_MENU();
+
+            // Give quest credit for having interacted with Huo (NPC 54787)
+            player->KilledMonsterCredit(NPC_HUO_UNLIT);
+
+            // Visual effect: reignite Huo
+            creature->CastSpell(creature, SPELL_REIGNITE_HUO, true);
+
+            // Summon the lit/following version of Huo near the player
+            if (Creature* huoLit = player->SummonCreature(NPC_HUO_LIT_FOLLOWER, *creature, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 1200000))
+            {
+                huoLit->SetOwnerGUID(player->GetGUID());
+                huoLit->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                huoLit->SetWalk(false);
+            }
+
+            // Despawn the original unlit Huo after a short delay
+            creature->DespawnOrUnsummon(2000);
+        }
         return true;
     }
 
@@ -1975,6 +2026,48 @@ public:
     SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_item_huo_offering_SpellScript();
+    }
+};
+class item_huos_offerings : public ItemScript
+{
+public:
+    item_huos_offerings() : ItemScript("item_huos_offerings") { }
+
+    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const& /*targets*/) OVERRIDE
+    {
+        if (!player)
+            return false;
+
+        // Only act while the quest objective is still incomplete
+        if (player->GetQuestStatus(QUEST_HUO_THE_SPIRIT_OF_FIRE) != QUEST_STATUS_INCOMPLETE)
+            return false;
+
+        // Play the reignite visual on the unlit Huo if he is nearby
+        if (Creature* huo = player->FindNearestCreature(NPC_HUO_UNLIT, 60.0f, true))
+        {
+            huo->CastSpell(huo, SPELL_REIGNITE_HUO, true);
+        }
+        else
+        {
+            player->CastSpell(player, SPELL_REIGNITE_HUO, true);
+        }
+
+        // Grant quest credit for the creature objective (NPC 54787)
+        player->KilledMonsterCredit(NPC_HUO_UNLIT);
+
+        // Summon the lit / following version of Huo next to the player
+        if (Creature* huoLit = player->SummonCreature(NPC_HUO_LIT_FOLLOWER, *player, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 1800000))
+        {
+            huoLit->SetOwnerGUID(player->GetGUID());
+            huoLit->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            huoLit->SetWalk(false);
+        }
+
+        // Consume the provided offering (mirrors retail "use the offerings")
+        player->DestroyItemCount(ITEM_HUOS_OFFERINGS, 1, true);
+
+        // We handled the use: suppress the (no-op / broken) default spell 102522
+        return true;
     }
 };
 
@@ -2533,6 +2626,7 @@ void AddSC_wandering_island()
     new AreaTrigger_at_temple_of_five_dawns();
     new npc_huo();
     new spell_item_huo_offering();
+    new item_huos_offerings();
     new npc_li_fei();
     new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
