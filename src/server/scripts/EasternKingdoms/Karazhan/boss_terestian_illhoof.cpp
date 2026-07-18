@@ -66,13 +66,9 @@ public:
         npc_kilrekAI(Creature* creature) : ScriptedAI(creature)
         {
             instance = creature->GetInstanceScript();
+            TerestianGUID = 0;
+            AmplifyTimer = 0;
         }
-
-        InstanceScript* instance;
-
-        uint64 TerestianGUID;
-
-        uint32 AmplifyTimer;
 
         void Reset() OVERRIDE
         {
@@ -119,6 +115,11 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+        uint64 TerestianGUID;
+        uint32 AmplifyTimer;
     };
 };
 
@@ -134,9 +135,10 @@ public:
 
     struct npc_demon_chainAI : public ScriptedAI
     {
-        npc_demon_chainAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint64 SacrificeGUID;
+        npc_demon_chainAI(Creature* creature) : ScriptedAI(creature)
+        {
+            SacrificeGUID = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -157,6 +159,8 @@ public:
                     Sacrifice->RemoveAurasDueToSpell(SPELL_SACRIFICE);
             }
         }
+    private:
+        uint64 SacrificeGUID;
     };
 };
 
@@ -206,9 +210,10 @@ public:
 
     struct npc_fiendish_impAI : public ScriptedAI
     {
-        npc_fiendish_impAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 FireboltTimer;
+        npc_fiendish_impAI(Creature* creature) : ScriptedAI(creature)
+        {
+            FireboltTimer = 2000;
+        }
 
         void Reset() OVERRIDE
         {
@@ -233,6 +238,9 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 FireboltTimer;
     };
 };
 
@@ -252,21 +260,18 @@ public:
         {
             for (uint8 i = 0; i < 2; ++i)
                 PortalGUID[i] = 0;
+
             instance = creature->GetInstanceScript();
+
+            PortalsCount = 0;
+            SacrificeTimer = 0;
+            ShadowboltTimer = 0;
+            SummonTimer = 0;
+            BerserkTimer = 0;
+
+            SummonedPortals = false;
+            Berserk = false;
         }
-
-        InstanceScript* instance;
-
-        uint64 PortalGUID[2];
-        uint8 PortalsCount;
-
-        uint32 SacrificeTimer;
-        uint32 ShadowboltTimer;
-        uint32 SummonTimer;
-        uint32 BerserkTimer;
-
-        bool SummonedPortals;
-        bool Berserk;
 
         void Reset() OVERRIDE
         {
@@ -409,6 +414,20 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        InstanceScript* instance;
+
+        uint64 PortalGUID[2];
+        uint8 PortalsCount;
+
+        uint32 SacrificeTimer;
+        uint32 ShadowboltTimer;
+        uint32 SummonTimer;
+        uint32 BerserkTimer;
+
+        bool SummonedPortals;
+        bool Berserk;
     };
 };
 
