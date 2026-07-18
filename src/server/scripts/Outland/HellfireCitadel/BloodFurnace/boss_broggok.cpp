@@ -38,14 +38,12 @@ public:
         boss_broggokAI(Creature* creature) : BossAI(creature, DATA_BROGGOK)
         {
             instance = creature->GetInstanceScript();
+
+            AcidSpray_Timer = 0;
+            PoisonSpawn_Timer = 0;
+            PoisonBolt_Timer = 0;
+            canAttack = false;
         }
-
-        InstanceScript* instance;
-
-        uint32 AcidSpray_Timer;
-        uint32 PoisonSpawn_Timer;
-        uint32 PoisonBolt_Timer;
-        bool canAttack;
 
         void Reset() OVERRIDE
         {
@@ -132,6 +130,14 @@ public:
                     break;
             }
         }
+
+    private:
+        InstanceScript* instance;
+
+        uint32 AcidSpray_Timer;
+        uint32 PoisonSpawn_Timer;
+        uint32 PoisonBolt_Timer;
+        bool canAttack;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

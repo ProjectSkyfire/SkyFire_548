@@ -32,10 +32,11 @@ public:
 
     struct boss_tinkerer_gizlockAI : public ScriptedAI
     {
-        boss_tinkerer_gizlockAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 uiBombTimer;
-        uint32 uiGoblinDragonGunTimer;
+        boss_tinkerer_gizlockAI(Creature* creature) : ScriptedAI(creature)
+        {
+            uiBombTimer = 0;
+            uiGoblinDragonGunTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -71,6 +72,10 @@ public:
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 uiBombTimer;
+        uint32 uiGoblinDragonGunTimer;
     };
 };
 
