@@ -48,11 +48,7 @@ class boss_loatheb : public CreatureScript
 
         struct boss_loathebAI : public BossAI
         {
-            boss_loathebAI(Creature* creature) : BossAI(creature, BOSS_LOATHEB)
-            {
-                _sporeLoserData = false;
-                _doomCounter = 0;
-            }
+            boss_loathebAI(Creature* creature) : BossAI(creature, BOSS_LOATHEB), _sporeLoserData(false), _doomCounter(0) { }
 
             void Reset() OVERRIDE
             {

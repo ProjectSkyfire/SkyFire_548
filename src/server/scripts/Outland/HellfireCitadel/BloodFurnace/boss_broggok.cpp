@@ -35,14 +35,9 @@ public:
 
     struct boss_broggokAI : public BossAI
     {
-        boss_broggokAI(Creature* creature) : BossAI(creature, DATA_BROGGOK)
+        boss_broggokAI(Creature* creature) : BossAI(creature, DATA_BROGGOK), AcidSpray_Timer(0), PoisonSpawn_Timer(0), PoisonBolt_Timer(0), canAttack(false)
         {
             instance = creature->GetInstanceScript();
-
-            AcidSpray_Timer = 0;
-            PoisonSpawn_Timer = 0;
-            PoisonBolt_Timer = 0;
-            canAttack = false;
         }
 
         void Reset() OVERRIDE
