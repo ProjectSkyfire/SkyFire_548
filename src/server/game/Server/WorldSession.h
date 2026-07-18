@@ -1087,6 +1087,7 @@ public:                                                 // opcodes handlers
     void HandleBattlePetSetBattleSlot(WorldPacket& recvData);
     void HandleBattlePetSetFlags(WorldPacket& recvData);
     void HandleBattlePetSummonCompanion(WorldPacket& recvData);
+    void HandleBattlePetCage(WorldPacket& recvData);
     void HandleBattlePetInput(WorldPacket& recvData);
     void HandleBattlePetInputFirstPet(WorldPacket& recvData);
     void HandleBattlePetFinalNotify(WorldPacket& recvData);

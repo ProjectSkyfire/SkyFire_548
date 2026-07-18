@@ -1793,3 +1793,7 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
     battlePetMgr->HideActivePetBattleWorldObject(wildBattlePet);
 }
 
+void WorldSession::HandleBattlePetCage(WorldPacket& recvData)
+{
+
+}
