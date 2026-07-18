@@ -9,15 +9,7 @@ else()
   cmake_minimum_required(VERSION 4.1.2)
 endif()
 
-if (WIN32)
-  #set clang as compiler if not msvc or mingw set
-  if (NOT MSVC AND NOT MINGW)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-    set(CMAKE_C_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
-    set(CMAKE_CXX_COMPILER "C:/Program Files/LLVM/bin/clang++.exe")
-    set(CMAKE_RC_COMPILER "C:/Program Files/LLVM/bin/clang.exe")
-  endif()
-endif()
+
 
 # Set projectname (must be done AFTER setting configurationtypes)
 project(Project_Skyfire)
@@ -72,26 +64,8 @@ set(OPENSSL_EXPECTED_VERSION 4.0.0)
 
 set(BOOST_EXPECTED_VERSION 1.91.0)
 
-if(BOOST_ROOT)
-  file(TO_CMAKE_PATH "${BOOST_ROOT}" BOOST_ROOT_HINT)
-elseif(DEFINED ENV{BOOST_ROOT})
-  file(TO_CMAKE_PATH "$ENV{BOOST_ROOT}" BOOST_ROOT_HINT)
-endif()
 
-if(BOOST_ROOT_HINT)
-  list(APPEND CMAKE_PREFIX_PATH "${BOOST_ROOT_HINT}")
 
-  if(NOT Boost_DIR)
-    file(GLOB BOOST_CONFIG_DIRS LIST_DIRECTORIES true
-      "${BOOST_ROOT_HINT}/lib*/cmake/Boost-${BOOST_EXPECTED_VERSION}"
-    )
-
-    if(BOOST_CONFIG_DIRS)
-      list(SORT BOOST_CONFIG_DIRS ORDER DESCENDING)
-      list(GET BOOST_CONFIG_DIRS 0 Boost_DIR)
-    endif()
-  endif()
-endif()
 
 find_package(PCHSupport)
 find_package(Boost ${BOOST_EXPECTED_VERSION} REQUIRED)

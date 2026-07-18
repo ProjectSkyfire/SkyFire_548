@@ -19,6 +19,7 @@ set(mmap_gen_Includes
   ${CMAKE_SOURCE_DIR}/src/server/collision/Management
   ${CMAKE_SOURCE_DIR}/src/server/collision/Maps
   ${CMAKE_SOURCE_DIR}/src/server/collision/Models
+  ${Boost_INCLUDE_DIRS}
 )
 
 if( WIN32 )
