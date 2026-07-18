@@ -6,6 +6,7 @@
 #include "BattlePet.h"
 #include "BattlePetMgr.h"
 #include "BattlePetPackets.h"
+#include "BattlePetPvpState.h"
 #include "Common.h"
 #include "Creature.h"
 #include "DB2Enums.h"
@@ -19,40 +20,14 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-#include <algorithm>
 #include <cmath>
 #include <ctime>
-#include <map>
-#include <vector>
 
 namespace
 {
-    struct PetBattlePvpProposal
-    {
-        uint64 OpponentGuid = 0;
-        bool Accepted = false;
-        time_t CreatedAt = 0;
-    };
-
-    struct PetBattlePvpChallenge
-    {
-        uint64 ChallengerGuid = 0;
-        uint64 TargetGuid = 0;
-        G3D::Vector3 Origin;
-        G3D::Vector3 Positions[2];
-        float Orientation = 0.0f;
-        uint32 LocationResult = 0;
-        bool HasLocationResult = false;
-        bool PromptAcknowledged = false;
-        time_t CreatedAt = 0;
-    };
-
-    std::vector<uint64> PetBattlePvpQueue;
-    std::map<uint64, PetBattlePvpProposal> PetBattlePvpProposals;
-    std::map<uint64, PetBattlePvpChallenge> PetBattlePvpChallengesByTarget;
-    std::map<uint64, uint64> PetBattlePvpChallengeTargetByChallenger;
     uint32 const PetBattlePvpProposalTimeout = 60;
     uint32 const PetBattlePvpChallengeTimeout = 60;
+    PetBattlePvpStateStore& PetBattlePvpState = GetPetBattlePvpStateStore();
 
     bool ValidatePetBattleQueueRequest(Player& player);
     bool ValidatePetBattlePvpDuelTarget(Player& challenger, Player* target);
@@ -84,22 +59,10 @@ namespace
         target.SendDirectMessage(&data);
     }
 
-    uint16 FindBattlePetSpeciesIdByNpcId(uint32 npcId)
-    {
-        for (uint32 speciesId = 0; speciesId < sBattlePetSpeciesStore.GetNumRows(); ++speciesId)
-        {
-            BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
-            if (speciesEntry && speciesEntry->NpcId == npcId)
-                return uint16(speciesId);
-        }
-
-        return 0;
-    }
-
     bool BuildWildInitialUpdatePetData(Creature const& wildBattlePet,
         Skyfire::BattlePetPackets::InitialUpdatePetData& wildPetData, uint8& wildPetBreed)
     {
-        uint16 const speciesId = FindBattlePetSpeciesIdByNpcId(wildBattlePet.GetEntry());
+        uint16 const speciesId = BattlePetSpeciesIdByNpcId(wildBattlePet.GetEntry());
         if (!speciesId)
             return false;
 
@@ -110,124 +73,6 @@ namespace
         return true;
     }
 
-    enum BattlePetAbilityEffectProperties
-    {
-        BATTLE_PET_EFFECT_DAMAGE = 24,
-        BATTLE_PET_EFFECT_RAMPING_DAMAGE = 27,
-        BATTLE_PET_EFFECT_DAMAGE_TOGGLE_AURA = 76,
-        BATTLE_PET_EFFECT_DAMAGE_HIT_STATE = 96,
-        BATTLE_PET_EFFECT_EXTRA_ATTACK_FIRST = 103,
-        BATTLE_PET_EFFECT_DAMAGE_NON_LETHAL = 149
-    };
-
-    bool BattlePetAbilityEffectDealsDamage(uint32 propertiesId)
-    {
-        switch (propertiesId)
-        {
-            case BATTLE_PET_EFFECT_DAMAGE:
-            case BATTLE_PET_EFFECT_RAMPING_DAMAGE:
-            case BATTLE_PET_EFFECT_DAMAGE_TOGGLE_AURA:
-            case BATTLE_PET_EFFECT_DAMAGE_HIT_STATE:
-            case BATTLE_PET_EFFECT_EXTRA_ATTACK_FIRST:
-            case BATTLE_PET_EFFECT_DAMAGE_NON_LETHAL:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForTurn(uint32 turnId, bool damageOnly)
-    {
-        BattlePetAbilityEffectEntry const* firstEffect = NULL;
-        BattlePetAbilityEffectEntry const* firstDamageEffect = NULL;
-
-        for (uint32 i = 0; i < sBattlePetAbilityEffectStore.GetNumRows(); ++i)
-        {
-            BattlePetAbilityEffectEntry const* effectEntry = sBattlePetAbilityEffectStore.LookupEntry(i);
-            if (!effectEntry || effectEntry->TurnEntryId != turnId)
-                continue;
-
-            if (!firstEffect)
-                firstEffect = effectEntry;
-
-            if (!firstDamageEffect && BattlePetAbilityEffectDealsDamage(effectEntry->PropertiesId))
-                firstDamageEffect = effectEntry;
-        }
-
-        return damageOnly ? firstDamageEffect : (firstDamageEffect ? firstDamageEffect : firstEffect);
-    }
-
-    BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForAbility(uint32 abilityId, bool damageOnly)
-    {
-        std::pair<BattlePetAbilityTurnByAbilityStore::const_iterator, BattlePetAbilityTurnByAbilityStore::const_iterator> turnRange =
-            sBattlePetAbilityTurnByAbilityStore.equal_range(abilityId);
-
-        BattlePetAbilityEffectEntry const* firstEffect = NULL;
-
-        for (BattlePetAbilityTurnByAbilityStore::const_iterator itr = turnRange.first; itr != turnRange.second; ++itr)
-        {
-            BattlePetAbilityEffectEntry const* effectEntry = BattlePetAbilityEffectForTurn(itr->second.first, damageOnly);
-            if (!effectEntry)
-                continue;
-
-            if (damageOnly || BattlePetAbilityEffectDealsDamage(effectEntry->PropertiesId))
-                return effectEntry;
-
-            if (!firstEffect)
-                firstEffect = effectEntry;
-        }
-
-        return damageOnly ? NULL : firstEffect;
-    }
-
-    uint32 BattlePetAbilityBasePoints(uint32 abilityId)
-    {
-        BattlePetAbilityEffectEntry const* damageEffect = BattlePetAbilityEffectForAbility(abilityId, true);
-        return damageEffect ? damageEffect->PropertyValues[0] : 0;
-    }
-
-    uint32 BattlePetScalePointsFromStats(uint32 points, uint16 power, uint8 level)
-    {
-        if (!points)
-            return 0;
-
-        uint32 const safeLevel = std::max<uint32>(level, 1);
-        uint32 const safePower = std::max<uint32>(power, safeLevel * 8);
-        uint32 const powerBonusPct = (safePower * 5) / 100;
-        uint32 const scaledPoints = points + ((points * powerBonusPct) / 100);
-        return std::max<uint32>(1, scaledPoints);
-    }
-
-    uint32 BattlePetDamageFromStats(uint32 abilityId, uint16 power, uint8 level)
-    {
-        if (!abilityId)
-            return 0;
-
-        return BattlePetScalePointsFromStats(BattlePetAbilityBasePoints(abilityId), power, level);
-    }
-
-    uint16 BattlePetPowerFromBattleState(uint16 species, uint8 level, uint8 quality, uint8 breed)
-    {
-        if (!species)
-            return level * 8;
-
-        float const basePower = BattlePetSpeciesMainStat(BATTLE_PET_STATE_STAT_POWER, species) +
-            BattlePetBreedMainStatModifier(BATTLE_PET_STATE_STAT_POWER, breed);
-        float const qualityMod = BattlePetQualityMultiplier(quality);
-        return uint16(std::max<float>(1.0f, std::floor((basePower * std::max<uint8>(level, 1) * qualityMod) + 0.5f)));
-    }
-
-    uint32 BattlePetInputDamageForAbility(uint32 abilityId, BattlePet const* caster)
-    {
-        if (!abilityId)
-            return 0;
-
-        if (!caster)
-            return BattlePetDamageFromStats(abilityId, 0, 1);
-
-        return BattlePetDamageFromStats(abilityId, caster->GetPower(), caster->GetLevel());
-    }
-
     uint32 BattlePetInputDamageForEnemyAbility(uint32 abilityId, ActivePetBattle const& activeBattle)
     {
         if (!abilityId)
@@ -236,52 +81,6 @@ namespace
         uint16 const power = BattlePetPowerFromBattleState(activeBattle.EnemySpecies,
             activeBattle.EnemyLevel, activeBattle.EnemyQuality, activeBattle.EnemyBreed);
         return BattlePetDamageFromStats(abilityId, power, activeBattle.EnemyLevel);
-    }
-
-    int32 BattlePetAbilityStateValue(uint32 abilityId, uint32 stateId)
-    {
-        for (uint32 i = 0; i < sBattlePetAbilityStateStore.GetNumRows(); ++i)
-        {
-            BattlePetAbilityStateEntry const* stateEntry = sBattlePetAbilityStateStore.LookupEntry(i);
-            if (stateEntry && stateEntry->AbilityId == abilityId && stateEntry->StateId == stateId)
-                return int32(stateEntry->Value);
-        }
-
-        return 0;
-    }
-
-    uint32 BattlePetIncomingDamageReductionFromStats(uint32 abilityId, uint16 power, uint8 level)
-    {
-        BattlePetAbilityEntry const* abilityEntry = sBattlePetAbilityStore.LookupEntry(abilityId);
-        if (!abilityEntry || !abilityEntry->AuraAbilityId)
-            return 0;
-
-        int32 const stateValue = BattlePetAbilityStateValue(
-            abilityEntry->AuraAbilityId, BATTLE_PET_STATE_DAMAGE_TAKEN_FLAT);
-        if (stateValue >= 0)
-            return 0;
-
-        return BattlePetScalePointsFromStats(uint32(std::abs(stateValue)), power, level);
-    }
-
-    uint8 BattlePetIncomingDamageReductionRounds(uint32 abilityId)
-    {
-        BattlePetAbilityEntry const* abilityEntry = sBattlePetAbilityStore.LookupEntry(abilityId);
-        if (!abilityEntry || !abilityEntry->AuraAbilityId)
-            return 0;
-
-        return uint8(std::min<uint32>(abilityEntry->AuraDuration, 255));
-    }
-
-    uint32 BattlePetInputIncomingDamageReductionForAbility(uint32 abilityId, BattlePet const* caster)
-    {
-        if (!abilityId)
-            return 0;
-
-        if (!caster)
-            return BattlePetIncomingDamageReductionFromStats(abilityId, 0, 1);
-
-        return BattlePetIncomingDamageReductionFromStats(abilityId, caster->GetPower(), caster->GetLevel());
     }
 
     uint32 BattlePetInputIncomingDamageReductionForEnemyAbility(uint32 abilityId, ActivePetBattle const& activeBattle)
@@ -330,21 +129,6 @@ namespace
                 return slot;
 
         return BATTLE_PET_ABILITY_SLOT_INVALID;
-    }
-
-    uint16 BattlePetAbilityCooldown(uint32 abilityId)
-    {
-        BattlePetAbilityEntry const* abilityEntry = sBattlePetAbilityStore.LookupEntry(abilityId);
-        if (!abilityEntry)
-            return 0;
-
-        return uint16(abilityEntry->Cooldown);
-    }
-
-    uint32 BattlePetInputEffectForAbility(uint32 abilityId)
-    {
-        BattlePetAbilityEffectEntry const* effectEntry = BattlePetAbilityEffectForAbility(abilityId, false);
-        return effectEntry ? effectEntry->Id : 0;
     }
 
     void SendBattlePetRoundResult(Player& player, Skyfire::BattlePetPackets::BattlePetRoundResult const& round)
@@ -493,14 +277,13 @@ namespace
     void ClearPetBattlePvpChallengeForTarget(uint64 targetGuid, bool notifyPlayers = false,
         uint64 exceptGuid = 0)
     {
-        std::map<uint64, PetBattlePvpChallenge>::iterator challengeItr =
-            PetBattlePvpChallengesByTarget.find(targetGuid);
-        if (challengeItr == PetBattlePvpChallengesByTarget.end())
+        PetBattlePvpStateStore::ChallengeMap::iterator challengeItr =
+            PetBattlePvpState.ChallengesByTarget().find(targetGuid);
+        if (challengeItr == PetBattlePvpState.ChallengesByTarget().end())
             return;
 
         PetBattlePvpChallenge const challenge = challengeItr->second;
-        PetBattlePvpChallengeTargetByChallenger.erase(challenge.ChallengerGuid);
-        PetBattlePvpChallengesByTarget.erase(challengeItr);
+        PetBattlePvpState.EraseChallengeForTarget(targetGuid);
 
         if (!notifyPlayers)
             return;
@@ -517,34 +300,24 @@ namespace
     {
         ClearPetBattlePvpChallengeForTarget(playerGuid, notifyPlayers, exceptGuid);
 
-        std::map<uint64, uint64>::iterator targetItr =
-            PetBattlePvpChallengeTargetByChallenger.find(playerGuid);
-        if (targetItr == PetBattlePvpChallengeTargetByChallenger.end())
+        PetBattlePvpStateStore::ChallengeTargetMap::iterator targetItr =
+            PetBattlePvpState.ChallengeTargetByChallenger().find(playerGuid);
+        if (targetItr == PetBattlePvpState.ChallengeTargetByChallenger().end())
             return;
 
         ClearPetBattlePvpChallengeForTarget(targetItr->second, notifyPlayers, exceptGuid);
     }
 
-    std::map<uint64, PetBattlePvpChallenge>::iterator FindPetBattlePvpChallengeForPlayer(uint64 playerGuid)
+    PetBattlePvpStateStore::ChallengeMap::iterator FindPetBattlePvpChallengeForPlayer(uint64 playerGuid)
     {
-        std::map<uint64, PetBattlePvpChallenge>::iterator challengeItr =
-            PetBattlePvpChallengesByTarget.find(playerGuid);
-        if (challengeItr != PetBattlePvpChallengesByTarget.end())
-            return challengeItr;
-
-        std::map<uint64, uint64>::iterator targetItr =
-            PetBattlePvpChallengeTargetByChallenger.find(playerGuid);
-        if (targetItr == PetBattlePvpChallengeTargetByChallenger.end())
-            return PetBattlePvpChallengesByTarget.end();
-
-        return PetBattlePvpChallengesByTarget.find(targetItr->second);
+        return PetBattlePvpState.FindChallengeForPlayer(playerGuid);
     }
 
     bool ExpirePetBattlePvpChallenge(Player& player)
     {
-        std::map<uint64, PetBattlePvpChallenge>::iterator challengeItr =
+        PetBattlePvpStateStore::ChallengeMap::iterator challengeItr =
             FindPetBattlePvpChallengeForPlayer(player.GetGUID());
-        if (challengeItr == PetBattlePvpChallengesByTarget.end()
+        if (challengeItr == PetBattlePvpState.ChallengesByTarget().end()
             || !IsPetBattlePvpChallengeExpired(challengeItr->second))
             return false;
 
@@ -746,19 +519,12 @@ namespace
 
     void RemovePetBattlePvpQueueEntry(uint64 playerGuid)
     {
-        PetBattlePvpQueue.erase(std::remove(PetBattlePvpQueue.begin(), PetBattlePvpQueue.end(), playerGuid),
-            PetBattlePvpQueue.end());
+        PetBattlePvpState.RemoveQueueEntry(playerGuid);
     }
 
     void ClearPetBattlePvpProposal(uint64 playerGuid)
     {
-        std::map<uint64, PetBattlePvpProposal>::iterator proposalItr = PetBattlePvpProposals.find(playerGuid);
-        if (proposalItr == PetBattlePvpProposals.end())
-            return;
-
-        uint64 const opponentGuid = proposalItr->second.OpponentGuid;
-        PetBattlePvpProposals.erase(playerGuid);
-        PetBattlePvpProposals.erase(opponentGuid);
+        PetBattlePvpState.ClearProposal(playerGuid);
     }
 
     bool IsPetBattlePvpProposalExpired(PetBattlePvpProposal const& proposal)
@@ -774,8 +540,8 @@ namespace
         uint64 const playerGuid = player.GetGUID();
         RemovePetBattlePvpQueueEntry(playerGuid);
 
-        std::map<uint64, PetBattlePvpProposal>::iterator proposalItr = PetBattlePvpProposals.find(playerGuid);
-        uint64 const opponentGuid = proposalItr != PetBattlePvpProposals.end() ? proposalItr->second.OpponentGuid : 0;
+        PetBattlePvpStateStore::ProposalMap::iterator proposalItr = PetBattlePvpState.Proposals().find(playerGuid);
+        uint64 const opponentGuid = proposalItr != PetBattlePvpState.Proposals().end() ? proposalItr->second.OpponentGuid : 0;
         ClearPetBattlePvpProposal(playerGuid);
 
         player.GetBattlePetMgr()->SetPetBattlePvpQueued(false);
@@ -795,9 +561,9 @@ namespace
 
     bool ExpirePetBattlePvpProposal(Player& player)
     {
-        std::map<uint64, PetBattlePvpProposal>::iterator proposalItr =
-            PetBattlePvpProposals.find(player.GetGUID());
-        if (proposalItr == PetBattlePvpProposals.end() || !IsPetBattlePvpProposalExpired(proposalItr->second))
+        PetBattlePvpStateStore::ProposalMap::iterator proposalItr =
+            PetBattlePvpState.Proposals().find(player.GetGUID());
+        if (proposalItr == PetBattlePvpState.Proposals().end() || !IsPetBattlePvpProposalExpired(proposalItr->second))
             return false;
 
         LeavePetBattlePvpQueue(player, true,
@@ -811,7 +577,8 @@ namespace
         uint64 const playerGuid = player.GetGUID();
         RemovePetBattlePvpQueueEntry(playerGuid);
 
-        for (std::vector<uint64>::iterator itr = PetBattlePvpQueue.begin(); itr != PetBattlePvpQueue.end();)
+        for (PetBattlePvpStateStore::QueueContainer::iterator itr = PetBattlePvpState.Queue().begin();
+            itr != PetBattlePvpState.Queue().end();)
         {
             Player* opponent = ObjectAccessor::FindPlayer(*itr);
             if (!IsPetBattlePvpQueueCandidate(opponent))
@@ -819,12 +586,12 @@ namespace
                 if (opponent)
                     opponent->GetBattlePetMgr()->SetPetBattlePvpQueued(false);
 
-                itr = PetBattlePvpQueue.erase(itr);
+                itr = PetBattlePvpState.Queue().erase(itr);
                 continue;
             }
 
             uint64 const opponentGuid = *itr;
-            PetBattlePvpQueue.erase(itr);
+            PetBattlePvpState.Queue().erase(itr);
             return opponentGuid;
         }
 
@@ -837,8 +604,7 @@ namespace
         uint64 const opponentGuid = opponent.GetGUID();
         time_t const createdAt = time(NULL);
 
-        PetBattlePvpProposals[playerGuid] = { opponentGuid, false, createdAt };
-        PetBattlePvpProposals[opponentGuid] = { playerGuid, false, createdAt };
+        PetBattlePvpState.AddProposalPair(playerGuid, opponentGuid, createdAt);
 
         SendPetBattleQueueProposeMatch(player);
         SendPetBattleQueueProposeMatch(opponent);
@@ -869,7 +635,7 @@ namespace
             return;
         }
 
-        PetBattlePvpQueue.push_back(playerGuid);
+        PetBattlePvpState.AddQueueEntry(playerGuid);
     }
 
     void FailAcceptedPetBattlePvpQueueMatch(Player& player, Player* opponent)
@@ -877,7 +643,7 @@ namespace
         LeavePetBattlePvpQueue(player, true,
             Skyfire::BattlePetPackets::PET_BATTLE_QUEUE_STATUS_JOIN_FAILED,
             Skyfire::BattlePetPackets::PET_BATTLE_QUEUE_STATUS_JOIN_FAILED,
-            opponent != NULL);
+            opponent != nullptr);
 
         if (opponent && opponent->GetBattlePetMgr()->IsPetBattlePvpQueued())
         {
@@ -952,7 +718,7 @@ namespace
     bool ValidatePetBattlePvpDuelTarget(Player& challenger, Player* target)
     {
         BattlePetMgr* challengerBattlePetMgr = challenger.GetBattlePetMgr();
-        BattlePetMgr* targetBattlePetMgr = target ? target->GetBattlePetMgr() : NULL;
+        BattlePetMgr* targetBattlePetMgr = target ? target->GetBattlePetMgr() : nullptr;
         if (!target || target == &challenger || !targetBattlePetMgr || targetBattlePetMgr->HasActivePetBattle()
             || target->GetMapId() != challenger.GetMapId())
         {
@@ -985,9 +751,9 @@ namespace
         Skyfire::BattlePetPackets::BattlePetRequestUpdate const& request)
     {
         uint64 const targetGuid = target.GetGUID();
-        std::map<uint64, PetBattlePvpChallenge>::iterator challengeItr =
-            PetBattlePvpChallengesByTarget.find(targetGuid);
-        if (challengeItr == PetBattlePvpChallengesByTarget.end())
+        PetBattlePvpStateStore::ChallengeMap::iterator challengeItr =
+            PetBattlePvpState.ChallengesByTarget().find(targetGuid);
+        if (challengeItr == PetBattlePvpState.ChallengesByTarget().end())
             return false;
 
         if (IsPetBattlePvpChallengeExpired(challengeItr->second))
@@ -1037,9 +803,9 @@ namespace
     bool CompletePendingPetBattlePvpChallenge(Player& target, bool accepted)
     {
         uint64 const targetGuid = target.GetGUID();
-        std::map<uint64, PetBattlePvpChallenge>::iterator challengeItr =
-            PetBattlePvpChallengesByTarget.find(targetGuid);
-        if (challengeItr == PetBattlePvpChallengesByTarget.end())
+        PetBattlePvpStateStore::ChallengeMap::iterator challengeItr =
+            PetBattlePvpState.ChallengesByTarget().find(targetGuid);
+        if (challengeItr == PetBattlePvpState.ChallengesByTarget().end())
             return false;
 
         if (IsPetBattlePvpChallengeExpired(challengeItr->second))
@@ -1131,8 +897,8 @@ void WorldSession::HandlePetBattleQueueProposeMatchResult(WorldPacket& recvData)
         return;
 
     uint64 const playerGuid = player->GetGUID();
-    std::map<uint64, PetBattlePvpProposal>::iterator proposalItr = PetBattlePvpProposals.find(playerGuid);
-    if (proposalItr == PetBattlePvpProposals.end())
+    PetBattlePvpStateStore::ProposalMap::iterator proposalItr = PetBattlePvpState.Proposals().find(playerGuid);
+    if (proposalItr == PetBattlePvpState.Proposals().end())
     {
         SendPetBattleQueueStatus(*this, *player, Skyfire::BattlePetPackets::PET_BATTLE_QUEUE_STATUS_NONE);
         return;
@@ -1149,8 +915,9 @@ void WorldSession::HandlePetBattleQueueProposeMatchResult(WorldPacket& recvData)
     proposalItr->second.Accepted = true;
 
     uint64 const opponentGuid = proposalItr->second.OpponentGuid;
-    std::map<uint64, PetBattlePvpProposal>::iterator opponentProposalItr = PetBattlePvpProposals.find(opponentGuid);
-    if (opponentProposalItr == PetBattlePvpProposals.end())
+    PetBattlePvpStateStore::ProposalMap::iterator opponentProposalItr =
+        PetBattlePvpState.Proposals().find(opponentGuid);
+    if (opponentProposalItr == PetBattlePvpState.Proposals().end())
     {
         LeavePetBattlePvpQueue(*player, true);
         return;
@@ -1162,7 +929,7 @@ void WorldSession::HandlePetBattleQueueProposeMatchResult(WorldPacket& recvData)
     Player* opponent = ObjectAccessor::FindPlayer(opponentGuid);
     if (!opponent)
     {
-        FailAcceptedPetBattlePvpQueueMatch(*player, NULL);
+        FailAcceptedPetBattlePvpQueueMatch(*player, nullptr);
         return;
     }
 
@@ -1235,8 +1002,7 @@ void WorldSession::HandlePetBattleRequestPvp(WorldPacket& recvData)
     challenge.LocationResult = petBattleRequest.LocationResult;
     challenge.HasLocationResult = true;
     challenge.CreatedAt = time(NULL);
-    PetBattlePvpChallengesByTarget[targetGuid] = challenge;
-    PetBattlePvpChallengeTargetByChallenger[playerGuid] = targetGuid;
+    PetBattlePvpState.AddChallenge(challenge);
 
     WorldPacket data = Skyfire::BattlePetPackets::BuildPvpChallengePacket(
         player->GetGUID(), petBattleRequest.Origin, petBattleRequest.Positions,

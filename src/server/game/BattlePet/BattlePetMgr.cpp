@@ -46,21 +46,6 @@ namespace
         return !left.empty() && !right.empty() && !stricmp(left.c_str(), right.c_str());
     }
 
-    uint32 BattlePetSpeciesNpcId(uint16 speciesId)
-    {
-        BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
-        return speciesEntry ? speciesEntry->NpcId : 0;
-    }
-
-    uint32 BattlePetSpeciesFamilyMask(uint16 speciesId)
-    {
-        BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
-        if (!speciesEntry || speciesEntry->FamilyId >= 32)
-            return 0;
-
-        return uint32(1) << speciesEntry->FamilyId;
-    }
-
     uint8 BattlePetHealthPercent(uint32 health, uint32 maxHealth)
     {
         if (!maxHealth)

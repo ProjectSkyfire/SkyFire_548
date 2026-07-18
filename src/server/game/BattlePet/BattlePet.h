@@ -261,4 +261,22 @@ private:
     BattlePetDbState m_dbState;
 };
 
+struct BattlePetAbilityEffectEntry;
+
+uint16 BattlePetSpeciesIdByNpcId(uint32 npcId);
+uint32 BattlePetSpeciesNpcId(uint16 speciesId);
+uint32 BattlePetSpeciesFamilyMask(uint16 speciesId);
+BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForAbility(uint32 abilityId, bool damageOnly);
+int32 BattlePetAbilityStateValue(uint32 abilityId, uint32 stateId);
+uint32 BattlePetAbilityBasePoints(uint32 abilityId);
+uint32 BattlePetScalePointsFromStats(uint32 points, uint16 power, uint8 level);
+uint32 BattlePetDamageFromStats(uint32 abilityId, uint16 power, uint8 level);
+uint16 BattlePetPowerFromBattleState(uint16 species, uint8 level, uint8 quality, uint8 breed);
+uint32 BattlePetInputDamageForAbility(uint32 abilityId, BattlePet const* caster);
+uint32 BattlePetIncomingDamageReductionFromStats(uint32 abilityId, uint16 power, uint8 level);
+uint8 BattlePetIncomingDamageReductionRounds(uint32 abilityId);
+uint32 BattlePetInputIncomingDamageReductionForAbility(uint32 abilityId, BattlePet const* caster);
+uint16 BattlePetAbilityCooldown(uint32 abilityId);
+uint32 BattlePetInputEffectForAbility(uint32 abilityId);
+
 #endif

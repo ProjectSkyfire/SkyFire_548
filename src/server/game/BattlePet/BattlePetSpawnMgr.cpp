@@ -13,9 +13,10 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
+#include "Util.h"
 #include "World.h"
 
-#include <cstdlib>
+#include <unordered_map>
 
 namespace
 {
@@ -23,17 +24,28 @@ namespace
 
     int32 BattlePetWildPoolMapForZone(uint32 zoneId)
     {
+        typedef std::unordered_map<uint32, int32> BattlePetWildPoolZoneMapCache;
+        static BattlePetWildPoolZoneMapCache zoneMapCache;
+
+        BattlePetWildPoolZoneMapCache::const_iterator cacheItr = zoneMapCache.find(zoneId);
+        if (cacheItr != zoneMapCache.end())
+            return cacheItr->second;
+
         for (uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)
         {
             AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(i);
             if (areaEntry && areaEntry->m_ID == zoneId)
+            {
+                zoneMapCache[zoneId] = int32(areaEntry->m_ContinentID);
                 return int32(areaEntry->m_ContinentID);
+            }
         }
 
+        zoneMapCache[zoneId] = -1;
         return -1;
     }
 
-    uint8 BattlePetWildPoolLevel(uint8 minLevel, uint8 maxLevel)
+    uint8 BattlePetWildPoolLevel(Creature const& source, uint8 minLevel, uint8 maxLevel)
     {
         if (!minLevel)
             minLevel = 1;
@@ -41,7 +53,10 @@ namespace
         if (!maxLevel || maxLevel < minLevel)
             maxLevel = minLevel;
 
-        return minLevel + uint8(std::rand() % (maxLevel - minLevel + 1));
+        if (maxLevel == minLevel)
+            return minLevel;
+
+        return uint8(minLevel + (rand32() % (uint32(maxLevel) - minLevel + 1)));
     }
 
     uint8 BattlePetWildPoolMaxCount(uint8 databaseMax)
@@ -323,7 +338,7 @@ void BattlePetWildZonePool::SpawnReplacement(uint64 originalGuid, BattlePetWildP
         return;
     }
 
-    Creature* original = ObjectAccessor::GetObjectInWorld(originalGuid, (Creature*)NULL);
+    Creature* original = ObjectAccessor::GetObjectInWorld(originalGuid, static_cast<Creature*>(nullptr));
     if (!original || !original->IsInWorld() || original->m_isTempWorldObject || original->GetEntry() != spawnTemplate.Entry)
     {
         spawnTemplate.ReadyForReplacement.erase(originalGuid);
@@ -349,7 +364,7 @@ void BattlePetWildZonePool::SpawnReplacement(uint64 originalGuid, BattlePetWildP
         return;
     }
 
-    uint8 const level = BattlePetWildPoolLevel(spawnTemplate.MinLevel, spawnTemplate.MaxLevel);
+    uint8 const level = BattlePetWildPoolLevel(*original, spawnTemplate.MinLevel, spawnTemplate.MaxLevel);
     replacement->SetLevel(level);
     replacement->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_WILDPET_CAPTURABLE);
     replacement->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC);
@@ -377,14 +392,14 @@ bool BattlePetWildZonePool::RemoveReplacement(uint64 originalGuid, BattlePetWild
         return false;
 
     uint64 const replacementGuid = relationItr->second;
-    Creature* replacement = ObjectAccessor::GetObjectInWorld(replacementGuid, (Creature*)NULL);
+    Creature* replacement = ObjectAccessor::GetObjectInWorld(replacementGuid, static_cast<Creature*>(nullptr));
     if (replacement)
     {
         replacement->RemoveFromWorld();
         replacement->AddObjectToRemoveList();
     }
 
-    if (Creature* original = ObjectAccessor::GetObjectInWorld(originalGuid, (Creature*)NULL))
+    if (Creature* original = ObjectAccessor::GetObjectInWorld(originalGuid, static_cast<Creature*>(nullptr)))
     {
         if (CreatureData const* creatureData = original->GetCreatureData())
             original->SetRespawnTime(creatureData->spawntimesecs);
