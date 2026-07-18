@@ -119,6 +119,7 @@ class npc_core_rager : public CreatureScript
             npc_core_ragerAI(Creature* creature) : ScriptedAI(creature)
             {
                 instance = creature->GetInstanceScript();
+                mangleTimer = 0;
             }
 
             void Reset() OVERRIDE
