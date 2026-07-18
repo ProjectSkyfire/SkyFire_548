@@ -663,6 +663,8 @@ namespace
 
     void ReadPetBattlePvpDuelRequestLocation(WorldPacket& recvData, PetBattleRequest& petBattleRequest)
     {
+        recvData >> petBattleRequest.Origin.z;
+
         for (uint8 i = 0; i < 2; i++)
         {
             recvData >> petBattleRequest.Positions[i].x;
@@ -670,7 +672,6 @@ namespace
             recvData >> petBattleRequest.Positions[i].y;
         }
 
-        recvData >> petBattleRequest.Origin.z;
         recvData >> petBattleRequest.Origin.y;
         recvData >> petBattleRequest.Origin.x;
 
