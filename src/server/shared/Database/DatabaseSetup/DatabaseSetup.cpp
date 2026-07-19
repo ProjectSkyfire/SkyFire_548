@@ -345,11 +345,40 @@ namespace Database
 
     bool ExecuteSqlScript(std::string const& sql, std::function<bool(std::string const&)> const& executor)
     {
-        for (std::string const& statement : SplitSqlStatements(sql))
+        std::string current;
+        std::string delimiter = ";";
+        std::istringstream input(sql);
+        std::string line;
+
+        while (std::getline(input, line))
         {
-            if (!executor(statement))
-                return false;
+            std::string newDelimiter;
+            if (Trim(current).empty() && TryReadDelimiterCommand(line, newDelimiter))
+            {
+                current.clear();
+                delimiter = newDelimiter;
+                continue;
+            }
+
+            current += line;
+            current.push_back('\n');
+            while (true)
+            {
+                std::string::size_type delimiterPosition = FindDelimiterOutsideQuotedText(current, delimiter);
+                if (delimiterPosition == std::string::npos)
+                    break;
+
+                std::string statement = Trim(current.substr(0, delimiterPosition));
+                if (!statement.empty() && !executor(statement))
+                    return false;
+
+                current.erase(0, delimiterPosition + delimiter.length());
+            }
         }
+
+        std::string statement = Trim(current);
+        if (!statement.empty() && !executor(statement))
+            return false;
 
         return true;
     }

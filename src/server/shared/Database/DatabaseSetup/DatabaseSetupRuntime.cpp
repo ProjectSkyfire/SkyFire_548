@@ -101,8 +101,14 @@ namespace Database
 
         bool ExecuteSqlText(MYSQL* setupConnection, std::string const& sql, SetupRuntimeContext const& context)
         {
-            return ExecuteSqlScript(sql, [setupConnection, &context](std::string const& statement)
+            uint32 statementCount = 0;
+            return ExecuteSqlScript(sql, [setupConnection, &context, &statementCount](std::string const& statement)
             {
+                ++statementCount;
+                if (statementCount == 1 || statementCount % 500 == 0)
+                    SF_LOG_INFO(context.LogFilter, "Executed %u %s database setup SQL statements.",
+                        statementCount, context.DatabaseName);
+
                 return ExecuteSetupQuery(setupConnection, statement, context.SqlExecutionContext, context);
             });
         }
@@ -292,6 +298,9 @@ namespace Database
             SF_LOG_ERROR(context.LogFilter, "Could not read SQL file %s.", path.string().c_str());
             return false;
         }
+
+        SF_LOG_INFO(context.LogFilter, "Executing SQL file %s (%u bytes).",
+            path.string().c_str(), uint32(contents.size()));
 
         if (!ExecuteSqlText(setupConnection, contents, context))
         {
