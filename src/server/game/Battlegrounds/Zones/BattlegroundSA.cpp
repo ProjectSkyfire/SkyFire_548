@@ -4,6 +4,7 @@
 */
 
 #include "BattlegroundSA.h"
+#include "BattlegroundMgr.h"
 #include "GameObject.h"
 #include "Language.h"
 #include "ObjectMgr.h"
@@ -12,9 +13,11 @@
 #include "WorldSession.h"
 
 #include <ctime>
+#include <sstream>
+#include <vector>
 
 BattlegroundSA::BattlegroundSA() : gateDestroyed(false), Attackers(TeamId::TEAM_ALLIANCE), TotalTime(0), EndRoundTimer(0), ShipsStarted(false), Status(BG_SA_Status::BG_SA_NOTSTARTED), TimerEnabled(false),
-UpdateWaitTimer(0), SignaledRoundTwo(false), SignaledRoundTwoHalfMin(false), InitSecondRound(false)
+UpdateWaitTimer(0), SignaledRoundTwo(false), SignaledRoundTwoHalfMin(false), InitSecondRound(false), BoatDebugTimerActive(false), BoatDebugStartTime(0), BoatDebugUpdateTimer(0), BoatDebugPlayerGuid(0)
 {
     StartMessageIds[BG_STARTING_EVENT_FIRST] = LANG_BG_SA_START_TWO_MINUTES;
     StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
@@ -38,6 +41,10 @@ void BattlegroundSA::Reset()
     for (uint8 i = 0; i <= 5; i++)
         GateStatus[i] = BG_SA_GATE_OK;
     ShipsStarted = false;
+    BoatDebugTimerActive = false;
+    BoatDebugStartTime = 0;
+    BoatDebugUpdateTimer = 0;
+    BoatDebugPlayerGuid = 0;
     gateDestroyed = false;
     _allVehiclesAlive[TEAM_ALLIANCE] = true;
     _allVehiclesAlive[TEAM_HORDE] = true;
@@ -111,6 +118,8 @@ bool BattlegroundSA::ResetObjs()
     GetBGObject(BG_SA_BOAT_TWO)->UpdateRotationFields(1.0f, 0.00001f);
     SpawnBGObject(BG_SA_BOAT_ONE, RESPAWN_IMMEDIATELY);
     SpawnBGObject(BG_SA_BOAT_TWO, RESPAWN_IMMEDIATELY);
+    GetBGObject(BG_SA_BOAT_ONE)->StopLegacyTransportAtInitialStop();
+    GetBGObject(BG_SA_BOAT_TWO)->StopLegacyTransportAtInitialStop();
 
     //Cannons and demolishers - NPCs are spawned
     //By capturing GYs.
@@ -139,6 +148,10 @@ bool BattlegroundSA::ResetObjs()
 
     TotalTime = 0;
     ShipsStarted = false;
+    BoatDebugTimerActive = false;
+    BoatDebugStartTime = 0;
+    BoatDebugUpdateTimer = 0;
+    BoatDebugPlayerGuid = 0;
 
     //Graveyards
     for (uint8 i = 0; i < BG_SA_MAX_GY; i++)
@@ -243,29 +256,176 @@ void BattlegroundSA::StartShips()
     if (ShipsStarted)
         return;
 
-    GetBGObject(BG_SA_BOAT_ONE)->SetGoState(GOState::GO_STATE_TRANSPORT_STOPPED);
-    GetBGObject(BG_SA_BOAT_TWO)->SetGoState(GOState::GO_STATE_TRANSPORT_STOPPED);
+    GameObject* boatOne = GetBGObject(BG_SA_BOAT_ONE);
+    GameObject* boatTwo = GetBGObject(BG_SA_BOAT_TWO);
+    if (!boatOne || !boatTwo)
+    {
+        SF_LOG_ERROR("bg.battleground", "SOTA: cannot start ships, one or more boat objects are missing");
+        return;
+    }
+
+    uint32 shipTravelTime = 0;
+    if (Status == BG_SA_WARMUP && TotalTime < BG_SA_WARMUPLENGTH)
+        shipTravelTime = BG_SA_WARMUPLENGTH - TotalTime;
+    else if (Status == BG_SA_SECOND_WARMUP && TotalTime < 60 * IN_MILLISECONDS)
+        shipTravelTime = 60 * IN_MILLISECONDS - TotalTime;
+
+    boatOne->StartLegacyTransportToFirstStop(shipTravelTime);
+    boatTwo->StartLegacyTransportToFirstStop(shipTravelTime);
+
+    SendBoatTransportUpdates();
+
+    ShipsStarted = true;
+}
+
+void BattlegroundSA::SendBoatTransportUpdates()
+{
+    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+    {
+        Player* player = ObjectAccessor::FindPlayer(itr->first);
+        if (!player)
+            continue;
+
+        UpdateData createData(player->GetMapId());
+        for (uint8 i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; ++i)
+        {
+            if (GameObject* transport = GetBGObject(i))
+                transport->BuildValuesUpdateBlockForPlayer(&createData, player);
+        }
+
+        WorldPacket createPacket;
+        createData.BuildPacket(&createPacket);
+        player->SendDirectMessage(&createPacket);
+    }
+}
+
+void BattlegroundSA::SendBoatDebugTimerUpdate()
+{
+    if (!BoatDebugTimerActive || !BoatDebugPlayerGuid)
+        return;
+
+    if (Player* player = ObjectAccessor::FindPlayer(BoatDebugPlayerGuid))
+        if (WorldSession* session = player->GetSession())
+            session->SendNotification("SOTA boat travel: %u ms", GetMSTimeDiffToNow(BoatDebugStartTime));
+}
+
+void BattlegroundSA::LogBoatDebugMarker(Player* player, char const* action, uint32 elapsedMs)
+{
+    if (!player)
+        return;
+
+    if (WorldSession* session = player->GetSession())
+    {
+        std::ostringstream marker;
+        marker << "SOTA_BOAT_DEBUG action=" << action
+            << " elapsed_ms=" << elapsedMs
+            << " bg_instance=" << GetInstanceID();
+        session->LogPacketMarker(marker.str());
+    }
+}
+
+bool BattlegroundSA::DebugStartBoats(Player* player)
+{
+    GameObject* boatOne = GetBGObject(BG_SA_BOAT_ONE);
+    GameObject* boatTwo = GetBGObject(BG_SA_BOAT_TWO);
+    if (!boatOne || !boatTwo)
+        return false;
+
+    boatOne->StartLegacyTransportToFirstStop(BG_SA_BOAT_START);
+    boatTwo->StartLegacyTransportToFirstStop(BG_SA_BOAT_START);
+    SendBoatTransportUpdates();
+
+    BoatDebugTimerActive = true;
+    BoatDebugStartTime = getMSTime();
+    BoatDebugUpdateTimer = 0;
+    BoatDebugPlayerGuid = player ? player->GetGUID() : 0;
+    ShipsStarted = true;
+    LogBoatDebugMarker(player, "start");
+    SendBoatDebugTimerUpdate();
+    return true;
+}
+
+bool BattlegroundSA::DebugStopBoats(Player* player)
+{
+    GameObject* boatOne = GetBGObject(BG_SA_BOAT_ONE);
+    GameObject* boatTwo = GetBGObject(BG_SA_BOAT_TWO);
+    if (!boatOne || !boatTwo)
+        return false;
+
+    uint32 const elapsedMs = BoatDebugTimerActive ? GetMSTimeDiffToNow(BoatDebugStartTime) : 0;
+    boatOne->StopLegacyTransportAtCurrentProgress();
+    boatTwo->StopLegacyTransportAtCurrentProgress();
+    SendBoatTransportUpdates();
+
+    BoatDebugTimerActive = false;
+    BoatDebugStartTime = 0;
+    BoatDebugUpdateTimer = 0;
+    BoatDebugPlayerGuid = 0;
+    ShipsStarted = true;
+    LogBoatDebugMarker(player, "stop", elapsedMs);
+    return true;
+}
+
+std::string BattlegroundSA::GetBoatDebugStatus()
+{
+    std::ostringstream status;
+    status << "boatsStarted=" << (ShipsStarted ? 1 : 0)
+        << " timerActive=" << (BoatDebugTimerActive ? 1 : 0);
 
     for (uint8 i = BG_SA_BOAT_ONE; i <= BG_SA_BOAT_TWO; ++i)
     {
         GameObject* transport = GetBGObject(i);
         if (!transport)
-            continue;
-
-        for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
         {
-            if (Player* player = ObjectAccessor::FindPlayer(itr->first))
-            {
-                UpdateData data(player->GetMapId());
-                WorldPacket packet;
-                transport->BuildValuesUpdateBlockForPlayer(&data, player);
-                data.BuildPacket(&packet);
-                player->SendDirectMessage(&packet);
-            }
+            status << " boat" << uint32(i) << "=missing";
+            continue;
         }
+
+        status << " boat" << uint32(i)
+            << "{entry=" << transport->GetEntry()
+            << " state=" << uint32(transport->GetGoState())
+            << " progress=" << transport->GetTransportPathProgress()
+            << " period=" << transport->GetTransportPeriod()
+            << "}";
     }
 
-    ShipsStarted = true;
+    return status.str();
+}
+
+bool BattlegroundSA::BoatLaunchWindowStarted() const
+{
+    if (ShipsStarted)
+        return true;
+
+    if (Status == BG_SA_WARMUP)
+        return TotalTime >= BG_SA_BOAT_START;
+
+    return Status == BG_SA_SECOND_WARMUP;
+}
+
+bool BattlegroundSA::ShouldDelayStartForDebug() const
+{
+    if (!sBattlegroundMgr->isTesting())
+        return false;
+
+    if (GetStatus() != STATUS_WAIT_JOIN)
+        return false;
+
+    uint32 activePlayers = 0;
+    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+    {
+        Player* player = ObjectAccessor::FindPlayer(itr->first);
+        if (!player)
+            continue;
+
+        if (player->GetMapId() != GetMapId() || player->GetInstanceId() != GetInstanceID())
+            continue;
+
+        if (++activePlayers >= 2)
+            return false;
+    }
+
+    return true;
 }
 
 void BattlegroundSA::PostUpdateImpl(uint32 diff)
@@ -287,7 +447,18 @@ void BattlegroundSA::PostUpdateImpl(uint32 diff)
             return;
         }
     }
+
     TotalTime += diff;
+    if (BoatDebugTimerActive)
+    {
+        if (BoatDebugUpdateTimer <= diff)
+        {
+            BoatDebugUpdateTimer = IN_MILLISECONDS;
+            SendBoatDebugTimerUpdate();
+        }
+        else
+            BoatDebugUpdateTimer -= diff;
+    }
 
     if (Status == BG_SA_WARMUP)
     {
@@ -300,7 +471,7 @@ void BattlegroundSA::PostUpdateImpl(uint32 diff)
             Status = BG_SA_ROUND_ONE;
             StartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, (Attackers == TEAM_ALLIANCE) ? 23748 : 21702);
         }
-        if (TotalTime >= BG_SA_BOAT_START)
+        if (BoatLaunchWindowStarted())
             StartShips();
         return;
     }
@@ -431,7 +602,7 @@ void BattlegroundSA::AddPlayer(Player* player)
 
     SendTransportInit(player);
 
-    if (!ShipsStarted)
+    if (!BoatLaunchWindowStarted())
     {
         if (player->GetTeamId() == Attackers)
         {
@@ -496,10 +667,7 @@ void BattlegroundSA::TeleportPlayers()
 
             player->ResetAllPowers();
             player->CombatStopWithPets(true);
-
-            for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-                if (Player* p = ObjectAccessor::FindPlayer(itr->first))
-                    p->CastSpell(p, SPELL_PREPARATION, true);
+            player->CastSpell(player, SPELL_PREPARATION, true);
 
             if (player->GetTeamId() == Attackers)
             {
@@ -894,6 +1062,15 @@ void BattlegroundSA::EndBattleground(uint32 winner)
     RewardHonorToTeam(GetBonusHonorFromKill(2), HORDE);
 
     Battleground::EndBattleground(winner);
+
+    std::vector<uint64> players;
+    players.reserve(GetPlayersSize());
+
+    for (BattlegroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+        players.push_back(itr->first);
+
+    for (std::vector<uint64>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        RemovePlayerAtLeave(*itr, true, true);
 }
 
 void BattlegroundSA::UpdateDemolisherSpawns()
@@ -930,14 +1107,24 @@ void BattlegroundSA::UpdateDemolisherSpawns()
 
 void BattlegroundSA::SendTransportInit(Player* player)
 {
-    if (BgObjects[BG_SA_BOAT_ONE] || BgObjects[BG_SA_BOAT_TWO])
-    {
-        UpdateData transData(player->GetMapId());
-        if (BgObjects[BG_SA_BOAT_ONE])
+    GameObject* boatOne = BgObjects[BG_SA_BOAT_ONE] ? GetBGObject(BG_SA_BOAT_ONE) : NULL;
+    GameObject* boatTwo = BgObjects[BG_SA_BOAT_TWO] ? GetBGObject(BG_SA_BOAT_TWO) : NULL;
 
-            GetBGObject(BG_SA_BOAT_ONE)->BuildCreateUpdateBlockForPlayer(&transData, player);
-        if (BgObjects[BG_SA_BOAT_TWO])
-            GetBGObject(BG_SA_BOAT_TWO)->BuildCreateUpdateBlockForPlayer(&transData, player);
+    if (boatOne || boatTwo)
+    {
+        if (!ShipsStarted)
+        {
+            if (boatOne)
+                boatOne->StopLegacyTransportAtInitialStop();
+            if (boatTwo)
+                boatTwo->StopLegacyTransportAtInitialStop();
+        }
+
+        UpdateData transData(player->GetMapId());
+        if (boatOne)
+            boatOne->BuildCreateUpdateBlockForPlayer(&transData, player);
+        if (boatTwo)
+            boatTwo->BuildCreateUpdateBlockForPlayer(&transData, player);
         WorldPacket packet;
         transData.BuildPacket(&packet);
         player->SendDirectMessage(&packet);
@@ -946,13 +1133,16 @@ void BattlegroundSA::SendTransportInit(Player* player)
 
 void BattlegroundSA::SendTransportsRemove(Player* player)
 {
-    if (BgObjects[BG_SA_BOAT_ONE] || BgObjects[BG_SA_BOAT_TWO])
+    GameObject* boatOne = BgObjects[BG_SA_BOAT_ONE] ? GetBGObject(BG_SA_BOAT_ONE) : NULL;
+    GameObject* boatTwo = BgObjects[BG_SA_BOAT_TWO] ? GetBGObject(BG_SA_BOAT_TWO) : NULL;
+
+    if (boatOne || boatTwo)
     {
         UpdateData transData(player->GetMapId());
-        if (BgObjects[BG_SA_BOAT_ONE])
-            GetBGObject(BG_SA_BOAT_ONE)->BuildOutOfRangeUpdateBlock(&transData);
-        if (BgObjects[BG_SA_BOAT_TWO])
-            GetBGObject(BG_SA_BOAT_TWO)->BuildOutOfRangeUpdateBlock(&transData);
+        if (boatOne)
+            boatOne->BuildOutOfRangeUpdateBlock(&transData);
+        if (boatTwo)
+            boatTwo->BuildOutOfRangeUpdateBlock(&transData);
         WorldPacket packet;
         transData.BuildPacket(&packet);
         player->SendDirectMessage(&packet);

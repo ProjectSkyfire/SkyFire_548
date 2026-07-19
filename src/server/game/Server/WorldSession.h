@@ -268,6 +268,7 @@ public:
     bool IsAddonRegistered(const std::string& prefix) const;
 
     void SendPacket(WorldPacket const* packet, bool forced = false);
+    void LogPacketMarker(std::string const& marker);
     void SendNotification(const char* format, ...) ATTR_PRINTF(2, 3);
     void SendNotification(uint32 string_id, ...);
     void SendPetNameInvalid(uint32 error, std::string const& name, DeclinedName* declinedName, uint32 petNumber);

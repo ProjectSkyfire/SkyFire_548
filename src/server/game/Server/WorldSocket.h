@@ -70,6 +70,9 @@ public:
     /// @return -1 of failure
     int SendPacket(const WorldPacket& pct);
 
+    /// Writes a readable marker into the per-session packet log.
+    void LogPacketMarker(std::string const& marker);
+
     /// Add reference to this object.
     long AddReference(void);
 

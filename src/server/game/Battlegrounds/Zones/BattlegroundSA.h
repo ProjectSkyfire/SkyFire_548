@@ -7,6 +7,7 @@
 #define SF_BATTLEGROUNDSA_H
 
 #include "Battleground.h"
+#include <string>
 
 struct BattlegroundSAScore : public BattlegroundScore
 {
@@ -438,6 +439,7 @@ public:
      * -Round switch
      */
     void PostUpdateImpl(uint32 diff) OVERRIDE;
+    bool ShouldDelayStartForDebug() const OVERRIDE;
 
     /* inherited from BattlegroundClass */
     /// Called when a player join battle
@@ -527,6 +529,9 @@ public:
     /* Scorekeeping */
     /// Update score board
     void UpdatePlayerScore(Player* Source, uint32 type, uint32 value, bool doAddHonor = true) OVERRIDE;
+    bool DebugStartBoats(Player* player);
+    bool DebugStopBoats(Player* player);
+    std::string GetBoatDebugStatus();
 
     // Achievement: Defense of the Ancients
     bool gateDestroyed;
@@ -544,8 +549,12 @@ private:
      * -Respawn all gameobject / creature to have good faction
      */
     bool ResetObjs();
+    bool BoatLaunchWindowStarted() const;
     /// Called for start ship movement
     void StartShips();
+    void SendBoatTransportUpdates();
+    void SendBoatDebugTimerUpdate();
+    void LogBoatDebugMarker(Player* player, char const* action, uint32 elapsedMs = 0);
     /**
      * \brief Called between the two round
      * -Teleport all players to good location
@@ -613,6 +622,10 @@ private:
     bool SignaledRoundTwoHalfMin;
     /// for know if second round has been init
     bool InitSecondRound;
+    bool BoatDebugTimerActive;
+    uint32 BoatDebugStartTime;
+    uint32 BoatDebugUpdateTimer;
+    uint64 BoatDebugPlayerGuid;
     std::map<uint32/*id*/, uint32/*timer*/> DemoliserRespawnList;
 
     // Achievement: Not Even a Scratch

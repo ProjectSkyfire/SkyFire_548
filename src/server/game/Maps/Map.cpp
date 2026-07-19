@@ -3185,15 +3185,14 @@ GameObject* Map::GetGameObject(uint64 guid)
 
 Transport* Map::GetTransport(uint64 guid)
 {
-    if (GUID_HIPART(guid) != HIGHGUID_MO_TRANSPORT && GUID_HIPART(guid) != HIGHGUID_TRANSPORT)
+    if (GUID_HIPART(guid) != HIGHGUID_MO_TRANSPORT)
         return NULL;
 
     for (TransportsContainer::const_iterator itr = _transports.begin(); itr != _transports.end(); ++itr)
         if ((*itr)->GetGUID() == guid)
             return *itr;
 
-    GameObject* go = GetGameObject(guid);
-    return go ? go->ToTransport() : NULL;
+    return NULL;
 }
 
 DynamicObject* Map::GetDynamicObject(uint64 guid)

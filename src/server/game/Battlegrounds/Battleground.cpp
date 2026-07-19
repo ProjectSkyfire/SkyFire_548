@@ -205,8 +205,11 @@ void Battleground::Update(uint32 diff)
         case STATUS_WAIT_JOIN:
             if (GetPlayersSize())
             {
-                _ProcessJoin(diff);
-                _CheckSafePositions(diff);
+                if (!ShouldDelayStartForDebug())
+                {
+                    _ProcessJoin(diff);
+                    _CheckSafePositions(diff);
+                }
             }
             break;
         case STATUS_IN_PROGRESS:
@@ -238,6 +241,9 @@ void Battleground::Update(uint32 diff)
     }
 
     // Update start time and reset stats timer
+    if (GetStatus() == STATUS_WAIT_JOIN && ShouldDelayStartForDebug())
+        return;
+
     SetElapsedTime(GetElapsedTime() + diff);
     if (GetStatus() == STATUS_WAIT_JOIN)
     {
@@ -1080,6 +1086,9 @@ void Battleground::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
 
         SF_LOG_DEBUG("bg.battleground", "Removed player %s from Battleground.", player->GetName().c_str());
     }
+
+    if (GetStatus() == STATUS_WAIT_LEAVE && !GetPlayersSize() && !GetInvitedCount(HORDE) && !GetInvitedCount(ALLIANCE))
+        m_SetDeleteThis = true;
 
     //battleground object will be deleted next Battleground::Update() call
 }

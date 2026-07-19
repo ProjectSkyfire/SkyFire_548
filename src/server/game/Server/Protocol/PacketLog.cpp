@@ -51,6 +51,15 @@ std::string SanitizePathPart(std::string value)
 
     return value;
 }
+
+std::string SanitizeMarker(std::string marker)
+{
+    for (char& ch : marker)
+        if (ch == '\r' || ch == '\n')
+            ch = ' ';
+
+    return marker;
+}
 }
 
 PacketLog::PacketLog() : _file(NULL), _logsDir(), _controlFiles(), _sessionLogDir(), _sessionLogs()
@@ -211,6 +220,27 @@ void PacketLog::LogPacket(void const* sessionKey, std::string const& remoteAddre
         fprintf(file, "%02X", packet[i]);
 
     fputc('\n', file);
+    fflush(file);
+}
+
+void PacketLog::LogMarker(void const* sessionKey, std::string const& remoteAddress, std::string const& marker)
+{
+    if (!IsSessionLoggingEnabled())
+    {
+        CloseSession(sessionKey);
+        return;
+    }
+
+    std::lock_guard<std::mutex> guard(_sessionLock);
+    FILE* file = OpenSessionLog(sessionKey, remoteAddress);
+    if (!file)
+        return;
+
+    SessionLog& session = _sessionLogs[sessionKey];
+    fprintf(file, "# %llu %u MARKER %s\n",
+        static_cast<unsigned long long>(++session.sequence),
+        static_cast<uint32>(time(NULL)),
+        SanitizeMarker(marker).c_str());
     fflush(file);
 }
 

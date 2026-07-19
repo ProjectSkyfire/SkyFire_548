@@ -928,6 +928,7 @@ uint32 GameObject::GetTransportPeriod() const
 
 void GameObject::SetTransportPathProgress(uint32 pathProgress)
 {
+    m_goValue.Transport.HoldingAtProgress = false;
     m_goValue.Transport.PathProgress = Skyfire::GameObjects::GetTransportDynamicPathProgress(
         GetGoType(), GetTransportPeriod(), pathProgress);
     MarkLegacyTransportPathProgressChanged();
@@ -943,12 +944,13 @@ std::vector<uint32> const* GameObject::GetPauseTimes() const
 
 void GameObject::InitializeLegacyTransport()
 {
-    SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, 0);
-
     m_goValue.Transport.AnimationInfo = sTransportMgr->GetTransportAnimInfo(GetGOInfo()->entry);
     m_goValue.Transport.CurrentSeg = 0;
     m_goValue.Transport.PathProgress = 0;
     m_goValue.Transport.WaitingAtPathStart = false;
+    m_goValue.Transport.HoldingAtProgress = false;
+    m_goValue.Transport.HoldProgress = 0;
+    m_goValue.Transport.StateChangeEndTime = 0;
 
     m_transportPauseTimes.clear();
 
@@ -965,6 +967,7 @@ void GameObject::InitializeLegacyTransport()
     uint32 const now = getMSTime();
     m_goValue.Transport.WaitingAtPathStart = !m_transportPauseTimes.empty() && !GetGOInfo()->transport.startOpen;
     m_goValue.Transport.StateChangeTime = now;
+    m_goValue.Transport.StateChangeEndTime = now;
     m_goValue.Transport.StateChangeProgress = m_goValue.Transport.PathProgress;
     SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, now);
     MarkLegacyTransportPathProgressChanged();
@@ -979,12 +982,18 @@ void GameObject::UpdateLegacyTransportPathProgress()
     uint32 newProgress = m_goValue.Transport.PathProgress;
     bool updateStoppedFlag = false;
     bool stopped = false;
-    if (m_transportPauseTimes.empty())
+    if (m_goValue.Transport.HoldingAtProgress)
+    {
+        newProgress = m_goValue.Transport.HoldProgress;
+        updateStoppedFlag = true;
+        stopped = true;
+    }
+    else if (m_transportPauseTimes.empty())
         newProgress = Skyfire::GameObjects::WrapTransportPathProgress(getMSTime(), period);
     else
     {
         uint32 const targetProgress = GetLegacyTransportTargetProgress(GetGoState());
-        uint32 const stopTime = GetUInt32Value(GAMEOBJECT_FIELD_LEVEL);
+        uint32 const stopTime = m_goValue.Transport.StateChangeEndTime;
         uint32 const now = getMSTime();
 
         if (stopTime > now)
@@ -1029,6 +1038,7 @@ void GameObject::HandleLegacyTransportStateChange(GOState oldState, GOState newS
 
     UpdateLegacyTransportPathProgress();
 
+    m_goValue.Transport.HoldingAtProgress = false;
     if (newState == GOState::GO_STATE_TRANSPORT_STOPPED && m_goValue.Transport.WaitingAtPathStart)
         m_goValue.Transport.WaitingAtPathStart = false;
 
@@ -1039,7 +1049,8 @@ void GameObject::HandleLegacyTransportStateChange(GOState oldState, GOState newS
 
     m_goValue.Transport.StateChangeTime = now;
     m_goValue.Transport.StateChangeProgress = m_goValue.Transport.PathProgress;
-    SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, now + travelTime);
+    m_goValue.Transport.StateChangeEndTime = now + travelTime;
+    SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, m_goValue.Transport.StateChangeEndTime);
 
     if (int32(oldState) < int32(GOState::GO_STATE_TRANSPORT_ACTIVE) || oldState == newState)
     {
@@ -1070,6 +1081,92 @@ void GameObject::HandleLegacyTransportStateChange(GOState oldState, GOState newS
 
     if (oldState != newState)
         MarkLegacyTransportPathProgressChanged();
+}
+
+void GameObject::SetLegacyTransportTravelTime(uint32 travelTime)
+{
+    if (GetGoType() != GAMEOBJECT_TYPE_TRANSPORT || m_transportPauseTimes.empty())
+        return;
+
+    uint32 const now = getMSTime();
+    m_goValue.Transport.HoldingAtProgress = false;
+    m_goValue.Transport.WaitingAtPathStart = false;
+    m_goValue.Transport.StateChangeTime = now;
+    m_goValue.Transport.StateChangeProgress = m_goValue.Transport.PathProgress;
+    m_goValue.Transport.StateChangeEndTime = now + travelTime;
+    SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, m_goValue.Transport.StateChangeEndTime);
+    SetLegacyTransportStopped(travelTime == 0);
+    MarkLegacyTransportPathProgressChanged();
+}
+
+void GameObject::StartLegacyTransportToFirstStop(uint32 travelTime)
+{
+    if (GetGoType() != GAMEOBJECT_TYPE_TRANSPORT || m_transportPauseTimes.empty())
+        return;
+
+    uint32 const now = getMSTime();
+    uint32 const targetProgress = m_transportPauseTimes.front();
+
+    m_goValue.Transport.HoldingAtProgress = false;
+    m_goValue.Transport.WaitingAtPathStart = false;
+    m_goValue.Transport.StateChangeTime = now;
+    m_goValue.Transport.StateChangeProgress = m_goValue.Transport.PathProgress;
+    m_goValue.Transport.StateChangeEndTime = now + travelTime;
+    SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, m_goValue.Transport.StateChangeEndTime);
+    SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0, GetGOStateValue(GOState::GO_STATE_TRANSPORT_STOPPED));
+
+    if (m_goValue.Transport.PathProgress > targetProgress)
+        SetFlag(OBJECT_FIELD_DYNAMIC_FLAGS, GO_DYNFLAG_LO_INVERTED_MOVEMENT);
+    else
+        RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, GO_DYNFLAG_LO_INVERTED_MOVEMENT);
+
+    SetLegacyTransportStopped(travelTime == 0);
+    MarkLegacyTransportPathProgressChanged();
+}
+
+void GameObject::StopLegacyTransportAtInitialStop()
+{
+    if (GetGoType() != GAMEOBJECT_TYPE_TRANSPORT || m_transportPauseTimes.empty())
+        return;
+
+    uint32 initialProgress = 0;
+    bool waitingAtPathStart = !GetGOInfo()->transport.startOpen;
+    if (GetGOInfo()->transport.startOpen)
+        initialProgress = m_transportPauseTimes.front();
+
+    uint32 const now = getMSTime();
+    m_goValue.Transport.PathProgress = initialProgress;
+    m_goValue.Transport.StateChangeTime = now;
+    m_goValue.Transport.StateChangeProgress = initialProgress;
+    m_goValue.Transport.StateChangeEndTime = now;
+    m_goValue.Transport.HoldProgress = initialProgress;
+    m_goValue.Transport.HoldingAtProgress = true;
+    m_goValue.Transport.WaitingAtPathStart = waitingAtPathStart;
+    SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, now);
+    SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0, GetGOStateValue(GOState::GO_STATE_TRANSPORT_STOPPED));
+    RemoveFlag(OBJECT_FIELD_DYNAMIC_FLAGS, GO_DYNFLAG_LO_INVERTED_MOVEMENT);
+    SetLegacyTransportStopped(true);
+    MarkLegacyTransportPathProgressChanged();
+}
+
+void GameObject::StopLegacyTransportAtCurrentProgress()
+{
+    if (GetGoType() != GAMEOBJECT_TYPE_TRANSPORT || m_transportPauseTimes.empty())
+        return;
+
+    UpdateLegacyTransportPathProgress();
+
+    uint32 const now = getMSTime();
+    m_goValue.Transport.StateChangeTime = now;
+    m_goValue.Transport.StateChangeProgress = m_goValue.Transport.PathProgress;
+    m_goValue.Transport.StateChangeEndTime = now;
+    m_goValue.Transport.HoldProgress = m_goValue.Transport.PathProgress;
+    m_goValue.Transport.HoldingAtProgress = true;
+    m_goValue.Transport.WaitingAtPathStart = false;
+    SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 0, GetGOStateValue(GOState::GO_STATE_TRANSPORT_STOPPED));
+    SetUInt32Value(GAMEOBJECT_FIELD_LEVEL, now);
+    SetLegacyTransportStopped(true);
+    MarkLegacyTransportPathProgressChanged();
 }
 
 void GameObject::SetLegacyTransportStopped(bool stopped)
@@ -2097,13 +2194,52 @@ void GameObject::ModifyHealth(int32 change, Unit* attackerOrHealer /*= NULL*/, u
     // dealing damage, send packet
     if (player)
     {
+        ObjectGuid playerGUID = player->GetGUID();
+        ObjectGuid vehicleGUID = attackerOrHealer->GetGUID();
+        ObjectGuid objectGUID = GetGUID();
+
         WorldPacket data(SMSG_DESTRUCTIBLE_BUILDING_DAMAGE, 8 + 8 + 8 + 4 + 4);
-        data.appendPackGUID(GetGUID());
-        data.appendPackGUID(attackerOrHealer->GetGUID());
-        data.appendPackGUID(player->GetGUID());
-        data << uint32(-change);                    // change  < 0 triggers SPELL_BUILDING_HEAL combat log event
-        // change >= 0 triggers SPELL_BUILDING_DAMAGE event
+        data.WriteGuidMask(vehicleGUID, 2);
+        data.WriteGuidMask(objectGUID, 2);
+        data.WriteGuidMask(playerGUID, 7);
+        data.WriteGuidMask(objectGUID, 4);
+        data.WriteGuidMask(playerGUID, 3, 5);
+        data.WriteGuidMask(objectGUID, 0);
+        data.WriteGuidMask(playerGUID, 2, 6);
+        data.WriteGuidMask(vehicleGUID, 4);
+        data.WriteGuidMask(objectGUID, 5);
+        data.WriteGuidMask(playerGUID, 0, 1);
+        data.WriteGuidMask(objectGUID, 1);
+        data.WriteGuidMask(vehicleGUID, 0, 3, 6);
+        data.WriteGuidMask(objectGUID, 7);
+        data.WriteGuidMask(vehicleGUID, 7, 5);
+        data.WriteGuidMask(objectGUID, 6);
+        data.WriteGuidMask(playerGUID, 4);
+        data.WriteGuidMask(vehicleGUID, 1);
+        data.WriteGuidMask(objectGUID, 3);
+
+        data.WriteGuidBytes(vehicleGUID, 2);
         data << uint32(spellId);
+        data.WriteGuidBytes(playerGUID, 5, 6);
+        data.WriteGuidBytes(objectGUID, 7);
+        data.WriteGuidBytes(playerGUID, 1);
+        data.WriteGuidBytes(objectGUID, 1);
+        data.WriteGuidBytes(playerGUID, 2);
+        data.WriteGuidBytes(vehicleGUID, 7, 5);
+        data.WriteGuidBytes(objectGUID, 0, 2, 6);
+        data.WriteGuidBytes(vehicleGUID, 1, 6);
+        data << int32(-change);                    // change  < 0 triggers SPELL_BUILDING_HEAL combat log event
+                                                   // change >= 0 triggers SPELL_BUILDING_DAMAGE event
+        data.WriteGuidBytes(objectGUID, 5);
+        data.WriteGuidBytes(playerGUID, 0);
+        data.WriteGuidBytes(vehicleGUID, 0);
+        data.WriteGuidBytes(playerGUID, 7, 4);
+        data.WriteGuidBytes(objectGUID, 3);
+        data.WriteGuidBytes(vehicleGUID, 3);
+        data.WriteGuidBytes(objectGUID, 4);
+        data.WriteGuidBytes(vehicleGUID, 4);
+        data.WriteGuidBytes(playerGUID, 3);
+
         player->SendDirectMessage(&data);
     }
 

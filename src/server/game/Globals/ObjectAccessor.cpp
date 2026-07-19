@@ -185,11 +185,10 @@ GameObject* ObjectAccessor::GetGameObject(WorldObject const& u, uint64 guid)
 
 Transport* ObjectAccessor::GetTransport(WorldObject const& u, uint64 guid)
 {
-    if (GUID_HIPART(guid) != HIGHGUID_MO_TRANSPORT && GUID_HIPART(guid) != HIGHGUID_TRANSPORT)
+    if (GUID_HIPART(guid) != HIGHGUID_MO_TRANSPORT)
         return NULL;
 
-    GameObject* go = GetGameObject(u, guid);
-    return go ? go->ToTransport() : NULL;
+    return u.GetMap()->GetTransport(guid);
 }
 
 DynamicObject* ObjectAccessor::GetDynamicObject(WorldObject const& u, uint64 guid)

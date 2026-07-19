@@ -264,6 +264,12 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
         m_Socket->CloseSocket();
 }
 
+void WorldSession::LogPacketMarker(std::string const& marker)
+{
+    if (m_Socket)
+        m_Socket->LogPacketMarker(marker);
+}
+
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket* new_packet)
 {

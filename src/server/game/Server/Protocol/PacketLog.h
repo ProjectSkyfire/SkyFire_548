@@ -33,6 +33,7 @@ public:
     bool CanLogPacket() const;
     void LogPacket(WorldPacket const& packet, Direction direction);
     void LogPacket(void const* sessionKey, std::string const& remoteAddress, WorldPacket const& packet, Direction direction);
+    void LogMarker(void const* sessionKey, std::string const& remoteAddress, std::string const& marker);
     void CloseSession(void const* sessionKey);
 
 private:

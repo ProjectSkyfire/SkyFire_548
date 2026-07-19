@@ -11,6 +11,7 @@ Category: commandscripts
 EndScriptData */
 
 #include "BattlegroundMgr.h"
+#include "BattlegroundSA.h"
 #include "Cell.h"
 #include "CellImpl.h"
 #include "Chat.h"
@@ -50,8 +51,14 @@ public:
             { "setphaseshift", rbac::RBAC_PERM_COMMAND_DEBUG_SEND_SETPHASESHIFT, false, &HandleDebugSendSetPhaseShiftCommand,   "", },
             { "spellfail",     rbac::RBAC_PERM_COMMAND_DEBUG_SEND_SPELLFAIL,     false, &HandleDebugSendSpellFailCommand,       "", },
         };
+        static std::vector<ChatCommand> boatCommandTable =
+        {
+            { "start",          rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, &HandleBoatStartCommand,             "", },
+            { "stop",           rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, &HandleBoatStopCommand,              "", },
+        };
         static std::vector<ChatCommand> debugCommandTable =
         {
+            { "boat",           rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, NULL,                                "", boatCommandTable },
             { "setbit",        rbac::RBAC_PERM_COMMAND_DEBUG_SETBIT,        false, &HandleDebugSet32BitCommand,         "", },
             { "threat",        rbac::RBAC_PERM_COMMAND_DEBUG_THREAT,        false, &HandleDebugThreatListCommand,       "", },
             { "hostil",        rbac::RBAC_PERM_COMMAND_DEBUG_HOSTIL,        false, &HandleDebugHostileRefListCommand,   "", },
@@ -82,10 +89,77 @@ public:
         };
         static std::vector<ChatCommand> commandTable =
         {
+            { "boat",           rbac::RBAC_PERM_COMMAND_DEBUG_BG, false, NULL,               "", boatCommandTable },
             { "debug",         rbac::RBAC_PERM_COMMAND_DEBUG,   true,  NULL,               "", debugCommandTable },
             { "wpgps",         rbac::RBAC_PERM_COMMAND_WPGPS,  false, &HandleWPGPSCommand, "", },
         };
         return commandTable;
+    }
+
+    static BattlegroundSA* GetSOTABattlegroundForBoatCommand(ChatHandler* handler)
+    {
+        if (!sBattlegroundMgr->isTesting())
+        {
+            handler->SendSysMessage("Enable battleground debug mode with .debug bg before using boat debug commands.");
+            handler->SetSentErrorMessage(true);
+            return NULL;
+        }
+
+        WorldSession* session = handler->GetSession();
+        Player* player = session ? session->GetPlayer() : NULL;
+        if (!player)
+        {
+            handler->SendSysMessage("Boat debug commands require an in-game player session.");
+            handler->SetSentErrorMessage(true);
+            return NULL;
+        }
+
+        Battleground* bg = player->GetBattleground();
+        if (!bg || bg->GetTypeID(true) != BattlegroundTypeId::BATTLEGROUND_SA)
+        {
+            handler->SendSysMessage("Boat debug commands can only be used inside Strand of the Ancients.");
+            handler->SetSentErrorMessage(true);
+            return NULL;
+        }
+
+        return static_cast<BattlegroundSA*>(bg);
+    }
+
+    static bool HandleBoatStartCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        BattlegroundSA* bg = GetSOTABattlegroundForBoatCommand(handler);
+        if (!bg)
+            return false;
+
+        Player* player = handler->GetSession()->GetPlayer();
+        if (!bg->DebugStartBoats(player))
+        {
+            handler->SendSysMessage("SOTA boat debug start failed: one or more boat objects are missing.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        handler->SendSysMessage("SOTA boat debug timer started. Use .boat stop to freeze boats and log elapsed time.");
+        handler->PSendSysMessage("SOTA boat debug status: %s", bg->GetBoatDebugStatus().c_str());
+        return true;
+    }
+
+    static bool HandleBoatStopCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        BattlegroundSA* bg = GetSOTABattlegroundForBoatCommand(handler);
+        if (!bg)
+            return false;
+
+        if (!bg->DebugStopBoats(handler->GetSession()->GetPlayer()))
+        {
+            handler->SendSysMessage("SOTA boat debug stop failed: one or more boat objects are missing.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        handler->SendSysMessage("SOTA boat debug timer stopped and written to the packet log.");
+        handler->PSendSysMessage("SOTA boat debug status: %s", bg->GetBoatDebugStatus().c_str());
+        return true;
     }
 
     static bool HandleDebugPlayCinematicCommand(ChatHandler* handler, char const* args)

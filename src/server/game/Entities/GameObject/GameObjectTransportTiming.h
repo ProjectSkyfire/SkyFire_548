@@ -85,9 +85,9 @@ namespace GameObjects
         return dynamicFlags & ~uint32(GO_DYNFLAG_LO_STOPPED);
     }
 
-    inline uint32 GetInitialLegacyTransportState(bool startOpen, bool hasStopFrames)
+    inline uint32 GetInitialLegacyTransportState(bool /*startOpen*/, bool hasStopFrames)
     {
-        if (hasStopFrames && startOpen)
+        if (hasStopFrames)
             return 25;
 
         return 24;

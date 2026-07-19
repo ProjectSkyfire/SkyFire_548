@@ -360,6 +360,10 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket& recvData)
     uint32 bgTypeId;
     recvData >> bgTypeId;                                  // id from DBC
 
+    if (Battleground* currentBg = _player->GetBattleground())
+        if (currentBg->GetTypeID(true) == BattlegroundTypeId::BATTLEGROUND_SA && currentBg->GetStatus() == STATUS_IN_PROGRESS)
+            return;
+
     BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgTypeId);
     if (!bl)
     {

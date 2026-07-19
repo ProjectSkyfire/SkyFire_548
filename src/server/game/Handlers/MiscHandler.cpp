@@ -2721,7 +2721,10 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
     GuidRequest request = ReadObjectUpdateFailedRequest(recvPacket);
 
     WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), request.guid);
-    SF_LOG_ERROR("network", "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(request.guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
+    if (request.guid == GetPlayer()->GetGUID())
+        SF_LOG_ERROR("network", "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(request.guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
+    else
+        SF_LOG_DEBUG("network", "Object update failed for object " UI64FMTD " (%s) for player %s (%u)", uint64(request.guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
 
     // If create object failed for current player then client will be stuck on loading screen
     //if (_player->GetGUID() == guid)

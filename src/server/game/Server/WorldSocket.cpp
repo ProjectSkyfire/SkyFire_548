@@ -204,6 +204,12 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
     return 0;
 }
 
+void WorldSocket::LogPacketMarker(std::string const& marker)
+{
+    if (sPacketLog->CanLogPacket())
+        sPacketLog->LogMarker(this, m_Address, marker);
+}
+
 long WorldSocket::AddReference(void)
 {
     return ++m_ReferenceCount;

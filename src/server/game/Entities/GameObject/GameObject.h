@@ -540,8 +540,11 @@ union GameObjectValue
         TransportAnimation const* AnimationInfo;
         uint32 CurrentSeg;
         uint32 StateChangeTime;
+        uint32 StateChangeEndTime;
         uint32 StateChangeProgress;
+        uint32 HoldProgress;
         bool WaitingAtPathStart;
+        bool HoldingAtProgress;
     } Transport;
     //25 GAMEOBJECT_TYPE_FISHINGHOLE
     struct
@@ -718,6 +721,10 @@ public:
     uint32 GetTransportPeriod() const;
     uint32 GetTransportPathProgress() const { return m_goValue.Transport.PathProgress; }
     void SetTransportPathProgress(uint32 pathProgress);
+    void SetLegacyTransportTravelTime(uint32 travelTime);
+    void StartLegacyTransportToFirstStop(uint32 travelTime);
+    void StopLegacyTransportAtInitialStop();
+    void StopLegacyTransportAtCurrentProgress();
     std::vector<uint32> const* GetPauseTimes() const;
     void SetGoHealth(uint8 health) { SetByteValue(GAMEOBJECT_FIELD_PERCENT_HEALTH, 3, health); }
     uint8 GetGoArtKit() const { return GetByteValue(GAMEOBJECT_FIELD_STATE_SPELL_VISUAL_ID, 1); }
@@ -823,8 +830,8 @@ public:
     GameObjectModel* m_model;
     void GetRespawnPosition(float& x, float& y, float& z, float* ori = NULL) const;
 
-    Transport* ToTransport() { if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT || GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport*>(this); else return NULL; }
-    Transport const* ToTransport() const { if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT || GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT) return reinterpret_cast<Transport const*>(this); else return NULL; }
+    Transport* ToTransport() { if (IS_MO_TRANSPORT_GUID(GetGUID())) return reinterpret_cast<Transport*>(this); else return NULL; }
+    Transport const* ToTransport() const { if (IS_MO_TRANSPORT_GUID(GetGUID())) return reinterpret_cast<Transport const*>(this); else return NULL; }
 
     float GetStationaryX() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionX(); return GetPositionX(); }
     float GetStationaryY() const OVERRIDE { if (GetGOInfo()->type != GAMEOBJECT_TYPE_MO_TRANSPORT) return m_stationaryPosition.GetPositionY(); return GetPositionY(); }

@@ -624,6 +624,7 @@ private:
      * @see Update(), PostUpdateImpl().
      */
     virtual bool PreUpdateImpl(uint32 /* diff */) { return true; }
+    virtual bool ShouldDelayStartForDebug() const { return false; }
 
     /**
      * @brief Post-update hook.
