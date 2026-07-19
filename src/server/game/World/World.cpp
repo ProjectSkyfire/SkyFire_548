@@ -2010,9 +2010,6 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading BlackMarket Templates...");
     sBlackMarketMgr->LoadBlackMarketTemplates();
 
-    SF_LOG_INFO("server.loading", "Loading missing KeyChains...");
-    sObjectMgr->LoadMissingKeyChains();
-
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
     SF_LOG_INFO("server.worldserver", "World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));

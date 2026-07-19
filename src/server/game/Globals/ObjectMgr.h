@@ -1383,8 +1383,6 @@ public:
         return ret ? ret : time(NULL);
     }
 
-    void LoadMissingKeyChains();
-
     bool QuestObjectiveExists(uint32 objectiveId) const;
     uint32 GetQuestObjectiveQuestId(uint32 objectiveId) const;
     SceneTemplate const* GetSceneTemplate(uint32 sceneId) const;
