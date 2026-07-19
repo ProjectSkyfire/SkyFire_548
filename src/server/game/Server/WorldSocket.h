@@ -41,6 +41,7 @@ namespace Net
 
 class WorldPacket;
 class WorldSession;
+struct PacketLogSessionInfo;
 
 /// Handler that can communicate over stream sockets.
 class WorldSocket
@@ -72,6 +73,9 @@ public:
 
     /// Writes a readable marker into the per-session packet log.
     void LogPacketMarker(std::string const& marker);
+
+    /// Refreshes packet log metadata after a session gains character context.
+    void RefreshPacketLogSessionInfo();
 
     /// Add reference to this object.
     long AddReference(void);
@@ -118,6 +122,7 @@ private:
     void HandleAsyncRead(boost::system::error_code const& error, size_t transferredBytes);
     void HandleAsyncWrite(boost::system::error_code const& error, size_t transferredBytes);
     void NotifyClosed();
+    PacketLogSessionInfo BuildPacketLogSessionInfo() const;
 
     /// Time in which the last ping was received
     std::chrono::steady_clock::time_point m_LastPingTime;
