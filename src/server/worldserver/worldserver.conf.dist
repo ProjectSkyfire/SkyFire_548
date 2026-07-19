@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2026271401
+ConfVersion=2026271901
 
 ###################################################################################################
 # SECTION INDEX
@@ -352,6 +352,14 @@ SocketTimeOutTime = 900000
 SessionAddDelay = 10000
 
 #
+#    DisconnectToleranceInterval
+#        Description: Time (in milliseconds) a disconnected session can remain tolerated before
+#                     normal cleanup completes.
+#        Default:     0 - (Disabled)
+
+DisconnectToleranceInterval = 0
+
+#
 #    GridCleanUpDelay
 #        Description: Time (in milliseconds) grid clean up delay.
 #        Default:     300000 - (5 minutes)
@@ -678,6 +686,13 @@ GameType = 0
 #                     29 - (CN9           - basic-Latin at create, any at login)
 
 RealmZone = 1
+
+#
+#    RealmID
+#        Description: Override realm id used by world services. Leave 0 to use the default realm.
+#        Default:     0
+
+RealmID = 0
 
 #
 #    StrictPlayerNames
@@ -1818,6 +1833,16 @@ Visibility.Distance.Instances = 170
 Visibility.Distance.BGArenas = 533
 
 #
+#    MonsterSight
+#    GuarderSight
+#        Description: Base sight distance, in yards, used by monsters and guards.
+#        Default:     50 - (MonsterSight)
+#                     50 - (GuarderSight)
+
+MonsterSight = 50
+GuarderSight = 50
+
+#
 #    Loot.AoERadius
 #        Description: Distance, in yards, around the looting player used to include nearby
 #                     corpse loot targets in area looting.
@@ -1869,7 +1894,6 @@ Visibility.Notify.Period.InBGArenas   = 1000
 #                     1 - (Rate.Focus)
 #                     1 - (Rate.Chi)
 #                     1 - (Rate.Energy)
-#                     1 - (Rate.Loyalty)
 
 Rate.Health            = 1
 Rate.Mana              = 1
@@ -1881,7 +1905,6 @@ Rate.DemonicFury.Loss  = 1
 Rate.Focus             = 1
 Rate.Chi               = 1
 Rate.Energy            = 1
-Rate.Loyalty           = 1
 
 #
 #    Rate.Skill.Discovery
@@ -1988,13 +2011,6 @@ Rate.Auction.Cut     = 1
 #        Default:     1
 
 Rate.Honor = 1
-
-#
-#    Rate.Talent
-#        Description: Talent point rate.
-#        Default:     1
-
-Rate.Talent = 1
 
 #
 #    Rate.Reputation.Gain
@@ -2405,28 +2421,20 @@ Arena.RatingDiscardTimer = 600000
 Arena.RatedUpdateTimer = 5000
 
 #
-#    Arena.AutoDistributePoints
-#        Description: Automatically distribute arena points.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-Arena.AutoDistributePoints = 0
-
-#
-#    Arena.AutoDistributeInterval
-#        Description: Time (in days) how often arena points should be distributed if automatic
-#                     distribution is enabled.
-#        Default:     7 - (Weekly)
-
-Arena.AutoDistributeInterval = 7
-
-#
 #    Arena.QueueAnnouncer.Enable
 #        Description: Announce arena queue status to chat.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
 Arena.QueueAnnouncer.Enable = 0
+
+#
+#    Arena.QueueAnnouncer.PlayerOnly
+#        Description: Restrict arena queue announcements to players.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Arena.QueueAnnouncer.PlayerOnly = 0
 
 #
 #    Arena.ArenaSeason.ID

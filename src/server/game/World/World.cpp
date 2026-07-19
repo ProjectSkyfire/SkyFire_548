@@ -684,7 +684,7 @@ void World::LoadConfigSettings(bool reload)
     SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Group", false));
     SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Guild", false));
     SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION, sConfigMgr->GetBoolDefault("AllowTwoSide.Interaction.Auction", false));
-    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_TRADE, sConfigMgr->GetBoolDefault("AllowTwoSide.trade", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_TRADE, sConfigMgr->GetBoolDefault("AllowTwoSide.Trade", false));
     setIntConfig(WorldIntConfigs::CONFIG_STRICT_PLAYER_NAMES, sConfigMgr->GetIntDefault("StrictPlayerNames", 0));
     setIntConfig(WorldIntConfigs::CONFIG_STRICT_CHARTER_NAMES, sConfigMgr->GetIntDefault("StrictCharterNames", 0));
     setIntConfig(WorldIntConfigs::CONFIG_STRICT_PET_NAMES, sConfigMgr->GetIntDefault("StrictPetNames", 0));
@@ -809,10 +809,10 @@ void World::LoadConfigSettings(bool reload)
         SF_LOG_ERROR("server.loading", "Currency.ResetHour (%i) can't be load. Set to 6.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_HOUR));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_HOUR, 3);
     }
-    setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_DAY, sConfigMgr->GetIntDefault("Currency.ResetDay", 3));
+    setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_DAY, sConfigMgr->GetIntDefault("Currency.ResetWeekDay", 3));
     if (getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_DAY) > 6)
     {
-        SF_LOG_ERROR("server.loading", "Currency.ResetDay (%i) can't be load. Set to 3.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_DAY));
+        SF_LOG_ERROR("server.loading", "Currency.ResetWeekDay (%i) can't be load. Set to 3.", getIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_DAY));
         setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_DAY, 3);
     }
     setIntConfig(WorldIntConfigs::CONFIG_CURRENCY_RESET_INTERVAL, sConfigMgr->GetIntDefault("Currency.ResetInterval", 7));
@@ -1266,7 +1266,7 @@ void World::LoadConfigSettings(bool reload)
     SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_GUILD, sConfigMgr->GetBoolDefault("ChatLogs.Guild", false));
     SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_PUBLIC, sConfigMgr->GetBoolDefault("ChatLogs.Public", false));
     SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_ADDON, sConfigMgr->GetBoolDefault("ChatLogs.Addon", false));
-    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_BGROUND, sConfigMgr->GetBoolDefault("ChatLogs.Battleground", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHATLOG_BGROUND, sConfigMgr->GetBoolDefault("ChatLogs.BattleGround", false));
 
     // Warden
     SetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED, sConfigMgr->GetBoolDefault("Warden.Enabled", false));
