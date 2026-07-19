@@ -279,7 +279,8 @@ namespace Database
         }
 
         bool ExecuteSetupQueryWithInsertChunks(MYSQL* setupConnection, std::string const& sql,
-            char const* queryContext, SetupRuntimeContext const& context, std::string const& tableName)
+            char const* queryContext, SetupRuntimeContext const& context, std::string const& tableName,
+            SqlStatementContext const& sqlContext)
         {
             constexpr std::size_t InsertChunkRows = 250;
             constexpr std::size_t LargeInsertThreshold = 1024 * 1024;
@@ -304,6 +305,10 @@ namespace Database
                 context.DatabaseName, tableName.empty() ? "unknown" : tableName.c_str(), uint32(rows.size()),
                 uint32(chunkCount));
 
+            std::uintmax_t statementEndByte = sqlContext.BytesRead;
+            std::uintmax_t statementStartByte = statementEndByte > sql.length() ? statementEndByte - sql.length() : 0;
+            std::uintmax_t statementBytes = statementEndByte > statementStartByte ? statementEndByte - statementStartByte : 0;
+
             for (std::size_t chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex)
             {
                 std::size_t begin = chunkIndex * InsertChunkRows;
@@ -325,12 +330,20 @@ namespace Database
                 if (!ExecuteSetupQuery(setupConnection, chunk.str(), chunkContext.str().c_str(), context))
                     return false;
 
-                if ((chunkIndex + 1) == chunkCount || (chunkIndex + 1) % 25 == 0)
+                std::uintmax_t chunkBytesRead = statementEndByte;
+                if (sqlContext.TotalBytes && statementBytes)
+                    chunkBytesRead = statementStartByte + statementBytes * (chunkIndex + 1) / chunkCount;
+
+                uint32 percent = 0;
+                if (sqlContext.TotalBytes)
                 {
-                    SF_LOG_INFO(context.LogFilter, "Importing %s database table `%s`: chunk %u/%u.",
-                        context.DatabaseName, tableName.empty() ? "unknown" : tableName.c_str(),
-                        uint32(chunkIndex + 1), uint32(chunkCount));
+                    std::uintmax_t percentValue = chunkBytesRead * 100 / sqlContext.TotalBytes;
+                    percent = uint32(percentValue > 100 ? 100 : percentValue);
                 }
+
+                SF_LOG_INFO(context.LogFilter, "Import progress: %u%% - %s database table `%s` - chunk %u/%u.",
+                    percent, context.DatabaseName, tableName.empty() ? "unknown" : tableName.c_str(),
+                    uint32(chunkIndex + 1), uint32(chunkCount));
             }
 
             return true;
@@ -595,8 +608,8 @@ namespace Database
             if (!currentTable.empty())
                 queryContext << " while importing table `" << currentTable << "`";
 
-            return ExecuteSetupQueryWithInsertChunks(setupConnection, statement, queryContext.str().c_str(), context,
-                currentTable);
+            return ExecuteSetupQueryWithInsertChunks(setupConnection, statement, queryContext.str().c_str(),
+                context, currentTable, sqlContext);
         });
 
         if (!executed)
