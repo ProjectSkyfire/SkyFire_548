@@ -14,6 +14,7 @@
 #include "Log.h"
 #include "MySQLConnection.h"
 
+#include <algorithm>
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
@@ -21,6 +22,7 @@
 #include <memory>
 #include <sstream>
 #include <system_error>
+#include <vector>
 
 namespace Skyfire
 {
@@ -78,6 +80,170 @@ namespace Database
             return uint32(percent > 100 ? 100 : percent);
         }
 
+        std::string TrimCopy(std::string const& text)
+        {
+            std::string::size_type begin = 0;
+            while (begin < text.length() && std::isspace(static_cast<unsigned char>(text[begin])))
+                ++begin;
+
+            std::string::size_type end = text.length();
+            while (end > begin && std::isspace(static_cast<unsigned char>(text[end - 1])))
+                --end;
+
+            return text.substr(begin, end - begin);
+        }
+
+        std::string::size_type FindKeywordOutsideQuotedText(std::string const& sql, char const* keyword)
+        {
+            bool inSingleQuote = false;
+            bool inDoubleQuote = false;
+            bool inBacktick = false;
+            bool escaped = false;
+            std::size_t keywordLength = std::strlen(keyword);
+
+            for (std::string::size_type i = 0; i < sql.length(); ++i)
+            {
+                char c = sql[i];
+
+                if (inSingleQuote)
+                {
+                    if (escaped)
+                        escaped = false;
+                    else if (c == '\\')
+                        escaped = true;
+                    else if (c == '\'')
+                        inSingleQuote = false;
+
+                    continue;
+                }
+
+                if (inDoubleQuote)
+                {
+                    if (escaped)
+                        escaped = false;
+                    else if (c == '\\')
+                        escaped = true;
+                    else if (c == '"')
+                        inDoubleQuote = false;
+
+                    continue;
+                }
+
+                if (inBacktick)
+                {
+                    if (c == '`')
+                        inBacktick = false;
+
+                    continue;
+                }
+
+                if (c == '\'')
+                {
+                    inSingleQuote = true;
+                    continue;
+                }
+
+                if (c == '"')
+                {
+                    inDoubleQuote = true;
+                    continue;
+                }
+
+                if (c == '`')
+                {
+                    inBacktick = true;
+                    continue;
+                }
+
+                if (i + keywordLength <= sql.length() &&
+                    StartsWithCaseInsensitive(sql.substr(i, keywordLength), keyword))
+                {
+                    bool beforeBoundary = i == 0 ||
+                        !std::isalnum(static_cast<unsigned char>(sql[i - 1]));
+                    bool afterBoundary = i + keywordLength == sql.length() ||
+                        !std::isalnum(static_cast<unsigned char>(sql[i + keywordLength]));
+
+                    if (beforeBoundary && afterBoundary)
+                        return i;
+                }
+            }
+
+            return std::string::npos;
+        }
+
+        std::vector<std::string> SplitInsertRows(std::string const& values)
+        {
+            std::vector<std::string> rows;
+            bool inSingleQuote = false;
+            bool inDoubleQuote = false;
+            bool escaped = false;
+            int depth = 0;
+            std::string::size_type rowBegin = 0;
+
+            for (std::string::size_type i = 0; i < values.length(); ++i)
+            {
+                char c = values[i];
+
+                if (inSingleQuote)
+                {
+                    if (escaped)
+                        escaped = false;
+                    else if (c == '\\')
+                        escaped = true;
+                    else if (c == '\'')
+                        inSingleQuote = false;
+
+                    continue;
+                }
+
+                if (inDoubleQuote)
+                {
+                    if (escaped)
+                        escaped = false;
+                    else if (c == '\\')
+                        escaped = true;
+                    else if (c == '"')
+                        inDoubleQuote = false;
+
+                    continue;
+                }
+
+                if (c == '\'')
+                {
+                    inSingleQuote = true;
+                    continue;
+                }
+
+                if (c == '"')
+                {
+                    inDoubleQuote = true;
+                    continue;
+                }
+
+                if (c == '(')
+                    ++depth;
+                else if (c == ')')
+                {
+                    if (depth > 0)
+                        --depth;
+                }
+                else if (c == ',' && depth == 0)
+                {
+                    std::string row = TrimCopy(values.substr(rowBegin, i - rowBegin));
+                    if (!row.empty())
+                        rows.push_back(row);
+
+                    rowBegin = i + 1;
+                }
+            }
+
+            std::string row = TrimCopy(values.substr(rowBegin));
+            if (!row.empty())
+                rows.push_back(row);
+
+            return rows;
+        }
+
         bool ExecuteSetupQuery(MYSQL* setupConnection, std::string const& sql, char const* queryContext,
             SetupRuntimeContext const& context)
         {
@@ -107,6 +273,64 @@ namespace Database
 
                 if (nextResult < 0)
                     break;
+            }
+
+            return true;
+        }
+
+        bool ExecuteSetupQueryWithInsertChunks(MYSQL* setupConnection, std::string const& sql,
+            char const* queryContext, SetupRuntimeContext const& context, std::string const& tableName)
+        {
+            constexpr std::size_t InsertChunkRows = 250;
+            constexpr std::size_t LargeInsertThreshold = 1024 * 1024;
+
+            std::string trimmed = TrimCopy(sql);
+            if (trimmed.length() < LargeInsertThreshold || !StartsWithCaseInsensitive(trimmed, "INSERT INTO"))
+                return ExecuteSetupQuery(setupConnection, sql, queryContext, context);
+
+            std::string::size_type valuesPosition = FindKeywordOutsideQuotedText(trimmed, "VALUES");
+            if (valuesPosition == std::string::npos)
+                return ExecuteSetupQuery(setupConnection, sql, queryContext, context);
+
+            std::string header = TrimCopy(trimmed.substr(0, valuesPosition + 6));
+            std::string values = TrimCopy(trimmed.substr(valuesPosition + 6));
+            std::vector<std::string> rows = SplitInsertRows(values);
+
+            if (rows.size() <= InsertChunkRows)
+                return ExecuteSetupQuery(setupConnection, sql, queryContext, context);
+
+            std::size_t chunkCount = (rows.size() + InsertChunkRows - 1) / InsertChunkRows;
+            SF_LOG_INFO(context.LogFilter, "Large INSERT for %s database table `%s` has %u rows; executing %u chunks.",
+                context.DatabaseName, tableName.empty() ? "unknown" : tableName.c_str(), uint32(rows.size()),
+                uint32(chunkCount));
+
+            for (std::size_t chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex)
+            {
+                std::size_t begin = chunkIndex * InsertChunkRows;
+                std::size_t end = std::min(begin + InsertChunkRows, rows.size());
+
+                std::ostringstream chunk;
+                chunk << header << ' ';
+                for (std::size_t rowIndex = begin; rowIndex < end; ++rowIndex)
+                {
+                    if (rowIndex != begin)
+                        chunk << ',';
+
+                    chunk << rows[rowIndex];
+                }
+
+                std::ostringstream chunkContext;
+                chunkContext << queryContext << " chunk " << (chunkIndex + 1) << "/" << chunkCount;
+
+                if (!ExecuteSetupQuery(setupConnection, chunk.str(), chunkContext.str().c_str(), context))
+                    return false;
+
+                if ((chunkIndex + 1) == chunkCount || (chunkIndex + 1) % 25 == 0)
+                {
+                    SF_LOG_INFO(context.LogFilter, "Importing %s database table `%s`: chunk %u/%u.",
+                        context.DatabaseName, tableName.empty() ? "unknown" : tableName.c_str(),
+                        uint32(chunkIndex + 1), uint32(chunkCount));
+                }
             }
 
             return true;
@@ -371,7 +595,8 @@ namespace Database
             if (!currentTable.empty())
                 queryContext << " while importing table `" << currentTable << "`";
 
-            return ExecuteSetupQuery(setupConnection, statement, queryContext.str().c_str(), context);
+            return ExecuteSetupQueryWithInsertChunks(setupConnection, statement, queryContext.str().c_str(), context,
+                currentTable);
         });
 
         if (!executed)
