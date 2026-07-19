@@ -4,9 +4,8 @@ Promotes pending SQL updates into the normal update stream.
 
 .DESCRIPTION
 Moves SQL files from sql/pending_updates/<database> to sql/updates/<database>
-and renumbers them to the next available official update sequence.
-Promoted files use the compact official name format:
-YYYY-MM-DD_<database>_NN.sql.
+and assigns each promoted file the next available official update name:
+YYYY_MM_DD_<database>_NN.sql.
 
 The script runs in dry-run mode by default. Use -Apply to move files.
 
@@ -17,12 +16,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/dev/promote_pending_up
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/dev/promote_pending_updates.ps1 -Database world -Apply
 
 .EXAMPLE
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/dev/promote_pending_updates.ps1 -InputPath sql/pending_updates/world/2026-06-22_world_04_areatrigger_tavern_missing.sql -Apply
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/dev/promote_pending_updates.ps1 -InputPath sql/pending_updates/world/areatrigger_tavern_missing.sql -Apply
 #>
 
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [string] $Root = '',
+
+    [string] $PromotionDate = '',
 
     [ValidateSet('auth', 'characters', 'world')]
     [string[]] $Database,
@@ -35,7 +36,21 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $ValidDatabases = @('auth', 'characters', 'world')
-$UpdateNamePattern = '^(?<date>\d{4}[-_]\d{2}[-_]\d{2})_(?<database>auth|characters|world)_(?<sequence>\d{2})(?<suffix>.*)\.sql$'
+$UpdateNamePattern = '^(?<date>\d{4}_\d{2}_\d{2})_(?<database>auth|characters|world)_(?<sequence>\d{2})(?<suffix>.*)\.sql$'
+
+function Resolve-PromotionDate {
+    param([string] $RequestedDate)
+
+    if ([string]::IsNullOrWhiteSpace($RequestedDate)) {
+        return (Get-Date).ToString('yyyy_MM_dd')
+    }
+
+    if ($RequestedDate -notmatch '^\d{4}_\d{2}_\d{2}$') {
+        throw "PromotionDate '$RequestedDate' must use YYYY_MM_DD."
+    }
+
+    return $RequestedDate
+}
 
 function Resolve-RepoRoot {
     param([string] $RequestedRoot)
@@ -163,20 +178,9 @@ function Get-PendingUpdateInfo {
         throw "Refusing '$relativePath' because '$databaseName' is not a known database folder."
     }
 
-    $match = [regex]::Match($File.Name, $UpdateNamePattern)
-    if (-not $match.Success) {
-        throw "Pending update '$relativePath' must be named like YYYY-MM-DD_${databaseName}_00_description.sql."
-    }
-
-    $fileDatabaseName = $match.Groups['database'].Value
-    if ($fileDatabaseName -ne $databaseName) {
-        throw "Pending update '$relativePath' is in the '$databaseName' folder but its filename says '$fileDatabaseName'."
-    }
-
     return [PSCustomObject]@{
         Source = $File
         Database = $databaseName
-        Date = $match.Groups['date'].Value
     }
 }
 
@@ -215,7 +219,8 @@ function Get-MaxOfficialSequence {
 function New-PromotionPlan {
     param(
         [string] $RootPath,
-        [System.IO.FileInfo[]] $Files
+        [System.IO.FileInfo[]] $Files,
+        [string] $DateText
     )
 
     $infos = @()
@@ -224,15 +229,15 @@ function New-PromotionPlan {
     }
 
     $actions = @()
-    $groups = $infos | Group-Object Database, Date
+    $groups = $infos | Group-Object Database
 
     foreach ($group in $groups) {
         $first = $group.Group | Select-Object -First 1
-        $nextSequence = (Get-MaxOfficialSequence -RootPath $RootPath -DatabaseName $first.Database -DateText $first.Date) + 1
+        $nextSequence = (Get-MaxOfficialSequence -RootPath $RootPath -DatabaseName $first.Database -DateText $DateText) + 1
         $updatesDir = Join-Path $RootPath "sql\updates\$($first.Database)"
 
         foreach ($info in ($group.Group | Sort-Object { $_.Source.Name })) {
-            $targetName = '{0}_{1}_{2:D2}.sql' -f $info.Date, $info.Database, $nextSequence
+            $targetName = '{0}_{1}_{2:D2}.sql' -f $DateText, $info.Database, $nextSequence
             $targetPath = Join-Path $updatesDir $targetName
 
             if (Test-Path -LiteralPath $targetPath) {
@@ -281,6 +286,7 @@ function Invoke-PromotionPlan {
 }
 
 $repoRoot = Resolve-RepoRoot -RequestedRoot $Root
+$promotionDateText = Resolve-PromotionDate -RequestedDate $PromotionDate
 $pendingFiles = @(Get-PendingSqlFiles -RootPath $repoRoot -RequestedDatabases $Database -RequestedPaths $InputPath)
 
 if ($pendingFiles.Count -eq 0) {
@@ -288,7 +294,7 @@ if ($pendingFiles.Count -eq 0) {
     exit 0
 }
 
-$plan = @(New-PromotionPlan -RootPath $repoRoot -Files $pendingFiles)
+$plan = @(New-PromotionPlan -RootPath $repoRoot -Files $pendingFiles -DateText $promotionDateText)
 Invoke-PromotionPlan -RootPath $repoRoot -Actions $plan -ApplyChanges:$Apply
 
 if (-not $Apply) {

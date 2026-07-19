@@ -36,6 +36,22 @@ jobs:
 
           git pull --rebase origin "${{ github.ref_name }}"
 
+          $pendingFiles = Get-ChildItem -Path sql/pending_updates -Filter *.sql -File -Recurse
+          $invalidFiles = @()
+          foreach ($file in $pendingFiles) {
+            $relativePath = $file.FullName.Substring((Get-Location).Path.Length + 1).Replace('\', '/')
+            $relativeParts = $relativePath.Split('/')
+            $databaseName = if ($relativeParts.Count -ge 3) { $relativeParts[2] } else { '' }
+
+            if ($relativeParts.Count -ne 4 -or $relativeParts[0] -ne 'sql' -or $relativeParts[1] -ne 'pending_updates' -or $databaseName -notin @('auth', 'characters', 'world')) {
+              $invalidFiles += $relativePath
+            }
+          }
+
+          if ($invalidFiles.Count -gt 0) {
+            Write-Error ("Pending SQL files must live directly under sql/pending_updates/<database>. The promotion script assigns official YYYY_MM_DD_<database>_NN.sql filenames. Invalid file(s):`n" + ($invalidFiles -join "`n"))
+          }
+
           ./tools/dev/promote_pending_updates.ps1 -Apply
           git add -A sql/pending_updates sql/updates
 
