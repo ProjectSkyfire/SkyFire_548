@@ -7,7 +7,9 @@
 #define SKYFIRE_DATABASE_SETUP_H
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
+#include <iosfwd>
 #include <map>
 #include <set>
 #include <string>
@@ -47,6 +49,13 @@ namespace Database
         std::string Hash;
     };
 
+    struct SqlStatementContext
+    {
+        std::size_t StatementCount = 0;
+        std::uintmax_t BytesRead = 0;
+        std::uintmax_t TotalBytes = 0;
+    };
+
     struct SetupPlan
     {
         bool ShouldCreateDatabase = false;
@@ -71,6 +80,8 @@ namespace Database
     std::vector<SqlUpdateFile> BuildSortedSqlUpdateList(std::vector<std::string> const& names, std::string const& directory);
     std::vector<SqlUpdateFile> DiscoverSqlUpdates(SetupOptions const& options);
     std::vector<std::string> SplitSqlStatements(std::string const& sql);
+    bool ExecuteSqlStream(std::istream& input, std::uintmax_t totalBytes,
+        std::function<bool(std::string const&, SqlStatementContext const&)> const& executor);
     bool ExecuteSqlScript(std::string const& sql, std::function<bool(std::string const&)> const& executor);
     std::string CalculateStableSqlHash(std::string const& sql);
     std::string EscapeSqlString(std::string const& value);

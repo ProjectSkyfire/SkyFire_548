@@ -345,13 +345,27 @@ namespace Database
 
     bool ExecuteSqlScript(std::string const& sql, std::function<bool(std::string const&)> const& executor)
     {
+        std::istringstream input(sql);
+        return ExecuteSqlStream(input, sql.length(),
+            [&executor](std::string const& statement, SqlStatementContext const&)
+        {
+            return executor(statement);
+        });
+    }
+
+    bool ExecuteSqlStream(std::istream& input, std::uintmax_t totalBytes,
+        std::function<bool(std::string const&, SqlStatementContext const&)> const& executor)
+    {
         std::string current;
         std::string delimiter = ";";
-        std::istringstream input(sql);
         std::string line;
+        SqlStatementContext context;
+        context.TotalBytes = totalBytes;
 
         while (std::getline(input, line))
         {
+            context.BytesRead += line.length() + 1;
+
             std::string newDelimiter;
             if (Trim(current).empty() && TryReadDelimiterCommand(line, newDelimiter))
             {
@@ -369,16 +383,24 @@ namespace Database
                     break;
 
                 std::string statement = Trim(current.substr(0, delimiterPosition));
-                if (!statement.empty() && !executor(statement))
-                    return false;
+                if (!statement.empty())
+                {
+                    ++context.StatementCount;
+                    if (!executor(statement, context))
+                        return false;
+                }
 
                 current.erase(0, delimiterPosition + delimiter.length());
             }
         }
 
         std::string statement = Trim(current);
-        if (!statement.empty() && !executor(statement))
-            return false;
+        if (!statement.empty())
+        {
+            ++context.StatementCount;
+            if (!executor(statement, context))
+                return false;
+        }
 
         return true;
     }

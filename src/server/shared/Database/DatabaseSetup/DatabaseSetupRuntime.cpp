@@ -14,10 +14,13 @@
 #include "Log.h"
 #include "MySQLConnection.h"
 
+#include <cctype>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <system_error>
 
 namespace Skyfire
 {
@@ -25,16 +28,54 @@ namespace Database
 {
     namespace
     {
-        bool ReadTextFile(std::filesystem::path const& path, std::string& contents)
+        bool StartsWithCaseInsensitive(std::string const& text, char const* prefix)
         {
-            std::ifstream file(path, std::ios::in | std::ios::binary);
-            if (!file)
+            std::size_t prefixLength = std::strlen(prefix);
+            if (text.length() < prefixLength)
                 return false;
 
-            std::ostringstream stream;
-            stream << file.rdbuf();
-            contents = stream.str();
+            for (std::size_t i = 0; i < prefixLength; ++i)
+            {
+                if (std::tolower(static_cast<unsigned char>(text[i])) !=
+                    std::tolower(static_cast<unsigned char>(prefix[i])))
+                    return false;
+            }
+
             return true;
+        }
+
+        std::string ExtractSqlTableName(std::string const& statement)
+        {
+            std::string::size_type begin = 0;
+            while (begin < statement.length() && std::isspace(static_cast<unsigned char>(statement[begin])))
+                ++begin;
+
+            std::string trimmed = statement.substr(begin);
+            if (!StartsWithCaseInsensitive(trimmed, "DROP TABLE") &&
+                !StartsWithCaseInsensitive(trimmed, "CREATE TABLE") &&
+                !StartsWithCaseInsensitive(trimmed, "INSERT INTO") &&
+                !StartsWithCaseInsensitive(trimmed, "DELETE FROM") &&
+                !StartsWithCaseInsensitive(trimmed, "ALTER TABLE"))
+                return "";
+
+            std::string::size_type tableBegin = trimmed.find('`');
+            if (tableBegin == std::string::npos)
+                return "";
+
+            std::string::size_type tableEnd = trimmed.find('`', tableBegin + 1);
+            if (tableEnd == std::string::npos)
+                return "";
+
+            return trimmed.substr(tableBegin + 1, tableEnd - tableBegin - 1);
+        }
+
+        uint32 CalculateSqlProgressPercent(SqlStatementContext const& sqlContext)
+        {
+            if (!sqlContext.TotalBytes)
+                return 0;
+
+            std::uintmax_t percent = sqlContext.BytesRead * 100 / sqlContext.TotalBytes;
+            return uint32(percent > 100 ? 100 : percent);
         }
 
         bool ExecuteSetupQuery(MYSQL* setupConnection, std::string const& sql, char const* queryContext,
@@ -99,20 +140,6 @@ namespace Database
             return true;
         }
 
-        bool ExecuteSqlText(MYSQL* setupConnection, std::string const& sql, SetupRuntimeContext const& context)
-        {
-            uint32 statementCount = 0;
-            return ExecuteSqlScript(sql, [setupConnection, &context, &statementCount](std::string const& statement)
-            {
-                ++statementCount;
-                if (statementCount == 1 || statementCount % 500 == 0)
-                    SF_LOG_INFO(context.LogFilter, "Executed %u %s database setup SQL statements.",
-                        statementCount, context.DatabaseName);
-
-                return ExecuteSetupQuery(setupConnection, statement, context.SqlExecutionContext, context);
-            });
-        }
-
         bool RecordUpdateMetadata(MYSQL* setupConnection, SetupOptions const& options, SqlUpdateFile const& update,
             std::string const& hash, SetupRuntimeContext const& context)
         {
@@ -129,9 +156,9 @@ namespace Database
         }
 
         bool RecordAppliedUpdate(MYSQL* setupConnection, SetupOptions const& options, SqlUpdateFile const& update,
-            std::string const& sql, SetupRuntimeContext const& context)
+            std::string const& hash, SetupRuntimeContext const& context)
         {
-            if (!RecordUpdateMetadata(setupConnection, options, update, CalculateStableSqlHash(sql), context))
+            if (!RecordUpdateMetadata(setupConnection, options, update, hash, context))
                 return false;
 
             std::string queryContext = "Could not record " + std::string(context.DatabaseName) +
@@ -293,20 +320,67 @@ namespace Database
     bool ExecuteSqlFile(MYSQL* setupConnection, std::filesystem::path const& path, std::string& contents,
         SetupRuntimeContext const& context)
     {
-        if (!ReadTextFile(path, contents))
+        contents.clear();
+
+        std::ifstream file(path, std::ios::in | std::ios::binary);
+        if (!file)
         {
             SF_LOG_ERROR(context.LogFilter, "Could not read SQL file %s.", path.string().c_str());
             return false;
         }
 
-        SF_LOG_INFO(context.LogFilter, "Executing SQL file %s (%u bytes).",
-            path.string().c_str(), uint32(contents.size()));
+        std::uintmax_t totalBytes = 0;
+        std::error_code fileSizeError;
+        totalBytes = std::filesystem::file_size(path, fileSizeError);
+        if (fileSizeError)
+            totalBytes = 0;
 
-        if (!ExecuteSqlText(setupConnection, contents, context))
+        std::string fileName = path.filename().string();
+        std::string currentTable;
+        uint32 lastLoggedPercent = 0;
+
+        SF_LOG_INFO(context.LogFilter, "Executing SQL file %s (%llu bytes).",
+            path.string().c_str(), static_cast<unsigned long long>(totalBytes));
+
+        bool executed = ExecuteSqlStream(file, totalBytes,
+            [setupConnection, &context, &currentTable, &fileName, &lastLoggedPercent]
+            (std::string const& statement, SqlStatementContext const& sqlContext)
+        {
+            std::string detectedTable = ExtractSqlTableName(statement);
+            if (!detectedTable.empty() && detectedTable != currentTable)
+            {
+                currentTable = detectedTable;
+                SF_LOG_INFO(context.LogFilter, "Importing %s database table `%s` from %s.",
+                    context.DatabaseName, currentTable.c_str(), fileName.c_str());
+            }
+
+            uint32 percent = CalculateSqlProgressPercent(sqlContext);
+            if (sqlContext.StatementCount == 1 || sqlContext.StatementCount % 500 == 0 ||
+                percent >= lastLoggedPercent + 5 || percent == 100)
+            {
+                lastLoggedPercent = percent;
+                SF_LOG_INFO(context.LogFilter,
+                    "Import progress: %u%% - %s database table `%s` - %u statements.",
+                    percent, context.DatabaseName, currentTable.empty() ? "unknown" : currentTable.c_str(),
+                    uint32(sqlContext.StatementCount));
+            }
+
+            std::ostringstream queryContext;
+            queryContext << context.SqlExecutionContext << " statement " << sqlContext.StatementCount
+                << " near byte " << static_cast<unsigned long long>(sqlContext.BytesRead);
+            if (!currentTable.empty())
+                queryContext << " while importing table `" << currentTable << "`";
+
+            return ExecuteSetupQuery(setupConnection, statement, queryContext.str().c_str(), context);
+        });
+
+        if (!executed)
         {
             SF_LOG_ERROR(context.LogFilter, "Failed while executing SQL file %s.", path.string().c_str());
             return false;
         }
+
+        SF_LOG_INFO(context.LogFilter, "Finished executing SQL file %s.", path.string().c_str());
 
         return true;
     }
@@ -384,7 +458,7 @@ namespace Database
             if (!ExecuteSqlFile(setupConnection, update.Path, updateSql, context))
                 return false;
 
-            if (!RecordAppliedUpdate(setupConnection, options, update, updateSql, context))
+            if (!RecordAppliedUpdate(setupConnection, options, update, update.Hash, context))
             {
                 SF_LOG_ERROR(context.LogFilter, "Could not record %s database update %s.",
                     context.DatabaseName, update.Name.c_str());
