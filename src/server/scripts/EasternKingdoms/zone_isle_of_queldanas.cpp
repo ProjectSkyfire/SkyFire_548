@@ -43,10 +43,11 @@ public:
 
     struct npc_converted_sentryAI : public ScriptedAI
     {
-        npc_converted_sentryAI(Creature* creature) : ScriptedAI(creature) { }
-
-        bool Credit;
-        uint32 Timer;
+        npc_converted_sentryAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Credit = false;
+            Timer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -73,6 +74,10 @@ public:
                 } else Timer -= diff;
             }
         }
+
+    private:
+        bool Credit;
+        uint32 Timer;
     };
 };
 

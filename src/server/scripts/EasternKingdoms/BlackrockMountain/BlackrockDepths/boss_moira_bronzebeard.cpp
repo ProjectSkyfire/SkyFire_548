@@ -28,12 +28,13 @@ public:
 
     struct boss_moira_bronzebeardAI : public ScriptedAI
     {
-        boss_moira_bronzebeardAI(Creature* creature) : ScriptedAI(creature) { }
-
-        uint32 Heal_Timer;
-        uint32 MindBlast_Timer;
-        uint32 ShadowWordPain_Timer;
-        uint32 Smite_Timer;
+        boss_moira_bronzebeardAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Heal_Timer = 0;
+            MindBlast_Timer = 0;
+            ShadowWordPain_Timer = 0;
+            Smite_Timer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -72,6 +73,12 @@ public:
                 Smite_Timer = 10000;
             } else Smite_Timer -= diff;
         }
+
+    private:
+        uint32 Heal_Timer;
+        uint32 MindBlast_Timer;
+        uint32 ShadowWordPain_Timer;
+        uint32 Smite_Timer;
     };
 };
 
