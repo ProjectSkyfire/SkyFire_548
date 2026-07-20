@@ -17,7 +17,7 @@ EndScriptData */
 enum Says
 {
     SAY_AGGRO                      = 0,
-    SAY_DOMINATION                 = 1,
+    SAY_CHARM                      = 1,
     SAY_SUMMON                     = 2,
     SAY_ENRAGE                     = 3,
     SAY_SLAY                       = 4,
@@ -128,7 +128,7 @@ class boss_pathaleon_the_calculator : public CreatureScript
                             events.ScheduleEvent(EVENT_ARCANE_TORRENT, std::rand() % 18000 + 12000);
                             break;
                         case EVENT_DOMINATION:
-                            Talk(SAY_DOMINATION);
+                            Talk(SAY_CHARM);
                             DoCastVictim(SPELL_DOMINATION, true);
                             events.ScheduleEvent(EVENT_DOMINATION, std::rand() % 30000 + 25000);
                             break;
