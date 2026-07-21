@@ -77,7 +77,7 @@ static uint32 TeleportSpells[]=
 class boss_urom : public CreatureScript
 {
 public:
-    boss_urom() : CreatureScript("boss_urom") { }
+    boss_urom() : CreatureScript("boss_urom") {}
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
@@ -86,7 +86,23 @@ public:
 
     struct boss_uromAI : public BossAI
     {
-        boss_uromAI(Creature* creature) : BossAI(creature, DATA_UROM_EVENT) { }
+        boss_uromAI(Creature* creature) : BossAI(creature, DATA_UROM_EVENT)
+        {
+            x = 0.0f;
+            y = 0.0f;
+
+            canCast = false;
+            canGoBack = false;
+
+            for (uint8 i = 0; i < 3; ++i)
+                group[i] = 0;
+
+            teleportTimer = 0;
+            arcaneExplosionTimer = 0;
+            castArcaneExplosionTimer = 0;
+            frostBombTimer = 0;
+            timeBombTimer = 0;
+        }
 
         void Reset() OVERRIDE
         {
@@ -123,7 +139,7 @@ public:
             CastTeleport();
 
             if (instance->GetData(DATA_UROM_PLATAFORM) != 3)
-                instance->SetData(DATA_UROM_PLATAFORM, instance->GetData(DATA_UROM_PLATAFORM)+1);
+                instance->SetData(DATA_UROM_PLATAFORM, instance->GetData(DATA_UROM_PLATAFORM) + 1);
         }
 
         void AttackStart(Unit* who) OVERRIDE
@@ -242,7 +258,8 @@ public:
                 DoCast(SPELL_TELEPORT);
                 teleportTimer = std::rand() % 35000 + 30000;
 
-            } else teleportTimer -= uiDiff;
+            }
+            else teleportTimer -= uiDiff;
 
             if (canCast && !me->FindCurrentSpellBySpellId(SPELL_EMPOWERED_ARCANE_EXPLOSION))
             {
@@ -252,7 +269,8 @@ public:
                     canGoBack = true;
                     DoCastAOE(SPELL_EMPOWERED_ARCANE_EXPLOSION);
                     castArcaneExplosionTimer = 2000;
-                }else castArcaneExplosionTimer -= uiDiff;
+                }
+                else castArcaneExplosionTimer -= uiDiff;
             }
 
             if (canGoBack)
@@ -272,7 +290,8 @@ public:
                     canCast = false;
                     canGoBack = false;
                     arcaneExplosionTimer = 9000;
-                } else arcaneExplosionTimer -= uiDiff;
+                }
+                else arcaneExplosionTimer -= uiDiff;
             }
 
             if (!me->IsNonMeleeSpellCasted(false, true, true))
@@ -281,7 +300,8 @@ public:
                 {
                     DoCastVictim(SPELL_FROSTBOMB);
                     frostBombTimer = std::rand() % 8000 + 5000;
-                } else frostBombTimer -= uiDiff;
+                }
+                else frostBombTimer -= uiDiff;
 
                 if (timeBombTimer <= uiDiff)
                 {
@@ -289,7 +309,8 @@ public:
                         DoCast(unit, SPELL_TIME_BOMB);
 
                     timeBombTimer = std::rand() % 25000 + 20000;
-                } else timeBombTimer -= uiDiff;
+                }
+                else timeBombTimer -= uiDiff;
             }
 
             DoMeleeAttackIfReady();
@@ -338,19 +359,19 @@ public:
                     break;
             }
         }
-        private:
-            float x, y;
+    private:
+        float x, y;
 
-            bool canCast;
-            bool canGoBack;
+        bool canCast;
+        bool canGoBack;
 
-            uint8 group[3];
+        uint8 group[3];
 
-            uint32 teleportTimer;
-            uint32 arcaneExplosionTimer;
-            uint32 castArcaneExplosionTimer;
-            uint32 frostBombTimer;
-            uint32 timeBombTimer;
+        uint32 teleportTimer;
+        uint32 arcaneExplosionTimer;
+        uint32 castArcaneExplosionTimer;
+        uint32 frostBombTimer;
+        uint32 timeBombTimer;
     };
 };
 
