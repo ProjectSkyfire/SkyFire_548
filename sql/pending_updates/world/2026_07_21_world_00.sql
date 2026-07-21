@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `OfferRewardText`='This is extremely unsettling. If mogu are banding together like this all over the continent, it could become a major threat to Pandaria.' WHERE `Id`=29670;
