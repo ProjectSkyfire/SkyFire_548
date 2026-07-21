@@ -25,7 +25,7 @@ int PetAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK)
+PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inCombat(false)
 {
     UpdateAllies();
 }
