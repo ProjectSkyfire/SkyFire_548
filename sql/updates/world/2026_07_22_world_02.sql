@@ -1,5 +1,5 @@
 -- Hero's Call: Westfall! -- Elwynn Forest version
-UPDATE `sf_world`.`quest_template` SET `OfferRewardText`='Murder, rookie. That\'S what you\'re looking at on the ground in front of us.' WHERE  `Id`=26378;
+UPDATE `quest_template` SET `OfferRewardText`='Murder, rookie. That\'S what you\'re looking at on the ground in front of us.' WHERE `Id`=26378;
 
 -- Hero's Call: Westfall! -- Stormwind Hero board version
 UPDATE `quest_template` SET `OfferRewardText`='Murder, rookie. That\'S what you\'re looking at on the ground in front of us.' WHERE `Id`=28562;
