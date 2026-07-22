@@ -226,6 +226,7 @@ void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_duskwood();
 void AddSC_eastern_plaguelands();
+void AddSC_elwynn_forest();
 void AddSC_eversong_woods();
 void AddSC_ghostlands();
 void AddSC_hinterlands();
@@ -233,7 +234,7 @@ void AddSC_isle_of_queldanas();
 void AddSC_silverpine_forest();
 void AddSC_stranglethorn_vale();
 void AddSC_undercity();
-void AddSC_elwynn_forest();
+void AddSC_westfall();
 
 //kalimdor
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -892,6 +893,7 @@ void AddEasternKingdomsScripts()
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
     AddSC_duskwood();
+    AddSC_undercity();
     AddSC_eastern_plaguelands();
     AddSC_eversong_woods();
     AddSC_ghostlands();
@@ -899,8 +901,8 @@ void AddEasternKingdomsScripts()
     AddSC_isle_of_queldanas();
     AddSC_silverpine_forest();
     AddSC_stranglethorn_vale();
-    AddSC_undercity();
     AddSC_elwynn_forest();
+    AddSC_westfall();
 #endif
 }
 
