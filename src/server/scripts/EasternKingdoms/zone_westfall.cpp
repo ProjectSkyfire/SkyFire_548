@@ -87,6 +87,7 @@ public:
         npc_transientAI(Creature* creature) : ScriptedAI(creature)
         {
             cooldown = 0;
+            talkCooldown = 0;
         }
 
         void GiveClueCredit(Player* player)
@@ -128,6 +129,7 @@ public:
         void Reset() OVERRIDE
         {
             cooldown = 0;
+            talkCooldown = std::rand() % 120000 + 60000;
             me->setFaction(7);
             me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
@@ -204,6 +206,31 @@ public:
             }
         }
 
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+        {
+            Player* const player = who->ToPlayer();
+            if (!player)
+                return;
+
+            if (player->GetQuestStatus(26209) != QUEST_STATUS_INCOMPLETE || talkCooldown)
+                return;
+
+            if (me->GetEntry() == 42386)
+            {
+                if ((std::rand() % 2 + 1) == 2)
+                {
+                    me->MonsterSay(TALKOOC1, Language::LANG_COMMON, me);
+                }
+                else
+                {
+                    me->MonsterSay(TALKOOC2, Language::LANG_COMMON, me);
+                }
+            }
+
+            talkCooldown = std::rand() % 120000 + 60000;
+
+        }
+        
         void UpdateAI(uint32 diff) OVERRIDE
         {
             if (cooldown)
@@ -217,11 +244,22 @@ public:
                     cooldown -= diff;
             }
 
+            if (talkCooldown)
+            {
+                if (talkCooldown <= diff)
+                {
+                    talkCooldown = 0;
+                }
+                else
+                    talkCooldown -= diff;
+            }
+
             if (me->getFaction() == 14)
                 DoMeleeAttackIfReady();
         }
     private:
         uint32 cooldown;
+        uint32 talkCooldown;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
