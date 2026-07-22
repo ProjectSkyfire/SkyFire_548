@@ -7,6 +7,7 @@
 #define SF_LFGGROUPDATA_H
 
 #include "LFG.h"
+#include <map>
 
 namespace lfg
 {
@@ -15,6 +16,17 @@ namespace lfg
     {
         LFG_GROUP_MAX_KICKS = 3,
     };
+
+    struct LfgGroupQueueData
+    {
+        LfgGroupQueueData();
+
+        LfgState State;                                     ///< Current state in this queue
+        LfgState OldState;                                  ///< Old state
+        uint32 Dungeon;                                     ///< Dungeon entry
+    };
+
+    typedef std::map<uint8, LfgGroupQueueData> LfgGroupQueueDataContainer;
 
     /**
         Stores all lfg data needed about a group.
@@ -25,7 +37,7 @@ namespace lfg
         LfgGroupData();
         ~LfgGroupData();
 
-        bool IsLfgGroup();
+        bool IsLfgGroup() const;
 
         // General
         void SetState(LfgState state);
@@ -34,6 +46,7 @@ namespace lfg
         uint8 RemovePlayer(uint64 guid);
         void RemoveAllPlayers();
         void SetLeader(uint64 guid);
+        void SetActiveQueueId(uint8 queueId);
 
         // Dungeon
         void SetDungeon(uint32 dungeon);
@@ -47,6 +60,8 @@ namespace lfg
         LfgGuidSet const& GetPlayers() const;
         uint8 GetPlayerCount() const;
         uint64 GetLeader() const;
+        uint8 GetActiveQueueId() const;
+        LfgGroupQueueDataContainer const& GetQueues() const;
 
         // Dungeon
         uint32 GetDungeon(bool asId = true) const;
@@ -57,13 +72,14 @@ namespace lfg
         bool IsVoteKickActive() const;
 
     private:
+        LfgGroupQueueData& GetActiveQueueData();
+        LfgGroupQueueData const& GetActiveQueueData() const;
+
         // General
-        LfgState m_State;                                  ///< State if group in LFG
-        LfgState m_OldState;                               ///< Old State
         uint64 m_Leader;                                   ///< Leader GUID
         LfgGuidSet m_Players;                              ///< Players in group
-        // Dungeon
-        uint32 m_Dungeon;                                  ///< Dungeon entry
+        uint8 m_ActiveQueueId;                             ///< Active queue data owner
+        LfgGroupQueueDataContainer m_Queues;               ///< Queue-scoped group data
         // Vote Kick
         uint8 m_KicksLeft;                                 ///< Number of kicks left
         bool m_VoteKickActive;

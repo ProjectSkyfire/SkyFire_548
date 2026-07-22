@@ -56,9 +56,14 @@ public:
             { "start",          rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, &HandleBoatStartCommand,             "", },
             { "stop",           rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, &HandleBoatStopCommand,              "", },
         };
+        static std::vector<ChatCommand> debugLfgCommandTable =
+        {
+            { "requirements",   rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, false, &HandleDebugLfgRequirementsCommand, "", },
+        };
         static std::vector<ChatCommand> debugCommandTable =
         {
             { "boat",           rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, NULL,                                "", boatCommandTable },
+            { "lfg",            rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, false, NULL,                             "", debugLfgCommandTable },
             { "setbit",        rbac::RBAC_PERM_COMMAND_DEBUG_SETBIT,        false, &HandleDebugSet32BitCommand,         "", },
             { "threat",        rbac::RBAC_PERM_COMMAND_DEBUG_THREAT,        false, &HandleDebugThreatListCommand,       "", },
             { "hostil",        rbac::RBAC_PERM_COMMAND_DEBUG_HOSTIL,        false, &HandleDebugHostileRefListCommand,   "", },
@@ -160,6 +165,42 @@ public:
         handler->SendSysMessage("SOTA boat debug timer stopped and written to the packet log.");
         handler->PSendSysMessage("SOTA boat debug status: %s", bg->GetBoatDebugStatus().c_str());
         return true;
+    }
+
+    static bool HandleDebugLfgRequirementsCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+        {
+            handler->SendSysMessage("Usage: .debug lfg requirements on|off");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : NULL;
+        if (!player)
+        {
+            handler->SendSysMessage("LFG requirement debug override requires an in-game player session.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!stricmp(args, "on"))
+        {
+            player->SetDebugLfgRequirementOverride(true);
+            handler->SendSysMessage("LFG scenario requirement override is ON for this character.");
+            return true;
+        }
+
+        if (!stricmp(args, "off"))
+        {
+            player->SetDebugLfgRequirementOverride(false);
+            handler->SendSysMessage("LFG scenario requirement override is OFF for this character.");
+            return true;
+        }
+
+        handler->SendSysMessage("Usage: .debug lfg requirements on|off");
+        handler->SetSentErrorMessage(true);
+        return false;
     }
 
     static bool HandleDebugPlayCinematicCommand(ChatHandler* handler, char const* args)

@@ -699,12 +699,16 @@ void Group::ChangeLeader(uint64 newLeaderGuid)
 
 void Group::Disband(bool hideDestroy /* = false */)
 {
+    bool const wasLFGGroup = isLFGGroup();
+    uint64 const lfgGroupGuid = wasLFGGroup ? GetGUID() : 0;
+    uint8 const lfgQueueId = wasLFGGroup ? sLFGMgr->GetQueueId(lfgGroupGuid) : 0;
+
     sScriptMgr->OnGroupDisband(this);
 
     Player* player;
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
-        player = ObjectAccessor::FindPlayer(citr->guid);
+        player = ObjectAccessor::FindPlayerInOrOutOfWorld(citr->guid);
         if (!player)
             continue;
 
@@ -722,7 +726,7 @@ void Group::Disband(bool hideDestroy /* = false */)
         }
 
         // quest related GO state dependent from raid membership
-        if (isRaidGroup())
+        if (isRaidGroup() && player->IsInWorld())
             player->UpdateForQuestWorldObjects();
 
         if (!player->GetSession())
@@ -740,6 +744,9 @@ void Group::Disband(bool hideDestroy /* = false */)
             group->SendUpdate();
         else
             SendUpdateToPlayer(player->GetGUID(), NULL);
+
+        if (wasLFGGroup)
+            player->GetSession()->SendLfgClearStatus(lfgGroupGuid, lfgQueueId, true);
 
         _homebindIfInstance(player);
     }
@@ -1592,7 +1599,8 @@ void Group::SendUpdate()
 
 void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
 {
-    Player* player = ObjectAccessor::FindPlayer(playerGUID);
+    Player* player = slot ? ObjectAccessor::FindPlayer(playerGUID) :
+        ObjectAccessor::FindPlayerInOrOutOfWorld(playerGUID);
 
     if (!player || !player->GetSession())
         return;

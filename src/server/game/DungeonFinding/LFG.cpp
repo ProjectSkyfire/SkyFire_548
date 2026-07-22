@@ -25,6 +25,14 @@ namespace lfg
         return dungeonstr;
     }
 
+    bool IsValidPlayerRoles(uint8 roles)
+    {
+        static uint8 const validRoleMask = PLAYER_ROLE_LEADER | PLAYER_ROLE_TANK | PLAYER_ROLE_HEALER | PLAYER_ROLE_DAMAGE;
+        static uint8 const playableRoleMask = PLAYER_ROLE_TANK | PLAYER_ROLE_HEALER | PLAYER_ROLE_DAMAGE;
+
+        return (roles & ~validRoleMask) == 0 && (roles & playableRoleMask) != 0;
+    }
+
     std::string GetRolesString(uint8 roles)
     {
         std::string rolesstr = "";

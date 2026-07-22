@@ -7,6 +7,7 @@
 #include "DatabaseEnv.h"
 #include "Group.h"
 #include "GroupMgr.h"
+#include "LFGMgr.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -488,6 +489,16 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recvData*/)
 
     // everything's fine, do it
     SendPartyResult(PartyOperation::PARTY_OP_LEAVE, GetPlayer()->GetName(), PartyResult::ERR_PARTY_RESULT_OK);
+
+    if (grp->isLFGGroup())
+    {
+        lfg::LfgState const state = sLFGMgr->GetState(grp->GetGUID());
+        if (state == lfg::LFG_STATE_DUNGEON || state == lfg::LFG_STATE_FINISHED_DUNGEON)
+        {
+            grp->Disband();
+            return;
+        }
+    }
 
     GetPlayer()->RemoveFromGroup(GROUP_REMOVEMETHOD_LEAVE);
 }

@@ -1887,27 +1887,27 @@ struct LFGDungeonEntry
     uint32  m_MinLevel;                                     // 2
     uint32  m_MaxLevel;                                     // 3
     uint32  m_TargetLevel;                                  // 4
-    //uint32  m_TargetMinLevel;                               // 5
-    //uint32  m_TargetMaxLevel;                               // 6
+    uint32  m_TargetMinLevel;                               // 5
+    uint32  m_TargetMaxLevel;                               // 6
     int32   m_ContinentID;                                  // 7
     uint32  m_DifficultyID;                                 // 8 Difficulty.dbc
     uint32  m_Flags;                                        // 9
     uint32  m_Type;                                         // 10 (1-Dungeon, 2-Raid, 4-OpenWorld, 6-Random)
-    //uint32  m_Faction;                                    // 11
+    int32   m_Faction;                                      // 11
     //char*   m_TextureFileName;                            // 12
     uint32  m_ExpansionLevel;                               // 13
     //uint32  m_OrderIndex;                                 // 14
     uint32  m_GroupID;                                      // 15
     //char*   m_Description;                                // 16
-    //uint32  m_RandomDungeonID;                              // 17 RandomDungeonID assigned for this dungeon
-    //uint32 m_CountTank;                                   // 18
-    //uint32 m_CountHealer;                                 // 19
-    //uint32 m_CountDamage;                                 // 20
+    uint32  m_RandomDungeonID;                              // 17 RandomDungeonID assigned for this dungeon
+    uint32  m_CountTank;                                    // 18
+    uint32  m_CountHealer;                                  // 19
+    uint32  m_CountDamage;                                  // 20
     //uint32 m_CountTankMin;                                // 21
     //uint32 m_CountHealerMin;                              // 22
     //uint32 m_CountDamageMin;                              // 23
-    //uint32 m_ScenarioID;                                  // 24
-    //uint32 m_SubType;                                     // 25
+    uint32  m_ScenarioID;                                   // 24
+    uint32  m_SubType;                                      // 25 LFG category sent in status packets
     //uint32 m_BonusReputationAmount;                       // 26
     //uint32 m_MentorLevel;                                 // 27
     //uint32 m_MentorItemLevel;                             // 28
@@ -1993,7 +1993,7 @@ struct MapEntry
     bool IsBattlegroundOrArena() const { return map_type == MAP_BATTLEGROUND || map_type == MAP_ARENA; }
     bool IsWorldMap() const { return map_type == MAP_COMMON; }
 
-    bool IsInstance() const { return map_type == MAP_DUNGEON || map_type == MAP_RAID; }
+    bool IsInstance() const { return map_type == MAP_DUNGEON || map_type == MAP_RAID || map_type == MAP_SCENARIO; }
 
     bool GetEntrancePos(int32& mapid, float& x, float& y) const
     {

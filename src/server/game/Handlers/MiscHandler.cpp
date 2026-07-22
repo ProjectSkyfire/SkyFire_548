@@ -160,6 +160,12 @@ struct TimeSyncRequest
     uint32 clientTicks;
 };
 
+struct DiscardedTimeSyncAcksRequest
+{
+    bool hasCounter;
+    uint32 counter;
+};
+
 struct UpdateMissileTrajectoryRequest
 {
     uint64 guid;
@@ -584,12 +590,20 @@ GuidRequest ReadObjectUpdateFailedRequest(WorldPacket& recvPacket)
     return request;
 }
 
-void ReadDiscardedTimeSyncAcksRequest(WorldPacket& recvData)
+DiscardedTimeSyncAcksRequest ReadDiscardedTimeSyncAcksRequest(WorldPacket& recvData)
 {
-    bool hasInfo = !recvData.ReadBit();
+    DiscardedTimeSyncAcksRequest request;
+    request.hasCounter = false;
+    request.counter = 0;
 
+    bool hasInfo = !recvData.ReadBit();
     if (hasInfo)
-        recvData.read_skip<uint32>();
+    {
+        request.hasCounter = true;
+        recvData >> request.counter;
+    }
+
+    return request;
 }
 
 SceneCompletedRequest ReadSceneCompletedRequest(WorldPacket& recvPacket)
@@ -2072,8 +2086,26 @@ void WorldSession::HandleTimeSyncResp(WorldPacket& recvData)
 
     TimeSyncRequest request = ReadTimeSyncRequest(recvData);
 
+    while (!_player->m_timeSyncQueue.empty() && _player->m_timeSyncQueue.front() < request.counter)
+    {
+        SF_LOG_DEBUG("network", "Discarding stale time sync counter %u for player %s before response %u",
+            _player->m_timeSyncQueue.front(), _player->GetName().c_str(), request.counter);
+        _player->m_timeSyncQueue.pop();
+    }
+
+    if (_player->m_timeSyncQueue.empty())
+    {
+        SF_LOG_DEBUG("network", "Ignoring time sync response %u from player %s with no pending request",
+            request.counter, _player->GetName().c_str());
+        return;
+    }
+
     if (request.counter != _player->m_timeSyncQueue.front())
-        SF_LOG_ERROR("network", "Wrong time sync counter from player %s (cheater?)", _player->GetName().c_str());
+    {
+        SF_LOG_DEBUG("network", "Ignoring out of order time sync response %u from player %s, expected %u",
+            request.counter, _player->GetName().c_str(), _player->m_timeSyncQueue.front());
+        return;
+    }
 
     SF_LOG_DEBUG("network", "Time sync received: counter %u, client ticks %u, time since last sync %u", request.counter, request.clientTicks, request.clientTicks - _player->m_timeSyncClient);
 
@@ -2909,7 +2941,24 @@ void WorldSession::HandleDiscardedTimeSyncAcks(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: CMSG_DISCARDED_TIME_SYNC_ACKS");
 
-    ReadDiscardedTimeSyncAcksRequest(recvData);
+    DiscardedTimeSyncAcksRequest request = ReadDiscardedTimeSyncAcksRequest(recvData);
+    if (!_player)
+        return;
+
+    if (!request.hasCounter)
+        return;
+
+    while (!_player->m_timeSyncQueue.empty())
+    {
+        uint32 counter = _player->m_timeSyncQueue.front();
+        _player->m_timeSyncQueue.pop();
+
+        SF_LOG_DEBUG("network", "Discarded time sync ack %u from player %s, removed pending counter %u",
+            request.counter, _player->GetName().c_str(), counter);
+
+        if (counter >= request.counter)
+            break;
+    }
 }
 
 void WorldSession::SendPlayMusic(uint32 SoundKitID)

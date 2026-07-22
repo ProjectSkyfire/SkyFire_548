@@ -22,6 +22,7 @@ void GetPlayerInfo(ChatHandler* handler, Player* player)
     handler->PSendSysMessage(LANG_LFG_PLAYER_INFO, player->GetName().c_str(),
         state.c_str(), uint8(dungeons.size()), lfg::ConcatenateDungeons(dungeons).c_str(),
         lfg::GetRolesString(sLFGMgr->GetRoles(guid)).c_str(), sLFGMgr->GetComment(guid).c_str());
+    handler->SendSysMessage(sLFGMgr->DumpPlayerInfo(guid).c_str());
 }
 
 class lfg_commandscript : public CommandScript
@@ -76,6 +77,7 @@ public:
         std::string const& state = lfg::GetStateString(sLFGMgr->GetState(guid));
         handler->PSendSysMessage(LANG_LFG_GROUP_INFO, grp->isLFGGroup(),
             state.c_str(), sLFGMgr->GetDungeon(guid));
+        handler->SendSysMessage(sLFGMgr->DumpGroupInfo(guid).c_str());
 
         for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
             GetPlayerInfo(handler, itr->GetSource());
@@ -104,7 +106,8 @@ public:
 
     static bool HandleLfgQueueInfoCommand(ChatHandler* handler, char const* args)
     {
-        handler->SendSysMessage(sLFGMgr->DumpQueueInfo(*args).c_str());
+        bool full = args && *args;
+        handler->SendSysMessage(sLFGMgr->DumpQueueInfo(full).c_str());
         return true;
     }
 

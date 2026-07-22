@@ -8,38 +8,57 @@
 
 namespace lfg
 {
+    namespace
+    {
+        LfgGroupQueueData const& EmptyGroupQueueData()
+        {
+            static LfgGroupQueueData empty;
+            return empty;
+        }
+    }
 
-    LfgGroupData::LfgGroupData() : m_State(LFG_STATE_NONE), m_OldState(LFG_STATE_NONE),
-        m_Leader(0), m_Dungeon(0), m_KicksLeft(LFG_GROUP_MAX_KICKS), m_VoteKickActive(false)
+    LfgGroupQueueData::LfgGroupQueueData() : State(LFG_STATE_NONE), OldState(LFG_STATE_NONE), Dungeon(0)
+    { }
+
+    LfgGroupData::LfgGroupData() : m_Leader(0), m_ActiveQueueId(0), m_KicksLeft(LFG_GROUP_MAX_KICKS),
+        m_VoteKickActive(false)
     { }
 
     LfgGroupData::~LfgGroupData()
     { }
 
-    bool LfgGroupData::IsLfgGroup()
+    bool LfgGroupData::IsLfgGroup() const
     {
-        return m_OldState != LFG_STATE_NONE;
+        return GetOldState() != LFG_STATE_NONE;
     }
 
     void LfgGroupData::SetState(LfgState state)
     {
+        LfgGroupQueueData& data = GetActiveQueueData();
+
         switch (state)
         {
             case LFG_STATE_NONE:
-                m_Dungeon = 0;
+                data.State = LFG_STATE_NONE;
+                data.OldState = LFG_STATE_NONE;
+                data.Dungeon = 0;
+                m_Queues.erase(m_ActiveQueueId);
+                m_ActiveQueueId = 0;
                 m_KicksLeft = LFG_GROUP_MAX_KICKS;
+                return;
             case LFG_STATE_FINISHED_DUNGEON:
             case LFG_STATE_DUNGEON:
-                m_OldState = state;
+                data.OldState = state;
                 // No break on purpose
             default:
-                m_State = state;
+                data.State = state;
         }
     }
 
     void LfgGroupData::RestoreState()
     {
-        m_State = m_OldState;
+        LfgGroupQueueData& data = GetActiveQueueData();
+        data.State = data.OldState;
     }
 
     void LfgGroupData::AddPlayer(uint64 guid)
@@ -65,9 +84,15 @@ namespace lfg
         m_Leader = guid;
     }
 
+    void LfgGroupData::SetActiveQueueId(uint8 queueId)
+    {
+        m_ActiveQueueId = queueId;
+        GetActiveQueueData();
+    }
+
     void LfgGroupData::SetDungeon(uint32 dungeon)
     {
-        m_Dungeon = dungeon;
+        GetActiveQueueData().Dungeon = dungeon;
     }
 
     void LfgGroupData::DecreaseKicksLeft()
@@ -78,12 +103,12 @@ namespace lfg
 
     LfgState LfgGroupData::GetState() const
     {
-        return m_State;
+        return GetActiveQueueData().State;
     }
 
     LfgState LfgGroupData::GetOldState() const
     {
-        return m_OldState;
+        return GetActiveQueueData().OldState;
     }
 
     LfgGuidSet const& LfgGroupData::GetPlayers() const
@@ -101,12 +126,23 @@ namespace lfg
         return m_Leader;
     }
 
+    uint8 LfgGroupData::GetActiveQueueId() const
+    {
+        return m_ActiveQueueId;
+    }
+
+    LfgGroupQueueDataContainer const& LfgGroupData::GetQueues() const
+    {
+        return m_Queues;
+    }
+
     uint32 LfgGroupData::GetDungeon(bool asId /* = true */) const
     {
+        uint32 dungeon = GetActiveQueueData().Dungeon;
         if (asId)
-            return (m_Dungeon & 0x00FFFFFF);
+            return (dungeon & 0x00FFFFFF);
         else
-            return m_Dungeon;
+            return dungeon;
     }
 
     uint8 LfgGroupData::GetKicksLeft() const
@@ -121,6 +157,20 @@ namespace lfg
     bool LfgGroupData::IsVoteKickActive() const
     {
         return m_VoteKickActive;
+    }
+
+    LfgGroupQueueData& LfgGroupData::GetActiveQueueData()
+    {
+        return m_Queues[m_ActiveQueueId];
+    }
+
+    LfgGroupQueueData const& LfgGroupData::GetActiveQueueData() const
+    {
+        LfgGroupQueueDataContainer::const_iterator itr = m_Queues.find(m_ActiveQueueId);
+        if (itr != m_Queues.end())
+            return itr->second;
+
+        return EmptyGroupQueueData();
     }
 
 } // namespace lfg

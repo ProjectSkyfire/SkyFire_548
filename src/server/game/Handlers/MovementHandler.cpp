@@ -280,6 +280,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         return;
 
     GetPlayer()->SetSemaphoreTeleportFar(false);
+    GetPlayer()->SetSemaphoreTeleportForcedFar(false);
 
     // get the teleport destination
     WorldLocation const& loc = GetPlayer()->GetTeleportDest();

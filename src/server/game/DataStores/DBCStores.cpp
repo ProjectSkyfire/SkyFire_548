@@ -477,6 +477,41 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sMapDifficultyStore, dbcPath, "MapDifficulty.dbc");//15595
     // fill data
     sMapDifficultyMap[0][0] = MapDifficulty(DIFFICULTY_NONE, "", 0, 0, false);//map 0 is missingg from MapDifficulty.dbc use this till its ported to sql
+
+    auto addScenarioDifficulty = [](uint32 mapId, DifficultyID difficulty, uint32 maxPlayers)
+    {
+        sMapDifficultyMap[mapId][difficulty] = MapDifficulty(difficulty, "", 0, maxPlayers, false);
+    };
+
+    addScenarioDifficulty(999, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1000, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1005, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1005, DIFFICULTY_SCE_HEROIC, 3);
+    addScenarioDifficulty(1024, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1030, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1030, DIFFICULTY_SCE_HEROIC, 3);
+    addScenarioDifficulty(1031, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1048, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1050, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1051, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1095, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1099, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1099, DIFFICULTY_SCE_HEROIC, 3);
+    addScenarioDifficulty(1102, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1103, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1104, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1112, DIFFICULTY_SCE_NORMAL, 1);
+    addScenarioDifficulty(1126, DIFFICULTY_SCE_NORMAL, 1);
+    addScenarioDifficulty(1130, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1130, DIFFICULTY_SCE_HEROIC, 3);
+    addScenarioDifficulty(1131, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1131, DIFFICULTY_SCE_HEROIC, 3);
+    addScenarioDifficulty(1135, DIFFICULTY_SCE_NORMAL, 1);
+    addScenarioDifficulty(1144, DIFFICULTY_SCE_NORMAL, 3);
+    addScenarioDifficulty(1144, DIFFICULTY_SCE_HEROIC, 3);
+    addScenarioDifficulty(1148, DIFFICULTY_SCE_NORMAL, 1);
+    addScenarioDifficulty(1157, DIFFICULTY_SCE_HEROIC, 1);
+
     for (uint32 i = 0; i < sMapDifficultyStore.GetNumRows(); ++i)
         if (MapDifficultyEntry const* entry = sMapDifficultyStore.LookupEntry(i))
             sMapDifficultyMap[entry->MapId][entry->Difficulty] = MapDifficulty(entry->Difficulty, entry->areaTriggerText, entry->resetTime, entry->maxPlayers, entry->areaTriggerText[0] > 0);
@@ -1217,6 +1252,26 @@ MapDifficulty const* GetMapDifficultyData(uint32 mapId, DifficultyID difficulty)
 
 MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, DifficultyID& difficulty)
 {
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
+    if (mapEntry && mapEntry->IsScenario())
+    {
+        if (MapDifficulty const* mapDiff = GetMapDifficultyData(mapId, difficulty))
+            return mapDiff;
+
+        if (difficulty == DIFFICULTY_SCE_HEROIC)
+        {
+            difficulty = DIFFICULTY_SCE_NORMAL;
+            if (MapDifficulty const* mapDiff = GetMapDifficultyData(mapId, difficulty))
+                return mapDiff;
+        }
+
+        difficulty = DIFFICULTY_SCE_NORMAL;
+        if (MapDifficulty const* mapDiff = GetMapDifficultyData(mapId, difficulty))
+            return mapDiff;
+
+        return GetDefaultMapDifficulty(mapId);
+    }
+
     DifficultyEntry const* diffEntry = sDifficultyStore.LookupEntry(difficulty);
     if (!diffEntry)
         return GetDefaultMapDifficulty(mapId);

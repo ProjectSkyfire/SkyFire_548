@@ -19,6 +19,39 @@
 
 namespace lfg
 {
+    namespace
+    {
+        bool IsLfgDungeonState(LfgState state)
+        {
+            return state == LFG_STATE_DUNGEON || state == LFG_STATE_FINISHED_DUNGEON;
+        }
+
+        bool ClearStrayPlayerState(Player* player, char const* reason)
+        {
+            if (!player)
+                return false;
+
+            Group* group = player->GetGroup();
+            if (group && group->isLFGGroup())
+                return false;
+
+            uint64 const guid = player->GetGUID();
+            LfgState const state = sLFGMgr->GetState(guid);
+            uint64 const savedGroup = sLFGMgr->GetGroup(guid);
+            if (!savedGroup && !IsLfgDungeonState(state) && state != LFG_STATE_BOOT)
+                return false;
+
+            if (savedGroup)
+                sLFGMgr->SetGroup(guid, 0);
+
+            sLFGMgr->LeaveSoloLfg(guid, sLFGMgr->GetQueueId(guid));
+            player->GetSession()->SendLfgClearStatus();
+            SF_LOG_DEBUG("lfg", "%s, Player %s(%u) cleared stray LFG state %u savedGroup %u.",
+                reason ? reason : "LFG stray state cleanup", player->GetName().c_str(), GUID_LOPART(guid),
+                uint32(state), GUID_LOPART(savedGroup));
+            return true;
+        }
+    }
 
     LFGPlayerScript::LFGPlayerScript() : PlayerScript("LFGPlayerScript") { }
 
@@ -29,7 +62,6 @@ namespace lfg
 
         if (!player->GetGroup())
         {
-            player->GetSession()->SendLfgLfrList(false);
             sLFGMgr->LeaveLfg(player->GetGUID());
         }
         else if (player->GetSession()->PlayerDisconnected())
@@ -56,7 +88,17 @@ namespace lfg
             }
         }
         sLFGMgr->SetTeam(player->GetGUID(), player->GetTeam());
-        /// @todo - Restore LfgPlayerData and send proper status to player if it was in a group
+
+        if (ClearStrayPlayerState(player, "LFGPlayerScript::OnLogin"))
+            return;
+
+        if (sLFGMgr->RestoreActiveQueue(guid))
+        {
+            LfgUpdateData updateData = sLFGMgr->GetLfgStatus(guid);
+            player->GetSession()->SendLfgUpdateStatus(updateData, player->GetGroup() != NULL);
+            if (updateData.state == LFG_STATE_PROPOSAL)
+                sLFGMgr->SendActiveProposal(guid);
+        }
     }
 
     void LFGPlayerScript::OnMapChanged(Player* player)
@@ -89,13 +131,29 @@ namespace lfg
         }
         else
         {
-            Group* group = player->GetGroup();
-            if (group && group->GetMembersCount() == 1)
+            if (ClearStrayPlayerState(player, "LFGPlayerScript::OnMapChanged"))
             {
-                sLFGMgr->LeaveLfg(group->GetGUID());
+                player->RemoveAurasDueToSpell(LFG_SPELL_LUCK_OF_THE_DRAW);
+                return;
+            }
+
+            Group* group = player->GetGroup();
+            if (group && group->isLFGGroup())
+            {
+                uint64 const groupGuid = group->GetGUID();
+                uint64 const playerGuid = player->GetGUID();
+                LfgState const groupState = sLFGMgr->GetState(groupGuid);
+
+                if (!IsLfgDungeonState(groupState) && groupState != LFG_STATE_NONE)
+                {
+                    player->RemoveAurasDueToSpell(LFG_SPELL_LUCK_OF_THE_DRAW);
+                    return;
+                }
+
                 group->Disband();
-                SF_LOG_DEBUG("lfg", "LFGPlayerScript::OnMapChanged, Player %s(%u) is last in the lfggroup so we disband the group.",
-                    player->GetName().c_str(), GUID_LOPART(player->GetGUID()));
+
+                SF_LOG_DEBUG("lfg", "LFGPlayerScript::OnMapChanged, Player %s(%u) left LFG dungeon flow; disbanded LFG group %u with state %u.",
+                    player->GetName().c_str(), GUID_LOPART(playerGuid), GUID_LOPART(groupGuid), uint32(groupState));
             }
             player->RemoveAurasDueToSpell(LFG_SPELL_LUCK_OF_THE_DRAW);
         }
@@ -142,8 +200,9 @@ namespace lfg
         SF_LOG_DEBUG("lfg", "LFGScripts::OnRemoveMember [" UI64FMTD "]: remove [" UI64FMTD "] Method: %d Kicker: [" UI64FMTD "] Reason: %s", gguid, guid, method, kicker, (reason ? reason : ""));
 
         bool isLFG = group->isLFGGroup();
+        LfgState state = sLFGMgr->GetState(gguid);
 
-        if (isLFG && method == GROUP_REMOVEMETHOD_KICK)        // Player have been kicked
+        if (isLFG && method == GROUP_REMOVEMETHOD_KICK && IsLfgDungeonState(state))        // Player have been kicked
         {
             /// @todo - Update internal kick cooldown of kicker
             std::string str_reason = "";
@@ -152,8 +211,6 @@ namespace lfg
             sLFGMgr->InitBoot(gguid, kicker, guid, str_reason);
             return;
         }
-
-        LfgState state = sLFGMgr->GetState(gguid);
 
         // If group is being formed after proposal success do nothing more
         if (state == LFG_STATE_PROPOSAL && method == GROUP_REMOVEMETHOD_DEFAULT)
@@ -182,8 +239,18 @@ namespace lfg
         }
 
         if (isLFG && state != LFG_STATE_FINISHED_DUNGEON) // Need more players to finish the dungeon
-            if (Player* leader = ObjectAccessor::FindPlayer(sLFGMgr->GetLeader(gguid)))
+        {
+            uint64 leaderGuid = sLFGMgr->GetLeader(gguid);
+            Player* leader = ObjectAccessor::FindPlayer(leaderGuid);
+            if (!leader)
+            {
+                leaderGuid = group->GetLeaderGUID();
+                leader = ObjectAccessor::FindPlayer(leaderGuid);
+            }
+
+            if (leader)
                 leader->GetSession()->SendLfgOfferContinue(sLFGMgr->GetDungeon(gguid, false));
+        }
     }
 
     void LFGGroupScript::OnDisband(Group* group)
@@ -193,6 +260,12 @@ namespace lfg
 
         uint64 gguid = group->GetGUID();
         SF_LOG_DEBUG("lfg", "LFGScripts::OnDisband [" UI64FMTD "]", gguid);
+
+        if (group->isLFGGroup())
+        {
+            sLFGMgr->TeleportDungeonGroupOut(group);
+            sLFGMgr->ClearDungeonGroupState(gguid, group->GetDbStoreId(), "LFG group disband", true);
+        }
 
         sLFGMgr->RemoveGroupData(gguid);
     }
