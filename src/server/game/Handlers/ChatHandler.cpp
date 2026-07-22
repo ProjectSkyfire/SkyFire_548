@@ -316,10 +316,12 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             }
 
             Player* receiver = sObjectAccessor->FindPlayerByName(to);
-            bool const receiverFiltersWhispers = receiver && receiver->GetSession() && !receiver->isAcceptWhispers() &&
-                receiver->GetSession()->HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) &&
+            bool const senderBypassesWhisperFilter = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHAT_GM_WHISPER_FILTER_BYPASS) &&
+                GetSecurity() > AccountTypes::SEC_PLAYER;
+            bool const receiverFiltersWhispers = receiver && !receiver->isAcceptWhispers() &&
+                !senderBypassesWhisperFilter &&
                 !receiver->IsInWhisperWhiteList(sender->GetGUID());
-            if (!receiver || !receiver->GetSession() || (receiverFiltersWhispers && !sender->IsInRaidWith(receiver)))
+            if (!receiver || !receiver->GetSession() || receiverFiltersWhispers)
             {
                 SendPlayerNotFoundNotice(to);
                 return;

@@ -602,6 +602,7 @@ void World::LoadConfigSettings(bool reload)
     setIntConfig(WorldIntConfigs::CONFIG_PERSISTENT_CHARACTER_CLEAN_FLAGS, sConfigMgr->GetIntDefault("PersistentCharacterCleanFlags", 0));
     setIntConfig(WorldIntConfigs::CONFIG_CHAT_CHANNEL_LEVEL_REQ, sConfigMgr->GetIntDefault("ChatLevelReq.Channel", 1));
     setIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ, sConfigMgr->GetIntDefault("ChatLevelReq.Whisper", 1));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_CHAT_GM_WHISPER_FILTER_BYPASS, sConfigMgr->GetBoolDefault("Chat.GMWhisperFilterBypass", true));
     setIntConfig(WorldIntConfigs::CONFIG_CHAT_SAY_LEVEL_REQ, sConfigMgr->GetIntDefault("ChatLevelReq.Say", 1));
     setIntConfig(WorldIntConfigs::CONFIG_TRADE_LEVEL_REQ, sConfigMgr->GetIntDefault("LevelReq.Trade", 1));
     setIntConfig(WorldIntConfigs::CONFIG_TICKET_LEVEL_REQ, sConfigMgr->GetIntDefault("LevelReq.Ticket", 1));

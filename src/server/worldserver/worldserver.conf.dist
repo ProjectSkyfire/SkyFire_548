@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2026271901
+ConfVersion=2026272101
 
 ###################################################################################################
 # SECTION INDEX
@@ -1678,6 +1678,15 @@ ChatLevelReq.Channel = 1
 #        Default:     1
 
 ChatLevelReq.Whisper = 1
+
+#
+#    Chat.GMWhisperFilterBypass
+#        Description: Allow GM accounts to whisper other GM accounts even when the receiver has
+#                     GM whispers disabled. Normal player senders remain restricted.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Chat.GMWhisperFilterBypass = 1
 
 #
 #    ChatLevelReq.Say
