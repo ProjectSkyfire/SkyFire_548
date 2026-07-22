@@ -129,6 +129,7 @@ public:
         {
             cooldown = 0;
             me->setFaction(7);
+            me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
 
         void JustRespawned() OVERRIDE
