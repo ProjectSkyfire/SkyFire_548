@@ -187,14 +187,16 @@ public:
         if (!stricmp(args, "on"))
         {
             player->SetDebugLfgRequirementOverride(true);
-            handler->SendSysMessage("LFG scenario requirement override is ON for this character.");
+            player->GetSession()->SendLfgPlayerLockInfo();
+            handler->SendSysMessage("LFG requirement override is ON for this character.");
             return true;
         }
 
         if (!stricmp(args, "off"))
         {
             player->SetDebugLfgRequirementOverride(false);
-            handler->SendSysMessage("LFG scenario requirement override is OFF for this character.");
+            player->GetSession()->SendLfgPlayerLockInfo();
+            handler->SendSysMessage("LFG requirement override is OFF for this character.");
             return true;
         }
 

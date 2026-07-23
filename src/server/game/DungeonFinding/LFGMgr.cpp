@@ -2118,11 +2118,11 @@ namespace lfg
 
             uint32 lockStatus = 0;
             uint32 requiredItemLevel = dungeon->requiredItemLevel;
-            bool bypassScenarioRequirements = player->HasDebugLfgRequirementOverride() && IsScenarioDungeon(*dungeon);
+            bool bypassLfgRequirements = player->HasDebugLfgRequirementOverride();
 
             if (denyJoin)
                 lockStatus = LFG_LOCKSTATUS_RAID_LOCKED;
-            else if (!bypassScenarioRequirements)
+            else if (!bypassLfgRequirements)
             {
                 if (dungeon->expansion > expansion)
                     lockStatus = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
