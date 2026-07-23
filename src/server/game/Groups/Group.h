@@ -277,6 +277,7 @@ public:
     /*********************************************************/
 
     bool isRollLootActive() const;
+    Rolls const& GetRolls() const { return RollId; }
     void SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll& r);
     void SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p, bool canNeed, Roll const& r);
     void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, RollType RollType, const Roll& r);

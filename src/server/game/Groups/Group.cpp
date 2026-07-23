@@ -787,26 +787,90 @@ void Group::Disband(bool hideDestroy /* = false */)
 /***                   LOOT SYSTEM                     ***/
 /*********************************************************/
 
+// MoP 5.4.8 bitpacked builders (opcodes 0x0EAA / 0x1840 / 0x0A3A / 0x0EBB / 0x101B).
+namespace
+{
+    void BuildStartLootRollPacket(WorldPacket& data, uint32 countDown, uint32 mapid, Roll const& roll, bool canNeed)
+    {
+        ObjectGuid lootedGuid = roll.itemGUID;
+        uint8 const unk56 = 0;
+
+        data.WriteBits(7, 3);
+        data.WriteBit(roll.itemSlot == 0);
+        data.WriteBit(0);
+        data.WriteBit(lootedGuid[3]);
+        data.WriteBit(lootedGuid[1]);
+        data.WriteBit(lootedGuid[7]);
+        data.WriteBit(lootedGuid[6]);
+        data.WriteBit(lootedGuid[2]);
+        data.WriteBit(lootedGuid[4]);
+        data.WriteBit(lootedGuid[5]);
+        data.WriteBit(lootedGuid[0]);
+        data.WriteBit(!unk56);
+        data.WriteBits(3, 2);
+        data.WriteByteSeq(lootedGuid[7]);
+        data << uint32(roll.itemRandomPropId);
+        data.WriteByteSeq(lootedGuid[5]);
+        data << uint32(mapid);
+        data << uint32(roll.itemRandomSuffix);
+        if (roll.itemSlot)
+            data << uint8(roll.itemSlot);
+        data.WriteByteSeq(lootedGuid[4]);
+        data.WriteByteSeq(lootedGuid[0]);
+        data.WriteByteSeq(lootedGuid[3]);
+        data.WriteByteSeq(lootedGuid[2]);
+        data << uint32(0);
+        data << uint32(roll.itemid);
+        uint8 voteMask = roll.rollVoteMask;
+        if (!canNeed)
+            voteMask &= ~uint8(RollMask::ROLL_FLAG_TYPE_NEED);
+        data << uint8(voteMask);
+        data << uint32(roll.itemCount);
+        data << uint8(0);
+        data << uint32(countDown);
+        if (unk56)
+            data << uint8(0);
+        data.WriteByteSeq(lootedGuid[6]);
+        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(roll.itemid))
+            data << uint32(proto->DisplayInfoID);
+        else
+            data << uint32(0);
+        data.WriteByteSeq(lootedGuid[1]);
+    }
+
+    void BuildLootRollsCompletePacket(WorldPacket& data, Roll const& roll)
+    {
+        ObjectGuid lootedGuid = roll.itemGUID;
+        data.WriteBit(lootedGuid[6]);
+        data.WriteBit(lootedGuid[5]);
+        data.WriteBit(lootedGuid[2]);
+        data.WriteBit(lootedGuid[3]);
+        data.WriteBit(lootedGuid[7]);
+        data.WriteBit(lootedGuid[0]);
+        data.WriteBit(lootedGuid[1]);
+        data.WriteBit(lootedGuid[4]);
+        data.WriteByteSeq(lootedGuid[1]);
+        data.WriteByteSeq(lootedGuid[0]);
+        data.WriteByteSeq(lootedGuid[2]);
+        data << uint8(roll.itemSlot);
+        data.WriteByteSeq(lootedGuid[7]);
+        data.WriteByteSeq(lootedGuid[4]);
+        data.WriteByteSeq(lootedGuid[6]);
+        data.WriteByteSeq(lootedGuid[3]);
+        data.WriteByteSeq(lootedGuid[5]);
+    }
+}
+
 void Group::SendLootStartRoll(uint32 countDown, uint32 mapid, const Roll& r)
 {
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
-    data << uint64(r.itemGUID);                             // guid of rolled item
-    data << uint32(mapid);                                  // 3.3.3 mapid
-    data << uint32(r.itemSlot);                             // itemslot
-    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
-    data << uint32(r.itemRandomSuffix);                     // randomSuffix
-    data << uint32(r.itemRandomPropId);                     // item random property ID
-    data << uint32(r.itemCount);                            // items in stack
-    data << uint32(countDown);                              // the countdown time to choose "need" or "greed"
-    data << uint8(r.rollVoteMask);                          // roll type mask
-    data << uint8(r.totalPlayersRolling);                   // maybe the number of players rolling for it???
+    WorldPacket data(SMSG_LOOT_START_ROLL);
+    BuildStartLootRollPacket(data, countDown, mapid, r, true);
 
     for (Roll::PlayerVote::const_iterator itr = r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
     {
         Player* p = ObjectAccessor::FindPlayer(itr->first);
         if (!p || !p->GetSession())
             continue;
-
         if (itr->second == RollType::MAX_ROLL_TYPE)
             p->GetSession()->SendPacket(&data);
     }
@@ -817,88 +881,213 @@ void Group::SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p,
     if (!p || !p->GetSession())
         return;
 
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
-    data << uint64(r.itemGUID);                             // guid of rolled item
-    data << uint32(mapId);                                  // 3.3.3 mapid
-    data << uint32(r.itemSlot);                             // itemslot
-    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
-    data << uint32(r.itemRandomSuffix);                     // randomSuffix
-    data << uint32(r.itemRandomPropId);                     // item random property ID
-    data << uint32(r.itemCount);                            // items in stack
-    data << uint32(countDown);                              // the countdown time to choose "need" or "greed"
-    uint8 voteMask = uint8(r.rollVoteMask);
-    if (!canNeed)
-        voteMask &= ~uint8(RollMask::ROLL_FLAG_TYPE_NEED);
-    data << uint8(voteMask);                                // roll type mask
-    data << uint8(r.totalPlayersRolling);                   // maybe the number of players rolling for it???
-
+    WorldPacket data(SMSG_LOOT_START_ROLL);
+    BuildStartLootRollPacket(data, countDown, mapId, r, canNeed);
     p->GetSession()->SendPacket(&data);
 }
 
-void Group::SendLootRoll(uint64 sourceGuid, uint64 targetGuid, uint8 rollNumber, RollType rollType, Roll const& roll)
+void Group::SendLootRoll(uint64 /*sourceGuid*/, uint64 targetGuidRaw, uint8 rollNumber, RollType rollType, Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ROLL, (8 + 4 + 8 + 4 + 4 + 4 + 1 + 1 + 1));
-    data << uint64(sourceGuid);                             // guid of the item rolled
-    data << uint32(roll.itemSlot);                          // slot
-    data << uint64(targetGuid);
-    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
-    data << uint32(roll.itemRandomSuffix);                  // randomSuffix
-    data << uint32(roll.itemRandomPropId);                  // Item random property ID
-    data << uint32(rollNumber);                             // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
-    data << uint8(rollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
-    data << uint8(0);                                       // 1: "You automatically passed on: %s because you cannot loot that item." - Possibly used in need befor greed
+    ObjectGuid lootedGuid = roll.itemGUID;
+    ObjectGuid targetGuid = targetGuidRaw;
+    uint8 const byte0x30 = 0;
+
+    WorldPacket data(SMSG_LOOT_ROLL);
+    data.WriteBit(lootedGuid[6]);
+    data.WriteBit(targetGuid[6]);
+    data.WriteBit(lootedGuid[5]);
+    data.WriteBit(lootedGuid[7]);
+    data.WriteBit(byte0x30 == 0);
+    data.WriteBit(targetGuid[3]);
+    data.WriteBit(targetGuid[7]);
+    data.WriteBit(lootedGuid[4]);
+    data.WriteBit(roll.itemSlot == 0);
+    data.WriteBit(lootedGuid[0]);
+    data.WriteBit(lootedGuid[2]);
+    data.WriteBit(targetGuid[1]);
+    data.WriteBit(targetGuid[0]);
+    data.WriteBit(0);
+    data.WriteBits(3, 2);
+    data.WriteBit(lootedGuid[3]);
+    data.WriteBit(0);
+    data.WriteBit(targetGuid[5]);
+    data.WriteBits(3, 3);
+    data.WriteBit(targetGuid[4]);
+    data.WriteBit(targetGuid[2]);
+    data.WriteBit(lootedGuid[1]);
+    data.WriteByteSeq(lootedGuid[7]);
+    data.WriteByteSeq(targetGuid[6]);
+    data.WriteByteSeq(lootedGuid[0]);
+    data.WriteByteSeq(lootedGuid[5]);
+    data.WriteByteSeq(lootedGuid[3]);
+    if (roll.itemSlot)
+        data << uint8(roll.itemSlot);
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(roll.itemid))
+        data << uint32(proto->DisplayInfoID);
+    else
+        data << uint32(0);
+    data << uint32(roll.itemRandomPropId);
+    data << uint32(roll.itemRandomSuffix);
+    data << uint32(0);
+    data.WriteByteSeq(lootedGuid[1]);
+    data.WriteByteSeq(lootedGuid[4]);
+    data.WriteByteSeq(targetGuid[2]);
+    data.WriteByteSeq(lootedGuid[2]);
+    data << uint32(roll.itemid);
+    data.WriteByteSeq(targetGuid[4]);
+    data << uint32(rollNumber);
+    if (byte0x30)
+        data << byte0x30;
+    data.WriteByteSeq(lootedGuid[6]);
+    data.WriteByteSeq(targetGuid[1]);
+    data.WriteByteSeq(targetGuid[0]);
+    data << uint8(rollType);
+    data.WriteByteSeq(targetGuid[7]);
+    data << uint32(roll.itemCount);
+    data.WriteByteSeq(targetGuid[5]);
+    data.WriteByteSeq(targetGuid[3]);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
         Player* p = ObjectAccessor::FindPlayer(itr->first);
         if (!p || !p->GetSession())
             continue;
-
         if (itr->second != RollType::ROLL_INVALID)
             p->GetSession()->SendPacket(&data);
     }
 }
 
-void Group::SendLootRollWon(uint64 sourceGuid, uint64 targetGuid, uint8 rollNumber, RollType rollType, Roll const& roll)
+void Group::SendLootRollWon(uint64 /*sourceGuid*/, uint64 targetGuidRaw, uint8 rollNumber, RollType rollType, Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ROLL_WON, (8 + 4 + 4 + 4 + 4 + 8 + 1 + 1));
-    data << uint64(sourceGuid);                             // guid of the item rolled
-    data << uint32(roll.itemSlot);                          // slot
-    data << uint32(roll.itemid);                            // the itemEntryId for the item that shall be rolled for
-    data << uint32(roll.itemRandomSuffix);                  // randomSuffix
-    data << uint32(roll.itemRandomPropId);                  // Item random property
-    data << uint64(targetGuid);                             // guid of the player who won.
-    data << uint32(rollNumber);                             // rollnumber realted to SMSG_LOOT_ROLL
-    data << uint8(rollType);                                // rollType related to SMSG_LOOT_ROLL
+    ObjectGuid lootedGuid = roll.itemGUID;
+    ObjectGuid targetGuid = targetGuidRaw;
+    uint8 const byte0x2C = 0;
+    uint8 const byte0x38 = 0;
+
+    WorldPacket data(SMSG_LOOT_ROLL_WON);
+    data.WriteBit(targetGuid[0]);
+    data.WriteBit(lootedGuid[3]);
+    data.WriteBits(0, 2);
+    data.WriteBit(targetGuid[3]);
+    data.WriteBit(targetGuid[2]);
+    data.WriteBit(targetGuid[6]);
+    data.WriteBit(targetGuid[7]);
+    data.WriteBit(byte0x2C == 0);
+    data.WriteBit(lootedGuid[7]);
+    data.WriteBit(lootedGuid[1]);
+    data.WriteBit(targetGuid[4]);
+    data.WriteBit(targetGuid[1]);
+    data.WriteBit(lootedGuid[4]);
+    data.WriteBit(targetGuid[5]);
+    data.WriteBits(0, 3);
+    data.WriteBit(lootedGuid[0]);
+    data.WriteBit(lootedGuid[2]);
+    data.WriteBit(roll.itemSlot == 0);
+    data.WriteBit(byte0x38 != 0);
+    data.WriteBit(lootedGuid[6]);
+    data.WriteBit(lootedGuid[5]);
+    data << uint32(0);
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(roll.itemid))
+        data << uint32(proto->DisplayInfoID);
+    else
+        data << uint32(0);
+    data.WriteByteSeq(targetGuid[2]);
+    data.WriteByteSeq(lootedGuid[7]);
+    data << uint32(roll.itemRandomPropId);
+    data.WriteByteSeq(targetGuid[5]);
+    data.WriteByteSeq(lootedGuid[3]);
+    data.WriteByteSeq(targetGuid[7]);
+    data.WriteByteSeq(lootedGuid[1]);
+    data.WriteByteSeq(lootedGuid[2]);
+    data.WriteByteSeq(lootedGuid[0]);
+    data.WriteByteSeq(targetGuid[3]);
+    data << int32(rollNumber);
+    data << uint32(roll.itemRandomSuffix);
+    data.WriteByteSeq(lootedGuid[6]);
+    data.WriteByteSeq(targetGuid[1]);
+    data.WriteByteSeq(targetGuid[4]);
+    data << uint8(rollType);
+    data.WriteByteSeq(targetGuid[6]);
+    if (roll.itemSlot)
+        data << uint8(roll.itemSlot);
+    data.WriteByteSeq(lootedGuid[4]);
+    data << uint32(roll.itemid);
+    data.WriteByteSeq(lootedGuid[5]);
+    data.WriteByteSeq(targetGuid[0]);
+    data << uint32(roll.itemCount);
+    if (byte0x2C)
+        data << uint8(byte0x2C);
+
+    WorldPacket data2(SMSG_LOOT_ROLLS_COMPLETE);
+    BuildLootRollsCompletePacket(data2, roll);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
         Player* p = ObjectAccessor::FindPlayer(itr->first);
         if (!p || !p->GetSession())
             continue;
-
         if (itr->second != RollType::ROLL_INVALID)
+        {
             p->GetSession()->SendPacket(&data);
+            p->GetSession()->SendPacket(&data2);
+        }
     }
 }
 
 void Group::SendLootAllPassed(Roll const& roll)
 {
-    WorldPacket data(SMSG_LOOT_ALL_PASSED, (8 + 4 + 4 + 4 + 4));
-    data << uint64(roll.itemGUID);                             // Guid of the item rolled
-    data << uint32(roll.itemSlot);                             // Item loot slot
-    data << uint32(roll.itemid);                               // The itemEntryId for the item that shall be rolled for
-    data << uint32(roll.itemRandomPropId);                     // Item random property ID
-    data << uint32(roll.itemRandomSuffix);                     // Item random suffix ID
+    ObjectGuid lootedGuid = roll.itemGUID;
+    uint8 const byte2C = 0;
+
+    WorldPacket data(SMSG_LOOT_ALL_PASSED);
+    data.WriteBit(roll.itemSlot == 0);
+    data.WriteBit(byte2C == 0);
+    data.WriteBit(lootedGuid[2]);
+    data.WriteBit(lootedGuid[4]);
+    data.WriteBit(lootedGuid[3]);
+    data.WriteBit(lootedGuid[1]);
+    data.WriteBit(0);
+    data.WriteBits(3, 2);
+    data.WriteBits(3, 3);
+    data.WriteBit(lootedGuid[6]);
+    data.WriteBit(lootedGuid[5]);
+    data.WriteBit(lootedGuid[7]);
+    data.WriteBit(lootedGuid[0]);
+    data.WriteByteSeq(lootedGuid[6]);
+    data.WriteByteSeq(lootedGuid[5]);
+    data.WriteByteSeq(lootedGuid[0]);
+    data << uint32(0);
+    data.WriteByteSeq(lootedGuid[3]);
+    data.WriteByteSeq(lootedGuid[2]);
+    if (byte2C)
+        data << uint8(byte2C);
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(roll.itemid))
+        data << uint32(proto->DisplayInfoID);
+    else
+        data << uint32(0);
+    data.WriteByteSeq(lootedGuid[1]);
+    data << uint32(0);
+    data << uint32(0);
+    data.WriteByteSeq(lootedGuid[4]);
+    data << uint32(0);
+    data << uint32(roll.itemid);
+    if (roll.itemSlot)
+        data << uint8(roll.itemSlot);
+    data.WriteByteSeq(lootedGuid[7]);
+
+    WorldPacket data2(SMSG_LOOT_ROLLS_COMPLETE);
+    BuildLootRollsCompletePacket(data2, roll);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
         Player* player = ObjectAccessor::FindPlayer(itr->first);
         if (!player || !player->GetSession())
             continue;
-
         if (itr->second != RollType::ROLL_INVALID)
+        {
             player->GetSession()->SendPacket(&data);
+            player->GetSession()->SendPacket(&data2);
+        }
     }
 }
 
