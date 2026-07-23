@@ -4279,14 +4279,9 @@ void Spell::SendSpellStart()
 
     if (predictedPowerCount > 0)
     {
-        /*for (uint32 i = 0; i < powerUnitPowerCount; ++i)
-        {
-            data << int32(powerValue);
-            data << uint8(powerType);
-        }*/
-
-        data << uint8(m_powerType);
+        // SMSG_SPELL_START (5.4.8): Power value then PowerType (WPP V5_4_8).
         data << int32(m_caster->GetPower((Powers)m_powerType));
+        data << uint8(m_powerType);
     }
 
     data << uint32(castFlags);
@@ -4755,12 +4750,7 @@ void Spell::SendSpellGo()
 
     if (predictedPowerCount > 0)
     {
-        //for (uint32 i = 0; i < powerUnitPowerCount; ++i)
-        //{
-        //    data << int32(powerValue);
-        //    data << uint8(powerType);
-        //}
-
+        // SMSG_SPELL_GO (5.4.8): PowerType then Power value (opposite of SPELL_START).
         data << uint8(m_powerType);
         data << int32(m_caster->GetPower((Powers)m_powerType));
     }
