@@ -787,84 +787,47 @@ void Group::Disband(bool hideDestroy /* = false */)
 /***                   LOOT SYSTEM                     ***/
 /*********************************************************/
 
-// MoP 5.4.8 bitpacked builders (opcodes 0x0EAA / 0x1840 / 0x0A3A / 0x0EBB / 0x101B).
-namespace
-{
-    void BuildStartLootRollPacket(WorldPacket& data, uint32 countDown, uint32 mapid, Roll const& roll, bool canNeed)
-    {
-        ObjectGuid lootedGuid = roll.itemGUID;
-        uint8 const unk56 = 0;
-
-        data.WriteBits(7, 3);
-        data.WriteBit(roll.itemSlot == 0);
-        data.WriteBit(0);
-        data.WriteBit(lootedGuid[3]);
-        data.WriteBit(lootedGuid[1]);
-        data.WriteBit(lootedGuid[7]);
-        data.WriteBit(lootedGuid[6]);
-        data.WriteBit(lootedGuid[2]);
-        data.WriteBit(lootedGuid[4]);
-        data.WriteBit(lootedGuid[5]);
-        data.WriteBit(lootedGuid[0]);
-        data.WriteBit(!unk56);
-        data.WriteBits(3, 2);
-        data.WriteByteSeq(lootedGuid[7]);
-        data << uint32(roll.itemRandomPropId);
-        data.WriteByteSeq(lootedGuid[5]);
-        data << uint32(mapid);
-        data << uint32(roll.itemRandomSuffix);
-        if (roll.itemSlot)
-            data << uint8(roll.itemSlot);
-        data.WriteByteSeq(lootedGuid[4]);
-        data.WriteByteSeq(lootedGuid[0]);
-        data.WriteByteSeq(lootedGuid[3]);
-        data.WriteByteSeq(lootedGuid[2]);
-        data << uint32(0);
-        data << uint32(roll.itemid);
-        uint8 voteMask = roll.rollVoteMask;
-        if (!canNeed)
-            voteMask &= ~uint8(RollMask::ROLL_FLAG_TYPE_NEED);
-        data << uint8(voteMask);
-        data << uint32(roll.itemCount);
-        data << uint8(0);
-        data << uint32(countDown);
-        if (unk56)
-            data << uint8(0);
-        data.WriteByteSeq(lootedGuid[6]);
-        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(roll.itemid))
-            data << uint32(proto->DisplayInfoID);
-        else
-            data << uint32(0);
-        data.WriteByteSeq(lootedGuid[1]);
-    }
-
-    void BuildLootRollsCompletePacket(WorldPacket& data, Roll const& roll)
-    {
-        ObjectGuid lootedGuid = roll.itemGUID;
-        data.WriteBit(lootedGuid[6]);
-        data.WriteBit(lootedGuid[5]);
-        data.WriteBit(lootedGuid[2]);
-        data.WriteBit(lootedGuid[3]);
-        data.WriteBit(lootedGuid[7]);
-        data.WriteBit(lootedGuid[0]);
-        data.WriteBit(lootedGuid[1]);
-        data.WriteBit(lootedGuid[4]);
-        data.WriteByteSeq(lootedGuid[1]);
-        data.WriteByteSeq(lootedGuid[0]);
-        data.WriteByteSeq(lootedGuid[2]);
-        data << uint8(roll.itemSlot);
-        data.WriteByteSeq(lootedGuid[7]);
-        data.WriteByteSeq(lootedGuid[4]);
-        data.WriteByteSeq(lootedGuid[6]);
-        data.WriteByteSeq(lootedGuid[3]);
-        data.WriteByteSeq(lootedGuid[5]);
-    }
-}
-
 void Group::SendLootStartRoll(uint32 countDown, uint32 mapid, const Roll& r)
 {
+    ObjectGuid lootedGuid = r.itemGUID;
+
     WorldPacket data(SMSG_LOOT_START_ROLL);
-    BuildStartLootRollPacket(data, countDown, mapid, r, true);
+    data.WriteBits(7, 3);
+    data.WriteBit(r.itemSlot == 0);
+    data.WriteBit(0);
+    data.WriteBit(lootedGuid[3]);
+    data.WriteBit(lootedGuid[1]);
+    data.WriteBit(lootedGuid[7]);
+    data.WriteBit(lootedGuid[6]);
+    data.WriteBit(lootedGuid[2]);
+    data.WriteBit(lootedGuid[4]);
+    data.WriteBit(lootedGuid[5]);
+    data.WriteBit(lootedGuid[0]);
+    data.WriteBit(1);
+    data.WriteBits(3, 2);
+    data.WriteByteSeq(lootedGuid[7]);
+    data << uint32(r.itemRandomPropId);
+    data.WriteByteSeq(lootedGuid[5]);
+    data << uint32(mapid);
+    data << uint32(r.itemRandomSuffix);
+    if (r.itemSlot)
+        data << uint8(r.itemSlot);
+    data.WriteByteSeq(lootedGuid[4]);
+    data.WriteByteSeq(lootedGuid[0]);
+    data.WriteByteSeq(lootedGuid[3]);
+    data.WriteByteSeq(lootedGuid[2]);
+    data << uint32(0);
+    data << uint32(r.itemid);
+    data << uint8(r.rollVoteMask);
+    data << uint32(r.itemCount);
+    data << uint8(0);
+    data << uint32(countDown);
+    data.WriteByteSeq(lootedGuid[6]);
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(r.itemid))
+        data << uint32(proto->DisplayInfoID);
+    else
+        data << uint32(0);
+    data.WriteByteSeq(lootedGuid[1]);
 
     for (Roll::PlayerVote::const_iterator itr = r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
     {
@@ -881,8 +844,48 @@ void Group::SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p,
     if (!p || !p->GetSession())
         return;
 
+    ObjectGuid lootedGuid = r.itemGUID;
+    uint8 voteMask = r.rollVoteMask;
+    if (!canNeed)
+        voteMask &= ~uint8(RollMask::ROLL_FLAG_TYPE_NEED);
+
     WorldPacket data(SMSG_LOOT_START_ROLL);
-    BuildStartLootRollPacket(data, countDown, mapId, r, canNeed);
+    data.WriteBits(7, 3);
+    data.WriteBit(r.itemSlot == 0);
+    data.WriteBit(0);
+    data.WriteBit(lootedGuid[3]);
+    data.WriteBit(lootedGuid[1]);
+    data.WriteBit(lootedGuid[7]);
+    data.WriteBit(lootedGuid[6]);
+    data.WriteBit(lootedGuid[2]);
+    data.WriteBit(lootedGuid[4]);
+    data.WriteBit(lootedGuid[5]);
+    data.WriteBit(lootedGuid[0]);
+    data.WriteBit(1);
+    data.WriteBits(3, 2);
+    data.WriteByteSeq(lootedGuid[7]);
+    data << uint32(r.itemRandomPropId);
+    data.WriteByteSeq(lootedGuid[5]);
+    data << uint32(mapId);
+    data << uint32(r.itemRandomSuffix);
+    if (r.itemSlot)
+        data << uint8(r.itemSlot);
+    data.WriteByteSeq(lootedGuid[4]);
+    data.WriteByteSeq(lootedGuid[0]);
+    data.WriteByteSeq(lootedGuid[3]);
+    data.WriteByteSeq(lootedGuid[2]);
+    data << uint32(0);
+    data << uint32(r.itemid);
+    data << uint8(voteMask);
+    data << uint32(r.itemCount);
+    data << uint8(0);
+    data << uint32(countDown);
+    data.WriteByteSeq(lootedGuid[6]);
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(r.itemid))
+        data << uint32(proto->DisplayInfoID);
+    else
+        data << uint32(0);
+    data.WriteByteSeq(lootedGuid[1]);
     p->GetSession()->SendPacket(&data);
 }
 
@@ -1019,7 +1022,23 @@ void Group::SendLootRollWon(uint64 /*sourceGuid*/, uint64 targetGuidRaw, uint8 r
         data << uint8(byte0x2C);
 
     WorldPacket data2(SMSG_LOOT_ROLLS_COMPLETE);
-    BuildLootRollsCompletePacket(data2, roll);
+    data2.WriteBit(lootedGuid[6]);
+    data2.WriteBit(lootedGuid[5]);
+    data2.WriteBit(lootedGuid[2]);
+    data2.WriteBit(lootedGuid[3]);
+    data2.WriteBit(lootedGuid[7]);
+    data2.WriteBit(lootedGuid[0]);
+    data2.WriteBit(lootedGuid[1]);
+    data2.WriteBit(lootedGuid[4]);
+    data2.WriteByteSeq(lootedGuid[1]);
+    data2.WriteByteSeq(lootedGuid[0]);
+    data2.WriteByteSeq(lootedGuid[2]);
+    data2 << uint8(roll.itemSlot);
+    data2.WriteByteSeq(lootedGuid[7]);
+    data2.WriteByteSeq(lootedGuid[4]);
+    data2.WriteByteSeq(lootedGuid[6]);
+    data2.WriteByteSeq(lootedGuid[3]);
+    data2.WriteByteSeq(lootedGuid[5]);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
@@ -1076,7 +1095,23 @@ void Group::SendLootAllPassed(Roll const& roll)
     data.WriteByteSeq(lootedGuid[7]);
 
     WorldPacket data2(SMSG_LOOT_ROLLS_COMPLETE);
-    BuildLootRollsCompletePacket(data2, roll);
+    data2.WriteBit(lootedGuid[6]);
+    data2.WriteBit(lootedGuid[5]);
+    data2.WriteBit(lootedGuid[2]);
+    data2.WriteBit(lootedGuid[3]);
+    data2.WriteBit(lootedGuid[7]);
+    data2.WriteBit(lootedGuid[0]);
+    data2.WriteBit(lootedGuid[1]);
+    data2.WriteBit(lootedGuid[4]);
+    data2.WriteByteSeq(lootedGuid[1]);
+    data2.WriteByteSeq(lootedGuid[0]);
+    data2.WriteByteSeq(lootedGuid[2]);
+    data2 << uint8(roll.itemSlot);
+    data2.WriteByteSeq(lootedGuid[7]);
+    data2.WriteByteSeq(lootedGuid[4]);
+    data2.WriteByteSeq(lootedGuid[6]);
+    data2.WriteByteSeq(lootedGuid[3]);
+    data2.WriteByteSeq(lootedGuid[5]);
 
     for (Roll::PlayerVote::const_iterator itr = roll.playerVote.begin(); itr != roll.playerVote.end(); ++itr)
     {
