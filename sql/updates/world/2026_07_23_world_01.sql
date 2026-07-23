@@ -34,4 +34,4 @@ UPDATE `quest_template` SET `OfferRewardText`='<Flem weighs the gems in his hand
 
 -- I'm A Huge Liar and a Fraud
 UPDATE `quest_template` SET `RequestItemsText`='Yes, $r? I\'m quite busy' WHERE  `Id`=26435;
-UPDATE `sf_world`.`quest_template` SET `OfferRewardText`='Fascinating!\r\n\r\nI\'ll need some time to study this. Why don\'t you have a look around Booty Bay and come back later?' WHERE `Id`=26435;
+UPDATE `quest_template` SET `OfferRewardText`='Fascinating!\r\n\r\nI\'ll need some time to study this. Why don\'t you have a look around Booty Bay and come back later?' WHERE `Id`=26435;
