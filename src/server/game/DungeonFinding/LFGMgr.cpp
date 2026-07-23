@@ -151,7 +151,8 @@ namespace lfg
     }
 
     LFGMgr::LFGMgr() : m_QueueTimer(0), m_lfgProposalId(1),
-        m_options(sWorld->getIntConfig(WorldIntConfigs::CONFIG_LFG_OPTIONSMASK))
+        m_options(sWorld->getIntConfig(WorldIntConfigs::CONFIG_LFG_OPTIONSMASK)),
+        m_debugRequirementOverride(false)
     {
         new LFGPlayerScript();
         new LFGGroupScript();
@@ -2118,7 +2119,7 @@ namespace lfg
 
             uint32 lockStatus = 0;
             uint32 requiredItemLevel = dungeon->requiredItemLevel;
-            bool bypassLfgRequirements = player->HasDebugLfgRequirementOverride();
+            bool bypassLfgRequirements = IsDebugRequirementOverrideEnabled();
 
             if (denyJoin)
                 lockStatus = LFG_LOCKSTATUS_RAID_LOCKED;

@@ -357,6 +357,10 @@ namespace lfg
         void SetOptions(uint32 options);
         /// Checks if given lfg option is enabled
         bool isOptionEnabled(uint32 option);
+        /// Gets the server-wide debug override for dungeon and raid finder requirements
+        bool IsDebugRequirementOverrideEnabled() const { return m_debugRequirementOverride; }
+        /// Sets the server-wide debug override for dungeon and raid finder requirements
+        void SetDebugRequirementOverride(bool enabled) { m_debugRequirementOverride = enabled; }
         /// Clears queue - Only for internal testing
         void Clean();
         /// Dumps the state of the queue - Only for internal testing
@@ -485,6 +489,7 @@ namespace lfg
         uint32 m_QueueTimer;                               ///< used to check interval of update
         uint32 m_lfgProposalId;                            ///< used as internal counter for proposals
         uint32 m_options;                                  ///< Stores config options
+        bool m_debugRequirementOverride;                   ///< bypasses LFG entry requirements for server-wide debugging
 
         LfgQueueContainer QueuesStore;                     ///< Queues
         LfgCachedDungeonContainer CachedDungeonMapStore;   ///< Stores all dungeons by groupType

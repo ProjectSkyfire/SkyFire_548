@@ -19,11 +19,14 @@ EndScriptData */
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Language.h"
+#include "LFGMgr.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "PlayerRestState.h"
 #include "ScriptMgr.h"
 #include "Transport.h"
+#include "WorldSession.h"
 
 class debug_commandscript : public CommandScript
 {
@@ -58,12 +61,12 @@ public:
         };
         static std::vector<ChatCommand> debugLfgCommandTable =
         {
-            { "requirements",   rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, false, &HandleDebugLfgRequirementsCommand, "", },
+            { "requirements",   rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, true,  &HandleDebugLfgRequirementsCommand, "", },
         };
         static std::vector<ChatCommand> debugCommandTable =
         {
             { "boat",           rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, NULL,                                "", boatCommandTable },
-            { "lfg",            rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, false, NULL,                             "", debugLfgCommandTable },
+            { "lfg",            rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, true,  NULL,                             "", debugLfgCommandTable },
             { "setbit",        rbac::RBAC_PERM_COMMAND_DEBUG_SETBIT,        false, &HandleDebugSet32BitCommand,         "", },
             { "threat",        rbac::RBAC_PERM_COMMAND_DEBUG_THREAT,        false, &HandleDebugThreatListCommand,       "", },
             { "hostil",        rbac::RBAC_PERM_COMMAND_DEBUG_HOSTIL,        false, &HandleDebugHostileRefListCommand,   "", },
@@ -167,36 +170,38 @@ public:
         return true;
     }
 
+    static void RefreshLfgLockInfoForOnlinePlayers()
+    {
+        SF_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
+        HashMapHolder<Player>::MapType const& players = sObjectAccessor->GetPlayers();
+        for (HashMapHolder<Player>::MapType::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            if (WorldSession* session = itr->second->GetSession())
+                session->SendLfgPlayerLockInfo();
+    }
+
     static bool HandleDebugLfgRequirementsCommand(ChatHandler* handler, char const* args)
     {
         if (!*args)
         {
+            handler->PSendSysMessage("LFG requirement override is currently %s server-wide.", sLFGMgr->IsDebugRequirementOverrideEnabled() ? "ON" : "OFF");
             handler->SendSysMessage("Usage: .debug lfg requirements on|off");
-            handler->SetSentErrorMessage(true);
-            return false;
-        }
-
-        Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : NULL;
-        if (!player)
-        {
-            handler->SendSysMessage("LFG requirement debug override requires an in-game player session.");
             handler->SetSentErrorMessage(true);
             return false;
         }
 
         if (!stricmp(args, "on"))
         {
-            player->SetDebugLfgRequirementOverride(true);
-            player->GetSession()->SendLfgPlayerLockInfo();
-            handler->SendSysMessage("LFG requirement override is ON for this character.");
+            sLFGMgr->SetDebugRequirementOverride(true);
+            RefreshLfgLockInfoForOnlinePlayers();
+            handler->SendSysMessage("LFG requirement override is ON server-wide.");
             return true;
         }
 
         if (!stricmp(args, "off"))
         {
-            player->SetDebugLfgRequirementOverride(false);
-            player->GetSession()->SendLfgPlayerLockInfo();
-            handler->SendSysMessage("LFG requirement override is OFF for this character.");
+            sLFGMgr->SetDebugRequirementOverride(false);
+            RefreshLfgLockInfoForOnlinePlayers();
+            handler->SendSysMessage("LFG requirement override is OFF server-wide.");
             return true;
         }
 
