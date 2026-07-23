@@ -19,6 +19,7 @@ namespace lfg
     namespace
     {
         uint8 const LFG_COMBAT_ROLE_MASK = PLAYER_ROLE_TANK | PLAYER_ROLE_HEALER | PLAYER_ROLE_DAMAGE;
+        uint8 const LFG_FLEX_RAID_MIN_PLAYERS = 10;
 
         bool QueueContainsGuid(LfgGuidList const& queue, uint64 guid)
         {
@@ -78,17 +79,41 @@ namespace lfg
             return map && map->IsScenario();
         }
 
-        uint8 GetDungeonGroupSize(uint32 dungeonId)
+        bool IsFlexibleRaidDungeon(uint32 dungeonId)
         {
             LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId);
-            if (!dungeon || !IsScenarioDungeon(dungeonId))
+            if (!dungeon || dungeon->m_DifficultyID != DIFFICULTY_FLEX)
+                return false;
+
+            MapEntry const* map = sMapStore.LookupEntry(dungeon->m_ContinentID);
+            return map && map->IsRaid();
+        }
+
+        uint8 GetDungeonMaxGroupSize(uint32 dungeonId)
+        {
+            LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId);
+            if (!dungeon)
                 return MAXGROUPSIZE;
 
-            if (MapDifficulty const* difficulty = GetMapDifficultyData(dungeon->m_ContinentID, DifficultyID(dungeon->m_DifficultyID)))
-                if (difficulty->maxPlayers)
-                    return uint8(std::min<uint32>(difficulty->maxPlayers, MAXGROUPSIZE));
+            if (IsScenarioDungeon(dungeonId))
+            {
+                if (MapDifficulty const* difficulty = GetMapDifficultyData(dungeon->m_ContinentID, DifficultyID(dungeon->m_DifficultyID)))
+                    if (difficulty->maxPlayers)
+                        return uint8(std::min<uint32>(difficulty->maxPlayers, MAXGROUPSIZE));
 
-            return 3;
+                return 3;
+            }
+
+            if (IsFlexibleRaidDungeon(dungeonId))
+            {
+                if (MapDifficulty const* difficulty = GetMapDifficultyData(dungeon->m_ContinentID, DifficultyID(dungeon->m_DifficultyID)))
+                    if (difficulty->maxPlayers)
+                        return uint8(std::min<uint32>(difficulty->maxPlayers, MAXRAIDSIZE));
+
+                return MAXRAIDSIZE;
+            }
+
+            return MAXGROUPSIZE;
         }
 
         bool HasScenarioDungeon(LfgDungeonSet const& dungeons)
@@ -100,19 +125,66 @@ namespace lfg
             return false;
         }
 
-        uint8 GetQueueGroupSize(LfgDungeonSet const& dungeons)
+        bool HasFlexibleRaidDungeon(LfgDungeonSet const& dungeons)
         {
-            uint8 groupSize = MAXGROUPSIZE;
             for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); ++it)
-                groupSize = std::min<uint8>(groupSize, GetDungeonGroupSize(*it));
+                if (IsFlexibleRaidDungeon(*it))
+                    return true;
 
-            return groupSize ? groupSize : MAXGROUPSIZE;
+            return false;
+        }
+
+        uint8 GetDungeonMinGroupSize(uint32 dungeonId)
+        {
+            if (IsFlexibleRaidDungeon(dungeonId))
+                return LFG_FLEX_RAID_MIN_PLAYERS;
+
+            return GetDungeonMaxGroupSize(dungeonId);
+        }
+
+        void GetQueueGroupSizeRange(LfgDungeonSet const& dungeons, uint8& minSize, uint8& maxSize)
+        {
+            minSize = 0;
+            maxSize = 0;
+            for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+            {
+                uint8 dungeonMinSize = GetDungeonMinGroupSize(*it);
+                uint8 dungeonMaxSize = GetDungeonMaxGroupSize(*it);
+                if (!minSize || dungeonMinSize < minSize)
+                    minSize = dungeonMinSize;
+                if (!maxSize || dungeonMaxSize < maxSize)
+                    maxSize = dungeonMaxSize;
+            }
+
+            if (!minSize)
+                minSize = MAXGROUPSIZE;
+            if (!maxSize)
+                maxSize = MAXGROUPSIZE;
+        }
+
+        uint8 GetQueueMaxGroupSize(LfgDungeonSet const& dungeons)
+        {
+            uint8 minSize = 0;
+            uint8 maxSize = 0;
+            GetQueueGroupSizeRange(dungeons, minSize, maxSize);
+            return maxSize;
+        }
+
+        uint8 GetQueueMinGroupSize(LfgDungeonSet const& dungeons)
+        {
+            uint8 minSize = 0;
+            uint8 maxSize = 0;
+            GetQueueGroupSizeRange(dungeons, minSize, maxSize);
+            return minSize;
         }
 
         bool CheckQueueRoles(LfgRolesMap& roles, LfgDungeonSet const& dungeons)
         {
             if (HasScenarioDungeon(dungeons))
-                return LFGMgr::CheckDpsOnlyRoles(roles, GetQueueGroupSize(dungeons));
+                return LFGMgr::CheckDpsOnlyRoles(roles, GetQueueMaxGroupSize(dungeons));
+
+            if (HasFlexibleRaidDungeon(dungeons))
+                return LFGMgr::CheckFlexibleRaidRoles(roles, GetQueueMaxGroupSize(dungeons));
 
             return LFGMgr::CheckGroupRoles(roles);
         }
@@ -121,7 +193,16 @@ namespace lfg
         {
             if (HasScenarioDungeon(dungeons))
             {
-                uint8 groupSize = GetQueueGroupSize(dungeons);
+                uint8 groupSize = GetQueueMaxGroupSize(dungeons);
+                tanks = 0;
+                healers = 0;
+                dps = roles.size() >= groupSize ? 0 : uint8(groupSize - roles.size());
+                return;
+            }
+
+            if (HasFlexibleRaidDungeon(dungeons))
+            {
+                uint8 groupSize = GetQueueMaxGroupSize(dungeons);
                 tanks = 0;
                 healers = 0;
                 dps = roles.size() >= groupSize ? 0 : uint8(groupSize - roles.size());
@@ -449,7 +530,24 @@ namespace lfg
         LfgRolesMap proposalRoles;
 
         // Check for correct size
-        if (check.size() > MAXGROUPSIZE || check.empty())
+        if (check.empty())
+        {
+            SF_LOG_DEBUG("lfg.queue.match.compatibility.check", "Guids: (%s): Size wrong - Not compatibles", strGuids.c_str());
+            return LFG_INCOMPATIBLES_WRONG_GROUP_SIZE;
+        }
+
+        uint8 checkGroupLimit = MAXGROUPSIZE;
+        for (LfgGuidList::const_iterator it = check.begin(); it != check.end(); ++it)
+        {
+            LfgQueueDataContainer::const_iterator itQueue = QueueDataStore.find(*it);
+            if (itQueue != QueueDataStore.end() && HasFlexibleRaidDungeon(itQueue->second.dungeons))
+            {
+                checkGroupLimit = MAXRAIDSIZE;
+                break;
+            }
+        }
+
+        if (check.size() > checkGroupLimit)
         {
             SF_LOG_DEBUG("lfg.queue.match.compatibility.check", "Guids: (%s): Size wrong - Not compatibles", strGuids.c_str());
             return LFG_INCOMPATIBLES_WRONG_GROUP_SIZE;
@@ -475,7 +573,7 @@ namespace lfg
         // Check if more than one LFG group and number of players joining
         uint8 numPlayers = 0;
         uint8 numLfgGroups = 0;
-        for (LfgGuidList::const_iterator it = check.begin(); it != check.end() && numLfgGroups < 2 && numPlayers <= MAXGROUPSIZE; ++it)
+        for (LfgGuidList::const_iterator it = check.begin(); it != check.end() && numLfgGroups < 2 && numPlayers <= checkGroupLimit; ++it)
         {
             uint64 guid = (*it);
             LfgQueueDataContainer::iterator itQueue = QueueDataStore.find(guid);
@@ -504,9 +602,9 @@ namespace lfg
         if (check.size() == 1)
         {
             LfgQueueDataContainer::iterator itQueue = QueueDataStore.find(check.front());
-            uint8 groupSize = GetQueueGroupSize(itQueue->second.dungeons);
+            uint8 minGroupSize = GetQueueMinGroupSize(itQueue->second.dungeons);
 
-            if (numPlayers != groupSize)
+            if (numPlayers < minGroupSize)
             {
                 SF_LOG_DEBUG("lfg.queue.match.compatibility.check", "Guids: (%s) single group. Compatibles", strGuids.c_str());
 
@@ -613,8 +711,9 @@ namespace lfg
             }
         }
 
-        uint8 groupSize = GetQueueGroupSize(proposalDungeons);
-        if (numPlayers > groupSize)
+        uint8 minGroupSize = GetQueueMinGroupSize(proposalDungeons);
+        uint8 maxGroupSize = GetQueueMaxGroupSize(proposalDungeons);
+        if (numPlayers > maxGroupSize)
         {
             SF_LOG_DEBUG("lfg.queue.match.compatibility.check", "Guids: (%s) Too much players (%u)", strGuids.c_str(), numPlayers);
             SetCompatibles(strGuids, LFG_INCOMPATIBLES_TOO_MUCH_PLAYERS);
@@ -622,7 +721,7 @@ namespace lfg
         }
 
         // Enough players?
-        if (numPlayers != groupSize)
+        if (numPlayers < minGroupSize)
         {
             SF_LOG_DEBUG("lfg.queue.match.compatibility.check", "Guids: (%s) Compatibles but not enough players(%u)", strGuids.c_str(), numPlayers);
             LfgCompatibilityData data(LFG_COMPATIBLES_WITH_LESS_PLAYERS);

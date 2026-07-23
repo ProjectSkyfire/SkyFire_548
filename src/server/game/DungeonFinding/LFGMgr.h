@@ -343,6 +343,8 @@ namespace lfg
         uint8 GetLFGDungeonCategory(uint32 id);
         /// Check whether the dungeon id belongs to a Raid Finder queue entry
         bool IsRaidFinderDungeon(uint32 dungeonId);
+        /// Check whether the dungeon id belongs to a flexible raid queue entry
+        bool IsFlexibleRaidDungeon(uint32 dungeonId);
 
         // cs_lfg
         /// Get current player roles
@@ -443,6 +445,8 @@ namespace lfg
         static bool CheckGroupRoles(LfgRolesMap& groles);
         /// Assigns queued players to damage roles for role-neutral scenario queues
         static bool CheckDpsOnlyRoles(LfgRolesMap& groles, uint8 neededDamage);
+        /// Assigns queued players to their preferred combat role for flexible raid queues
+        static bool CheckFlexibleRaidRoles(LfgRolesMap& groles, uint8 maxPlayers);
         /// Checks if given players are ignoring each other
         static bool HasIgnore(uint64 guid1, uint64 guid2);
         /// Sends queue status to player

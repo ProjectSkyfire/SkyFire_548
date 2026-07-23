@@ -68,6 +68,11 @@ namespace lfg
             return map && map->IsRaid();
         }
 
+        bool IsFlexibleRaidData(LFGDungeonData const& dungeon)
+        {
+            return dungeon.difficulty == DIFFICULTY_FLEX && IsRaidDungeon(dungeon);
+        }
+
         bool HasValidLfgTeleportLocation(LFGDungeonData const& dungeon)
         {
             if (!dungeon.map || (dungeon.x == 0.0f && dungeon.y == 0.0f && dungeon.z == 0.0f))
@@ -538,6 +543,7 @@ namespace lfg
         LfgGuidSet players;
         uint32 rDungeonId = 0;
         bool isContinue = grp && grp->isLFGGroup() && GetState(gguid) == LFG_STATE_DUNGEON;
+        bool hasFlexibleRaid = false;
 
         // Do not allow to change dungeon in the middle of a current dungeon
         if (isContinue)
@@ -545,6 +551,13 @@ namespace lfg
             dungeons.clear();
             dungeons.insert(GetDungeon(gguid));
         }
+
+        for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end(); ++it)
+            if (IsFlexibleRaidDungeon(*it))
+            {
+                hasFlexibleRaid = true;
+                break;
+            }
 
         // Already in queue?
         LfgState state = GetState(gguid);
@@ -578,7 +591,8 @@ namespace lfg
             joinData.result = LFG_JOIN_NOT_MEET_REQS;
         else if (grp)
         {
-            if (grp->GetMembersCount() > MAXGROUPSIZE)
+            uint8 groupMemberLimit = hasFlexibleRaid ? MAXRAIDSIZE : MAXGROUPSIZE;
+            if (grp->GetMembersCount() > groupMemberLimit)
                 joinData.result = LFG_JOIN_TOO_MUCH_MEMBERS;
             else
             {
@@ -612,6 +626,7 @@ namespace lfg
         if (joinData.result == LFG_JOIN_OK)
         {
             bool isDungeon = false;
+            bool hasNonFlexibleRaid = false;
             for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end() && joinData.result == LFG_JOIN_OK; ++it)
             {
                 LfgType type = GetDungeonType(*it);
@@ -632,6 +647,12 @@ namespace lfg
                         if (isDungeon)
                             joinData.result = LFG_JOIN_MIXED_RAID_DUNGEON;
                         isRaid = true;
+                        if (IsFlexibleRaidDungeon(*it))
+                            hasFlexibleRaid = true;
+                        else
+                            hasNonFlexibleRaid = true;
+                        if (hasFlexibleRaid && hasNonFlexibleRaid)
+                            joinData.result = LFG_JOIN_MIXED_RAID_DUNGEON;
                         break;
                     default:
                         joinData.result = LFG_JOIN_DUNGEON_INVALID;
@@ -664,7 +685,7 @@ namespace lfg
             return;
         }
 
-        if (isRaid)
+        if (isRaid && !hasFlexibleRaid)
         {
             SF_LOG_DEBUG("lfg.join", "%u trying to join raid browser and it's disabled.", GUID_LOPART(guid));
             return;
@@ -896,21 +917,32 @@ namespace lfg
                 // use temporal var to check roles, CheckGroupRoles modifies the roles
                 check_roles = roleCheck.roles;
                 bool scenario = false;
+                bool flexibleRaid = false;
                 for (LfgDungeonSet::const_iterator it = roleCheck.dungeons.begin(); it != roleCheck.dungeons.end(); ++it)
                 {
                     LFGDungeonData const* dungeon = GetLFGDungeon(*it);
                     if (!dungeon)
                         continue;
 
-                    MapEntry const* map = sMapStore.LookupEntry(dungeon->map);
-                    if (IsScenarioDifficulty(dungeon->difficulty) || (map && map->IsScenario()))
+                    if (IsScenarioDungeon(*dungeon))
                     {
                         scenario = true;
                         break;
                     }
+
+                    if (IsFlexibleRaidData(*dungeon))
+                        flexibleRaid = true;
                 }
 
-                roleCheck.state = (scenario ? CheckDpsOnlyRoles(check_roles, uint8(check_roles.size())) : CheckGroupRoles(check_roles)) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
+                bool rolesOk = false;
+                if (scenario)
+                    rolesOk = CheckDpsOnlyRoles(check_roles, uint8(check_roles.size()));
+                else if (flexibleRaid)
+                    rolesOk = CheckFlexibleRaidRoles(check_roles, MAXRAIDSIZE);
+                else
+                    rolesOk = CheckGroupRoles(check_roles);
+
+                roleCheck.state = rolesOk ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
             }
         }
 
@@ -1081,6 +1113,29 @@ namespace lfg
 
         for (LfgRolesMap::iterator it = groles.begin(); it != groles.end(); ++it)
             it->second = PLAYER_ROLE_DAMAGE | (it->second & PLAYER_ROLE_LEADER);
+
+        return true;
+    }
+
+    bool LFGMgr::CheckFlexibleRaidRoles(LfgRolesMap& groles, uint8 maxPlayers)
+    {
+        if (groles.empty() || !maxPlayers || groles.size() > maxPlayers)
+            return false;
+
+        for (LfgRolesMap::iterator it = groles.begin(); it != groles.end(); ++it)
+        {
+            uint8 leader = it->second & PLAYER_ROLE_LEADER;
+            uint8 roles = it->second & LFG_COMBAT_ROLE_MASK;
+            if (!roles)
+                return false;
+
+            if (roles & PLAYER_ROLE_TANK)
+                it->second = PLAYER_ROLE_TANK | leader;
+            else if (roles & PLAYER_ROLE_HEALER)
+                it->second = PLAYER_ROLE_HEALER | leader;
+            else
+                it->second = PLAYER_ROLE_DAMAGE | leader;
+        }
 
         return true;
     }
@@ -1989,7 +2044,13 @@ namespace lfg
     bool LFGMgr::IsRaidFinderDungeon(uint32 dungeonId)
     {
         LFGDungeonData const* dungeon = GetLFGDungeon(dungeonId);
-        return dungeon && IsRaidDungeon(*dungeon);
+        return dungeon && dungeon->difficulty == DIFFICULTY_25MAN_LFR && IsRaidDungeon(*dungeon);
+    }
+
+    bool LFGMgr::IsFlexibleRaidDungeon(uint32 dungeonId)
+    {
+        LFGDungeonData const* dungeon = GetLFGDungeon(dungeonId);
+        return dungeon && IsFlexibleRaidData(*dungeon);
     }
 
     LfgState LFGMgr::GetState(uint64 guid)
