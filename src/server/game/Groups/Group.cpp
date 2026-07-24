@@ -805,6 +805,7 @@ void Group::SendLootStartRoll(uint32 countDown, uint32 mapid, const Roll& r)
     data.WriteBit(lootedGuid[0]);
     data.WriteBit(1);
     data.WriteBits(3, 2);
+    data.FlushBits();
     data.WriteByteSeq(lootedGuid[7]);
     data << uint32(r.itemRandomPropId);
     data.WriteByteSeq(lootedGuid[5]);
@@ -863,6 +864,7 @@ void Group::SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p,
     data.WriteBit(lootedGuid[0]);
     data.WriteBit(1);
     data.WriteBits(3, 2);
+    data.FlushBits();
     data.WriteByteSeq(lootedGuid[7]);
     data << uint32(r.itemRandomPropId);
     data.WriteByteSeq(lootedGuid[5]);
@@ -918,6 +920,7 @@ void Group::SendLootRoll(uint64 /*sourceGuid*/, uint64 targetGuidRaw, uint8 roll
     data.WriteBit(targetGuid[4]);
     data.WriteBit(targetGuid[2]);
     data.WriteBit(lootedGuid[1]);
+    data.FlushBits();
     data.WriteByteSeq(lootedGuid[7]);
     data.WriteByteSeq(targetGuid[6]);
     data.WriteByteSeq(lootedGuid[0]);
@@ -989,6 +992,7 @@ void Group::SendLootRollWon(uint64 /*sourceGuid*/, uint64 targetGuidRaw, uint8 r
     data.WriteBit(byte0x38 != 0);
     data.WriteBit(lootedGuid[6]);
     data.WriteBit(lootedGuid[5]);
+    data.FlushBits();
     data << uint32(0);
     if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(roll.itemid))
         data << uint32(proto->DisplayInfoID);
@@ -1030,6 +1034,7 @@ void Group::SendLootRollWon(uint64 /*sourceGuid*/, uint64 targetGuidRaw, uint8 r
     data2.WriteBit(lootedGuid[0]);
     data2.WriteBit(lootedGuid[1]);
     data2.WriteBit(lootedGuid[4]);
+    data2.FlushBits();
     data2.WriteByteSeq(lootedGuid[1]);
     data2.WriteByteSeq(lootedGuid[0]);
     data2.WriteByteSeq(lootedGuid[2]);
@@ -1072,6 +1077,7 @@ void Group::SendLootAllPassed(Roll const& roll)
     data.WriteBit(lootedGuid[5]);
     data.WriteBit(lootedGuid[7]);
     data.WriteBit(lootedGuid[0]);
+    data.FlushBits();
     data.WriteByteSeq(lootedGuid[6]);
     data.WriteByteSeq(lootedGuid[5]);
     data.WriteByteSeq(lootedGuid[0]);
@@ -1103,6 +1109,7 @@ void Group::SendLootAllPassed(Roll const& roll)
     data2.WriteBit(lootedGuid[0]);
     data2.WriteBit(lootedGuid[1]);
     data2.WriteBit(lootedGuid[4]);
+    data2.FlushBits();
     data2.WriteByteSeq(lootedGuid[1]);
     data2.WriteByteSeq(lootedGuid[0]);
     data2.WriteByteSeq(lootedGuid[2]);
