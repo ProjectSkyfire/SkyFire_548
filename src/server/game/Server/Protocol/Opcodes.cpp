@@ -531,6 +531,7 @@ void OpcodeTable::InitializeClientTable()
 void OpcodeTable::InitializeServerTable()
 {
 #define DEFINE_OPCODE_HANDLER(opcode, opcodeNumber, status) ValidateAndSetOpcode<(opcodeNumber < NUM_OPCODE_HANDLERS), (opcode != 0)>(opcode, opcodeNumber, #opcode, status, PROCESS_INPLACE, 0);
+    DEFINE_OPCODE_HANDLER(MSG_VERIFY_CONNECTIVITY,                             0x4F57, STATUS_NEVER    ); // Not an opcode
     DEFINE_OPCODE_HANDLER(SMSG_ACCOUNT_CRITERIA_UPDATE,                        0x189E, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_ACCOUNT_DATA_TIMES,                             0x162B, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_ACHIEVEMENT_DELETED,                            0x1A2F, STATUS_NEVER    ); // 5.4.8 18414
