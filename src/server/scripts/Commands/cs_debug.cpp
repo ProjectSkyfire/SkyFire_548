@@ -62,6 +62,7 @@ public:
         };
         static std::vector<ChatCommand> debugLfgCommandTable =
         {
+            { "flex",           rbac::RBAC_PERM_COMMAND_DEBUG_LFG_FLEX,         true,  &HandleDebugLfgFlexCommand,         "", },
             { "group",          rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, false, &HandleDebugLfgGroupCommand,        "", },
             { "requirements",   rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, true,  &HandleDebugLfgRequirementsCommand, "", },
         };
@@ -208,6 +209,34 @@ public:
         }
 
         handler->SendSysMessage("Usage: .debug lfg requirements on|off");
+        handler->SetSentErrorMessage(true);
+        return false;
+    }
+
+    static bool HandleDebugLfgFlexCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args || !stricmp(args, "status"))
+        {
+            handler->PSendSysMessage("LFG flex raid minimum override is currently %s server-wide.", sLFGMgr->IsDebugFlexRaidMinimumOverrideEnabled() ? "ON" : "OFF");
+            handler->SendSysMessage("Usage: .debug lfg flex on|off|status");
+            return true;
+        }
+
+        if (!stricmp(args, "on"))
+        {
+            sLFGMgr->SetDebugFlexRaidMinimumOverride(true);
+            handler->SendSysMessage("LFG flex raid minimum override is ON server-wide.");
+            return true;
+        }
+
+        if (!stricmp(args, "off"))
+        {
+            sLFGMgr->SetDebugFlexRaidMinimumOverride(false);
+            handler->SendSysMessage("LFG flex raid minimum override is OFF server-wide.");
+            return true;
+        }
+
+        handler->SendSysMessage("Usage: .debug lfg flex on|off|status");
         handler->SetSentErrorMessage(true);
         return false;
     }

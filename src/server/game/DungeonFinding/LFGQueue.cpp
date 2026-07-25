@@ -137,7 +137,7 @@ namespace lfg
         uint8 GetDungeonMinGroupSize(uint32 dungeonId)
         {
             if (IsFlexibleRaidDungeon(dungeonId))
-                return LFG_FLEX_RAID_MIN_PLAYERS;
+                return sLFGMgr->IsDebugFlexRaidMinimumOverrideEnabled() ? 1 : LFG_FLEX_RAID_MIN_PLAYERS;
 
             return GetDungeonMaxGroupSize(dungeonId);
         }

@@ -157,7 +157,8 @@ namespace lfg
 
     LFGMgr::LFGMgr() : m_QueueTimer(0), m_lfgProposalId(1),
         m_options(sWorld->getIntConfig(WorldIntConfigs::CONFIG_LFG_OPTIONSMASK)),
-        m_debugRequirementOverride(false)
+        m_debugRequirementOverride(false),
+        m_debugFlexRaidMinimumOverride(false)
     {
         new LFGPlayerScript();
         new LFGGroupScript();

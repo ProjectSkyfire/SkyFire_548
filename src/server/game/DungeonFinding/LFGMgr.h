@@ -363,6 +363,10 @@ namespace lfg
         bool IsDebugRequirementOverrideEnabled() const { return m_debugRequirementOverride; }
         /// Sets the server-wide debug override for dungeon and raid finder requirements
         void SetDebugRequirementOverride(bool enabled) { m_debugRequirementOverride = enabled; }
+        /// Gets the server-wide debug override for flexible raid minimum group size
+        bool IsDebugFlexRaidMinimumOverrideEnabled() const { return m_debugFlexRaidMinimumOverride; }
+        /// Sets the server-wide debug override for flexible raid minimum group size
+        void SetDebugFlexRaidMinimumOverride(bool enabled) { m_debugFlexRaidMinimumOverride = enabled; }
         /// Clears queue - Only for internal testing
         void Clean();
         /// Dumps the state of the queue - Only for internal testing
@@ -494,6 +498,7 @@ namespace lfg
         uint32 m_lfgProposalId;                            ///< used as internal counter for proposals
         uint32 m_options;                                  ///< Stores config options
         bool m_debugRequirementOverride;                   ///< bypasses LFG entry requirements for server-wide debugging
+        bool m_debugFlexRaidMinimumOverride;               ///< allows flexible raid queues to form below normal minimum for debugging
 
         LfgQueueContainer QueuesStore;                     ///< Queues
         LfgCachedDungeonContainer CachedDungeonMapStore;   ///< Stores all dungeons by groupType
