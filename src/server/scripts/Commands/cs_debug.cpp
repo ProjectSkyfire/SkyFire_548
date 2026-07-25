@@ -240,10 +240,17 @@ public:
 
         if (!*args || !stricmp(args, "status"))
         {
+            uint32 missingRoles = 0;
+            Group::MemberSlotList const& slots = group->GetMemberSlots();
+            for (Group::MemberSlotList::const_iterator itr = slots.begin(); itr != slots.end(); ++itr)
+                if (!itr->roles)
+                    ++missingRoles;
+
             handler->PSendSysMessage("Current group mode: %s (%u/%u members).",
                 group->isRaidGroup() ? "raid" : "party",
                 group->GetMembersCount(),
                 group->isRaidGroup() ? MAXRAIDSIZE : MAXGROUPSIZE);
+            handler->PSendSysMessage("Members missing LFG roles: %u.", missingRoles);
             handler->SendSysMessage("Usage: .debug lfg group raid|party|status");
             return true;
         }
@@ -253,7 +260,23 @@ public:
             if (!group->isRaidGroup())
                 group->ConvertToRaid();
 
+            uint32 seededRoles = 0;
+            Group::MemberSlotList const& slots = group->GetMemberSlots();
+            for (Group::MemberSlotList::const_iterator itr = slots.begin(); itr != slots.end(); ++itr)
+            {
+                if (itr->roles)
+                    continue;
+
+                group->SetMemberRole(itr->guid, lfg::PLAYER_ROLE_DAMAGE);
+                ++seededRoles;
+            }
+
+            if (seededRoles)
+                group->SendUpdate();
+
             handler->PSendSysMessage("Current group converted to raid mode (%u/%u members).", group->GetMembersCount(), MAXRAIDSIZE);
+            if (seededRoles)
+                handler->PSendSysMessage("Seeded %u missing LFG role(s) as damage for flex raid testing.", seededRoles);
             return true;
         }
 
