@@ -1,0 +1,1 @@
+UPDATE `quest_template` SET `OfferRewardText`='If we can get things straightened out here, we have a chance to strike at the Alliance while most of their forces are busy in the Barrens.' WHERE `Id`=28554;
