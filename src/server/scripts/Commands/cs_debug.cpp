@@ -18,6 +18,7 @@ EndScriptData */
 #include "GossipDef.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "Language.h"
 #include "LFGMgr.h"
 #include "ObjectAccessor.h"
@@ -61,6 +62,7 @@ public:
         };
         static std::vector<ChatCommand> debugLfgCommandTable =
         {
+            { "group",          rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, false, &HandleDebugLfgGroupCommand,        "", },
             { "requirements",   rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, true,  &HandleDebugLfgRequirementsCommand, "", },
         };
         static std::vector<ChatCommand> debugCommandTable =
@@ -206,6 +208,72 @@ public:
         }
 
         handler->SendSysMessage("Usage: .debug lfg requirements on|off");
+        handler->SetSentErrorMessage(true);
+        return false;
+    }
+
+    static bool HandleDebugLfgGroupCommand(ChatHandler* handler, char const* args)
+    {
+        WorldSession* session = handler->GetSession();
+        Player* player = session ? session->GetPlayer() : NULL;
+        if (!player)
+        {
+            handler->SendSysMessage("Usage: .debug lfg group raid|party|status");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Group* group = player->GetGroup();
+        if (!group)
+        {
+            handler->SendSysMessage("You are not in a group.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!group->IsLeader(player->GetGUID()))
+        {
+            handler->SendSysMessage("Only the group leader can convert the group.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        if (!*args || !stricmp(args, "status"))
+        {
+            handler->PSendSysMessage("Current group mode: %s (%u/%u members).",
+                group->isRaidGroup() ? "raid" : "party",
+                group->GetMembersCount(),
+                group->isRaidGroup() ? MAXRAIDSIZE : MAXGROUPSIZE);
+            handler->SendSysMessage("Usage: .debug lfg group raid|party|status");
+            return true;
+        }
+
+        if (!stricmp(args, "raid"))
+        {
+            if (!group->isRaidGroup())
+                group->ConvertToRaid();
+
+            handler->PSendSysMessage("Current group converted to raid mode (%u/%u members).", group->GetMembersCount(), MAXRAIDSIZE);
+            return true;
+        }
+
+        if (!stricmp(args, "party"))
+        {
+            if (group->GetMembersCount() > MAXGROUPSIZE)
+            {
+                handler->PSendSysMessage("Cannot convert back to party while the group has %u members.", group->GetMembersCount());
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
+
+            if (group->isRaidGroup())
+                group->ConvertToGroup();
+
+            handler->PSendSysMessage("Current group converted to party mode (%u/%u members).", group->GetMembersCount(), MAXGROUPSIZE);
+            return true;
+        }
+
+        handler->SendSysMessage("Usage: .debug lfg group raid|party|status");
         handler->SetSentErrorMessage(true);
         return false;
     }
