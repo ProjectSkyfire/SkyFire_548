@@ -5,6 +5,7 @@
 
 #include "Cell.h"
 #include "CurrencyFormulas.h"
+#include "AreaTableUtils.h"
 #include "DBCEnums.h"
 #include "GridDefines.h"
 #include "LegacyTransportSupport.h"
@@ -1694,6 +1695,31 @@ namespace
         return passed;
     }
 
+    bool TestAreaTableRootZoneResolutionRules()
+    {
+        bool passed = true;
+
+        auto parentLookup = [](uint32 areaId) -> uint32
+        {
+            switch (areaId)
+            {
+                case 3431: return 6455;
+                case 6455: return 3430;
+                case 3430: return 0;
+                default: return 0;
+            }
+        };
+
+        passed &= Expect(Skyfire::AreaTable::ResolveRootZoneId(3431, parentLookup) == 3430,
+            "Nested AreaTable parents should resolve to the top-level zone");
+        passed &= Expect(Skyfire::AreaTable::ResolveRootZoneId(6455, parentLookup) == 3430,
+            "Intermediate AreaTable parents should resolve to the top-level zone");
+        passed &= Expect(Skyfire::AreaTable::ResolveRootZoneId(3430, parentLookup) == 3430,
+            "Root zones should resolve to themselves");
+
+        return passed;
+    }
+
 }
 
 int main()
@@ -1723,6 +1749,7 @@ int main()
     passed &= TestRuntimeMetricsRules();
     passed &= TestInnAreaBoundsRules();
     passed &= TestLegacyTransportVisibilityPreservationRules();
+    passed &= TestAreaTableRootZoneResolutionRules();
 
     return passed ? 0 : 1;
 }
