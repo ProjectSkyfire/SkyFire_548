@@ -165,6 +165,14 @@ bool AchievementCriteriaData::IsValid(CriteriaEntry const* criteria)
             }
             return true;
         }
+        case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AREA:
+            if (!GetAreaEntryByAreaID(area.id))
+            {
+                SF_LOG_ERROR("sql.sql", "Table `achievement_criteria_data` (Entry: %u Type: %u) for data type ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AREA (%u) has wrong area id in value1 (%u), ignored.",
+                    criteria->ID, criteria->type, dataType, area.id);
+                return false;
+            }
+            return true;
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_VALUE:
             if (value.compType >= COMP_TYPE_MAX)
             {
@@ -297,6 +305,12 @@ bool AchievementCriteriaData::Meets(uint32 criteria_id, Player const* source, Un
             return !target->HealthAbovePct(health.percent);
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AURA:
             return source->HasAuraEffect(aura.spell_id, aura.effect_idx);
+        case ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AREA:
+        {
+            uint32 zoneId, areaId;
+            source->GetZoneAndAreaId(zoneId, areaId);
+            return area.id == zoneId || area.id == areaId;
+        }
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_T_AURA:
             return target && target->HasAuraEffect(aura.spell_id, aura.effect_idx);
         case ACHIEVEMENT_CRITERIA_DATA_TYPE_VALUE:
