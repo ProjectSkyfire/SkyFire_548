@@ -45,6 +45,7 @@ enum AchievementCriteriaDataType
     ACHIEVEMENT_CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE = 2, // class_id       race_id
     ACHIEVEMENT_CRITERIA_DATA_TYPE_T_PLAYER_LESS_HEALTH = 3, // health_percent 0
     ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AURA = 5, // spell_id       effect_idx
+    ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AREA = 6, // area_id        0
     ACHIEVEMENT_CRITERIA_DATA_TYPE_T_AURA = 7, // spell_id       effect_idx
     ACHIEVEMENT_CRITERIA_DATA_TYPE_VALUE = 8, // minvalue                     value provided with achievement update must be not less that limit
     ACHIEVEMENT_CRITERIA_DATA_TYPE_T_LEVEL = 9, // minlevel                     minlevel of target
@@ -93,6 +94,11 @@ struct AchievementCriteriaData
             uint32 spell_id;
             uint32 effect_idx;
         } aura;
+        // ACHIEVEMENT_CRITERIA_DATA_TYPE_S_AREA            = 6
+        struct
+        {
+            uint32 id;
+        } area;
         // ACHIEVEMENT_CRITERIA_DATA_TYPE_VALUE             = 8
         struct
         {
