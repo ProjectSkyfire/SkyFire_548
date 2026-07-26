@@ -7,6 +7,7 @@
 #include "AchievementMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
+#include "AreaTableUtils.h"
 #include "BattlePet.h"
 #include "Chat.h"
 #include "Common.h"
@@ -5655,12 +5656,6 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
-        if (areaEntry->m_ParentAreaID != 0)
-        {
-            SF_LOG_ERROR("sql.sql", "Table `game_graveyard_zone` has a record for subzone id (%u) instead of zone, skipped.", zoneId);
-            continue;
-        }
-
         if (team != 0 && team != HORDE && team != ALLIANCE)
         {
             SF_LOG_ERROR("sql.sql", "Table `game_graveyard_zone` has a record for non player faction (%u), skipped.", team);
@@ -5710,7 +5705,18 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
     //     then check faction
     //   if mapId != graveyard.mapId (ghost in instance) and search any graveyard associated
     //     then check faction
-    GraveYardMapBounds range = GraveYardStore.equal_range(zoneId);
+    uint32 lookupZoneId = zoneId;
+    GraveYardMapBounds range = GraveYardStore.equal_range(lookupZoneId);
+    if (range.first == range.second)
+    {
+        uint32 rootZoneId = Skyfire::AreaTable::GetRootZoneId(zoneId);
+        if (rootZoneId && rootZoneId != zoneId)
+        {
+            lookupZoneId = rootZoneId;
+            range = GraveYardStore.equal_range(lookupZoneId);
+        }
+    }
+
     MapEntry const* map = sMapStore.LookupEntry(MapId);
 
     // not need to check validity of map object; MapId _MUST_ be valid here
@@ -5815,13 +5821,26 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveYard(float x, float y, float
 
 GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 zoneId)
 {
-    GraveYardMapBounds range = GraveYardStore.equal_range(zoneId);
-    for (; range.first != range.second; ++range.first)
+    auto findData = [this, id](uint32 lookupZoneId) -> GraveYardData const*
     {
-        GraveYardData const& data = range.first->second;
-        if (data.safeLocId == id)
-            return &data;
-    }
+        GraveYardMapBounds range = GraveYardStore.equal_range(lookupZoneId);
+        for (; range.first != range.second; ++range.first)
+        {
+            GraveYardData const& data = range.first->second;
+            if (data.safeLocId == id)
+                return &data;
+        }
+
+        return NULL;
+    };
+
+    if (GraveYardData const* data = findData(zoneId))
+        return data;
+
+    uint32 rootZoneId = Skyfire::AreaTable::GetRootZoneId(zoneId);
+    if (rootZoneId && rootZoneId != zoneId)
+        return findData(rootZoneId);
+
     return NULL;
 }
 
