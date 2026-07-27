@@ -302,6 +302,10 @@ namespace lfg
             if (!dungeon)
                 continue;
 
+            MapEntry const* dungeonMap = sMapStore.LookupEntry(dungeon->m_ContinentID);
+            if (dungeonMap && dungeonMap->IsBattlegroundOrArena())
+                continue;
+
             switch (dungeon->m_Type)
             {
                 case LFG_TYPE_DUNGEON:
