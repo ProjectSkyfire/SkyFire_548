@@ -34,7 +34,8 @@ enum ActivePetBattleTurnEffect
 {
     ACTIVE_PET_BATTLE_TURN_EFFECT_NONE = 0,
     ACTIVE_PET_BATTLE_TURN_EFFECT_DAMAGE = 1,
-    ACTIVE_PET_BATTLE_TURN_EFFECT_SWAP = 2
+    ACTIVE_PET_BATTLE_TURN_EFFECT_SWAP = 2,
+    ACTIVE_PET_BATTLE_TURN_EFFECT_ABILITY = 3
 };
 
 struct ActivePetBattleCooldown
@@ -44,6 +45,7 @@ struct ActivePetBattleCooldown
     uint32 AbilityID = 0;
     uint16 Cooldown = 0;
     uint16 Lockdown = 0;
+    uint8 NextTurnIndex = 0;
     bool OnCooldown = false;
 };
 
@@ -62,6 +64,7 @@ struct ActivePetBattleTurn
     uint8 Winner = PET_BATTLE_WINNER_NONE;
     uint32 RoundID = 0;
     uint32 RemainingHealth = 0;
+    uint32 DamageDealt = 0;
     std::vector<ActivePetBattleCooldown> Cooldowns;
 };
 
@@ -76,6 +79,18 @@ struct ActivePetBattleAuraState
 {
     uint32 IncomingDamageReduction = 0;
     uint8 Rounds = 0;
+    uint32 AuraAbilityId = 0;
+    bool Untargetable = false;
+};
+
+struct ActivePetBattleWeather
+{
+    uint32 AuraAbilityId = 0;
+    uint8 Rounds = 0;
+    uint8 BoostedFamilyId = 0;
+    int32 FamilyDamagePct = 0;
+
+    bool IsActive() const { return AuraAbilityId != 0 && Rounds != 0; }
 };
 
 struct ActivePetBattle
@@ -152,7 +167,10 @@ struct ActivePetBattle
     uint32 ApplyAllyDamage(uint32 damage)
     {
         if (!IsAllyPetAlive(AllyFrontPet))
-            return AllyHealth;
+            return AllyTeam[AllyFrontPet].Health;
+
+        if (AllyAura.Untargetable)
+            return AllyTeam[AllyFrontPet].Health;
 
         damage = ApplyIncomingDamageReduction(AllyAura, damage);
 
@@ -174,8 +192,29 @@ struct ActivePetBattle
         return remainingHealth;
     }
 
+    uint32 ApplyAllyHealToPet(uint8 petIndex, uint32 amount)
+    {
+        if (!amount || !IsAllyPetAlive(petIndex))
+            return HasAllyPet(petIndex) ? AllyTeam[petIndex].Health : 0;
+
+        ActivePetBattlePetState& pet = AllyTeam[petIndex];
+        uint32 const healed = std::min<uint32>(amount, pet.MaxHealth > pet.Health ? pet.MaxHealth - pet.Health : 0);
+        pet.Health += healed;
+        if (petIndex == AllyFrontPet)
+            SyncActiveAllyPet();
+        return pet.Health;
+    }
+
+    uint32 ApplyAllyHeal(uint32 amount)
+    {
+        return ApplyAllyHealToPet(AllyFrontPet, amount);
+    }
+
     uint32 ApplyEnemyDamage(uint32 damage)
     {
+        if (EnemyAura.Untargetable)
+            return EnemyHealth;
+
         damage = ApplyIncomingDamageReduction(EnemyAura, damage);
         return ApplyDamage(EnemyHealth, damage, PET_BATTLE_WINNER_ALLY);
     }
@@ -188,6 +227,116 @@ struct ActivePetBattle
     void ActivateEnemyIncomingDamageReduction(uint32 amount, uint8 rounds)
     {
         ActivateIncomingDamageReduction(EnemyAura, amount, rounds);
+    }
+
+    void ActivateAllyCombatAura(uint32 auraAbilityId, uint8 rounds, bool untargetable)
+    {
+        ActivateCombatAura(AllyAura, auraAbilityId, rounds, untargetable);
+    }
+
+    void ActivateEnemyCombatAura(uint32 auraAbilityId, uint8 rounds, bool untargetable)
+    {
+        ActivateCombatAura(EnemyAura, auraAbilityId, rounds, untargetable);
+    }
+
+    void ClearAllyCombatAura(uint32 auraAbilityId = 0)
+    {
+        ClearCombatAura(AllyAura, auraAbilityId);
+    }
+
+    void ClearEnemyCombatAura(uint32 auraAbilityId = 0)
+    {
+        ClearCombatAura(EnemyAura, auraAbilityId);
+    }
+
+    bool IsAllyUntargetable() const { return AllyAura.Untargetable; }
+    bool IsEnemyUntargetable() const { return EnemyAura.Untargetable; }
+
+    uint32 ScaleEnemyOutgoingDamage(uint32 damage) const
+    {
+        if (!damage || !EnemyAura.AuraAbilityId || !EnemyAura.Rounds)
+            return damage;
+
+        int32 const pct = BattlePetAbilityStateValue(
+            EnemyAura.AuraAbilityId, BATTLE_PET_STATE_MOD_DAMAGE_DEALT_PERCENT);
+        if (!pct)
+            return damage;
+
+        int32 const scaled = int32(damage) + (int32(damage) * pct) / 100;
+        return scaled > 0 ? uint32(scaled) : 0;
+    }
+
+    void ActivateWeather(uint32 auraAbilityId, uint8 rounds)
+    {
+        Weather = ActivePetBattleWeather();
+        if (!auraAbilityId || !rounds)
+            return;
+
+        Weather.AuraAbilityId = auraAbilityId;
+        Weather.Rounds = rounds;
+        Weather.FamilyDamagePct = BattlePetAbilityStateValue(
+            auraAbilityId, BATTLE_PET_STATE_MOD_PET_TYPE_DAMAGE_DEALT_PERCENT);
+        int32 const familyId = BattlePetAbilityStateValue(
+            auraAbilityId, BATTLE_PET_STATE_MOD_PET_TYPE_ID);
+        Weather.BoostedFamilyId = familyId > 0 ? uint8(familyId) : 0;
+    }
+
+    void ActivateWeather(uint32 auraAbilityId, uint8 rounds, uint8 boostedFamilyId, int32 familyDamagePct)
+    {
+        Weather = ActivePetBattleWeather();
+        if (!auraAbilityId || !rounds)
+            return;
+
+        Weather.AuraAbilityId = auraAbilityId;
+        Weather.Rounds = rounds;
+        Weather.BoostedFamilyId = boostedFamilyId;
+        Weather.FamilyDamagePct = familyDamagePct;
+    }
+
+    void ClearWeather()
+    {
+        Weather = ActivePetBattleWeather();
+    }
+
+    uint32 ScaleAllyOutgoingDamage(uint32 damage, uint8 casterFamilyId) const
+    {
+        if (!damage || !Weather.IsActive() || !Weather.FamilyDamagePct)
+            return damage;
+
+        if (Weather.BoostedFamilyId && casterFamilyId != Weather.BoostedFamilyId)
+            return damage;
+
+        int32 const scaled = int32(damage) + (int32(damage) * Weather.FamilyDamagePct) / 100;
+        return scaled > 0 ? uint32(scaled) : 0;
+    }
+
+    bool GetAllyAbilityChannel(uint8 petIndex, uint8& abilitySlot, uint32& abilityId, uint8& nextTurnIndex) const
+    {
+        if (!IsValidAllyPetIndex(petIndex))
+            return false;
+
+        for (uint8 slot = 0; slot < BATTLE_PET_ABILITY_SLOT_COUNT; ++slot)
+        {
+            ActivePetBattleCooldown const& cooldownState = AllyCooldowns[petIndex][slot];
+            if (!cooldownState.OnCooldown || !cooldownState.NextTurnIndex)
+                continue;
+
+            abilitySlot = slot;
+            abilityId = cooldownState.AbilityID;
+            nextTurnIndex = cooldownState.NextTurnIndex;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool HasAllyAbilityChannel(uint8 petIndex = 0xFF) const
+    {
+        uint8 abilitySlot = 0;
+        uint32 abilityId = 0;
+        uint8 nextTurnIndex = 0;
+        uint8 const pet = petIndex == 0xFF ? AllyFrontPet : petIndex;
+        return GetAllyAbilityChannel(pet, abilitySlot, abilityId, nextTurnIndex);
     }
 
     ActivePetBattleTurn ApplyAbilityRound(uint32 roundId, uint32 damage)
@@ -258,6 +407,15 @@ struct ActivePetBattle
         uint8 allyAbilitySlot, uint32 allyAbilityId, uint16 allyAbilityCooldown,
         ActivePetBattleTurn& allyTurn, ActivePetBattleTurn& enemyTurn)
     {
+        return ApplyAbilityExchange(roundId, allyDamage, enemyDamage, allyAbilitySlot, allyAbilityId,
+            allyAbilityCooldown, 0, 0, allyTurn, enemyTurn);
+    }
+
+    bool ApplyAbilityExchange(uint32 roundId, uint32 allyDamage, uint32 enemyDamage,
+        uint8 allyAbilitySlot, uint32 allyAbilityId, uint16 allyAbilityCooldown,
+        uint16 allyAbilityLockdown, uint8 allyNextTurnIndex,
+        ActivePetBattleTurn& allyTurn, ActivePetBattleTurn& enemyTurn)
+    {
         allyTurn = CreateTurn(roundId);
         enemyTurn = CreateTurn(roundId);
 
@@ -267,34 +425,39 @@ struct ActivePetBattle
         if (WaitingForAllyFrontPet)
             return false;
 
-        if (IsValidAbilitySlot(allyAbilitySlot) && IsAllyAbilityOnCooldown(AllyFrontPet, allyAbilitySlot))
+        bool const continuingChannel = IsContinuingAllyAbilityChannel(AllyFrontPet, allyAbilitySlot, allyAbilityId);
+        if (IsValidAbilitySlot(allyAbilitySlot) && IsAllyAbilityOnCooldown(AllyFrontPet, allyAbilitySlot) && !continuingChannel)
             return false;
 
         allyTurn.Accepted = true;
         allyTurn.HasRoundResult = true;
-        allyTurn.EffectKind = ACTIVE_PET_BATTLE_TURN_EFFECT_DAMAGE;
+        allyTurn.EffectKind = allyDamage ? ACTIVE_PET_BATTLE_TURN_EFFECT_DAMAGE : ACTIVE_PET_BATTLE_TURN_EFFECT_ABILITY;
         allyTurn.CasterPet = AllyFrontPet;
         allyTurn.TargetPet = EnemyFrontPet;
+        allyTurn.DamageDealt = allyDamage;
         allyTurn.RemainingHealth = ApplyEnemyDamage(allyDamage);
-        allyTurn.TargetDied = allyTurn.RemainingHealth == 0;
+        allyTurn.TargetDied = EnemyHealth == 0;
         allyTurn.HasFinalRound = IsFinished();
         allyTurn.Winner = Winner;
 
         if (!IsFinished())
         {
+            uint32 const appliedEnemyDamage = IsAllyUntargetable() ? 0 : enemyDamage;
             enemyTurn.Accepted = true;
             enemyTurn.HasRoundResult = true;
-            enemyTurn.EffectKind = ACTIVE_PET_BATTLE_TURN_EFFECT_DAMAGE;
+            enemyTurn.EffectKind = appliedEnemyDamage ? ACTIVE_PET_BATTLE_TURN_EFFECT_DAMAGE : ACTIVE_PET_BATTLE_TURN_EFFECT_ABILITY;
             enemyTurn.CasterPet = EnemyFrontPet;
             enemyTurn.TargetPet = AllyFrontPet;
-            enemyTurn.RemainingHealth = ApplyAllyDamage(enemyDamage);
-            enemyTurn.TargetDied = enemyTurn.RemainingHealth == 0;
+            enemyTurn.DamageDealt = appliedEnemyDamage;
+            enemyTurn.RemainingHealth = ApplyAllyDamage(appliedEnemyDamage);
+            enemyTurn.TargetDied = enemyTurn.RemainingHealth == 0 && appliedEnemyDamage > 0;
             enemyTurn.RequiresFrontPet = enemyTurn.TargetDied && WaitingForAllyFrontPet;
             enemyTurn.HasFinalRound = IsFinished();
             enemyTurn.Winner = Winner;
         }
 
-        StartAllyAbilityCooldown(AllyFrontPet, allyAbilitySlot, allyAbilityId, allyAbilityCooldown);
+        StartAllyAbilityCooldown(AllyFrontPet, allyAbilitySlot, allyAbilityId, allyAbilityCooldown,
+            allyAbilityLockdown, allyNextTurnIndex);
         FinishAcceptedRound(allyTurn);
         return true;
     }
@@ -521,6 +684,7 @@ struct ActivePetBattle
     uint8 TrapFailedAttempts = 0;
     bool WaitingForAllyFrontPet = false;
     ActivePetBattlePetState AllyTeam[BATTLE_PET_MAX_ACTIVE_TEAM_PETS];
+    ActivePetBattleWeather Weather;
 
 private:
     ActivePetBattleCooldown AllyCooldowns[BATTLE_PET_MAX_ACTIVE_TEAM_PETS][BATTLE_PET_ABILITY_SLOT_COUNT];
@@ -565,20 +729,46 @@ private:
 
     bool IsAllyAbilityOnCooldown(uint8 petIndex, uint8 abilitySlot) const
     {
-        return GetAllyAbilityCooldown(petIndex, abilitySlot) != 0;
+        if (!IsValidAllyPetIndex(petIndex) || !IsValidAbilitySlot(abilitySlot))
+            return false;
+
+        ActivePetBattleCooldown const& cooldownState = AllyCooldowns[petIndex][abilitySlot];
+        return cooldownState.OnCooldown && cooldownState.Cooldown != 0 && cooldownState.Lockdown == 0;
     }
 
-    void StartAllyAbilityCooldown(uint8 petIndex, uint8 abilitySlot, uint32 abilityId, uint16 cooldown)
+    bool IsContinuingAllyAbilityChannel(uint8 petIndex, uint8 abilitySlot, uint32 abilityId) const
     {
-        if (!IsValidAllyPetIndex(petIndex) || !IsValidAbilitySlot(abilitySlot) || !abilityId || !cooldown)
+        if (!IsValidAllyPetIndex(petIndex) || !IsValidAbilitySlot(abilitySlot) || !abilityId)
+            return false;
+
+        ActivePetBattleCooldown const& cooldownState = AllyCooldowns[petIndex][abilitySlot];
+        return cooldownState.OnCooldown
+            && cooldownState.AbilityID == abilityId
+            && cooldownState.NextTurnIndex > 0;
+    }
+
+    void StartAllyAbilityCooldown(uint8 petIndex, uint8 abilitySlot, uint32 abilityId, uint16 cooldown,
+        uint16 lockdown = 0, uint8 nextTurnIndex = 0)
+    {
+        if (!IsValidAllyPetIndex(petIndex) || !IsValidAbilitySlot(abilitySlot) || !abilityId)
             return;
 
         ActivePetBattleCooldown& cooldownState = AllyCooldowns[petIndex][abilitySlot];
+        bool const continuingChannel = cooldownState.OnCooldown
+            && cooldownState.AbilityID == abilityId
+            && (cooldownState.NextTurnIndex > 0 || nextTurnIndex > 0 || lockdown > 0);
+
+        if (!cooldown && !lockdown && !nextTurnIndex && !continuingChannel)
+            return;
+
         cooldownState.PetPBOID = petIndex;
         cooldownState.AbilitySlot = abilitySlot;
         cooldownState.AbilityID = abilityId;
-        cooldownState.Cooldown = cooldown;
-        cooldownState.Lockdown = 0;
+        if (!continuingChannel || !cooldownState.Cooldown)
+            cooldownState.Cooldown = cooldown;
+        // Lockdown remains server-side channel bookkeeping; packets force it to 0 for the client.
+        cooldownState.Lockdown = lockdown;
+        cooldownState.NextTurnIndex = nextTurnIndex;
         cooldownState.OnCooldown = true;
     }
 
@@ -602,7 +792,8 @@ private:
             for (uint8 abilitySlot = 0; abilitySlot < BATTLE_PET_ABILITY_SLOT_COUNT; ++abilitySlot)
             {
                 ActivePetBattleCooldown& cooldownState = AllyCooldowns[petIndex][abilitySlot];
-                if (cooldownState.OnCooldown && !cooldownState.Cooldown)
+                if (cooldownState.OnCooldown && !cooldownState.Cooldown && !cooldownState.Lockdown
+                    && !cooldownState.NextTurnIndex)
                     cooldownState = ActivePetBattleCooldown();
             }
         }
@@ -615,10 +806,12 @@ private:
             for (uint8 abilitySlot = 0; abilitySlot < BATTLE_PET_ABILITY_SLOT_COUNT; ++abilitySlot)
             {
                 ActivePetBattleCooldown& cooldownState = AllyCooldowns[petIndex][abilitySlot];
-                if (!cooldownState.Cooldown)
+                if (!cooldownState.OnCooldown)
                     continue;
 
-                --cooldownState.Cooldown;
+                // Lockdown is managed explicitly by the channel executor; only tick cooldown here.
+                if (cooldownState.Cooldown)
+                    --cooldownState.Cooldown;
             }
         }
     }
@@ -630,6 +823,36 @@ private:
 
         aura.IncomingDamageReduction = amount;
         aura.Rounds = rounds;
+    }
+
+    static void ActivateCombatAura(ActivePetBattleAuraState& aura, uint32 auraAbilityId, uint8 rounds, bool untargetable)
+    {
+        if (!auraAbilityId)
+            return;
+
+        aura.AuraAbilityId = auraAbilityId;
+        aura.Untargetable = untargetable;
+        if (rounds)
+            aura.Rounds = rounds;
+        else if (untargetable)
+            aura.Rounds = 1;
+    }
+
+    static void ClearCombatAura(ActivePetBattleAuraState& aura, uint32 auraAbilityId)
+    {
+        if (auraAbilityId && aura.AuraAbilityId && aura.AuraAbilityId != auraAbilityId)
+            return;
+
+        bool const keepReduction = aura.IncomingDamageReduction != 0 && aura.Rounds != 0
+            && (!auraAbilityId || aura.AuraAbilityId != auraAbilityId);
+        if (keepReduction)
+        {
+            aura.AuraAbilityId = 0;
+            aura.Untargetable = false;
+            return;
+        }
+
+        aura = ActivePetBattleAuraState();
     }
 
     static uint32 ApplyIncomingDamageReduction(ActivePetBattleAuraState const& aura, uint32 damage)
@@ -647,13 +870,30 @@ private:
 
         --aura.Rounds;
         if (!aura.Rounds)
-            aura = ActivePetBattleAuraState();
+        {
+            // Keep untargetable channel auras until explicitly removed by effect props.
+            if (aura.Untargetable && aura.AuraAbilityId)
+                aura.Rounds = 1;
+            else
+                aura = ActivePetBattleAuraState();
+        }
+    }
+
+    void DecrementWeather()
+    {
+        if (!Weather.Rounds)
+            return;
+
+        --Weather.Rounds;
+        if (!Weather.Rounds)
+            Weather = ActivePetBattleWeather();
     }
 
     void DecrementAuras()
     {
         DecrementAura(AllyAura);
         DecrementAura(EnemyAura);
+        DecrementWeather();
     }
 
     void FinishAcceptedRound(ActivePetBattleTurn& turn)

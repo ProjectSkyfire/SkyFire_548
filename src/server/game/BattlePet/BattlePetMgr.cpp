@@ -867,29 +867,245 @@ bool BattlePetMgr::ApplyBattlePetAbilityExchangeInput(uint32 roundId,
     Skyfire::BattlePetPackets::BattlePetRoundResult& round,
     Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound)
 {
-    m_activePetBattle.ActivateAllyIncomingDamageReduction(
-        allyIncomingDamageReduction, allyIncomingDamageReductionRounds);
-    m_activePetBattle.ActivateEnemyIncomingDamageReduction(
-        enemyIncomingDamageReduction, enemyIncomingDamageReductionRounds);
+    (void)allyDamage;
+    (void)allyAbilityEffectId;
+    (void)allyAbilityCooldown;
+
+    return ApplyBattlePetAbilityTurnExchangeInput(roundId, allyAbilitySlot, allyAbilityId, 1,
+        0, 1, enemyDamage, enemyAbilityEffectId,
+        allyIncomingDamageReduction, allyIncomingDamageReductionRounds,
+        enemyIncomingDamageReduction, enemyIncomingDamageReductionRounds,
+        round, finalRound);
+}
+
+bool BattlePetMgr::ApplyBattlePetAbilityTurnExchangeInput(uint32 roundId,
+    uint8 allyAbilitySlot, uint32 allyAbilityId, uint8 turnIndex,
+    uint16 power, uint8 level,
+    uint32 enemyDamage, uint32 enemyAbilityEffectId,
+    uint32 allyIncomingDamageReduction, uint8 allyIncomingDamageReductionRounds,
+    uint32 enemyIncomingDamageReduction, uint8 enemyIncomingDamageReductionRounds,
+    Skyfire::BattlePetPackets::BattlePetRoundResult& round,
+    Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound)
+{
+    if (!allyAbilityId || !turnIndex || allyAbilitySlot >= BATTLE_PET_ABILITY_SLOT_COUNT)
+        return false;
+
+    uint8 const turnCount = BattlePetAbilityTurnCount(allyAbilityId);
+    uint8 const safeTurnCount = turnCount ? turnCount : 1;
+    uint8 const safeTurnIndex = std::min<uint8>(turnIndex, safeTurnCount);
+
+    std::vector<BattlePetAbilityEffectEntry const*> const effects =
+        BattlePetAbilityEffectsForTurn(allyAbilityId, safeTurnIndex);
+
+    uint32 totalDamage = 0;
+    uint32 killHealAmount = 0;
+    uint32 killHealEffectId = 0;
+    uint16 auraInstanceSeed = uint16(allyAbilityId ^ (safeTurnIndex << 8));
+    bool processedCombatEffect = false;
+    std::vector<Skyfire::BattlePetPackets::BattlePetRoundEffect> allyEffects;
+
+    uint8 casterFamilyId = 0;
+    if (BattlePet const* allyPet = GetBattlePet(m_activePetBattle.AllyPetID))
+        casterFamilyId = BattlePetSpeciesFamilyId(allyPet->GetSpecies());
+
+    for (BattlePetAbilityEffectEntry const* effectEntry : effects)
+    {
+        if (!effectEntry)
+            continue;
+
+        if (BattlePetAbilityEffectDealsDamage(effectEntry->PropertiesId))
+        {
+            uint32 hitDamage = BattlePetScalePointsFromStats(effectEntry->PropertyValues[0], power, level);
+            hitDamage = m_activePetBattle.ScaleAllyOutgoingDamage(hitDamage, casterFamilyId);
+            if (!hitDamage)
+                continue;
+
+            processedCombatEffect = true;
+            totalDamage += hitDamage;
+            uint32 const remainingHealth = m_activePetBattle.EnemyHealth > totalDamage
+                ? m_activePetBattle.EnemyHealth - totalDamage
+                : 0;
+            allyEffects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
+                m_activePetBattle.AllyFrontPet, m_activePetBattle.EnemyFrontPet, int32(remainingHealth),
+                effectEntry->Id, uint16(allyEffects.size() + 1)));
+            continue;
+        }
+
+        // Cleansing Rain-style team heals: one effect per ally slot (EffectIndex 1-3 → slots 0-2).
+        if (BattlePetAbilityEffectHeals(effectEntry->PropertiesId))
+        {
+            uint32 const healAmount = BattlePetScalePointsFromStats(effectEntry->PropertyValues[0], power, level);
+            if (!healAmount)
+                continue;
+
+            uint8 petIndex = effectEntry->EffectIndex > 0
+                ? uint8(effectEntry->EffectIndex - 1)
+                : 0;
+            if (petIndex >= ActivePetBattle::BATTLE_PET_MAX_ACTIVE_TEAM_PETS)
+                continue;
+            if (!m_activePetBattle.IsAllyPetAlive(petIndex))
+                continue;
+
+            processedCombatEffect = true;
+            uint32 const remainingHealth = m_activePetBattle.ApplyAllyHealToPet(petIndex, healAmount);
+            allyEffects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
+                m_activePetBattle.AllyFrontPet, petIndex, int32(remainingHealth),
+                effectEntry->Id, uint16(allyEffects.size() + 1)));
+            continue;
+        }
+
+        // Devour-style: Points with RequiredTargetState=Is_Dead restore health on kill.
+        // Emitting these as TriggerAbility visuals corrupted the enemy health bar (0/0 zombies).
+        if (BattlePetAbilityEffectIsKillHeal(effectEntry->PropertiesId, effectEntry))
+        {
+            uint32 const healPoints = BattlePetScalePointsFromStats(effectEntry->PropertyValues[0], power, level);
+            if (healPoints && m_activePetBattle.EnemyHealth <= totalDamage)
+            {
+                processedCombatEffect = true;
+                killHealAmount += healPoints;
+                killHealEffectId = effectEntry->Id;
+            }
+            continue;
+        }
+
+        if (BattlePetAbilityEffectAppliesWeather(effectEntry->PropertiesId) && effectEntry->AuraAbilityId)
+        {
+            // Weather is battle-wide. Duration lives in Param[2] (Cleansing Rain = 9).
+            // Do not emit AuraApply — same client HP corruption risk as Squawk.
+            uint8 const duration = uint8(std::min<uint32>(effectEntry->PropertyValues[2]
+                ? effectEntry->PropertyValues[2] : 1, 255));
+            m_activePetBattle.ActivateWeather(effectEntry->AuraAbilityId, duration);
+            processedCombatEffect = true;
+            continue;
+        }
+
+        if (BattlePetAbilityEffectAppliesAura(effectEntry->PropertiesId) && effectEntry->AuraAbilityId)
+        {
+            // Duration: apply-aura-duration uses Param[2]; target auras (Squawk) also store Duration there.
+            uint8 const duration = uint8(std::min<uint32>(effectEntry->PropertyValues[2]
+                ? effectEntry->PropertyValues[2] : 1, 255));
+            bool const untargetable = BattlePetAuraMakesUntargetable(effectEntry->AuraAbilityId);
+            bool const toEnemy = BattlePetAbilityEffectAppliesAuraToTarget(effectEntry->PropertiesId);
+
+            processedCombatEffect = true;
+            if (toEnemy)
+                m_activePetBattle.ActivateEnemyCombatAura(effectEntry->AuraAbilityId, duration, untargetable);
+            else
+                m_activePetBattle.ActivateAllyCombatAura(effectEntry->AuraAbilityId, duration, untargetable);
+
+            // Only emit an aura packet for untargetable channel visuals (Lift-Off / Dive).
+            // Self-buff AuraApply with a full aura target payload desynced the round bitstream
+            // (fake pet deaths / ~131k heals on the wrong slot). Emerald Presence mitigation still
+            // applies via IncomingDamageReduction; shield VFX stays deferred until the aura
+            // target layout is verified against the client.
+            if (untargetable && !toEnemy)
+            {
+                allyEffects.push_back(Skyfire::BattlePetPackets::BuildAuraEffect(
+                    m_activePetBattle.AllyFrontPet, m_activePetBattle.AllyFrontPet, effectEntry->Id,
+                    effectEntry->AuraAbilityId, duration, auraInstanceSeed++, true,
+                    uint16(allyEffects.size() + 1)));
+            }
+            continue;
+        }
+
+        if (BattlePetAbilityEffectRemovesAura(effectEntry->PropertiesId) && effectEntry->AuraAbilityId)
+        {
+            // Land before the enemy replies this round. Skip a remove packet — SetHealth-style
+            // stand-ins were logging "Lift-Off dealt 0 damage" and replaying a junk graphic.
+            processedCombatEffect = true;
+            m_activePetBattle.ClearAllyCombatAura(effectEntry->AuraAbilityId);
+            continue;
+        }
+
+        // Unknown effect properties: do not emit speculative visuals (wrong PetBattleEffectType
+        // desyncs client HP). Damage/aura handlers above cover the supported combat path.
+    }
+
+    if (allyEffects.empty() && !processedCombatEffect)
+    {
+        uint32 const fallbackEffectId = BattlePetInputEffectForAbilityTurn(allyAbilityId, safeTurnIndex);
+        if (fallbackEffectId)
+            allyEffects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
+                m_activePetBattle.AllyFrontPet, m_activePetBattle.EnemyFrontPet,
+                int32(m_activePetBattle.EnemyHealth > totalDamage
+                    ? m_activePetBattle.EnemyHealth - totalDamage
+                    : 0),
+                fallbackEffectId));
+    }
+
+    // Shield-style flat reduction still uses the cast ability's linked apply effect.
+    if (safeTurnIndex == 1)
+    {
+        m_activePetBattle.ActivateAllyIncomingDamageReduction(
+            allyIncomingDamageReduction, allyIncomingDamageReductionRounds);
+        m_activePetBattle.ActivateEnemyIncomingDamageReduction(
+            enemyIncomingDamageReduction, enemyIncomingDamageReductionRounds);
+    }
+
+    uint16 const abilityCooldown = BattlePetAbilityCooldown(allyAbilityId);
+    uint16 const remainingLockdown = safeTurnIndex < safeTurnCount
+        ? uint16(safeTurnCount - safeTurnIndex) : 0;
+    uint8 const nextTurnIndex = remainingLockdown ? uint8(safeTurnIndex + 1) : 0;
+    // Do not put the ability on its real cooldown while channeling — the client grays it out and
+    // with channel input locks the player can only forfeit.
+    uint16 const cooldownToApply = remainingLockdown ? 0 : abilityCooldown;
+
+    uint32 const appliedEnemyDamage = m_activePetBattle.IsAllyUntargetable()
+        ? 0
+        : m_activePetBattle.ScaleEnemyOutgoingDamage(enemyDamage);
 
     ActivePetBattleTurn allyTurn;
     ActivePetBattleTurn enemyTurn;
-    if (!m_activePetBattle.ApplyAbilityExchange(roundId, allyDamage, enemyDamage,
-        allyAbilitySlot, allyAbilityId, allyAbilityCooldown, allyTurn, enemyTurn))
+    if (!m_activePetBattle.ApplyAbilityExchange(roundId, totalDamage, appliedEnemyDamage,
+        allyAbilitySlot, allyAbilityId, cooldownToApply, remainingLockdown, nextTurnIndex,
+        allyTurn, enemyTurn))
         return false;
 
     if (!allyTurn.Accepted || !allyTurn.HasRoundResult)
         return false;
 
+    if (killHealAmount && allyTurn.TargetDied)
+    {
+        uint32 const healedHealth = m_activePetBattle.ApplyAllyHeal(killHealAmount);
+        allyEffects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
+            m_activePetBattle.AllyFrontPet, m_activePetBattle.AllyFrontPet, int32(healedHealth),
+            killHealEffectId ? killHealEffectId : 0, uint16(allyEffects.size() + 1)));
+    }
+
     round.RoundID = roundId;
     Skyfire::BattlePetPackets::AppendRoundCooldowns(round, allyTurn);
-    round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
-        allyTurn.CasterPet, allyTurn.TargetPet, int32(allyTurn.RemainingHealth), allyAbilityEffectId, 1));
+    if (remainingLockdown && !allyTurn.HasFinalRound)
+        Skyfire::BattlePetPackets::AppendChannelInputFlags(round, allyAbilitySlot);
+
+    for (Skyfire::BattlePetPackets::BattlePetRoundEffect const& effect : allyEffects)
+        round.Effects.push_back(effect);
+
+    if (allyTurn.TargetDied)
+    {
+        round.DeadPets.push_back(allyTurn.TargetPet);
+        Skyfire::BattlePetPackets::MarkRoundResultAsCatchOrKill(round);
+    }
 
     if (enemyTurn.Accepted && enemyTurn.HasRoundResult)
     {
-        round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
-            enemyTurn.CasterPet, enemyTurn.TargetPet, int32(enemyTurn.RemainingHealth), enemyAbilityEffectId, 2));
+        if (appliedEnemyDamage)
+        {
+            round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
+                enemyTurn.CasterPet, enemyTurn.TargetPet, int32(enemyTurn.RemainingHealth),
+                enemyAbilityEffectId ? enemyAbilityEffectId : 0, uint16(round.Effects.size() + 1)));
+        }
+        else if (enemyAbilityEffectId)
+        {
+            round.Effects.push_back(Skyfire::BattlePetPackets::BuildMissEffect(
+                enemyTurn.CasterPet, enemyTurn.TargetPet, enemyAbilityEffectId,
+                int32(enemyTurn.RemainingHealth), uint16(round.Effects.size() + 1)));
+        }
+
+        if (enemyTurn.TargetDied)
+        {
+            round.DeadPets.push_back(enemyTurn.TargetPet);
+            Skyfire::BattlePetPackets::MarkRoundResultAsCatchOrKill(round);
+        }
 
         if (enemyTurn.RequiresFrontPet)
             round.InputFlags[0] = Skyfire::BattlePetPackets::BATTLE_PET_ROUND_INPUT_FLAG_SELECT_NEW_FRONT_PET;

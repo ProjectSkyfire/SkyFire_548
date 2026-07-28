@@ -24,4 +24,12 @@ enum BattlePetSpeciesFlags
     BATTLE_PET_FLAG_UNKNOWN_5           = 0x1000  // only seen on battle pet 316 (Cenarion Hatchling)
 };
 
+enum BattlePetAbilityFlags
+{
+    BATTLE_PET_ABILITY_FLAG_NONE                 = 0x00,
+    BATTLE_PET_ABILITY_FLAG_AURA                 = 0x01, // Script_GetAuraInfo
+    BATTLE_PET_ABILITY_FLAG_HIDE_STRONG_WEAK     = 0x02, // no strong/weak hints in tooltips
+    BATTLE_PET_ABILITY_FLAG_PASSIVE              = 0x04  // AddPassiveAbilityIterator
+};
+
 #endif
