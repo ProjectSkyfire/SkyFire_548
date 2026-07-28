@@ -70,9 +70,9 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattlegroundB
 
 CharStartOutfitEntry const* GetCharStartOutfitEntry(uint8 race, uint8 class_, uint8 gender);
 
-//typedef std::vector<std::pair<int32, int32> > DigsitePOIPolygon;
-//typedef std::map<uint32 /*digsiteId*/, DigsitePOIPolygon> DigsitePOIPolygonContainer;
-//DigsitePOIPolygon const* GetDigsitePOIPolygon(uint32 digsiteId);
+typedef std::vector<std::pair<int32, int32> > DigsitePOIPolygon;
+typedef std::map<uint32 /*digsiteId*/, DigsitePOIPolygon> DigsitePOIPolygonContainer;
+DigsitePOIPolygon const* GetDigsitePOIPolygon(uint32 digsiteId);
 
 uint32 GetPowerIndexByClass(uint32 powerType, uint32 classId);
 LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, DifficultyID difficulty);
@@ -182,9 +182,9 @@ extern DBCStorage <QuestXPEntry>                 sQuestXPStore;
 extern DBCStorage <QuestFactionRewEntry>         sQuestFactionRewardStore;
 extern DBCStorage <QuestPOIPointEntry>           sQuestPOIPointStore;
 extern DBCStorage <RandomPropertiesPointsEntry>  sRandomPropertiesPointsStore;
-//extern DBCStorage <ResearchBranchEntry>          sResearchBranchStore;
-//extern DBCStorage <ResearchProjectEntry>         sResearchProjectStore;
-//extern DBCStorage <ResearchSiteEntry>            sResearchSiteStore;
+extern DBCStorage <ResearchBranchEntry>          sResearchBranchStore;
+extern DBCStorage <ResearchProjectEntry>         sResearchProjectStore;
+extern DBCStorage <ResearchSiteEntry>            sResearchSiteStore;
 extern DBCStorage <ScalingStatDistributionEntry> sScalingStatDistributionStore;
 extern DBCStorage <ScalingStatValuesEntry>       sScalingStatValuesStore;
 extern DBCStorage <SkillLineEntry>               sSkillLineStore;

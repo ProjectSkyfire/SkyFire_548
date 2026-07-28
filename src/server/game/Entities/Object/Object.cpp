@@ -356,7 +356,7 @@ uint16 Object::GetUInt16Value(uint16 index, uint8 offset) const
 
 uint32 Object::GetDynamicUInt32Value(uint32 tab, uint16 index) const
 {
-    ASSERT(tab < m_dynamicTab.size() || index < 32);
+    ASSERT(tab < m_dynamicTab.size() && index < 32);
     return m_dynamicTab[tab][index];
 }
 
@@ -826,18 +826,26 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
     *data << uint8(updateMask.GetBlockCount());
     updateMask.AppendToPacket(data);
     data->append(fieldBuffer);
-    BuildDynamicValuesUpdate(data);
+    BuildDynamicValuesUpdate(updateType, data, target);
 }
 
-void Object::BuildDynamicValuesUpdate(ByteBuffer* data) const
+void Object::BuildDynamicValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
 {
-    // Only handle Item type
-    // TODO: Implement Player dynamis fields
-    if (m_objectTypeId != TypeID::TYPEID_ITEM)
+    // Items use dynamic modifiers; players use archaeology digsite / daily-quest dynamic fields.
+    if (m_objectTypeId != TypeID::TYPEID_ITEM && m_objectTypeId != TypeID::TYPEID_PLAYER)
     {
         *data << uint8(0);
         return;
     }
+
+    // Player dynamic fields are private (self only).
+    if (m_objectTypeId == TypeID::TYPEID_PLAYER && target != this)
+    {
+        *data << uint8(0);
+        return;
+    }
+
+    bool const isCreate = updateType == UPDATETYPE_CREATE_OBJECT || updateType == UPDATETYPE_CREATE_OBJECT2;
 
     // Dynamic Fields (5.0.5 MoP new fields)
     uint32 dynamicTabMask = 0;
@@ -851,7 +859,17 @@ void Object::BuildDynamicValuesUpdate(ByteBuffer* data) const
     {
         for (int index = 0; index < 32; index++)
         {
-            if (m_dynamicChange[i][index])
+            bool sendValue = isCreate ? m_dynamicTab[i][index] != 0 : m_dynamicChange[i][index];
+
+            // Client expects researchSiteProgress entries for every active researchSites index,
+            // including zero progress on a fresh digsite.
+            if (!sendValue && isCreate && m_objectTypeId == TypeID::TYPEID_PLAYER &&
+                i == PLAYER_DYNAMIC_FIELD_RESEARCH_SITE_PROGRESS &&
+                m_dynamicTab.size() > PLAYER_DYNAMIC_FIELD_RESERACH_SITE &&
+                m_dynamicTab[PLAYER_DYNAMIC_FIELD_RESERACH_SITE][index] != 0)
+                sendValue = true;
+
+            if (sendValue)
             {
                 dynamicTabMask |= 1 << i;
                 dynamicFieldsMask[i] |= 1 << index;
@@ -859,7 +877,7 @@ void Object::BuildDynamicValuesUpdate(ByteBuffer* data) const
         }
     }
 
-    *data << uint8(bool(dynamicTabMask));
+    *data << uint8(bool(dynamicTabMask) ? 1 : 0);
     if (dynamicTabMask)
     {
         *data << uint32(dynamicTabMask);
@@ -868,15 +886,28 @@ void Object::BuildDynamicValuesUpdate(ByteBuffer* data) const
         {
             if (dynamicTabMask & (1 << i))
             {
-                *data << uint8(1); // Always 1 or (1<<i)?
+                uint16 arraySize = 0;
+                for (int index = 31; index >= 0; --index)
+                {
+                    if (dynamicFieldsMask[i] & (1 << index))
+                    {
+                        arraySize = uint16(index + 1);
+                        break;
+                    }
+                }
+
+                // MoP: high bit on the count byte means a uint16 array size follows.
+                if (isCreate && arraySize)
+                    *data << uint8(0x80 | 1) << arraySize;
+                else
+                    *data << uint8(1);
+
                 *data << uint32(dynamicFieldsMask[i]);
 
                 for (int index = 0; index < 32; index++)
                 {
                     if (dynamicFieldsMask[i] & (1 << index))
-                    {
                         *data << uint32(m_dynamicTab[i][index]);
-                    }
                 }
             }
         }
@@ -1023,7 +1054,7 @@ void Object::SetUInt32Value(uint16 index, uint32 value)
 
 void Object::SetDynamicUInt32Value(uint32 tab, uint16 index, uint32 value)
 {
-    ASSERT(tab < m_dynamicTab.size() || index < 32);
+    ASSERT(tab < m_dynamicTab.size() && index < 32);
 
     if (m_dynamicTab[tab][index] != value)
     {

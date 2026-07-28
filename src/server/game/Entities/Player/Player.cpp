@@ -515,6 +515,14 @@ Player::Player(WorldSession* session) : Unit(true)
 
     m_valuesCount = PLAYER_END;
 
+    m_dynamicTab.resize(PLAYER_DYNAMIC_END);
+    m_dynamicChange.resize(PLAYER_DYNAMIC_END);
+    for (int i = 0; i < PLAYER_DYNAMIC_END; ++i)
+    {
+        m_dynamicTab[i] = new uint32[32];
+        m_dynamicChange[i] = new bool[32];
+    }
+
     m_session = session;
 
     m_divider = 0;
@@ -732,6 +740,7 @@ Player::Player(WorldSession* session) : Unit(true)
 
     memset(_voidStorageItems, 0, VOID_STORAGE_MAX_SLOT * sizeof(VoidStorageItem*));
     memset(_CUFProfiles, 0, MAX_CUF_PROFILES * sizeof(CUFProfile*));
+    memset(_researchDigsites, 0, sizeof(_researchDigsites));
 
     m_achievementMgr = new AchievementMgr<Player>(this);
     m_reputationMgr = new ReputationMgr(this);
@@ -777,6 +786,10 @@ Player::~Player()
 
     for (uint8 i = 0; i < MAX_CUF_PROFILES; ++i)
         delete _CUFProfiles[i];
+
+    for (uint8 i = 0; i < RESEARCH_CONTINENT_COUNT; ++i)
+        for (uint8 j = 0; j < MAX_DIGSITES_PER_CONTINENT; ++j)
+            delete _researchDigsites[i][j];
 
     ClearResurrectRequestData();
 
@@ -6390,6 +6403,12 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL, id);
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILL_LEVEL, id);
 
+            if (id == SKILL_ARCHAEOLOGY && IsInWorld())
+            {
+                UpdateResearchDigsites();
+                UpdateResearchProjects();
+            }
+
             if (refreshQuestObjects)
                 UpdateForQuestWorldObjects();
         }
@@ -6422,6 +6441,12 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
                 SetUInt32Value(PLAYER_FIELD_PROFESSION_SKILL_LINE, 0);
             else if (GetUInt32Value(PLAYER_FIELD_PROFESSION_SKILL_LINE + 1) == id)
                 SetUInt32Value(PLAYER_FIELD_PROFESSION_SKILL_LINE + 1, 0);
+
+            if (id == SKILL_ARCHAEOLOGY && IsInWorld())
+            {
+                UpdateResearchDigsites();
+                UpdateResearchProjects();
+            }
 
             if (refreshQuestObjects)
                 UpdateForQuestWorldObjects();
@@ -6488,6 +6513,12 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
 
                 // Learn all spells for skill
                 learnSkillRewardedSpells(id, newVal);
+
+                if (id == SKILL_ARCHAEOLOGY && IsInWorld())
+                {
+                    UpdateResearchDigsites();
+                    UpdateResearchProjects();
+                }
 
                 if (refreshQuestObjects)
                     UpdateForQuestWorldObjects();
@@ -7512,30 +7543,30 @@ void Player::SendNewCurrency(uint32 id) const
         return;
 
     uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-    uint32 WeeklyQuantity = itr->second.WeeklyQuantity / precision;
     uint32 weekCap = GetCurrencyWeekCap(entry);
-    uint32 TrackedQuantity = itr->second.TrackedQuantity;
+    uint32 weeklyQuantity = itr->second.WeeklyQuantity / precision;
+    uint32 trackedQuantity = itr->second.TrackedQuantity / precision;
+    uint32 quantity = itr->second.Quantity / precision;
 
-
-    packet.WriteBit(TrackedQuantity); //28
-    packet.WriteBits(0, 5); // some flags 32
-    packet.WriteBit(weekCap); //20
-    packet.WriteBit(WeeklyQuantity); //12
+    packet.WriteBit(trackedQuantity);
+    packet.WriteBits(itr->second.Flags, 5);
+    packet.WriteBit(weekCap);
+    packet.WriteBit(weeklyQuantity);
 
     packet.FlushBits();
 
-    if (WeeklyQuantity) //12
-        packet << uint32(WeeklyQuantity / precision); //8
+    if (weeklyQuantity)
+        packet << uint32(weeklyQuantity);
 
     packet << uint32(entry->ID);
 
-    if (TrackedQuantity) //28
-        packet << uint32(TrackedQuantity / precision);  //24
+    if (trackedQuantity)
+        packet << uint32(trackedQuantity);
 
-    packet << uint32(itr->second.Quantity / precision);
+    packet << uint32(quantity);
 
-    if (weekCap) //20
-        packet << uint32(weekCap); //16
+    if (weekCap)
+        packet << uint32(weekCap);
 
     GetSession()->SendPacket(&packet);
 }
@@ -7557,22 +7588,22 @@ void Player::SendCurrencies() const
             continue;
 
         uint32 precision = (entry->Flags & CURRENCY_FLAG_HIGH_PRECISION) ? CURRENCY_PRECISION : 1;
-        uint32 WeeklyQuantity = itr->second.WeeklyQuantity / precision;
         uint32 weekCap = GetCurrencyWeekCap(entry);
-        uint32 TrackedQuantity = itr->second.TrackedQuantity;
+        uint32 weeklyQuantity = itr->second.WeeklyQuantity / precision;
+        uint32 trackedQuantity = itr->second.TrackedQuantity / precision;
 
-        packet.WriteBit(TrackedQuantity);
-        packet.WriteBits(0, 5); // some flags
+        packet.WriteBit(trackedQuantity);
+        packet.WriteBits(itr->second.Flags, 5);
         packet.WriteBit(weekCap);
-        packet.WriteBit(WeeklyQuantity);
+        packet.WriteBit(weeklyQuantity);
 
-        if (WeeklyQuantity)
-            buff << uint32(WeeklyQuantity / precision);
+        if (weeklyQuantity)
+            buff << uint32(weeklyQuantity);
 
         buff << uint32(entry->ID);
 
-        if (TrackedQuantity)
-            buff << uint32(TrackedQuantity / precision);
+        if (trackedQuantity)
+            buff << uint32(trackedQuantity);
 
         buff << uint32(itr->second.Quantity / precision);
 
@@ -7663,7 +7694,8 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
     uint32 oldWeekQuantity = 0;
     uint32 oldTrackedQuantity = 0;
     PlayerCurrenciesMap::iterator itr = _currencyStorage.find(id);
-    if (itr == _currencyStorage.end())
+    bool const isNewCurrency = (itr == _currencyStorage.end());
+    if (isNewCurrency)
     {
         PlayerCurrency cur;
         cur.state = PlayerCurrencyState::PLAYERCURRENCY_NEW;
@@ -7740,37 +7772,60 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
             return;
         }
 
-        WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
+        // First gain of a currency (e.g. archaeology fragments) must go through SETUP
+        // or the archaeology journal never binds the amount to a race.
+        // Archaeology race totals on the journal main page come from the full SETUP list —
+        // a single-currency SETUP replaces that list and zeros other races until relog.
+        if (isNewCurrency)
+        {
+            if (currency->Category == CURRENCY_CATEGORY_ARCHAEOLOGY)
+                SendCurrencies();
+            else
+                SendNewCurrency(id);
 
-        packet << uint32(id); // 44 Type
-        packet << int32(newQuantity / precision); // 16 Quantity
-        packet << uint32(itr->second.Flags); // 24 Flags
+            if (printLog)
+            {
+                WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
+                packet << uint32(id);
+                packet << int32(newQuantity / precision);
+                packet << uint32(itr->second.Flags);
+                packet.WriteBit(newTrackedQuantity);
+                packet.WriteBit(0); // do not suppress chat log
+                packet.WriteBit(newWeekQuantity);
+                packet.FlushBits();
+                if (newTrackedQuantity)
+                    packet << uint32(newTrackedQuantity / precision);
+                if (newWeekQuantity)
+                    packet << uint32(newWeekQuantity / precision);
+                GetSession()->SendPacket(&packet);
+            }
+        }
+        else
+        {
+            WorldPacket packet(SMSG_UPDATE_CURRENCY, 12);
 
-        packet.WriteBit(newTrackedQuantity); //32
-        packet.WriteBit(!printLog); //20 SuppressChatLog
-        packet.WriteBit(newWeekQuantity); //40
+            packet << uint32(id); // 44 Type
+            packet << int32(newQuantity / precision); // 16 Quantity
+            packet << uint32(itr->second.Flags); // 24 Flags
 
-        packet.FlushBits();
+            packet.WriteBit(newTrackedQuantity); //32
+            packet.WriteBit(!printLog); //20 SuppressChatLog
+            packet.WriteBit(newWeekQuantity); //40
 
-        if (newTrackedQuantity)
-            packet << uint32(newTrackedQuantity / precision); // 28 TrackedQuantity
+            packet.FlushBits();
 
-        if (newWeekQuantity)
-            packet << uint32(newWeekQuantity / precision); // 36 WeeklyQuantity
+            if (newTrackedQuantity)
+                packet << uint32(newTrackedQuantity / precision); // 28 TrackedQuantity
 
-        /*
-        packet.WriteBit(weekCap != 0);
-        packet.WriteBit(0); // hasSeasonCount
-        packet.WriteBit(!printLog); // print in log
+            if (newWeekQuantity)
+                packet << uint32(newWeekQuantity / precision); // 36 WeeklyQuantity
 
-        // if hasSeasonCount packet << uint32(seasontotalearned); TODO: save this in character DB and use it
+            GetSession()->SendPacket(&packet);
 
-        packet << uint32(newTotalCount / precision);
-        packet << uint32(id);
-        if (weekCap)
-            packet << uint32(newWeekCount / precision);
-            */
-        GetSession()->SendPacket(&packet);
+            // Archaeology journal main page needs the full SETUP list after fragment changes.
+            if (currency->Category == CURRENCY_CATEGORY_ARCHAEOLOGY)
+                SendCurrencies();
+        }
     }
 }
 
@@ -8996,7 +9051,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
     }
 }
 
-void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex)
+void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex, SpellResearchData const* researchData /*= NULL*/)
 {
     ItemTemplate const* proto = item->GetTemplate();
     // special learning case
@@ -9060,6 +9115,11 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
         spell->m_CastItem = item;
         spell->m_cast_count = cast_count;                   // set count of casts
         spell->m_glyphIndex = glyphIndex;                   // glyph index
+        if (researchData && !count)
+        {
+            SpellResearchData* data = new SpellResearchData(*researchData);
+            spell->m_researchData = data;
+        }
         spell->prepare(&targets);
 
         ++count;
@@ -9296,6 +9356,11 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool isAoE)
     {
         SF_LOG_DEBUG("loot", "IS_GAMEOBJECT_GUID(guid)");
         GameObject* go = GetMap()->GetGameObject(guid);
+
+        // Archaeology finds are type CHEST but award fragment currency instead of loot.
+        // The client often opens them via the loot opcode rather than GAMEOBJECT_USE.
+        if (go && OnArchaeologyFindUsed(go))
+            return;
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         // And permit out of range GO with no owner in case fishing hole
@@ -12758,6 +12823,16 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
     _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS));
 
     _LoadCUFProfiles(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES));
+
+    _LoadResearchDigsites(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_RESEARCH_DIGSITES));
+    _LoadResearchHistory(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_RESEARCH_HISTORY));
+    _LoadResearchProjects(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_RESEARCH_PROJECTS));
+    if (HasSkill(SKILL_ARCHAEOLOGY))
+    {
+        UpdateResearchDigsites();
+        UpdateResearchProjects();
+    }
+
     return true;
 }
 
@@ -14504,6 +14579,8 @@ void Player::SaveToDB(bool create /*=false*/)
     _SaveInstanceTimeRestrictions(trans);
     _SaveCurrency(trans);
     _SaveCUFProfiles(trans);
+    _SaveResearchHistory(trans);
+    _SaveResearchProjects(trans);
     m_battlePetMgr->SaveToDb(trans);
 
     // check if stats should only be saved on logout
@@ -23102,29 +23179,27 @@ void Player::ReadMovementInfo(WorldPacket& data, MovementInfo* mi, Movement::Ext
 
 #undef REMOVE_VIOLATING_FLAGS
 }
-/*
+
 void Player::SaveResearchDigsiteToDB(ResearchDigsite* digsite)
 {
-    // DELETE FROM character_research_digsites WHERE guid = ? AND digsiteId = ?
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_RESEARCH_DIGSITE);
     stmt->setUInt32(0, GetGUIDLow());
     stmt->setUInt32(1, digsite->GetDigsiteId());
     CharacterDatabase.Execute(stmt);
 
-    // INSERT INTO character_research_digsites (guid, digsiteId, currentFindGUID, remainingFindCount) VALUES (?, ?, ?, ?)
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_RESEARCH_DIGSITE);
     stmt->setUInt32(0, GetGUIDLow());
     stmt->setUInt32(1, digsite->GetDigsiteId());
     if (ArchaeologyFindInfo const* find = digsite->GetArchaeologyFind())
         stmt->setUInt32(2, find->guid);
-
+    else
+        stmt->setUInt32(2, 0);
     stmt->setUInt8(3, digsite->GetRemainingFindCount());
     CharacterDatabase.Execute(stmt);
 }
 
 void Player::DeleteResearchDigsite(ResearchDigsite* digsite)
 {
-    // DELETE FROM character_research_digsites WHERE guid = ? AND digsiteId = ?
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_RESEARCH_DIGSITE);
     stmt->setUInt32(0, GetGUIDLow());
     stmt->setUInt32(1, digsite->GetDigsiteId());
@@ -23141,10 +23216,9 @@ void Player::_LoadResearchDigsites(PreparedQueryResult result)
     std::map<uint32, std::list<ResearchDigsite*> > tempDigsiteMap;
     do
     {
-        // SELECT digsiteId, currentFindGUID, remainingFindCount FROM character_research_digsites WHERE guid = ?
         Field* fields = result->Fetch();
 
-        uint32 digsiteId = fields [0].GetUInt32();
+        uint32 digsiteId = fields[0].GetUInt32();
         ResearchDigsiteInfo const* digsiteInfo = sObjectMgr->GetResearchDigsiteInfo(digsiteId);
         ResearchSiteEntry const* digsiteEntry = sResearchSiteStore.LookupEntry(digsiteId);
         if (!digsiteInfo || !digsiteEntry)
@@ -23157,10 +23231,10 @@ void Player::_LoadResearchDigsites(PreparedQueryResult result)
             continue;
         }
 
-        if (tempDigsiteMap [digsiteEntry->MapId].size() >= MAX_DIGSITES_PER_CONTINENT)
+        if (tempDigsiteMap[digsiteEntry->MapId].size() >= MAX_DIGSITES_PER_CONTINENT)
         {
-            SF_LOG_ERROR("entities.player", "Player::_LoadResearchDigsites - Player %s (GUID: %u) is trying to load digsite %u with map id %u, but he has already %u active digsites in the map. Deleting digsite.", GetName().c_str(),
-                         GetGUIDLow(), digsiteId, digsiteEntry->MapId, MAX_DIGSITES_PER_CONTINENT);
+            SF_LOG_DEBUG("entities.player", "Player::_LoadResearchDigsites - Player %s (GUID: %u) has surplus digsite %u on map %u; deleting.", GetName().c_str(),
+                         GetGUIDLow(), digsiteId, digsiteEntry->MapId);
             PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_RESEARCH_DIGSITE);
             stmt->setUInt32(0, GetGUIDLow());
             stmt->setUInt32(1, digsiteId);
@@ -23168,8 +23242,8 @@ void Player::_LoadResearchDigsites(PreparedQueryResult result)
             continue;
         }
 
-        uint32 currentFindGUID = fields [1].GetUInt32();
-        uint32 remainingFindCount = fields [2].GetUInt8();
+        uint32 currentFindGUID = fields[1].GetUInt32();
+        uint32 remainingFindCount = fields[2].GetUInt8();
         ResearchDigsite* digsite = new ResearchDigsite(digsiteInfo, remainingFindCount);
         if (ArchaeologyFindInfo const* find = sObjectMgr->GetArchaeologyFindInfo(currentFindGUID, digsiteId))
             digsite->ChangeArchaeologyFind(find);
@@ -23179,32 +23253,157 @@ void Player::_LoadResearchDigsites(PreparedQueryResult result)
             SaveResearchDigsiteToDB(digsite);
         }
 
-        tempDigsiteMap [digsiteEntry->MapId].push_back(digsite);
+        tempDigsiteMap[digsiteEntry->MapId].push_back(digsite);
     }
     while (result->NextRow());
 
-    uint8 i = 0;
-    for (std::map<uint32, std::list<ResearchDigsite*> >::iterator itr = tempDigsiteMap.begin(); itr != tempDigsiteMap.end(); ++i, ++itr)
+    // Place digsites into the continent slot that matches ResearchContinents[], not map iteration order.
+    for (uint8 i = 0; i < RESEARCH_CONTINENT_COUNT; ++i)
     {
+        std::map<uint32, std::list<ResearchDigsite*> >::iterator itr = tempDigsiteMap.find(ResearchContinents[i]);
+        if (itr == tempDigsiteMap.end())
+            continue;
+
         uint8 j = 0;
-        for (std::list<ResearchDigsite*>::iterator digsite = itr->second.begin(); digsite != itr->second.end(); ++j, ++digsite)
-            _researchDigsites [i] [j] = *digsite;
+        for (std::list<ResearchDigsite*>::iterator digsite = itr->second.begin(); digsite != itr->second.end() && j < MAX_DIGSITES_PER_CONTINENT; ++j, ++digsite)
+            _researchDigsites[i][j] = *digsite;
+
+        itr->second.clear();
+    }
+
+    // Any digsites left were for unexpected map ids; free and remove from DB.
+    for (std::map<uint32, std::list<ResearchDigsite*> >::iterator itr = tempDigsiteMap.begin(); itr != tempDigsiteMap.end(); ++itr)
+    {
+        for (std::list<ResearchDigsite*>::iterator digsite = itr->second.begin(); digsite != itr->second.end(); ++digsite)
+        {
+            SF_LOG_ERROR("entities.player", "Player::_LoadResearchDigsites - Player %s (GUID: %u) has digsite %u on unsupported map %u. Deleting digsite.",
+                         GetName().c_str(), GetGUIDLow(), (*digsite)->GetDigsiteId(), itr->first);
+            DeleteResearchDigsite(*digsite);
+        }
     }
 }
 
-void Player::SendSurveryCastInfo(ResearchDigsite* digsite, bool success)
+void Player::SendSurveyCastInfo(ResearchDigsite* digsite, bool success)
 {
     if (!digsite)
         return;
 
+    // Wire order is total, completed, researchBranchID (client remaps to Lua
+    // ARCHAEOLOGY_SURVEY_CAST(completed, total, branch, successfulFind)).
+    // Branch ID is required for Digsite Complete race name + archaeology book icon.
     WorldPacket data(SMSG_ARCHAEOLOGY_SURVERY_CAST, 13);
     data << uint32(MAX_FINDS_PER_DIGSITE);
     data << uint32(MAX_FINDS_PER_DIGSITE - digsite->GetRemainingFindCount());
-    data << uint32(digsite->GetDigsiteId());
+    data << uint32(digsite->GetDigsiteInfo()->branchId);
     data.WriteBit(success);
-    data.FlushBits(); // Client needs this
+    data.FlushBits();
 
     GetSession()->SendPacket(&data);
+}
+
+ResearchDigsite* Player::GetResearchDigsiteForFind(GameObject const* go) const
+{
+    if (!go)
+        return NULL;
+
+    // Prefer the digsite that actually spawned this node over polygon checks — players often
+    // loot from just outside the site border, which previously skipped fragment credit while
+    // still allowing keystone chest loot.
+    if (go->GetOwnerGUID() && go->GetOwnerGUID() != GetGUID())
+        return NULL;
+
+    for (uint8 i = 0; i < RESEARCH_CONTINENT_COUNT; ++i)
+    {
+        if (ResearchContinents[i] != GetMapId())
+            continue;
+
+        for (uint8 j = 0; j < MAX_DIGSITES_PER_CONTINENT; ++j)
+        {
+            ResearchDigsite* digsite = _researchDigsites[i][j];
+            if (!digsite)
+                continue;
+
+            ArchaeologyFindInfo const* find = digsite->GetArchaeologyFind();
+            if (!find || find->goEntry != go->GetEntry())
+                continue;
+
+            if (go->GetDistance(find->x, find->y, find->z) > INTERACTION_DISTANCE)
+                continue;
+
+            return digsite;
+        }
+    }
+
+    return NULL;
+}
+
+bool Player::OnArchaeologyFindUsed(GameObject* go)
+{
+    if (!go || !HasSkill(SKILL_ARCHAEOLOGY))
+        return false;
+
+    // GAMEOBJECT_USE and OPEN_LOCK both hit this for archaeology chests; claim once.
+    if (go->getLootState() != LootState::GO_READY)
+        return false;
+
+    ResearchDigsite* digsite = GetResearchDigsiteForFind(go);
+    if (!digsite)
+        return false;
+
+    go->SetLootState(LootState::GO_ACTIVATED, this);
+
+    ResearchDigsiteInfo const* digsiteInfo = digsite->GetDigsiteInfo();
+    if (ResearchBranchEntry const* branch = sResearchBranchStore.LookupEntry(digsiteInfo->branchId))
+    {
+        if (branch->FragmentCurrencyId)
+        {
+            int32 fragments = int32(5 + (uint32(rand32()) % 5)); // 5-9 per find
+            ModifyCurrency(branch->FragmentCurrencyId, fragments);
+
+            char const* raceName = "Unknown";
+            switch (branch->Id)
+            {
+                case 1: raceName = "Dwarf"; break;
+                case 2: raceName = "Draenei"; break;
+                case 3: raceName = "Fossil"; break;
+                case 4: raceName = "Night Elf"; break;
+                case 5: raceName = "Nerubian"; break;
+                case 6: raceName = "Orc"; break;
+                case 7: raceName = "Tol'vir"; break;
+                case 8: raceName = "Troll"; break;
+                case 27: raceName = "Vrykul"; break;
+                case 29: raceName = "Mantid"; break;
+                case 229: raceName = "Pandaren"; break;
+                case 231: raceName = "Mogu"; break;
+                default: break;
+            }
+
+            ChatHandler(GetSession()).PSendSysMessage("|cff00ff00Archaeology:|r +%d %s Fragments (total %u). Open Archaeology to solve artifacts.",
+                fragments, raceName, GetCurrency(branch->FragmentCurrencyId, false));
+
+            // First fragments for a race unlock that branch and assign its active project.
+            UpdateResearchProjects();
+        }
+
+        // Keystones are uncommon; roughly one in ten digs.
+        if (branch->KeystoneItemId && roll_chance_i(10))
+            AddItem(branch->KeystoneItemId, 1);
+    }
+
+    UpdateSkillPro(SKILL_ARCHAEOLOGY, 1000, 1);
+
+    digsite->SelectNewArchaeologyFind(false);
+    SaveResearchDigsiteToDB(digsite);
+
+    // Progress bar switches from SURVEY_CAST to FIND_COMPLETE after it appears; send an
+    // updated cast so each looted find advances the 6-segment digsite bar.
+    SendSurveyCastInfo(digsite, true);
+
+    UpdateResearchDigsites();
+
+    go->SetRespawnTime(0);
+    go->Delete();
+    return true;
 }
 
 void Player::UpdateResearchDigsites()
@@ -23213,26 +23412,31 @@ void Player::UpdateResearchDigsites()
     {
         for (uint8 j = 0; j < MAX_DIGSITES_PER_CONTINENT; ++j)
         {
-            if (_researchDigsites [i] [j] && (_researchDigsites [i] [j]->IsEmptyDigsite() || !IsResearchDigsiteAvailable(_researchDigsites [i] [j]->GetDigsiteInfo())))
+            if (_researchDigsites[i][j] && (_researchDigsites[i][j]->IsEmptyDigsite() || !IsResearchDigsiteAvailable(_researchDigsites[i][j]->GetDigsiteInfo())))
             {
-                // we need to spawn a new digsite before the old digsite is deleted, so there won't be a chance that the old digsite will be spawned again
-                ResearchDigsite* newDigsite = TryToSpawnResearchDigsiteOnContinent(ResearchContinents [i]);
-                DeleteResearchDigsite(_researchDigsites [i] [j]);
-                _researchDigsites [i] [j] = newDigsite;
+                // Spawn replacement first so the old digsite is not immediately re-picked.
+                ResearchDigsite* newDigsite = TryToSpawnResearchDigsiteOnContinent(ResearchContinents[i]);
+                DeleteResearchDigsite(_researchDigsites[i][j]);
+                _researchDigsites[i][j] = newDigsite;
             }
-            else if (!_researchDigsites [i] [j])
-                _researchDigsites [i] [j] = TryToSpawnResearchDigsiteOnContinent(ResearchContinents [i]);
+            else if (!_researchDigsites[i][j])
+                _researchDigsites[i][j] = TryToSpawnResearchDigsiteOnContinent(ResearchContinents[i]);
 
-            if (_researchDigsites [i] [j])
+            if (_researchDigsites[i][j])
             {
-                SetDynamicUInt32Value(PLAYER_DYNAMIC_FIELD_RESERACH_SITE, i * MAX_DIGSITES_PER_CONTINENT + j, _researchDigsites [i] [j]->GetDigsiteId());
-                SetDynamicUInt32Value(PLAYER_DYNAMIC_FIELD_RESEARCH_SITE_PROGRESS, i * MAX_DIGSITES_PER_CONTINENT + j, MAX_FINDS_PER_DIGSITE - _researchDigsites [i] [j]->GetRemainingFindCount());
+                SetDynamicUInt32Value(PLAYER_DYNAMIC_FIELD_RESERACH_SITE, i * MAX_DIGSITES_PER_CONTINENT + j, _researchDigsites[i][j]->GetDigsiteId());
+                SetDynamicUInt32Value(PLAYER_DYNAMIC_FIELD_RESEARCH_SITE_PROGRESS, i * MAX_DIGSITES_PER_CONTINENT + j, MAX_FINDS_PER_DIGSITE - _researchDigsites[i][j]->GetRemainingFindCount());
+            }
+            else
+            {
+                SetDynamicUInt32Value(PLAYER_DYNAMIC_FIELD_RESERACH_SITE, i * MAX_DIGSITES_PER_CONTINENT + j, 0);
+                SetDynamicUInt32Value(PLAYER_DYNAMIC_FIELD_RESEARCH_SITE_PROGRESS, i * MAX_DIGSITES_PER_CONTINENT + j, 0);
             }
         }
     }
 }
 
-bool Player::IsWithinResearchDigsite(ResearchDigsite* digsite)
+bool Player::IsWithinResearchDigsite(ResearchDigsite* digsite) const
 {
     if (!digsite)
         return false;
@@ -23244,7 +23448,7 @@ bool Player::IsWithinResearchDigsite(ResearchDigsite* digsite)
     float x = GetPositionX();
     float y = GetPositionY();
     bool result = false;
-    int j = polygon->size() - 1;
+    int j = int(polygon->size()) - 1;
     for (uint32 i = 0; i < polygon->size(); j = i++)
     {
         if ((polygon->at(i).second < y && polygon->at(j).second >= y || polygon->at(j).second < y && polygon->at(i).second >= y) && (polygon->at(i).first <= x || polygon->at(j).first <= x))
@@ -23258,11 +23462,11 @@ ResearchDigsite* Player::GetCurrentResearchDigsite()
 {
     for (uint8 i = 0; i < RESEARCH_CONTINENT_COUNT; ++i)
     {
-        if (ResearchContinents [i] != GetMapId())
+        if (ResearchContinents[i] != GetMapId())
             continue;
 
         for (uint8 j = 0; j < MAX_DIGSITES_PER_CONTINENT; ++j)
-            if (ResearchDigsite* digsite = _researchDigsites [i] [j])
+            if (ResearchDigsite* digsite = _researchDigsites[i][j])
                 if (IsWithinResearchDigsite(digsite))
                     return digsite;
     }
@@ -23291,7 +23495,7 @@ ResearchDigsiteInfo const* Player::GetRandomResearchDigsiteForContinent(uint32 m
     std::set<uint32> activeDigsitesById;
     for (uint8 i = 0; i < RESEARCH_CONTINENT_COUNT; ++i)
         for (uint8 j = 0; j < MAX_DIGSITES_PER_CONTINENT; ++j)
-            if (ResearchDigsite* activeDigsite = _researchDigsites [i] [j])
+            if (ResearchDigsite* activeDigsite = _researchDigsites[i][j])
                 activeDigsitesById.insert(activeDigsite->GetDigsiteId());
 
     std::list<ResearchDigsiteInfo const*> availableDigsites;
@@ -23300,12 +23504,11 @@ ResearchDigsiteInfo const* Player::GetRandomResearchDigsiteForContinent(uint32 m
         if (!IsResearchDigsiteAvailable(&(*digsite)))
             continue;
 
-        // Patch 4.1.0: Players now have a much smaller chance of getting a dig site for a race for which they have completed all rare finds.
+        // Patch 4.1.0: much smaller chance of dig site for a race with all rare finds completed.
         if (HasCompletedAllRareProjectsForRace(digsite->branchId))
             if (!roll_chance_i(25))
                 continue;
 
-        // check if digsite is already active
         if (activeDigsitesById.find(digsite->digsiteId) != activeDigsitesById.end())
             continue;
 
@@ -23318,7 +23521,7 @@ ResearchDigsiteInfo const* Player::GetRandomResearchDigsiteForContinent(uint32 m
     return Skyfire::Containers::SelectRandomContainerElement(availableDigsites);
 }
 
-bool Player::IsResearchDigsiteAvailable(ResearchDigsiteInfo const* digsiteInfo)
+bool Player::IsResearchDigsiteAvailable(ResearchDigsiteInfo const* digsiteInfo) const
 {
     if (!HasSkill(SKILL_ARCHAEOLOGY))
         return false;
@@ -23350,19 +23553,18 @@ void Player::_LoadResearchHistory(PreparedQueryResult result)
 
     do
     {
-        // SELECT projectId, researchCount, firstResearchTimestamp FROM character_research_history WHERE guid = ?
         Field* fields = result->Fetch();
 
-        uint32 projectId = fields [0].GetUInt32();
+        uint32 projectId = fields[0].GetUInt32();
         if (!sResearchProjectStore.LookupEntry(projectId))
         {
-            SF_LOG_ERROR("entities.player", "Player::_LoadResearchHistory - Player(GUID: %u, name : %s) is trying to load history for non existing reasearch project(id: %u).", GetGUIDLow(), GetName().c_str(), projectId);
+            SF_LOG_ERROR("entities.player", "Player::_LoadResearchHistory - Player (GUID: %u, name: %s) is trying to load history for non existing research project (id: %u).", GetGUIDLow(), GetName().c_str(), projectId);
             continue;
         }
 
-        ResearchProjectHistory& researchProjectHistory = _researchHistory [projectId];
-        researchProjectHistory.researchCount = fields [1].GetUInt32();
-        researchProjectHistory.firstResearchTimestamp = fields [2].GetUInt32();
+        ResearchProjectHistory& researchProjectHistory = _researchHistory[projectId];
+        researchProjectHistory.researchCount = fields[1].GetUInt32();
+        researchProjectHistory.firstResearchTimestamp = fields[2].GetUInt32();
     }
     while (result->NextRow());
 }
@@ -23374,39 +23576,37 @@ void Player::_LoadResearchProjects(PreparedQueryResult result)
 
     do
     {
-        // SELECT projectId FROM character_research_projects WHERE guid = ?
         Field* fields = result->Fetch();
 
-        uint32 projectId = fields [0].GetUInt32();
+        uint32 projectId = fields[0].GetUInt32();
         ResearchProjectEntry const* projectEntry = sResearchProjectStore.LookupEntry(projectId);
         if (!projectEntry)
         {
-            SF_LOG_ERROR("entities.player", "Player::_LoadResearchProjects - Player (GUID: %u, name: %s) is trying to load non existing reasearch project (id: %u).", GetGUIDLow(), GetName().c_str(), projectId);
+            SF_LOG_ERROR("entities.player", "Player::_LoadResearchProjects - Player (GUID: %u, name: %s) is trying to load non existing research project (id: %u).", GetGUIDLow(), GetName().c_str(), projectId);
             continue;
         }
 
         if (_researchProjects.find(projectEntry->ResearchBranchId) != _researchProjects.end())
         {
-            SF_LOG_ERROR("entities.player", "Player::_LoadResearchProjects - Player (GUID: %u, name: %s) is trying to load reasearch project (id: %u) for branch id %u, but he is already researching another project for this branch.",
+            // Keep the first project for this branch; extras are dropped and rewritten on next character save.
+            SF_LOG_DEBUG("entities.player", "Player::_LoadResearchProjects - Player (GUID: %u, name: %s) has surplus research project %u for branch %u; ignoring.",
                          GetGUIDLow(), GetName().c_str(), projectId, projectEntry->ResearchBranchId);
             continue;
         }
 
-        _researchProjects [projectEntry->ResearchBranchId] = projectId;
+        _researchProjects[projectEntry->ResearchBranchId] = projectId;
     }
     while (result->NextRow());
 }
 
 void Player::_SaveResearchHistory(SQLTransaction& trans)
 {
-    // DELETE FROM character_research_history WHERE guid = ?
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_RESEARCH_HISTORY);
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
 
     for (ResearchHistoryMap::iterator itr = _researchHistory.begin(); itr != _researchHistory.end(); ++itr)
     {
-        // INSERT INTO character_research_history (guid, projectId, researchCount, firstResearchTimestamp) VALUES (?, ?, ?, ?)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_RESEARCH_HISTORY);
         stmt->setUInt32(0, GetGUIDLow());
         stmt->setUInt32(1, itr->first);
@@ -23418,14 +23618,12 @@ void Player::_SaveResearchHistory(SQLTransaction& trans)
 
 void Player::_SaveResearchProjects(SQLTransaction& trans)
 {
-    // DELETE FROM character_research_projects WHERE guid = ?
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_RESEARCH_PROJECTS);
     stmt->setUInt32(0, GetGUIDLow());
     trans->Append(stmt);
 
     for (ResearchProjectMap::iterator itr = _researchProjects.begin(); itr != _researchProjects.end(); ++itr)
     {
-        // INSERT INTO character_research_projects (guid, projectId) VALUES (?, ?)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_RESEARCH_PROJECT);
         stmt->setUInt32(0, GetGUIDLow());
         stmt->setUInt32(1, itr->second);
@@ -23441,7 +23639,7 @@ void Player::SendResearchHistory()
 
     for (ResearchHistoryMap::iterator itr = _researchHistory.begin(); itr != _researchHistory.end(); ++itr)
     {
-        data << uint32(itr->first); // project id
+        data << uint32(itr->first);
         data << uint32(itr->second.researchCount);
         data << uint32(itr->second.firstResearchTimestamp);
     }
@@ -23451,19 +23649,31 @@ void Player::SendResearchHistory()
 
 void Player::SolveResearchProject(Spell* spell)
 {
-    SpellResearchData const* researchData = spell->m_researchData;
-    if (!researchData)
+    uint32 projectId = spell->GetSpellInfo()->ResearchProject;
+    if (!projectId)
         return;
 
-    if (researchData->fragmentCurrencyId && researchData->fragmentCount)
-        ModifyCurrency(researchData->fragmentCurrencyId, -(int32) researchData->fragmentCount);
+    ResearchProjectEntry const* projectEntry = sResearchProjectStore.LookupEntry(projectId);
+    if (!projectEntry)
+        return;
 
-    if (researchData->keystoneItemId && researchData->keystoneCount)
-        DestroyItemCount(researchData->keystoneItemId, researchData->keystoneCount, true);
+    SpellResearchData const* researchData = spell->m_researchData;
+    if (researchData)
+    {
+        if (researchData->fragmentCurrencyId && researchData->fragmentCount)
+            ModifyCurrency(researchData->fragmentCurrencyId, -(int32)researchData->fragmentCount);
 
-    uint32 projectId = spell->GetSpellInfo()->ResearchProject;
+        if (researchData->keystoneItemId && researchData->keystoneCount)
+            DestroyItemCount(researchData->keystoneItemId, researchData->keystoneCount, true);
+    }
+    else if (ResearchBranchEntry const* branch = sResearchBranchStore.LookupEntry(projectEntry->ResearchBranchId))
+    {
+        // Fallback if the client omitted research payload: consume the full fragment cost.
+        if (branch->FragmentCurrencyId && projectEntry->RequiredFragmentCount)
+            ModifyCurrency(branch->FragmentCurrencyId, -(int32)projectEntry->RequiredFragmentCount);
+    }
 
-    ResearchProjectHistory& researchProjectHistory = _researchHistory [projectId];
+    ResearchProjectHistory& researchProjectHistory = _researchHistory[projectId];
     researchProjectHistory.researchCount++;
     if (!researchProjectHistory.firstResearchTimestamp)
         researchProjectHistory.firstResearchTimestamp = uint32(time(NULL));
@@ -23476,14 +23686,31 @@ void Player::SolveResearchProject(Spell* spell)
 
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ARCHAEOLOGY_PROJECTS, projectId);
 
-    // new project will be selected in UpdateResearchProjects
-    if (ResearchProjectEntry const* currentProjectEntry = sResearchProjectStore.LookupEntry(projectId))
-        _researchProjects [currentProjectEntry->ResearchBranchId] = 0;
+    _researchProjects[projectEntry->ResearchBranchId] = 0;
 
     UpdateResearchProjects();
 }
 
-bool Player::HasCompletedAllRareProjectsForRace(uint32 researchBranchId)
+bool Player::IsResearchBranchUnlocked(uint32 researchBranchId) const
+{
+    // Races only unlock after you dig that race (fragments) or finish one of its projects —
+    // not simply by learning Archaeology.
+    ResearchBranchEntry const* branch = sResearchBranchStore.LookupEntry(researchBranchId);
+    if (!branch)
+        return false;
+
+    if (branch->FragmentCurrencyId && GetCurrency(branch->FragmentCurrencyId, false) > 0)
+        return true;
+
+    for (ResearchHistoryMap::const_iterator itr = _researchHistory.begin(); itr != _researchHistory.end(); ++itr)
+        if (ResearchProjectEntry const* projectEntry = sResearchProjectStore.LookupEntry(itr->first))
+            if (projectEntry->ResearchBranchId == researchBranchId)
+                return true;
+
+    return false;
+}
+
+bool Player::HasCompletedAllRareProjectsForRace(uint32 researchBranchId) const
 {
     for (uint32 i = 0; i < sResearchProjectStore.GetNumRows(); ++i)
         if (ResearchProjectEntry const* projectEntry = sResearchProjectStore.LookupEntry(i))
@@ -23493,7 +23720,7 @@ bool Player::HasCompletedAllRareProjectsForRace(uint32 researchBranchId)
     return true;
 }
 
-bool Player::HasCompletedAllCommonProjectsForRace(uint32 researchBranchId, bool onlyAvailable)
+bool Player::HasCompletedAllCommonProjectsForRace(uint32 researchBranchId, bool onlyAvailable) const
 {
     for (uint32 i = 0; i < sResearchProjectStore.GetNumRows(); ++i)
         if (ResearchProjectEntry const* projectEntry = sResearchProjectStore.LookupEntry(i))
@@ -23523,11 +23750,9 @@ uint32 Player::GetRandomResearchProjectForRace(uint32 researchBranchId)
             if (projectEntry->ResearchBranchId != researchBranchId)
                 continue;
 
-            // rare artifact can be completed only once
             if (projectEntry->Rarity > 0 && HasCompletedResearchProject(projectEntry->Id))
                 continue;
 
-            // common artifact can be completed again only if player has completed all available common artifacts
             if (projectEntry->Rarity == 0 && HasCompletedResearchProject(projectEntry->Id) && !hasCompletedAllCommonProjects)
                 continue;
 
@@ -23537,7 +23762,7 @@ uint32 Player::GetRandomResearchProjectForRace(uint32 researchBranchId)
                     continue;
 
                 if (requirements->chance > 0)
-                    explicitlyChancedProjects [projectEntry->Id] = requirements->chance;
+                    explicitlyChancedProjects[projectEntry->Id] = requirements->chance;
                 else
                     equalChancedProjects.push_back(projectEntry->Id);
             }
@@ -23549,12 +23774,12 @@ uint32 Player::GetRandomResearchProjectForRace(uint32 researchBranchId)
     if (!explicitlyChancedProjects.empty())
     {
         std::map<uint32, float>::iterator itr = explicitlyChancedProjects.begin();
-        std::advance(itr, urand(0, explicitlyChancedProjects.size() - 1));
+        std::advance(itr, size_t(uint32(rand32()) % explicitlyChancedProjects.size()));
         if (roll_chance_f(itr->second))
             return itr->first;
     }
 
-    if (!equalChancedProjects.empty())  // If nothing selected yet - project is taken from equal-chanced part
+    if (!equalChancedProjects.empty())
         return Skyfire::Containers::SelectRandomContainerElement(equalChancedProjects);
 
     return 0;
@@ -23562,55 +23787,72 @@ uint32 Player::GetRandomResearchProjectForRace(uint32 researchBranchId)
 
 void Player::UpdateResearchProjects()
 {
-    uint32 projectIds [RESEARCH_BRANCH_COUNT];
-    memset(&projectIds, 0, RESEARCH_BRANCH_COUNT * sizeof(uint32));
+    uint32 projectIds[RESEARCH_BRANCH_COUNT];
+    memset(projectIds, 0, sizeof(projectIds));
+    bool unlockedNewRace = false;
     if (HasSkill(SKILL_ARCHAEOLOGY))
     {
-        uint8 j = 0;
-        for (uint32 i = 0; i < sResearchBranchStore.GetNumRows(); ++i)
+        // Drop stale projects for races that were auto-assigned before unlock gating.
+        for (ResearchProjectMap::iterator itr = _researchProjects.begin(); itr != _researchProjects.end();)
         {
-            if (i == 29) // this branch should not be available
-                continue;
+            if (!IsResearchBranchUnlocked(itr->first))
+                _researchProjects.erase(itr++);
+            else
+                ++itr;
+        }
 
+        uint8 j = 0;
+        for (uint32 i = 0; i < sResearchBranchStore.GetNumRows() && j < RESEARCH_BRANCH_COUNT; ++i)
+        {
             if (ResearchBranchEntry const* branchEntry = sResearchBranchStore.LookupEntry(i))
             {
+                // Skip unused placeholder branch.
+                if (branchEntry->Id == 315)
+                    continue;
+
+                if (!IsResearchBranchUnlocked(branchEntry->Id))
+                    continue;
+
                 ResearchProjectMap::iterator itr = _researchProjects.find(branchEntry->Id);
-                if (itr == _researchProjects.end()) // branch not found
+                if (itr == _researchProjects.end())
                 {
-                    if (uint32 projectId = GetRandomResearchProjectForRace(branchEntry->Id)) // try to select new project
+                    if (uint32 projectId = GetRandomResearchProjectForRace(branchEntry->Id))
                     {
-                        _researchProjects [branchEntry->Id] = projectId;
-                        projectIds [++j] = projectId;
+                        _researchProjects[branchEntry->Id] = projectId;
+                        projectIds[j++] = projectId;
+                        unlockedNewRace = true;
                     }
                 }
-                else if (!itr->second) // branch found, but without project
+                else if (!itr->second)
                 {
-                    if (uint32 projectId = GetRandomResearchProjectForRace(branchEntry->Id)) // try to select new project
+                    if (uint32 projectId = GetRandomResearchProjectForRace(branchEntry->Id))
                     {
                         itr->second = projectId;
-                        projectIds [++j] = projectId;
+                        projectIds[j++] = projectId;
                     }
-                    else // no project selected, remove branch
+                    else
                         _researchProjects.erase(itr);
                 }
                 else
-                    projectIds [++j] = itr->second;
+                    projectIds[j++] = itr->second;
             }
         }
     }
-    else // archaeology has been unlearned, remove all active research projects and research history
+    else
     {
         _researchProjects.clear();
         _researchHistory.clear();
     }
 
     for (uint8 i = 0; i < RESEARCH_BRANCH_COUNT; ++i)
-    {
-        uint32 offset = i % 2;
-        SetUInt16Value(PLAYER_FIELD_RESEARCHING, i % 2, projectIds [i]);
-    }
+        SetUInt16Value(PLAYER_FIELD_RESEARCHING + i / 2, i % 2, projectIds[i]);
+
+    // Journal binds race fragment totals after the researching field is set; SETUP that
+    // ran during ModifyCurrency is too early for a newly unlocked race (shows 0/X).
+    if (unlockedNewRace)
+        SendCurrencies();
 }
-*/
+
 void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecline /*= false*/)
 {
     WorldPacket data(SMSG_GUILD_DECLINE, 5 + declinerName.length());

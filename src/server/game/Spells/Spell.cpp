@@ -572,6 +572,7 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
     focusObject = NULL;
     m_cast_count = 0;
     m_glyphIndex = 0;
+    m_researchData = NULL;
     m_triggeredByAuraSpell = NULL;
     m_spellAura = NULL;
 
@@ -624,6 +625,7 @@ Spell::~Spell()
         ASSERT(m_caster->ToPlayer()->m_spellModTakingSpell != this);
 
     delete m_spellValue;
+    delete m_researchData;
 
     CheckEffectExecuteData();
 }

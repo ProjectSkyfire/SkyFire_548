@@ -792,6 +792,7 @@ public:                                                 // opcodes handlers
     void HandleLearnPreviewTalents(WorldPacket& recvPacket);
     void HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket);
     void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
+    void HandleRequestResearchHistory(WorldPacket& recvPacket);
 
     void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
     void HandleQuestgiverStatusMultipleQuery(WorldPacket& recvPacket);

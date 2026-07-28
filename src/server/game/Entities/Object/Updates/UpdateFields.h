@@ -312,6 +312,7 @@ enum EUnitDynamicFields
 
 enum EPlayerDynamicFields
 {
+    // On Player objects, dynamic field indices continue after unit dynamic fields.
     PLAYER_DYNAMIC_FIELD_RESERACH_SITE = UNIT_DYNAMIC_END + 0x0, // Size: 0x1
     PLAYER_DYNAMIC_FIELD_RESEARCH_SITE_PROGRESS = UNIT_DYNAMIC_END + 0x1, // Size: 0x1
     PLAYER_DYNAMIC_FIELD_DAILY_QUESTS = UNIT_DYNAMIC_END + 0x2, // Size: 0x1

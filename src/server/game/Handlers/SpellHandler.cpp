@@ -53,6 +53,8 @@ struct UseItemRequest
     Position srcPos;
     Position destPos;
     std::string targetString;
+    SpellResearchData researchData;
+    bool hasResearchData;
 };
 
 struct CastSpellRequest
@@ -71,6 +73,8 @@ struct CastSpellRequest
     Position srcPos;
     Position destPos;
     std::string targetString;
+    SpellResearchData researchData;
+    bool hasResearchData;
 };
 
 struct CancelCastRequest
@@ -116,7 +120,10 @@ struct ProjectilePositionRequest
 UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
 {
     UseItemRequest request = UseItemRequest();
+    request.hasResearchData = false;
+    memset(&request.researchData, 0, sizeof(SpellResearchData));
     uint32 targetStringLength = 0;
+    uint8 researchTypes[4] = { 0, 0, 0, 0 };
 
     // Movement data
     MovementInfo movementInfo;
@@ -160,7 +167,7 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
     uint8 researchDataCount = recvPacket.ReadBits(2);
 
     for (uint8 i = 0; i < researchDataCount; ++i)
-        recvPacket.ReadBits(2);
+        researchTypes[i] = recvPacket.ReadBits(2);
 
     if (hasMovement)
     {
@@ -273,8 +280,27 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
 
     for (uint8 i = 0; i < researchDataCount; ++i)
     {
-        recvPacket.read_skip<uint32>();
-        recvPacket.read_skip<uint32>();
+        // Client sends (usedCount, entryId); type 1 = keystone item, type 2 = fragment currency.
+        uint32 usedCount = 0;
+        uint32 entry = 0;
+        recvPacket >> usedCount;
+        recvPacket >> entry;
+
+        switch (researchTypes[i])
+        {
+            case 1: // Keystones
+                request.researchData.keystoneItemId = entry;
+                request.researchData.keystoneCount = usedCount;
+                request.hasResearchData = true;
+                break;
+            case 2: // Fragments
+                request.researchData.fragmentCurrencyId = entry;
+                request.researchData.fragmentCount = usedCount;
+                request.hasResearchData = true;
+                break;
+            default:
+                break;
+        }
     }
 
     recvPacket.ReadByteSeq(request.itemGuid[7]);
@@ -508,7 +534,10 @@ GuidRequest ReadGameObjectReportUseRequest(WorldPacket& recvPacket)
 CastSpellRequest ReadCastSpellRequest(WorldPacket& recvPacket, Unit* caster)
 {
     CastSpellRequest request = CastSpellRequest();
+    request.hasResearchData = false;
+    memset(&request.researchData, 0, sizeof(SpellResearchData));
     uint32 targetStringLength = 0;
+    uint8 researchTypes[4] = { 0, 0, 0, 0 };
 
     // Movement data
     MovementInfo movementInfo;
@@ -538,7 +567,7 @@ CastSpellRequest ReadCastSpellRequest(WorldPacket& recvPacket, Unit* caster)
     bool hasMissileSpeed = !recvPacket.ReadBit();
 
     for (uint8 i = 0; i < researchDataCount; ++i)
-        recvPacket.ReadBits(2);
+        researchTypes[i] = recvPacket.ReadBits(2);
 
     bool hasGlyphIndex = !recvPacket.ReadBit();
     bool hasMovement = recvPacket.ReadBit();
@@ -650,8 +679,27 @@ CastSpellRequest ReadCastSpellRequest(WorldPacket& recvPacket, Unit* caster)
 
     for (uint8 i = 0; i < researchDataCount; ++i)
     {
-        recvPacket.read_skip<uint32>();
-        recvPacket.read_skip<uint32>();
+        // Client sends (usedCount, entryId); type 1 = keystone item, type 2 = fragment currency.
+        uint32 usedCount = 0;
+        uint32 entry = 0;
+        recvPacket >> usedCount;
+        recvPacket >> entry;
+
+        switch (researchTypes[i])
+        {
+            case 1: // Keystones
+                request.researchData.keystoneItemId = entry;
+                request.researchData.keystoneCount = usedCount;
+                request.hasResearchData = true;
+                break;
+            case 2: // Fragments
+                request.researchData.fragmentCurrencyId = entry;
+                request.researchData.fragmentCount = usedCount;
+                request.hasResearchData = true;
+                break;
+            default:
+                break;
+        }
     }
 
     if (hasMovement)
@@ -1105,9 +1153,13 @@ bool ValidateCastSource(WorldPacket& recvPacket, Player* player, Unit*& caster, 
 
     if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && !caster->ToPlayer()->HasActiveSpell(spellId))
     {
-        // not have spell in spellbook
-        recvPacket.rfinish(); // prevent spam at ignore packet
-        return false;
+        // Archaeology solves are cast from the journal UI, not the spellbook.
+        Player* casterPlayer = caster->ToPlayer();
+        if (!spellInfo->ResearchProject || !casterPlayer->HasResearchingProject(spellInfo->ResearchProject))
+        {
+            recvPacket.rfinish(); // prevent spam at ignore packet
+            return false;
+        }
     }
 
     return true;
@@ -1279,7 +1331,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (!sScriptMgr->OnItemUse(pUser, pItem, targets))
     {
         // no script or script not process request by self
-        pUser->CastItemUseSpell(pItem, targets, request.castCount, request.glyphIndex);
+        pUser->CastItemUseSpell(pItem, targets, request.castCount, request.glyphIndex,
+            request.hasResearchData ? &request.researchData : NULL);
     }
 }
 
@@ -1565,32 +1618,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     spell->m_cast_count = castCount;                       // set count of casts
     spell->m_glyphIndex = glyphIndex;
 
-    /*
-    if (castFlags & 0x8)   // Archaeology
+    if (request.hasResearchData)
     {
         SpellResearchData* researchData = new SpellResearchData();
-        memset(researchData, 0, sizeof(SpellResearchData*));
-        uint32 count;
-        uint8 type;
-        recvPacket >> count;
-        for (uint32 i = 0; i < count; ++i)
-        {
-            recvPacket >> type;
-            switch (type)
-            {
-                case 2: // Keystones
-                    recvPacket >> researchData->keystoneItemId;       // Item id
-                    recvPacket >> researchData->keystoneCount;        // Item count
-                    break;
-                case 1: // Fragments
-                    recvPacket >> researchData->fragmentCurrencyId;   // Currency id
-                    recvPacket >> researchData->fragmentCount;        // Currency count
-                    break;
-            }
-        }
-
+        *researchData = request.researchData;
         spell->m_researchData = researchData;
-    }*/
+    }
 
     spell->prepare(&targets);
 }

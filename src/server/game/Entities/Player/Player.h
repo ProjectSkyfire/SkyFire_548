@@ -46,6 +46,7 @@ class PlayerSocial;
 class SpellCastTargets;
 class UpdateMask;
 class BattlePetMgr;
+struct SpellResearchData;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -904,6 +905,9 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_BATTLE_PETS = 36,
     PLAYER_LOGIN_QUERY_LOAD_BATTLE_PET_SLOTS = 37,
     PLAYER_LOGIN_QUERY_LOAD_QUEST_OBJECTIVE_STATUS = 38,
+    PLAYER_LOGIN_QUERY_LOAD_RESEARCH_DIGSITES = 39,
+    PLAYER_LOGIN_QUERY_LOAD_RESEARCH_HISTORY = 40,
+    PLAYER_LOGIN_QUERY_LOAD_RESEARCH_PROJECTS = 41,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1218,17 +1222,17 @@ private:
     PlayerTalentInfo(PlayerTalentInfo const&);
 };
 
-/*
 #define RESEARCH_CONTINENT_COUNT    5
-#define RESEARCH_BRANCH_COUNT       10
+#define RESEARCH_BRANCH_COUNT       12
 #define MAX_DIGSITES_PER_CONTINENT  4
 #define MAX_FINDS_PER_DIGSITE       6
 
-const uint32 ResearchContinents [RESEARCH_CONTINENT_COUNT] = { 0, 1, 530, 571, 870 }; // Eastern Kingdoms, Kalimdor, Outland, Northrend, Pandaria
+const uint32 ResearchContinents[RESEARCH_CONTINENT_COUNT] = { 0, 1, 530, 571, 870 }; // Eastern Kingdoms, Kalimdor, Outland, Northrend, Pandaria
 
 struct ResearchDigsite
 {
-    ResearchDigsite(ResearchDigsiteInfo const* digsiteInfo, uint8 remainingFindCount) : _digsiteInfo(digsiteInfo), _archaeologyFind(NULL), _remainingFindCount(remainingFindCount)
+    ResearchDigsite(ResearchDigsiteInfo const* digsiteInfo, uint8 remainingFindCount)
+        : _digsiteInfo(digsiteInfo), _archaeologyFind(NULL), _remainingFindCount(remainingFindCount)
     { }
 
     void SelectNewArchaeologyFind(bool onInit);
@@ -1236,29 +1240,29 @@ struct ResearchDigsite
     {
         _archaeologyFind = find;
     }
-    ArchaeologyFindInfo const* GetArchaeologyFind()
+    ArchaeologyFindInfo const* GetArchaeologyFind() const
     {
         return _archaeologyFind;
     }
-    bool IsEmptyDigsite()
+    bool IsEmptyDigsite() const
     {
         return !_remainingFindCount;
     }
 
-    uint32 GetDigsiteId()
+    uint32 GetDigsiteId() const
     {
         return _digsiteInfo->digsiteId;
     }
-    ResearchDigsiteInfo const* GetDigsiteInfo()
+    ResearchDigsiteInfo const* GetDigsiteInfo() const
     {
         return _digsiteInfo;
     }
-    uint8 GetRemainingFindCount()
+    uint8 GetRemainingFindCount() const
     {
         return _remainingFindCount;
     }
 
-    private:
+private:
     ResearchDigsiteInfo const* _digsiteInfo;
     ArchaeologyFindInfo const* _archaeologyFind;
     uint8 _remainingFindCount;
@@ -1269,10 +1273,9 @@ struct ResearchProjectHistory
     uint32 researchCount;
     uint32 firstResearchTimestamp;
 };
-*/
 
-//typedef UNORDERED_MAP<uint32 /*projectId*/, ResearchProjectHistory> ResearchHistoryMap;
-//typedef UNORDERED_MAP<uint32 /*branchId*/, uint32 /*projectId*/> ResearchProjectMap;
+typedef UNORDERED_MAP<uint32 /*projectId*/, ResearchProjectHistory> ResearchHistoryMap;
+typedef UNORDERED_MAP<uint32 /*branchId*/, uint32 /*projectId*/> ResearchProjectMap;
 
 enum AttackSwingError
 {
@@ -2659,7 +2662,7 @@ public:
     void ApplyEquipSpell(SpellInfo const* spellInfo, Item* item, bool apply, bool form_change = false);
     void UpdateEquipSpellsAtFormChange();
     void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
-    void CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex);
+    void CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex, SpellResearchData const* researchData = NULL);
     void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item* item, ItemTemplate const* proto);
 
     void SendEquipmentSetList();
@@ -3197,24 +3200,32 @@ public:
     uint32 GetQuestObjectiveCounter(uint32 objectiveId) const;
 
     // Archaeology
-    /*
     void SaveResearchDigsiteToDB(ResearchDigsite* digsite);
     void DeleteResearchDigsite(ResearchDigsite* digsite);
     void UpdateResearchDigsites();
-    bool IsWithinResearchDigsite(ResearchDigsite* digsite);
+    bool IsWithinResearchDigsite(ResearchDigsite* digsite) const;
     ResearchDigsite* GetCurrentResearchDigsite();
+    ResearchDigsite* GetResearchDigsiteForFind(GameObject const* go) const;
     ResearchDigsite* TryToSpawnResearchDigsiteOnContinent(uint32 mapId);
     ResearchDigsiteInfo const* GetRandomResearchDigsiteForContinent(uint32 mapId);
-    bool IsResearchDigsiteAvailable(ResearchDigsiteInfo const* digsiteInfo);
+    bool IsResearchDigsiteAvailable(ResearchDigsiteInfo const* digsiteInfo) const;
     void SendResearchHistory();
     void SolveResearchProject(Spell* spell);
-    bool HasCompletedResearchProject(uint32 projectId) { return _researchHistory.end() != _researchHistory.find(projectId); }
-    bool HasCompletedAllRareProjectsForRace(uint32 researchBranchId);
-    bool HasCompletedAllCommonProjectsForRace(uint32 researchBranchId, bool onlyAvailable);
+    bool HasCompletedResearchProject(uint32 projectId) const { return _researchHistory.find(projectId) != _researchHistory.end(); }
+    bool HasResearchingProject(uint32 projectId) const
+    {
+        for (ResearchProjectMap::const_iterator itr = _researchProjects.begin(); itr != _researchProjects.end(); ++itr)
+            if (itr->second == projectId)
+                return true;
+        return false;
+    }
+    bool HasCompletedAllRareProjectsForRace(uint32 researchBranchId) const;
+    bool HasCompletedAllCommonProjectsForRace(uint32 researchBranchId, bool onlyAvailable) const;
+    bool IsResearchBranchUnlocked(uint32 researchBranchId) const;
     uint32 GetRandomResearchProjectForRace(uint32 researchBranchId);
     void UpdateResearchProjects();
-    void SendSurveryCastInfo(ResearchDigsite* digsite, bool success);
-    */
+    void SendSurveyCastInfo(ResearchDigsite* digsite, bool success);
+    bool OnArchaeologyFindUsed(GameObject* go);
 
 protected:
     // Gamemaster whisper whitelist
@@ -3293,9 +3304,9 @@ protected:
     void _LoadInstanceTimeRestrictions(PreparedQueryResult result);
     void _LoadCurrency(PreparedQueryResult result);
     void _LoadCUFProfiles(PreparedQueryResult result);
-    //void _LoadResearchHistory(PreparedQueryResult result);
-    //void _LoadResearchProjects(PreparedQueryResult result);
-    //void _LoadResearchDigsites(PreparedQueryResult result);
+    void _LoadResearchHistory(PreparedQueryResult result);
+    void _LoadResearchProjects(PreparedQueryResult result);
+    void _LoadResearchDigsites(PreparedQueryResult result);
 
     /*********************************************************/
     /***                   SAVE SYSTEM                     ***/
@@ -3322,8 +3333,8 @@ protected:
     void _SaveInstanceTimeRestrictions(SQLTransaction& trans);
     void _SaveCurrency(SQLTransaction& trans);
     void _SaveCUFProfiles(SQLTransaction& trans);
-    //void _SaveResearchHistory(SQLTransaction& trans);
-    //void _SaveResearchProjects(SQLTransaction& trans);
+    void _SaveResearchHistory(SQLTransaction& trans);
+    void _SaveResearchProjects(SQLTransaction& trans);
 
     /*********************************************************/
     /***              ENVIRONMENTAL SYSTEM                 ***/
@@ -3500,12 +3511,11 @@ protected:
 
     CUFProfile* _CUFProfiles[MAX_CUF_PROFILES];
 
-    /*
     // Archaeology
-    ResearchDigsite* _researchDigsites [RESEARCH_CONTINENT_COUNT] [MAX_DIGSITES_PER_CONTINENT];
+    ResearchDigsite* _researchDigsites[RESEARCH_CONTINENT_COUNT][MAX_DIGSITES_PER_CONTINENT];
     ResearchProjectMap _researchProjects;
     ResearchHistoryMap _researchHistory;
-    */
+
 private:
     // internal common parts for CanStore/StoreItem functions
     InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;

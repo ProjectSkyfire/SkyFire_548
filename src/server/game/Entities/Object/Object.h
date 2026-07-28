@@ -233,7 +233,7 @@ protected:
     uint32 GetUpdateFieldData(Player const* target, uint32*& flags) const;
 
     void BuildMovementUpdate(ByteBuffer* data, uint16 flags) const;
-    void BuildDynamicValuesUpdate(ByteBuffer* data) const;
+    void BuildDynamicValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const;
     virtual void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, Player* target) const;
 
     std::vector<uint32*> m_dynamicTab;

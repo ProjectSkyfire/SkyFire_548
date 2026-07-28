@@ -15,6 +15,7 @@
 #include "GroupMgr.h"
 #include "ObjectMgr.h"
 #include "OutdoorPvPMgr.h"
+#include "Player.h"
 #include "PoolMgr.h"
 #include "ScriptMgr.h"
 #include "SpellMgr.h"
@@ -1427,6 +1428,9 @@ void GameObject::Use(Unit* user)
 
     if (Player* playerUser = user->ToPlayer())
     {
+        if (playerUser->OnArchaeologyFindUsed(this))
+            return;
+
         if (sScriptMgr->OnGossipHello(playerUser, this))
             return;
 
@@ -1459,6 +1463,15 @@ void GameObject::Use(Unit* user)
 
             player->PrepareGossipMenu(this, GetGOInfo()->questgiver.gossipID, true);
             player->SendPreparedGossip(this);
+            return;
+        }
+        case GAMEOBJECT_TYPE_CHEST:                         //3
+        {
+            if (user->GetTypeId() != TypeID::TYPEID_PLAYER)
+                return;
+
+            // Archaeology finds are handled at the start of Use(); remaining chests open as loot.
+            user->ToPlayer()->SendLoot(GetGUID(), LootType::LOOT_CORPSE);
             return;
         }
         case GAMEOBJECT_TYPE_TRAP:                          //6

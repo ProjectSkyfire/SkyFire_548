@@ -9,6 +9,7 @@
 void AddSC_deathknight_spell_scripts();
 void AddSC_druid_spell_scripts();
 void AddSC_generic_spell_scripts();
+void AddSC_archaeology_spell_scripts();
 void AddSC_hunter_spell_scripts();
 void AddSC_mage_spell_scripts();
 void AddSC_masteries_spell_scripts();
@@ -669,6 +670,7 @@ void AddSpellScripts()
     AddSC_deathknight_spell_scripts();
     AddSC_druid_spell_scripts();
     AddSC_generic_spell_scripts();
+    AddSC_archaeology_spell_scripts();
     AddSC_hunter_spell_scripts();
     AddSC_mage_spell_scripts();
     AddSC_masteries_spell_scripts();

@@ -64,6 +64,9 @@ void Spell::EffectCreateItem(SpellEffIndex effIndex)
 
     DoCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);
     ExecuteLogEffectCreateItem(effIndex, m_spellInfo->Effects[effIndex].ItemType);
+
+    if (m_researchData && m_caster->GetTypeId() == TypeID::TYPEID_PLAYER && m_spellInfo->ResearchProject)
+        m_caster->ToPlayer()->SolveResearchProject(this);
 }
 
 void Spell::EffectCreateItem2(SpellEffIndex effIndex)
@@ -100,6 +103,10 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
             player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);    // create some random items
     }
     /// @todo ExecuteLogEffectCreateItem(i, m_spellInfo->Effects[i].ItemType);
+
+    // Pandaria archaeology projects use CREATE_ITEM_2; still need to consume fragments / advance the project.
+    if (m_researchData && m_caster->GetTypeId() == TypeID::TYPEID_PLAYER && m_spellInfo->ResearchProject)
+        m_caster->ToPlayer()->SolveResearchProject(this);
 }
 
 void Spell::EffectCreateRandomItem(SpellEffIndex /*effIndex*/)
@@ -196,7 +203,14 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     }
 
     if (gameObjTarget)
+    {
+        // Archaeology finds: claim fragments here. Avoid opening empty chest loot after
+        // GAMEOBJECT_USE already processed the same node (Delete is deferred).
+        if (player->OnArchaeologyFindUsed(gameObjTarget))
+            return;
+
         SendLoot(guid, LootType::LOOT_SKINNING);
+    }
     else if (itemTarget)
         itemTarget->SetFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_UNLOCKED);
 

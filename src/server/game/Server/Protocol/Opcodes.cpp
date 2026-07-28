@@ -416,6 +416,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PVP_OPTIONS_ENABLED,             0x0A22, STATUS_LOGGEDIN,                     PROCESS_INPLACE,      &WorldSession::HandleRequestPvpOptions               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_PVP_REWARDS,                     0x0375, STATUS_LOGGEDIN,                     PROCESS_INPLACE,      &WorldSession::HandleRequestPvpReward                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_RAID_INFO,                       0x0A87, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRequestRaidInfoOpcode           ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_REQUEST_RESEARCH_HISTORY,                0x13FB, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRequestResearchHistory             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_STABLED_PETS,                    0x02CA, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRequestStabledPetsOpcode        ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_EXIT,                    0x1DC3, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRequestVehicleExit              ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_REQUEST_VEHICLE_NEXT_SEAT,               0x0141, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleChangeSeatsOnControlledVehicle  ); // 5.4.8 18414
@@ -965,6 +966,8 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_REMOVED_SPELL,                                  0x14C3, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_REQUEST_CEMETERY_LIST_RESPONSE,                 0x042A, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_REQUEST_PVP_REWARDS_RESPONSE,                   0x08AA, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_RESEARCH_COMPLETE,                              0x0F6B, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_RESEARCH_SETUP_HISTORY,                         0x054A, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESET_FAILED_NOTIFY,                            0x10AE, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESPEC_WIPE_CONFIRM,                            0x02AB, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESPOND_INSPECT_ACHIEVEMENTS,                   0x009E, STATUS_NEVER    ); // 5.4.8 18414

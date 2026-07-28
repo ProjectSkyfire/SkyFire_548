@@ -108,3 +108,11 @@ void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recvData)
 
     GetPlayer()->SetSkill(skillId, 0, 0, 0);
 }
+
+void WorldSession::HandleRequestResearchHistory(WorldPacket& /*recvPacket*/)
+{
+    if (!_player)
+        return;
+
+    _player->SendResearchHistory();
+}

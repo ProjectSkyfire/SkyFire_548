@@ -2115,9 +2115,9 @@ struct QuestFactionRewEntry
 struct QuestPOIPointEntry
 {
     uint32 Id;                                              // 0
-    //int32 X;                                              // 1
-    //int32 Y;                                              // 2
-    //uint32 BlobId;                                        // 3
+    int32 X;                                                // 1
+    int32 Y;                                                // 2
+    uint32 BlobId;                                          // 3
 };
 
 struct QuestSortEntry
@@ -2139,15 +2139,14 @@ struct RandomPropertiesPointsEntry
     uint32    RarePropertiesPoints[5];                      // 6-10
     uint32    UncommonPropertiesPoints[5];                  // 11-15
 };
-/*
 struct ResearchBranchEntry
 {
-    uint32 Id;                                            // 0
-    //char* BranchName;                                   // 1
-    //uint32 ResearchFieldId;                             // 2 research field (from ResearchField.dbc)
-    //uint32 FragmentCurrencyId;                          // 3
-    //char* Icon;                                         // 4
-    //uint32 KeystoneItemId;                              // 5
+    uint32 Id;                                              // 0
+    //char* BranchName;                                     // 1
+    //uint32 ResearchFieldId;                               // 2 research field (from ResearchField.dbc)
+    uint32 FragmentCurrencyId;                              // 3
+    //char* Icon;                                           // 4
+    uint32 KeystoneItemId;                                  // 5
 };
 
 //struct ResearchFieldEntry
@@ -2178,7 +2177,7 @@ struct ResearchSiteEntry
     //char* SiteName;                                       // 3
     //uint32 IconId;                                        // 4
 };
-*/
+
 struct ScalingStatDistributionEntry
 {
     //uint32  Id;                                           // 0
@@ -2418,7 +2417,7 @@ struct SpellEntry
     uint32 SpellShapeshiftId;                               // 20       SpellShapeshift.dbc
     uint32 SpellTargetRestrictionsId;                       // 21       SpellTargetRestrictions.dbc
     uint32 SpellTotemsId;                                   // 22       SpellTotems.dbc
-    //uint32 ResearchProject;                               // 23       ResearchProject.dbc
+    uint32 ResearchProject;                                 // 23       ResearchProject.dbc
     uint32 SpellMiscId;                                     // 24       SpellMisc.dbc
 };
 
