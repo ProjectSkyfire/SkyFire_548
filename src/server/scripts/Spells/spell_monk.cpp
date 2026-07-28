@@ -3298,7 +3298,6 @@ void AddSC_monk_spell_scripts()
     //new spell_monk_thunder_focus_tea();
     new spell_monk_teachings_of_the_monastery();
     new spell_monk_mana_tea();
-    new spell_monk_glyph_of_mana_tea();
     new spell_monk_mana_tea_stacks();
     new spell_monk_enveloping_mist();
     new spell_monk_surging_mist();

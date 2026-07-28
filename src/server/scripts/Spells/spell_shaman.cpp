@@ -869,7 +869,7 @@ public:
 
         void Register() OVERRIDE
         {
-            OnEffectHitTarget += SpellEffectFn(spell_sha_thunderstorm_SpellScript::HandleKnockBack, EFFECT_2, SPELL_EFFECT_KNOCK_BACK);
+            OnEffectHitTarget += SpellEffectFn(spell_sha_thunderstorm_SpellScript::HandleKnockBack, EFFECT_1, SPELL_EFFECT_KNOCK_BACK);
         }
     };
 
@@ -989,7 +989,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_earth_shield();
     new spell_sha_fire_nova();
     new spell_sha_glyph_of_healing_wave();
-    new spell_sha_healing_stream_totem();
     new spell_sha_heroism();
     new spell_sha_item_lightning_shield();
     new spell_sha_item_lightning_shield_trigger();

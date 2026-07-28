@@ -919,9 +919,9 @@ class spell_xt002_heart_overload_periodic : public SpellScriptLoader
 public:
     spell_xt002_heart_overload_periodic() : SpellScriptLoader("spell_xt002_heart_overload_periodic") { }
 
-    class spell_xt002_heart_overload_periodic_SpellScript : public SpellScript
+    class spell_xt002_heart_overload_periodic_AuraScript : public AuraScript
     {
-        PrepareSpellScript(spell_xt002_heart_overload_periodic_SpellScript);
+        PrepareAuraScript(spell_xt002_heart_overload_periodic_AuraScript);
 
         bool Validate(SpellInfo const* /*spell*/) OVERRIDE
         {
@@ -940,8 +940,10 @@ public:
             return true;
         }
 
-        void HandleScript(SpellEffIndex /*effIndex*/)
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
         {
+            PreventDefaultAction();
+
             if (Unit* caster = GetCaster())
             {
                 if (InstanceScript* instance = caster->GetInstanceScript())
@@ -971,13 +973,13 @@ public:
 
         void Register() OVERRIDE
         {
-            OnEffectHit += SpellEffectFn(spell_xt002_heart_overload_periodic_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_xt002_heart_overload_periodic_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    AuraScript* GetAuraScript() const OVERRIDE
     {
-        return new spell_xt002_heart_overload_periodic_SpellScript();
+        return new spell_xt002_heart_overload_periodic_AuraScript();
     }
 };
 

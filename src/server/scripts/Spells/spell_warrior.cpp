@@ -299,7 +299,7 @@ public:
 
         void Register() OVERRIDE
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_improved_spell_reflection_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_PARTY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_improved_spell_reflection_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
         }
     };
 
@@ -486,7 +486,7 @@ public:
         void Register() OVERRIDE
         {
             DoCheckProc += AuraCheckProcFn(spell_warr_retaliation_AuraScript::CheckProc);
-            OnEffectProc += AuraEffectProcFn(spell_warr_retaliation_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            OnEffectProc += AuraEffectProcFn(spell_warr_retaliation_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 
@@ -745,13 +745,12 @@ public:
 
         void HandleEffectProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
         {
-            PreventDefaultAction();
             GetTarget()->RemoveAura(GetId());
         }
 
         void Register() OVERRIDE
         {
-            OnEffectProc += AuraEffectProcFn(spell_warr_victorious_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
+            OnEffectProc += AuraEffectProcFn(spell_warr_victorious_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 
@@ -822,7 +821,6 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_intimidating_shout();
     new spell_warr_last_stand();
     new spell_warr_rallying_cry();
-    new spell_warr_rend();
     new spell_warr_retaliation();
     new spell_warr_second_wind_proc();
     new spell_warr_second_wind_trigger();

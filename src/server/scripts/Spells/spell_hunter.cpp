@@ -767,7 +767,6 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_fire();
 
     new spell_hun_improved_serpent_sting();
-    new spell_hun_invigoration();
     new spell_hun_last_stand_pet();
     new spell_hun_masters_call();
     new spell_hun_misdirection();
@@ -780,5 +779,4 @@ void AddSC_hunter_spell_scripts()
 
     new spell_hun_steady_shot();
     new spell_hun_tame_beast();
-    new spell_hun_thrill_of_the_hunt();
 }

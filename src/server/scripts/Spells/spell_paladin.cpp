@@ -953,8 +953,6 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_judgment();
     new spell_pal_selfless_healer();
     //new spell_pal_ardent_defender();
-    new spell_pal_aura_mastery();
-    new spell_pal_aura_mastery_immune();
     new spell_pal_beacon_of_light();
     new spell_pal_blessing_of_faith();
     new spell_pal_eye_for_an_eye();

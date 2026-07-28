@@ -974,8 +974,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_eclipse("spell_dru_eclipse_solar");
     new spell_dru_eclipse_energize();
     new spell_dru_glyph_of_innervate();
-    new spell_dru_glyph_of_starfire();
-    new spell_dru_glyph_of_starfire_proc();
     new spell_dru_innervate();
     new spell_dru_lifebloom();
     new spell_dru_living_seed();
@@ -985,7 +983,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
     new spell_dru_starfall_dummy();
-    new spell_dru_stampede();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
     new spell_dru_t10_restoration_4p_bonus();

@@ -1117,10 +1117,10 @@ public:
 };
 
 const Position aysaChamberMovePos1 = { 647.493f, 4224.63f, 202.90865f, 2.426f };
-class npc_aysa_battle_for_the_skies : public CreatureScript
+class npc_aysa_in_wind_temple : public CreatureScript
 {
 public:
-    npc_aysa_battle_for_the_skies() : CreatureScript("npc_aysa_battle_for_the_skies") { }
+    npc_aysa_in_wind_temple() : CreatureScript("npc_aysa_in_wind_temple") { }
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
     {
@@ -1133,13 +1133,13 @@ public:
         }
         return true;
     }
-    struct npc_aysa_battle_for_the_skiesAI : public CreatureAI
+    struct npc_aysa_in_wind_templeAI : public CreatureAI
     { 
-        npc_aysa_battle_for_the_skiesAI(Creature* creature) : CreatureAI(creature) {}
+        npc_aysa_in_wind_templeAI(Creature* creature) : CreatureAI(creature) {}
     };
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
-        return new npc_aysa_battle_for_the_skiesAI(creature);
+        return new npc_aysa_in_wind_templeAI(creature);
     }
 };
 
@@ -2484,7 +2484,7 @@ void AddSC_wandering_island()
     new npc_master_shang_xi_worthy_of_passing();
     new npc_firework_launcher();
     new boss_zhao_ren();
-    new npc_aysa_battle_for_the_skies();
+    new npc_aysa_in_wind_temple();
     new npc_aysa_chamber_of_whispers();
     new npc_uplift_draft();
     new npc_shu_dailo();
