@@ -13,6 +13,27 @@ namespace LegacyTransport
         {
             return mapId == 369 && spawnMode == 0;
         }
+
+        bool IsThunderBluffMesaElevatorMap(uint32 mapId, uint32 spawnMode)
+        {
+            return mapId == 1 && spawnMode == 0;
+        }
+
+        bool IsThunderBluffMesaElevatorDbEntry(uint32 dbEntry)
+        {
+            switch (dbEntry)
+            {
+                case 4170:
+                case 4171:
+                case 11898:
+                case 11899:
+                case 47296:
+                case 47297:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 
     bool IsDeeprunSubwayDbEntry(uint32 dbEntry)
@@ -49,7 +70,7 @@ namespace LegacyTransport
 
     bool IsLocalTransportDbEntry(uint32 dbEntry)
     {
-        return IsDeeprunSubwayDbEntry(dbEntry);
+        return IsDeeprunSubwayDbEntry(dbEntry) || IsThunderBluffMesaElevatorDbEntry(dbEntry);
     }
 
     uint32 GetClientEntryForDbEntry(uint32 dbEntry)
@@ -85,10 +106,13 @@ namespace LegacyTransport
 
     bool IsAllowedOnMap(uint32 dbEntry, uint32 mapId, uint32 spawnMode)
     {
-        if (!IsDeeprunSubwayDbEntry(dbEntry))
-            return false;
+        if (IsDeeprunSubwayDbEntry(dbEntry))
+            return IsDeeprunSubwayMap(mapId, spawnMode);
 
-        return IsDeeprunSubwayMap(mapId, spawnMode);
+        if (IsThunderBluffMesaElevatorDbEntry(dbEntry))
+            return IsThunderBluffMesaElevatorMap(mapId, spawnMode);
+
+        return false;
     }
 
     bool ShouldPreservePassengerGameObjectVisibility(uint32 clientEntry)
