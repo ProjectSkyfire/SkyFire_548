@@ -451,6 +451,18 @@ target_include_directories(gossip_schema_tests PRIVATE
 
 add_test(NAME gossip_schema_tests COMMAND gossip_schema_tests)
 
+add_executable(legacy_transport_support_tests
+  ${CMAKE_SOURCE_DIR}/src/server/game/Maps/LegacyTransportSupport.cpp
+  LegacyTransportSupportTests.cpp
+)
+
+target_include_directories(legacy_transport_support_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Maps
+)
+
+add_test(NAME legacy_transport_support_tests COMMAND legacy_transport_support_tests)
+
 add_executable(game_domain_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Player/PlayerRestState.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/Spells/Auras/SpellAuraMetadata.cpp
