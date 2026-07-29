@@ -1,5 +1,5 @@
 -- What's Keeping Jessup?
-UPDATE quest_template` SET `OfferRewardText`='It won\'t be tough to collapse th\' tunnel, but I\'m goin\' to need my team an\' my equipment \'afore I can get to th\' task.' WHERE `Id`=26316;
+UPDATE `quest_template` SET `OfferRewardText`='It won\'t be tough to collapse th\' tunnel, but I\'m goin\' to need my team an\' my equipment \'afore I can get to th\' task.' WHERE `Id`=26316;
 
 -- Get Me Explosives Back!
 UPDATE `quest_template` SET `RequestItemsText`='Well, did you recover me missing supplies?' WHERE `Id`=26285;
