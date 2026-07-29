@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2026272101
+ConfVersion=2026272801
 
 ###################################################################################################
 # SECTION INDEX
@@ -138,12 +138,25 @@ WorldDatabase.AutoBaseline = 0
 WorldDatabase.AllowUpdateHashMismatch = 1
 
 #
+#    WorldDatabase.ImportPendingUpdates
+#        Description: Also imports SQL files from pending_updates/world during world database
+#                     startup update checks.
+#        Important:   Disabled by default. Enable only on development or staging databases.
+#                     Pending files are recorded in skyfire_db_updates by filename, the same as
+#                     normal updates. Promote verified files into updates/world before production.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+WorldDatabase.ImportPendingUpdates = 0
+
+#
 #    WorldDatabase.SqlPath
 #        Description: Root SQL directory used by world database setup, stored procedures, and
 #                     world update checks.
 #        Example:     "D:/SkyFire/sql" or "/opt/skyfire/sql"
 #        Important:   The directory must contain updates/world for startup update checks.
-#                     Empty world database setup also requires base/stored_procs.sql.
+#                     When WorldDatabase.ImportPendingUpdates is enabled, pending_updates/world
+#                     is also scanned. Empty world database setup also requires base/stored_procs.sql.
 #        Default:     "" - (No SQL directory configured)
 
 WorldDatabase.SqlPath = ""
@@ -207,11 +220,26 @@ CharacterDatabase.AutoBaseline = 0
 CharacterDatabase.AllowUpdateHashMismatch = 1
 
 #
+#    CharacterDatabase.ImportPendingUpdates
+#        Description: Also imports SQL files from pending_updates/characters during character
+#                     database startup update checks.
+#        Important:   Disabled by default. Enable only on development or staging databases.
+#                     Pending files are recorded in skyfire_db_updates by filename, the same as
+#                     normal updates. Promote verified files into updates/characters before
+#                     production.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+CharacterDatabase.ImportPendingUpdates = 0
+
+#
 #    CharacterDatabase.SqlPath
 #        Description: Root SQL directory used by character database setup and update checks.
 #        Example:     "D:/SkyFire/sql" or "/opt/skyfire/sql"
 #        Important:   The directory must contain updates/characters for startup update checks.
-#                     CharacterDatabase.AutoSetup also requires base/characters_database.sql.
+#                     When CharacterDatabase.ImportPendingUpdates is enabled,
+#                     pending_updates/characters is also scanned. CharacterDatabase.AutoSetup
+#                     also requires base/characters_database.sql.
 #        Default:     "" - (No SQL directory configured)
 
 CharacterDatabase.SqlPath = ""

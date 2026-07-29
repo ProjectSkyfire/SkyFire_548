@@ -42,9 +42,12 @@ namespace
         passed &= Expect(!options.AutoCreate, "Auth auto create should default off");
         passed &= Expect(!options.AutoBaseline, "Auth auto baseline should default off");
         passed &= Expect(!options.AllowUpdateHashMismatch, "Auth update hash mismatch bypass should default off");
+        passed &= Expect(!options.ImportPendingUpdates, "Auth pending updates import should default off");
         passed &= Expect(options.SqlPath.empty(), "Auth setup SQL path should default empty");
         passed &= Expect(options.BaseFileName == "auth_database.sql", "Auth setup should use the auth base SQL file");
         passed &= Expect(options.UpdatesDirectory == "updates/auth", "Auth setup should use the auth updates directory");
+        passed &= Expect(options.PendingUpdatesDirectory == "pending_updates/auth",
+            "Auth setup should use the auth pending updates directory");
 
         return passed;
     }
@@ -59,9 +62,12 @@ namespace
         passed &= Expect(!options.AutoCreate, "Character auto create should default off");
         passed &= Expect(!options.AutoBaseline, "Character auto baseline should default off");
         passed &= Expect(!options.AllowUpdateHashMismatch, "Character update hash mismatch bypass should default off");
+        passed &= Expect(!options.ImportPendingUpdates, "Character pending updates import should default off");
         passed &= Expect(options.SqlPath.empty(), "Character setup SQL path should default empty");
         passed &= Expect(options.BaseFileName == "characters_database.sql", "Character setup should use the characters base SQL file");
         passed &= Expect(options.UpdatesDirectory == "updates/characters", "Character setup should use the characters updates directory");
+        passed &= Expect(options.PendingUpdatesDirectory == "pending_updates/characters",
+            "Character setup should use the characters pending updates directory");
 
         return passed;
     }
@@ -76,6 +82,7 @@ namespace
         passed &= Expect(!options.AutoCreate, "World auto create should default off");
         passed &= Expect(!options.AutoBaseline, "World auto baseline should default off");
         passed &= Expect(!options.AllowUpdateHashMismatch, "World update hash mismatch bypass should default off");
+        passed &= Expect(!options.ImportPendingUpdates, "World pending updates import should default off");
         passed &= Expect(options.SqlPath.empty(), "World setup SQL path should default empty");
         passed &= Expect(options.BaseFileName.empty(), "World setup should not assume an in-tree base SQL file");
         passed &= Expect(options.ExternalBaseFile.empty(), "World external base SQL file should default empty");
@@ -83,6 +90,8 @@ namespace
         passed &= Expect(options.RequiredBaseFileNames[0] == "stored_procs.sql",
             "World setup should use the in-tree stored procedures file");
         passed &= Expect(options.UpdatesDirectory == "updates/world", "World setup should use the world updates directory");
+        passed &= Expect(options.PendingUpdatesDirectory == "pending_updates/world",
+            "World setup should use the world pending updates directory");
 
         return passed;
     }
@@ -576,13 +585,17 @@ namespace
     {
         std::filesystem::path root = std::filesystem::temp_directory_path() / "skyfire_database_setup_tests";
         std::filesystem::path updatesDir = root / "updates" / "auth";
+        std::filesystem::path pendingDir = root / "pending_updates" / "auth";
 
         std::filesystem::remove_all(root);
         std::filesystem::create_directories(updatesDir);
+        std::filesystem::create_directories(pendingDir);
 
         std::ofstream(updatesDir / "2026-03-01_auth_00.sql") << "SELECT 1;";
         std::ofstream(updatesDir / "readme.txt") << "notes";
         std::ofstream(updatesDir / "2026-01-23_auth_00.sql") << "SELECT 2;";
+        std::ofstream(pendingDir / "pending_auth_fix.sql") << "SELECT 3;";
+        std::ofstream(pendingDir / "2026-03-01_auth_00.sql") << "SELECT 4;";
 
         Skyfire::Database::SetupOptions options = Skyfire::Database::MakeAuthDatabaseSetupOptions(true, false, root.string());
         std::vector<Skyfire::Database::SqlUpdateFile> updates =
@@ -596,6 +609,20 @@ namespace
             "Auth discovery should return full configured update paths");
         passed &= Expect(updates[0].Hash == Skyfire::Database::CalculateStableSqlHash("SELECT 2;"),
             "Auth discovery should hash update file contents for version control");
+
+        options.ImportPendingUpdates = true;
+        updates = Skyfire::Database::DiscoverSqlUpdates(options);
+
+        passed &= Expect(updates.size() == 3, "Auth discovery should include pending updates when enabled");
+        passed &= Expect(updates[0].Name == "2026-01-23_auth_00.sql", "Pending import should keep sorted update filenames");
+        passed &= Expect(updates[1].Name == "2026-03-01_auth_00.sql", "Pending import should prefer updates over pending duplicates");
+        passed &= ExpectEqual(updates[1].Path, (updatesDir / "2026-03-01_auth_00.sql").string(),
+            "Pending import should keep the updates-directory path for duplicate names");
+        passed &= Expect(updates[2].Name == "pending_auth_fix.sql", "Pending import should discover pending-only SQL files");
+        passed &= ExpectEqual(updates[2].Path, (pendingDir / "pending_auth_fix.sql").string(),
+            "Pending import should return full pending update paths");
+        passed &= Expect(updates[2].Hash == Skyfire::Database::CalculateStableSqlHash("SELECT 3;"),
+            "Pending import should hash pending update file contents");
 
         std::filesystem::remove_all(root);
 

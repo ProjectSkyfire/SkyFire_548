@@ -64,6 +64,8 @@ namespace
 
         options.AllowUpdateHashMismatch =
             sConfigMgr->GetBoolDefault("CharacterDatabase.AllowUpdateHashMismatch", true);
+        options.ImportPendingUpdates =
+            sConfigMgr->GetBoolDefault("CharacterDatabase.ImportPendingUpdates", false);
 
         return options;
     }
@@ -79,6 +81,8 @@ namespace
 
         options.AllowUpdateHashMismatch =
             sConfigMgr->GetBoolDefault("WorldDatabase.AllowUpdateHashMismatch", true);
+        options.ImportPendingUpdates =
+            sConfigMgr->GetBoolDefault("WorldDatabase.ImportPendingUpdates", false);
 
         return options;
     }
