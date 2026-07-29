@@ -30,6 +30,7 @@
 #include "PassiveAI.h"
 #include "Pet.h"
 #include "PetAI.h"
+#include "PetTransportSupport.h"
 #include "Player.h"
 #include "QuestDef.h"
 #include "ReputationMgr.h"
@@ -383,7 +384,8 @@ void Unit::UpdateSplinePosition()
 
     m_movesplineTimer.Reset(positionUpdateDelay);
     Movement::Location loc = movespline->ComputePosition();
-    if (GetTransGUID())
+    bool const hasTransport = GetTransGUID() != 0;
+    if (hasTransport)
     {
         Position& pos = m_movementInfo.transport.pos;
         pos.m_positionX = loc.x;
@@ -399,7 +401,7 @@ void Unit::UpdateSplinePosition()
         loc.orientation = GetOrientation();
 
     // Ground spline paths can interpolate below terrain on hills; snap server position to vmap.
-    if (GetTypeId() == TypeID::TYPEID_UNIT && !movespline->isFalling())
+    if (Skyfire::PetTransport::ShouldApplySplineGroundClamp(hasTransport, GetTypeId() == TypeID::TYPEID_UNIT, movespline->isFalling()))
     {
         Creature const* creature = ToCreature();
         CreatureTemplate const* cInfo = creature->GetCreatureTemplate();
@@ -3653,11 +3655,22 @@ void Unit::Mount(uint32 mount, uint32 VehicleId, uint32 creatureEntry)
         if (pet)
         {
             Battleground* bg = ToPlayer()->GetBattleground();
-            // don't unsummon pet in arena but SetFlag UNIT_FLAG_STUNNED to disable pet's interface
-            if (bg && bg->isArena())
-                pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-            else
+            bool hasFlyingMountSpeedAura = false;
+            if (HasAuraType(SPELL_AURA_MOUNTED))
+                if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAuraEffectsByType(SPELL_AURA_MOUNTED).front()->GetAmount()))
+                    if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(mountCapability->SpeedModSpell))
+                        hasFlyingMountSpeedAura = spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
+
+            if (Skyfire::PetTransport::ShouldTemporarilyUnsummonMountedPet(bg && !bg->isArena(), hasFlyingMountSpeedAura))
                 player->UnsummonPetTemporaryIfAny();
+            else if (!player->GetTransport())
+            {
+                pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                pet->AI()->EnterEvadeMode();
+            }
+            else if (Skyfire::PetTransport::ShouldClearMountedPetStunForTransport(player->IsMounted(),
+                player->GetTransport() != NULL, pet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED)))
+                pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         }
 
         player->SendMovementSetCollisionHeight(player->GetCollisionHeight(true));
@@ -6766,7 +6779,8 @@ void Unit::SetStunned(bool apply)
 
         // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
         Unit* owner = GetOwner();
-        if (!owner || (owner->GetTypeId() == TypeID::TYPEID_PLAYER && !owner->ToPlayer()->IsMounted()))
+        if (!owner || (owner->GetTypeId() == TypeID::TYPEID_PLAYER
+                && (!owner->ToPlayer()->IsMounted() || owner->ToPlayer()->GetTransport())))
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
         if (!HasUnitState(UNIT_STATE_ROOT))         // prevent moving if it also has root effect

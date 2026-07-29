@@ -9,9 +9,15 @@
 #include "Errors.h"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
+#include "PetTransportSupport.h"
 #include "Player.h"
 #include "TargetedMovementGenerator.h"
 #include "World.h"
+
+namespace
+{
+    float const TransportPetFollowTolerance = 0.25f;
+}
 
 template<class T, typename D>
 void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool updateDestination)
@@ -26,6 +32,37 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
         return;
 
     float x, y, z;
+
+    if (Skyfire::PetTransport::ShouldUseTransportLocalPetFollow(owner->IsPet(),
+            owner->GetOwnerGUID() == i_target->GetGUID(), owner->GetTransport() != NULL,
+            owner->GetTransport() && owner->GetTransport() == i_target->GetTransport(), i_offset > 0.0f))
+    {
+        Skyfire::PetTransport::PassengerOffset const offset = Skyfire::PetTransport::CalculateFollowerPosition(
+            i_target->GetTransOffsetX(), i_target->GetTransOffsetY(), i_target->GetTransOffsetZ(), i_target->GetTransOffsetO(),
+            i_target->GetCombatReach(), 0.0f, i_offset, i_angle);
+
+        if (!Skyfire::PetTransport::ShouldMoveTransportPetToFollowOffset(owner->GetTransOffsetX(), owner->GetTransOffsetY(),
+                owner->GetTransOffsetZ(), offset.X, offset.Y, offset.Z, TransportPetFollowTolerance))
+            return;
+
+        delete i_path;
+        i_path = NULL;
+
+        D::_addUnitStateMove(owner);
+        i_targetReached = false;
+        i_recalculateTravel = false;
+        owner->AddUnitState(UNIT_STATE_CHASE);
+
+        Movement::MoveSplineInit init(owner);
+        init.DisableTransportPathTransformations();
+        init.MoveTo(offset.X, offset.Y, offset.Z, false, true);
+        init.SetWalk(((D*)this)->EnableWalking());
+        if (i_angle == 0.f)
+            init.SetFacing(i_target.getTarget());
+
+        init.Launch();
+        return;
+    }
 
     if (updateDestination || !i_path)
     {

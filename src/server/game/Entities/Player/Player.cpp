@@ -49,6 +49,8 @@
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"
 #include "Pet.h"
+#include "PetTransportController.h"
+#include "PetTransportSupport.h"
 #include "QuestDef.h"
 #include "ReputationMgr.h"
 #include "PlayerRestState.h"
@@ -1721,9 +1723,19 @@ void Player::Update(uint32 p_time)
     }
 
     Pet* pet = GetPet();
-    if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange()) && !pet->isPossessed())
-        //if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGUID() && (pet->GetGUID() != GetCharmGUID())))
-        RemovePet(pet, PET_SAVE_NOT_IN_SLOT, true);
+    if (pet)
+    {
+        Transport* transport = GetTransport();
+        if (Skyfire::PetTransport::ShouldTryBoardPetBeforeOwnerRangeRemoval(transport != NULL, true, pet->GetTransport() == transport))
+            Skyfire::PetTransport::BoardOwnerHunterPet(this, transport);
+
+        bool const petOnOwnerTransport = transport && pet->GetTransport() == transport;
+        bool const petInVisibilityRange = pet->IsWithinDistInMap(this, GetMap()->GetVisibilityRange());
+        if (Skyfire::PetTransport::ShouldRemovePetForOwnerRange(true, pet->isPossessed(), petOnOwnerTransport,
+                petInVisibilityRange, pet->HasTransportExitGrace()))
+            //if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGUID() && (pet->GetGUID() != GetCharmGUID())))
+            RemovePet(pet, PET_SAVE_NOT_IN_SLOT, true);
+    }
 
     //we should execute delayed teleports only for alive(!) players
     //because we don't want player's ghost teleported from graveyard
@@ -2252,7 +2264,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
 
             // remove pet on map change
-            if (pet)
+            if (pet && !(options & TELE_TO_NOT_UNSUMMON_PET))
                 UnsummonPetTemporaryIfAny();
 
             GetBattlePetMgr()->UnSummonCurrentBattlePet(true);
@@ -21141,7 +21153,20 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
 
 bool Player::IsPetNeedBeTemporaryUnsummoned() const
 {
-    return !IsInWorld() || !IsAlive() || IsMounted(); /*+in flight*/
+    if (!IsInWorld() || !IsAlive())
+        return true;
+
+    if (!IsMounted())
+        return false;
+
+    bool hasFlyingMountSpeedAura = false;
+    if (HasAuraType(SPELL_AURA_MOUNTED))
+        if (MountCapabilityEntry const* mountCapability = sMountCapabilityStore.LookupEntry(GetAuraEffectsByType(SPELL_AURA_MOUNTED).front()->GetAmount()))
+            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(mountCapability->SpeedModSpell))
+                hasFlyingMountSpeedAura = spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED);
+
+    Battleground* bg = GetBattleground();
+    return Skyfire::PetTransport::ShouldTemporarilyUnsummonMountedPet(bg && !bg->isArena(), hasFlyingMountSpeedAura); /*+in flight*/
 }
 
 bool Player::CanSeeSpellClickOn(Creature const* c) const

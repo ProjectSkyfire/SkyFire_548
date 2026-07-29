@@ -13,6 +13,8 @@
 #include "MovementStructures.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
+#include "PetTransportController.h"
+#include "PetTransportSupport.h"
 #include "Player.h"
 #include "SpellAuras.h"
 #include "Transport.h"
@@ -227,7 +229,8 @@ bool ValidateTransportMovementInfo(WorldPacket& recvPacket, MovementInfo const& 
 
     // transports size limited
     // (also received at zeppelin leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
-    if (movementInfo.transport.pos.GetPositionX() > 50 || movementInfo.transport.pos.GetPositionY() > 50 || movementInfo.transport.pos.GetPositionZ() > 50)
+    if (!Skyfire::PetTransport::IsPassengerOffsetWithinLimit(movementInfo.transport.pos.GetPositionX(),
+        movementInfo.transport.pos.GetPositionY(), movementInfo.transport.pos.GetPositionZ(), 50.0f))
     {
         recvPacket.rfinish();                          // prevent warnings spam
         return false;
@@ -504,6 +507,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     if (!ValidateMovementInfo(mover, movementInfo))
         return;
 
+    Transport* pendingPetTransportRemoval = NULL;
+
     /* handle special cases */
     if (movementInfo.transport.guid)
     {
@@ -524,7 +529,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
             else if (plrMover->GetTransport()->GetGUID() != movementInfo.transport.guid)
             {
                 bool foundNewTransport = false;
-                plrMover->m_transport->RemovePassenger(plrMover);
+                Transport* oldTransport = plrMover->m_transport;
+                oldTransport->RemovePassenger(plrMover);
                 if (Transport* transport = plrMover->GetMap()->GetTransport(movementInfo.transport.guid))
                 {
                     foundNewTransport = true;
@@ -536,6 +542,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
                 {
                     plrMover->m_transport = NULL;
                     movementInfo.ResetTransport();
+                    pendingPetTransportRemoval = oldTransport;
                 }
             }
         }
@@ -549,6 +556,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     }
     else if (plrMover && plrMover->GetTransport())                // if we were on a transport, leave
     {
+        pendingPetTransportRemoval = plrMover->m_transport;
         plrMover->m_transport->RemovePassenger(plrMover);
         plrMover->m_transport = NULL;
         movementInfo.ResetTransport();
@@ -575,6 +583,9 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     movementInfo.guid = mover->GetGUID();
     mover->m_movementInfo = movementInfo;
 
+    if (plrMover && plrMover->GetTransport())
+        Skyfire::PetTransport::BoardOwnerHunterPet(plrMover, plrMover->GetTransport());
+
     /*----------------------*/
     /* process position-change */
     // this is almost never true (not sure why it is sometimes, but it is), normally use mover->IsVehicle()
@@ -595,6 +606,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     }
 
     mover->UpdatePosition(movementInfo.pos);
+
+    if (plrMover && pendingPetTransportRemoval)
+        Skyfire::PetTransport::RemoveOwnerHunterPet(plrMover, pendingPetTransportRemoval);
+
+    if (plrMover && plrMover->GetTransport())
+        Skyfire::PetTransport::BoardOwnerHunterPet(plrMover, plrMover->GetTransport());
 
     if (mover->GetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE) == 10)
     {

@@ -12,6 +12,8 @@
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Pet.h"
+#include "PetTransportController.h"
+#include "PetTransportSupport.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
@@ -25,7 +27,7 @@
 Pet::Pet(Player* owner, PetType type) :
     Guardian(NULL, owner, true), m_petSpec(0), m_usedTalentCount(0), m_removed(false),
     m_petType(type), m_duration(0), m_auraRaidUpdateMask(0), m_loading(false),
-    m_declinedname(NULL)
+    m_regenTimer(PET_FOCUS_REGEN_INTERVAL), m_transportExitGraceTimer(0), m_declinedname(NULL)
 {
     ASSERT(m_owner->GetTypeId() == TypeID::TYPEID_PLAYER);
 
@@ -40,7 +42,6 @@ Pet::Pet(Player* owner, PetType type) :
     }
 
     m_name = "Pet";
-    m_regenTimer = PET_FOCUS_REGEN_INTERVAL;
 }
 
 Pet::~Pet()
@@ -80,6 +81,11 @@ void Pet::RemoveFromWorld()
         Unit::RemoveFromWorld();
         sObjectAccessor->RemoveObject(this);
     }
+}
+
+void Pet::StartTransportExitGrace(uint32 duration)
+{
+    m_transportExitGraceTimer = duration;
 }
 
 bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool current)
@@ -294,7 +300,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     */
 
     owner->SetMinion(this, true);
+    Skyfire::PetTransport::AttachHunterPetToOwnerTransport(owner, this, owner->GetTransport());
     map->AddToMap(this->ToCreature());
+    Skyfire::PetTransport::BoardOwnerHunterPet(owner, owner->GetTransport());
 
     uint16 specId = fields[16].GetUInt16();
     SetSpec(specId);
@@ -538,6 +546,14 @@ void Pet::Update(uint32 diff)
     if (m_loading)
         return;
 
+    if (m_transportExitGraceTimer)
+    {
+        if (m_transportExitGraceTimer <= diff)
+            m_transportExitGraceTimer = 0;
+        else
+            m_transportExitGraceTimer -= diff;
+    }
+
     switch (m_deathState)
     {
         case DeathState::CORPSE:
@@ -553,7 +569,25 @@ void Pet::Update(uint32 diff)
         {
             // unsummon pet that lost owner
             Player* owner = GetOwner();
-            if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityRange()) && !isPossessed()) || (isControlled() && !owner->GetPetGUID()))
+            bool petOnOwnerTransport = false;
+            bool petInVisibilityRange = false;
+            if (owner)
+            {
+                Transport* ownerTransport = owner->GetTransport();
+                petOnOwnerTransport = ownerTransport && GetTransport() == ownerTransport;
+                if (Skyfire::PetTransport::ShouldReattachPetDuringOwnerTransportUpdate(ownerTransport != NULL,
+                        getPetType() == PetType::HUNTER_PET, isControlled(), IsAlive(), GetOwnerGUID() == owner->GetGUID(),
+                        petOnOwnerTransport))
+                {
+                    Skyfire::PetTransport::AttachHunterPetToOwnerTransport(owner, this, ownerTransport);
+                    petOnOwnerTransport = ownerTransport && GetTransport() == ownerTransport;
+                }
+
+                petInVisibilityRange = IsWithinDistInMap(owner, GetMap()->GetVisibilityRange());
+            }
+
+            if (!owner || Skyfire::PetTransport::ShouldRemovePetForOwnerRange(true, isPossessed(), petOnOwnerTransport,
+                    petInVisibilityRange, HasTransportExitGrace()) || (isControlled() && !owner->GetPetGUID()))
                 //if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
             {
                 Remove(PET_SAVE_NOT_IN_SLOT, true);

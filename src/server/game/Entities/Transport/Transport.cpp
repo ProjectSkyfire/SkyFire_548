@@ -604,8 +604,7 @@ bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
             switch (obj->GetTypeId())
             {
                 case TypeID::TYPEID_UNIT:
-                    if (!IS_PLAYER_GUID(obj->ToUnit()->GetOwnerGUID()))  // pets should be teleported with player
-                        obj->ToCreature()->FarTeleportTo(newMap, destX, destY, destZ, destO);
+                    obj->ToCreature()->FarTeleportTo(newMap, destX, destY, destZ, destO);
                     break;
                 case TypeID::TYPEID_GAMEOBJECT:
                 {
@@ -617,7 +616,7 @@ bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
                     break;
                 }
                 case TypeID::TYPEID_PLAYER:
-                    if (!obj->ToPlayer()->TeleportTo(newMapid, destX, destY, destZ, destO, TELE_TO_NOT_LEAVE_TRANSPORT))
+                    if (!obj->ToPlayer()->TeleportTo(newMapid, destX, destY, destZ, destO, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_UNSUMMON_PET))
                         _passengers.erase(obj);
                     break;
                 default:

@@ -54,6 +54,9 @@ public:
 
     void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
     void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
+    void StartTransportExitGrace(uint32 duration);
+    void ClearTransportExitGrace() { m_transportExitGraceTimer = 0; }
+    bool HasTransportExitGrace() const { return m_transportExitGraceTimer != 0; }
 
     uint8 GetPetAutoSpellSize() const { return m_autospells.size(); }
     uint32 GetPetAutoSpellOnPos(uint8 pos) const
@@ -148,6 +151,7 @@ protected:
     uint64  m_auraRaidUpdateMask;
     bool    m_loading;
     uint32  m_regenTimer;
+    uint32  m_transportExitGraceTimer;
 
     DeclinedName* m_declinedname;
 
