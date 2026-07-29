@@ -5,114 +5,111 @@
 
 #include "LegacyTransportSupport.h"
 
+#include <algorithm>
+#include <vector>
+
 namespace LegacyTransport
 {
     namespace
     {
-        bool IsDeeprunSubwayMap(uint32 mapId, uint32 spawnMode)
+        uint32 const SupportedLegacyTransportFlags = LEGACY_TRANSPORT_FLAG_PRESERVE_PASSENGER_GAMEOBJECT_VISIBILITY;
+
+        typedef std::vector<LegacyTransportEntry> LegacyTransportEntryStore;
+
+        LegacyTransportEntryStore& GetLegacyTransportEntries()
         {
-            return mapId == 369 && spawnMode == 0;
+            static LegacyTransportEntryStore entries;
+            return entries;
         }
 
-        bool IsThunderBluffMesaElevatorMap(uint32 mapId, uint32 spawnMode)
+        LegacyTransportEntryStore::const_iterator FindByDbEntry(uint32 dbEntry)
         {
-            return mapId == 1 && spawnMode == 0;
-        }
-
-        bool IsThunderBluffMesaElevatorDbEntry(uint32 dbEntry)
-        {
-            switch (dbEntry)
+            LegacyTransportEntryStore const& entries = GetLegacyTransportEntries();
+            return std::find_if(entries.begin(), entries.end(), [dbEntry](LegacyTransportEntry const& entry)
             {
-                case 4170:
-                case 4171:
-                case 11898:
-                case 11899:
-                case 47296:
-                case 47297:
-                    return true;
-                default:
-                    return false;
-            }
+                return entry.DbEntry == dbEntry;
+            });
         }
+
+        LegacyTransportEntryStore::const_iterator FindByClientEntry(uint32 clientEntry)
+        {
+            LegacyTransportEntryStore const& entries = GetLegacyTransportEntries();
+            return std::find_if(entries.begin(), entries.end(), [clientEntry](LegacyTransportEntry const& entry)
+            {
+                return entry.ClientEntry == clientEntry;
+            });
+        }
+
+        bool HasFlag(LegacyTransportEntry const& entry, uint32 flag)
+        {
+            return (entry.Flags & flag) != 0;
+        }
+    }
+
+    void ClearLegacyTransportEntries()
+    {
+        GetLegacyTransportEntries().clear();
+    }
+
+    bool AddLegacyTransportEntry(LegacyTransportEntry const& entry)
+    {
+        if (!entry.DbEntry || !entry.ClientEntry || !entry.SpawnMask || (entry.Flags & ~SupportedLegacyTransportFlags))
+            return false;
+
+        LegacyTransportEntryStore& entries = GetLegacyTransportEntries();
+        for (LegacyTransportEntryStore::const_iterator itr = entries.begin(); itr != entries.end(); ++itr)
+        {
+            if (itr->DbEntry == entry.DbEntry && itr->ClientEntry != entry.ClientEntry)
+                return false;
+
+            if (itr->DbEntry == entry.DbEntry && itr->MapId == entry.MapId && itr->SpawnMask == entry.SpawnMask)
+                return false;
+        }
+
+        entries.push_back(entry);
+        return true;
     }
 
     bool IsDeeprunSubwayDbEntry(uint32 dbEntry)
     {
-        switch (dbEntry)
-        {
-            case 176080:
-            case 176081:
-            case 176082:
-            case 176083:
-            case 176084:
-            case 176085:
-                return true;
-            default:
-                return false;
-        }
+        LegacyTransportEntryStore::const_iterator itr = FindByDbEntry(dbEntry);
+        return itr != GetLegacyTransportEntries().end() && HasFlag(*itr, LEGACY_TRANSPORT_FLAG_PRESERVE_PASSENGER_GAMEOBJECT_VISIBILITY);
     }
 
     bool IsDeeprunSubwayClientEntry(uint32 clientEntry)
     {
-        switch (clientEntry)
-        {
-            case 218203:
-            case 218204:
-            case 218205:
-            case 218206:
-            case 218207:
-            case 218208:
-                return true;
-            default:
-                return false;
-        }
+        LegacyTransportEntryStore::const_iterator itr = FindByClientEntry(clientEntry);
+        return itr != GetLegacyTransportEntries().end() && HasFlag(*itr, LEGACY_TRANSPORT_FLAG_PRESERVE_PASSENGER_GAMEOBJECT_VISIBILITY);
     }
 
     bool IsLocalTransportDbEntry(uint32 dbEntry)
     {
-        return IsDeeprunSubwayDbEntry(dbEntry) || IsThunderBluffMesaElevatorDbEntry(dbEntry);
+        return FindByDbEntry(dbEntry) != GetLegacyTransportEntries().end();
     }
 
     uint32 GetClientEntryForDbEntry(uint32 dbEntry)
     {
-        switch (dbEntry)
-        {
-            case 176080:
-                return 218203;
-            case 176081:
-                return 218204;
-            case 176082:
-                return 218205;
-            case 176083:
-                return 218206;
-            case 176084:
-                return 218207;
-            case 176085:
-                return 218208;
-            default:
-                return dbEntry;
-        }
+        LegacyTransportEntryStore::const_iterator itr = FindByDbEntry(dbEntry);
+        return itr != GetLegacyTransportEntries().end() ? itr->ClientEntry : dbEntry;
     }
 
     uint32 GetAllowedSpawnMask(uint32 dbEntry, uint32 mapId, uint32 spawnMask)
     {
         uint32 allowedSpawnMask = 0;
-        for (uint8 i = 0; spawnMask != 0; ++i, spawnMask >>= 1)
-            if ((spawnMask & 1) && IsAllowedOnMap(dbEntry, mapId, i))
-                allowedSpawnMask |= 1u << i;
+        LegacyTransportEntryStore const& entries = GetLegacyTransportEntries();
+        for (LegacyTransportEntryStore::const_iterator itr = entries.begin(); itr != entries.end(); ++itr)
+            if (itr->DbEntry == dbEntry && itr->MapId == mapId)
+                allowedSpawnMask |= itr->SpawnMask & spawnMask;
 
         return allowedSpawnMask;
     }
 
     bool IsAllowedOnMap(uint32 dbEntry, uint32 mapId, uint32 spawnMode)
     {
-        if (IsDeeprunSubwayDbEntry(dbEntry))
-            return IsDeeprunSubwayMap(mapId, spawnMode);
+        if (spawnMode >= 32)
+            return false;
 
-        if (IsThunderBluffMesaElevatorDbEntry(dbEntry))
-            return IsThunderBluffMesaElevatorMap(mapId, spawnMode);
-
-        return false;
+        return (GetAllowedSpawnMask(dbEntry, mapId, 1u << spawnMode) & (1u << spawnMode)) != 0;
     }
 
     bool ShouldPreservePassengerGameObjectVisibility(uint32 clientEntry)

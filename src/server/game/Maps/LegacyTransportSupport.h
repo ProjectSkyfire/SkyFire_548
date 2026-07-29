@@ -10,6 +10,21 @@
 
 namespace LegacyTransport
 {
+    enum LegacyTransportFlags
+    {
+        LEGACY_TRANSPORT_FLAG_NONE = 0x00,
+        LEGACY_TRANSPORT_FLAG_PRESERVE_PASSENGER_GAMEOBJECT_VISIBILITY = 0x01
+    };
+
+    struct LegacyTransportEntry
+    {
+        uint32 DbEntry;
+        uint32 ClientEntry;
+        uint32 MapId;
+        uint32 SpawnMask;
+        uint32 Flags;
+    };
+
     struct LegacyTransportSpawnDiagnostic
     {
         uint32 DbGuid;
@@ -24,6 +39,10 @@ namespace LegacyTransport
         uint32 AnimTime;
         uint32 AnimNodes;
     };
+
+    void ClearLegacyTransportEntries();
+    bool AddLegacyTransportEntry(LegacyTransportEntry const& entry);
+    void LoadLegacyTransportEntries();
 
     bool IsLocalTransportDbEntry(uint32 dbEntry);
     bool IsDeeprunSubwayDbEntry(uint32 dbEntry);

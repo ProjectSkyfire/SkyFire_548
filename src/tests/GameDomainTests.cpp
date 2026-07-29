@@ -1683,6 +1683,18 @@ namespace
     {
         bool passed = true;
 
+        LegacyTransport::ClearLegacyTransportEntries();
+
+        LegacyTransport::LegacyTransportEntry firstDeeprunTransport =
+            { 176080, 218203, 369, 1, LegacyTransport::LEGACY_TRANSPORT_FLAG_PRESERVE_PASSENGER_GAMEOBJECT_VISIBILITY };
+        LegacyTransport::LegacyTransportEntry lastDeeprunTransport =
+            { 176085, 218208, 369, 1, LegacyTransport::LEGACY_TRANSPORT_FLAG_PRESERVE_PASSENGER_GAMEOBJECT_VISIBILITY };
+
+        passed &= Expect(LegacyTransport::AddLegacyTransportEntry(firstDeeprunTransport),
+            "Deeprun Tram visibility-preservation test data should load");
+        passed &= Expect(LegacyTransport::AddLegacyTransportEntry(lastDeeprunTransport),
+            "Deeprun Tram visibility-preservation test data should load");
+
         passed &= Expect(LegacyTransport::ShouldPreservePassengerGameObjectVisibility(218203),
             "Deeprun Tram client entry 218203 should preserve station gameobjects while riding");
         passed &= Expect(LegacyTransport::ShouldPreservePassengerGameObjectVisibility(218208),
@@ -1691,6 +1703,8 @@ namespace
             "Database-only Deeprun Tram entry should not be used for passenger visibility preservation");
         passed &= Expect(!LegacyTransport::ShouldPreservePassengerGameObjectVisibility(1),
             "Unrelated transports should not preserve passenger gameobject visibility");
+
+        LegacyTransport::ClearLegacyTransportEntries();
 
         return passed;
     }

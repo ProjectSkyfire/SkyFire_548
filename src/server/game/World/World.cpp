@@ -41,6 +41,7 @@
 #include "InstanceSaveMgr.h"
 #include "ItemEnchantmentMgr.h"
 #include "Language.h"
+#include "LegacyTransportSupport.h"
 #include "LFGMgr.h"
 #ifdef ELUNA
 void StartEluna(bool restart);
@@ -1489,6 +1490,9 @@ void World::SetInitialWorldSettings()
 
     SF_LOG_INFO("server.loading", "Loading Transport templates...");
     sTransportMgr->LoadTransportTemplates();
+
+    SF_LOG_INFO("server.loading", "Loading Legacy Local Transport Data...");
+    LegacyTransport::LoadLegacyTransportEntries();
 
     SF_LOG_INFO("server.loading", "Loading Spell Rank Data...");
     sSpellMgr->LoadSpellRanks();
