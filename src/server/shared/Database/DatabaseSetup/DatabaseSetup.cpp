@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <set>
 #include <sstream>
 #include <utility>
 
@@ -206,6 +207,7 @@ namespace Database
         options.SqlPath = std::move(sqlPath);
         options.BaseFileName = "auth_database.sql";
         options.UpdatesDirectory = "updates/auth";
+        options.PendingUpdatesDirectory = "pending_updates/auth";
 
         return options;
     }
@@ -225,6 +227,7 @@ namespace Database
         options.SqlPath = std::move(sqlPath);
         options.BaseFileName = "characters_database.sql";
         options.UpdatesDirectory = "updates/characters";
+        options.PendingUpdatesDirectory = "pending_updates/characters";
 
         return options;
     }
@@ -248,6 +251,7 @@ namespace Database
         options.ExternalBaseFile = std::move(externalBaseFile);
         options.RequiredBaseFileNames.push_back("stored_procs.sql");
         options.UpdatesDirectory = "updates/world";
+        options.PendingUpdatesDirectory = "pending_updates/world";
 
         return options;
     }
@@ -275,29 +279,60 @@ namespace Database
 
     std::vector<SqlUpdateFile> DiscoverSqlUpdates(SetupOptions const& options)
     {
-        std::vector<std::string> names;
-
         if (options.SqlPath.empty())
             return {};
 
-        std::filesystem::path updatesDirectory = std::filesystem::path(options.SqlPath) / options.UpdatesDirectory;
-        updatesDirectory.make_preferred();
-        if (!std::filesystem::exists(updatesDirectory) || !std::filesystem::is_directory(updatesDirectory))
-            return {};
-
-        for (std::filesystem::directory_entry const& entry : std::filesystem::directory_iterator(updatesDirectory))
+        auto discoverFromDirectory = [](std::filesystem::path directory) -> std::vector<SqlUpdateFile>
         {
-            if (entry.is_regular_file())
-                names.push_back(entry.path().filename().string());
+            directory.make_preferred();
+            if (!std::filesystem::exists(directory) || !std::filesystem::is_directory(directory))
+                return {};
+
+            std::vector<std::string> names;
+            for (std::filesystem::directory_entry const& entry : std::filesystem::directory_iterator(directory))
+            {
+                if (entry.is_regular_file())
+                    names.push_back(entry.path().filename().string());
+            }
+
+            std::vector<SqlUpdateFile> updates = BuildSortedSqlUpdateList(names, directory.string());
+            for (SqlUpdateFile& update : updates)
+            {
+                std::string contents;
+                if (ReadTextFile(update.Path, contents))
+                    update.Hash = CalculateStableSqlHash(contents);
+            }
+
+            return updates;
+        };
+
+        std::vector<SqlUpdateFile> updates =
+            discoverFromDirectory(std::filesystem::path(options.SqlPath) / options.UpdatesDirectory);
+
+        if (!options.ImportPendingUpdates || options.PendingUpdatesDirectory.empty())
+            return updates;
+
+        std::vector<SqlUpdateFile> pendingUpdates =
+            discoverFromDirectory(std::filesystem::path(options.SqlPath) / options.PendingUpdatesDirectory);
+        if (pendingUpdates.empty())
+            return updates;
+
+        std::set<std::string> knownNames;
+        for (SqlUpdateFile const& update : updates)
+            knownNames.insert(update.Name);
+
+        for (SqlUpdateFile& update : pendingUpdates)
+        {
+            if (!knownNames.insert(update.Name).second)
+                continue;
+
+            updates.push_back(std::move(update));
         }
 
-        std::vector<SqlUpdateFile> updates = BuildSortedSqlUpdateList(names, updatesDirectory.string());
-        for (SqlUpdateFile& update : updates)
+        std::sort(updates.begin(), updates.end(), [](SqlUpdateFile const& left, SqlUpdateFile const& right)
         {
-            std::string contents;
-            if (ReadTextFile(update.Path, contents))
-                update.Hash = CalculateStableSqlHash(contents);
-        }
+            return left.Name < right.Name;
+        });
 
         return updates;
     }

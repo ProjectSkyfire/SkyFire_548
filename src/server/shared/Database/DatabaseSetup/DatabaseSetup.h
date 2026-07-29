@@ -25,12 +25,14 @@ namespace Database
         bool AutoCreate = false;
         bool AutoBaseline = false;
         bool AllowUpdateHashMismatch = false;
+        bool ImportPendingUpdates = false;
         std::string Domain;
         std::string SqlPath;
         std::string BaseFileName;
         std::string ExternalBaseFile;
         std::vector<std::string> RequiredBaseFileNames;
         std::string UpdatesDirectory;
+        std::string PendingUpdatesDirectory;
     };
 
     struct SetupState
