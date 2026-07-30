@@ -47,14 +47,16 @@ DELETE FROM `smart_scripts` WHERE `entryorguid`=42419;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (42419, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 0, 80, 4241900, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Respawn - Run Script');
 
+-- 12363 blue -- holo 46684
 DELETE FROM `smart_scripts` WHERE `entryorguid`=4241900;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(4241900, 9, 0, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 0'),
-(4241900, 9, 1, 0, 0, 0, 100, 0, 23000, 23000, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 1'),
-(4241900, 9, 2, 0, 0, 0, 100, 0, 16000, 16000, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 2'),
-(4241900, 9, 3, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 3'),
-(4241900, 9, 4, 0, 0, 0, 100, 0, 17000, 17000, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 4'),
-(4241900, 9, 5, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 11, 42422, 15, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Set Data to Image of Hinkles Fastblast'),
+(4241900, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 43, 46684, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Mount Up'),
+(4241900, 9, 1, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 0'),
+(4241900, 9, 2, 0, 0, 0, 100, 0, 23000, 23000, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 1'),
+(4241900, 9, 3, 0, 0, 0, 100, 0, 16000, 16000, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 2'),
+(4241900, 9, 4, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 3'),
+(4241900, 9, 5, 0, 0, 0, 100, 0, 17000, 17000, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Talk 4'),
+(4241900, 9, 6, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 11, 42422, 15, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Set Data to Image of Hinkles Fastblast'),
 (4241900, 9, 7, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 45, 1, 1, 0, 0, 0, 0, 11, 42420, 15, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Set Data to Image of "Doc" Cogspin'),
 (4241900, 9, 8, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 11, 51347, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Cast Spell Teleport'),
 (4241900, 9, 9, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 41, 1000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of High Tinker Mekkatorque - On Script - Despawn');
@@ -64,6 +66,7 @@ UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=42422;
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=42422;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(42422, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 0, 43, 12363, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of Hinkles Fastblast - On Respawn - Mount Up'),
 (42422, 0, 1, 0, 38, 0, 100, 0, 1, 1, 1000, 1000, 0, 80, 4242200, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of Hinkles Fastblast - Data Set - Run Script');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=4242200;
@@ -76,6 +79,7 @@ UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry`=42420;
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=42420;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(42420, 0, 0, 0, 11, 0, 100, 0, 0, 0, 0, 0, 0, 43, 12363, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of Hinkles Fastblast - On Respawn - Mount Up'),
 (42420, 0, 1, 0, 38, 0, 100, 0, 1, 1, 1000, 1000, 0, 80, 4242000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Image of Hinkles Fastblast - Data Set - Run Script');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid`=4242000;
