@@ -4,6 +4,7 @@
 */
 
 #include "AchievementMgr.h"
+#include "AchievementCriteriaPackets.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
 #include "BattlePet.h"
@@ -448,7 +449,7 @@ void AchievementMgr<Guild>::RemoveCriteriaProgress(CriteriaEntry const* entry)
 }
 
 template<class T>
-void AchievementMgr<T>::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1, uint64 miscValue2, bool /*evenIfCriteriaComplete*/)
+void AchievementMgr<T>::ResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1, uint64 miscValue2, bool evenIfCriteriaComplete)
 {
     SF_LOG_DEBUG("achievement", "ResetAchievementCriteria(%u, " UI64FMTD ", " UI64FMTD ")", type, miscValue1, miscValue2);
 
@@ -461,9 +462,15 @@ void AchievementMgr<T>::ResetAchievementCriteria(AchievementCriteriaTypes type, 
     {
         CriteriaEntry const* achievementCriteria = (*i);
 
-        // don't update already completed criteria if not forced or achievement already complete
-        if (!IsCompletedCriteria(achievementCriteria))
-            RemoveCriteriaProgress(achievementCriteria);
+        if (achievementCriteria->failEvent != miscValue1)
+            continue;
+
+        if (achievementCriteria->failAsset && achievementCriteria->failAsset != miscValue2)
+            continue;
+
+        // Keep reset criteria in sync with persistence without emitting criteria delete packets.
+        if (evenIfCriteriaComplete || !IsCompletedCriteria(achievementCriteria))
+            SetCriteriaProgress(achievementCriteria, 0, GetOwner(), PROGRESS_SET);
     }
 }
 
@@ -952,58 +959,42 @@ void AchievementMgr<T>::SendCriteriaUpdate(CriteriaEntry const* /*entry*/, Crite
 template<>
 void AchievementMgr<Player>::SendCriteriaUpdate(CriteriaEntry const* entry, CriteriaProgress const* progress, uint32 timeElapsed, bool timedCompleted) const
 {
-    WorldPacket data(SMSG_ACCOUNT_CRITERIA_UPDATE, 4 + 4 + 4 + 4 + 8 + 4);
     ObjectGuid guid = GetOwner()->GetGUID();
-    ObjectGuid counter = progress->counter;
 
-    data.WriteBit(counter[4]);
-    data.WriteBit(guid[2]);
-    data.WriteBit(counter[2]);
+    WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
     data.WriteBit(guid[4]);
-    data.WriteBit(counter[0]);
-    data.WriteBit(counter[5]);
-    data.WriteBit(guid[3]);
-    data.WriteBit(counter[3]);
     data.WriteBit(guid[6]);
-    data.WriteBit(counter[6]);
-    data.WriteBit(guid[1]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[3]);
     data.WriteBit(guid[7]);
-    data.WriteBit(counter[1]);
-
-    data.WriteBits(0, 4);
-
+    data.WriteBit(guid[1]);
     data.WriteBit(guid[5]);
-    data.WriteBit(counter[7]);
     data.WriteBit(guid[0]);
 
-    data.FlushBits();
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[2]);
 
-    data.WriteByteSeq(guid[7]);
-
-    data << uint32(timeElapsed);
     data << uint32(entry->ID);
 
-    data.WriteByteSeq(counter[7]);
+    if (!entry->timeLimit)
+        data << uint32(0);
+    else
+        data << uint32(timedCompleted ? 0 : 1);
 
-    data << uint32(timeElapsed);
-
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[1]);
 
     data.AppendPackedTime(progress->date);
+    data.WriteByteSeq(guid[4]);
 
-    data.WriteByteSeq(counter[0]);
-    data.WriteByteSeq(counter[1]);
-    data.WriteByteSeq(counter[2]);
-    data.WriteByteSeq(counter[3]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(counter[4]);
-    data.WriteByteSeq(counter[5]);
-    data.WriteByteSeq(guid[5]);
-    data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(counter[6]);
+    data << uint32(timeElapsed);
+    data << uint32(0);
+
+    data.WriteByteSeq(guid[7]);
     data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[6]);
+
+    data << uint64(progress->counter);
     SendPacket(&data);
 }
 
@@ -1810,6 +1801,9 @@ void AchievementMgr<T>::SetCriteriaProgress(CriteriaEntry const* entry, uint64 c
     progress->date = time(NULL); // set the date to the latest update.
     uint32 timeElapsed = 0; // @todo : Fix me
 
+    bool hasLinkedAchievement = false;
+    bool hasLiveEligibleAchievement = false;
+
     AchievementCriteriaTreeList criteriaList = sAchievementMgr->GetAchievementCriteriaTreeList(entry);
     for (AchievementCriteriaTreeList::const_iterator iter = criteriaList.begin(); iter != criteriaList.end(); ++iter)
     {
@@ -1817,6 +1811,11 @@ void AchievementMgr<T>::SetCriteriaProgress(CriteriaEntry const* entry, uint64 c
 
         if (!achievement)
             continue;
+
+        hasLinkedAchievement = true;
+        hasLiveEligibleAchievement = hasLiveEligibleAchievement
+            || (Skyfire::Achievements::IsLiveCriteriaTypeEligible(entry->type)
+                && Skyfire::Achievements::IsLiveCriteriaProgressEligible(achievement->flags));
 
         bool criteriaComplete = IsCompletedCriteriaForAchievement(entry, achievement);
 
@@ -1834,7 +1833,8 @@ void AchievementMgr<T>::SetCriteriaProgress(CriteriaEntry const* entry, uint64 c
             progress->CompletedGUID = referencePlayer->GetGUID();
     }
 
-    SendCriteriaUpdate(entry, progress, timeElapsed, false);
+    if (Skyfire::Achievements::ShouldSendLiveCriteriaProgress(hasLinkedAchievement, hasLiveEligibleAchievement))
+        SendCriteriaUpdate(entry, progress, timeElapsed, false);
 }
 
 template<class T>

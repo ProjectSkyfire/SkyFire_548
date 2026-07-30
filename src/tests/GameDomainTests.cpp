@@ -4,14 +4,17 @@
 */
 
 #include "Cell.h"
+#include "CombatPackets.h"
 #include "CurrencyFormulas.h"
 #include "AreaTableUtils.h"
+#include "AchievementCriteriaPackets.h"
 #include "DBCEnums.h"
 #include "GridDefines.h"
 #include "LegacyTransportSupport.h"
 #include "MapLifecycle.h"
 #include "ObjectAccessorLifecycle.h"
 #include "PlayerRestState.h"
+#include "PlayerPackets.h"
 #include "RuntimeMetrics.h"
 #include "SpellCalculations.h"
 #include "SpellAuraMetadata.h"
@@ -109,6 +112,55 @@ namespace
         return passed;
     }
 
+    bool TestPreResurrectPacketUsesPlayerGuid()
+    {
+        bool passed = true;
+
+        ObjectGuid playerGuid(UI64LIT(0x04000000053CC8E8));
+        WorldPacket packet = Skyfire::PlayerPackets::BuildPreResurrectPacket(playerGuid);
+
+        passed &= Expect(packet.GetOpcode() == SMSG_PRE_RESURRECT,
+            "Pre-resurrect builder should create SMSG_PRE_RESURRECT packets");
+        passed &= Expect(packet.size() == 6,
+            "Pre-resurrect packet should serialize the non-empty player guid");
+
+        uint8 const expected[] = { 0xD6, 0xC9, 0x05, 0xE9, 0x3D, 0x04 };
+        if (packet.size() == sizeof(expected))
+            for (size_t i = 0; i < sizeof(expected); ++i)
+                passed &= Expect(packet.contents()[i] == expected[i],
+                    "Pre-resurrect packet should keep the 5.4.8 guid byte order");
+
+        return passed;
+    }
+
+    bool TestCancelCombatPacketIsEmpty()
+    {
+        bool passed = true;
+
+        WorldPacket packet = Skyfire::PlayerPackets::BuildCancelCombatPacket();
+
+        passed &= Expect(packet.GetOpcode() == SMSG_CANCEL_COMBAT,
+            "Cancel combat builder should create SMSG_CANCEL_COMBAT packets");
+        passed &= Expect(packet.size() == 0,
+            "Cancel combat packet should not serialize trailing zero fields");
+
+        return passed;
+    }
+
+    bool TestAttackStopVictimDeadBitRules()
+    {
+        bool passed = true;
+
+        passed &= Expect(!Skyfire::CombatPackets::GetAttackStopVictimDeadBit(false, false),
+            "Attack-stop packets without a victim should not mark the victim dead");
+        passed &= Expect(!Skyfire::CombatPackets::GetAttackStopVictimDeadBit(true, false),
+            "Attack-stop packets for a live victim should not mark the victim dead");
+        passed &= Expect(Skyfire::CombatPackets::GetAttackStopVictimDeadBit(true, true),
+            "Attack-stop packets for a dead victim should mark the victim dead");
+
+        return passed;
+    }
+
     bool TestClientOpcodeTableAcceptsGuildAchievementTracking()
     {
         bool passed = true;
@@ -142,6 +194,54 @@ namespace
             "SMSG_DISPLAY_GAME_ERROR should use the 5.4.8 opcode number");
         passed &= Expect(handler && handler->Status == STATUS_NEVER,
             "SMSG_DISPLAY_GAME_ERROR should be enabled as a server-only opcode");
+
+        return passed;
+    }
+
+    bool TestServerOpcodeTableUsesCancelCombatOpcode()
+    {
+        bool passed = true;
+
+        serverOpcodeTable.InitializeServerTable();
+        OpcodeHandler const* handler = serverOpcodeTable[SMSG_CANCEL_COMBAT];
+        OpcodeHandler const* readFailed = serverOpcodeTable[SMSG_READ_ITEM_RESULT_FAILED];
+
+        passed &= Expect(handler != NULL,
+            "SMSG_CANCEL_COMBAT should have an opcode table entry");
+        passed &= Expect(handler && handler->OpcodeNumber == 0x0E8B,
+            "SMSG_CANCEL_COMBAT should use the verified 5.4.8 opcode number");
+        passed &= Expect(handler && handler->Status == STATUS_NEVER,
+            "SMSG_CANCEL_COMBAT should be enabled as a server-only opcode");
+        passed &= Expect(readFailed && readFailed->OpcodeNumber == 0x0000,
+            "SMSG_READ_ITEM_RESULT_FAILED should stay unhandled until its opcode is verified");
+        passed &= Expect(serverOpcodeTable.GetOpcodeByNumber(0x0534) != SMSG_CANCEL_COMBAT,
+            "0x0534 should not map to SMSG_CANCEL_COMBAT");
+
+        return passed;
+    }
+
+    bool TestAchievementCriteriaLiveUpdatePolicy()
+    {
+        bool passed = true;
+
+        passed &= Expect(!Skyfire::Achievements::IsLiveCriteriaProgressEligible(ACHIEVEMENT_FLAG_COUNTER),
+            "Counter/stat achievement criteria should not send live progress packets");
+        passed &= Expect(!Skyfire::Achievements::IsLiveCriteriaProgressEligible(ACHIEVEMENT_FLAG_HIDDEN),
+            "Hidden achievement criteria should not send live progress packets");
+        passed &= Expect(Skyfire::Achievements::IsLiveCriteriaProgressEligible(0),
+            "Visible non-counter achievement criteria should send live progress packets");
+        passed &= Expect(!Skyfire::Achievements::IsLiveCriteriaTypeEligible(ACHIEVEMENT_CRITERIA_TYPE_DEATH),
+            "Generic death criteria should not send live progress packets");
+        passed &= Expect(!Skyfire::Achievements::IsLiveCriteriaTypeEligible(ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN),
+            "Flight path counter criteria should not send live progress packets");
+        passed &= Expect(Skyfire::Achievements::IsLiveCriteriaTypeEligible(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST),
+            "Normal visible achievement criteria types should send live progress packets");
+        passed &= Expect(!Skyfire::Achievements::ShouldSendLiveCriteriaProgress(false, false),
+            "Criteria without a linked achievement should not send live progress packets");
+        passed &= Expect(!Skyfire::Achievements::ShouldSendLiveCriteriaProgress(true, false),
+            "Criteria linked only to counter/stat achievements should not send live progress packets");
+        passed &= Expect(Skyfire::Achievements::ShouldSendLiveCriteriaProgress(true, true),
+            "Criteria linked to a visible non-counter achievement should send live progress packets");
 
         return passed;
     }
@@ -1742,8 +1842,13 @@ int main()
 
     passed &= TestCurrencyFormulaBoundaries();
     passed &= TestWorldPacketContainerBehavior();
+    passed &= TestPreResurrectPacketUsesPlayerGuid();
+    passed &= TestCancelCombatPacketIsEmpty();
+    passed &= TestAttackStopVictimDeadBitRules();
     passed &= TestClientOpcodeTableAcceptsGuildAchievementTracking();
     passed &= TestServerOpcodeTableEnablesDisplayGameError();
+    passed &= TestServerOpcodeTableUsesCancelCombatOpcode();
+    passed &= TestAchievementCriteriaLiveUpdatePolicy();
     passed &= TestWorldStateBuilderPacketLayout();
     passed &= TestThreatSpellModifierRules();
     passed &= TestSpellValidationMasks();

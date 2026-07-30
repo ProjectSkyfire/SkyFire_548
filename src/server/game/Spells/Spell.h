@@ -6,11 +6,14 @@
 #ifndef SF_SPELL_H
 #define SF_SPELL_H
 
+#include "ByteBuffer.h"
 #include "GridDefines.h"
 #include "ObjectMgr.h"
 #include "PathGenerator.h"
 #include "SharedDefines.h"
 #include "SpellInfo.h"
+#include <list>
+#include <map>
 
 class Unit;
 class Player;
@@ -77,6 +80,64 @@ struct SpellDestination
     WorldLocation _position;
     uint64 _transportGUID;
     WorldLocation _transportOffset;
+};
+
+struct SpellLogEnergizeHelper
+{
+    uint32 Value;
+    float Multiplier;
+    uint32 PowerType;
+    ObjectGuid Guid;
+};
+
+struct SpellLogExtraAttacksHelper
+{
+    uint32 Count;
+    ObjectGuid Guid;
+};
+
+struct SpellLogHelper
+{
+    std::list<ObjectGuid> Targets;
+    std::list<SpellLogEnergizeHelper> Energizes;
+    std::list<SpellLogExtraAttacksHelper> ExtraAttacks;
+    std::list<uint32> PetFeed;
+    std::list<uint32> CreatedItems;
+
+    void AddTarget(ObjectGuid guid)
+    {
+        Targets.push_back(guid);
+    }
+
+    void AddCreatedItem(uint32 id)
+    {
+        CreatedItems.push_back(id);
+    }
+
+    void AddPetFeed(uint32 entry)
+    {
+        PetFeed.push_back(entry);
+    }
+
+    void AddEnergize(ObjectGuid guid, float multiplier, uint32 value, uint32 powerType)
+    {
+        SpellLogEnergizeHelper helper;
+        helper.Value = value;
+        helper.Multiplier = multiplier;
+        helper.PowerType = powerType;
+        helper.Guid = guid;
+
+        Energizes.push_back(helper);
+    }
+
+    void AddExtraAttacks(ObjectGuid guid, uint32 count)
+    {
+        SpellLogExtraAttacksHelper helper;
+        helper.Count = count;
+        helper.Guid = guid;
+
+        ExtraAttacks.push_back(helper);
+    }
 };
 
 class SpellCastTargets
@@ -647,7 +708,6 @@ protected:
     void FinishTargetProcessing();
 
     // spell execution log
-    void InitEffectExecuteData(uint8 effIndex);
     void CheckEffectExecuteData() const;
 
     // Scripting system
@@ -700,7 +760,8 @@ protected:
     uint8 m_auraScaleMask;
     PathGenerator m_preGeneratedPath;
 
-    ByteBuffer* m_effectExecuteData[MAX_SPELL_EFFECTS];
+    typedef std::map<uint32, SpellLogHelper> LogHelperMap;
+    LogHelperMap m_effectExecuteData;
 
 #ifdef MAP_BASED_RAND_GEN
     int32 irand(int32 min, int32 max) { return int32(m_caster->GetMap()->mtRand.randInt(max - min)) + min; }

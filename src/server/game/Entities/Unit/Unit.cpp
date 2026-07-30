@@ -7,6 +7,7 @@
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
 #include "CellImpl.h"
+#include "CombatPackets.h"
 #include "Common.h"
 #include "ConditionMgr.h"
 #include "Creature.h"
@@ -658,7 +659,9 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     data.WriteBit(attackerGuid[2]);
     data.WriteBit(attackerGuid[5]);
     data.WriteBit(victimGuid[4]);
-    data.WriteBit(1);
+    bool const victimIsDead = Skyfire::CombatPackets::GetAttackStopVictimDeadBit(
+        victim != NULL, victim && victim->isDead());
+    data.WriteBit(victimIsDead);
     data.WriteBit(victimGuid[3]);
     data.WriteBit(victimGuid[0]);
     data.WriteBit(victimGuid[2]);

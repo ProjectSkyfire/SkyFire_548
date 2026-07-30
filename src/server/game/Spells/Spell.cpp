@@ -596,7 +596,6 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
         && !m_spellInfo->IsPassive() && !m_spellInfo->IsPositive();
 
     CleanupTargetList();
-    memset(m_effectExecuteData, 0, MAX_SPELL_EFFECTS * sizeof(ByteBuffer*));
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         m_destTargets[i] = SpellDestination(*m_caster);
@@ -4804,49 +4803,112 @@ void Spell::SendSpellGo()
 
 void Spell::SendLogExecute()
 {
-    ObjectGuid CastergGuid = m_caster->GetGUID();
+    if (m_effectExecuteData.empty())
+        return;
 
-    WorldPacket data(SMSG_SPELL_EXECUTE_LOG, 8 + 4 + 4 + 4 + 4 + 8);
+    ObjectGuid casterGuid = m_caster->GetGUID();
+    bool hasSpellCastLogData = false;
+    uint32 spellCastLogDataCount = 0;
 
-    data.WriteGuidMask(CastergGuid, 0, 6, 5, 7, 2);
-    data.WriteBits(0, 19); // effCount
-    data.WriteGuidMask(CastergGuid, 4, 1, 3);
-    data.WriteBit(0); // HasSpellCastLogData
-    data.FlushBits();
-    data << uint32(m_spellInfo->Id);
+    WorldPacket data(SMSG_SPELL_EXECUTE_LOG);
 
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+    data.WriteGuidMask(casterGuid, 0, 6, 5, 7, 2);
+    data.WriteBits(m_effectExecuteData.size(), 19);
+    data.WriteGuidMask(casterGuid, 4);
+
+    for (LogHelperMap::const_iterator itr = m_effectExecuteData.begin(); itr != m_effectExecuteData.end(); ++itr)
     {
-        if (!m_effectExecuteData[i])
-            continue;
+        SpellLogHelper const& helper = itr->second;
 
-        data << uint32(m_spellInfo->Effects[i].Effect); // SpellID
+        data.WriteBits(helper.ExtraAttacks.size(), 21);
+        for (std::list<SpellLogExtraAttacksHelper>::const_iterator extraAttack = helper.ExtraAttacks.begin(); extraAttack != helper.ExtraAttacks.end(); ++extraAttack)
+            data.WriteGuidMask(extraAttack->Guid, 5, 4, 2, 3, 1, 0, 6, 7);
 
-        data.append(*m_effectExecuteData[i]);
+        data.WriteBits(helper.Energizes.size(), 20);
+        for (std::list<SpellLogEnergizeHelper>::const_iterator energize = helper.Energizes.begin(); energize != helper.Energizes.end(); ++energize)
+            data.WriteGuidMask(energize->Guid, 0, 3, 1, 5, 6, 4, 7, 2);
 
-        delete m_effectExecuteData[i];
-        m_effectExecuteData[i] = NULL;
+        data.WriteBits(0, 21); // Unknown counter
+        data.WriteBits(helper.PetFeed.size(), 22);
+        data.WriteBits(helper.CreatedItems.size(), 22);
+
+        data.WriteBits(helper.Targets.size(), 24);
+        for (std::list<ObjectGuid>::const_iterator target = helper.Targets.begin(); target != helper.Targets.end(); ++target)
+            data.WriteGuidMask(*target, 6, 5, 1, 0, 3, 4, 7, 2);
     }
 
-    data.WriteGuidBytes(CastergGuid, 5, 7, 1, 6, 2, 0, 4, 3);
+    data.WriteGuidMask(casterGuid, 1, 3);
+
+    data.WriteBit(hasSpellCastLogData);
+    if (hasSpellCastLogData)
+        data.WriteBits(spellCastLogDataCount, 21);
+    data.FlushBits();
+
+    if (hasSpellCastLogData)
+    {
+        for (uint32 i = 0; i < spellCastLogDataCount; ++i)
+        {
+            data << uint32(0);
+            data << uint32(0);
+        }
+
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+    }
+
+    for (LogHelperMap::const_iterator itr = m_effectExecuteData.begin(); itr != m_effectExecuteData.end(); ++itr)
+    {
+        uint32 effIndex = itr->first;
+        SpellLogHelper const& helper = itr->second;
+
+        for (std::list<ObjectGuid>::const_iterator target = helper.Targets.begin(); target != helper.Targets.end(); ++target)
+            data.WriteGuidBytes(*target, 7, 5, 1, 2, 6, 4, 0, 3);
+
+        for (std::list<SpellLogEnergizeHelper>::const_iterator energize = helper.Energizes.begin(); energize != helper.Energizes.end(); ++energize)
+        {
+            data.WriteGuidBytes(energize->Guid, 3, 7, 5, 2, 0);
+            data << uint32(energize->PowerType);
+            data << uint32(energize->Value);
+            data.WriteGuidBytes(energize->Guid, 4, 1);
+            data << float(energize->Multiplier);
+            data.WriteGuidBytes(energize->Guid, 6);
+        }
+
+        for (std::list<SpellLogExtraAttacksHelper>::const_iterator extraAttack = helper.ExtraAttacks.begin(); extraAttack != helper.ExtraAttacks.end(); ++extraAttack)
+        {
+            data.WriteGuidBytes(extraAttack->Guid, 0, 6, 4, 7, 2, 5, 3);
+            data << uint32(extraAttack->Count);
+            data.WriteGuidBytes(extraAttack->Guid, 1);
+        }
+
+        for (std::list<uint32>::const_iterator petFeedEntry = helper.PetFeed.begin(); petFeedEntry != helper.PetFeed.end(); ++petFeedEntry)
+            data << uint32(*petFeedEntry);
+
+        data << uint32(m_spellInfo->Effects[effIndex].Effect);
+
+        for (std::list<uint32>::const_iterator itemEntry = helper.CreatedItems.begin(); itemEntry != helper.CreatedItems.end(); ++itemEntry)
+            data << uint32(*itemEntry);
+    }
+
+    data << uint32(m_spellInfo->Id);
+    data.WriteGuidBytes(casterGuid, 5, 7, 1, 6, 2, 0, 4, 3);
 
     m_caster->SendMessageToSet(&data, true);
+
+    m_effectExecuteData.clear();
 }
 
 void Spell::ExecuteLogEffectTakeTargetPower(uint8 effIndex, Unit* target, uint32 powerType, uint32 powerTaken, float gainMultiplier)
 {
-    InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(target->GetPackGUID());
-    *m_effectExecuteData[effIndex] << uint32(powerTaken);
-    *m_effectExecuteData[effIndex] << uint32(powerType);
-    *m_effectExecuteData[effIndex] << float(gainMultiplier);
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddEnergize(target->GetGUID(), gainMultiplier, powerTaken, powerType);
 }
 
 void Spell::ExecuteLogEffectExtraAttacks(uint8 effIndex, Unit* victim, uint32 attCount)
 {
-    InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(victim->GetPackGUID());
-    *m_effectExecuteData[effIndex] << uint32(attCount);
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddExtraAttacks(victim->GetGUID(), attCount);
 }
 
 void Spell::ExecuteLogEffectInterruptCast(uint8 /*effIndex*/, Unit* victim, uint32 spellId)
@@ -4881,48 +4943,46 @@ void Spell::ExecuteLogEffectInterruptCast(uint8 /*effIndex*/, Unit* victim, uint
     m_caster->SendMessageToSet(&data, true);
 }
 
-void Spell::ExecuteLogEffectDurabilityDamage(uint8 effIndex, Unit* victim, int32 itemId, int32 slot)
+void Spell::ExecuteLogEffectDurabilityDamage(uint8 effIndex, Unit* /*victim*/, int32 /*itemId*/, int32 /*slot*/)
 {
-    InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(victim->GetPackGUID());
-    *m_effectExecuteData[effIndex] << int32(itemId);
-    *m_effectExecuteData[effIndex] << int32(slot);
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    // Not represented in the 5.4.8 execute-log payload used here.
 }
 
 void Spell::ExecuteLogEffectOpenLock(uint8 effIndex, Object* obj)
 {
-    InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(obj->GetPackGUID());
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddTarget(obj->GetGUID());
 }
 
 void Spell::ExecuteLogEffectCreateItem(uint8 effIndex, uint32 entry)
 {
-    InitEffectExecuteData(effIndex);
-    *m_effectExecuteData[effIndex] << uint32(entry);
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddCreatedItem(entry);
 }
 
 void Spell::ExecuteLogEffectDestroyItem(uint8 effIndex, uint32 entry)
 {
-    InitEffectExecuteData(effIndex);
-    *m_effectExecuteData[effIndex] << uint32(entry);
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddPetFeed(entry);
 }
 
 void Spell::ExecuteLogEffectSummonObject(uint8 effIndex, WorldObject* obj)
 {
-    InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(obj->GetPackGUID());
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddTarget(obj->GetGUID());
 }
 
 void Spell::ExecuteLogEffectUnsummonObject(uint8 effIndex, WorldObject* obj)
 {
-    InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(obj->GetPackGUID());
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddTarget(obj->GetGUID());
 }
 
 void Spell::ExecuteLogEffectResurrect(uint8 effIndex, Unit* target)
 {
-    InitEffectExecuteData(effIndex);
-    m_effectExecuteData[effIndex]->append(target->GetPackGUID());
+    ASSERT(effIndex < MAX_SPELL_EFFECTS);
+    m_effectExecuteData[effIndex].AddTarget(target->GetGUID());
 }
 
 void Spell::SendInterrupted(uint8 result)
@@ -7631,27 +7691,9 @@ void Spell::FinishTargetProcessing()
     SendLogExecute();
 }
 
-void Spell::InitEffectExecuteData(uint8 effIndex)
-{
-    ASSERT(effIndex < MAX_SPELL_EFFECTS);
-    if (!m_effectExecuteData[effIndex])
-    {
-        m_effectExecuteData[effIndex] = new ByteBuffer(0x20);
-        // first dword - target counter
-        *m_effectExecuteData[effIndex] << uint32(1);
-    }
-    else
-    {
-        // increase target counter by one
-        uint32 count = (*m_effectExecuteData[effIndex]).read<uint32>(0);
-        (*m_effectExecuteData[effIndex]).put<uint32>(0, ++count);
-    }
-}
-
 void Spell::CheckEffectExecuteData() const
 {
-    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        ASSERT(!m_effectExecuteData[i]);
+    ASSERT(m_effectExecuteData.empty());
 }
 
 void Spell::LoadScripts()

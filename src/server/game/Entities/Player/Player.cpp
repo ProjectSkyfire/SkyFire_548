@@ -53,6 +53,7 @@
 #include "PetTransportSupport.h"
 #include "QuestDef.h"
 #include "ReputationMgr.h"
+#include "PlayerPackets.h"
 #include "PlayerRestState.h"
 #include "SkillDiscovery.h"
 #include "SocialMgr.h"
@@ -5150,10 +5151,7 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 */
 void Player::BuildPlayerRepop()
 {
-    ObjectGuid guid;
-    WorldPacket data(SMSG_PRE_RESURRECT, 8);
-    data.WriteGuidMask(guid, 1, 7, 5, 2, 6, 0, 3, 4);
-    data.WriteGuidBytes(guid, 5, 1, 7, 0, 6, 4, 2, 3);
+    WorldPacket data = Skyfire::PlayerPackets::BuildPreResurrectPacket(GetGUID());
     GetSession()->SendPacket(&data);
 
     if (getRace() == RACE_NIGHTELF)
@@ -15466,12 +15464,7 @@ void Player::SendAttackSwingError(AttackSwingError error)
 
 void Player::SendAttackSwingCancelAttack()
 {
-    ObjectGuid guid = GetGUID();
-
-    WorldPacket data(SMSG_CANCEL_COMBAT, 8);
-    data << uint32(0); // Unk
-    data << uint32(0); // Unk
-
+    WorldPacket data = Skyfire::PlayerPackets::BuildCancelCombatPacket();
     GetSession()->SendPacket(&data);
 }
 

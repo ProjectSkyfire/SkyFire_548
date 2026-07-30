@@ -1329,12 +1329,12 @@ struct CriteriaEntry
     uint32 timedCriteriaStartType;                          // 3
     uint32 timedCriteriaMiscId;                             // 4
     uint32 timeLimit;                                       // 5
-    //uint32 unk;                                           // 6
-    //uint32 unk;                                           // 7
+    uint32 failEvent;                                       // 6
+    uint32 failAsset;                                       // 7
     uint32 modifierTreeId;                                  // 8
-    //uint32 completionFlag;                                // 9
-    //uint32 worldStateId;                                  // 10
-    //uint32 worldStateValue;                               // 11
+    uint32 completionFlag;                                  // 9
+    uint32 worldStateId;                                    // 10
+    uint32 worldStateValue;                                 // 11
 };
 
 struct CriteriaTreeEntry
