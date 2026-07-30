@@ -7,12 +7,14 @@
 #define SF_REALMSOCKET_H
 
 #include "Common.h"
+#include "PacketLogServer.h"
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/system/error_code.hpp>
 #include <array>
 #include <atomic>
 #include <deque>
 #include <memory>
+#include <string>
 #include <vector>
 
 typedef boost::asio::ip::tcp::socket RealmSocketHandle;
@@ -46,6 +48,7 @@ public:
 
     const std::string& getRemoteAddress(void) const;
     uint16 getRemotePort(void) const;
+    void SetPacketLogAccountName(std::string accountName);
 
     void set_session(std::unique_ptr<Session> session);
 
@@ -59,6 +62,8 @@ private:
     void CloseSocket();
     void NotifyClose();
     void CompactInputBuffer();
+    Skyfire::PacketLogServerSessionInfo BuildPacketLogSessionInfo() const;
+    void LogAuthPacket(void const* data, size_t len, Skyfire::PacketLogServerDirection direction);
 
     bool IsOpen(void) const;
 
@@ -68,6 +73,7 @@ private:
     size_t _inputReadPos;
     std::unique_ptr<Session> _session;
     std::string _remoteAddress;
+    std::string _packetLogAccountName;
     uint16 _remotePort;
     std::deque<std::vector<char>> _writeQueue;
     bool _writeInProgress;

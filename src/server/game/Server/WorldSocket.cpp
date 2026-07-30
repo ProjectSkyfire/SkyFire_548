@@ -369,9 +369,9 @@ void WorldSocket::NotifyClosed()
         m_CloseHandler(this);
 }
 
-PacketLogSessionInfo WorldSocket::BuildPacketLogSessionInfo() const
+Skyfire::PacketLogServerSessionInfo WorldSocket::BuildPacketLogSessionInfo() const
 {
-    PacketLogSessionInfo info;
+    Skyfire::PacketLogServerSessionInfo info;
     info.RemoteAddress = m_Address;
     info.AccountId = 0;
     info.RealmId = 0;

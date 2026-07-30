@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026310602
+ConfVersion=2026310603
 
 ###################################################################################################
 # SECTION INDEX
@@ -69,6 +69,27 @@ BindIP = "0.0.0.0"
 #        Default:     ""                  - (Disabled)
 
 PidFile = ""
+
+#
+#    PacketLogServerControlFile
+#        Description: Control file watched by authserver for packetlogserver logs.
+#                     Leave empty to disable authserver packet logging.
+#                     Relative paths are resolved from the authserver working
+#                     directory. Set this to the same control file used by the
+#                     packet_log_server tool to capture auth packets.
+#        Example:     "packetlogserver.active"
+#        Default:     "" - (Disabled)
+
+PacketLogServerControlFile = ""
+
+#
+#    PacketLogServerOutputDir
+#        Description: Directory where packetlogserver writes per-session packet
+#                     logs. Relative paths are resolved from the authserver
+#                     working directory.
+#        Default:     "PacketLogs"
+
+PacketLogServerOutputDir = "PacketLogs"
 
 #
 #    UseProcessors

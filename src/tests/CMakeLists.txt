@@ -53,6 +53,8 @@ add_test(NAME database_setup_tests COMMAND database_setup_tests)
 
 add_executable(realm_socket_tests
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Server/RealmSocket.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets/PacketLogServer.cpp
+  PacketLogServerConfigStub.cpp
   RealmSocketLogStub.cpp
   RealmSocketTests.cpp
 )

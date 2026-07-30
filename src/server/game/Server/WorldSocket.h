@@ -41,7 +41,10 @@ namespace Net
 
 class WorldPacket;
 class WorldSession;
-struct PacketLogSessionInfo;
+namespace Skyfire
+{
+struct PacketLogServerSessionInfo;
+}
 
 /// Handler that can communicate over stream sockets.
 class WorldSocket
@@ -122,7 +125,7 @@ private:
     void HandleAsyncRead(boost::system::error_code const& error, size_t transferredBytes);
     void HandleAsyncWrite(boost::system::error_code const& error, size_t transferredBytes);
     void NotifyClosed();
-    PacketLogSessionInfo BuildPacketLogSessionInfo() const;
+    Skyfire::PacketLogServerSessionInfo BuildPacketLogSessionInfo() const;
 
     /// Time in which the last ping was received
     std::chrono::steady_clock::time_point m_LastPingTime;

@@ -269,6 +269,7 @@ bool AuthSocket::_HandleLogonChallenge()
     ByteBuffer pkt;
 
     _login = (const char*)ch->I;
+    socket().SetPacketLogAccountName(_login);
     _build = ch->build;
     _expversion = uint8(AuthHelper::IsPostBCAcceptedClientBuild(_build) ? POST_BC_EXP_FLAG :
         (AuthHelper::IsPreBCAcceptedClientBuild(_build) ? PRE_BC_EXP_FLAG : NO_VALID_EXP_FLAG));
@@ -642,6 +643,7 @@ bool AuthSocket::_HandleReconnectChallenge()
     SF_LOG_DEBUG("server.authserver", "[ReconnectChallenge] name(%d): '%s'", ch->I_len, ch->I);
 
     _login = (const char*)ch->I;
+    socket().SetPacketLogAccountName(_login);
 
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_SESSIONKEY);
     stmt->setString(0, _login);

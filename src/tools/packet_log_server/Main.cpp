@@ -28,7 +28,7 @@ void PrintUsage(char const* executable)
         << "Usage: " << executable << " [control-file]\n"
         << "\n"
         << "Creates a packet log control file while this process is running.\n"
-        << "worldserver writes per-session packet logs when it sees that file.\n"
+        << "Configured servers write per-session packet logs when they see that file.\n"
         << "\n"
         << "Default control-file: packetlogserver.active\n";
 }

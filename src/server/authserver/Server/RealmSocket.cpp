@@ -12,7 +12,36 @@
 #include <boost/asio/write.hpp>
 #include <algorithm>
 #include <cstring>
+#include <string>
 #include <utility>
+
+namespace
+{
+std::string GetAuthOpcodeNameForLogging(uint8 opcode)
+{
+    switch (opcode)
+    {
+        case 0x00:
+            return "AUTH_LOGON_CHALLENGE";
+        case 0x01:
+            return "AUTH_LOGON_PROOF";
+        case 0x02:
+            return "AUTH_RECONNECT_CHALLENGE";
+        case 0x03:
+            return "AUTH_RECONNECT_PROOF";
+        case 0x10:
+            return "REALM_LIST";
+        case 0x32:
+            return "XFER_ACCEPT";
+        case 0x33:
+            return "XFER_RESUME";
+        case 0x34:
+            return "XFER_CANCEL";
+        default:
+            return "UNKNOWN_AUTH_OPCODE";
+    }
+}
+}
 
 RealmSocket::Session::Session(void) { }
 
@@ -20,8 +49,8 @@ RealmSocket::Session::~Session(void) { }
 
 RealmSocket::RealmSocket(std::unique_ptr<RealmSocketHandle> socket, std::string remoteAddress, uint16 remotePort) :
     _socket(std::move(socket)), _readBuffer(), _inputBuffer(), _inputReadPos(0), _session(),
-    _remoteAddress(std::move(remoteAddress)), _remotePort(remotePort), _writeQueue(), _writeInProgress(false),
-    _closed(false), _closeNotified(false)
+    _remoteAddress(std::move(remoteAddress)), _packetLogAccountName(), _remotePort(remotePort), _writeQueue(),
+    _writeInProgress(false), _closed(false), _closeNotified(false)
 {
     _inputBuffer.reserve(4096);
 }
@@ -52,6 +81,12 @@ const std::string& RealmSocket::getRemoteAddress(void) const
 uint16 RealmSocket::getRemotePort(void) const
 {
     return _remotePort;
+}
+
+void RealmSocket::SetPacketLogAccountName(std::string accountName)
+{
+    _packetLogAccountName = std::move(accountName);
+    sPacketLogServer->RefreshSessionInfo(this, BuildPacketLogSessionInfo());
 }
 
 size_t RealmSocket::GetAvailableBytes(void) const
@@ -100,6 +135,8 @@ bool RealmSocket::QueueSend(void const* buf, size_t len)
 
     char const* bytes = static_cast<char const*>(buf);
     std::vector<char> data(bytes, bytes + len);
+    LogAuthPacket(data.data(), data.size(), Skyfire::PACKET_LOG_SERVER_TO_CLIENT);
+
     std::shared_ptr<RealmSocket> self = shared_from_this();
     boost::asio::post(_socket->get_executor(),
         [self, data = std::move(data)]() mutable
@@ -142,6 +179,8 @@ void RealmSocket::HandleRead(boost::system::error_code const& error, size_t byte
     }
 
     _inputBuffer.insert(_inputBuffer.end(), _readBuffer.data(), _readBuffer.data() + bytesTransferred);
+    LogAuthPacket(_readBuffer.data(), bytesTransferred, Skyfire::PACKET_LOG_CLIENT_TO_SERVER);
+
     if (_session)
     {
         _session->OnRead();
@@ -227,6 +266,8 @@ void RealmSocket::NotifyClose()
 
     if (_session)
         _session->OnClose();
+
+    sPacketLogServer->CloseSession(this);
 }
 
 void RealmSocket::CompactInputBuffer()
@@ -240,4 +281,27 @@ void RealmSocket::CompactInputBuffer()
         _inputBuffer.erase(_inputBuffer.begin(), _inputBuffer.begin() + ptrdiff_t(_inputReadPos));
 
     _inputReadPos = 0;
+}
+
+Skyfire::PacketLogServerSessionInfo RealmSocket::BuildPacketLogSessionInfo() const
+{
+    Skyfire::PacketLogServerSessionInfo sessionInfo;
+    sessionInfo.RemoteAddress = _remoteAddress;
+    sessionInfo.AccountName = _packetLogAccountName;
+    sessionInfo.SessionName = "auth";
+    sessionInfo.FilePrefix = "authsession";
+    return sessionInfo;
+}
+
+void RealmSocket::LogAuthPacket(void const* data, size_t len, Skyfire::PacketLogServerDirection direction)
+{
+    if (!sPacketLogServer->CanLogPacket())
+        return;
+
+    uint32 opcode = 0;
+    if (data && len > 0)
+        opcode = *static_cast<uint8 const*>(data);
+
+    sPacketLogServer->LogPacket(this, BuildPacketLogSessionInfo(), direction, opcode,
+        GetAuthOpcodeNameForLogging(uint8(opcode)), data, len);
 }
