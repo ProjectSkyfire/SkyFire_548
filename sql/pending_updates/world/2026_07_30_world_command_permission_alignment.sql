@@ -1,0 +1,36 @@
+-- Align world command permission overrides with the current RBAC enum.
+
+UPDATE `command` SET `permission` = 478 WHERE `name` = 'group summon';
+UPDATE `command` SET `permission` = 633 WHERE `name` = 'reload creature_linked_respawn';
+UPDATE `command` SET `permission` = 634 WHERE `name` = 'reload creature_loot_template';
+UPDATE `command` SET `permission` = 635 WHERE `name` = 'reload creature_onkill_reputation';
+UPDATE `command` SET `permission` = 636 WHERE `name` = 'reload creature_questender';
+UPDATE `command` SET `permission` = 637 WHERE `name` = 'reload creature_queststarter';
+UPDATE `command` SET `permission` = 638 WHERE `name` = 'reload creature_summon_groups';
+UPDATE `command` SET `permission` = 639 WHERE `name` = 'reload creature_template';
+UPDATE `command` SET `permission` = 640 WHERE `name` = 'reload creature_text';
+UPDATE `command` SET `permission` = 646 WHERE `name` = 'reload gameobject_questender';
+UPDATE `command` SET `permission` = 647 WHERE `name` = 'reload gameobject_loot_template';
+UPDATE `command` SET `permission` = 648 WHERE `name` = 'reload gameobject_queststarter';
+UPDATE `command` SET `permission` = 649 WHERE `name` = 'reload game_tele';
+UPDATE `command` SET `permission` = 683 WHERE `name` = 'reload reserved_name';
+UPDATE `command` SET `permission` = 684 WHERE `name` = 'reload skill_discovery_template';
+UPDATE `command` SET `permission` = 685 WHERE `name` = 'reload skill_extra_item_template';
+UPDATE `command` SET `permission` = 686 WHERE `name` = 'reload skill_fishing_base_level';
+UPDATE `command` SET `permission` = 687 WHERE `name` = 'reload skinning_loot_template';
+UPDATE `command` SET `permission` = 688 WHERE `name` = 'reload smart_scripts';
+UPDATE `command` SET `permission` = 689 WHERE `name` = 'reload spell_area';
+UPDATE `command` SET `permission` = 690 WHERE `name` = 'reload spell_bonus_data';
+UPDATE `command` SET `permission` = 691 WHERE `name` = 'reload spell_group';
+UPDATE `command` SET `permission` = 692 WHERE `name` = 'reload spell_group_stack_rules';
+UPDATE `command` SET `permission` = 693 WHERE `name` = 'reload spell_learn_spell';
+UPDATE `command` SET `permission` = 694 WHERE `name` = 'reload spell_linked_spell';
+UPDATE `command` SET `permission` = 696 WHERE `name` = 'reload spell_pet_auras';
+UPDATE `command` SET `permission` = 697 WHERE `name` = 'reload spell_proc';
+UPDATE `command` SET `permission` = 699 WHERE `name` = 'reload spell_required';
+UPDATE `command` SET `permission` = 705 WHERE `name` = 'reload vehicle_accessory';
+UPDATE `command` SET `permission` = 706 WHERE `name` = 'reload vehicle_template_accessory';
+UPDATE `command` SET `permission` = 708 WHERE `name` = 'reload waypoint_data';
+UPDATE `command` SET `permission` = 709 WHERE `name` = 'reload waypoint_scripts';
+UPDATE `command` SET `permission` = 524 WHERE `name` = 'save';
+UPDATE `command` SET `permission` = 525 WHERE `name` = 'saveall';
