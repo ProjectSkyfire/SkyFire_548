@@ -804,26 +804,11 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (GetStackAmount() >= 5 && !target->HasAura(Skyfire::Spells::GetStonedAuraTriggerSpellId(GetId())))
                             target->CastSpell(target, Skyfire::Spells::GetStonedAuraTriggerSpellId(GetId()), true);
                         break;
-                    case 60970: // Heroic Fury (remove Intercept cooldown)
-                        if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
-                            target->ToPlayer()->RemoveSpellCooldown(Skyfire::Spells::GetHeroicFuryCooldownSpellId(), true);
-                        break;
                 }
                 break;
             case SPELLFAMILY_DRUID:
                 if (!caster)
                     break;
-                // Rejuvenation
-                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x10 && GetEffect(EFFECT_0))
-                {
-                    // Druid T8 Restoration 4P Bonus
-                    if (caster->HasAura(Skyfire::Spells::GetDruidTier8RestorationAuraSpellId()))
-                    {
-                        int32 heal = GetEffect(EFFECT_0)->GetAmount();
-                        caster->CastCustomSpell(target, Skyfire::Spells::GetDruidTier8RestorationTriggerSpellId(),
-                            &heal, NULL, NULL, true, NULL, GetEffect(EFFECT_0));
-                    }
-                }
 
                 switch (m_spellInfo->Id)
                 {
@@ -898,23 +883,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_PRIEST:
                 if (!caster)
                     break;
-                // Devouring Plague
-                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x02000000 && GetEffect(0))
-                {
-                    // Improved Devouring Plague
-                    if (AuraEffect const* aurEff = caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST, 3790, 0))
-                    {
-                        uint32 damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), GetEffect(0)->GetAmount(), DOT);
-                        damage = target->SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DOT);
-                        int32 basepoints0 = aurEff->GetAmount() * GetEffect(0)->GetTotalTicks() * int32(damage) / 100;
-                        int32 heal = int32(CalculatePct(basepoints0, 15));
-
-                        caster->CastCustomSpell(target, Skyfire::Spells::GetImprovedDevouringPlagueDamageSpellId(),
-                            &basepoints0, NULL, NULL, true, NULL, GetEffect(0));
-                        caster->CastCustomSpell(caster, Skyfire::Spells::GetImprovedDevouringPlagueHealSpellId(),
-                            &heal, NULL, NULL, true, NULL, GetEffect(0));
-                    }
-                }
                 // Power Word: Shield
                 else if (m_spellInfo->SpellFamilyFlags[0] & 0x1 && m_spellInfo->SpellFamilyFlags[2] & 0x400 && GetEffect(0))
                 {
@@ -945,12 +913,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_GENERIC:
                 switch (GetId())
                 {
-                    case 61987: // Avenging Wrath
-                        // Remove the immunity shield marker on Avenging Wrath removal if Forbearance is not present
-                        if (target->HasAura(Skyfire::Spells::GetAvengingWrathMarkerAuraSpellId()) &&
-                            !target->HasAura(Skyfire::Spells::GetForbearanceAuraSpellId()))
-                            target->RemoveAura(Skyfire::Spells::GetAvengingWrathMarkerAuraSpellId());
-                        break;
                     case 72368: // Shared Suffering
                     case 72369:
                         if (caster)
@@ -996,51 +958,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                 }
                 break;
-            case SPELLFAMILY_PRIEST:
-                if (!caster)
-                    break;
-                // Power word: shield
-                if (removeMode == AURA_REMOVE_BY_ENEMY_SPELL && GetSpellInfo()->SpellFamilyFlags[0] & 0x00000001)
-                {
-                    // Rapture
-                    if (Aura const* aura = caster->GetAuraOfRankedSpell(Skyfire::Spells::GetRaptureRankedSpellId()))
-                    {
-                        // check cooldown
-                        if (caster->GetTypeId() == TypeID::TYPEID_PLAYER)
-                        {
-                            if (caster->ToPlayer()->HasSpellCooldown(aura->GetId()))
-                            {
-                                // This additional check is needed to add a minimal delay before cooldown in in effect
-                                // to allow all bubbles broken by a single damage source proc mana return
-                                if (caster->ToPlayer()->GetSpellCooldownDelay(aura->GetId()) <= 11)
-                                    break;
-                            }
-                            else    // and add if needed
-                                caster->ToPlayer()->AddSpellCooldown(aura->GetId(), 0, uint32(time(NULL) + 12));
-                        }
-
-                        // effect on caster
-                        if (AuraEffect const* aurEff = aura->GetEffect(0))
-                        {
-                            float multiplier = float(aurEff->GetAmount());
-                            int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
-                            caster->CastCustomSpell(caster, Skyfire::Spells::GetRaptureEnergizeSpellId(),
-                                &basepoints0, NULL, NULL, true);
-                        }
-                    }
-                }
-                break;
             case SPELLFAMILY_ROGUE:
                 // Remove Vanish on stealth remove
                 if (GetId() == Skyfire::Spells::GetStealthAuraSpellId())
                     target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
-                break;
-            case SPELLFAMILY_PALADIN:
-                // Remove the immunity shield marker on Forbearance removal if AW marker is not present
-                if (GetId() == Skyfire::Spells::GetForbearanceAuraSpellId() &&
-                    target->HasAura(Skyfire::Spells::GetAvengingWrathMarkerAuraSpellId()) &&
-                    !target->HasAura(Skyfire::Spells::GetAvengingWrathAuraSpellId()))
-                    target->RemoveAura(Skyfire::Spells::GetAvengingWrathMarkerAuraSpellId());
                 break;
             case SPELLFAMILY_DEATHKNIGHT:
                 // Blood of the North
@@ -1125,25 +1046,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     break;
             }
             break;
-        case SPELLFAMILY_WARLOCK:
-            // Drain Soul - If the target is at or below 25% health, Drain Soul causes four times the normal damage
-            if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00004000)
-            {
-                if (!caster)
-                    break;
-                if (apply)
-                {
-                    if (target != caster && !target->HealthAbovePct(25))
-                        caster->CastSpell(caster, Skyfire::Spells::GetDrainSoulExecuteAuraSpellId(), true);
-                }
-                else
-                {
-                    if (target != caster)
-                        caster->RemoveAurasDueToSpell(GetId());
-                    else
-                        caster->RemoveAurasDueToSpell(Skyfire::Spells::GetDrainSoulExecuteAuraSpellId());
-                }
-            }
+        default:
             break;
     }
 }

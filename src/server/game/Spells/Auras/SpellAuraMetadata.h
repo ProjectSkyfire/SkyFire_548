@@ -80,7 +80,6 @@ namespace Spells
     bool ShouldBindStackingAuraToCaster(bool canStackWithDifferentCasters, bool casterIsCreature,
         bool casterIsSummon, bool ownerIsSummon);
     uint32 GetNetOMaticRootSelfSpellId();
-    uint32 GetKillCommandOwnerAuraSpellId();
     uint32 GetKillCommandPetAuraSpellId();
     uint32 GetBloodElfIllusionDisguiseSpellId(uint32 auraSpellId, uint8 gender);
     uint32 GetAuraDummyTriggeredSpellId(uint32 auraSpellId);
@@ -95,9 +94,7 @@ namespace Spells
     PeriodicBulletControllerRule const* GetPeriodicBulletControllerRule(uint32 auraSpellId);
     uint32 GetPeriodicOverloadCircuitShutdownSpellId(uint32 auraSpellId);
     uint32 GetPeriodicFuseArmorTriggerSpellId(uint32 auraSpellId);
-    uint32 GetPeriodicFrenziedRegenerationSpellId();
     uint32 GetKillingSpreePeriodicSpellId(uint8 index);
-    uint32 GetPeriodicExplosiveShotTriggerSpellId();
     uint32 GetPeriodicDeathAndDecayTriggerSpellId();
     uint32 GetPeriodicHysteriaAuraSpellId();
     uint32 GetPeriodicTriggerOverrideSpellId(uint32 auraSpellId);
@@ -116,31 +113,23 @@ namespace Spells
     uint32 GetDrainSoulShardSpellId();
     uint32 GetTenacityAuraSpellId();
     uint32 GetWildGrowthTier10AuraSpellId();
-    uint32 GetManaFeedTriggerSpellId();
     bool IsUnsavableSpecialAura(uint32 auraSpellId);
     bool IsUnsavableDruidEclipseAura(uint32 auraSpellId);
     uint32 GetStonedAuraTriggerSpellId(uint32 auraSpellId);
-    uint32 GetHeroicFuryCooldownSpellId();
     uint32 GetDruidTier8RestorationAuraSpellId();
-    uint32 GetDruidTier8RestorationTriggerSpellId();
     uint32 GetDruidCatFormSpellId();
     uint32 GetDruidBearFormSpellId();
     uint32 GetPolymorphSheepSpellId();
     uint32 GetPolymorphPenguinSpellId();
     uint32 GetArcanePotencyTriggerSpellId(uint32 auraSpellId);
-    uint32 GetImprovedDevouringPlagueDamageSpellId();
-    uint32 GetImprovedDevouringPlagueHealSpellId();
     uint32 GetGlyphOfPowerWordShieldAuraSpellId();
     uint32 GetGlyphOfPowerWordShieldHealSpellId();
     uint32 GetGlyphOfBlurredSpeedAuraSpellId();
     uint32 GetGlyphOfBlurredSpeedSprintSpellId();
-    uint32 GetAvengingWrathAuraSpellId();
     uint32 GetForbearanceAuraSpellId();
-    uint32 GetAvengingWrathMarkerAuraSpellId();
     uint32 GetSharedSufferingTriggerSpellId();
     uint32 GetInvisibilityFadeSpellId();
     uint32 GetImprovedFearTriggerSpellId(uint32 auraSpellId);
-    uint32 GetRaptureRankedSpellId();
     uint32 GetRaptureEnergizeSpellId();
     uint32 GetGlyphOfFreezingTrapAuraSpellId();
     uint32 GetGlyphOfFreezingTrapTriggerSpellId();
@@ -154,7 +143,6 @@ namespace Spells
     uint32 GetDivineFavorAuraSpellId();
     uint32 GetPaladinTier10HolyBonusAuraSpellId();
     uint32 GetPaladinTier10HolyBonusTriggerSpellId();
-    uint32 GetDrainSoulExecuteAuraSpellId();
     AuraStateImmunityRule const* GetAuraStateImmunityRule(int32 miscValue, uint32 auraSpellId, int32 amount);
     uint8 GetDefaultAuraStateImmunityAuraTypes(int32 miscValue, uint32* auraTypes, uint8 maxAuraTypes);
     MechanicImmunitySpellRule const* GetMechanicImmunitySpellRule(uint32 auraSpellId);

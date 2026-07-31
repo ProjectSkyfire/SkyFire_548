@@ -119,10 +119,6 @@ namespace Spells
         uint32 const SPELL_LEADER_OF_THE_PACK_TRIGGERED = 24932;
         uint32 const SPELL_VENGEANCE_OF_THE_BLUE_FLIGHT = 45839;
         uint32 const SPELL_NET_O_MATIC_SELF_ROOT = 13138;
-        uint32 const SPELL_KILL_COMMAND_OWNER_AURA = 34027;
-        uint32 const SPELL_KILL_COMMAND_PET_AURA = 58914;
-        uint32 const SPELL_PERIODIC_FRENZIED_REGENERATION_HEAL = 22845;
-        uint32 const SPELL_PERIODIC_EXPLOSIVE_SHOT_TRIGGER = 53352;
         uint32 const SPELL_PERIODIC_DEATH_AND_DECAY_TRIGGER = 52212;
         uint32 const SPELL_PERIODIC_HYSTERIA = 49016;
         uint32 const SPELL_PERIODIC_RESTORATION_ENERGIZE = 23493;
@@ -135,26 +131,18 @@ namespace Spells
         uint32 const SPELL_DRAIN_SOUL_SHARD = 95810;
         uint32 const SPELL_TENACITY = 58549;
         uint32 const SPELL_WILD_GROWTH_T10_RESTORATION = 70658;
-        uint32 const SPELL_MANA_FEED_TRIGGER = 32554;
-        uint32 const SPELL_HEROIC_FURY_COOLDOWN = 20252;
         uint32 const SPELL_DRUID_T8_RESTORATION = 64760;
-        uint32 const SPELL_DRUID_T8_RESTORATION_TRIGGER = 64801;
         uint32 const SPELL_DRUID_CAT_FORM = 768;
         uint32 const SPELL_DRUID_BEAR_FORM = 5487;
         uint32 const SPELL_POLYMORPH_SHEEP_SOUND = 61634;
         uint32 const SPELL_POLYMORPH_PENGUIN_SOUND = 61635;
-        uint32 const SPELL_IMPROVED_DEVOURING_PLAGUE_DAMAGE = 63675;
-        uint32 const SPELL_IMPROVED_DEVOURING_PLAGUE_HEAL = 75999;
         uint32 const SPELL_GLYPH_OF_POWER_WORD_SHIELD = 55672;
         uint32 const SPELL_GLYPH_OF_POWER_WORD_SHIELD_HEAL = 56160;
         uint32 const SPELL_GLYPH_OF_BLURRED_SPEED = 58039;
         uint32 const SPELL_GLYPH_OF_BLURRED_SPEED_SPRINT = 61922;
-        uint32 const SPELL_AVENGING_WRATH = 61987;
         uint32 const SPELL_FORBEARANCE = 25771;
-        uint32 const SPELL_AVENGING_WRATH_MARKER = 61988;
         uint32 const SPELL_SHARED_SUFFERING_TRIGGER = 72373;
         uint32 const SPELL_INVISIBILITY_FADE = 32612;
-        uint32 const SPELL_RAPTURE_RANK = 47535;
         uint32 const SPELL_RAPTURE_ENERGIZE = 47755;
         uint32 const SPELL_GLYPH_OF_FREEZING_TRAP = 56845;
         uint32 const SPELL_GLYPH_OF_FREEZING_TRAP_TRIGGER = 61394;
@@ -168,7 +156,6 @@ namespace Spells
         uint32 const SPELL_DIVINE_FAVOR = 31842;
         uint32 const SPELL_PALADIN_T10_HOLY = 70755;
         uint32 const SPELL_PALADIN_T10_HOLY_TRIGGER = 71166;
-        uint32 const SPELL_DRAIN_SOUL_EXECUTE_AURA = 100001;
         uint32 const NPC_TAGGED_BLACKSILT_SCOUT = 17654;
         uint32 const NPC_UNTAGGED_BLACKSILT_SCOUT = 17326;
         uint32 const NPC_FESTIVE_HOLIDAY_MOUNT_FLYING = 24906;
@@ -749,16 +736,6 @@ namespace Spells
         return SPELL_NET_O_MATIC_SELF_ROOT;
     }
 
-    uint32 GetKillCommandOwnerAuraSpellId()
-    {
-        return SPELL_KILL_COMMAND_OWNER_AURA;
-    }
-
-    uint32 GetKillCommandPetAuraSpellId()
-    {
-        return SPELL_KILL_COMMAND_PET_AURA;
-    }
-
     uint32 GetBloodElfIllusionDisguiseSpellId(uint32 auraSpellId, uint8 gender)
     {
         for (GenderedAuraSpellInfo const& disguise : BloodElfIllusionDisguises)
@@ -872,20 +849,10 @@ namespace Spells
         return auraSpellId == 64821 ? 64774 : 0;
     }
 
-    uint32 GetPeriodicFrenziedRegenerationSpellId()
-    {
-        return SPELL_PERIODIC_FRENZIED_REGENERATION_HEAL;
-    }
-
     uint32 GetKillingSpreePeriodicSpellId(uint8 index)
     {
         uint32 const spellIds[] = { 57840, 57841 };
         return index < 2 ? spellIds[index] : 0;
-    }
-
-    uint32 GetPeriodicExplosiveShotTriggerSpellId()
-    {
-        return SPELL_PERIODIC_EXPLOSIVE_SHOT_TRIGGER;
     }
 
     uint32 GetPeriodicDeathAndDecayTriggerSpellId()
@@ -985,11 +952,6 @@ namespace Spells
         return SPELL_WILD_GROWTH_T10_RESTORATION;
     }
 
-    uint32 GetManaFeedTriggerSpellId()
-    {
-        return SPELL_MANA_FEED_TRIGGER;
-    }
-
     bool IsUnsavableSpecialAura(uint32 auraSpellId)
     {
         return ContainsSpellId(UnsavableSpecialAuras, sizeof(UnsavableSpecialAuras) / sizeof(uint32), auraSpellId);
@@ -1009,19 +971,9 @@ namespace Spells
         return 0;
     }
 
-    uint32 GetHeroicFuryCooldownSpellId()
-    {
-        return SPELL_HEROIC_FURY_COOLDOWN;
-    }
-
     uint32 GetDruidTier8RestorationAuraSpellId()
     {
         return SPELL_DRUID_T8_RESTORATION;
-    }
-
-    uint32 GetDruidTier8RestorationTriggerSpellId()
-    {
-        return SPELL_DRUID_T8_RESTORATION_TRIGGER;
     }
 
     uint32 GetDruidCatFormSpellId()
@@ -1053,16 +1005,6 @@ namespace Spells
         return 0;
     }
 
-    uint32 GetImprovedDevouringPlagueDamageSpellId()
-    {
-        return SPELL_IMPROVED_DEVOURING_PLAGUE_DAMAGE;
-    }
-
-    uint32 GetImprovedDevouringPlagueHealSpellId()
-    {
-        return SPELL_IMPROVED_DEVOURING_PLAGUE_HEAL;
-    }
-
     uint32 GetGlyphOfPowerWordShieldAuraSpellId()
     {
         return SPELL_GLYPH_OF_POWER_WORD_SHIELD;
@@ -1083,19 +1025,9 @@ namespace Spells
         return SPELL_GLYPH_OF_BLURRED_SPEED_SPRINT;
     }
 
-    uint32 GetAvengingWrathAuraSpellId()
-    {
-        return SPELL_AVENGING_WRATH;
-    }
-
     uint32 GetForbearanceAuraSpellId()
     {
         return SPELL_FORBEARANCE;
-    }
-
-    uint32 GetAvengingWrathMarkerAuraSpellId()
-    {
-        return SPELL_AVENGING_WRATH_MARKER;
     }
 
     uint32 GetSharedSufferingTriggerSpellId()
@@ -1115,11 +1047,6 @@ namespace Spells
                 return triggeredSpell.TriggerSpellId;
 
         return 0;
-    }
-
-    uint32 GetRaptureRankedSpellId()
-    {
-        return SPELL_RAPTURE_RANK;
     }
 
     uint32 GetRaptureEnergizeSpellId()
@@ -1185,11 +1112,6 @@ namespace Spells
     uint32 GetPaladinTier10HolyBonusTriggerSpellId()
     {
         return SPELL_PALADIN_T10_HOLY_TRIGGER;
-    }
-
-    uint32 GetDrainSoulExecuteAuraSpellId()
-    {
-        return SPELL_DRAIN_SOUL_EXECUTE_AURA;
     }
 
     AuraStateImmunityRule const* GetAuraStateImmunityRule(int32 miscValue, uint32 auraSpellId, int32 amount)
