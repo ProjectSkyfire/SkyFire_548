@@ -1,5 +1,5 @@
 -- Orchard Tool
-SET @OGUID := 50007;
+SET @OGUID := 50008;
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID-8 AND @OGUID-0;
 DELETE FROM `gameobject` WHERE `id`=209344;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`) VALUES
@@ -18,7 +18,7 @@ UPDATE `gameobject` SET `state`=1 WHERE `id`=209344;
 UPDATE `gameobject_template` SET `flags`=4 WHERE `entry`=209344;
 
 -- Orchard Tool
-SET @OGUID := 50015;
+SET @OGUID := 50017;
 DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID-8 AND @OGUID-0;
 DELETE FROM `gameobject` WHERE `id`=209345;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`) VALUES
