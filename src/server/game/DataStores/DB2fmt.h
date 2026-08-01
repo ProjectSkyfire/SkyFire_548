@@ -6,10 +6,10 @@
 #ifndef SKYFIRE_DB2SFRM_H
 #define SKYFIRE_DB2SFRM_H
 
-char const BattlePetAbilityEffectfmt[] = "nixxiiiiiiii";
+char const BattlePetAbilityEffectfmt[] = "niiiiiiiiiii";
 char const BattlePetAbilityfmt[] = "nixiiixx";
 char const BattlePetAbilityStatefmt[] = "niii";
-char const BattlePetAbilityTurnfmt[] = "nixixx";
+char const BattlePetAbilityTurnfmt[] = "niiixx";
 char const BattlePetBreedQualityfmt[] = "nif";
 char const BattlePetBreedStatefmt[] = "diii";
 char const BattlePetEffectPropertiesfmt[] = "nxssssssxxxxxx";
@@ -17,7 +17,7 @@ char const BattlePetSpeciesfmt[] = "dixiixixx";
 char const BattlePetSpeciesStatefmt[] = "diii";
 char const BattlePetSpeciesXAbilityfmt[] = "diiii";
 char const BattlePetStatefmt[] = "nxsi";
-//char const BattlePetVisualfmt[] = "nxxxxxxx";
+char const BattlePetVisualfmt[] = "niiiiixx";
 char const BroadcastTextfmt[] = "nxxxxxxxxxxxx";
 //char const CreatureDifficultyfmt[] = "nxxxxxxxxxx";
 //char const Creaturefmt[] = "nxxxxxxxxxxxxxxxxx";

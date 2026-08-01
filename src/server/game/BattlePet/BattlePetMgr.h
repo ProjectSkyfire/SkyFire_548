@@ -194,6 +194,14 @@ public:
         uint32 enemyIncomingDamageReduction, uint8 enemyIncomingDamageReductionRounds,
         Skyfire::BattlePetPackets::BattlePetRoundResult& round,
         Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound = NULL);
+    bool ApplyBattlePetAbilityTurnExchangeInput(uint32 roundId,
+        uint8 allyAbilitySlot, uint32 allyAbilityId, uint8 turnIndex,
+        uint16 power, uint8 level,
+        uint32 enemyDamage, uint32 enemyAbilityEffectId,
+        uint32 allyIncomingDamageReduction, uint8 allyIncomingDamageReductionRounds,
+        uint32 enemyIncomingDamageReduction, uint8 enemyIncomingDamageReductionRounds,
+        Skyfire::BattlePetPackets::BattlePetRoundResult& round,
+        Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound = NULL);
     bool ApplyBattlePetSwapInput(uint32 roundId, uint8 newFrontPet,
         Skyfire::BattlePetPackets::BattlePetRoundResult& round);
     bool ApplyBattlePetForfeitInput(uint32 roundId, Skyfire::BattlePetPackets::BattlePetFinalRound& finalRound);

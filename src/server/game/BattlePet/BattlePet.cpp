@@ -15,35 +15,9 @@
 
 namespace
 {
-    enum BattlePetAbilityEffectProperties
-    {
-        BATTLE_PET_EFFECT_DAMAGE = 24,
-        BATTLE_PET_EFFECT_RAMPING_DAMAGE = 27,
-        BATTLE_PET_EFFECT_DAMAGE_TOGGLE_AURA = 76,
-        BATTLE_PET_EFFECT_DAMAGE_HIT_STATE = 96,
-        BATTLE_PET_EFFECT_EXTRA_ATTACK_FIRST = 103,
-        BATTLE_PET_EFFECT_DAMAGE_NON_LETHAL = 149
-    };
-
     typedef std::unordered_map<uint32, BattlePetAbilityEffectEntry const*> BattlePetAbilityEffectByTurnCache;
     typedef std::unordered_map<uint64, int32> BattlePetAbilityStateCache;
     typedef std::unordered_map<uint32, uint16> BattlePetSpeciesByNpcCache;
-
-    bool BattlePetAbilityEffectDealsDamage(uint32 propertiesId)
-    {
-        switch (propertiesId)
-        {
-            case BATTLE_PET_EFFECT_DAMAGE:
-            case BATTLE_PET_EFFECT_RAMPING_DAMAGE:
-            case BATTLE_PET_EFFECT_DAMAGE_TOGGLE_AURA:
-            case BATTLE_PET_EFFECT_DAMAGE_HIT_STATE:
-            case BATTLE_PET_EFFECT_EXTRA_ATTACK_FIRST:
-            case BATTLE_PET_EFFECT_DAMAGE_NON_LETHAL:
-                return true;
-            default:
-                return false;
-        }
-    }
 
     BattlePetSpeciesByNpcCache const& BattlePetSpeciesByNpc()
     {
@@ -88,14 +62,17 @@ namespace
         static BattlePetAbilityEffectByTurnCache firstDamageEffectByTurn;
         BuildBattlePetAbilityEffectCaches(firstEffectByTurn, firstDamageEffectByTurn);
 
-        BattlePetAbilityEffectByTurnCache::const_iterator itr = firstDamageEffectByTurn.find(turnId);
-        if (itr != firstDamageEffectByTurn.end())
-            return itr->second;
-
         if (damageOnly)
-            return nullptr;
+        {
+            BattlePetAbilityEffectByTurnCache::const_iterator itr = firstDamageEffectByTurn.find(turnId);
+            return itr != firstDamageEffectByTurn.end() ? itr->second : nullptr;
+        }
 
-        itr = firstEffectByTurn.find(turnId);
+        BattlePetAbilityEffectByTurnCache::const_iterator damageItr = firstDamageEffectByTurn.find(turnId);
+        if (damageItr != firstDamageEffectByTurn.end())
+            return damageItr->second;
+
+        BattlePetAbilityEffectByTurnCache::const_iterator itr = firstEffectByTurn.find(turnId);
         return itr != firstEffectByTurn.end() ? itr->second : nullptr;
     }
 
@@ -114,11 +91,84 @@ namespace
         {
             BattlePetAbilityStateEntry const* stateEntry = sBattlePetAbilityStateStore.LookupEntry(i);
             if (stateEntry)
-                abilityStates[BattlePetAbilityStateKey(stateEntry->AbilityId, stateEntry->StateId)] = int32(stateEntry->Value);
+                abilityStates[BattlePetAbilityStateKey(stateEntry->AbilityId, stateEntry->StateId)] = stateEntry->Value;
         }
 
         return abilityStates;
     }
+
+    bool TurnIndexLess(std::pair<uint32, uint8> const& left, std::pair<uint32, uint8> const& right)
+    {
+        return left.second < right.second;
+    }
+}
+
+bool BattlePetAbilityEffectDealsDamage(uint32 propertiesId)
+{
+    switch (propertiesId)
+    {
+        case BATTLE_PET_EFFECT_DAMAGE:
+        case BATTLE_PET_EFFECT_RAMPING_DAMAGE:
+        case BATTLE_PET_EFFECT_DAMAGE_TOGGLE_AURA:
+        case BATTLE_PET_EFFECT_DAMAGE_HIT_STATE:
+        case BATTLE_PET_EFFECT_EXTRA_ATTACK_FIRST:
+        case BATTLE_PET_EFFECT_DAMAGE_NON_LETHAL:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool BattlePetAbilityEffectHeals(uint32 propertiesId)
+{
+    return propertiesId == BATTLE_PET_EFFECT_HEAL;
+}
+
+bool BattlePetAbilityEffectAppliesAura(uint32 propertiesId)
+{
+    return propertiesId == BATTLE_PET_EFFECT_APPLY_AURA
+        || propertiesId == BATTLE_PET_EFFECT_APPLY_AURA_DURATION
+        || propertiesId == BATTLE_PET_EFFECT_APPLY_AURA_TO_TARGET
+        || propertiesId == BATTLE_PET_EFFECT_APPLY_AURA_TO_TARGET_2;
+}
+
+bool BattlePetAbilityEffectAppliesAuraToTarget(uint32 propertiesId)
+{
+    return propertiesId == BATTLE_PET_EFFECT_APPLY_AURA_TO_TARGET
+        || propertiesId == BATTLE_PET_EFFECT_APPLY_AURA_TO_TARGET_2;
+}
+
+bool BattlePetAbilityEffectAppliesWeather(uint32 propertiesId)
+{
+    return propertiesId == BATTLE_PET_EFFECT_APPLY_WEATHER_AURA;
+}
+
+bool BattlePetAbilityEffectRemovesAura(uint32 propertiesId)
+{
+    return propertiesId == BATTLE_PET_EFFECT_REMOVE_AURA;
+}
+
+bool BattlePetAbilityEffectIsKillHeal(uint32 propertiesId, BattlePetAbilityEffectEntry const* effectEntry)
+{
+    if (!effectEntry)
+        return false;
+
+    // Devour-style on-kill restore: Points + RequiredTargetState = Is_Dead.
+    if (propertiesId != BATTLE_PET_EFFECT_POINTS_STATE_CONDITIONAL
+        && propertiesId != BATTLE_PET_EFFECT_DAMAGE_STATE_CONDITIONAL)
+        return false;
+
+    return effectEntry->PropertyValues[3] == BATTLE_PET_STATE_IS_DEAD;
+}
+
+bool BattlePetAuraMakesUntargetable(uint32 auraAbilityId)
+{
+    if (!auraAbilityId)
+        return false;
+
+    return BattlePetAbilityStateValue(auraAbilityId, BATTLE_PET_STATE_UNTARGETABLE) != 0
+        || BattlePetAbilityStateValue(auraAbilityId, BATTLE_PET_STATE_MECHANIC_IS_FLYING) != 0
+        || BattlePetAbilityStateValue(auraAbilityId, BATTLE_PET_STATE_MECHANIC_IS_UNDERGROUND) != 0;
 }
 
 uint16 BattlePetHealthFromPercent(uint16 maxHealth, uint8 percent)
@@ -201,16 +251,110 @@ uint32 BattlePetSpeciesFamilyMask(uint16 speciesId)
     return uint32(1) << speciesEntry->FamilyId;
 }
 
-BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForAbility(uint32 abilityId, bool damageOnly)
+uint8 BattlePetSpeciesFamilyId(uint16 speciesId)
 {
+    BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(speciesId);
+    return speciesEntry ? uint8(speciesEntry->FamilyId) : 0;
+}
+
+uint8 BattlePetAbilityTurnCount(uint32 abilityId)
+{
+    if (!abilityId)
+        return 0;
+
+    uint8 turnCount = 0;
     std::pair<BattlePetAbilityTurnByAbilityStore::const_iterator, BattlePetAbilityTurnByAbilityStore::const_iterator> turnRange =
         sBattlePetAbilityTurnByAbilityStore.equal_range(abilityId);
 
-    BattlePetAbilityEffectEntry const* firstEffect = nullptr;
+    for (BattlePetAbilityTurnByAbilityStore::const_iterator itr = turnRange.first; itr != turnRange.second; ++itr)
+        turnCount = std::max<uint8>(turnCount, itr->second.second);
 
+    return turnCount;
+}
+
+std::vector<BattlePetAbilityEffectEntry const*> BattlePetAbilityEffectsForTurn(uint32 abilityId, uint8 turnIndex)
+{
+    std::vector<BattlePetAbilityEffectEntry const*> effects;
+    if (!abilityId || !turnIndex)
+        return effects;
+
+    std::pair<BattlePetAbilityTurnByAbilityStore::const_iterator, BattlePetAbilityTurnByAbilityStore::const_iterator> turnRange =
+        sBattlePetAbilityTurnByAbilityStore.equal_range(abilityId);
+
+    uint32 turnEntryId = 0;
     for (BattlePetAbilityTurnByAbilityStore::const_iterator itr = turnRange.first; itr != turnRange.second; ++itr)
     {
-        BattlePetAbilityEffectEntry const* effectEntry = BattlePetAbilityEffectForTurn(itr->second.first, damageOnly);
+        if (itr->second.second != turnIndex)
+            continue;
+
+        turnEntryId = itr->second.first;
+        break;
+    }
+
+    if (!turnEntryId)
+        return effects;
+
+    for (uint32 i = 0; i < sBattlePetAbilityEffectStore.GetNumRows(); ++i)
+    {
+        BattlePetAbilityEffectEntry const* effectEntry = sBattlePetAbilityEffectStore.LookupEntry(i);
+        if (!effectEntry || effectEntry->TurnEntryId != turnEntryId)
+            continue;
+
+        effects.push_back(effectEntry);
+    }
+
+    std::sort(effects.begin(), effects.end(),
+        [](BattlePetAbilityEffectEntry const* left, BattlePetAbilityEffectEntry const* right)
+        {
+            if (left->EffectIndex != right->EffectIndex)
+                return left->EffectIndex < right->EffectIndex;
+            return left->Id < right->Id;
+        });
+
+    return effects;
+}
+
+BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForAbilityTurn(uint32 abilityId, uint8 turnIndex, bool damageOnly)
+{
+    std::vector<BattlePetAbilityEffectEntry const*> const effects = BattlePetAbilityEffectsForTurn(abilityId, turnIndex);
+    BattlePetAbilityEffectEntry const* firstEffect = nullptr;
+
+    for (BattlePetAbilityEffectEntry const* effectEntry : effects)
+    {
+        if (!effectEntry)
+            continue;
+
+        if (damageOnly || BattlePetAbilityEffectDealsDamage(effectEntry->PropertiesId))
+        {
+            if (BattlePetAbilityEffectDealsDamage(effectEntry->PropertiesId))
+                return effectEntry;
+            if (damageOnly)
+                continue;
+        }
+
+        if (!firstEffect)
+            firstEffect = effectEntry;
+    }
+
+    return damageOnly ? nullptr : firstEffect;
+}
+
+BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForAbility(uint32 abilityId, bool damageOnly)
+{
+    // Prefer the earliest TurnIndex so multi-turn channels do not skip to later damage turns.
+    std::pair<BattlePetAbilityTurnByAbilityStore::const_iterator, BattlePetAbilityTurnByAbilityStore::const_iterator> turnRange =
+        sBattlePetAbilityTurnByAbilityStore.equal_range(abilityId);
+
+    std::vector<std::pair<uint32, uint8>> turns;
+    for (BattlePetAbilityTurnByAbilityStore::const_iterator itr = turnRange.first; itr != turnRange.second; ++itr)
+        turns.push_back(itr->second);
+
+    std::sort(turns.begin(), turns.end(), TurnIndexLess);
+
+    BattlePetAbilityEffectEntry const* firstEffect = nullptr;
+    for (std::pair<uint32, uint8> const& turn : turns)
+    {
+        BattlePetAbilityEffectEntry const* effectEntry = BattlePetAbilityEffectForTurn(turn.first, damageOnly);
         if (!effectEntry)
             continue;
 
@@ -237,6 +381,12 @@ uint32 BattlePetAbilityBasePoints(uint32 abilityId)
     return damageEffect ? damageEffect->PropertyValues[0] : 0;
 }
 
+uint32 BattlePetAbilityBasePointsForTurn(uint32 abilityId, uint8 turnIndex)
+{
+    BattlePetAbilityEffectEntry const* damageEffect = BattlePetAbilityEffectForAbilityTurn(abilityId, turnIndex, true);
+    return damageEffect ? damageEffect->PropertyValues[0] : 0;
+}
+
 uint32 BattlePetScalePointsFromStats(uint32 points, uint16 power, uint8 level)
 {
     if (!points)
@@ -255,6 +405,14 @@ uint32 BattlePetDamageFromStats(uint32 abilityId, uint16 power, uint8 level)
         return 0;
 
     return BattlePetScalePointsFromStats(BattlePetAbilityBasePoints(abilityId), power, level);
+}
+
+uint32 BattlePetDamageFromStatsForTurn(uint32 abilityId, uint8 turnIndex, uint16 power, uint8 level)
+{
+    if (!abilityId || !turnIndex)
+        return 0;
+
+    return BattlePetScalePointsFromStats(BattlePetAbilityBasePointsForTurn(abilityId, turnIndex), power, level);
 }
 
 uint16 BattlePetPowerFromBattleState(uint16 species, uint8 level, uint8 quality, uint8 breed)
@@ -279,14 +437,52 @@ uint32 BattlePetInputDamageForAbility(uint32 abilityId, BattlePet const* caster)
     return BattlePetDamageFromStats(abilityId, caster->GetPower(), caster->GetLevel());
 }
 
+uint32 BattlePetInputDamageForAbilityTurn(uint32 abilityId, uint8 turnIndex, BattlePet const* caster)
+{
+    if (!abilityId || !turnIndex)
+        return 0;
+
+    if (!caster)
+        return BattlePetDamageFromStatsForTurn(abilityId, turnIndex, 0, 1);
+
+    return BattlePetDamageFromStatsForTurn(abilityId, turnIndex, caster->GetPower(), caster->GetLevel());
+}
+
+static BattlePetAbilityEffectEntry const* BattlePetIncomingDamageReductionEffect(uint32 abilityId)
+{
+    if (!abilityId)
+        return nullptr;
+
+    std::pair<BattlePetAbilityTurnByAbilityStore::const_iterator, BattlePetAbilityTurnByAbilityStore::const_iterator> turnRange =
+        sBattlePetAbilityTurnByAbilityStore.equal_range(abilityId);
+
+    for (BattlePetAbilityTurnByAbilityStore::const_iterator turnItr = turnRange.first; turnItr != turnRange.second; ++turnItr)
+    {
+        uint32 const turnId = turnItr->second.first;
+        for (uint32 i = 0; i < sBattlePetAbilityEffectStore.GetNumRows(); ++i)
+        {
+            BattlePetAbilityEffectEntry const* effectEntry = sBattlePetAbilityEffectStore.LookupEntry(i);
+            if (!effectEntry || effectEntry->TurnEntryId != turnId || !effectEntry->AuraAbilityId)
+                continue;
+
+            int32 const flatTaken = BattlePetAbilityStateValue(
+                effectEntry->AuraAbilityId, BATTLE_PET_STATE_DAMAGE_TAKEN_FLAT);
+            if (flatTaken < 0)
+                return effectEntry;
+        }
+    }
+
+    return nullptr;
+}
+
 uint32 BattlePetIncomingDamageReductionFromStats(uint32 abilityId, uint16 power, uint8 level)
 {
-    BattlePetAbilityEntry const* abilityEntry = sBattlePetAbilityStore.LookupEntry(abilityId);
-    if (!abilityEntry || !abilityEntry->AuraAbilityId)
+    BattlePetAbilityEffectEntry const* effectEntry = BattlePetIncomingDamageReductionEffect(abilityId);
+    if (!effectEntry)
         return 0;
 
     int32 const stateValue = BattlePetAbilityStateValue(
-        abilityEntry->AuraAbilityId, BATTLE_PET_STATE_DAMAGE_TAKEN_FLAT);
+        effectEntry->AuraAbilityId, BATTLE_PET_STATE_DAMAGE_TAKEN_FLAT);
     if (stateValue >= 0)
         return 0;
 
@@ -295,11 +491,12 @@ uint32 BattlePetIncomingDamageReductionFromStats(uint32 abilityId, uint16 power,
 
 uint8 BattlePetIncomingDamageReductionRounds(uint32 abilityId)
 {
-    BattlePetAbilityEntry const* abilityEntry = sBattlePetAbilityStore.LookupEntry(abilityId);
-    if (!abilityEntry || !abilityEntry->AuraAbilityId)
+    BattlePetAbilityEffectEntry const* effectEntry = BattlePetIncomingDamageReductionEffect(abilityId);
+    if (!effectEntry)
         return 0;
 
-    return uint8(std::min<uint32>(abilityEntry->AuraDuration, 255));
+    // Apply-aura effects store duration in Param[2] (BattlePetEffectProperties "Duration").
+    return uint8(std::min<uint32>(effectEntry->PropertyValues[2], 255));
 }
 
 uint32 BattlePetInputIncomingDamageReductionForAbility(uint32 abilityId, BattlePet const* caster)
@@ -326,6 +523,22 @@ uint32 BattlePetInputEffectForAbility(uint32 abilityId)
 {
     BattlePetAbilityEffectEntry const* effectEntry = BattlePetAbilityEffectForAbility(abilityId, false);
     return effectEntry ? effectEntry->Id : 0;
+}
+
+uint32 BattlePetInputEffectForAbilityTurn(uint32 abilityId, uint8 turnIndex)
+{
+    BattlePetAbilityEffectEntry const* effectEntry = BattlePetAbilityEffectForAbilityTurn(abilityId, turnIndex, false);
+    return effectEntry ? effectEntry->Id : 0;
+}
+
+uint32 BattlePetAbilitySpellVisual(uint32 abilityId)
+{
+    BattlePetAbilityEntry const* abilityEntry = sBattlePetAbilityStore.LookupEntry(abilityId);
+    if (!abilityEntry || !abilityEntry->VisualId)
+        return 0;
+
+    BattlePetVisualEntry const* visualEntry = sBattlePetVisualStore.LookupEntry(abilityEntry->VisualId);
+    return visualEntry ? visualEntry->SpellVisualId : 0;
 }
 
 void BattlePet::CalculateStats(bool currentHealth)

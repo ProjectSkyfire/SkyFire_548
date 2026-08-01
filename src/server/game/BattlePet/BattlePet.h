@@ -9,6 +9,8 @@
 #include "Common.h"
 #include "SharedDefines.h"
 
+#include <vector>
+
 #define BATTLE_PET_MAX_LEVEL       25
 #define BATTLE_PET_MAX_NAME_LENGTH 16
 
@@ -149,11 +151,38 @@ enum BattlePetEvent
 
 enum BattlePetStates
 {
+    BATTLE_PET_STATE_IS_DEAD = 1,
     BATTLE_PET_STATE_STAT_POWER = 18,
     BATTLE_PET_STATE_STAT_STAMINA = 19,
     BATTLE_PET_STATE_STAT_SPEED = 20,
+    BATTLE_PET_STATE_MOD_DAMAGE_DEALT_PERCENT = 23,
+    BATTLE_PET_STATE_UNTARGETABLE = 29,
+    BATTLE_PET_STATE_MECHANIC_IS_UNDERGROUND = 30,
+    BATTLE_PET_STATE_MECHANIC_IS_FLYING = 33,
+    BATTLE_PET_STATE_WEATHER_RAIN = 60,
     BATTLE_PET_STATE_DAMAGE_TAKEN_FLAT = 71,
-    BATTLE_PET_STATE_STAT_GENDER = 78  // currently not used by Blizzard
+    BATTLE_PET_STATE_STAT_GENDER = 78,  // currently not used by Blizzard
+    BATTLE_PET_STATE_MOD_PET_TYPE_DAMAGE_DEALT_PERCENT = 87,
+    BATTLE_PET_STATE_MOD_PET_TYPE_ID = 89
+};
+
+enum BattlePetAbilityEffectProperties
+{
+    BATTLE_PET_EFFECT_HEAL = 23,
+    BATTLE_PET_EFFECT_DAMAGE = 24,
+    BATTLE_PET_EFFECT_APPLY_AURA = 26,
+    BATTLE_PET_EFFECT_RAMPING_DAMAGE = 27,
+    BATTLE_PET_EFFECT_APPLY_AURA_DURATION = 28,
+    BATTLE_PET_EFFECT_DAMAGE_STATE_CONDITIONAL = 29,
+    BATTLE_PET_EFFECT_REMOVE_AURA = 49,
+    BATTLE_PET_EFFECT_APPLY_AURA_TO_TARGET = 50,
+    BATTLE_PET_EFFECT_DAMAGE_TOGGLE_AURA = 76,
+    BATTLE_PET_EFFECT_APPLY_WEATHER_AURA = 80,
+    BATTLE_PET_EFFECT_DAMAGE_HIT_STATE = 96,
+    BATTLE_PET_EFFECT_EXTRA_ATTACK_FIRST = 103,
+    BATTLE_PET_EFFECT_POINTS_STATE_CONDITIONAL = 104,
+    BATTLE_PET_EFFECT_DAMAGE_NON_LETHAL = 149,
+    BATTLE_PET_EFFECT_APPLY_AURA_TO_TARGET_2 = 168
 };
 
 enum class BattlePetDbState
@@ -266,17 +295,34 @@ struct BattlePetAbilityEffectEntry;
 uint16 BattlePetSpeciesIdByNpcId(uint32 npcId);
 uint32 BattlePetSpeciesNpcId(uint16 speciesId);
 uint32 BattlePetSpeciesFamilyMask(uint16 speciesId);
+uint8 BattlePetSpeciesFamilyId(uint16 speciesId);
 BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForAbility(uint32 abilityId, bool damageOnly);
+BattlePetAbilityEffectEntry const* BattlePetAbilityEffectForAbilityTurn(uint32 abilityId, uint8 turnIndex, bool damageOnly);
+uint8 BattlePetAbilityTurnCount(uint32 abilityId);
+std::vector<BattlePetAbilityEffectEntry const*> BattlePetAbilityEffectsForTurn(uint32 abilityId, uint8 turnIndex);
+bool BattlePetAbilityEffectDealsDamage(uint32 propertiesId);
+bool BattlePetAbilityEffectHeals(uint32 propertiesId);
+bool BattlePetAbilityEffectAppliesAura(uint32 propertiesId);
+bool BattlePetAbilityEffectAppliesAuraToTarget(uint32 propertiesId);
+bool BattlePetAbilityEffectAppliesWeather(uint32 propertiesId);
+bool BattlePetAbilityEffectRemovesAura(uint32 propertiesId);
+bool BattlePetAbilityEffectIsKillHeal(uint32 propertiesId, BattlePetAbilityEffectEntry const* effectEntry);
+bool BattlePetAuraMakesUntargetable(uint32 auraAbilityId);
 int32 BattlePetAbilityStateValue(uint32 abilityId, uint32 stateId);
 uint32 BattlePetAbilityBasePoints(uint32 abilityId);
+uint32 BattlePetAbilityBasePointsForTurn(uint32 abilityId, uint8 turnIndex);
 uint32 BattlePetScalePointsFromStats(uint32 points, uint16 power, uint8 level);
 uint32 BattlePetDamageFromStats(uint32 abilityId, uint16 power, uint8 level);
+uint32 BattlePetDamageFromStatsForTurn(uint32 abilityId, uint8 turnIndex, uint16 power, uint8 level);
 uint16 BattlePetPowerFromBattleState(uint16 species, uint8 level, uint8 quality, uint8 breed);
 uint32 BattlePetInputDamageForAbility(uint32 abilityId, BattlePet const* caster);
+uint32 BattlePetInputDamageForAbilityTurn(uint32 abilityId, uint8 turnIndex, BattlePet const* caster);
 uint32 BattlePetIncomingDamageReductionFromStats(uint32 abilityId, uint16 power, uint8 level);
 uint8 BattlePetIncomingDamageReductionRounds(uint32 abilityId);
 uint32 BattlePetInputIncomingDamageReductionForAbility(uint32 abilityId, BattlePet const* caster);
 uint16 BattlePetAbilityCooldown(uint32 abilityId);
 uint32 BattlePetInputEffectForAbility(uint32 abilityId);
+uint32 BattlePetInputEffectForAbilityTurn(uint32 abilityId, uint8 turnIndex);
+uint32 BattlePetAbilitySpellVisual(uint32 abilityId);
 
 #endif

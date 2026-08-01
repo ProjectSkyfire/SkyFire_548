@@ -1457,21 +1457,37 @@ void WorldSession::HandleBattlePetInput(WorldPacket& recvData)
             uint32 const enemyDamage = enemyBattlePet
                 ? BattlePetInputDamageForAbility(enemyAbilityId, enemyBattlePet)
                 : BattlePetInputDamageForEnemyAbility(enemyAbilityId, activeBattle);
-            uint8 const allyAbilitySlot = BattlePetActiveAbilitySlot(allyBattlePet, command.AbilityID);
-            if (allyAbilitySlot == BATTLE_PET_ABILITY_SLOT_INVALID)
+
+            uint8 allyAbilitySlot = BattlePetActiveAbilitySlot(allyBattlePet, command.AbilityID);
+            uint32 allyAbilityId = command.AbilityID;
+            uint8 turnIndex = 1;
+
+            uint8 channelSlot = 0;
+            uint32 channelAbilityId = 0;
+            uint8 channelNextTurn = 0;
+            if (battlePetMgr->GetActivePetBattle().GetAllyAbilityChannel(
+                    activeBattle.AllyFrontPet, channelSlot, channelAbilityId, channelNextTurn))
+            {
+                allyAbilitySlot = channelSlot;
+                allyAbilityId = channelAbilityId;
+                turnIndex = channelNextTurn;
+            }
+            else if (allyAbilitySlot == BATTLE_PET_ABILITY_SLOT_INVALID)
                 return;
 
             if (activeBattle.IsPvP())
                 pvpFinalOpponentGuid = activeBattle.EnemyGUID;
 
-            handled = battlePetMgr->ApplyBattlePetAbilityExchangeInput(roundId,
-                BattlePetInputDamageForAbility(command.AbilityID, allyBattlePet),
-                BattlePetInputEffectForAbility(command.AbilityID),
-                allyAbilitySlot, command.AbilityID, BattlePetAbilityCooldown(command.AbilityID),
+            uint16 const allyPower = allyBattlePet ? allyBattlePet->GetPower() : 0;
+            uint8 const allyLevel = allyBattlePet ? allyBattlePet->GetLevel() : 1;
+
+            handled = battlePetMgr->ApplyBattlePetAbilityTurnExchangeInput(roundId,
+                allyAbilitySlot, allyAbilityId, turnIndex,
+                allyPower, allyLevel,
                 enemyDamage,
                 BattlePetInputEffectForAbility(enemyAbilityId),
-                BattlePetInputIncomingDamageReductionForAbility(command.AbilityID, allyBattlePet),
-                BattlePetIncomingDamageReductionRounds(command.AbilityID),
+                BattlePetInputIncomingDamageReductionForAbility(allyAbilityId, allyBattlePet),
+                BattlePetIncomingDamageReductionRounds(allyAbilityId),
                 enemyBattlePet
                     ? BattlePetInputIncomingDamageReductionForAbility(enemyAbilityId, enemyBattlePet)
                     : BattlePetInputIncomingDamageReductionForEnemyAbility(enemyAbilityId, activeBattle),
@@ -1525,6 +1541,57 @@ void WorldSession::HandleBattlePetInput(WorldPacket& recvData)
 
     if (sendRound)
         SendBattlePetRoundResult(*player, round);
+
+    // Vs AI, immediately resolve remaining channel turns (Lift-Off crash, Dive, etc.) after the
+    // opening channel round has been sent, so the client is not stuck with no usable input.
+    if (sendRound && !sendFinal && command.Action == Skyfire::BattlePetPackets::BATTLE_PET_INPUT_ACTION_ABILITY
+        && battlePetMgr->HasActivePetBattle() && !battlePetMgr->GetActivePetBattle().IsPvP()
+        && !battlePetMgr->GetActivePetBattle().IsFinished())
+    {
+        while (battlePetMgr->HasActivePetBattle() && !battlePetMgr->GetActivePetBattle().IsFinished())
+        {
+            ActivePetBattle const& channelBattle = battlePetMgr->GetActivePetBattle();
+            uint8 continueSlot = 0;
+            uint32 continueAbilityId = 0;
+            uint8 continueTurn = 0;
+            if (!channelBattle.GetAllyAbilityChannel(channelBattle.AllyFrontPet, continueSlot,
+                    continueAbilityId, continueTurn))
+                break;
+
+            uint32 const continueEnemyAbilityId = BattlePetGetSpeciesAbility(
+                channelBattle.EnemySpecies, 0, 0, channelBattle.EnemyLevel);
+            BattlePet const* continueAllyPet = GetActiveBattlePet(*battlePetMgr);
+            BattlePet const* continueEnemyPet = GetPvpOpponentActiveBattlePet(*player, channelBattle);
+            uint32 const continueEnemyDamage = continueEnemyPet
+                ? BattlePetInputDamageForAbility(continueEnemyAbilityId, continueEnemyPet)
+                : BattlePetInputDamageForEnemyAbility(continueEnemyAbilityId, channelBattle);
+
+            Skyfire::BattlePetPackets::BattlePetRoundResult continueRound;
+            Skyfire::BattlePetPackets::BattlePetFinalRound continueFinal;
+            if (!battlePetMgr->ApplyBattlePetAbilityTurnExchangeInput(channelBattle.RoundID,
+                    continueSlot, continueAbilityId, continueTurn,
+                    continueAllyPet ? continueAllyPet->GetPower() : 0,
+                    continueAllyPet ? continueAllyPet->GetLevel() : 1,
+                    continueEnemyDamage,
+                    BattlePetInputEffectForAbility(continueEnemyAbilityId),
+                    BattlePetInputIncomingDamageReductionForAbility(continueAbilityId, continueAllyPet),
+                    BattlePetIncomingDamageReductionRounds(continueAbilityId),
+                    continueEnemyPet
+                        ? BattlePetInputIncomingDamageReductionForAbility(continueEnemyAbilityId, continueEnemyPet)
+                        : BattlePetInputIncomingDamageReductionForEnemyAbility(continueEnemyAbilityId, channelBattle),
+                    BattlePetIncomingDamageReductionRounds(continueEnemyAbilityId),
+                    continueRound, &continueFinal))
+                break;
+
+            SendBattlePetRoundResult(*player, continueRound);
+            if (!continueFinal.Pets.empty())
+            {
+                finalRound = continueFinal;
+                sendFinal = true;
+                break;
+            }
+        }
+    }
 
     if (sendFinal)
     {

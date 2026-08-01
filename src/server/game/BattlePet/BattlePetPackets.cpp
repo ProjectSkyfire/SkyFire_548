@@ -24,8 +24,12 @@ namespace Skyfire::BattlePetPackets
         uint8 constexpr PetBattleEffectTargetTriggerAbility = 5;
         uint8 constexpr PetBattleEffectTargetNpcEmote = 6;
         uint8 constexpr PetBattleEffectTargetAura = 7;
+        uint8 constexpr PetBattleEffectSetHealth = 0;
+        uint8 constexpr PetBattleEffectAuraApply = 1;
+        uint8 constexpr PetBattleEffectAuraCancel = 2;
         uint8 constexpr PetBattleEffectActivePet = 4;
         uint8 constexpr PetBattleEffectCatch = 5;
+        uint8 constexpr PetBattleEffectTriggerAbility = 7;
         uint16 constexpr PetBattleEffectFlagMiss = 0x0002;
         uint8 constexpr PetBattleRoundResultNormal = 2;
         uint8 constexpr PetBattleRoundResultCatchOrKill = 3;
@@ -35,7 +39,7 @@ namespace Skyfire::BattlePetPackets
             data.WriteBit(!effect.AbilityEffectID);
             data.WriteBit(!effect.PetBattleEffectType);
             data.WriteBits(effect.Targets.size(), 25);
-            data.WriteBit(1);
+            data.WriteBit(!effect.SourceAuraInstanceID);
 
             for (BattlePetRoundEffectTarget const& target : effect.Targets)
             {
@@ -46,10 +50,10 @@ namespace Skyfire::BattlePetPackets
 
                 if (target.Type == PetBattleEffectTargetAura)
                 {
-                    data.WriteBit(1);
-                    data.WriteBit(1);
-                    data.WriteBit(1);
-                    data.WriteBit(1);
+                    data.WriteBit(!target.HasAuraInstanceID);
+                    data.WriteBit(!target.HasAuraAbilityID);
+                    data.WriteBit(!target.HasRoundsRemaining);
+                    data.WriteBit(!target.HasCurrentRound);
                 }
 
                 if (target.Type == PetBattleEffectTargetNpcEmote)
@@ -118,6 +122,18 @@ namespace Skyfire::BattlePetPackets
                 if (target.Type == PetBattleEffectTargetPet && target.HasRemainingHealth)
                     data << int32(target.RemainingHealth);
 
+                if (target.Type == PetBattleEffectTargetAura)
+                {
+                    if (target.HasAuraInstanceID)
+                        data << uint16(target.AuraInstanceID);
+                    if (target.HasAuraAbilityID)
+                        data << uint32(target.AuraAbilityID);
+                    if (target.HasRoundsRemaining)
+                        data << uint32(target.RoundsRemaining);
+                    if (target.HasCurrentRound)
+                        data << uint32(target.CurrentRound);
+                }
+
                 if (target.Type == PetBattleEffectTargetTriggerAbility)
                     data << uint32(0);
 
@@ -128,6 +144,7 @@ namespace Skyfire::BattlePetPackets
             if (effect.PetBattleEffectType)
                 data << uint8(effect.PetBattleEffectType);
 
+            // Match the original MoP round-result value order: TurnInstance before Caster.
             if (effect.TurnInstanceID)
                 data << uint16(effect.TurnInstanceID);
 
@@ -137,6 +154,8 @@ namespace Skyfire::BattlePetPackets
             if (effect.StackDepth)
                 data << uint8(effect.StackDepth);
 
+            if (effect.SourceAuraInstanceID)
+                data << uint16(effect.SourceAuraInstanceID);
         }
     }
 
@@ -310,6 +329,59 @@ namespace Skyfire::BattlePetPackets
         return effect;
     }
 
+    BattlePetRoundEffect BuildAuraEffect(uint8 casterPet, uint8 targetPet, uint32 abilityEffectId,
+        uint32 auraAbilityId, uint32 roundsRemaining, uint16 auraInstanceId, bool applying,
+        uint16 turnInstanceId)
+    {
+        // Do not emit SetHealth (type 0) or full aura target payloads — both desync 5.4.8 HP
+        // (pets "killed", multi-hundred-thousand heals on the wrong slot). AbilityEffectID +
+        // AuraApply/Cancel with an empty target is enough for channel fly-ups; shield buffs use
+        // the same minimal shape so the round bitstream stays aligned.
+        (void)auraAbilityId;
+        (void)roundsRemaining;
+        (void)auraInstanceId;
+
+        BattlePetRoundEffectTarget target;
+        target.PetX = targetPet;
+        target.Type = PetBattleEffectTargetNone;
+
+        BattlePetRoundEffect effect;
+        effect.CasterPBOID = casterPet;
+        effect.PetBattleEffectType = applying ? PetBattleEffectAuraApply : PetBattleEffectAuraCancel;
+        effect.TurnInstanceID = turnInstanceId;
+        effect.StackDepth = 1;
+        effect.AbilityEffectID = abilityEffectId;
+        effect.Targets.push_back(target);
+        return effect;
+    }
+
+    BattlePetRoundEffect BuildMissEffect(uint8 casterPet, uint8 targetPet, uint32 abilityEffectId,
+        int32 remainingHealth, uint16 turnInstanceId)
+    {
+        // Miss still uses SetHealth + miss flag so the client keeps the real HP and shows "missed".
+        BattlePetRoundEffect effect = BuildDamageEffect(casterPet, targetPet, remainingHealth,
+            abilityEffectId, turnInstanceId);
+        effect.Flags = PetBattleEffectFlagMiss;
+        return effect;
+    }
+
+    BattlePetRoundEffect BuildAbilityVisualEffect(uint8 casterPet, uint8 targetPet, uint32 abilityEffectId,
+        uint16 turnInstanceId)
+    {
+        BattlePetRoundEffectTarget target;
+        target.PetX = targetPet;
+        target.Type = PetBattleEffectTargetNone;
+
+        BattlePetRoundEffect effect;
+        effect.CasterPBOID = casterPet;
+        effect.PetBattleEffectType = PetBattleEffectTriggerAbility;
+        effect.TurnInstanceID = turnInstanceId;
+        effect.StackDepth = 1;
+        effect.AbilityEffectID = abilityEffectId;
+        effect.Targets.push_back(target);
+        return effect;
+    }
+
     BattlePetRoundEffect BuildCatchEffect(uint8 casterPet, uint8 targetPet, uint32 abilityEffectId,
         bool captured, uint16 turnInstanceId)
     {
@@ -386,12 +458,22 @@ namespace Skyfire::BattlePetPackets
             BattlePetRoundCooldown cooldown;
             cooldown.AbilityID = source.AbilityID;
             cooldown.Cooldown = source.Cooldown;
-            cooldown.Lockdown = source.Lockdown;
+            // Client GetAbilityState treats Lockdown > 0 as "ability unusable" (Nevermore-style).
+            // Multi-turn channels are tracked server-side via NextTurnIndex; never advertise lockdown.
+            cooldown.Lockdown = 0;
             cooldown.AbilitySlot = source.AbilitySlot;
             cooldown.PetPBOID = source.PetPBOID;
             cooldown.HasPetPBOID = true;
             round.Cooldowns.push_back(cooldown);
         }
+    }
+
+    void AppendChannelInputFlags(BattlePetRoundResult& round, uint8 abilitySlot)
+    {
+        // Intentionally leave abilities unlocked. Locking slots (especially ability 3, which has no
+        // dedicated unlock flag) prevents the player from sending the input that continues a channel.
+        (void)round;
+        (void)abilitySlot;
     }
 
     void MarkRoundResultAsCatchOrKill(BattlePetRoundResult& round)

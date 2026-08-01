@@ -70,18 +70,6 @@ struct BattlePetEffectPropertiesEntry
     //uint32 Unk13;                                         // 13
 };
 
-struct BattlePetVisualEntry
-{
-    uint32 ID;                                              // 0
-    //uint32 Unk1;                                          // 1
-    //uint32 Unk2;                                          // 2
-    //uint32 Unk3;                                          // 3
-    //uint32 Unk4;                                          // 4
-    //uint32 Unk5;                                          // 5
-    //uint32 Unk6;                                          // 6
-    //uint32 Unk7;                                          // 7
-};
-
 struct CreatureDifficultyEntry
 {
     uint32 ID;                                              // 0
@@ -172,8 +160,8 @@ struct BattlePetAbilityEntry
     int32 FamilyId;                                         // 1 - battle pet family id or -1 for aura
     //uint32 IconId;                                        // 2 - icon id
     uint32 Cooldown;                                        // 3 - cooldown in turns
-    uint32 AuraAbilityId;                                   // 4 - linked aura ability id
-    uint32 AuraDuration;                                    // 5 - aura duration in turns
+    uint32 VisualId;                                        // 4 - BattlePetVisual.db2
+    uint32 Flags;                                           // 5 - see BattlePetAbilityFlags
     //LocalizedString* Name;                                // 6 - name text
     //LocalizedString* Description;                         // 7 - description text
 };
@@ -182,11 +170,11 @@ struct BattlePetAbilityEffectEntry
 {
     uint32 Id;                                              // 0
     uint32 TurnEntryId;                                     // 1 - BattlePetAbilityTurn.db2
-    //uint32 Unk1;                                          // 2
-    //uint32 Unk2;                                          // 3
+    uint32 VisualId;                                        // 2 - BattlePetVisual.db2
+    uint32 AuraAbilityId;                                   // 3 - applied aura ability (BattlePetAbility.db2)
     uint32 PropertiesId;                                    // 4 - BattlePetEffectProperties.db2
     uint32 EffectIndex;                                     // 5
-    uint32 PropertyValues[MAX_BATTLE_PET_EFFECT_PROPERTIES];// 6-11
+    uint32 PropertyValues[MAX_BATTLE_PET_EFFECT_PROPERTIES];// 6-11 - Param[2] is duration for apply-aura effects
 };
 
 struct BattlePetAbilityStateEntry
@@ -194,17 +182,29 @@ struct BattlePetAbilityStateEntry
     uint32 Id;                                              // 0
     uint32 AbilityId;                                       // 1 - battle pet ability id (BattlePetAbility.db2)
     uint32 StateId;                                         // 2 - battle pet state id (BattlePetState.db2)
-    uint32 Value;                                           // 3 - value for state
+    int32 Value;                                            // 3 - value for state (signed; e.g. flat damage taken)
 };
 
 struct BattlePetAbilityTurnEntry
 {
     uint32 Id;                                              // 0
     uint32 AbilityId;                                       // 1 - battle pet ability id
-    //uint32 StateId;                                       // 2
-    uint32 TurnIndex;                                       // 3
-    //uint32 Unk1;                                          // 4
-    //uint32 ProcIndex;                                     // 5
+    uint32 VisualId;                                        // 2 - BattlePetVisual.db2
+    uint32 TurnIndex;                                       // 3 - OrderIndex
+    //uint32 TurnType;                                      // 4
+    //uint32 EventType;                                     // 5
+};
+
+struct BattlePetVisualEntry
+{
+    uint32 Id;                                              // 0
+    uint32 SpellVisualId;                                   // 1 - SpellVisual.db2
+    uint32 CastMilliSeconds;                                // 2
+    uint32 ImpactMilliSeconds;                              // 3
+    uint32 RangeType;                                       // 4
+    uint32 Flags;                                           // 5
+    //uint32 SceneScriptPackageId;                          // 6
+    //char* SceneScriptFunction;                            // 7
 };
 
 struct BattlePetBreedQualityEntry

@@ -1388,6 +1388,61 @@ namespace
         return passed;
     }
 
+    bool TestPetBattleRoundResultPacketWritesNonzeroLockdown()
+    {
+        bool passed = true;
+
+        Skyfire::BattlePetPackets::BattlePetRoundResult round;
+        round.RoundID = 9;
+
+        Skyfire::BattlePetPackets::BattlePetRoundCooldown cooldown;
+        cooldown.AbilityID = 170;
+        cooldown.AbilitySlot = 0;
+        cooldown.PetPBOID = 0;
+        cooldown.Cooldown = 0;
+        cooldown.Lockdown = 1;
+        round.Cooldowns.push_back(cooldown);
+
+        WorldPacket packet = Skyfire::BattlePetPackets::BuildRoundResultPacket(round);
+        packet.rpos(0);
+        packet.ReadBits(22);
+        packet.ReadBit();
+        packet.ReadBits(3);
+        passed &= Expect(packet.ReadBits(20) == 1,
+            "Pet battle round result lockdown packet should write cooldown count");
+        packet.ReadBit();
+
+        uint16 cooldownTurns = 0;
+        uint16 lockdownTurns = 0;
+        packet >> cooldownTurns;
+        packet >> lockdownTurns;
+
+        passed &= Expect(cooldownTurns == 0,
+            "Pet battle round result should keep real cooldown at zero while channeling");
+        passed &= Expect(lockdownTurns == 1,
+            "Pet battle round result helper can still encode lockdown bytes when set manually");
+
+        return passed;
+    }
+
+    bool TestPetBattleRoundResultPacketWritesMultipleDamageEffects()
+    {
+        bool passed = true;
+
+        Skyfire::BattlePetPackets::BattlePetRoundResult round;
+        round.RoundID = 2;
+        round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(0, 3, 90, 333, 1));
+        round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(0, 3, 80, 854, 2));
+        round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(0, 3, 70, 855, 3));
+
+        WorldPacket packet = Skyfire::BattlePetPackets::BuildRoundResultPacket(round);
+        packet.rpos(0);
+        passed &= Expect(packet.ReadBits(22) == 3,
+            "Pet battle multi-hit round should write three damage effects");
+
+        return passed;
+    }
+
     bool TestPetBattleRoundResultPacketWritesDamageEffect()
     {
         bool passed = true;
@@ -1967,6 +2022,137 @@ namespace
         return passed;
     }
 
+    bool TestActivePetBattleAbilityChannelLockdownContinues()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 600, 600, 0x300, 700, 700);
+        battle.SetAllyPet(0, 0x200, 600, 600);
+
+        ActivePetBattleTurn turn1;
+        ActivePetBattleTurn enemy1;
+        passed &= Expect(battle.ApplyAbilityExchange(0, 0, 0, 0, 170, 0, 1, 2, turn1, enemy1),
+            "Lift-Off turn 1 should accept with lockdown and no crash damage");
+        passed &= Expect(turn1.Accepted && turn1.DamageDealt == 0,
+            "Lift-Off turn 1 should not deal crash damage");
+        passed &= Expect(battle.EnemyHealth == 700,
+            "Lift-Off turn 1 should leave enemy health unchanged");
+        passed &= Expect(turn1.Cooldowns.size() == 1
+            && turn1.Cooldowns[0].Lockdown == 1
+            && turn1.Cooldowns[0].NextTurnIndex == 2
+            && turn1.Cooldowns[0].Cooldown == 0,
+            "Lift-Off turn 1 should snapshot lockdown without starting the real cooldown");
+
+        battle.ActivateAllyCombatAura(341, 1, true);
+
+        uint8 channelSlot = 0;
+        uint32 channelAbility = 0;
+        uint8 nextTurn = 0;
+        passed &= Expect(battle.GetAllyAbilityChannel(0, channelSlot, channelAbility, nextTurn),
+            "Lift-Off should expose an active channel after turn 1");
+        passed &= Expect(channelAbility == 170 && nextTurn == 2 && channelSlot == 0,
+            "Lift-Off channel should point at turn 2");
+
+        // Crash turn clears Flying before the enemy reply (handled by the turn executor in-game).
+        battle.ClearAllyCombatAura(341);
+
+        ActivePetBattleTurn turn2;
+        ActivePetBattleTurn enemy2;
+        passed &= Expect(battle.ApplyAbilityExchange(1, 35, 40, 0, 170, 4, 0, 0, turn2, enemy2),
+            "Lift-Off turn 2 should continue the channel and deal damage");
+        passed &= Expect(turn2.Accepted && turn2.DamageDealt == 35,
+            "Lift-Off turn 2 should deal crash damage");
+        passed &= Expect(battle.EnemyHealth == 665,
+            "Lift-Off turn 2 should reduce enemy health");
+        passed &= Expect(turn2.Cooldowns.size() == 1
+            && turn2.Cooldowns[0].Lockdown == 0
+            && turn2.Cooldowns[0].NextTurnIndex == 0
+            && turn2.Cooldowns[0].Cooldown == 4,
+            "Lift-Off turn 2 should clear lockdown and start the real cooldown");
+        // Flying is cleared on the crash turn before the enemy replies, so the chicken can connect.
+        passed &= Expect(enemy2.DamageDealt == 40 && battle.AllyHealth == 560,
+            "Lift-Off turn 2 should allow enemy damage after landing");
+
+        return passed;
+    }
+
+    bool TestActivePetBattleUntargetableSkipsAllyDamage()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 600, 600, 0x300, 700, 700);
+        battle.SetAllyPet(0, 0x200, 600, 600);
+        battle.ActivateAllyCombatAura(341, 1, true);
+
+        uint32 const remaining = battle.ApplyAllyDamage(250);
+        passed &= Expect(remaining == 600 && battle.AllyHealth == 600,
+            "Untargetable ally should ignore direct enemy damage");
+
+        battle.ClearAllyCombatAura(341);
+        uint32 const after = battle.ApplyAllyDamage(100);
+        passed &= Expect(after == 500 && battle.AllyHealth == 500,
+            "Ally should take damage again after Flying aura is cleared");
+
+        return passed;
+    }
+
+    bool TestActivePetBattleTeamHealTargetsAllySlots()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 600, 400, 0x300, 700, 700);
+        battle.SetAllyPet(0, 0x200, 600, 400);
+        battle.SetAllyPet(1, 0x201, 500, 100);
+        battle.SetAllyPet(2, 0x202, 550, 0); // dead — heal should skip
+
+        uint32 const slot0 = battle.ApplyAllyHealToPet(0, 250);
+        uint32 const slot1 = battle.ApplyAllyHealToPet(1, 250);
+        uint32 const slot2 = battle.ApplyAllyHealToPet(2, 250);
+
+        passed &= Expect(slot0 == 600 && battle.AllyTeam[0].Health == 600,
+            "Team heal should clamp front pet to max health");
+        passed &= Expect(slot1 == 350 && battle.AllyTeam[1].Health == 350,
+            "Team heal should restore backup pet by amount");
+        passed &= Expect(slot2 == 0 && battle.AllyTeam[2].Health == 0,
+            "Team heal should skip dead ally slots");
+        passed &= Expect(battle.AllyHealth == 600,
+            "Front-pet heal should sync mirrored AllyHealth");
+
+        return passed;
+    }
+
+    bool TestActivePetBattleWeatherBoostsMatchingFamilyDamage()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 600, 600, 0x300, 700, 700);
+        // Aquatic family 9, +25% — mirrors Cleansing Rain aura 229 without DB2.
+        battle.ActivateWeather(229, 9, 9, 25);
+
+        passed &= Expect(battle.Weather.IsActive() && battle.Weather.Rounds == 9,
+            "Weather should activate with configured duration");
+        passed &= Expect(battle.ScaleAllyOutgoingDamage(100, 9) == 125,
+            "Weather should boost Aquatic family damage by 25%");
+        passed &= Expect(battle.ScaleAllyOutgoingDamage(100, 5) == 100,
+            "Weather should not boost non-Aquatic family damage");
+
+        battle.ActivateWeather(300, 4, 9, 25);
+        passed &= Expect(battle.Weather.AuraAbilityId == 300 && battle.Weather.Rounds == 4,
+            "New weather should replace previous weather");
+
+        for (uint8 i = 0; i < 4; ++i)
+            battle.ApplyAbilityRound(battle.RoundID, 1);
+
+        passed &= Expect(!battle.Weather.IsActive() && battle.Weather.Rounds == 0,
+            "Weather should clear after its round duration elapses");
+
+        return passed;
+    }
+
     bool TestActivePetBattleRejectsStaleRoundInput()
     {
         bool passed = true;
@@ -2401,6 +2587,8 @@ int main()
     passed &= TestPetBattleFinishedPacketIsEmpty();
     passed &= TestPetBattleRoundResultPacketWritesEmptyRound();
     passed &= TestPetBattleRoundResultPacketWritesCooldowns();
+    passed &= TestPetBattleRoundResultPacketWritesNonzeroLockdown();
+    passed &= TestPetBattleRoundResultPacketWritesMultipleDamageEffects();
     passed &= TestPetBattleRoundResultPacketWritesDamageEffect();
     passed &= TestPetBattleDamageRoundHelperMarksDeadTarget();
     passed &= TestPetBattleSwapEffectHelperSelectsNewFrontPet();
@@ -2420,6 +2608,10 @@ int main()
     passed &= TestActivePetBattleAdvanceRoundStopsAfterFinished();
     passed &= TestActivePetBattleAbilityTurnBuildsRoundAndFinalState();
     passed &= TestActivePetBattleAbilityCooldownBlocksOnlyUntilExpired();
+    passed &= TestActivePetBattleAbilityChannelLockdownContinues();
+    passed &= TestActivePetBattleUntargetableSkipsAllyDamage();
+    passed &= TestActivePetBattleTeamHealTargetsAllySlots();
+    passed &= TestActivePetBattleWeatherBoostsMatchingFamilyDamage();
     passed &= TestActivePetBattleRejectsStaleRoundInput();
     passed &= TestActivePetBattleSwapTurnSelectsNewFrontPet();
     passed &= TestActivePetBattleForfeitFinishesForEnemy();
