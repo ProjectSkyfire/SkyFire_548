@@ -17629,7 +17629,15 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
 
     // self spell cooldown
     if (recTime > 0)
+    {
         AddSpellCooldown(spellInfo->Id, itemId, recTime);
+
+        // MoP client often only starts the action-bar swirl from RecoveryTime.
+        // Spells like Mangle (Bear) store the CD as CategoryRecoveryTime only
+        // (RecoveryTime = 0), so push an explicit cooldown update.
+        if (!infinityCooldown)
+            SendSpellCooldown(spellInfo->Id, uint32((recTime - curTime) * IN_MILLISECONDS));
+    }
 
     // category spells
     if (cat && catrec > 0)
@@ -17643,6 +17651,8 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
                     continue;
 
                 AddSpellCooldown(*i_scset, itemId, catrecTime);
+                if (!infinityCooldown)
+                    SendSpellCooldown(*i_scset, uint32((catrecTime - curTime) * IN_MILLISECONDS));
             }
         }
     }

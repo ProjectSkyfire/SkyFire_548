@@ -3005,6 +3005,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
     uint32 tmpPowerCost = 0;
     uint32 tmpPeriodicPowerCost = 0;
+    bool foundSpellPower = false;
     for (uint32 i = 0; i < sSpellPowerStore.GetNumRows(); ++i)
     {
         const SpellPowerEntry* spellPower = sSpellPowerStore.LookupEntry(i);
@@ -3017,6 +3018,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         if (spellPower->ShapeShiftSpellID && !m_caster->ToPlayer()->HasAura(spellPower->ShapeShiftSpellID))
             continue;
 
+        foundSpellPower = true;
         m_powerType = spellPower->powerType;
         uint32 maxPowerForCost = 0;
         if (spellPower->ChannelCostPercentageFloat ||
@@ -3109,6 +3111,12 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             }
         }
     }
+
+    // No SpellPower.dbc row (Mangle Bear, Lacerate, Thrash, ...): m_powerType stayed POWER_MANA.
+    // SPELL_START/GO then sent the wrong power and the client never cleared the cast
+    // (stuck yellow action-bar outline, no GCD on other abilities).
+    if (!foundSpellPower)
+        m_powerType = m_caster->getPowerType();
 
     // Fill cost data (not use power for item casts)
     m_powerCost = m_CastItem ? 0 : tmpPowerCost;
@@ -3210,8 +3218,9 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         if (!(_triggeredCastFlags & TRIGGERED_IGNORE_GCD))
             TriggerGlobalCooldown();
 
-        //item: first cast may destroy item and second cast causes crash
-        if (!m_casttime && !m_spellInfo->StartRecoveryTime && !m_castItemGUID && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
+        // Instant spells: cast immediately even when they trigger a GCD.
+        // Waiting a tick (old StartRecoveryTime gate) is unnecessary and can desync client UI.
+        if (!m_casttime && !m_castItemGUID && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
             cast(true);
     }
 }
@@ -4023,7 +4032,12 @@ void Spell::SendSpellStart()
     if (!IsNeedSendToClient())
         return;
 
-    uint32 castFlags = CAST_FLAG_HAS_TRAJECTORY;
+    // Only mark trajectory when the cast actually has one. Always setting this made the
+    // client wait on a missile for melee abilities (e.g. Mangle), leaving the action button
+    // pushed in and suppressing GCD/cooldown display even though damage applied.
+    uint32 castFlags = CAST_FLAG_NONE;
+    if (m_targets.HasTraj())
+        castFlags |= CAST_FLAG_HAS_TRAJECTORY;
     if (((IsTriggered() && !m_spellInfo->IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell) && !m_cast_count)
         castFlags |= CAST_FLAG_PENDING;
 

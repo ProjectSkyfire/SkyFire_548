@@ -580,7 +580,18 @@ bool Aura::CanBeSaved() const
 
 bool Aura::CanBeSentToClient() const
 {
-    return !IsPassive() || GetSpellInfo()->HasAreaAuraEffect() || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) || HasEffectType(SPELL_AURA_CAST_WHILE_WALKING);
+    // Passive passives are normally hidden from the client, but some must be sent so the
+    // client can update action bars / GCD (e.g. Bear Form Passive3 OVERRIDE_ACTIONBAR
+    // remaps stub Mangle 33917 -> 33878). Without this, the client keeps casting the
+    // stub spell while SPELL_START/GO use the remapped id, leaving the button stuck.
+    if (!IsPassive() || GetSpellInfo()->HasAreaAuraEffect())
+        return true;
+
+    return HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE)
+        || HasEffectType(SPELL_AURA_CAST_WHILE_WALKING)
+        || HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS)
+        || HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2)
+        || HasEffectType(SPELL_AURA_MOD_SPELL_COOLDOWN_BY_HASTE);
 }
 
 bool Aura::IsSingleTargetWith(Aura const* aura) const
