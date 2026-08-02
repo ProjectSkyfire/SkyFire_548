@@ -795,7 +795,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_LOGOUT_COMPLETE,                                0x142F, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_LOGOUT_RESPONSE,                                0x008F, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_LOG_XPGAIN,                                     0x1E9A, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_LOOT_ALL_PASSED,                                0x0EBB, STATUS_UNHANDLED); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_LOOT_ALL_PASSED,                                0x0EBB, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_CLEAR_MONEY,                               0x1632, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_LIST,                                      0x1C3F, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_MASTER_LIST,                               0x02BF, STATUS_NEVER    ); // 5.4.8 18414
@@ -803,9 +803,10 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_RELEASE_RESPONSE,                          0x123F, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_REMOVED,                                   0x0C3E, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_LOOT_RESPONSE,                                  0x128A, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_LOOT_ROLL,                                      0x1840, STATUS_UNHANDLED); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_LOOT_ROLL_WON,                                  0x0A3A, STATUS_UNHANDLED); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_LOOT_START_ROLL,                                0x0EAA, STATUS_UNHANDLED); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_LOOT_ROLL,                                      0x1840, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_LOOT_ROLLS_COMPLETE,                            0x101B, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_LOOT_ROLL_WON,                                  0x0A3A, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_LOOT_START_ROLL,                                0x0EAA, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MAIL_LIST_RESULT,                               0x1C0B, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MAIL_QUERY_NEXT_TIME_RESULT,                    0x089B, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_MESSAGECHAT,                                    0x1A9A, STATUS_NEVER    ); // 5.4.8 18414
@@ -1100,6 +1101,5 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_WHOIS,                                          0x12BA, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_WORLD_SERVER_INFO,                              0x0082, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_ZONE_UNDER_ATTACK,                              0x10C2, STATUS_NEVER    ); // 5.4.8 18414
-
 #undef DEFINE_OPCODE_HANDLER
 };
