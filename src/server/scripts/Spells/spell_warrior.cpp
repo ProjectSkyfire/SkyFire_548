@@ -337,41 +337,33 @@ public:
     }
 };
 
-/// Updated 4.3.4
 // 12975 - Last Stand
+// MoP applies SPELL_AURA_MOD_INCREASE_HEALTH_2 with base points 30 (flat).
+// Recalculate amount to 30% of the caster's max health.
 class spell_warr_last_stand : public SpellScriptLoader
 {
 public:
     spell_warr_last_stand() : SpellScriptLoader("spell_warr_last_stand") { }
 
-    class spell_warr_last_stand_SpellScript : public SpellScript
+    class spell_warr_last_stand_AuraScript : public AuraScript
     {
-        PrepareSpellScript(spell_warr_last_stand_SpellScript);
+        PrepareAuraScript(spell_warr_last_stand_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_LAST_STAND_TRIGGERED))
-                return false;
-            return true;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            Unit* caster = GetCaster();
-            int32 healthModSpellBasePoints0 = int32(caster->CountPctFromMaxHealth(GetEffectValue()));
-            caster->CastCustomSpell(caster, SPELL_WARRIOR_LAST_STAND_TRIGGERED, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
+            if (Unit* caster = GetCaster())
+                amount = int32(caster->CountPctFromMaxHealth(amount > 0 ? amount : 30));
         }
 
         void Register() OVERRIDE
         {
-            // add dummy effect spell handler to Last Stand
-            OnEffectHit += SpellEffectFn(spell_warr_last_stand_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_last_stand_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_INCREASE_HEALTH_2);
         }
     };
 
-    SpellScript* GetSpellScript() const OVERRIDE
+    AuraScript* GetAuraScript() const OVERRIDE
     {
-        return new spell_warr_last_stand_SpellScript();
+        return new spell_warr_last_stand_AuraScript();
     }
 };
 

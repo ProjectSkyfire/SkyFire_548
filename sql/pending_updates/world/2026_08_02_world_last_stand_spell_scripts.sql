@@ -1,0 +1,4 @@
+-- Last Stand: bind MoP health-increase script (30% max health via CalcAmount).
+DELETE FROM `spell_script_names` WHERE `spell_id` = 12975 AND `ScriptName` = 'spell_warr_last_stand';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(12975, 'spell_warr_last_stand');
