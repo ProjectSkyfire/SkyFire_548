@@ -1637,9 +1637,10 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
 
     // DUMMY (explore) objectives are tracked on 18414 via quest-log STATE bits
     // (0x100 << index). Client FFD60/FD4A0 gates QUEST_AUTOCOMPLETE on that bit.
-    // Apply locally; CompleteQuest flushes UF. Do NOT send SMSG_QUESTUPDATE_ADD_CREDIT
-    // here: that packet and SMSG_QUESTUPDATE_COMPLETE both display
-    // ERR_QUEST_OBJECTIVE_COMPLETE_S (doubled yellow "(Completed)" lines).
+    // Send SMSG_QUESTUPDATE_ADD_CREDIT for the yellow
+    // "objective text (Complete)" line. CompleteQuest skips SMSG_QUESTUPDATE_COMPLETE
+    // for AUTOCOMPLETE quests (that packet hardcodes an OFFER popup), so this is
+    // the single yellow notification for those quests.
     if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
     {
         uint16 logSlot = FindQuestSlot(questId);
@@ -1650,22 +1651,32 @@ void Player::AreaExploredOrEventHappens(uint32 questId)
             if (!objective || objective->Type != QUEST_OBJECTIVE_TYPE_DUMMY)
                 continue;
 
-            uint16 credit = objective->Amount > 0 ? uint16(objective->Amount) : 1;
-            if (GetQuestObjectiveCounter(objective->Id) >= credit &&
-                (logSlot >= MAX_QUEST_LOG_SIZE || objective->Index >= 24 ||
-                 (GetQuestSlotState(logSlot) & (QUEST_STATE_OBJECTIVE_0 << objective->Index))))
+            uint16 required = objective->Amount > 0 ? uint16(objective->Amount) : 1;
+            uint16 oldCount = GetQuestObjectiveCounter(objective->Id);
+            bool hasStateBit = logSlot < MAX_QUEST_LOG_SIZE && objective->Index < 24 &&
+                (GetQuestSlotState(logSlot) & (QUEST_STATE_OBJECTIVE_0 << objective->Index));
+
+            if (oldCount >= required && hasStateBit)
                 continue;
 
-            m_questObjectiveStatus[objective->Id] = credit;
-            m_questObjectiveStatusSave[objective->Id] = true;
-            m_QuestStatusSave[questId] = true;
-
-            if (logSlot < MAX_QUEST_LOG_SIZE)
+            if (oldCount < required)
             {
-                SetQuestSlotCounter(logSlot, objective->Index, credit);
-                if (objective->Index < 24)
-                    SetQuestSlotState(logSlot, QUEST_STATE_OBJECTIVE_0 << objective->Index);
+                uint16 addCount = required - oldCount;
+                m_questObjectiveStatus[objective->Id] = required;
+                m_questObjectiveStatusSave[objective->Id] = true;
+                m_QuestStatusSave[questId] = true;
+
+                // Client prints ERR_QUEST_OBJECTIVE_COMPLETE_S from the cached
+                // objective Description. Refresh query first so an empty/stale
+                // cache cannot swallow the yellow "(Complete)" line.
+                if (PlayerTalkClass)
+                    PlayerTalkClass->SendQuestQueryResponse(quest);
+
+                // Updates counters + DUMMY state bit and shows yellow complete text.
+                SendQuestUpdateAddCredit(quest, objective, ObjectGuid(0), oldCount, addCount);
             }
+            else if (!hasStateBit && logSlot < MAX_QUEST_LOG_SIZE && objective->Index < 24)
+                SetQuestSlotState(logSlot, QUEST_STATE_OBJECTIVE_0 << objective->Index);
         }
     }
 
