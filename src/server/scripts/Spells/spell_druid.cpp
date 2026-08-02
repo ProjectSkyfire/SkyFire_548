@@ -455,6 +455,38 @@ public:
     }
 };
 
+// 33745 - Lacerate
+// Bake AP into DoT amount so client $w1 tooltip and ticks match MoP (AP * 0.0512 / tick).
+class spell_dru_lacerate : public SpellScriptLoader
+{
+public:
+    spell_dru_lacerate() : SpellScriptLoader("spell_dru_lacerate") { }
+
+    class spell_dru_lacerate_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_lacerate_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                canBeRecalculated = false;
+                amount += int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.0512f);
+            }
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_lacerate_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_lacerate_AuraScript();
+    }
+};
+
 // 774 - Rejuvenation
 // MoP has two PERIODIC_HEAL effects (EFFECT_0 and EFFECT_2); suppress EFFECT_2 to avoid double ticks.
 class spell_dru_rejuvenation : public SpellScriptLoader
@@ -993,6 +1025,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_eclipse_energize();
     new spell_dru_glyph_of_innervate();
     new spell_dru_innervate();
+    new spell_dru_lacerate();
     new spell_dru_lifebloom();
     new spell_dru_rejuvenation();
     new spell_dru_living_seed();
