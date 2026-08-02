@@ -329,6 +329,8 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
+            PreventHitDefaultEffect(EFFECT_0);
+
             Player* caster = GetCaster()->ToPlayer();
             if (Unit* target = GetHitUnit())
             {
@@ -355,7 +357,8 @@ public:
 
         void Register() OVERRIDE
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warl_life_tap_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            // MoP EFFECT_0 is SPELL_EFFECT_ENERGIZE (not DUMMY)
+            OnEffectHitTarget += SpellEffectFn(spell_warl_life_tap_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_ENERGIZE);
             OnCheckCast += SpellCheckCastFn(spell_warl_life_tap_SpellScript::CheckCast);
         }
     };
