@@ -13604,9 +13604,27 @@ void Player::_LoadQuestObjectiveStatus(PreparedQueryResult result)
 
                 // Quest existence is checked on Quest Objective load, no issue should arise
                 QuestObjective const* objective = sObjectMgr->GetQuestTemplate(objectiveQuestId)->GetQuestObjective(objectiveId);
+                if (!objective)
+                    break;
 
                 SetQuestSlotCounter(i, objective->Index, amount);
                 m_questObjectiveStatus.insert(std::make_pair(objectiveId, amount));
+
+                // 18414: DUMMY/pet-battle progress is a state bit, not only a counter.
+                if (amount > 0 && objective->Index < 24)
+                {
+                    switch (objective->Type)
+                    {
+                        case QUEST_OBJECTIVE_TYPE_DUMMY:
+                        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER:
+                        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE:
+                        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_PVP:
+                            SetQuestSlotState(i, QUEST_STATE_OBJECTIVE_0 << objective->Index);
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 break;
             }

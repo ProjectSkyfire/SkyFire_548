@@ -21,6 +21,7 @@
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
+#include "UpdateData.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -188,8 +189,11 @@ Quest const* Player::GetNextQuest(uint64 guid, Quest const* quest)
     switch (GUID_HIPART(guid))
     {
         case HIGHGUID_PLAYER:
-            //QUEST_FLAGS_AUTO_SUBMIT
-            ASSERT(quest->HasFlag(QUEST_FLAGS_PLAYER_CAST_ACCEPT));
+            // Remote autocomplete / auto-submit turn-in (no NPC GUID).
+            if (!quest->HasFlag(QUEST_FLAGS_PLAYER_CAST_ACCEPT) &&
+                !quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE) &&
+                !quest->HasFlag(QUEST_FLAGS_PLAYER_CAST_COMPLETE))
+                return NULL;
             return sObjectMgr->GetQuestTemplate(nextQuestID);
         case HIGHGUID_UNIT:
         case HIGHGUID_PET:
@@ -288,8 +292,9 @@ bool Player::CanCompleteQuest(uint32 questId)
         if (!qInfo->IsRepeatable() && m_RewardedQuests.find(questId) != m_RewardedQuests.end())
             return false;                                   // not allow re-complete quest
 
-        // auto complete quest
-        if ((qInfo->IsAutoComplete() || qInfo->GetFlags() & QUEST_FLAGS_AUTOCOMPLETE) && CanTakeQuest(qInfo, false))
+        // Method==0 quests complete on accept (no objectives). Do NOT treat
+        // QUEST_FLAGS_AUTOCOMPLETE here — that flag only controls remote turn-in UI.
+        if (qInfo->IsAutoComplete() && CanTakeQuest(qInfo, false))
             return true;
 
         QuestStatusMap::iterator itr = m_QuestStatus.find(questId);
@@ -311,8 +316,23 @@ bool Player::CanCompleteQuest(uint32 questId)
                 switch (questObjective->Type)
                 {
                     case QUEST_OBJECTIVE_TYPE_DUMMY:
+                    case QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER:
+                    case QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE:
+                    case QUEST_OBJECTIVE_TYPE_PET_BATTLE_PVP:
                     {
-                        break;
+                        // These are event/state objectives — never treat as done by default.
+                        // DB Amount is often 0; retail still requires the event (areatrigger etc.).
+                        uint32 required = questObjective->Amount > 0 ? uint32(questObjective->Amount) : 1;
+                        if (GetQuestObjectiveCounter(questObjective->Id) >= required)
+                            break;
+
+                        // 18414 also tracks progress in quest-log state bits (0x100 << index).
+                        uint16 slot = FindQuestSlot(questId);
+                        if (slot < MAX_QUEST_LOG_SIZE && questObjective->Index < 24 &&
+                            (GetQuestSlotState(slot) & (QUEST_STATE_OBJECTIVE_0 << questObjective->Index)))
+                            break;
+
+                        return false;
                     }
                     case QUEST_OBJECTIVE_TYPE_SPELL:
                     {
@@ -537,10 +557,11 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         UpdatePvPState();
     }
 
+    // Quest log slot must exist before CompleteQuest touches QUEST_STATE bits.
+    SetQuestSlot(logSlot, questId, qtime);
+
     if (CanCompleteQuest(questId))
         CompleteQuest(questId);
-
-    SetQuestSlot(logSlot, questId, qtime);
 
     m_QuestStatusSave[questId] = true;
 
@@ -584,29 +605,58 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
 
 void Player::CompleteQuest(uint32 quest_id)
 {
-    if (quest_id)
+    if (!quest_id)
+        return;
+
+    SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
+
+    uint16 log_slot = FindQuestSlot(quest_id);
+    if (log_slot < MAX_QUEST_LOG_SIZE)
+        SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
+
+    Quest const* qInfo = sObjectMgr->GetQuestTemplate(quest_id);
+    if (!qInfo)
+        return;
+
+    if (qInfo->HasFlag(QUEST_FLAGS_TRACKING_EVENT))
+        RewardQuest(qInfo, 0, this, false);
+    else if (IsInWorld() && GetSession())
     {
-        SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
-
-        uint16 log_slot = FindQuestSlot(quest_id);
-        if (log_slot < MAX_QUEST_LOG_SIZE)
-            SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
-
-        if (Quest const* qInfo = sObjectMgr->GetQuestTemplate(quest_id))
+        // 18414 right-side COMPLETE toast is NOT driven by SMSG_QUESTUPDATE_COMPLETE
+        // (that handler hardcodes AddAutoQuestPopUp(OFFER)). Stock client fires
+        // QUEST_AUTOCOMPLETE (FireEvent 181) from quest-log UF / quest-query
+        // callbacks when:
+        //   - quest cache flags include QUEST_FLAGS_AUTOCOMPLETE (0x10000)
+        //   - DUMMY objectives have state bit (0x100 << index) in the quest log UF
+        //   - QUEST_STATE_COMPLETE is set and FAIL is not
+        // Order: flush UF first (state bits), then refresh query cache (flags +
+        // objectives) so the second callback can succeed even if the first raced
+        // ahead of a stale cache, then completion NPCs for turn-in UI.
+        UpdateData upd(GetMapId());
+        BuildValuesUpdateBlockForPlayer(&upd, this);
+        if (upd.HasData())
         {
-            if (qInfo->HasFlag(QUEST_FLAGS_TRACKING_EVENT))
-                RewardQuest(qInfo, 0, this, false);
-            else
-                SendQuestComplete(qInfo);
-
-            uint32 zone = 0, area = 0;
-
-            GetZoneAndAreaId(zone, area);
-            UpdateZoneDependentAuras(zone);
-            UpdateAreaDependentAuras(area);
-            UpdateForQuestWorldObjects();
+            WorldPacket updatePacket;
+            upd.BuildPacket(&updatePacket);
+            GetSession()->SendPacket(&updatePacket);
         }
+
+        PlayerTalkClass->SendQuestQueryResponse(qInfo);
+        SendQuestCompletionNPCs(quest_id);
+
+        // SMSG_QUESTUPDATE_COMPLETE hardcodes AddAutoQuestPopUp(OFFER) on 18414.
+        // AUTOCOMPLETE toasts come from QUEST_AUTOCOMPLETE (UF/query above); sending
+        // this packet would inject a wrong OFFER popup. Keep it for normal quests
+        // (yellow text / legacy cue only).
+        if (!qInfo->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
+            SendQuestComplete(qInfo);
     }
+
+    uint32 zone = 0, area = 0;
+    GetZoneAndAreaId(zone, area);
+    UpdateZoneDependentAuras(zone);
+    UpdateAreaDependentAuras(area);
+    UpdateForQuestWorldObjects();
 }
 
 void Player::IncompleteQuest(uint32 quest_id)
@@ -1571,22 +1621,56 @@ void Player::SwapQuestSlot(uint16 slot1, uint16 slot2)
 
 void Player::AreaExploredOrEventHappens(uint32 questId)
 {
-    if (questId)
-    {
-        uint16 log_slot = FindQuestSlot(questId);
-        if (log_slot < MAX_QUEST_LOG_SIZE)
-        {
-            QuestStatusData& q_status = m_QuestStatus[questId];
+    if (!questId)
+        return;
 
-            if (!q_status.Explored)
+    QuestStatusMap::iterator itr = m_QuestStatus.find(questId);
+    if (itr == m_QuestStatus.end())
+        return;
+
+    // Always mark explored on the status entry (not only when a log slot exists).
+    if (!itr->second.Explored)
+    {
+        itr->second.Explored = true;
+        m_QuestStatusSave[questId] = true;
+    }
+
+    // DUMMY (explore) objectives are tracked on 18414 via quest-log STATE bits
+    // (0x100 << index). Client FFD60/FD4A0 gates QUEST_AUTOCOMPLETE on that bit.
+    // Apply locally; CompleteQuest flushes UF. Do NOT send SMSG_QUESTUPDATE_ADD_CREDIT
+    // here: that packet and SMSG_QUESTUPDATE_COMPLETE both display
+    // ERR_QUEST_OBJECTIVE_COMPLETE_S (doubled yellow "(Completed)" lines).
+    if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
+    {
+        uint16 logSlot = FindQuestSlot(questId);
+        for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin();
+            citr != quest->m_questObjectives.end(); ++citr)
+        {
+            QuestObjective const* objective = *citr;
+            if (!objective || objective->Type != QUEST_OBJECTIVE_TYPE_DUMMY)
+                continue;
+
+            uint16 credit = objective->Amount > 0 ? uint16(objective->Amount) : 1;
+            if (GetQuestObjectiveCounter(objective->Id) >= credit &&
+                (logSlot >= MAX_QUEST_LOG_SIZE || objective->Index >= 24 ||
+                 (GetQuestSlotState(logSlot) & (QUEST_STATE_OBJECTIVE_0 << objective->Index))))
+                continue;
+
+            m_questObjectiveStatus[objective->Id] = credit;
+            m_questObjectiveStatusSave[objective->Id] = true;
+            m_QuestStatusSave[questId] = true;
+
+            if (logSlot < MAX_QUEST_LOG_SIZE)
             {
-                q_status.Explored = true;
-                m_QuestStatusSave[questId] = true;
+                SetQuestSlotCounter(logSlot, objective->Index, credit);
+                if (objective->Index < 24)
+                    SetQuestSlotState(logSlot, QUEST_STATE_OBJECTIVE_0 << objective->Index);
             }
         }
-        if (CanCompleteQuest(questId))
-            CompleteQuest(questId);
     }
+
+    if (CanCompleteQuest(questId))
+        CompleteQuest(questId);
 }
 
 //not used in Skyfired, function for external script library
@@ -2119,6 +2203,31 @@ void Player::SendQuestComplete(Quest const* quest)
     }
 }
 
+void Player::SendQuestCompletionNPCs(uint32 questId)
+{
+    if (!questId || !sObjectMgr->GetQuestTemplate(questId))
+        return;
+
+    std::vector<uint32> entries;
+    auto creatures = sObjectMgr->GetCreatureQuestInvolvedRelationReverseBounds(questId);
+    for (auto it = creatures.first; it != creatures.second; ++it)
+        entries.push_back(it->second);
+
+    auto gos = sObjectMgr->GetGOQuestInvolvedRelationReverseBounds(questId);
+    for (auto it = gos.first; it != gos.second; ++it)
+        entries.push_back(it->second | 0x80000000); // GO mask
+
+    WorldPacket data(SMSG_QUEST_NPC_QUERY_RESPONSE, 3 + 4 + entries.size() * 4);
+    data.WriteBits(1, 21);
+    data.WriteBits(entries.size(), 22);
+    data.FlushBits();
+    data << uint32(questId);
+    for (uint32 entry : entries)
+        data << uint32(entry);
+
+    GetSession()->SendPacket(&data);
+}
+
 void Player::SendQuestReward(Quest const* quest, uint32 XP)
 {
     uint32 questId = quest->GetQuestId();
@@ -2267,8 +2376,27 @@ void Player::SendQuestUpdateAddCredit(Quest const* quest, QuestObjective const* 
     SF_LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL");
 
     uint16 logSlot = FindQuestSlot(quest->GetQuestId());
-    if (logSlot < MAX_QUEST_LOG_SIZE)
-        SetQuestSlotCounter(logSlot, objective->Index, GetQuestSlotCounter(logSlot, objective->Index) + addCount);
+    if (logSlot >= MAX_QUEST_LOG_SIZE)
+        return;
+
+    // Kill/collect objectives store progress in per-index counters.
+    SetQuestSlotCounter(logSlot, objective->Index, GetQuestSlotCounter(logSlot, objective->Index) + addCount);
+
+    // DUMMY / pet-battle objectives are flagged in the state field instead.
+    // Without this bit, GetQuestLogTitle reports incomplete and WatchFrame
+    // will not render the COMPLETE autocomplete toast.
+    switch (objective->Type)
+    {
+        case QUEST_OBJECTIVE_TYPE_DUMMY:
+        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER:
+        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE:
+        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_PVP:
+            if (objective->Index < 24)
+                SetQuestSlotState(logSlot, QUEST_STATE_OBJECTIVE_0 << objective->Index);
+            break;
+        default:
+            break;
+    }
 }
 
 void Player::SendQuestUpdateAddPlayer(Quest const* quest, QuestObjective const* objective, uint16 oldCount, uint16 addCount)

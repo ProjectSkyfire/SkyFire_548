@@ -530,8 +530,11 @@ void WorldSession::HandleQuestNPCQuery(WorldPacket& recvData)
         uint32 questId;
         recvData >> questId;
 
-        /// @todo verify if we should only send completed quests questgivers
-        if (sObjectMgr->GetQuestTemplate(questId) && _player->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE)
+        // Include incomplete quests too: autocomplete / area-trigger quests need
+        // completion NPC data before the client can show the right-side complete popup.
+        QuestStatus status = _player->GetQuestStatus(questId);
+        if (sObjectMgr->GetQuestTemplate(questId) &&
+            (status == QUEST_STATUS_COMPLETE || status == QUEST_STATUS_INCOMPLETE))
         {
             auto creatures = sObjectMgr->GetCreatureQuestInvolvedRelationReverseBounds(questId);
             for (auto it = creatures.first; it != creatures.second; ++it)

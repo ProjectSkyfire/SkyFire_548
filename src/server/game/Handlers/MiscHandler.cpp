@@ -1538,13 +1538,15 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recvData)
         }
     }
 
-    if (player->isDebugAreaTriggers)
+    // unk2 is enter/leave (set on enter). Debug + exploration credit only on enter,
+    // otherwise .debug areatriggers prints twice (enter and leave).
+    if (request.unk2 && player->isDebugAreaTriggers)
         ChatHandler(player->GetSession()).PSendSysMessage(LANG_DEBUG_AREATRIGGER_REACHED, request.triggerId);
 
     if (sScriptMgr->OnAreaTrigger(player, atEntry))
         return;
 
-    if (player->IsAlive())
+    if (request.unk2 && player->IsAlive())
         if (uint32 questId = sObjectMgr->GetQuestForAreaTrigger(request.triggerId))
             if (player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
                 player->AreaExploredOrEventHappens(questId);

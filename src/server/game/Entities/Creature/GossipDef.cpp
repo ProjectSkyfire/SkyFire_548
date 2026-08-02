@@ -718,7 +718,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(quest->GetRewardReputationMask());                       // rep mask (unsure on what it does)
     data << uint32(quest->GetPointOpt());
     data << int32(quest->GetQuestLevel());                                  // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
-    data << uint32(quest->GetQuestMethod());                                // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
+    data << uint32(quest->GetQuestMethod());                                // 0 = complete-on-accept (Method), 1 unused, 2 = normal
     data << uint32(quest->RequiredSourceItemCount[2]);
     data << uint32(quest->GetXPId());                                       // seems to always have the same value as the first XP ID field
     data.WriteString(questDetails);
@@ -761,7 +761,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(quest->GetQuestGiverPortrait());
     data << uint32(0);                                                      // unknown
     data << uint32(quest->RequiredSourceItemCount[3]);
-    data << uint32(quest->GetFlags() & 0xFFFF);                             // quest flags
+    // Full 32-bit flags required for client UI (AUTOCOMPLETE and other high bits).
+    // Masking to 0xFFFF drops QUEST_FLAGS_AUTOCOMPLETE (0x10000) and related flags.
+    data << uint32(quest->GetFlags());                                      // quest flags
     data << uint32(quest->GetRewardPackageItemId());
     data << uint32(quest->GetSrcItemId());                                  // source item id
 

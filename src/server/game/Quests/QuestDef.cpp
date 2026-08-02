@@ -198,7 +198,10 @@ bool Quest::IsAutoAccept() const
 
 bool Quest::IsAutoComplete() const
 {
-    return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_AUTO_COMPLETE) ? false : (Method == 0 || HasFlag(QUEST_FLAGS_AUTOCOMPLETE));
+    // Method == 0 means "complete on accept" (skip objectives).
+    // QUEST_FLAGS_AUTOCOMPLETE is unrelated: it only enables the remote
+    // "click to complete" toast UI after objectives are actually finished.
+    return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_QUEST_IGNORE_AUTO_COMPLETE) ? false : (Method == 0);
 }
 
 bool Quest::IsRaidQuest(DifficultyID difficulty) const

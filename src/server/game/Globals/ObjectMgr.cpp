@@ -7271,6 +7271,7 @@ void ObjectMgr::LoadGameobjectQuestStarters()
 
 void ObjectMgr::LoadGameobjectQuestEnders()
 {
+    _goQuestInvolvedRelationsReverse.clear();
     LoadQuestRelationsHelper(_goQuestInvolvedRelations, "gameobject_questender", false, true);
 
     for (QuestRelations::iterator itr = _goQuestInvolvedRelations.begin(); itr != _goQuestInvolvedRelations.end(); ++itr)
@@ -7280,6 +7281,9 @@ void ObjectMgr::LoadGameobjectQuestEnders()
             SF_LOG_ERROR("sql.sql", "Table `gameobject_questender` have data for not existed gameobject entry (%u) and existed quest %u", itr->first, itr->second);
         else if (goInfo->type != GAMEOBJECT_TYPE_QUESTGIVER)
             SF_LOG_ERROR("sql.sql", "Table `gameobject_questender` have data gameobject entry (%u) for quest %u, but GO is not GAMEOBJECT_TYPE_QUESTGIVER", itr->first, itr->second);
+
+        // questId -> GO entry (required by CMSG_QUEST_NPC_QUERY / autocomplete UI)
+        _goQuestInvolvedRelationsReverse.insert(QuestRelationsReverse::value_type(itr->second, itr->first));
     }
 }
 
@@ -7299,6 +7303,7 @@ void ObjectMgr::LoadCreatureQuestStarters()
 
 void ObjectMgr::LoadCreatureQuestEnders()
 {
+    _creatureQuestInvolvedRelationsReverse.clear();
     LoadQuestRelationsHelper(_creatureQuestInvolvedRelations, "creature_questender", false, false);
 
     for (QuestRelations::iterator itr = _creatureQuestInvolvedRelations.begin(); itr != _creatureQuestInvolvedRelations.end(); ++itr)
@@ -7308,6 +7313,9 @@ void ObjectMgr::LoadCreatureQuestEnders()
             SF_LOG_ERROR("sql.sql", "Table `creature_questender` have data for not existed creature entry (%u) and existed quest %u", itr->first, itr->second);
         else if (!(cInfo->npcflag & UNIT_NPC_FLAG_QUESTGIVER))
             SF_LOG_ERROR("sql.sql", "Table `creature_questender` has creature entry (%u) for quest %u, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
+
+        // questId -> creature entry (required by CMSG_QUEST_NPC_QUERY / autocomplete UI)
+        _creatureQuestInvolvedRelationsReverse.insert(QuestRelationsReverse::value_type(itr->second, itr->first));
     }
 }
 
