@@ -29,6 +29,7 @@ enum WarriorSpells
     SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2          = 29838,
     SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1       = 29841, // obsolete
     SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2       = 29842, // Arms/Fury Passive Unbridled Wrath
+    SPELL_WARRIOR_SECOND_WIND_HEAL                  = 125667, // Second Wind healing aura (server handled)
     SPELL_WARRIOR_SHIELD_SLAM                       = 23922,
     
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK     = 26654,
@@ -52,7 +53,6 @@ enum WarriorSpellIcons
 {
     WARRIOR_ICON_ID_SUDDEN_DEATH                    = 1989
 };
-
 
 enum MiscSpells
 {
@@ -538,40 +538,62 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1) ||
-                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2) ||
-                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1) ||
-                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2))
+            // Validate the proc spell and the healing aura (Second Wind)
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2) ||
+                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SECOND_WIND_HEAL))
                 return false;
             return true;
         }
 
+        void ApplySecondWindHeal(Unit* target, AuraEffect const* aurEff)
+        {
+            if (!target)
+                return;
+
+            target->CastSpell(target, SPELL_WARRIOR_SECOND_WIND_HEAL, true, NULL, aurEff);
+        }
+
+        void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+            if (!target || !target->IsAlive())
+                return;
+
+            if (target->HealthBelowPct(35) && !target->HasAura(SPELL_WARRIOR_SECOND_WIND_HEAL))
+                ApplySecondWindHeal(target, aurEff);
+        }
+
         bool CheckProc(ProcEventInfo& eventInfo)
         {
-            if (eventInfo.GetProcTarget() == GetTarget())
+            Unit* target = GetTarget();
+            if (!target || !target->IsAlive())
                 return false;
-            if (!eventInfo.GetDamageInfo()->GetSpellInfo() || !(eventInfo.GetDamageInfo()->GetSpellInfo()->GetAllEffectsMechanicMask() & ((1 << MECHANIC_ROOT) | (1 << MECHANIC_STUN))))
+
+            if (target->HasAura(SPELL_WARRIOR_SECOND_WIND_HEAL))
                 return false;
-            return true;
+
+            DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+            if (!damageInfo)
+                return false;
+
+            uint32 damage = damageInfo->GetDamage();
+            return target->HealthBelowPctDamaged(35, damage) || target->HealthBelowPct(35);
         }
 
         void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            uint32 spellId = 0;
 
-            if (GetSpellInfo()->Id == SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1)
-                spellId = SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1;
-            else if (GetSpellInfo()->Id == SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2)
-                spellId = SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2;
-            if (!spellId)
+            Unit* target = GetTarget();
+            if (!target || target->HasAura(SPELL_WARRIOR_SECOND_WIND_HEAL))
                 return;
 
-            GetTarget()->CastSpell(GetTarget(), spellId, true, NULL, aurEff);
+            ApplySecondWindHeal(target, aurEff);
         }
 
         void Register() OVERRIDE
         {
+            AfterEffectApply += AuraEffectApplyFn(spell_warr_second_wind_proc_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
             DoCheckProc += AuraCheckProcFn(spell_warr_second_wind_proc_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_warr_second_wind_proc_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
@@ -583,29 +605,59 @@ public:
     }
 };
 
-class spell_warr_second_wind_trigger : public SpellScriptLoader
+// 125667 - Second Wind (heal buff). Dummy aura; force 1s ticks for 3% max HP regen while below 35%.
+class spell_warr_second_wind_heal : public SpellScriptLoader
 {
 public:
-    spell_warr_second_wind_trigger() : SpellScriptLoader("spell_warr_second_wind_trigger") { }
+    spell_warr_second_wind_heal() : SpellScriptLoader("spell_warr_second_wind_heal") { }
 
-    class spell_warr_second_wind_trigger_AuraScript : public AuraScript
+    class spell_warr_second_wind_heal_AuraScript : public AuraScript
     {
-        PrepareAuraScript(spell_warr_second_wind_trigger_AuraScript);
+        PrepareAuraScript(spell_warr_second_wind_heal_AuraScript);
 
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        void CalcPeriodic(AuraEffect const* /*aurEff*/, bool& isPeriodic, int32& amplitude)
         {
-            amount = int32(GetUnitOwner()->CountPctFromMaxHealth(amount));
+            isPeriodic = true;
+            amplitude = 1 * IN_MILLISECONDS;
+        }
+
+        void HandlePeriodic(AuraEffect const* aurEff)
+        {
+            PreventDefaultAction();
+
+            Unit* target = GetTarget();
+            if (!target || !target->IsAlive())
+                return;
+
+            if (!target->HealthBelowPct(35))
+            {
+                Remove(AURA_REMOVE_BY_DEFAULT);
+                return;
+            }
+
+            // Keep the short DBC duration refreshed while still below the threshold.
+            if (Aura* aura = GetAura())
+            {
+                int32 duration = aura->GetMaxDuration();
+                if (duration <= 0)
+                    duration = 3 * IN_MILLISECONDS;
+                aura->SetDuration(duration);
+            }
+
+            uint32 healAmount = target->CountPctFromMaxHealth(aurEff->GetAmount() > 0 ? aurEff->GetAmount() : 3);
+            target->HealBySpell(target, GetSpellInfo(), healAmount);
         }
 
         void Register() OVERRIDE
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warr_second_wind_trigger_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_PERIODIC_HEAL);
+            DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_warr_second_wind_heal_AuraScript::CalcPeriodic, EFFECT_0, SPELL_AURA_DUMMY);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warr_second_wind_heal_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
     {
-        return new spell_warr_second_wind_trigger_AuraScript();
+        return new spell_warr_second_wind_heal_AuraScript();
     }
 };
 
@@ -823,7 +875,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_rallying_cry();
     new spell_warr_retaliation();
     new spell_warr_second_wind_proc();
-    new spell_warr_second_wind_trigger();
+    new spell_warr_second_wind_heal();
     new spell_warr_shattering_throw();
     new spell_warr_sudden_death();
     new spell_warr_sweeping_strikes();
@@ -831,3 +883,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_victorious();
     new spell_warr_shockwave();
 }
+
+
+
+
