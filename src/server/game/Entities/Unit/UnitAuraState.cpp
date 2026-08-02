@@ -144,20 +144,27 @@ void Unit::_AddAura(UnitAura* aura, Unit* caster)
          *        but may be created as a result of aura links (player mounts with passengers)
          */
 
-         // register single target aura
+        // register single target / LIMIT_N aura
         caster->GetSingleCastAuras().push_back(aura);
-        // remove other single target auras
+
+        // MoP SPELL_ATTR5_LIMIT_N: keep up to MaxAffectedTargets matching auras (default 1).
+        // Living Bomb uses MaxAffectedTargets = 3 so it can sit on multiple enemies.
+        uint32 const limit = std::max<uint32>(1, aura->GetSpellInfo()->MaxAffectedTargets);
         Unit::AuraList& scAuras = caster->GetSingleCastAuras();
-        for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end();)
+
+        std::vector<Aura*> matching;
+        matching.reserve(scAuras.size());
+        for (Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+            if ((*itr)->IsSingleTargetWith(aura))
+                matching.push_back(*itr);
+
+        // List order is oldest -> newest; drop oldest extras beyond the limit.
+        while (matching.size() > limit)
         {
-            if ((*itr) != aura &&
-                (*itr)->IsSingleTargetWith(aura))
-            {
-                (*itr)->Remove();
-                itr = scAuras.begin();
-            }
-            else
-                ++itr;
+            Aura* oldest = matching.front();
+            matching.erase(matching.begin());
+            if (oldest != aura)
+                oldest->Remove();
         }
     }
 }

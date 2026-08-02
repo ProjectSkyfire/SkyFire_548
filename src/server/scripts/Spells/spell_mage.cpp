@@ -9,6 +9,7 @@
  * Scriptnames of files in this file should be prefixed with "spell_mage_".
  */
 
+#include "Containers.h"
 #include "Player.h"
 #include "GridNotifiers.h"
 #include "ScriptMgr.h"
@@ -540,18 +541,68 @@ public:
                 return;
 
             if (Unit* caster = GetCaster())
-                caster->CastSpell(GetTarget(), uint32(aurEff->GetAmount()), true, NULL, aurEff);
+                // Cap AOE selection: bomb target + up to 3 extra enemies nearby.
+                caster->CastCustomSpell(uint32(aurEff->GetAmount()), SPELLVALUE_MAX_TARGETS, 4, GetTarget(), true, NULL, aurEff);
         }
 
         void Register() override
         {
-            AfterEffectRemove += AuraEffectRemoveFn(spell_mage_living_bomb_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_mage_living_bomb_AuraScript::AfterRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
     AuraScript* GetAuraScript() const override
     {
         return new spell_mage_living_bomb_AuraScript();
+    }
+};
+
+// 44461 - Living Bomb (explosion)
+// Always hit the bomb target, then at most 3 additional nearby enemies.
+class spell_mage_living_bomb_explosion : public SpellScriptLoader
+{
+public:
+    spell_mage_living_bomb_explosion() : SpellScriptLoader("spell_mage_living_bomb_explosion") { }
+
+    class spell_mage_living_bomb_explosion_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_mage_living_bomb_explosion_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            Unit* bombTarget = GetExplTargetUnit();
+            if (!bombTarget)
+            {
+                if (targets.size() > 3)
+                    Skyfire::Containers::RandomResizeList(targets, 3);
+                return;
+            }
+
+            std::list<WorldObject*> extraTargets;
+            for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+            {
+                if (*itr != bombTarget)
+                    extraTargets.push_back(*itr);
+            }
+
+            if (extraTargets.size() > 3)
+                Skyfire::Containers::RandomResizeList(extraTargets, 3);
+
+            targets.clear();
+            targets.push_back(bombTarget);
+            targets.splice(targets.end(), extraTargets);
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_living_bomb_explosion_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_living_bomb_explosion_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_mage_living_bomb_explosion_SpellScript();
     }
 };
 
@@ -977,6 +1028,7 @@ void AddSC_mage_spell_scripts()
     new spell_mage_glyph_of_ice_block();
     new spell_mage_glyph_of_polymorph();
     new spell_mage_living_bomb();
+    new spell_mage_living_bomb_explosion();
     new spell_mage_nether_vortex();
     new spell_mage_polymorph_cast_visual();
     new spell_mage_ring_of_frost();

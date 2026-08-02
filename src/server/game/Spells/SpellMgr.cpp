@@ -3448,6 +3448,12 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_200_YARDS); // 200yd
                 spellInfo->MaxAffectedTargets = 3;
                 break;
+            case 44457: // Living Bomb - MoP LIMIT_N allows 3 simultaneous DoTs
+                spellInfo->MaxAffectedTargets = 3;
+                break;
+            case 44461: // Living Bomb (explosion) - bomb target + up to 3 nearby
+                spellInfo->MaxAffectedTargets = 4;
+                break;
             case 73579: // Summon Spirit Bomb
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_25_YARDS); // 25yd
                 break;
