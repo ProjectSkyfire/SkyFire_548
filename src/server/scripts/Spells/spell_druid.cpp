@@ -38,6 +38,7 @@ enum DruidSpells
     SPELL_DRUID_NATURES_GRACE               = 16880,
     SPELL_DRUID_NATURES_GRACE_TRIGGER       = 16886,
     SPELL_DRUID_SURVIVAL_INSTINCTS          = 50322,
+    SPELL_DRUID_SAVAGE_DEFENSE_AURA         = 132402, // Dodge chance buff from Savage Defense
     SPELL_DRUID_SAVAGE_ROAR                 = 52610,
     SPELL_DRUID_SAVAGE_ROAR_TRIGGER         = 62071,
     SPELL_DRUID_STAMPEDE_BAER_RANK_1        = 81016,
@@ -624,45 +625,38 @@ public:
 };
 
 // 62606 - Savage Defense
+// MoP: Dummy cast that applies dodge aura 132402 (not the old Cata absorb shield).
 class spell_dru_savage_defense : public SpellScriptLoader
 {
 public:
     spell_dru_savage_defense() : SpellScriptLoader("spell_dru_savage_defense") { }
 
-    class spell_dru_savage_defense_AuraScript : public AuraScript
+    class spell_dru_savage_defense_SpellScript : public SpellScript
     {
-        PrepareAuraScript(spell_dru_savage_defense_AuraScript);
+        PrepareSpellScript(spell_dru_savage_defense_SpellScript);
 
-        uint32 absorbPct;
-
-        bool Load() override
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_SAVAGE_DEFENSE_AURA))
+                return false;
             return true;
         }
 
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        void HandleCast()
         {
-            // Set absorbtion amount to unlimited
-            amount = -1;
-        }
-
-        void Absorb(AuraEffect* aurEff, DamageInfo& /*dmgInfo*/, uint32& absorbAmount)
-        {
-            absorbAmount = uint32(CalculatePct(GetTarget()->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK), absorbPct));
-            aurEff->SetAmount(0);
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_DRUID_SAVAGE_DEFENSE_AURA, true);
         }
 
         void Register() override
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_savage_defense_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-            OnEffectAbsorb += AuraEffectAbsorbFn(spell_dru_savage_defense_AuraScript::Absorb, EFFECT_0);
+            AfterCast += SpellCastFn(spell_dru_savage_defense_SpellScript::HandleCast);
         }
     };
 
-    AuraScript* GetAuraScript() const override
+    SpellScript* GetSpellScript() const override
     {
-        return new spell_dru_savage_defense_AuraScript();
+        return new spell_dru_savage_defense_SpellScript();
     }
 };
 
