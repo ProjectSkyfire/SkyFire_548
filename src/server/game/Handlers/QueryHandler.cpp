@@ -406,7 +406,7 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     recvData.ReadGuidMask(guid, 4, 5, 1, 7, 0, 2, 6, 3);
     recvData.ReadGuidBytes(guid, 4, 0, 2, 5, 1, 7, 3, 7);
 
-    SF_LOG_ERROR("network", "WORLD: CMSG_NPC_TEXT_QUERY ID '%u', %lu", textID, uint64(guid));
+    SF_LOG_DEBUG("network", "WORLD: CMSG_NPC_TEXT_QUERY ID '%u', %lu", textID, uint64(guid));
     //SendBroadcastText(textID);
 
     GossipText const* pGossip = sObjectMgr->GetGossipText(textID);

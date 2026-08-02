@@ -1,0 +1,57 @@
+-- Darkmoon Faire: schedule and bind Deathmatch Pavilion behavior.
+
+SET @DARKMOON_EVENT_ENTRY := 75;
+SET @DARKMOON_DEATHMATCH_ANNOUNCE_EVENT := 82;
+SET @DARKMOON_DEATHMATCH_RUN_EVENT := 83;
+SET @DARKMOON_DEATHMATCH_ANNOUNCER := 55402;
+SET @DARKMOON_DEATHMATCH_CHEST := 209620;
+SET @SPELL_DARKMOON_DEATHMATCH := 108941;
+
+DELETE FROM `game_event_arena_seasons` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_battleground_holiday` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_condition` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_creature` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_creature_quest` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_gameobject` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_gameobject_quest` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_model_equip` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_npc_vendor` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_npcflag` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_pool` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_prerequisite`
+WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT)
+   OR `prerequisite_event` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_quest_condition` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event_seasonal_questrelation` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+DELETE FROM `game_event` WHERE `eventEntry` IN (@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, @DARKMOON_DEATHMATCH_RUN_EVENT);
+
+INSERT INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `description`, `world_event`, `announce`) VALUES
+(@DARKMOON_DEATHMATCH_ANNOUNCE_EVENT, '2026-07-25 23:55:00', '2030-12-31 23:59:00', 180, 5, 0, 'Darkmoon Deathmatch announce', 0, 0),
+(@DARKMOON_DEATHMATCH_RUN_EVENT, '2026-07-26 00:00:00', '2030-12-31 23:59:00', 180, 30, 0, 'Darkmoon Deathmatch', 0, 0);
+
+INSERT IGNORE INTO `game_event_creature` (`eventEntry`, `guid`)
+SELECT @DARKMOON_EVENT_ENTRY, `guid`
+FROM `creature`
+WHERE `id` = @DARKMOON_DEATHMATCH_ANNOUNCER
+  AND `map` = 974;
+
+INSERT IGNORE INTO `game_event_gameobject` (`eventEntry`, `guid`)
+SELECT @DARKMOON_EVENT_ENTRY, `guid`
+FROM `gameobject`
+WHERE `id` = @DARKMOON_DEATHMATCH_CHEST
+  AND `map` = 974;
+
+UPDATE `creature_template`
+SET `AIName` = '', `ScriptName` = 'npc_darkmoon_deathmatch_announcer'
+WHERE `entry` = @DARKMOON_DEATHMATCH_ANNOUNCER;
+
+UPDATE `gameobject_template`
+SET `ScriptName` = 'go_darkmoon_treasure_chest'
+WHERE `entry` = @DARKMOON_DEATHMATCH_CHEST;
+
+DELETE FROM `spell_script_names`
+WHERE `ScriptName` = 'spell_darkmoon_deathmatch'
+   OR (`spell_id` = @SPELL_DARKMOON_DEATHMATCH AND `ScriptName` <> 'spell_darkmoon_deathmatch');
+
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(@SPELL_DARKMOON_DEATHMATCH, 'spell_darkmoon_deathmatch');

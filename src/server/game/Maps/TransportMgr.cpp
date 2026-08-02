@@ -366,6 +366,7 @@ Transport* TransportMgr::CreateLocalTransport(uint32 guid, Map* map)
     }
 
     ASSERT(transport->GetMap()->AddToMap<Transport>(transport));
+    sScriptMgr->OnTransportCreate(transport);
     diagnostic.X = transport->GetPositionX();
     diagnostic.Y = transport->GetPositionY();
     diagnostic.Z = transport->GetPositionZ();
@@ -386,6 +387,7 @@ Transport* TransportMgr::CreateLocalTransport(uint32 entry, Map* map, float x, f
     }
 
     ASSERT(transport->GetMap()->AddToMap<Transport>(transport));
+    sScriptMgr->OnTransportCreate(transport);
     return transport;
 }
 
@@ -447,6 +449,7 @@ Transport* TransportMgr::CreateTransport(uint32 entry, uint32 guid /*= 0*/, Map*
     // Passengers will be loaded once a player is near
 
     trans->GetMap()->AddToMap<Transport>(trans);
+    sScriptMgr->OnTransportCreate(trans);
     return trans;
 }
 

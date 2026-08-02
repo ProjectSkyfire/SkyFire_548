@@ -50,6 +50,15 @@
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
+namespace
+{
+    enum DarkmoonRingTossSpells
+    {
+        SPELL_DARKMOON_RING_TOSS_THROW = 101695,
+        SPELL_DARKMOON_RING_TOSS_ACTION = 102058
+    };
+}
+
 SpellDestination::SpellDestination()
 {
     _position.Relocate(0, 0, 0, 0);
@@ -5786,7 +5795,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // check spell focus object
-    if (m_spellInfo->RequiresSpellFocus)
+    if (m_spellInfo->RequiresSpellFocus && !(m_spellInfo->Id == SPELL_DARKMOON_RING_TOSS_THROW && m_caster->HasAura(SPELL_DARKMOON_RING_TOSS_ACTION)))
     {
         focusObject = SearchSpellFocus();
         if (!focusObject)

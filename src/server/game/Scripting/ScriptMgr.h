@@ -235,6 +235,9 @@ public:
     // Called on every world tick (don't execute too heavy code here).
     virtual void OnUpdate(uint32 /*diff*/) { }
 
+    // Called when a world game event starts or stops.
+    virtual void OnGameEvent(bool /*start*/, uint16 /*eventId*/) { }
+
     // Called when the world is started.
     virtual void OnStartup() { }
 
@@ -584,6 +587,9 @@ protected:
 public:
     bool IsDatabaseBound() const FINAL { return true; }
 
+    // Called after the transport is created and added to its map.
+    virtual void OnCreate(Transport* /*transport*/) { }
+
     // Called when a player boards the transport.
     virtual void OnAddPassenger(Transport* /*transport*/, Player* /*player*/) { }
 
@@ -807,6 +813,7 @@ public: /* Initialization */
     void OnShutdownInitiate(ShutdownExitCode code, ShutdownMask mask);
     void OnShutdownCancel();
     void OnWorldUpdate(uint32 diff);
+    void OnGameEvent(bool start, uint16 eventId);
     void OnStartup();
     void OnShutdown();
 
@@ -905,6 +912,7 @@ public: /* Initialization */
     void OnAddPassenger(Transport* transport, Player* player);
     void OnAddCreaturePassenger(Transport* transport, Creature* creature);
     void OnRemovePassenger(Transport* transport, Player* player);
+    void OnTransportCreate(Transport* transport);
     void OnTransportUpdate(Transport* transport, uint32 diff);
     void OnRelocate(Transport* transport, uint32 waypointId, uint32 mapId, float x, float y, float z);
 

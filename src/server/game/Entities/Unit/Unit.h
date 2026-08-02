@@ -1968,7 +1968,15 @@ public:
     Aura* AddAura(SpellInfo const* spellInfo, uint32 effMask, Unit* target);
     void SetAuraStack(uint32 spellId, Unit* target, uint32 stack);
     void SendPlaySpellVisualKit(uint32 SpellVisualId, uint32 Duration, int32 Type);
-    void SendPlaySpellVisual(uint32 SpellVisualId, float x, float y, float z, float orientation, uint8 SpeedTime, uint16 MissReason, uint16 ReflectStatus);
+    void SendPlaySpellVisual(uint32 spellVisualId, uint64 targetGuid, float speed, uint16 missReason = 0, uint16 reflectStatus = 0)
+    {
+        SendPlaySpellVisual(spellVisualId, targetGuid, 0.0f, 0.0f, 0.0f, speed, false, missReason, reflectStatus);
+    }
+    void SendPlaySpellVisual(uint32 spellVisualId, float x, float y, float z, float speed, uint16 missReason = 0, uint16 reflectStatus = 0)
+    {
+        SendPlaySpellVisual(spellVisualId, 0, x, y, z, speed, true, missReason, reflectStatus);
+    }
+    void SendPlaySpellVisual(uint32 spellVisualId, uint64 targetGuid, float x, float y, float z, float speed, bool hasDest, uint16 missReason, uint16 reflectStatus);
 
     void DeMorph();
 

@@ -8,14 +8,102 @@
 #include "GameObjectAI.h"
 #include "GossipDef.h"
 #include "Language.h"
+#include "LegacyTransportSupport.h"
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "PoolMgr.h"
+#include "ScriptMgr.h"
+#include "Transport.h"
+#include "TransportMgr.h"
 #include "UnitAI.h"
+#include "UpdateData.h"
 #include "World.h"
 #include "WorldPacket.h"
+
+namespace
+{
+    bool IsLegacyLocalTransport(GameObjectData const* data)
+    {
+        if (!data)
+            return false;
+
+        GameObjectTemplate const* goInfo = sObjectMgr->GetGameObjectTemplate(data->id);
+        return goInfo && goInfo->type == GAMEOBJECT_TYPE_TRANSPORT && LegacyTransport::IsLocalTransportDbEntry(data->id);
+    }
+
+    uint64 GetLegacyLocalTransportGuid(uint32 dbGuid)
+    {
+        return MAKE_NEW_GUID(dbGuid, 0, HIGHGUID_MO_TRANSPORT);
+    }
+
+    uint32 GetLegacyLocalTransportSpawnMask(GameObjectData const* data)
+    {
+        return LegacyTransport::GetAllowedSpawnMask(data->id, data->mapid, data->spawnMask);
+    }
+
+    void SpawnLegacyLocalTransport(uint32 dbGuid, GameObjectData const* data)
+    {
+        uint32 const allowedSpawnMask = GetLegacyLocalTransportSpawnMask(data);
+        if (!allowedSpawnMask)
+            return;
+
+        sTransportMgr->AddLocalTransportSpawn(data->mapid, allowedSpawnMask, dbGuid);
+
+        Map* map = sMapMgr->CreateBaseMap(data->mapid);
+        if (map->Instanceable() || !LegacyTransport::IsAllowedOnMap(data->id, map->GetId(), map->GetSpawnMode()))
+            return;
+
+        if (map->GetTransport(GetLegacyLocalTransportGuid(dbGuid)))
+            return;
+
+        sTransportMgr->CreateLocalTransport(dbGuid, map);
+    }
+
+    void UnspawnLegacyLocalTransport(uint32 dbGuid, GameObjectData const* data)
+    {
+        uint32 const allowedSpawnMask = GetLegacyLocalTransportSpawnMask(data);
+        if (allowedSpawnMask)
+            sTransportMgr->RemoveLocalTransportSpawn(data->mapid, allowedSpawnMask, dbGuid);
+
+        Map* map = sMapMgr->FindBaseNonInstanceMap(data->mapid);
+        if (!map)
+            return;
+
+        if (Transport* transport = map->GetTransport(GetLegacyLocalTransportGuid(dbGuid)))
+        {
+            Map::PlayerList const& players = map->GetPlayers();
+            if (!players.isEmpty())
+            {
+                UpdateData updateData(map->GetId());
+                transport->BuildOutOfRangeUpdateBlock(&updateData);
+
+                WorldPacket packet;
+                updateData.BuildPacket(&packet);
+
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    Player* player = itr->GetSource();
+                    player->SendDirectMessage(&packet);
+                    player->m_clientGUIDs.erase(transport->GetGUID());
+                }
+            }
+
+            while (!transport->GetPassengers().empty())
+            {
+                WorldObject* passenger = *transport->GetPassengers().begin();
+                transport->RemovePassenger(passenger);
+                if (Creature* creature = passenger->ToCreature())
+                    creature->AddObjectToRemoveList();
+            }
+
+            transport->UnloadStaticPassengers();
+            transport->CleanupsBeforeDelete(false);
+            map->RemoveFromMap<Transport>(transport, true);
+        }
+    }
+}
 
 bool GameEventMgr::CheckOneGameEvent(uint16 entry) const
 {
@@ -1032,6 +1120,7 @@ void GameEventMgr::UnApplyEvent(uint16 event_id)
     SF_LOG_INFO("gameevent", "GameEvent %u \"%s\" removed.", event_id, mGameEvent[event_id].description.c_str());
     //! Run SAI scripts with SMART_EVENT_GAME_EVENT_END
     RunSmartAIScripts(event_id, false);
+    sScriptMgr->OnGameEvent(false, event_id);
     // un-spawn positive event tagged objects
     GameEventUnspawn(event_id);
     // spawn negative event tagget objects
@@ -1060,6 +1149,7 @@ void GameEventMgr::ApplyNewEvent(uint16 event_id)
 
     //! Run SAI scripts with SMART_EVENT_GAME_EVENT_END
     RunSmartAIScripts(event_id, true);
+    sScriptMgr->OnGameEvent(true, event_id);
 
     // spawn positive event tagget objects
     GameEventSpawn(event_id);
@@ -1167,6 +1257,12 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
         // Add to correct cell
         if (GameObjectData const* data = sObjectMgr->GetGOData(*itr))
         {
+            if (IsLegacyLocalTransport(data))
+            {
+                SpawnLegacyLocalTransport(*itr, data);
+                continue;
+            }
+
             sObjectMgr->AddGameobjectToGrid(*itr, data);
             // Spawn if necessary (loaded grids only)
             // this base map checked as non-instanced and then only existed
@@ -1240,6 +1336,12 @@ void GameEventMgr::GameEventUnspawn(int16 event_id)
         // Remove the gameobject from grid
         if (GameObjectData const* data = sObjectMgr->GetGOData(*itr))
         {
+            if (IsLegacyLocalTransport(data))
+            {
+                UnspawnLegacyLocalTransport(*itr, data);
+                continue;
+            }
+
             sObjectMgr->RemoveGameobjectFromGrid(*itr, data);
 
             if (GameObject* pGameobject = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(*itr, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))

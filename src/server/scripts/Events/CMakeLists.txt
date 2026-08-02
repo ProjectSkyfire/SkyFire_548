@@ -8,4 +8,6 @@ set(scripts_STAT_SRCS
   Events/childrens_week.cpp
 )
 
+include(Events/darkmoonfaire/CMakeLists.txt)
+
 message("  -> Prepared: Events")

@@ -476,6 +476,72 @@ target_include_directories(pet_transport_support_tests PRIVATE
 
 add_test(NAME pet_transport_support_tests COMMAND pet_transport_support_tests)
 
+add_executable(loot_count_tests
+  LootCountTests.cpp
+)
+
+target_include_directories(loot_count_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Loot
+)
+
+add_test(NAME loot_count_tests COMMAND loot_count_tests)
+
+add_executable(darkmoon_shooting_gallery_tests
+  DarkmoonShootingGalleryTests.cpp
+)
+
+target_include_directories(darkmoon_shooting_gallery_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/Events/darkmoonfaire
+)
+
+add_test(NAME darkmoon_shooting_gallery_tests COMMAND darkmoon_shooting_gallery_tests)
+
+add_executable(darkmoon_ring_toss_tests
+  DarkmoonRingTossTests.cpp
+)
+
+target_include_directories(darkmoon_ring_toss_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/Events/darkmoonfaire
+)
+
+add_test(NAME darkmoon_ring_toss_tests COMMAND darkmoon_ring_toss_tests)
+
+add_executable(darkmoon_tonk_challenge_tests
+  DarkmoonTonkChallengeTests.cpp
+)
+
+target_include_directories(darkmoon_tonk_challenge_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/Events/darkmoonfaire
+)
+
+add_test(NAME darkmoon_tonk_challenge_tests COMMAND darkmoon_tonk_challenge_tests)
+
+add_executable(darkmoon_cannon_tests
+  DarkmoonCannonTests.cpp
+)
+
+target_include_directories(darkmoon_cannon_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/Events/darkmoonfaire
+)
+
+add_test(NAME darkmoon_cannon_tests COMMAND darkmoon_cannon_tests)
+
+add_executable(darkmoon_faire_tests
+  DarkmoonFaireTests.cpp
+)
+
+target_include_directories(darkmoon_faire_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/Events/darkmoonfaire
+)
+
+add_test(NAME darkmoon_faire_tests COMMAND darkmoon_faire_tests)
+
 add_executable(game_domain_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Player/PlayerRestState.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/Spells/Auras/SpellAuraMetadata.cpp

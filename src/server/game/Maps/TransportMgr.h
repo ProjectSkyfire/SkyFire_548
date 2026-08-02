@@ -119,6 +119,23 @@ public:
                 _localTransportSpawns[MAKE_PAIR32(mapId, i)].insert(guid);
     }
 
+    void RemoveLocalTransportSpawn(uint16 mapId, uint32 spawnMask, uint32 guid)
+    {
+        for (uint8 i = 0; spawnMask != 0; i++, spawnMask >>= 1)
+        {
+            if (!(spawnMask & 1))
+                continue;
+
+            TransportInstanceMap::iterator itr = _localTransportSpawns.find(MAKE_PAIR32(mapId, i));
+            if (itr == _localTransportSpawns.end())
+                continue;
+
+            itr->second.erase(guid);
+            if (itr->second.empty())
+                _localTransportSpawns.erase(itr);
+        }
+    }
+
     TransportTemplate const* GetTransportTemplate(uint32 entry) const
     {
         TransportTemplates::const_iterator itr = _transportTemplates.find(entry);

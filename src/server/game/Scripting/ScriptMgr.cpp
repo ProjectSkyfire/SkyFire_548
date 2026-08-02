@@ -445,6 +445,11 @@ void ScriptMgr::OnWorldUpdate(uint32 diff)
     FOREACH_SCRIPT(WorldScript)->OnUpdate(diff);
 }
 
+void ScriptMgr::OnGameEvent(bool start, uint16 eventId)
+{
+    FOREACH_SCRIPT(WorldScript)->OnGameEvent(start, eventId);
+}
+
 void ScriptMgr::OnHonorCalculation(float& honor, uint8 level, float multiplier)
 {
     FOREACH_SCRIPT(FormulaScript)->OnHonorCalculation(honor, level, multiplier);
@@ -1084,6 +1089,14 @@ void ScriptMgr::OnRemovePassenger(Transport* transport, Player* player)
 
     GET_SCRIPT(TransportScript, transport->GetScriptId(), tmpscript);
     tmpscript->OnRemovePassenger(transport, player);
+}
+
+void ScriptMgr::OnTransportCreate(Transport* transport)
+{
+    ASSERT(transport);
+
+    GET_SCRIPT(TransportScript, transport->GetScriptId(), tmpscript);
+    tmpscript->OnCreate(transport);
 }
 
 void ScriptMgr::OnTransportUpdate(Transport* transport, uint32 diff)

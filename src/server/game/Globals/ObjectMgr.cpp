@@ -2059,17 +2059,20 @@ void ObjectMgr::LoadGameobjects()
 
         if (gInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
         {
-            uint32 const transportEntry = sTransportMgr->GetLocalTransportEntry(gInfo->entry);
-            uint32 const allowedSpawnMask = LegacyTransport::GetAllowedSpawnMask(data.id, data.mapid, data.spawnMask);
-            if (allowedSpawnMask)
+            if (gameEvent == 0 && PoolId == 0)
             {
-                if (TransportAnimation const* animationInfo = sTransportMgr->GetTransportAnimInfo(transportEntry))
+                uint32 const transportEntry = sTransportMgr->GetLocalTransportEntry(gInfo->entry);
+                uint32 const allowedSpawnMask = LegacyTransport::GetAllowedSpawnMask(data.id, data.mapid, data.spawnMask);
+                if (allowedSpawnMask)
                 {
-                    LegacyTransport::LogRegisteredSpawn({ guid, data.id, transportEntry, data.mapid, allowedSpawnMask, data.posX, data.posY, data.posZ, data.orientation, animationInfo->TotalTime, uint32(animationInfo->Path.size()) });
-                    sTransportMgr->AddLocalTransportSpawn(data.mapid, allowedSpawnMask, guid);
+                    if (TransportAnimation const* animationInfo = sTransportMgr->GetTransportAnimInfo(transportEntry))
+                    {
+                        LegacyTransport::LogRegisteredSpawn({ guid, data.id, transportEntry, data.mapid, allowedSpawnMask, data.posX, data.posY, data.posZ, data.orientation, animationInfo->TotalTime, uint32(animationInfo->Path.size()) });
+                        sTransportMgr->AddLocalTransportSpawn(data.mapid, allowedSpawnMask, guid);
+                    }
+                    else
+                        LegacyTransport::LogMissingAnimationData(guid, data.id, transportEntry);
                 }
-                else
-                    LegacyTransport::LogMissingAnimationData(guid, data.id, transportEntry);
             }
         }
         else if (gameEvent == 0 && PoolId == 0)                      // if not this is to be managed by GameEvent System or Pool system

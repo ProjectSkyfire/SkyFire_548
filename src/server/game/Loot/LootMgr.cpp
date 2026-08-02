@@ -6,6 +6,7 @@
 #include "Containers.h"
 #include "Group.h"
 #include "Log.h"
+#include "LootCount.h"
 #include "LootMgr.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -393,7 +394,7 @@ void Loot::AddItem(LootStoreItem const& item)
     if (!proto)
         return;
 
-    uint32 count = std::rand() % item.maxcount + item.mincountOrRef;
+    uint32 count = Skyfire::Looting::CalculateLootItemCount(uint32(item.mincountOrRef), item.maxcount, uint32(std::rand()));
     uint32 stacks = count / proto->GetMaxStackSize() + ((count % proto->GetMaxStackSize()) ? 1 : 0);
 
     std::vector<LootItem>& lootItems = item.needs_quest ? quest_items : items;

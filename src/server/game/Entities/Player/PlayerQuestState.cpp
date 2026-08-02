@@ -1523,12 +1523,40 @@ uint16 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
     if (!qInfo)
         return 0;
 
-    if (qInfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
+    if (qInfo->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_NPC))
         for (QuestObjectiveSet::const_iterator citr = qInfo->m_questObjectives.begin(); citr != qInfo->m_questObjectives.end(); ++citr)
             if ((*citr)->Type == QUEST_OBJECTIVE_TYPE_NPC && (*citr)->ObjectId == entry)
                 return GetQuestObjectiveCounter((*citr)->Id);
 
     return 0;
+}
+
+void Player::ResetQuestObjectiveCounter(uint32 questId, uint8 type, uint32 objectId)
+{
+    if (GetQuestStatus(questId) != QUEST_STATUS_INCOMPLETE)
+        return;
+
+    Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+    if (!quest || !quest->GetQuestObjectiveCountType(type))
+        return;
+
+    uint16 logSlot = FindQuestSlot(questId);
+
+    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
+    {
+        QuestObjective const* questObjective = *citr;
+        if (questObjective->Type != type || questObjective->ObjectId != objectId)
+            continue;
+
+        m_questObjectiveStatus[questObjective->Id] = 0;
+        m_questObjectiveStatusSave[questObjective->Id] = true;
+        m_QuestStatusSave[questId] = true;
+
+        if (logSlot < MAX_QUEST_LOG_SIZE)
+            SetQuestSlotCounter(logSlot, questObjective->Index, 0);
+
+        break;
+    }
 }
 
 void Player::AdjustQuestReqItemCount(Quest const* quest, QuestStatusData& questStatusData)

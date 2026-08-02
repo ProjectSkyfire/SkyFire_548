@@ -1810,6 +1810,7 @@ public:
     void SwapQuestSlot(uint16 slot1, uint16 slot2);
 
     uint16 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
+    void ResetQuestObjectiveCounter(uint32 questId, uint8 type, uint32 objectId);
     void AreaExploredOrEventHappens(uint32 questId);
     void GroupEventHappens(uint32 questId, WorldObject const* pEventObject);
     void ItemAddedQuestCheck(uint32 entry, uint32 count);

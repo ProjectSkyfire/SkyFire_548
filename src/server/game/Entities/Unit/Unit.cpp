@@ -7322,54 +7322,54 @@ void Unit::SetPvP(bool state)
         RemoveByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 1, UNIT_BYTE2_FLAG_PVP);
 }
 
-void Unit::SendPlaySpellVisual(uint32 SpellVisualId, float x, float y, float z, float orientation, uint8 SpeedTime, uint16 MissReason, uint16 ReflectStatus)
+void Unit::SendPlaySpellVisual(uint32 spellVisualId, uint64 target, float x, float y, float z, float speed, bool hasDest, uint16 missReason, uint16 reflectStatus)
 {
-    ObjectGuid SourceGuid = GetGUID();
-    ObjectGuid TargetGuid;
+    ObjectGuid sourceGuid = GetGUID();
+    ObjectGuid targetGuid = target;
 
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 4 + 4 + 4 + 8);
 
-    data.WriteBit(SourceGuid[4]);
-    data.WriteBit(TargetGuid[6]);
-    data.WriteBit(TargetGuid[4]);
-    data.WriteBit(TargetGuid[7]);
-    data.WriteBit(SourceGuid[6]);
-    data.WriteBit(TargetGuid[2]);
-    data.WriteBit(TargetGuid[0]);
-    data.WriteBit(SourceGuid[2]);
-    data.WriteBit(SpeedTime);
-    data.WriteBit(SourceGuid[7]);
-    data.WriteBit(TargetGuid[3]);
-    data.WriteBit(TargetGuid[1]);
-    data.WriteBit(SourceGuid[0]);
-    data.WriteBit(SourceGuid[1]);
-    data.WriteBit(TargetGuid[5]);
-    data.WriteBit(SourceGuid[5]);
-    data.WriteBit(SourceGuid[3]);
+    data.WriteBit(targetGuid[4]);
+    data.WriteBit(sourceGuid[6]);
+    data.WriteBit(sourceGuid[4]);
+    data.WriteBit(sourceGuid[7]);
+    data.WriteBit(targetGuid[6]);
+    data.WriteBit(sourceGuid[2]);
+    data.WriteBit(sourceGuid[0]);
+    data.WriteBit(targetGuid[2]);
+    data.WriteBit(hasDest);
+    data.WriteBit(targetGuid[7]);
+    data.WriteBit(sourceGuid[3]);
+    data.WriteBit(sourceGuid[1]);
+    data.WriteBit(targetGuid[0]);
+    data.WriteBit(targetGuid[1]);
+    data.WriteBit(sourceGuid[5]);
+    data.WriteBit(targetGuid[5]);
+    data.WriteBit(targetGuid[3]);
 
     data << float(z);
-    data.WriteByteSeq(SourceGuid[2]);
-    data.WriteByteSeq(SourceGuid[6]);
-    data.WriteByteSeq(SourceGuid[5]);
-    data.WriteByteSeq(TargetGuid[2]);
-    data.WriteByteSeq(SourceGuid[1]);
+    data.WriteByteSeq(targetGuid[2]);
+    data.WriteByteSeq(targetGuid[6]);
+    data.WriteByteSeq(targetGuid[5]);
+    data.WriteByteSeq(sourceGuid[2]);
+    data.WriteByteSeq(targetGuid[1]);
     data << float(x);
-    data.WriteByteSeq(SourceGuid[3]);
-    data << uint16(ReflectStatus);
-    data.WriteByteSeq(TargetGuid[4]);
-    data.WriteByteSeq(TargetGuid[7]);
-    data << float(orientation);
+    data.WriteByteSeq(targetGuid[3]);
+    data << uint16(reflectStatus);
+    data.WriteByteSeq(sourceGuid[4]);
+    data.WriteByteSeq(sourceGuid[7]);
+    data << float(speed);
     data << float(y);
-    data.WriteByteSeq(SourceGuid[4]);
-    data.WriteByteSeq(TargetGuid[5]);
-    data << uint32(SpellVisualId);
-    data.WriteByteSeq(TargetGuid[1]);
-    data.WriteByteSeq(SourceGuid[7]);
-    data << uint16(MissReason);
-    data.WriteByteSeq(TargetGuid[0]);
-    data.WriteByteSeq(TargetGuid[6]);
-    data.WriteByteSeq(SourceGuid[0]);
-    data.WriteByteSeq(TargetGuid[3]);
+    data.WriteByteSeq(targetGuid[4]);
+    data.WriteByteSeq(sourceGuid[5]);
+    data << uint32(spellVisualId);
+    data.WriteByteSeq(sourceGuid[1]);
+    data.WriteByteSeq(targetGuid[7]);
+    data << uint16(missReason);
+    data.WriteByteSeq(sourceGuid[0]);
+    data.WriteByteSeq(sourceGuid[6]);
+    data.WriteByteSeq(targetGuid[0]);
+    data.WriteByteSeq(sourceGuid[3]);
 
     SendMessageToSet(&data, true);
 }
