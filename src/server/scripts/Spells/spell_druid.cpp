@@ -454,6 +454,34 @@ public:
     }
 };
 
+// 774 - Rejuvenation
+// MoP has two PERIODIC_HEAL effects (EFFECT_0 and EFFECT_2); suppress EFFECT_2 to avoid double ticks.
+class spell_dru_rejuvenation : public SpellScriptLoader
+{
+public:
+    spell_dru_rejuvenation() : SpellScriptLoader("spell_dru_rejuvenation") { }
+
+    class spell_dru_rejuvenation_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_rejuvenation_AuraScript);
+
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
+        {
+            PreventDefaultAction();
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_rejuvenation_AuraScript::HandlePeriodic, EFFECT_2, SPELL_AURA_PERIODIC_HEAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_rejuvenation_AuraScript();
+    }
+};
+
 // -48496 - Living Seed
 class spell_dru_living_seed : public SpellScriptLoader
 {
@@ -972,6 +1000,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_glyph_of_innervate();
     new spell_dru_innervate();
     new spell_dru_lifebloom();
+    new spell_dru_rejuvenation();
     new spell_dru_living_seed();
     new spell_dru_living_seed_proc();
     new spell_dru_might_of_ursoc();
