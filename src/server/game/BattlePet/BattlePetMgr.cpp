@@ -655,6 +655,36 @@ void BattlePetMgr::Delete(BattlePet* battlePet)
     SendBattlePetDeleted(battlePet->GetId());
 }
 
+void BattlePetMgr::CageBattlePet(ObjectGuid guid)
+{
+    BattlePet* battlePet = GetBattlePet(guid);
+    if (!battlePet)
+    {
+        SF_LOG_DEBUG("network", "WorldSession::CageBattlePet - Player %u tryed to cage battle pet companion %u which it doesn't own!", m_owner->GetGUIDLow(), (uint64)guid);
+        return;
+    }
+
+    ItemPosCountVec dest;
+    InventoryResult err = m_owner->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, BATTLE_PET_CAGE_ITEM_ID, 1);
+    if (err != EQUIP_ERR_OK)
+    {
+        m_owner->SendEquipError(err, nullptr, nullptr, BATTLE_PET_CAGE_ITEM_ID);
+        return;
+    }
+
+    Item* item = m_owner->StoreNewItem(dest, BATTLE_PET_CAGE_ITEM_ID, true);
+    if (!item)
+        return;
+
+    item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 3, battlePet->GetSpecies());
+    item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 4, battlePet->GetBreed() | (battlePet->GetQuality() << 24));
+    item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 5, battlePet->GetLevel());
+
+    m_owner->SendNewItem(item, 1, true, false);
+
+    Delete(battlePet);
+}
+
 void BattlePetMgr::HealBattlePets(uint8 percent)
 {
     if (!percent)

@@ -18,9 +18,13 @@ typedef std::set<BattlePet*> BattlePetSet;
 class Player;
 class Creature;
 
-#define BATTLE_PET_MAX_JOURNAL_SPECIES 3   // client modifications required to increase
-#define BATTLE_PET_MAX_JOURNAL_PETS    500 // sent to client as 25 bits (theoretical max 33,554,431)
-#define BATTLE_PET_MAX_LOADOUT_SLOTS   3
+enum
+{
+    BATTLE_PET_MAX_JOURNAL_SPECIES = 3,   // client modifications required to increase
+    BATTLE_PET_MAX_JOURNAL_PETS    = 500, // sent to client as 25 bits (theoretical max 33,554,431)
+    BATTLE_PET_MAX_LOADOUT_SLOTS   = 3,
+    BATTLE_PET_CAGE_ITEM_ID        = 82800,
+};
 
 enum BattlePetLoadoutSlots
 {
@@ -156,6 +160,7 @@ public:
     BattlePet* Create(uint16 speciesId, uint8 level, uint8 quality, uint8 breed, bool notification = true);
     bool CanCreateBattlePet(uint16 speciesId) const;
     void Delete(BattlePet* battlePet);
+    void CageBattlePet(ObjectGuid guid);
     void HealBattlePets(uint8 percent);
     void StartWildPetBattle(uint64 enemyGuid, uint64 allyPetId, uint32 allyMaxHealth, uint32 allyHealth,
         uint64 enemyPetId, uint32 enemyMaxHealth, uint32 enemyHealth,

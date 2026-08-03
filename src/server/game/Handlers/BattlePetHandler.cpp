@@ -1863,5 +1863,9 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
 
 void WorldSession::HandleBattlePetCage(WorldPacket& recvData)
 {
+    ObjectGuid petEntry;
+    recvData.ReadGuidMask(petEntry, 5, 1, 4, 3, 0, 6, 2, 7);
+    recvData.ReadGuidBytes(petEntry, 5, 4, 2, 7, 1, 3, 6, 0);
 
+    GetPlayer()->GetBattlePetMgr()->CageBattlePet(petEntry);
 }
