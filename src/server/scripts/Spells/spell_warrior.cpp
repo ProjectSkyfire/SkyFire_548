@@ -32,8 +32,10 @@ enum WarriorSpells
     SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_1          = 29834, // obsolete
     SPELL_WARRIOR_SECOUND_WIND_PROC_RANK_2          = 29838,
     SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_1       = 29841, // obsolete
-    SPELL_WARRIOR_SECOUND_WIND_TRIGGER_RANK_2       = 29842, // Arms/Fury Passive Unbridled Wrath
     SPELL_WARRIOR_SECOND_WIND_HEAL                  = 125667, // Second Wind healing aura (server handled)
+
+    SPELL_WARRIOR_UNBRIDLED_WRATH                   = 143268, // Arms/Fury passive
+    SPELL_WARRIOR_UNBRIDLED_WRATH_EFFECT            = 29842,  // 15 Rage over 10 sec
     SPELL_WARRIOR_SHIELD_SLAM                       = 23922,
     
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK     = 26654,
@@ -612,6 +614,98 @@ public:
     }
 };
 
+// 143268 - Unbridled Wrath (passive): on stun/immobilize, generate 15 Rage over 10 sec via 29842.
+class spell_warr_unbridled_wrath : public SpellScriptLoader
+{
+public:
+    spell_warr_unbridled_wrath() : SpellScriptLoader("spell_warr_unbridled_wrath") { }
+
+    class spell_warr_unbridled_wrath_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_unbridled_wrath_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_UNBRIDLED_WRATH_EFFECT))
+                return false;
+            return true;
+        }
+
+        static bool IsStunOrImmobilize(SpellInfo const* spellInfo)
+        {
+            if (!spellInfo)
+                return false;
+
+            if (spellInfo->Mechanic == MECHANIC_STUN || spellInfo->Mechanic == MECHANIC_ROOT)
+                return true;
+
+            uint32 const stunRootMask = (1 << MECHANIC_STUN) | (1 << MECHANIC_ROOT);
+            if (spellInfo->GetAllEffectsMechanicMask() & stunRootMask)
+                return true;
+
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            {
+                if (!spellInfo->Effects[i].IsAura())
+                    continue;
+
+                AuraType const aura = AuraType(spellInfo->Effects[i].ApplyAuraName);
+                if (aura == SPELL_AURA_MOD_STUN || aura == SPELL_AURA_MOD_ROOT)
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            // Prefer stun/root on the striking spell (tooltip: struck by Stun or Immobilize)
+            if (IsStunOrImmobilize(eventInfo.GetSpellInfo()))
+                return true;
+
+            // Fallback when effect data is incomplete but CC was just applied on this hit
+            Unit* warrior = GetTarget();
+            if (!warrior || !eventInfo.GetSpellInfo())
+                return false;
+
+            bool hasLoadedEffects = false;
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            {
+                if (eventInfo.GetSpellInfo()->Effects[i].IsEffect())
+                {
+                    hasLoadedEffects = true;
+                    break;
+                }
+            }
+            if (hasLoadedEffects)
+                return false;
+
+            return warrior->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED) || warrior->HasAuraType(SPELL_AURA_MOD_ROOT);
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        {
+            PreventDefaultAction();
+
+            Unit* warrior = GetTarget();
+            if (!warrior)
+                return;
+
+            warrior->CastSpell(warrior, SPELL_WARRIOR_UNBRIDLED_WRATH_EFFECT, true, NULL, aurEff);
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_warr_unbridled_wrath_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_warr_unbridled_wrath_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_warr_unbridled_wrath_AuraScript();
+    }
+};
+
 // 125667 - Second Wind (heal buff). Dummy aura; force 1s ticks for 3% max HP regen while below 35%.
 class spell_warr_second_wind_heal : public SpellScriptLoader
 {
@@ -1143,6 +1237,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_retaliation();
     new spell_warr_second_wind_proc();
     new spell_warr_second_wind_heal();
+    new spell_warr_unbridled_wrath();
     new spell_warr_shattering_throw();
     new spell_warr_sudden_death();
     new spell_warr_sweeping_strikes();
