@@ -27,7 +27,6 @@ enum PaladinSpells
     SPELL_PALADIN_LONG_ARM_OF_THE_LAW_SPEEDBUFF  = 87173,
 
     SPELL_PALADIN_AVENGERS_SHIELD                = 31935,
-    SPELL_PALADIN_AURA_MASTERY_IMMUNE            = 64364,
     SPELL_PALADIN_ARDENT_DEFENDER_HEAL           = 66235,
     SPELL_PALADIN_BEACON_OF_LIGHT_MARKER         = 53563,
     SPELL_PALADIN_BEACON_OF_LIGHT_HEAL           = 53652,
@@ -35,7 +34,6 @@ enum PaladinSpells
     SPELL_PALADIN_BLESSING_OF_LOWER_CITY_PALADIN = 37879,
     SPELL_PALADIN_BLESSING_OF_LOWER_CITY_PRIEST  = 37880,
     SPELL_PALADIN_BLESSING_OF_LOWER_CITY_SHAMAN  = 37881,
-    SPELL_PALADIN_CONCENTRACTION_AURA            = 19746,
     SPELL_PALADIN_DIVINE_PURPOSE_PROC            = 90174,
     SPELL_PALADIN_EYE_FOR_AN_EYE_RANK_1          = 9799,
     SPELL_PALADIN_EYE_FOR_AN_EYE_DAMAGE          = 25997,
@@ -307,80 +305,6 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_pal_ardent_defender_AuraScript();
-    }
-};
-
-// 31821 - Aura Mastery
-class spell_pal_aura_mastery : public SpellScriptLoader
-{
-public:
-    spell_pal_aura_mastery() : SpellScriptLoader("spell_pal_aura_mastery") { }
-
-    class spell_pal_aura_mastery_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pal_aura_mastery_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_AURA_MASTERY_IMMUNE))
-                return false;
-            return true;
-        }
-
-        void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            GetTarget()->CastSpell(GetTarget(), SPELL_PALADIN_AURA_MASTERY_IMMUNE, true);
-        }
-
-        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            GetTarget()->RemoveOwnedAura(SPELL_PALADIN_AURA_MASTERY_IMMUNE, GetCasterGUID());
-        }
-
-        void Register() override
-        {
-            AfterEffectApply += AuraEffectApplyFn(spell_pal_aura_mastery_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
-            AfterEffectRemove += AuraEffectRemoveFn(spell_pal_aura_mastery_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_pal_aura_mastery_AuraScript();
-    }
-};
-
-// 64364 - Aura Mastery Immune
-class spell_pal_aura_mastery_immune : public SpellScriptLoader
-{
-public:
-    spell_pal_aura_mastery_immune() : SpellScriptLoader("spell_pal_aura_mastery_immune") { }
-
-    class spell_pal_aura_mastery_immune_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_pal_aura_mastery_immune_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONCENTRACTION_AURA))
-                return false;
-            return true;
-        }
-
-        bool CheckAreaTarget(Unit* target)
-        {
-            return target->HasAura(SPELL_PALADIN_CONCENTRACTION_AURA, GetCasterGUID());
-        }
-
-        void Register() override
-        {
-            DoCheckAreaTarget += AuraCheckAreaTargetFn(spell_pal_aura_mastery_immune_AuraScript::CheckAreaTarget);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_pal_aura_mastery_immune_AuraScript();
     }
 };
 

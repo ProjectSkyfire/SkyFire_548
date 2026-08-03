@@ -440,6 +440,18 @@ target_include_directories(paladin_spell_calculation_tests PRIVATE
 
 add_test(NAME paladin_spell_calculation_tests COMMAND paladin_spell_calculation_tests)
 
+add_executable(paladin_script_registration_tests
+  PaladinScriptRegistrationTests.cpp
+)
+
+target_include_directories(paladin_script_registration_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+)
+
+target_compile_definitions(paladin_script_registration_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME paladin_script_registration_tests COMMAND paladin_script_registration_tests)
+
 add_executable(battle_pet_packet_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePet.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePetPackets.cpp
