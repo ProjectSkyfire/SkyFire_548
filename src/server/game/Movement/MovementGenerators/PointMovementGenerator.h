@@ -50,7 +50,8 @@ public:
 class EffectMovementGenerator : public MovementGenerator
 {
 public:
-    explicit EffectMovementGenerator(uint32 Id) : m_Id(Id) { }
+    explicit EffectMovementGenerator(uint32 Id, uint32 arrivalSpellId = 0)
+        : m_Id(Id), m_arrivalSpellId(arrivalSpellId) { }
     void Initialize(Unit*) { }
     void Finalize(Unit*);
     void Reset(Unit*) { }
@@ -58,6 +59,7 @@ public:
     MovementGeneratorType GetMovementGeneratorType() { return EFFECT_MOTION_TYPE; }
 private:
     uint32 m_Id;
+    uint32 m_arrivalSpellId;
 };
 
 #endif

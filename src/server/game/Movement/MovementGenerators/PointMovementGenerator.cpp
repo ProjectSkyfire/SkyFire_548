@@ -121,6 +121,10 @@ bool EffectMovementGenerator::Update(Unit* unit, uint32)
 
 void EffectMovementGenerator::Finalize(Unit* unit)
 {
+    // Cast arrival spell for players and creatures (e.g. Heroic Leap damage 52174).
+    if (m_arrivalSpellId)
+        unit->CastSpell(unit, m_arrivalSpellId, true);
+
     if (unit->GetTypeId() != TypeID::TYPEID_UNIT)
         return;
 

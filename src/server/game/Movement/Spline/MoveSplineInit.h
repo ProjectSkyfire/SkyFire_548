@@ -171,6 +171,7 @@ namespace Movement
         args.time_perc = time_shift;
         args.parabolic_amplitude = amplitude;
         args.flags.EnableParabolic();
+        args.flags.smoothGroundPath = false;
     }
 
     inline void MoveSplineInit::SetAnimation(AnimType anim)

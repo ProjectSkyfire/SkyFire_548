@@ -350,7 +350,7 @@ void MotionMaster::MoveJumpTo(float angle, float speedXY, float speedZ)
     MoveJump(x, y, z, speedXY, speedZ);
 }
 
-void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id)
+void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id, uint32 arrivalSpellId)
 {
     SF_LOG_DEBUG("misc", "Unit (GUID: %u) jump to point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);
 
@@ -362,7 +362,7 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     init.SetParabolic(max_height, 0);
     init.SetVelocity(speedXY);
     init.Launch();
-    Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
+    Mutate(new EffectMovementGenerator(id, arrivalSpellId), MOTION_SLOT_CONTROLLED);
 }
 
 void MotionMaster::MoveFall(uint32 id /*=0*/)

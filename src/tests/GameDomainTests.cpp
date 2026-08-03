@@ -944,6 +944,11 @@ namespace
     {
         bool passed = true;
 
+        passed &= Expect(Skyfire::Spells::GetJumpArrivalSpellId(6544) == 52174,
+            "Heroic Leap should resolve landing damage spell 52174");
+        passed &= Expect(Skyfire::Spells::GetJumpArrivalSpellId(999999) == 0,
+            "Unknown jump spells should not resolve an arrival spell");
+
         Skyfire::Spells::JumpDestOverride const* shadowstepOverride =
             Skyfire::Spells::GetJumpDestOverride(108938);
         passed &= Expect(shadowstepOverride && shadowstepOverride->SpellId == 108938,

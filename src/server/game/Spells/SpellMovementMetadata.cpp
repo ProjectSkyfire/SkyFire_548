@@ -14,7 +14,20 @@ namespace Spells
     {
         JumpDestOverride const JumpDestOverrides[] =
         {
-            { 108938, 10.0f, 20.0f, 20.0f }
+            { 108938, 10.0f, 20.0f, 20.0f },
+            // Heroic Leap: keep a clear arc, but faster than the generic run-speed jump formula.
+            { 6544, 0.0f, 48.0f, 16.0f }
+        };
+
+        struct JumpArrivalSpell
+        {
+            uint32 SpellId;
+            uint32 ArrivalSpellId;
+        };
+
+        JumpArrivalSpell const JumpArrivalSpells[] =
+        {
+            { 6544, 52174 } // Heroic Leap -> Heroic Leap (damage)
         };
 
         TeleportPostEffect const TeleportPostEffects[] =
@@ -37,6 +50,15 @@ namespace Spells
                 return &jumpDestOverride;
 
         return nullptr;
+    }
+
+    uint32 GetJumpArrivalSpellId(uint32 spellId)
+    {
+        for (JumpArrivalSpell const& jumpArrival : JumpArrivalSpells)
+            if (jumpArrival.SpellId == spellId)
+                return jumpArrival.ArrivalSpellId;
+
+        return 0;
     }
 
     TeleportPostEffect const* GetTeleportPostEffect(uint32 spellId)

@@ -143,6 +143,10 @@ namespace Movement
         ObjectGuid guid = unit->GetGUID();
         ObjectGuid transport = unit->GetTransGUID();
         MonsterMoveType type = GetMonsterMoveType(moveSpline);
+        // MoP client: inverted bits. Without these the leap is a flat ground slide.
+        bool const hasParabolicSpeed = (moveSpline.splineflags & MoveSplineFlag::Parabolic) &&
+            moveSpline.effect_start_time < moveSpline.Duration();
+        bool const hasParabolicTime = (moveSpline.splineflags & (MoveSplineFlag::Parabolic | MoveSplineFlag::Animation)) != 0;
         G3D::Vector3 const& firstPoint = moveSpline.spline.getPoint(moveSpline.spline.first());
         data << float(firstPoint.z);
         data << float(firstPoint.x);
@@ -152,7 +156,7 @@ namespace Movement
         data << float(unit->GetTransOffsetZ()); // Most likely transport Z
         data << float(unit->GetTransOffsetX()); // Most likely transport X
 
-        data.WriteBit(1); // Parabolic speed // esi+4Ch
+        data.WriteBit(!hasParabolicSpeed); // +21 Vertical / parabolic speed
         data.WriteBit(guid[0]);
         data.WriteBits(type, 3);
 
@@ -169,7 +173,7 @@ namespace Movement
             data.WriteBit(targetGuid[2]);
         }
 
-        data.WriteBit(1);
+        data.WriteBit(!hasParabolicTime); // +19 effect / parabolic start time
         data.WriteBit(1);
         data.WriteBit(!hasVehicle);
 
@@ -249,6 +253,12 @@ namespace Movement
         }
 
         data.WriteByteSeq(guid[5]);
+
+        if (hasParabolicSpeed)
+            data << float(moveSpline.vertical_acceleration);
+
+        if (hasParabolicTime)
+            data << uint32(moveSpline.effect_start_time);
 
         if (type == MonsterMoveFacingAngle)
             data << float(moveSpline.facing.angle);

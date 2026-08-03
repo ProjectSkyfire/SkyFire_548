@@ -37,6 +37,9 @@ namespace Spells
     };
 
     JumpDestOverride const* GetJumpDestOverride(uint32 spellId);
+    // Spell to cast when a JUMP/JUMP_DEST spline finishes (e.g. Heroic Leap -> 52174).
+    // Used when SpellEffect.TriggerSpell is 0 in DBC.
+    uint32 GetJumpArrivalSpellId(uint32 spellId);
     TeleportPostEffect const* GetTeleportPostEffect(uint32 spellId);
     uint32 GetEverlookRipperPostEffectSpellId(uint32 roll);
     uint32 GetToshleysTransporterPostEffectSpellId(uint32 randomEffect, uint32 team);
