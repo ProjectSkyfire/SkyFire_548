@@ -2508,8 +2508,8 @@ struct SpellScalingEntry
     int32     ScalingClass;                                 // 4        (index * 100) + charLevel - 1 => gtSpellScaling.dbc
     float     CoefBase;                                     // 5        some coefficient, mostly 1.0f
     int32     CoefLevelBase;                                // 6        some level
-    //int32   unk1                                          // 7  - Pandaria
-    //int32   unk2                                          // 8  - Pandaria
+    uint32    MaxLevel;                                     // 7  - Pandaria (cap for gtSpellScaling lookup)
+    int32     ItemLevel;                                    // 8  - Pandaria
 };
 
 // SpellShapeshift.dbc

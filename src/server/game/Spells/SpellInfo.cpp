@@ -127,7 +127,19 @@ int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const
             if (target && _spellInfo->IsPositiveEffect(_effIndex) && (Effect == SPELL_EFFECT_APPLY_AURA))
                 level = target->getLevel();
 
-            if (GtSpellScalingEntry const* gtScaling = sGtSpellScalingStore.LookupEntry((_spellInfo->ScalingClass != -1 ? _spellInfo->ScalingClass - 1 : MAX_CLASSES - 1) * 100 + level - 1))
+            // ScalingClass <= -1 selects the generic gtSpellScaling columns
+            // (e.g. Mana Gem / Replenish Mana use -2). Cap by SpellScaling.MaxLevel.
+            int32 const scalingClass = _spellInfo->ScalingClass;
+            int32 const gtKeyBase = (scalingClass <= -1)
+                ? MAX_CLASSES - 2 - scalingClass
+                : scalingClass - 1;
+
+            uint32 levelForKey = uint32(level);
+            if (SpellScalingEntry const* scaling = _spellInfo->GetSpellScaling())
+                if (scaling->MaxLevel)
+                    levelForKey = std::min(scaling->MaxLevel, levelForKey);
+
+            if (GtSpellScalingEntry const* gtScaling = sGtSpellScalingStore.LookupEntry(gtKeyBase * 100 + levelForKey - 1))
             {
                 float multiplier = gtScaling->value;
                 if (_spellInfo->CastTimeMax > 0 && _spellInfo->CastTimeMaxLevel > level)

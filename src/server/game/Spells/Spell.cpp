@@ -6893,16 +6893,14 @@ SpellCastResult Spell::CheckItems()
                             player->SendEquipError(msg, NULL, NULL, m_spellInfo->Effects[i].ItemType);
                             return SpellCastResult::SPELL_FAILED_DONT_REPORT;
                         }
-                        else
+                        // Conjure Mana Gem / Brilliant Mana Gem: already own the gem -> recharge
+                        // (EFFECT_1 BasePoints is charge count for the tooltip, not a spell id).
+                        if (m_spellInfo->Id == 759 || m_spellInfo->Id == 119316)
                         {
-                            if (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && (m_spellInfo->SpellFamilyFlags[0] & 0x40000000)))
-                                return SpellCastResult::SPELL_FAILED_TOO_MANY_OF_ITEM;
-                            else if (!(player->HasItemCount(m_spellInfo->Effects[i].ItemType)))
-                                return SpellCastResult::SPELL_FAILED_TOO_MANY_OF_ITEM;
-                            else
-                                player->CastSpell(m_caster, m_spellInfo->Effects[EFFECT_1].CalcValue(), false);        // move this to anywhere
+                            player->CastSpell(player, m_spellInfo->Id == 119316 ? 119318 : 54408, false);
                             return SpellCastResult::SPELL_FAILED_DONT_REPORT;
                         }
+                        return SpellCastResult::SPELL_FAILED_TOO_MANY_OF_ITEM;
                     }
                 }
                 break;
