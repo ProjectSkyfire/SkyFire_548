@@ -13,6 +13,18 @@
 #include "PointMovementGenerator.h"
 #include "World.h"
 
+namespace
+{
+    bool UnitReachedEffectMovementDestination(Unit const* unit)
+    {
+        if (!unit->movespline->Initialized())
+            return false;
+
+        G3D::Vector3 const destination = unit->movespline->FinalDestination();
+        return unit->GetExactDistSq(destination.x, destination.y, destination.z) <= 1.0f;
+    }
+}
+
 //----- Point Movement Generator
 template<class T>
 void PointMovementGenerator<T>::DoInitialize(T* unit)
@@ -116,13 +128,17 @@ void AssistanceMovementGenerator::Finalize(Unit* unit)
 
 bool EffectMovementGenerator::Update(Unit* unit, uint32)
 {
-    return !unit->movespline->Finalized();
+    if (!unit->movespline->Finalized())
+        return true;
+
+    m_arrived = Skyfire::Movement::ShouldMarkEffectMovementArrived(true, unit->movespline->Initialized(), UnitReachedEffectMovementDestination(unit));
+    return false;
 }
 
 void EffectMovementGenerator::Finalize(Unit* unit)
 {
     // Cast arrival spell for players and creatures (e.g. Heroic Leap damage 52174).
-    if (m_arrivalSpellId)
+    if (Skyfire::Movement::ShouldCastEffectMovementArrivalSpell(m_arrivalSpellId, m_arrived))
         unit->CastSpell(unit, m_arrivalSpellId, true);
 
     if (unit->GetTypeId() != TypeID::TYPEID_UNIT)

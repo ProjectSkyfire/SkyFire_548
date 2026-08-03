@@ -9,6 +9,22 @@
 #include "FollowerReference.h"
 #include "MovementGenerator.h"
 
+namespace Skyfire
+{
+namespace Movement
+{
+    inline bool ShouldMarkEffectMovementArrived(bool splineFinalized, bool splineInitialized, bool unitAtFinalDestination)
+    {
+        return splineFinalized && splineInitialized && unitAtFinalDestination;
+    }
+
+    inline bool ShouldCastEffectMovementArrivalSpell(uint32 arrivalSpellId, bool movementArrived)
+    {
+        return arrivalSpellId && movementArrived;
+    }
+}
+}
+
 template<class T>
 class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementGenerator<T> >
 {
@@ -51,7 +67,7 @@ class EffectMovementGenerator : public MovementGenerator
 {
 public:
     explicit EffectMovementGenerator(uint32 Id, uint32 arrivalSpellId = 0)
-        : m_Id(Id), m_arrivalSpellId(arrivalSpellId) { }
+        : m_Id(Id), m_arrivalSpellId(arrivalSpellId), m_arrived(false) { }
     void Initialize(Unit*) { }
     void Finalize(Unit*);
     void Reset(Unit*) { }
@@ -60,6 +76,7 @@ public:
 private:
     uint32 m_Id;
     uint32 m_arrivalSpellId;
+    bool m_arrived;
 };
 
 #endif

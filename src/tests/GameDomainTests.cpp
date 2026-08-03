@@ -14,6 +14,7 @@
 #include "MapLifecycle.h"
 #include "ObjectAccessorLifecycle.h"
 #include "PlayerRestState.h"
+#include "PointMovementGenerator.h"
 #include "PlayerPackets.h"
 #include "RuntimeMetrics.h"
 #include "SpellCalculations.h"
@@ -1839,6 +1840,29 @@ namespace
         return passed;
     }
 
+    bool TestEffectMovementArrivalSpellRules()
+    {
+        bool passed = true;
+
+        passed &= Expect(Skyfire::Movement::ShouldMarkEffectMovementArrived(true, true, true),
+            "Effect movement should mark arrival after the spline completes at its destination");
+        passed &= Expect(!Skyfire::Movement::ShouldMarkEffectMovementArrived(true, true, false),
+            "Effect movement cleanup should not mark arrival when the unit did not reach the destination");
+        passed &= Expect(!Skyfire::Movement::ShouldMarkEffectMovementArrived(true, false, true),
+            "Effect movement cleanup should not mark arrival for stop splines without a real path");
+        passed &= Expect(!Skyfire::Movement::ShouldMarkEffectMovementArrived(false, true, true),
+            "Effect movement should not mark arrival while the spline is still running");
+
+        passed &= Expect(Skyfire::Movement::ShouldCastEffectMovementArrivalSpell(52174, true),
+            "Effect movement should cast an arrival spell after a completed arrival");
+        passed &= Expect(!Skyfire::Movement::ShouldCastEffectMovementArrivalSpell(52174, false),
+            "Effect movement should not cast an arrival spell during cleanup");
+        passed &= Expect(!Skyfire::Movement::ShouldCastEffectMovementArrivalSpell(0, true),
+            "Effect movement should not cast when no arrival spell is configured");
+
+        return passed;
+    }
+
 }
 
 int main()
@@ -1861,6 +1885,7 @@ int main()
     passed &= TestSpellCalculationRules();
     passed &= TestSpellAuraMetadataRules();
     passed &= TestSpellMovementMetadataRules();
+    passed &= TestEffectMovementArrivalSpellRules();
     passed &= TestSpellItemMetadataRules();
     passed &= TestSpellCombatMetadataRules();
     passed &= TestSpellEffectMetadataRules();
