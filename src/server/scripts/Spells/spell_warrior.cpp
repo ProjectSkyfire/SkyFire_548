@@ -52,6 +52,10 @@ enum WarriorSpells
     SPELL_WARRIOR_VICTORY_RUSH_HEAL                 = 118779,
 
     SPELL_WARRIOR_ENRAGE                            = 12880,
+
+    SPELL_WARRIOR_TASTE_FOR_BLOOD                   = 56636, // passive
+    SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT            = 60503, // stacks enabling Overpower
+    SPELL_WARRIOR_OVERPOWER                         = 7384,
 };
 
 enum WarriorSpellIcons
@@ -910,6 +914,125 @@ public:
     }
 };
 
+// 56636 - Taste for Blood (Arms passive)
+// Mortal Strike hit -> 2 stacks of 60503; target dodge -> 1 stack. Max 5, 12 sec.
+class spell_warr_taste_for_blood : public SpellScriptLoader
+{
+public:
+    spell_warr_taste_for_blood() : SpellScriptLoader("spell_warr_taste_for_blood") { }
+
+    class spell_warr_taste_for_blood_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_taste_for_blood_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT) ||
+                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_MORTAL_STRIKE_AURA))
+                return false;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (eventInfo.GetActor() == eventInfo.GetActionTarget())
+                return false;
+
+            if (eventInfo.GetHitMask() & PROC_EX_DODGE)
+                return true;
+
+            if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+                if (spellInfo->Id == SPELL_WARRIOR_MORTAL_STRIKE_AURA)
+                    return true;
+
+            return false;
+        }
+
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit* caster = eventInfo.GetActor();
+            if (!caster)
+                return;
+
+            int32 stacks = 0;
+            if (eventInfo.GetHitMask() & PROC_EX_DODGE)
+                stacks = GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster);
+            else
+                stacks = GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);
+
+            if (stacks <= 0)
+                return;
+
+            // Avoid SPELLVALUE_AURA_STACK on refresh (core adds +1 then ModStackAmount again).
+            if (Aura* aura = caster->GetAura(SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT))
+            {
+                aura->ModStackAmount(stacks);
+            }
+            else if (stacks > 1)
+                caster->CastCustomSpell(SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT, SPELLVALUE_AURA_STACK, stacks, caster, true);
+            else
+                caster->CastSpell(caster, SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_warr_taste_for_blood_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_warr_taste_for_blood_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_warr_taste_for_blood_AuraScript();
+    }
+};
+
+// 7384 - Overpower
+// Consumes one Taste for Blood stack and reduces Mortal Strike cooldown by 0.5 sec.
+class spell_warr_overpower : public SpellScriptLoader
+{
+public:
+    spell_warr_overpower() : SpellScriptLoader("spell_warr_overpower") { }
+
+    class spell_warr_overpower_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_overpower_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT) ||
+                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_MORTAL_STRIKE_AURA))
+                return false;
+            return true;
+        }
+
+        void HandleAfterCast()
+        {
+            Player* player = GetCaster() ? GetCaster()->ToPlayer() : NULL;
+            if (!player)
+                return;
+
+            if (Aura* taste = player->GetAura(SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT))
+                taste->ModStackAmount(-1);
+
+            if (player->HasSpellCooldown(SPELL_WARRIOR_MORTAL_STRIKE_AURA))
+                player->ModifySpellCooldown(SPELL_WARRIOR_MORTAL_STRIKE_AURA, -500);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterCast += SpellCastFn(spell_warr_overpower_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_warr_overpower_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -931,6 +1054,8 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_victory_rush();
     new spell_warr_shockwave();
     new spell_warr_berserker_rage();
+    new spell_warr_taste_for_blood();
+    new spell_warr_overpower();
 }
 
 
