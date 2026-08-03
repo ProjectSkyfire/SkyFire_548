@@ -10,6 +10,7 @@
  */
 
 #include "Player.h"
+#include "Item.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
@@ -64,6 +65,14 @@ enum WarriorSpells
     SPELL_WARRIOR_TASTE_FOR_BLOOD                   = 56636, // passive
     SPELL_WARRIOR_TASTE_FOR_BLOOD_EFFECT            = 60503, // stacks enabling Overpower
     SPELL_WARRIOR_OVERPOWER                         = 7384,
+
+    // Shield Wall / Spell Reflection cosmetic auras
+    SPELL_WARRIOR_SHIELD_WALL_VISUAL_ALLIANCE       = 147925,
+    SPELL_WARRIOR_SHIELD_WALL_VISUAL_HORDE          = 146127,
+    SPELL_WARRIOR_SHIELD_WALL_VISUAL_WITH_SHIELD    = 146128,
+    SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_WITH_SHIELD = 146120,
+    SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_ALLIANCE  = 147923,
+    SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_HORDE     = 146122,
 };
 
 enum WarriorSpellIcons
@@ -1104,6 +1113,120 @@ public:
     }
 };
 
+// 871 - Shield Wall
+// 23920 - Spell Reflection
+// Applies faction / shield-equipped cosmetic auras while the defensive buff is active.
+class spell_warr_shield_visual : public SpellScriptLoader
+{
+public:
+    spell_warr_shield_visual() : SpellScriptLoader("spell_warr_shield_visual") { }
+
+    class spell_warr_shield_visual_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_shield_visual_AuraScript);
+
+        uint32 _spellWithShield = 0;
+        uint32 _spellAlliance = 0;
+        uint32 _spellHorde = 0;
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SHIELD_WALL_VISUAL_ALLIANCE)
+                && sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SHIELD_WALL_VISUAL_HORDE)
+                && sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SHIELD_WALL_VISUAL_WITH_SHIELD)
+                && sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_WITH_SHIELD)
+                && sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_ALLIANCE)
+                && sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_HORDE);
+        }
+
+        bool Load() OVERRIDE
+        {
+            bool const isShieldWall = GetId() == 871;
+            _spellWithShield = isShieldWall
+                ? SPELL_WARRIOR_SHIELD_WALL_VISUAL_WITH_SHIELD
+                : SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_WITH_SHIELD;
+            _spellAlliance = isShieldWall
+                ? SPELL_WARRIOR_SHIELD_WALL_VISUAL_ALLIANCE
+                : SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_ALLIANCE;
+            _spellHorde = isShieldWall
+                ? SPELL_WARRIOR_SHIELD_WALL_VISUAL_HORDE
+                : SPELL_WARRIOR_SPELL_REFLECTION_VISUAL_HORDE;
+            return true;
+        }
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Player* warrior = GetUnitOwner()->ToPlayer();
+            if (!warrior)
+                return;
+
+            uint32 spellId = 0;
+            if (Item* offhand = warrior->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                if (ItemTemplate const* proto = offhand->GetTemplate())
+                    if (proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+                        spellId = _spellWithShield;
+
+            if (!spellId)
+                spellId = (warrior->getRaceMask() & RACEMASK_ALLIANCE) ? _spellAlliance : _spellHorde;
+
+            warrior->CastSpell(warrior, spellId, true);
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* owner = GetUnitOwner();
+            owner->RemoveAurasDueToSpell(_spellWithShield);
+            owner->RemoveAurasDueToSpell(_spellAlliance);
+            owner->RemoveAurasDueToSpell(_spellHorde);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warr_shield_visual_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_warr_shield_visual_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_warr_shield_visual_AuraScript();
+    }
+};
+
+// 23920 - Spell Reflection
+// 114028 - Mass Spell Reflection
+// MoP 5.3: reflection is not consumed by spells from player pets/guardians.
+class spell_warr_spell_reflection : public SpellScriptLoader
+{
+public:
+    spell_warr_spell_reflection() : SpellScriptLoader("spell_warr_spell_reflection") { }
+
+    class spell_warr_spell_reflection_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warr_spell_reflection_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            Unit* actor = eventInfo.GetActor();
+            if (!actor)
+                return false;
+
+            Unit* owner = actor->GetOwner();
+            return !owner || owner->GetTypeId() != TypeID::TYPEID_PLAYER;
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_warr_spell_reflection_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_warr_spell_reflection_AuraScript();
+    }
+};
+
 // 56636 - Taste for Blood (Arms passive)
 // Mortal Strike hit -> 2 stacks of 60503; target dodge -> 1 stack. Max 5, 12 sec.
 class spell_warr_taste_for_blood : public SpellScriptLoader
@@ -1246,6 +1369,8 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_victory_rush();
     new spell_warr_shockwave();
     new spell_warr_berserker_rage();
+    new spell_warr_shield_visual();
+    new spell_warr_spell_reflection();
     new spell_warr_taste_for_blood();
     new spell_warr_overpower();
 }
