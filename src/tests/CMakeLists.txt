@@ -428,6 +428,18 @@ target_include_directories(spell_charge_persistence_tests PRIVATE
 
 add_test(NAME spell_charge_persistence_tests COMMAND spell_charge_persistence_tests)
 
+add_executable(paladin_spell_calculation_tests
+  PaladinSpellCalculationTests.cpp
+)
+
+target_include_directories(paladin_spell_calculation_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/Spells
+)
+
+add_test(NAME paladin_spell_calculation_tests COMMAND paladin_spell_calculation_tests)
+
 add_executable(battle_pet_packet_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePet.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePetPackets.cpp

@@ -14,6 +14,7 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "Group.h"
+#include "PaladinSpellCalculations.h"
 
 enum PaladinSpells
 {
@@ -27,6 +28,7 @@ enum PaladinSpells
 
     SPELL_PALADIN_AVENGERS_SHIELD                = 31935,
     SPELL_PALADIN_AURA_MASTERY_IMMUNE            = 64364,
+    SPELL_PALADIN_ARDENT_DEFENDER_HEAL           = 66235,
     SPELL_PALADIN_BEACON_OF_LIGHT_MARKER         = 53563,
     SPELL_PALADIN_BEACON_OF_LIGHT_HEAL           = 53652,
     SPELL_PALADIN_BLESSING_OF_LOWER_CITY_DRUID   = 37878,
@@ -236,83 +238,77 @@ public:
 };
 
 
-/*
 // 31850 - Ardent Defender
 class spell_pal_ardent_defender : public SpellScriptLoader
 {
-    public:
-        spell_pal_ardent_defender() : SpellScriptLoader("spell_pal_ardent_defender") { }
+public:
+    spell_pal_ardent_defender() : SpellScriptLoader("spell_pal_ardent_defender") { }
 
-        class spell_pal_ardent_defender_AuraScript : public AuraScript
+    class spell_pal_ardent_defender_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pal_ardent_defender_AuraScript);
+
+        uint32 _absorbPct;
+        uint32 _healPct;
+        bool _deathPreventionUsed;
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
         {
-            PrepareAuraScript(spell_pal_ardent_defender_AuraScript);
+            if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_ARDENT_DEFENDER_HEAL))
+                return false;
 
-            uint32 absorbPct, healPct;
-
-            enum Spell
-            {
-                PAL_SPELL_ARDENT_DEFENDER_HEAL = 66235,
-            };
-
-            bool Load() override
-            {
-                healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
-                absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
-                return GetUnitOwner()->GetTypeId() == TYPEID_PLAYER;
-            }
-
-            void CalculateAmount(AuraEffect const* aurEff, int32 & amount, bool & canBeRecalculated)
-            {
-                // Set absorbtion amount to unlimited
-                amount = -1;
-            }
-
-            void Absorb(AuraEffect* aurEff, DamageInfo & dmgInfo, uint32 & absorbAmount)
-            {
-                Unit* victim = GetTarget();
-                int32 remainingHealth = victim->GetHealth() - dmgInfo.GetDamage();
-                uint32 allowedHealth = victim->CountPctFromMaxHealth(35);
-                // If damage kills us
-                if (remainingHealth <= 0 && !victim->ToPlayer()->HasSpellCooldown(PAL_SPELL_ARDENT_DEFENDER_HEAL))
-                {
-                    // Cast healing spell, completely avoid damage
-                    absorbAmount = dmgInfo.GetDamage();
-
-                    uint32 defenseSkillValue = victim->GetDefenseSkillValue();
-                    // Max heal when defense skill denies critical hits from raid bosses
-                    // Formula: max defense at level + 140 (raiting from gear)
-                    uint32 reqDefForMaxHeal  = victim->getLevel() * 5 + 140;
-                    float pctFromDefense = (defenseSkillValue >= reqDefForMaxHeal)
-                        ? 1.0f
-                        : float(defenseSkillValue) / float(reqDefForMaxHeal);
-
-                    int32 healAmount = int32(victim->CountPctFromMaxHealth(uint32(healPct * pctFromDefense)));
-                    victim->CastCustomSpell(victim, PAL_SPELL_ARDENT_DEFENDER_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff);
-                    victim->ToPlayer()->AddSpellCooldown(PAL_SPELL_ARDENT_DEFENDER_HEAL, 0, time(NULL) + 120);
-                }
-                else if (remainingHealth < int32(allowedHealth))
-                {
-                    // Reduce damage that brings us under 35% (or full damage if we are already under 35%) by x%
-                    uint32 damageToReduce = (victim->GetHealth() < allowedHealth)
-                        ? dmgInfo.GetDamage()
-                        : allowedHealth - remainingHealth;
-                    absorbAmount = CalculatePct(damageToReduce, absorbPct);
-                }
-            }
-
-            void Register() override
-            {
-                 DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_ardent_defender_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                 OnEffectAbsorb += AuraEffectAbsorbFn(spell_pal_ardent_defender_AuraScript::Absorb, EFFECT_0);
-            }
-        };
-
-        AuraScript* GetAuraScript() const override
-        {
-            return new spell_pal_ardent_defender_AuraScript();
+            return true;
         }
+
+        bool Load() override
+        {
+            _absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
+            _healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+            _deathPreventionUsed = false;
+            return GetUnitOwner()->ToPlayer();
+        }
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            // Keep the school absorb aura from being consumed as a finite shield.
+            amount = -1;
+            canBeRecalculated = false;
+        }
+
+        void Absorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
+        {
+            Player* target = GetTarget()->ToPlayer();
+            if (!target)
+                return;
+
+            Skyfire::Spells::Paladin::ArdentDefenderAbsorbResult const result =
+                Skyfire::Spells::Paladin::CalculateArdentDefenderAbsorb(target->GetHealth(), target->GetMaxHealth(),
+                    dmgInfo.GetDamage(), _absorbPct, _healPct, _deathPreventionUsed);
+
+            absorbAmount = result.AbsorbAmount;
+            if (!result.PreventedDeath)
+                return;
+
+            _deathPreventionUsed = true;
+            if (result.HealAmount)
+            {
+                int32 healAmount = int32(result.HealAmount);
+                target->CastCustomSpell(target, SPELL_PALADIN_ARDENT_DEFENDER_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff);
+            }
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_pal_ardent_defender_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_pal_ardent_defender_AuraScript::Absorb, EFFECT_0);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_pal_ardent_defender_AuraScript();
+    }
 };
-*/
 
 // 31821 - Aura Mastery
 class spell_pal_aura_mastery : public SpellScriptLoader
@@ -952,7 +948,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_flash_of_light();
     new spell_pal_judgment();
     new spell_pal_selfless_healer();
-    //new spell_pal_ardent_defender();
+    new spell_pal_ardent_defender();
     new spell_pal_beacon_of_light();
     new spell_pal_blessing_of_faith();
     new spell_pal_eye_for_an_eye();
