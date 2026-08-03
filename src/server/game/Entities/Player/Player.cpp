@@ -17632,10 +17632,12 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
     {
         AddSpellCooldown(spellInfo->Id, itemId, recTime);
 
-        // MoP client often only starts the action-bar swirl from RecoveryTime.
+        // MoP client starts the action-bar swirl from RecoveryTime on cast.
         // Spells like Mangle (Bear) store the CD as CategoryRecoveryTime only
-        // (RecoveryTime = 0), so push an explicit cooldown update.
-        if (!infinityCooldown)
+        // (RecoveryTime = 0), so push an explicit cooldown update for those.
+        // Do not also SendSpellCooldown when RecoveryTime > 0 -- that desyncs
+        // client CD/GCD state for abilities such as Thunder Clap.
+        if (!infinityCooldown && spellInfo->RecoveryTime == 0)
             SendSpellCooldown(spellInfo->Id, uint32((recTime - curTime) * IN_MILLISECONDS));
     }
 
@@ -17651,7 +17653,7 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
                     continue;
 
                 AddSpellCooldown(*i_scset, itemId, catrecTime);
-                if (!infinityCooldown)
+                if (!infinityCooldown && spellInfo->RecoveryTime == 0)
                     SendSpellCooldown(*i_scset, uint32((catrecTime - curTime) * IN_MILLISECONDS));
             }
         }

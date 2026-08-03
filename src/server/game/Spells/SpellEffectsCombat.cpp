@@ -189,11 +189,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARRIOR:
             {
-                // Victory Rush
-                if (Skyfire::Spells::IsVictoryRushDamageSpell(m_spellInfo->Id))
-                    ApplyPct(damage, m_caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK));
+                // Victory Rush AP (0.56) is applied via spell_bonus_data — do not ApplyPct(damage, AP).
+                // That WotLK hack treated BP as a percent; MoP school damage BP is 1 with AP coeff 0.56.
                 // Shockwave
-                else if (Skyfire::Spells::IsShockwaveDamageSpell(m_spellInfo->Id))
+                if (Skyfire::Spells::IsShockwaveDamageSpell(m_spellInfo->Id))
                 {
                     int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
                     if (pct > 0)
