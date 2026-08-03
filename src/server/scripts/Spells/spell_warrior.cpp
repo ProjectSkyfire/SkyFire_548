@@ -75,7 +75,8 @@ enum MiscSpells
 {
     SPELL_PALADIN_BLESSING_OF_SANCTUARY             = 20911,
     SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY     = 25899,
-    SPELL_PRIEST_RENEWED_HOPE                       = 63944
+    SPELL_PRIEST_RENEWED_HOPE                       = 63944,
+    SPELL_MAGE_GLYPH_OF_ICE_BLOCK                   = 115760 // excepted from Shattering Throw remove
 };
 
 // Bloodthirst - 23881
@@ -505,7 +506,9 @@ public:
     }
 };
 
-// 64380, 65941 - Shattering Throw
+// 64382/65940/112997 damage casts + 64380/65941/113000 linked missiles.
+// Strip Ice Block / Divine Shield before damage/armor effects so the throw both
+// breaks invulnerability and deals damage (DBC pierce attrs applied in SpellMgr).
 class spell_warr_shattering_throw : public SpellScriptLoader
 {
 public:
@@ -515,18 +518,15 @@ public:
     {
         PrepareSpellScript(spell_warr_shattering_throw_SpellScript);
 
-        void HandleScript(SpellEffIndex effIndex)
+        void HandleBeforeHit()
         {
-            PreventHitDefaultEffect(effIndex);
-
-            // remove shields, will still display immune to damage part
             if (Unit* target = GetHitUnit())
-                target->RemoveAurasWithMechanic(1 << MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL);
+                target->RemoveAurasWithMechanic(1 << MECHANIC_IMMUNE_SHIELD, AURA_REMOVE_BY_ENEMY_SPELL, SPELL_MAGE_GLYPH_OF_ICE_BLOCK);
         }
 
         void Register() OVERRIDE
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warr_shattering_throw_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            BeforeHit += SpellHitFn(spell_warr_shattering_throw_SpellScript::HandleBeforeHit);
         }
     };
 

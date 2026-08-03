@@ -3568,6 +3568,14 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 108055: // Remove Weapon
                 spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 break;
+            // Shattering Throw / Shattering Blow damage spells: pierce invulnerability so
+            // spell_warr_shattering_throw can strip Ice Block/Divine Shield then deal damage.
+            // Linked missiles 64380/65941 already have these attrs in DBC.
+            case 64382:
+            case 112997:
+                spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                spellInfo->AttributesEx2 |= 0x04000000; // SPELL_ATTR2_NO_SCHOOL_IMMUNITY
+                break;
             default:
                 break;
         }
