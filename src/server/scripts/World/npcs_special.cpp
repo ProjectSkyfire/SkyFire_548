@@ -1619,8 +1619,12 @@ public:
 
         void Reset() OVERRIDE
         {
-            me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
-            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);//imune to knock aways like blast wave
+            // Pacify + root for client; avoid SetControlled(STUNNED) which breaks Attack().
+            me->SetFacingTo(me->GetHomePosition().GetOrientation());
+            me->AddUnitState(UNIT_STATE_ROOT);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->SetFullHealth();
 
             resetTimer = 5000;
             despawnTimer = 15000;
@@ -1637,16 +1641,19 @@ public:
         void DamageTaken(Unit* /*doneBy*/, uint32& damage) OVERRIDE
         {
             resetTimer = 5000;
-            damage = 0;
+
+            // Allow damage for combat text / rage / procs, but never die.
+            if (damage >= me->GetHealth())
+                damage = me->GetHealth() > 1 ? me->GetHealth() - 1 : 0;
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            if (!me->HasUnitState(UNIT_STATE_ROOT))
+                me->AddUnitState(UNIT_STATE_ROOT);
+
             if (!UpdateVictim())
                 return;
-
-            if (!me->HasUnitState(UNIT_STATE_STUNNED))
-                me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
 
             if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
             {
@@ -1666,6 +1673,15 @@ public:
                 else
                     despawnTimer -= diff;
             }
+        }
+
+        void AttackStart(Unit* target) OVERRIDE
+        {
+            if (!target)
+                return;
+
+            if (me->Attack(target, true))
+                DoStartNoMovement(target);
         }
 
         void MoveInLineOfSight(Unit* /*who*/) OVERRIDE { }
