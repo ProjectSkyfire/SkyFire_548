@@ -417,6 +417,17 @@ target_include_directories(spell_book_packet_tests PRIVATE
 
 add_test(NAME spell_book_packet_tests COMMAND spell_book_packet_tests)
 
+add_executable(spell_charge_persistence_tests
+  SpellChargePersistenceTests.cpp
+)
+
+target_include_directories(spell_charge_persistence_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Spells
+)
+
+add_test(NAME spell_charge_persistence_tests COMMAND spell_charge_persistence_tests)
+
 add_executable(battle_pet_packet_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePet.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePetPackets.cpp

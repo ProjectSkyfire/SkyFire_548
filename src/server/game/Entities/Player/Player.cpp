@@ -61,6 +61,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellBookPackets.h"
+#include "SpellChargePersistence.h"
 #include "SpellMgr.h"
 #include "Transport.h"
 #include "UpdateData.h"
@@ -4406,6 +4407,85 @@ void Player::_SaveSpellCooldowns(SQLTransaction& trans)
         trans->Append(ss.str().c_str());
 }
 
+void Player::_LoadSpellCharges(PreparedQueryResult result)
+{
+    if (!result)
+        return;
+
+    uint32 const now = uint32(time(NULL));
+    uint32 const nowMs = getMSTime();
+
+    do
+    {
+        Field* fields = result->Fetch();
+        uint32 const categoryId = fields[0].GetUInt32();
+        uint8 consumedCharges = fields[1].GetUInt8();
+        uint32 const resetTime = fields[2].GetUInt32();
+        uint32 baseRegenTime = fields[3].GetUInt32();
+
+        SpellCategoryEntry const* category = sSpellCategoryStore.LookupEntry(categoryId);
+        if (!category || !category->ChargeRegenTime)
+        {
+            SF_LOG_ERROR("entities.player.loading", "Player %u has unknown spell charge category %u in `character_spell_charges`, skipping.", GetGUIDLow(), categoryId);
+            continue;
+        }
+
+        if (!baseRegenTime)
+            baseRegenTime = category->ChargeRegenTime;
+
+        uint32 maxCharges = category->MaxCharges;
+        if (!maxCharges)
+            maxCharges = uint32(GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_CHARGES, categoryId));
+
+        if (maxCharges && consumedCharges > maxCharges)
+            consumedCharges = uint8(maxCharges);
+
+        Skyfire::SpellCharges::RuntimeState state;
+        if (!Skyfire::SpellCharges::BuildRuntimeState(consumedCharges, resetTime, baseRegenTime, now, nowMs, state))
+            continue;
+
+        SpellChargeData& chargeData = m_spellCharges[categoryId];
+        chargeData.ConsumedCharges = state.ConsumedCharges;
+        chargeData.CurrentResetTime = state.CurrentResetTime;
+        chargeData.BaseRegenTime = state.BaseRegenTime;
+
+        SF_LOG_DEBUG("entities.player.loading", "Player (GUID: %u) spell charge category %u loaded (%u consumed).", GetGUIDLow(), categoryId, uint32(state.ConsumedCharges));
+    } while (result->NextRow());
+}
+
+void Player::_SaveSpellCharges(SQLTransaction& trans)
+{
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SPELL_CHARGES);
+    stmt->setUInt32(0, GetGUIDLow());
+    trans->Append(stmt);
+
+    uint32 const nowMs = getMSTime();
+    uint32 const now = uint32(time(NULL));
+
+    bool first_round = true;
+    std::ostringstream ss;
+
+    for (SpellChargeMap::const_iterator itr = m_spellCharges.begin(); itr != m_spellCharges.end(); ++itr)
+    {
+        Skyfire::SpellCharges::PersistedState state;
+        if (!Skyfire::SpellCharges::BuildPersistedState(itr->second.ConsumedCharges, itr->second.CurrentResetTime, itr->second.BaseRegenTime, nowMs, now, state))
+            continue;
+
+        if (first_round)
+        {
+            ss << "INSERT INTO character_spell_charges (guid, category, consumedCharges, resetTime, baseRegenTime) VALUES ";
+            first_round = false;
+        }
+        else
+            ss << ',';
+
+        ss << '(' << GetGUIDLow() << ',' << itr->first << ',' << uint32(state.ConsumedCharges) << ',' << uint64(state.ResetTime) << ',' << state.BaseRegenTime << ')';
+    }
+
+    if (!first_round)
+        trans->Append(ss.str().c_str());
+}
+
 uint32 Player::GetNextResetSpecializationCost() const
 {
     // The first time reset costs 1 gold
@@ -4979,6 +5059,10 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             trans->Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SPELL_COOLDOWN);
+            stmt->setUInt32(0, guid);
+            trans->Append(stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SPELL_CHARGES);
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
 
@@ -12731,6 +12815,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
     SetFallInformation(0, GetPositionZ());
 
     _LoadSpellCooldowns(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS));
+    _LoadSpellCharges(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELL_CHARGES));
 
     // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
     // Do now before stats re-calculation cleanup for ghost state unexpected auras
@@ -14604,6 +14689,7 @@ void Player::SaveToDB(bool create /*=false*/)
     _SaveTalents(trans);
     _SaveSpells(trans);
     _SaveSpellCooldowns(trans);
+    _SaveSpellCharges(trans);
     _SaveActions(trans);
     _SaveAuras(trans);
     _SaveSkills(trans);

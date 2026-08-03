@@ -896,7 +896,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_SPELL_COOLDOWNS = 14,
     PLAYER_LOGIN_QUERY_LOAD_DECLINED_NAMES = 15,
     PLAYER_LOGIN_QUERY_LOAD_GUILD = 16,
-    // 17 free
+    PLAYER_LOGIN_QUERY_LOAD_SPELL_CHARGES = 17,
     PLAYER_LOGIN_QUERY_LOAD_ACHIEVEMENTS = 18,
     PLAYER_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS = 19,
     PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS = 20,
@@ -2209,6 +2209,8 @@ public:
     void RemoveAllSpellCooldown();
     void _LoadSpellCooldowns(PreparedQueryResult result);
     void _SaveSpellCooldowns(SQLTransaction& trans);
+    void _LoadSpellCharges(PreparedQueryResult result);
+    void _SaveSpellCharges(SQLTransaction& trans);
     void SetLastPotionId(uint32 item_id)
     {
         m_lastPotionId = item_id;

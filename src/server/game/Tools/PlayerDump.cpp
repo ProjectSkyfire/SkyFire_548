@@ -11,7 +11,7 @@
 #include "UpdateFields.h"
 #include "World.h"
 
-#define DUMP_TABLE_COUNT 29
+#define DUMP_TABLE_COUNT 30
 
 namespace CharacterDumpFields = Skyfire::PlayerDump::CharacterFields;
 namespace PetDumpFields = Skyfire::PlayerDump::PetFields;
@@ -46,6 +46,7 @@ static DumpTable dumpTables[DUMP_TABLE_COUNT] =
     { "character_reputation",             DTT_CHAR_TABLE },
     { "character_skills",                 DTT_CHAR_TABLE },
     { "character_spell",                  DTT_CHAR_TABLE },
+    { "character_spell_charges",          DTT_CHAR_TABLE },
     { "character_spell_cooldown",         DTT_CHAR_TABLE },
     { "character_talent",                 DTT_CHAR_TABLE },
     { "item_instance",                    DTT_ITEM       },

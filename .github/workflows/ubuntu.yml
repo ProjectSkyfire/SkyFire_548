@@ -3,11 +3,11 @@ name: ubuntu-build
 on:
   workflow_dispatch:
   push:
-    branches: [ main, trunk, movement, boost_conversion, game_refine, handler_refine, phase_5, phase_6, data_setup, scripting, eluna, lfg_mechanics, heroic_leap ]
+    branches: [ main, trunk, movement, boost_conversion, game_refine, handler_refine, phase_5, phase_6, data_setup, scripting, eluna, lfg_mechanics, heroic_leap, cooldowns ]
     paths-ignore:
       - 'sql/**'
   pull_request:
-    branches: [ main, trunk, movement, boost_conversion, game_refine, handler_refine, phase_5, phase_6, data_setup, scripting, eluna, lfg_mechanics, heroic_leap ]
+    branches: [ main, trunk, movement, boost_conversion, game_refine, handler_refine, phase_5, phase_6, data_setup, scripting, eluna, lfg_mechanics, heroic_leap, cooldowns ]
     paths-ignore:
       - 'sql/**'
 
