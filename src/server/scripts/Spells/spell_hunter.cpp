@@ -44,7 +44,6 @@ enum HunterSpells
     SPELL_HUNTER_SERPENT_STING                      = 1978,
 
     SPELL_HUNTER_STEADY_SHOT_FOCUS                  = 77443,
-    SPELL_HUNTER_THRILL_OF_THE_HUNT                 = 34720,
 };
 
 class spell_hun_a_murder_of_crows : public SpellScriptLoader
@@ -718,44 +717,6 @@ public:
     SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_hun_tame_beast_SpellScript();
-    }
-};
-
-// 34497 - Thrill of the Hunt
-class spell_hun_thrill_of_the_hunt : public SpellScriptLoader
-{
-public:
-    spell_hun_thrill_of_the_hunt() : SpellScriptLoader("spell_hun_thrill_of_the_hunt") { }
-
-    class spell_hun_thrill_of_the_hunt_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_hun_thrill_of_the_hunt_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_THRILL_OF_THE_HUNT))
-                return false;
-            return true;
-        }
-
-        void HandleEffectProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            PreventDefaultAction();
-            //int32 focus = eventInfo.GetDamageInfo()->GetSpellInfo()->CalcPowerCost(GetTarget(), SpellSchoolMask(eventInfo.GetDamageInfo()->GetSchoolMask()));
-            //focus = CalculatePct(focus, aurEff->GetAmount());
-
-            //GetTarget()->CastCustomSpell(GetTarget(), SPELL_HUNTER_THRILL_OF_THE_HUNT, &focus, NULL, NULL, true, NULL, aurEff);
-        }
-
-        void Register() OVERRIDE
-        {
-            OnEffectProc += AuraEffectProcFn(spell_hun_thrill_of_the_hunt_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const OVERRIDE
-    {
-        return new spell_hun_thrill_of_the_hunt_AuraScript();
     }
 };
 
