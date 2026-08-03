@@ -60,7 +60,7 @@ enum SpellCastFlags
     CAST_FLAG_UNKNOWN_29 = 0x10000000,
     CAST_FLAG_UNKNOWN_30 = 0x20000000,
     CAST_FLAG_HEAL_PREDICTION = 0x40000000,
-    CAST_FLAG_UNKNOWN_32 = 0x80000000
+    CAST_FLAG_NO_COOLDOWN = 0x80000000             // client must not start RecoveryTime CD (charge spells)
 };
 
 enum SpellRangeFlag

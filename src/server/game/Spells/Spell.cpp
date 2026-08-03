@@ -4398,6 +4398,27 @@ void Spell::SendSpellGo()
     if (m_targets.HasTraj())
         castFlags |= CAST_FLAG_ADJUST_MISSILE;
 
+    // Spells with category charges (Double Time Charge, Roll, etc.): client must not start
+    // DBC RecoveryTime on SPELL_GO — that looks like dumping both charges into a ~20s CD.
+    // Charge regen is driven by SMSG_SEND_SPELL_CHARGES instead.
+    if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
+    {
+        if (SpellCategoriesEntry const* categories = m_spellInfo->GetSpellCategories())
+        {
+            if (categories->ChargesCategory)
+            {
+                if (SpellCategoryEntry const* category = sSpellCategoryStore.LookupEntry(categories->ChargesCategory))
+                {
+                    uint32 maxCharges = category->MaxCharges;
+                    if (!maxCharges)
+                        maxCharges = uint32(m_caster->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_CHARGES, int32(category->Id)));
+                    if (maxCharges && category->ChargeRegenTime)
+                        castFlags |= CAST_FLAG_NO_COOLDOWN;
+                }
+            }
+        }
+    }
+
     ObjectGuid casterGuid = m_CastItem ? m_CastItem->GetGUID() : m_caster->GetGUID();
     ObjectGuid casterUnitGuid = m_caster->GetGUID();
     ObjectGuid targetGuid = m_targets.GetObjectTargetGUID();
@@ -5579,6 +5600,15 @@ SpellCastResult Spell::CheckCast(bool strict)
             else
                 return SpellCastResult::SPELL_FAILED_NOT_READY;
         }
+
+        if (SpellCategoriesEntry const* categories = m_spellInfo->GetSpellCategories())
+            if (categories->ChargesCategory && !m_caster->ToPlayer()->HasSpellCharge(categories->ChargesCategory))
+            {
+                if (m_triggeredByAuraSpell)
+                    return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+                else
+                    return SpellCastResult::SPELL_FAILED_NOT_READY;
+            }
     }
 
     if (m_spellInfo->AttributesEx7 & SPELL_ATTR7_IS_CHEAT_SPELL && !m_caster->HasFlag(UNIT_FIELD_FLAGS2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))

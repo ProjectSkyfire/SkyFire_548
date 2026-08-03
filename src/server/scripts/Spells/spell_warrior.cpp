@@ -23,8 +23,9 @@ enum WarriorSpells
 {
     SPELL_WARRIOR_BLOODTHIRST_DAMAGE                = 23881,
     SPELL_WARRIOR_BLOODTHIRST_HEAL                  = 117313,
-    SPELL_WARRIOR_CHARGE                            = 34846,
     SPELL_WARRIOR_CHARGE_STUN                       = 7922,
+    SPELL_WARRIOR_DOUBLE_TIME                       = 103827,
+    SPELL_WARRIOR_DOUBLE_TIME_MARKER                = 124184,
     SPELL_WARRIOR_COLOSSUS_SMASH                    = 86346,
 
     SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976, // obsolete
@@ -146,16 +147,24 @@ public:
                 !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_WARBRINGER_SLOW) ||
                 !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_WARBRINGER) ||
                 !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE_STUN) ||
-                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_CHARGE))
+                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DOUBLE_TIME) ||
+                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_DOUBLE_TIME_MARKER))
                 return false;
             return true;
         }
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            int32 chargeBasePoints0 = GetEffectValue();
             Unit* caster = GetCaster();
-            caster->CastCustomSpell(caster, SPELL_WARRIOR_CHARGE, &chargeBasePoints0, NULL, NULL, true);
+            // Double Time: Charge grants Rage only once every 12 sec
+            if (caster->HasAura(SPELL_WARRIOR_DOUBLE_TIME) && caster->HasAura(SPELL_WARRIOR_DOUBLE_TIME_MARKER))
+                return;
+
+            // EFFECT_1 Dummy BasePoints are already in rage power units (e.g. 200 = 20 Rage)
+            caster->EnergizeBySpell(caster, GetSpellInfo()->Id, GetEffectValue(), POWER_RAGE);
+
+            if (caster->HasAura(SPELL_WARRIOR_DOUBLE_TIME))
+                caster->CastSpell(caster, SPELL_WARRIOR_DOUBLE_TIME_MARKER, true);
         }
 
         void HandleCharge(SpellEffIndex /*effIndex*/)
@@ -172,10 +181,10 @@ public:
             }
         }
 
-
         void Register() OVERRIDE
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
+            // Rage on launch so Dummy EFFECT_1 always fires (hit-target can miss for caster-only effects)
+            OnEffectLaunch += SpellEffectFn(spell_warr_charge_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
             OnEffectHitTarget += SpellEffectFn(spell_warr_charge_SpellScript::HandleCharge, EFFECT_0, SPELL_EFFECT_CHARGE);
         }
     };

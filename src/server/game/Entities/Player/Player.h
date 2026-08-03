@@ -302,7 +302,16 @@ struct SpellCooldown
     uint16 itemid;
 };
 
+struct SpellChargeData
+{
+    SpellChargeData() : ConsumedCharges(0), CurrentResetTime(0), BaseRegenTime(0) { }
+    uint8 ConsumedCharges;
+    uint32 CurrentResetTime; // getMSTime() when next charge restores
+    uint32 BaseRegenTime;    // ms
+};
+
 typedef std::map<uint32, SpellCooldown> SpellCooldowns;
+typedef UNORDERED_MAP<uint32, SpellChargeData> SpellChargeMap;
 typedef UNORDERED_MAP<uint32 /*instanceId*/, time_t/*releaseTime*/> InstanceTimeMap;
 
 enum TrainerSpellState
@@ -2176,12 +2185,19 @@ public:
     void ModifySpellCooldown(uint32 spellId, int32 cooldown);
     void SendSpellCooldown(uint32 spellId, uint32 cooldown);
     void SendSpellCooldowns(); // SMSG_SEND_SPELL_HISTORY (login sync)
+    void SendSpellCharges();   // SMSG_SEND_SPELL_CHARGES (login / consume sync)
     void SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId = 0, Spell* spell = NULL, bool setCooldown = true);
     void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) override;
     void RemoveSpellCooldown(uint32 spell_id, bool update = false);
     void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
     void SendClearCooldown(uint32 spell_id, Unit* target);
     void SendClearAllCooldowns(Unit* target);
+
+    bool HasSpellCharge(uint32 categoryId) const;
+    bool ConsumeSpellCharge(SpellInfo const* spellInfo);
+    void UpdateSpellCharges();
+    void ClearSpellCharges(uint32 categoryId);
+    void ClearAllSpellCharges();
 
     GlobalCooldownMgr& GetGlobalCooldownMgr()
     {
@@ -3594,6 +3610,7 @@ private:
     ReputationMgr* m_reputationMgr;
 
     SpellCooldowns m_spellCooldowns;
+    SpellChargeMap m_spellCharges;
 
     uint32 m_ChampioningFaction;
     uint8 m_ChampioningType;

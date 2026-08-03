@@ -2349,7 +2349,7 @@ struct SpellCategoriesEntry
     uint32    Mechanic;                                     // 6        m_mechanic
     uint32    PreventionType;                               // 7        m_preventionType
     uint32    StartRecoveryCategory;                        // 8        m_startRecoveryCategory
-    //uint32 unk1;                                          // 9  - Pandaria
+    uint32    ChargesCategory;                              // 9        charge category (SpellCategory.dbc)
 };
 
 typedef std::set<uint32> SpellCategorySet;
@@ -2361,8 +2361,8 @@ struct SpellCategoryEntry
     uint32 Flags;
     // uint32 unk;
     // char* Name;
-    // uint32 unk  - Pandaria
-    // uint32 unk2 - Pandaria - could be shared CD
+    uint32 MaxCharges;                                      // 4
+    uint32 ChargeRegenTime;                                 // 5
 };
 
 // SpellClassOptions.dbc

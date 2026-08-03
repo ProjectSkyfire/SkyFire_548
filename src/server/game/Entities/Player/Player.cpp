@@ -1418,6 +1418,8 @@ void Player::Update(uint32 p_time)
         m_nextMailDelivereTime = 0;
     }
 
+    UpdateSpellCharges();
+
     // If this is set during update SetSpellModTakingSpell call is missing somewhere in the code
     // Having this would prevent more aura charges to be dropped, so let's crash
     //ASSERT (!m_spellModTakingSpell);
@@ -3521,6 +3523,7 @@ void Player::SendInitialSpells()
 
     GetSession()->SendPacket(&data);
     SendSpellCooldowns(); // SMSG_SEND_SPELL_HISTORY - required for MoP client CD UI after login
+    SendSpellCharges();
 
     SF_LOG_DEBUG("network", "CHARACTER: Sent Initial Spells");
 }
@@ -4295,6 +4298,19 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         }
     }
 
+    for (SpellChargeMap::iterator it = m_spellCharges.begin(); it != m_spellCharges.end();)
+    {
+        if (it->second.BaseRegenTime < 10 * MINUTE * IN_MILLISECONDS)
+        {
+            uint32 categoryId = it->first;
+            m_spellCharges.erase(it++);
+            ClearSpellCharges(categoryId);
+        }
+        else
+            ++it;
+    }
+    SendSpellCharges();
+
     // pet cooldowns
     if (removeActivePetCooldowns)
         if (Pet* pet = GetPet())
@@ -4315,6 +4331,7 @@ void Player::RemoveAllSpellCooldown()
         SendClearAllCooldowns(this);
         m_spellCooldowns.clear();
     }
+    ClearAllSpellCharges();
 }
 
 void Player::_LoadSpellCooldowns(PreparedQueryResult result)
@@ -17524,6 +17541,9 @@ uint32 Player::GetSpellCooldownDelay(uint32 spell_id) const
 
 void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
 {
+    // Consume a category charge first (Double Time / Roll / etc.).
+    bool const consumedCharge = ConsumeSpellCharge(spellInfo);
+
     // init cooldown values
     uint32 cat = 0;
     int32 rec = -1;
@@ -17614,6 +17634,13 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
 
         if (catrec < 0)
             catrec = 0;
+
+        // Category charges own the long recharge (e.g. Charge + Double Time). Applying
+        // RecoveryTime as a normal spell CD locks the button for ~20s and makes the client
+        // look like both charges were spent. SPELL_GO also uses CAST_FLAG_NO_COOLDOWN so the
+        // client does not re-apply DBC RecoveryTime after this.
+        if (consumedCharge)
+            rec = 0;
 
         // no cooldown after applying spell mods
         if (rec == 0 && catrec == 0)
@@ -17775,6 +17802,184 @@ void Player::SendSpellCooldowns()
         data << uint32(itr->spellId);
     }
 
+    SendDirectMessage(&data);
+}
+
+bool Player::HasSpellCharge(uint32 categoryId) const
+{
+    SpellCategoryEntry const* category = sSpellCategoryStore.LookupEntry(categoryId);
+    if (!category || category->ChargeRegenTime == 0)
+        return true;
+
+    SpellChargeMap::const_iterator itr = m_spellCharges.find(categoryId);
+    if (itr == m_spellCharges.end())
+        return true;
+
+    uint32 now = getMSTime();
+    uint8 usedCharges = itr->second.ConsumedCharges;
+    uint32 resetTime = itr->second.CurrentResetTime;
+    while (usedCharges)
+    {
+        if ((int32)(now - resetTime) < 0)
+            break;
+        --usedCharges;
+        resetTime += itr->second.BaseRegenTime;
+    }
+
+    if (!usedCharges)
+        return true;
+
+    uint32 maxCharges = category->MaxCharges;
+    if (!maxCharges)
+        maxCharges = uint32(GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_CHARGES, categoryId));
+
+    return !maxCharges || usedCharges < maxCharges;
+}
+
+bool Player::ConsumeSpellCharge(SpellInfo const* spellInfo)
+{
+    SpellCategoriesEntry const* categories = spellInfo->GetSpellCategories();
+    if (!categories || !categories->ChargesCategory)
+        return false;
+
+    SpellCategoryEntry const* category = sSpellCategoryStore.LookupEntry(categories->ChargesCategory);
+    if (!category || category->ChargeRegenTime == 0)
+        return false;
+
+    uint32 maxCharges = category->MaxCharges;
+    if (!maxCharges)
+        maxCharges = uint32(GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_CHARGES, category->Id));
+    if (!maxCharges)
+        return false;
+
+    uint32 now = getMSTime();
+    std::pair<SpellChargeMap::iterator, bool> res = m_spellCharges.insert(SpellChargeMap::value_type(category->Id, SpellChargeData()));
+    SpellChargeData& chargeData = res.first->second;
+    ++chargeData.ConsumedCharges;
+    if (res.second)
+    {
+        chargeData.BaseRegenTime = category->ChargeRegenTime;
+        chargeData.CurrentResetTime = now + chargeData.BaseRegenTime;
+    }
+
+    // Sync consumed state; client also predicts, but an explicit update keeps the bar correct.
+    SendSpellCharges();
+    return true;
+}
+
+void Player::UpdateSpellCharges()
+{
+    uint32 now = getMSTime();
+    for (SpellChargeMap::iterator it = m_spellCharges.begin(); it != m_spellCharges.end();)
+    {
+        SpellChargeData& chargeData = it->second;
+        bool erase = false;
+        while ((int32)(now - chargeData.CurrentResetTime) >= 0)
+        {
+            if (--chargeData.ConsumedCharges == 0)
+            {
+                erase = true;
+                break;
+            }
+            chargeData.CurrentResetTime += chargeData.BaseRegenTime;
+        }
+
+        if (erase)
+        {
+            uint32 categoryId = it->first;
+            m_spellCharges.erase(it++);
+            ClearSpellCharges(categoryId);
+        }
+        else
+            ++it;
+    }
+}
+
+void Player::ClearSpellCharges(uint32 categoryId)
+{
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_CLEAR_SPELL_CHARGES, 1 + 8 + 4);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[1]);
+    data.FlushBits();
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[4]);
+    data << uint32(categoryId);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[5]);
+    SendDirectMessage(&data);
+}
+
+void Player::ClearAllSpellCharges()
+{
+    if (m_spellCharges.empty())
+        return;
+
+    ObjectGuid guid = GetGUID();
+    WorldPacket data(SMSG_CLEAR_ALL_SPELL_CHARGES, 1 + 8);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[2]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[6]);
+    data.WriteBit(guid[1]);
+    data.FlushBits();
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[0]);
+    data.WriteByteSeq(guid[1]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[2]);
+    data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[4]);
+    SendDirectMessage(&data);
+
+    m_spellCharges.clear();
+}
+
+void Player::SendSpellCharges()
+{
+    WorldPacket data(SMSG_SEND_SPELL_CHARGES);
+    data.WriteBits(0, 21);
+    data.FlushBits();
+
+    uint32 now = getMSTime();
+    uint32 count = 0;
+
+    for (SpellChargeMap::const_iterator itr = m_spellCharges.begin(); itr != m_spellCharges.end(); ++itr)
+    {
+        uint8 usedCharges = itr->second.ConsumedCharges;
+        uint32 resetTime = itr->second.CurrentResetTime;
+        while (usedCharges)
+        {
+            if ((int32)(now - resetTime) < 0)
+                break;
+            --usedCharges;
+            resetTime += itr->second.BaseRegenTime;
+        }
+
+        if (!usedCharges)
+            continue;
+
+        ++count;
+        data << int32(resetTime - now);
+        data << uint8(usedCharges);
+        data << uint32(itr->first);
+    }
+
+    data.PutBits(0, count, 21);
     SendDirectMessage(&data);
 }
 
