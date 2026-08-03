@@ -3493,12 +3493,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
 void Player::SendInitialSpells()
 {
-    time_t curTime = time(NULL);
-    time_t infTime = curTime + infinityCooldownDelayCheck;
-
     uint16 spellCount = 0;
 
-    WorldPacket data(SMSG_SEND_KNOWN_SPELLS, (1 + 2 + 4 * m_spells.size() + 2 + m_spellCooldowns.size() * (2 + 2 + 2 + 4 + 4)));
+    WorldPacket data(SMSG_SEND_KNOWN_SPELLS, (1 + 2 + 4 * m_spells.size()));
     data.WriteBit(0);
 
     size_t bitPos = data.bitwpos();
@@ -3522,44 +3519,8 @@ void Player::SendInitialSpells()
     data.PutBits(bitPos, spellCount, 22);
     data.FlushBits();
 
-    /*
-    uint16 spellCooldowns = m_spellCooldowns.size();
-    data << uint16(spellCooldowns);
-    for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end(); ++itr)
-    {
-        SpellInfo const* sEntry = sSpellMgr->GetSpellInfo(itr->first);
-        if (!sEntry)
-            continue;
-
-        data << uint32(itr->first);
-
-        data << uint32(itr->second.itemid);                 // cast item id
-        data << uint16(sEntry->GetCategory());              // spell category
-
-        // send infinity cooldown in special format
-        if (itr->second.end >= infTime)
-        {
-            data << uint32(1);                              // cooldown
-            data << uint32(0x80000000);                     // category cooldown
-            continue;
-        }
-
-        time_t cooldown = itr->second.end > curTime ? (itr->second.end-curTime)*IN_MILLISECONDS : 0;
-
-        if (sEntry->GetCategory())                          // may be wrong, but anyway better than nothing...
-        {
-            data << uint32(0);                              // cooldown
-            data << uint32(cooldown);                       // category cooldown
-        }
-        else
-        {
-            data << uint32(cooldown);                       // cooldown
-            data << uint32(0);                              // category cooldown
-        }
-    }
-    */
     GetSession()->SendPacket(&data);
-    SendSpellCooldowns();
+    SendSpellCooldowns(); // SMSG_SEND_SPELL_HISTORY - required for MoP client CD UI after login
 
     SF_LOG_DEBUG("network", "CHARACTER: Sent Initial Spells");
 }
@@ -17737,43 +17698,78 @@ void Player::SendSpellCooldown(uint32 spellId, uint32 cooldown)
 
 void Player::SendSpellCooldowns()
 {
-    if (m_spellCooldowns.empty())
-        return;
-
+    // MoP client expects SMSG_SEND_SPELL_HISTORY on login, not SMSG_SPELL_COOLDOWN.
+    // Without this packet the action bar looks ready while the server still blocks casts.
     time_t const curTime = time(NULL);
-    std::vector<std::pair<uint32, uint32>> activeCooldowns;
-    activeCooldowns.reserve(m_spellCooldowns.size());
+    time_t const infTime = curTime + infinityCooldownDelayCheck;
+
+    struct HistoryEntry
+    {
+        uint32 spellId;
+        uint32 itemId;
+        uint32 category;
+        uint32 cooldown;
+        uint32 categoryCooldown;
+        bool onHold;
+    };
+
+    std::vector<HistoryEntry> entries;
+    entries.reserve(m_spellCooldowns.size());
 
     for (SpellCooldowns::const_iterator itr = m_spellCooldowns.begin(); itr != m_spellCooldowns.end(); ++itr)
     {
-        if (itr->second.end <= curTime)
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
+        if (!spellInfo)
             continue;
 
-        if (!sSpellMgr->GetSpellInfo(itr->first))
-            continue;
+        HistoryEntry entry;
+        entry.spellId = itr->first;
+        entry.itemId = itr->second.itemid;
+        entry.category = spellInfo->GetCategory();
+        entry.onHold = itr->second.end >= infTime;
 
-        activeCooldowns.push_back(std::make_pair(itr->first, uint32((itr->second.end - curTime) * IN_MILLISECONDS)));
+        if (entry.onHold)
+        {
+            entry.cooldown = 1;
+            entry.categoryCooldown = 0x80000000;
+        }
+        else if (itr->second.end <= curTime)
+            continue;
+        else
+        {
+            uint32 remaining = uint32((itr->second.end - curTime) * IN_MILLISECONDS);
+            // Category-only RecoveryTime spells (e.g. Mangle) drive the client swirl
+            // from CategoryRecoveryTime; put remaining there so the bar matches server.
+            if (spellInfo->RecoveryTime == 0 && entry.category && spellInfo->CategoryRecoveryTime > 0)
+            {
+                entry.cooldown = 0;
+                entry.categoryCooldown = remaining;
+            }
+            else
+            {
+                entry.cooldown = remaining;
+                entry.categoryCooldown = 0;
+            }
+        }
+
+        entries.push_back(entry);
     }
 
-    if (activeCooldowns.empty())
-        return;
-
-    ObjectGuid guid = GetGUID();
-    WorldPacket data(SMSG_SPELL_COOLDOWN, 9 + 3 + activeCooldowns.size() * 8);
-    data.WriteGuidMask(guid, 0, 6);
-    data.WriteBit(1); // Missing flags
-    data.WriteGuidMask(guid, 7, 3, 1, 5);
-    data.WriteBits(activeCooldowns.size(), 21);
-    data.WriteGuidMask(guid, 2, 4);
+    WorldPacket data(SMSG_SEND_SPELL_HISTORY, 4 + entries.size() * (1 + 20));
+    data.WriteBits(entries.size(), 19);
+    for (size_t i = 0; i < entries.size(); ++i)
+        data.WriteBit(0);
     data.FlushBits();
 
-    for (std::vector<std::pair<uint32, uint32>>::const_iterator itr = activeCooldowns.begin(); itr != activeCooldowns.end(); ++itr)
+    for (std::vector<HistoryEntry>::const_iterator itr = entries.begin(); itr != entries.end(); ++itr)
     {
-        data << uint32(itr->first);
-        data << uint32(itr->second);
+        data << uint32(itr->categoryCooldown);
+        data << uint32(itr->itemId);
+        data << uint32(itr->cooldown);
+        data << uint32(itr->category);
+        data << uint32(itr->spellId);
     }
 
-    data.WriteGuidBytes(guid, 5, 3, 7, 4, 1, 0, 2, 6);
     SendDirectMessage(&data);
 }
 

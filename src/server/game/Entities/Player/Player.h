@@ -2175,7 +2175,7 @@ public:
     void AddSpellCooldown(uint32 spell_id, uint32 itemid, time_t end_time);
     void ModifySpellCooldown(uint32 spellId, int32 cooldown);
     void SendSpellCooldown(uint32 spellId, uint32 cooldown);
-    void SendSpellCooldowns();
+    void SendSpellCooldowns(); // SMSG_SEND_SPELL_HISTORY (login sync)
     void SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId = 0, Spell* spell = NULL, bool setCooldown = true);
     void ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs) override;
     void RemoveSpellCooldown(uint32 spell_id, bool update = false);
