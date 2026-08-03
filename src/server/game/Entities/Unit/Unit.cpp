@@ -8926,9 +8926,8 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
         // Calculate rage from health and damage taken
         //! ToDo: Check formula
         addRage = floor(0.5f + (25.7f * baseRage / GetMaxHealth()));
-        // Berserker Rage effect
-        if (HasAura(18499))
-            addRage *= 2.0f;
+        // MoP: Berserker Rage no longer doubles rage from damage taken;
+        // it applies Enrage (12880), which grants flat rage on cast.
     }
 
     addRage *= sWorld->getRate(Rates::RATE_POWER_RAGE_INCOME);

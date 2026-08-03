@@ -50,6 +50,8 @@ enum WarriorSpells
 
     SPELL_WARRIOR_VICTORIOUS                        = 32216,
     SPELL_WARRIOR_VICTORY_RUSH_HEAL                 = 118779,
+
+    SPELL_WARRIOR_ENRAGE                            = 12880,
 };
 
 enum WarriorSpellIcons
@@ -872,6 +874,42 @@ public:
     }
 };
 
+// 18499 - Berserker Rage
+// MoP: "You become Enraged" — apply Enrage (12880) for rage + physical damage amp.
+class spell_warr_berserker_rage : public SpellScriptLoader
+{
+public:
+    spell_warr_berserker_rage() : SpellScriptLoader("spell_warr_berserker_rage") { }
+
+    class spell_warr_berserker_rage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_berserker_rage_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_ENRAGE))
+                return false;
+            return true;
+        }
+
+        void HandleAfterCast()
+        {
+            if (Unit* caster = GetCaster())
+                caster->CastSpell(caster, SPELL_WARRIOR_ENRAGE, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterCast += SpellCastFn(spell_warr_berserker_rage_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_warr_berserker_rage_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -892,6 +930,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_sword_and_board();
     new spell_warr_victory_rush();
     new spell_warr_shockwave();
+    new spell_warr_berserker_rage();
 }
 
 
