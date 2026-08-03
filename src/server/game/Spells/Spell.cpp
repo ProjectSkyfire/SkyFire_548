@@ -30,6 +30,7 @@
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
 #include "Spell.h"
+#include "AllowOnlyAbilityCast.h"
 #include "SpellAuraEffects.h"
 #include "SpellCalculations.h"
 #include "SpellInfo.h"
@@ -5589,8 +5590,12 @@ SpellCastResult Spell::CheckCast(bool strict)
     // check cooldowns to prevent cheating
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER && !(m_spellInfo->Attributes & SPELL_ATTR0_PASSIVE))
     {
-        //can cast triggered (by aura only?) spells while have this flag
-        if (!(_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) && m_caster->ToPlayer()->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_ALLOW_ONLY_ABILITY))
+        // SPELL_AURA_ALLOW_ONLY_ABILITY (Bladestorm, Killing Spree, ...):
+        // only spells matching the aura effect SpellClassMask may be cast
+        if (Skyfire::Spells::ShouldBlockCastForAllowOnlyAbility(
+                (_triggeredCastFlags & TRIGGERED_IGNORE_CASTER_AURASTATE) != 0,
+                m_caster->HasAuraType(SPELL_AURA_ALLOW_ONLY_ABILITY),
+                m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_ALLOW_ONLY_ABILITY, m_spellInfo)))
             return SpellCastResult::SPELL_FAILED_SPELL_IN_PROGRESS;
 
         if (m_caster->ToPlayer()->HasSpellCooldown(m_spellInfo->Id))

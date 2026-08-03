@@ -428,6 +428,17 @@ target_include_directories(spell_charge_persistence_tests PRIVATE
 
 add_test(NAME spell_charge_persistence_tests COMMAND spell_charge_persistence_tests)
 
+add_executable(allow_only_ability_cast_tests
+  AllowOnlyAbilityCastTests.cpp
+)
+
+target_include_directories(allow_only_ability_cast_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Spells
+)
+
+add_test(NAME allow_only_ability_cast_tests COMMAND allow_only_ability_cast_tests)
+
 add_executable(paladin_spell_calculation_tests
   PaladinSpellCalculationTests.cpp
 )
