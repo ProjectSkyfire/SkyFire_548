@@ -143,14 +143,16 @@ void AuraApplication::ClientUpdate(bool remove)
     data.WriteBit(targetGuid[5]);
     data.WriteBit(!remove);                             // Not remove
 
+    // Client indexes $wN by effect index. Count must be (highest effect index + 1) with
+    // zero padding for gaps — not the number of active effects (e.g. ER $w2 with only EFFECT_1).
+    uint8 effCount = 0;
     if (!remove)
     {
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
-            uint8 effCount = 0;
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (HasEffect(i))
-                    effCount++;
+                    effCount = i + 1;
 
             data.WriteBits(effCount, 22);               // Effect Count
         }
@@ -211,15 +213,13 @@ void AuraApplication::ClientUpdate(bool remove)
 
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
-            for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            for (uint32 i = 0; i < effCount; ++i)
             {
+                float amount = 0.0f;
                 if (HasEffect(i))
-                {
                     if (AuraEffect const* eff = aura->GetEffect(i))
-                        data << float(eff->GetAmount());
-                    else
-                        data << float(0.f);
-                }
+                        amount = float(eff->GetAmount());
+                data << float(amount);
             }
         }
     }

@@ -16277,6 +16277,14 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
     if (mod->type == SPELLMOD_FLAT)
         data << uint8(mod->op);
 
+    // Update the list before computing the packet value. For PCT mods, applying
+    // AddPct(+100) then AddPct(-100) on remove yields 0 instead of 1.0 — that made
+    // Enraged Regeneration tooltips drop to 0% after Enrage fell off.
+    if (apply)
+        m_spellMods[mod->op].push_back(mod);
+    else
+        m_spellMods[mod->op].remove(mod);
+
     for (int eff = 0; eff < 128; ++eff)
     {
         if (eff != 0 && (eff % 32) == 0)
@@ -16285,13 +16293,13 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
         _mask[i] = uint32(1) << (eff - (32 * i));
         if (mod->mask & _mask)
         {
-            float val = 0.0f;
+            float val;
             if (mod->type == SPELLMOD_FLAT)
             {
+                val = 0.0f;
                 for (SpellModList::iterator itr = m_spellMods[mod->op].begin(); itr != m_spellMods[mod->op].end(); ++itr)
                     if ((*itr)->type == mod->type && (*itr)->mask & _mask)
                         val += (*itr)->value;
-                val += apply ? mod->value : -(mod->value);
             }
             else
             {
@@ -16299,7 +16307,6 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
                 for (SpellModList::iterator itr = m_spellMods[mod->op].begin(); itr != m_spellMods[mod->op].end(); ++itr)
                     if ((*itr)->type == mod->type && (*itr)->mask & _mask)
                         AddPct(val, (*itr)->value);
-                AddPct(val, apply ? mod->value : -(mod->value));
             }
 
             data << float(val);
@@ -16313,11 +16320,9 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
 
     data.PutBits(writePos, modTypeCount, 21);
     SendDirectMessage(&data);
-    if (apply)
-        m_spellMods[mod->op].push_back(mod);
-    else
+
+    if (!apply)
     {
-        m_spellMods[mod->op].remove(mod);
         // mods bound to aura will be removed in AuraEffect::~AuraEffect
         if (!mod->ownerAura)
             delete mod;
@@ -19076,12 +19081,13 @@ void Player::SendAurasForTarget(Unit* target)
 
         data.WriteBit(1);                               // Not remove
 
+        // Client indexes $wN by effect index — count is highest index + 1 (pad gaps with 0).
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
             uint8 effCount = 0;
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                 if (auraApp->HasEffect(i))
-                    effCount++;
+                    effCount = i + 1;
 
             data.WriteBits(effCount, 22);               // Effect Count
         }
@@ -19148,15 +19154,18 @@ void Player::SendAurasForTarget(Unit* target)
 
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
+            uint8 effCount = 0;
             for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-            {
                 if (auraApp->HasEffect(i))
-                {
+                    effCount = i + 1;
+
+            for (uint32 i = 0; i < effCount; ++i)
+            {
+                float amount = 0.0f;
+                if (auraApp->HasEffect(i))
                     if (AuraEffect const* eff = aura->GetEffect(i))
-                        data << float(eff->GetAmount());
-                    else
-                        data << float(0.f);
-                }
+                        amount = float(eff->GetAmount());
+                data << float(amount);
             }
         }
 
