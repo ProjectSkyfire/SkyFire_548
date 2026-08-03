@@ -8738,6 +8738,33 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const* proto, ScalingSt
         UpdateDamagePhysical(attType);
 }
 
+// Recalculate passive weapon spellmods after equip/unequip finishes (slot state is current).
+class WeaponDependentSpellModEvent : public BasicEvent
+{
+public:
+    explicit WeaponDependentSpellModEvent(Player& owner) : BasicEvent(), _owner(owner) { }
+
+    bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) OVERRIDE
+    {
+        AuraType const types[] = { SPELL_AURA_ADD_FLAT_MODIFIER, SPELL_AURA_ADD_PCT_MODIFIER };
+        for (AuraType type : types)
+        {
+            Unit::AuraEffectList const& effects = _owner.GetAuraEffectsByType(type);
+            for (Unit::AuraEffectList::const_iterator itr = effects.begin(); itr != effects.end(); ++itr)
+            {
+                AuraEffect* aurEff = *itr;
+                SpellInfo const* spellInfo = aurEff->GetSpellInfo();
+                if (spellInfo->IsPassive() && spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON)
+                    aurEff->RecalculateAmount();
+            }
+        }
+        return true;
+    }
+
+private:
+    Player& _owner;
+};
+
 void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply)
 {
     AuraEffectList const& auraCritList = GetAuraEffectsByType(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
@@ -8751,6 +8778,9 @@ void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackTy
     AuraEffectList const& auraDamagePctList = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for (AuraEffectList::const_iterator itr = auraDamagePctList.begin(); itr != auraDamagePctList.end(); ++itr)
         _ApplyWeaponDependentAuraDamageMod(item, attackType, *itr, apply);
+
+    // Defer spellmod recalculation: on unequip the item is still in the slot during this call.
+    m_Events.AddEvent(new WeaponDependentSpellModEvent(*this), m_Events.CalculateTime(1));
 }
 
 void Player::_ApplyWeaponDependentAuraCritMod(Item* item, WeaponAttackType attackType, AuraEffect const* aura, bool apply)
