@@ -13,6 +13,10 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "Cell.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 
 enum WarriorSpells
 {
@@ -33,6 +37,8 @@ enum WarriorSpells
     SPELL_WARRIOR_SHIELD_SLAM                       = 23922,
     
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK     = 26654,
+    SPELL_WARRIOR_SLAM                              = 1464,
+    SPELL_WARRIOR_SLAM_CLEAVE                       = 146361, // SS: 35% Slam damage to enemies within 2yd
 
     SPELL_WARRIOR_WARBRINGER                        = 103828,
     SPELL_WARRIOR_WARBRINGER_ROOT                   = 105771,
@@ -710,7 +716,8 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK))
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK) ||
+                !sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SLAM_CLEAVE))
                 return false;
             return true;
         }
@@ -724,13 +731,72 @@ public:
         bool CheckProc(ProcEventInfo& eventInfo)
         {
             _procTarget = eventInfo.GetActor()->SelectNearbyTarget(eventInfo.GetProcTarget());
-            return _procTarget;
+            if (_procTarget)
+                return true;
+
+            // Slam cleaves everyone within 2 yards of the primary target (not caster melee range alone)
+            if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+                return spellInfo->Id == SPELL_WARRIOR_SLAM && eventInfo.GetActionTarget();
+
+            return false;
         }
 
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
         {
             PreventDefaultAction();
-            GetTarget()->CastSpell(_procTarget, SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, true, NULL, aurEff);
+
+            Unit* caster = GetTarget();
+            DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+            if (!caster || !damageInfo || !damageInfo->GetDamage())
+                return;
+
+            // Slam: while SS is active, deal 35% damage to all other enemies within 2 yards of the target
+            if (SpellInfo const* procSpell = eventInfo.GetSpellInfo())
+            {
+                if (procSpell->Id == SPELL_WARRIOR_SLAM)
+                {
+                    Unit* slamTarget = eventInfo.GetActionTarget();
+                    if (!slamTarget)
+                        return;
+
+                    int32 slamDamage = CalculatePct(damageInfo->GetDamage(), 35);
+                    SpellInfo const* cleaveInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SLAM_CLEAVE);
+                    float radius = cleaveInfo ? cleaveInfo->Effects[EFFECT_0].CalcRadius(caster) : 2.0f;
+                    if (radius <= 0.0f)
+                        radius = 2.0f;
+
+                    // Area version of 146361: one cast around the Slam target (script filters the primary)
+                    if (cleaveInfo && cleaveInfo->Effects[EFFECT_0].IsTargetingArea())
+                    {
+                        caster->CastCustomSpell(SPELL_WARRIOR_SLAM_CLEAVE, SPELLVALUE_BASE_POINT0, slamDamage, slamTarget, true, NULL, aurEff);
+                        return;
+                    }
+
+                    // Fallback if DBC targets are single-unit: hit each nearby enemy for 35%
+                    std::list<Unit*> targets;
+                    Skyfire::AnyUnfriendlyUnitInObjectRangeCheck u_check(slamTarget, caster, radius);
+                    Skyfire::UnitListSearcher<Skyfire::AnyUnfriendlyUnitInObjectRangeCheck> searcher(slamTarget, targets, u_check);
+                    slamTarget->VisitNearbyObject(radius, searcher);
+                    targets.remove(slamTarget);
+
+                    for (Unit* target : targets)
+                    {
+                        if (!caster->IsValidAttackTarget(target) || !caster->IsWithinLOSInMap(target))
+                            continue;
+                        if (target->IsTotem() || target->IsSpiritService() || target->GetCreatureType() == CREATURE_TYPE_CRITTER)
+                            continue;
+
+                        caster->CastCustomSpell(SPELL_WARRIOR_SLAM_CLEAVE, SPELLVALUE_BASE_POINT0, slamDamage, target, true, NULL, aurEff);
+                    }
+                    return;
+                }
+            }
+
+            if (!_procTarget)
+                return;
+
+            int32 damage = CalculatePct(damageInfo->GetDamage(), aurEff->GetAmount());
+            caster->CastCustomSpell(SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK, SPELLVALUE_BASE_POINT0, damage, _procTarget, true, NULL, aurEff);
         }
 
         void Register() OVERRIDE
@@ -746,6 +812,36 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_warr_sweeping_strikes_AuraScript();
+    }
+};
+
+// 146361 - Slam (Sweeping Strikes cleave)
+class spell_warr_slam_cleave : public SpellScriptLoader
+{
+public:
+    spell_warr_slam_cleave() : SpellScriptLoader("spell_warr_slam_cleave") { }
+
+    class spell_warr_slam_cleave_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_slam_cleave_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            // "all other enemies" - exclude the primary Slam target used as the cast destination
+            if (WorldObject* explTarget = GetExplTargetWorldObject())
+                targets.remove(explTarget);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_slam_cleave_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_slam_cleave_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_warr_slam_cleave_SpellScript();
     }
 };
 
@@ -1050,6 +1146,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_shattering_throw();
     new spell_warr_sudden_death();
     new spell_warr_sweeping_strikes();
+    new spell_warr_slam_cleave();
     new spell_warr_sword_and_board();
     new spell_warr_victory_rush();
     new spell_warr_shockwave();
