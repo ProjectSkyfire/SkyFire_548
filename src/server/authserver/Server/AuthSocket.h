@@ -51,7 +51,9 @@ private:
     bool _authed;
 
     std::string _login;
+    std::string _accountName;
     std::string _tokenKey;
+    uint32 _accountId = 0;
 
     // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
     // between enUS and enGB, which is important for the patch system

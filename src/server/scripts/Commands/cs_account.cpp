@@ -46,10 +46,15 @@ public:
             { "add",            rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST_ADD,       true,  &HandleAccountBoostAddCommand,     "",      },
             { "delete",         rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST_DEL,       true,  &HandleAccountBoostDelCommand,     "",      },
         };
+        static std::vector<ChatCommand> accountConvertCommandTable =
+        {
+            { "email",          rbac::RBAC_PERM_COMMAND_ACCOUNT_CONVERT_EMAIL,   false, &HandleAccountConvertEmailCommand, "",      },
+        };
         static std::vector<ChatCommand> accountCommandTable =
         {
             { "addon",          rbac::RBAC_PERM_COMMAND_ACCOUNT_ADDON,           false, &HandleAccountAddonCommand,        "",      },
             { "boost",          rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST,           false, NULL,          "", accountBoostCommandTable },
+            { "convert",        rbac::RBAC_PERM_COMMAND_ACCOUNT_CONVERT,         false, NULL,        "", accountConvertCommandTable },
             { "create",         rbac::RBAC_PERM_COMMAND_ACCOUNT_CREATE,          true,  &HandleAccountCreateCommand,       "",      },
             { "delete",         rbac::RBAC_PERM_COMMAND_ACCOUNT_DELETE,          true,  &HandleAccountDeleteCommand,       "",      },
             { "email",          rbac::RBAC_PERM_COMMAND_ACCOUNT_EMAIL,           false, &HandleAccountEmailCommand,        "",      },
@@ -417,6 +422,79 @@ public:
                 return false;
             default:
                 handler->SendSysMessage(LANG_COMMAND_NOTCHANGEEMAIL);
+                handler->SetSentErrorMessage(true);
+                return false;
+        }
+
+        return true;
+    }
+
+    static bool HandleAccountConvertEmailCommand(ChatHandler* handler, char const* args)
+    {
+        if (!handler->GetSession() || !*args)
+        {
+            handler->SendSysMessage(".account convert email <email> <oldPassword> <newPassword> <newPasswordConfirm>");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        char* email = strtok((char*)args, " ");
+        char* oldPassword = strtok(NULL, " ");
+        char* newPassword = strtok(NULL, " ");
+        char* passwordConfirmation = strtok(NULL, " ");
+
+        if (!email || !oldPassword || !newPassword || !passwordConfirmation)
+        {
+            handler->SendSysMessage(".account convert email <email> <oldPassword> <newPassword> <newPasswordConfirm>");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        uint32 accountId = handler->GetSession()->GetAccountId();
+        if (!AccountMgr::CheckPassword(accountId, std::string(oldPassword)))
+        {
+            handler->SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
+            handler->SetSentErrorMessage(true);
+            SF_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (GUID: %u) Tried to convert to email login, but the provided old password is wrong.",
+                accountId, handler->GetSession()->GetRemoteAddress().c_str(),
+                handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUIDLow());
+            return false;
+        }
+
+        if (strcmp(newPassword, passwordConfirmation) != 0)
+        {
+            handler->SendSysMessage(LANG_NEW_PASSWORDS_NOT_MATCH);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        AccountOpResult result = AccountMgr::ConvertToEmailLogin(accountId, std::string(email), std::string(newPassword));
+        switch (result)
+        {
+            case AccountOpResult::AOR_OK:
+                handler->SendSysMessage("Account converted to email login. Use the email address and new password the next time you log in.");
+                SF_LOG_INFO("entities.player.character", "Account: %u (IP: %s) Character:[%s] (GUID: %u) Converted account to email login.",
+                    accountId, handler->GetSession()->GetRemoteAddress().c_str(),
+                    handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUIDLow());
+                break;
+            case AccountOpResult::AOR_EMAIL_TOO_LONG:
+                handler->SendSysMessage(LANG_EMAIL_TOO_LONG);
+                handler->SetSentErrorMessage(true);
+                return false;
+            case AccountOpResult::AOR_PASS_TOO_LONG:
+                handler->SendSysMessage(LANG_PASSWORD_TOO_LONG);
+                handler->SetSentErrorMessage(true);
+                return false;
+            case AccountOpResult::AOR_EMAIL_INVALID:
+                handler->SendSysMessage("That is not a valid email address.");
+                handler->SetSentErrorMessage(true);
+                return false;
+            case AccountOpResult::AOR_EMAIL_ALREADY_EXIST:
+                handler->SendSysMessage("That email address is already assigned to another account.");
+                handler->SetSentErrorMessage(true);
+                return false;
+            default:
+                handler->SendSysMessage("Account email login conversion failed.");
                 handler->SetSentErrorMessage(true);
                 return false;
         }

@@ -103,6 +103,46 @@ target_include_directories(auth_patch_transfer_tests PRIVATE
 
 add_test(NAME auth_patch_transfer_tests COMMAND auth_patch_transfer_tests)
 
+add_executable(login_identity_tests
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Auth/LoginIdentity.cpp
+  LoginIdentityTests.cpp
+)
+
+target_include_directories(login_identity_tests PRIVATE
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Auth
+)
+
+add_test(NAME login_identity_tests COMMAND login_identity_tests)
+
+add_executable(account_data_utils_tests
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities/AccountDataUtils.cpp
+  AccountDataUtilsTests.cpp
+)
+
+target_include_directories(account_data_utils_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+)
+
+add_test(NAME account_data_utils_tests COMMAND account_data_utils_tests)
+
+add_executable(world_auth_identity_tests
+  WorldAuthIdentityTests.cpp
+)
+
+target_compile_definitions(world_auth_identity_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME world_auth_identity_tests COMMAND world_auth_identity_tests)
+
+add_executable(account_email_conversion_tests
+  AccountEmailConversionTests.cpp
+)
+
+target_compile_definitions(account_email_conversion_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME account_email_conversion_tests COMMAND account_email_conversion_tests)
+
 add_executable(network_address_tests
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities/NetworkAddress.cpp
   NetworkAddressTests.cpp

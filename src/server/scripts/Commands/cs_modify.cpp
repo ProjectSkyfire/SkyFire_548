@@ -39,6 +39,7 @@ public:
         static std::vector<ChatCommand> modifyCommandTable =
         {
             { "bit",          rbac::RBAC_PERM_COMMAND_MODIFY_BIT,          false, &HandleModifyBitCommand,           "", },
+            { "currency",     rbac::RBAC_PERM_COMMAND_MODIFY_CURRENCY,     false, &HandleModifyCurrencyCommand,      "", },
             { "drunk",        rbac::RBAC_PERM_COMMAND_MODIFY_DRUNK,        false, &HandleModifyDrunkCommand,         "", },
             { "energy",       rbac::RBAC_PERM_COMMAND_MODIFY_ENERGY,       false, &HandleModifyEnergyCommand,        "", },
             { "faction",      rbac::RBAC_PERM_COMMAND_MODIFY_FACTION,      false, &HandleModifyFactionCommand,       "", },
@@ -1336,7 +1337,7 @@ public:
         if (!amountStr)
             return false;
 
-        uint32 amount = atoi(amountStr);
+        int32 amount = atoi(amountStr);
         if (!amount)
             return false;
 

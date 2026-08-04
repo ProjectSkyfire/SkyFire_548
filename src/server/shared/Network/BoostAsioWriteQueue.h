@@ -107,31 +107,34 @@ namespace Net
             Entry completed(std::move(_queue.front()));
             _queue.pop_front();
             SubtractPending(completed.Data.size());
-            _writeInProgress = false;
-
-            if (completed.Handler)
-                completed.Handler(error, transferredBytes);
 
             if (error)
             {
-                FailQueued(error);
+                std::deque<Entry> failedQueue;
+                failedQueue.swap(_queue);
+
+                for (typename std::deque<Entry>::iterator itr = failedQueue.begin(); itr != failedQueue.end(); ++itr)
+                    SubtractPending(itr->Data.size());
+
+                _writeInProgress = false;
+
+                for (typename std::deque<Entry>::iterator itr = failedQueue.begin(); itr != failedQueue.end(); ++itr)
+                    if (itr->Handler)
+                        itr->Handler(error, 0);
+
+                if (completed.Handler)
+                    completed.Handler(error, transferredBytes);
+
                 return;
             }
 
-            StartWrite();
-        }
+            if (!_queue.empty())
+                StartWrite();
+            else
+                _writeInProgress = false;
 
-        void FailQueued(boost::system::error_code const& error)
-        {
-            while (!_queue.empty())
-            {
-                Entry entry(std::move(_queue.front()));
-                _queue.pop_front();
-                SubtractPending(entry.Data.size());
-
-                if (entry.Handler)
-                    entry.Handler(error, 0);
-            }
+            if (completed.Handler)
+                completed.Handler(error, transferredBytes);
         }
 
         void SubtractPending(size_t bytes)

@@ -1765,6 +1765,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     if (pCurrChar->IsGameMaster())
         SendNotification(LANG_GM_ON);
 
+    if (!UsedEmailLogin())
+        chH.SendSysMessage("This session used legacy username login. Convert your login with .account convert email <email> <oldPassword> <newPassword> <newPasswordConfirm>.");
+
     std::string IP_str = GetRemoteAddress();
     SF_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Login Character:[%s] (GUID: %u) Level: %d",
         GetAccountId(), IP_str.c_str(), pCurrChar->GetName().c_str(), pCurrChar->GetGUIDLow(), pCurrChar->getLevel());

@@ -14,6 +14,7 @@
 #include "CryptoHash.h"
 #include "Configuration/Config.h"
 #include "Database/DatabaseEnv.h"
+#include "LoginIdentity.h"
 #include "Log.h"
 #include "NetworkAddress.h"
 #include "openssl/crypto.h"
@@ -269,6 +270,13 @@ bool AuthSocket::_HandleLogonChallenge()
     ByteBuffer pkt;
 
     _login = (const char*)ch->I;
+    _accountId = 0;
+    _accountName.clear();
+
+    Skyfire::Auth::LoginIdentity const loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(_login);
+    SF_LOG_DEBUG("server.authserver", "[AuthChallenge] login identity kind: %s",
+        Skyfire::Auth::GetLoginIdentityKindName(loginIdentity.Kind));
+
     socket().SetPacketLogAccountName(_login);
     _build = ch->build;
     _expversion = uint8(AuthHelper::IsPostBCAcceptedClientBuild(_build) ? POST_BC_EXP_FLAG :
@@ -301,13 +309,29 @@ bool AuthSocket::_HandleLogonChallenge()
     {
         // Get the account details from the account table
         // No SQL injection (prepared statement)
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_LOGONCHALLENGE);
-        stmt->setString(0, _login);
+        if (loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_LOGONCHALLENGE_BY_LOGIN_IDENTITY);
+            stmt->setString(0, loginIdentity.Canonical);
+            stmt->setString(1, loginIdentity.Canonical);
+            stmt->setString(2, loginIdentity.Canonical);
+        }
+        else
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_LOGONCHALLENGE);
+            stmt->setString(0, _login);
+        }
 
         PreparedQueryResult res2 = LoginDatabase.Query(stmt);
         if (res2)
         {
             Field* fields = res2->Fetch();
+            _accountId = fields[0].GetUInt32();
+            _accountName = fields[8].GetString();
+
+            if (loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+                SF_LOG_DEBUG("server.authserver", "[AuthChallenge] email identity '%s' resolved to account '%s' (%u)",
+                    _login.c_str(), _accountName.c_str(), _accountId);
 
             // If the IP is 'locked', check that the player comes indeed from the correct IP address
             bool locked = false;
@@ -370,7 +394,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
                 // If the account is banned, reject the logon attempt
                 stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
-                stmt->setUInt32(0, fields[1].GetUInt32());
+                stmt->setUInt32(0, _accountId);
                 PreparedQueryResult banresult = LoginDatabase.Query(stmt);
                 if (banresult)
                 {
@@ -390,6 +414,8 @@ bool AuthSocket::_HandleLogonChallenge()
                 }
                 else
                 {
+                    // GRUNT SRP proofs are bound to the client-sent identity string.
+                    // Do not replace email logins with the legacy username here.
                     _srp6.emplace(_login, fields[5].GetBinary<SkyFire::Crypto::SRP6::SALT_LENGTH>(),
                         fields[6].GetBinary<SkyFire::Crypto::SRP6::VERIFIER_LENGTH>());
 
@@ -507,12 +533,12 @@ bool AuthSocket::_HandleLogonProof()
         // in the account table for this account.
         // No SQL injection (escaped user name) and IP address as received by socket
 
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF);
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF_BY_ID);
         stmt->setBinary(0, _sessionKey);
         stmt->setString(1, socket().getRemoteAddress().c_str());
         stmt->setUInt32(2, GetLocaleByName(_localizationName));
         stmt->setString(3, _os);
-        stmt->setString(4, _login);
+        stmt->setUInt32(4, _accountId);
         LoginDatabase.DirectExecute(stmt);
 
         // Finish SRP6 and send the final result to the client
@@ -576,12 +602,18 @@ bool AuthSocket::_HandleLogonProof()
         if (MaxWrongPassCount > 0)
         {
             //Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
-            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_FAILEDLOGINS);
-            stmt->setString(0, _login);
+            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(_accountId ? LOGIN_UPD_FAILEDLOGINS_BY_ID : LOGIN_UPD_FAILEDLOGINS);
+            if (_accountId)
+                stmt->setUInt32(0, _accountId);
+            else
+                stmt->setString(0, _login);
             LoginDatabase.Execute(stmt);
 
-            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_FAILEDLOGINS);
-            stmt->setString(0, _login);
+            stmt = LoginDatabase.GetPreparedStatement(_accountId ? LOGIN_SEL_FAILEDLOGINS_BY_ID : LOGIN_SEL_FAILEDLOGINS);
+            if (_accountId)
+                stmt->setUInt32(0, _accountId);
+            else
+                stmt->setString(0, _login);
 
             if (PreparedQueryResult loginfail = LoginDatabase.Query(stmt))
             {
@@ -643,10 +675,25 @@ bool AuthSocket::_HandleReconnectChallenge()
     SF_LOG_DEBUG("server.authserver", "[ReconnectChallenge] name(%d): '%s'", ch->I_len, ch->I);
 
     _login = (const char*)ch->I;
+    _accountId = 0;
+    _accountName.clear();
     socket().SetPacketLogAccountName(_login);
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_SESSIONKEY);
-    stmt->setString(0, _login);
+    Skyfire::Auth::LoginIdentity const loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(_login);
+    PreparedStatement* stmt = nullptr;
+    if (loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_SESSIONKEY_BY_LOGIN_IDENTITY);
+        stmt->setString(0, loginIdentity.Canonical);
+        stmt->setString(1, loginIdentity.Canonical);
+        stmt->setString(2, loginIdentity.Canonical);
+    }
+    else
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_SESSIONKEY);
+        stmt->setString(0, _login);
+    }
+
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
     // Stop if the account is not found
@@ -672,6 +719,12 @@ bool AuthSocket::_HandleReconnectChallenge()
     std::reverse(_os.begin(), _os.end());
 
     Field* fields = result->Fetch();
+    _accountId = fields[1].GetUInt32();
+    if (loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+        _accountName = fields[3].GetString();
+    else
+        _accountName = _login;
+
     AccountTypes secLevel = AccountTypes(fields[2].GetUInt8());
     _accountSecurityLevel = secLevel <= AccountTypes::SEC_ADMINISTRATOR ?
         AccountTypes(secLevel) : AccountTypes::SEC_ADMINISTRATOR;
@@ -764,20 +817,26 @@ bool AuthSocket::_HandleRealmList()
 
     // Get the user id (else close the connection)
     // No SQL injection (prepared statement)
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ID_BY_NAME);
-    stmt->setString(0, _login);
-    PreparedQueryResult result = LoginDatabase.Query(stmt);
-    if (!result)
+    uint32 id = _accountId;
+    PreparedStatement* stmt = nullptr;
+    PreparedQueryResult result;
+    if (!id)
     {
-        SF_LOG_ERROR("server.authserver",
-            "'%s:%d' [ERROR] user %s tried to login but we cannot find him in the database.",
-            socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str());
-        socket().Close();
-        return false;
-    }
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_ID_BY_NAME);
+        stmt->setString(0, _login);
+        result = LoginDatabase.Query(stmt);
+        if (!result)
+        {
+            SF_LOG_ERROR("server.authserver",
+                "'%s:%d' [ERROR] user %s tried to login but we cannot find him in the database.",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str());
+            socket().Close();
+            return false;
+        }
 
-    Field* fields = result->Fetch();
-    uint32 id = fields[0].GetUInt32();
+        Field* fields = result->Fetch();
+        id = fields[0].GetUInt32();
+    }
 
     // Update realm list if need
     sRealmList->UpdateIfNeed();

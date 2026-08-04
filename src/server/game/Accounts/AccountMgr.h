@@ -16,6 +16,8 @@ enum class AccountOpResult
     AOR_NAME_TOO_LONG,
     AOR_PASS_TOO_LONG,
     AOR_EMAIL_TOO_LONG,
+    AOR_EMAIL_INVALID,
+    AOR_EMAIL_ALREADY_EXIST,
     AOR_NAME_ALREADY_EXIST,
     AOR_NAME_NOT_EXIST,
     AOR_DB_INTERNAL_ERROR
@@ -52,6 +54,7 @@ public:
     static AccountOpResult ChangePassword(uint32 accountId, std::string newPassword);
     static AccountOpResult ChangeEmail(uint32 accountId, std::string newEmail);
     static AccountOpResult ChangeRegEmail(uint32 accountId, std::string newEmail);
+    static AccountOpResult ConvertToEmailLogin(uint32 accountId, std::string email, std::string newPassword);
     static bool CheckPassword(uint32 accountId, std::string password);
     static bool CheckEmail(uint32 accountId, std::string newEmail);
 

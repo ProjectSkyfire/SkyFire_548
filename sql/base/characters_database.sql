@@ -1305,6 +1305,32 @@ LOCK TABLES `character_spell` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `character_spell_charges`
+--
+
+DROP TABLE IF EXISTS `character_spell_charges`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `character_spell_charges` (
+  `guid` int unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier, Low part',
+  `category` int unsigned NOT NULL DEFAULT '0' COMMENT 'Spell charge category',
+  `consumedCharges` tinyint unsigned NOT NULL DEFAULT '0',
+  `resetTime` int unsigned NOT NULL DEFAULT '0',
+  `baseRegenTime` int unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`,`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `character_spell_charges`
+--
+
+LOCK TABLES `character_spell_charges` WRITE;
+/*!40000 ALTER TABLE `character_spell_charges` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_spell_charges` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `character_spell_cooldown`
 --
 

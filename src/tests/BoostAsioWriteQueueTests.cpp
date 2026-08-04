@@ -6,6 +6,7 @@
 #include "Common.h"
 #include "Network/BoostAsioWriteQueue.h"
 
+#include <boost/asio/async_result.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/error.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -14,9 +15,13 @@
 #include <array>
 #include <chrono>
 #include <cstring>
+#include <deque>
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 #ifdef _WIN32
@@ -108,6 +113,186 @@ namespace
     {
         return std::vector<char>(text, text + std::strlen(text));
     }
+
+    class ControlledAsyncWriteStream
+    {
+    public:
+        typedef boost::asio::io_context::executor_type executor_type;
+
+        explicit ControlledAsyncWriteStream(boost::asio::io_context& ioContext) :
+            _ioContext(ioContext)
+        {
+        }
+
+        executor_type get_executor() noexcept
+        {
+            return _ioContext.get_executor();
+        }
+
+        template<class ConstBufferSequence, class CompletionToken>
+        auto async_write_some(ConstBufferSequence const& buffers, CompletionToken&& token)
+        {
+            size_t const byteCount = boost::asio::buffer_size(buffers);
+            return boost::asio::async_initiate<CompletionToken, void(boost::system::error_code, size_t)>(
+                [this, byteCount](auto&& handler)
+                {
+                    typedef typename std::decay<decltype(handler)>::type HandlerType;
+                    std::shared_ptr<HandlerType> sharedHandler =
+                        std::make_shared<HandlerType>(std::forward<decltype(handler)>(handler));
+
+                    _writes.push_back([sharedHandler, byteCount](boost::system::error_code const& error, size_t transferredBytes)
+                    {
+                        (*sharedHandler)(error, error ? transferredBytes : byteCount);
+                    });
+                },
+                token);
+        }
+
+        void CompleteNext(boost::system::error_code const& error, size_t transferredBytes)
+        {
+            std::function<void(boost::system::error_code const&, size_t)> completion = std::move(_writes.front());
+            _writes.pop_front();
+            boost::asio::post(_ioContext,
+                [completion = std::move(completion), error, transferredBytes]() mutable
+                {
+                    completion(error, transferredBytes);
+                });
+        }
+
+        bool HasPendingWrite() const
+        {
+            return !_writes.empty();
+        }
+
+    private:
+        boost::asio::io_context& _ioContext;
+        std::deque<std::function<void(boost::system::error_code const&, size_t)>> _writes;
+    };
+
+    bool TestQueuedWritesAreSerialized()
+    {
+        boost::asio::io_context ioContext;
+        tcp::socket server(ioContext);
+        tcp::socket peer(ioContext);
+        CreateConnectedSockets(ioContext, server, peer);
+
+        Skyfire::Net::BoostAsioWriteQueue<tcp::socket> queue(server);
+
+        uint32 completedWrites = 0;
+        boost::system::error_code firstError;
+        boost::system::error_code secondError;
+
+        queue.Queue(MakeData("first"),
+            [&completedWrites, &firstError](boost::system::error_code const& error, size_t bytes)
+            {
+                firstError = error;
+                if (bytes == 5)
+                    ++completedWrites;
+            });
+
+        queue.Queue(MakeData("second"),
+            [&completedWrites, &secondError](boost::system::error_code const& error, size_t bytes)
+            {
+                secondError = error;
+                if (bytes == 6)
+                    ++completedWrites;
+            });
+
+        if (!queue.HasPendingOutput())
+        {
+            std::cerr << "Write queue did not report pending output after queued writes\n";
+            return false;
+        }
+
+        std::string received;
+        if (!WaitForRead(ioContext, peer, received, std::strlen("firstsecond")))
+        {
+            std::cerr << "Timed out waiting for queued writes\n";
+            return false;
+        }
+
+        if (received != "firstsecond")
+        {
+            std::cerr << "Queued writes were not serialized in FIFO order. Received: " << received << '\n';
+            return false;
+        }
+
+        if (completedWrites != 2 || firstError || secondError)
+        {
+            std::cerr << "Queued write callbacks did not complete successfully\n";
+            return false;
+        }
+
+        for (uint32 i = 0; i < 200 && queue.HasPendingOutput(); ++i)
+        {
+            ioContext.restart();
+            ioContext.poll();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+
+        if (queue.HasPendingOutput())
+        {
+            std::cerr << "Write queue still reports pending output after completed writes\n";
+            return false;
+        }
+
+        return true;
+    }
+
+    bool TestErrorCompletionCanDestroyQueue()
+    {
+        boost::asio::io_context ioContext;
+        ControlledAsyncWriteStream stream(ioContext);
+        std::unique_ptr<Skyfire::Net::BoostAsioWriteQueue<ControlledAsyncWriteStream>> queue(
+            new Skyfire::Net::BoostAsioWriteQueue<ControlledAsyncWriteStream>(stream));
+
+        uint32 callbacks = 0;
+        boost::system::error_code firstError;
+        boost::system::error_code secondError;
+
+        queue->Queue(MakeData("first"),
+            [&queue, &callbacks, &firstError](boost::system::error_code const& error, size_t /*bytes*/)
+            {
+                firstError = error;
+                ++callbacks;
+                queue.reset();
+            });
+
+        queue->Queue(MakeData("second"),
+            [&callbacks, &secondError](boost::system::error_code const& error, size_t /*bytes*/)
+            {
+                secondError = error;
+                ++callbacks;
+            });
+
+        ioContext.restart();
+        ioContext.poll();
+
+        if (!stream.HasPendingWrite())
+        {
+            std::cerr << "Controlled stream did not receive the first pending write\n";
+            return false;
+        }
+
+        stream.CompleteNext(boost::asio::error::operation_aborted, 0);
+
+        ioContext.restart();
+        ioContext.poll();
+
+        if (queue)
+        {
+            std::cerr << "Write queue should have been destroyed by the completion handler\n";
+            return false;
+        }
+
+        if (callbacks != 2 || !firstError || !secondError)
+        {
+            std::cerr << "Write queue did not fail queued writes before owner destruction\n";
+            return false;
+        }
+
+        return true;
+    }
 }
 
 int main()
@@ -116,70 +301,11 @@ int main()
     WinsockScope winsock;
 #endif
 
-    boost::asio::io_context ioContext;
-    tcp::socket server(ioContext);
-    tcp::socket peer(ioContext);
-    CreateConnectedSockets(ioContext, server, peer);
-
-    Skyfire::Net::BoostAsioWriteQueue<tcp::socket> queue(server);
-
-    uint32 completedWrites = 0;
-    boost::system::error_code firstError;
-    boost::system::error_code secondError;
-
-    queue.Queue(MakeData("first"),
-        [&completedWrites, &firstError](boost::system::error_code const& error, size_t bytes)
-        {
-            firstError = error;
-            if (bytes == 5)
-                ++completedWrites;
-        });
-
-    queue.Queue(MakeData("second"),
-        [&completedWrites, &secondError](boost::system::error_code const& error, size_t bytes)
-        {
-            secondError = error;
-            if (bytes == 6)
-                ++completedWrites;
-        });
-
-    if (!queue.HasPendingOutput())
-    {
-        std::cerr << "Write queue did not report pending output after queued writes\n";
+    if (!TestQueuedWritesAreSerialized())
         return 1;
-    }
 
-    std::string received;
-    if (!WaitForRead(ioContext, peer, received, std::strlen("firstsecond")))
-    {
-        std::cerr << "Timed out waiting for queued writes\n";
+    if (!TestErrorCompletionCanDestroyQueue())
         return 1;
-    }
-
-    if (received != "firstsecond")
-    {
-        std::cerr << "Queued writes were not serialized in FIFO order. Received: " << received << '\n';
-        return 1;
-    }
-
-    if (completedWrites != 2 || firstError || secondError)
-    {
-        std::cerr << "Queued write callbacks did not complete successfully\n";
-        return 1;
-    }
-
-    for (uint32 i = 0; i < 200 && queue.HasPendingOutput(); ++i)
-    {
-        ioContext.restart();
-        ioContext.poll();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-
-    if (queue.HasPendingOutput())
-    {
-        std::cerr << "Write queue still reports pending output after completed writes\n";
-        return 1;
-    }
 
     return 0;
 }

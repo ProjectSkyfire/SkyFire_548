@@ -4,6 +4,7 @@
 */
 
 #include "AccountMgr.h"
+#include "Auth/LoginIdentity.h"
 #include "BigNumber.h"
 #include "ByteBuffer.h"
 #include "Common.h"
@@ -825,12 +826,23 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return -1;
     }
 
-    // Get the account information from the realmd database
-    //         0           1        2       3          4         5       6          7   8
-    // SELECT id, sessionkey, last_ip, locked, expansion, mutetime, locale, recruiter, os FROM account WHERE username = ?
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
+    Skyfire::Auth::LoginIdentity const loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(account);
 
-    stmt->setString(0, account);
+    // Get the account information from the realmd database.
+    // 0 id, 1 sessionkey, 2 last_ip, 3 locked, 4 expansion, 5 mutetime, 6 locale, 7 recruiter, 8 os, 9 hasBoost
+    PreparedStatement* stmt = nullptr;
+    if (loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_LOGIN_IDENTITY);
+        stmt->setString(0, loginIdentity.Canonical);
+        stmt->setString(1, loginIdentity.Canonical);
+        stmt->setString(2, loginIdentity.Canonical);
+    }
+    else
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
+        stmt->setString(0, account);
+    }
 
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
@@ -972,15 +984,16 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     // Update the last_ip in the database
 
-    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LAST_IP);
+    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LAST_IP_BY_ID);
 
     stmt->setString(0, address);
-    stmt->setString(1, account);
+    stmt->setUInt32(1, id);
 
     LoginDatabase.Execute(stmt);
 
     // NOTE ATM the socket is single-threaded, have this in mind ...
-    WorldSession* session = new (std::nothrow) WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, hasBoost);
+    bool const usedEmailLogin = loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email;
+    WorldSession* session = new (std::nothrow) WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, recruiter, isRecruiter, hasBoost, usedEmailLogin);
     if (!session)
         return -1;
 

@@ -5,6 +5,7 @@
 
 #include "AccountMgr.h"
 #include "AccountMgr.h"
+#include "AccountDataUtils.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -43,6 +44,8 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "zlib.h"
+
+#include <cstddef>
 
 namespace
 {
@@ -1626,12 +1629,28 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
     uint8 type = 0;
     recvData >> decompressedSize >> timestamp >> compCount;
 
+    std::size_t const typePosition = recvData.rpos() + compCount;
+    if (typePosition >= recvData.size())
+    {
+        recvData.rfinish();
+        SF_LOG_DEBUG("network", "UAD: Account data packet missing type bits");
+        return;
+    }
+
+    type = recvData[typePosition] >> 5;
+    AccountDataType UADType = AccountDataType(type);
+    if (UADType >= AccountDataType::NUM_ACCOUNT_DATA_TYPES)
+    {
+        recvData.rfinish();
+        SF_LOG_DEBUG("network", "UAD: Unknown account data type: %u", type);
+        return;
+    }
+
     if (decompressedSize == 0)                               // erase
     {
-        SetAccountData(AccountDataType(type), 0, "");
+        SetAccountData(UADType, 0, "");
 
         WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4 + 4);
-        type = recvData.ReadBits(3);
         data << uint32(type);
         data << uint32(0);
         SendPacket(&data);
@@ -1659,14 +1678,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recvData)
 
     recvData.rpos(recvData.rpos() + compCount);
 
-    type = recvData.ReadBits(3);
-
-    AccountDataType UADType = AccountDataType(type);
-    if (UADType >= AccountDataType::NUM_ACCOUNT_DATA_TYPES)
-    {
-        SF_LOG_DEBUG("network", "UAD: Unknown account data type: %u", type);
-        return;
-    }
+    recvData.ReadBits(3);
 
     std::string adata;
     dest >> adata;
@@ -1695,10 +1707,16 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
     }
 
     AccountData* adata = GetAccountData(RADType);
+    if (RADType == AccountDataType::PER_CHARACTER_CHAT_CACHE && Skyfire::AccountData::HasEmptyCharacterChatChannels(adata->Data))
+    {
+        SF_LOG_DEBUG("network", "RAD: Clearing empty per-character chat cache for account %u player %u", GetAccountId(), GetGuidLow());
+        SetAccountData(RADType, 0, "");
+        adata = GetAccountData(RADType);
+    }
 
     uint32 size = adata->Data.size();
 
-    uLongf destSize = compressBound(size);
+    uLongf destSize = size ? compressBound(size) : 0;
 
     ByteBuffer dest;
     dest.resize(destSize);
@@ -1713,7 +1731,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8 + 4 + 4 + 4 + destSize);
 
-    ObjectGuid guid;
+    ObjectGuid guid = GetPlayer() ? GetPlayer()->GetGUID() : 0;
 
     data.WriteBits(request.value, 3); // type (0-7)
     data.WriteGuidMask(guid, 5, 1, 3, 7, 0, 4, 2, 6);

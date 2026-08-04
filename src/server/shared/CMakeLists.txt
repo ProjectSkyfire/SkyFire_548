@@ -8,6 +8,7 @@ if( USE_COREPCH )
 endif()
 
 file(GLOB_RECURSE sources_Configuration Configuration/*.cpp Configuration/*.h)
+file(GLOB_RECURSE sources_Auth Auth/*.cpp Auth/*.h)
 file(GLOB_RECURSE sources_Cryptography Cryptography/*.cpp Cryptography/*.h)
 file(GLOB_RECURSE sources_Database Database/*.cpp Database/*.h)
 file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
@@ -22,6 +23,7 @@ file(GLOB sources_localdir *.cpp *.h)
 
 source_group(CMake FILES CMakeLists.txt)
 source_group(Configuration FILES ${sources_Configuration})
+source_group(Auth FILES ${sources_Auth})
 source_group(Cryptography FILES ${sources_Cryptography})
 source_group(Database FILES ${sources_Database})
 source_group(DataStores FILES ${sources_DataStores})
@@ -51,6 +53,7 @@ endif()
 set(shared_STAT_SRCS
   ${shared_STAT_SRCS}
   ${sources_Configuration}
+  ${sources_Auth}
   ${sources_Cryptography}
   ${sources_Database}
   ${sources_DataStores}
@@ -74,6 +77,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/server
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/Configuration
+  ${CMAKE_CURRENT_SOURCE_DIR}/Auth
   ${CMAKE_CURRENT_SOURCE_DIR}/Cryptography
   ${CMAKE_CURRENT_SOURCE_DIR}/Database
   ${CMAKE_CURRENT_SOURCE_DIR}/DataStores
