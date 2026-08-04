@@ -3229,6 +3229,39 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
             ProcessTimedAction(e, e.event.friendlyHealthPct.repeatMin, e.event.friendlyHealthPct.repeatMax, target);
             break;
         }
+        case SMART_EVENT_DISTANCE_CREATURE:
+        {
+            if (!me)
+                return;
+
+            WorldObject* creature = NULL;
+
+            if (e.event.distance.guid != 0)
+            {
+                creature = FindCreatureNear(me, e.event.distance.guid);
+
+                if (!creature || !me->IsInRange(creature, 0, (float)e.event.distance.dist))
+                {
+                    RecalcTimer(e, e.event.distance.repeat, e.event.distance.repeat);
+                    return;
+                }
+            }
+            else if (e.event.distance.entry != 0)
+            {
+                std::list<Creature*> list;
+                me->GetCreatureListWithEntryInGrid(list, e.event.distance.entry, (float)e.event.distance.dist);
+
+                if (!list.empty())
+                    creature = list.front();
+            }
+
+            if (creature)
+                ProcessTimedAction(e, e.event.distance.repeat, e.event.distance.repeat);
+            else
+                RecalcTimer(e, e.event.distance.repeat, e.event.distance.repeat);
+
+            break;
+        }
         default:
             SF_LOG_ERROR("sql.sql", "SmartScript::ProcessEvent: Unhandled Event type %u", e.GetEventType());
             break;
@@ -3248,6 +3281,9 @@ void SmartScript::InitTimer(SmartScriptHolder& e)
         case SMART_EVENT_IC_LOS:
         case SMART_EVENT_OOC_LOS:
             RecalcTimer(e, e.event.los.cooldownMin, e.event.los.cooldownMax);
+            break;
+        case SMART_EVENT_DISTANCE_CREATURE:
+            RecalcTimer(e, e.event.distance.repeat, e.event.distance.repeat);
             break;
         default:
             e.active = true;
@@ -3317,6 +3353,7 @@ void SmartScript::UpdateTimer(SmartScriptHolder& e, uint32 const diff)
             case SMART_EVENT_TARGET_BUFFED:
             case SMART_EVENT_IS_BEHIND_TARGET:
             case SMART_EVENT_FRIENDLY_HEALTH_PCT:
+            case SMART_EVENT_DISTANCE_CREATURE:
             {
                 ProcessEvent(e);
                 if (e.GetScriptType() == SMART_SCRIPT_TYPE_TIMED_ACTIONLIST)

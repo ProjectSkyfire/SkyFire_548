@@ -570,6 +570,31 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
                         return false;
                 }
                 break;
+            case SMART_EVENT_DISTANCE_CREATURE:
+                if (e.event.distance.guid == 0 && e.event.distance.entry == 0)
+                {
+                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u SMART_EVENT_DISTANCE_CREATURE did not provide creature guid or entry, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
+                    return false;
+                }
+
+                if (e.event.distance.guid != 0 && e.event.distance.entry != 0)
+                {
+                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u SMART_EVENT_DISTANCE_CREATURE provided both an entry and guid, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType());
+                    return false;
+                }
+
+                if (e.event.distance.guid != 0 && !sObjectMgr->GetCreatureData(e.event.distance.guid))
+                {
+                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u SMART_EVENT_DISTANCE_CREATURE using invalid creature guid %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.event.distance.guid);
+                    return false;
+                }
+
+                if (e.event.distance.entry != 0 && !sObjectMgr->GetCreatureTemplate(e.event.distance.entry))
+                {
+                    SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u SMART_EVENT_DISTANCE_CREATURE using invalid creature entry %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.event.distance.entry);
+                    return false;
+                }
+                break;
             case SMART_EVENT_GO_STATE_CHANGED:
             case SMART_EVENT_GO_EVENT_INFORM:
             case SMART_EVENT_TIMED_EVENT_TRIGGERED:
