@@ -811,6 +811,57 @@ public:
     }
 };
 
+// 121411 - Crimson Tempest
+class spell_rog_crimson_tempest : public SpellScriptLoader
+{
+public:
+    spell_rog_crimson_tempest() : SpellScriptLoader("spell_rog_crimson_tempest") { }
+
+    class spell_rog_crimson_tempest_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_crimson_tempest_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_CRIMSON_TEMPEST_DOT))
+                return false;
+            return true;
+        }
+
+        void HandleHit()
+        {
+            Player* rogue = GetCaster()->ToPlayer();
+            Unit* target = GetHitUnit();
+            if (!rogue || !target)
+                return;
+
+            // Tooltip: 240% of the direct damage as a 6-tick bleed
+            int32 damage = CalculatePct(GetHitDamage(), 240) / 6;
+            if (damage <= 0)
+                return;
+
+            Unit::AuraEffectList const& bleedTaken = target->GetAuraEffectsByType(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT);
+            for (Unit::AuraEffectList::const_iterator itr = bleedTaken.begin(); itr != bleedTaken.end(); ++itr)
+                if ((1 << (*itr)->GetMiscValue()) & (1 << MECHANIC_BLEED))
+                    AddPct(damage, (*itr)->GetAmount());
+
+            AddPct(damage, rogue->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DAMAGE_DONE_FOR_MECHANIC, MECHANIC_BLEED));
+
+            rogue->CastCustomSpell(SPELL_ROGUE_CRIMSON_TEMPEST_DOT, SPELLVALUE_BASE_POINT0, damage, target, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterHit += SpellHitFn(spell_rog_crimson_tempest_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_crimson_tempest_SpellScript();
+    }
+};
+
 // 51723 - Fan of Knives
 class spell_rog_fan_of_knives : public SpellScriptLoader
 {
@@ -1188,6 +1239,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cheat_death();
     new spell_rog_combat_potency();
     new spell_rog_combo_point_delayed();
+    new spell_rog_crimson_tempest();
     new spell_rog_crippling_poison();
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
