@@ -1819,8 +1819,6 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
         case SMART_ACTION_RANDOM_MOVE:
         {
             ObjectList* targets = GetTargets(e, unit);
-            if (!targets)
-                break;
 
             auto applyRandomMove = [](Creature* creature, uint32 distance)
             {
@@ -1843,19 +1841,23 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             bool foundTarget = false;
 
-            for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
+            if (targets)
             {
-                if (IsCreature((*itr)))
+                for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 {
-                    foundTarget = true;
-                    applyRandomMove((*itr)->ToCreature(), e.action.moveRandom.distance);
+                    if (IsCreature((*itr)))
+                    {
+                        foundTarget = true;
+                        applyRandomMove((*itr)->ToCreature(), e.action.moveRandom.distance);
+                    }
                 }
+                delete targets;
             }
 
+            // target_type NONE/empty still means the script owner (common in DB scripts).
             if (!foundTarget && me && IsCreature(me))
                 applyRandomMove(me, e.action.moveRandom.distance);
 
-            delete targets;
             break;
         }
         case SMART_ACTION_SET_UNIT_FIELD_ANIM_TIER:
