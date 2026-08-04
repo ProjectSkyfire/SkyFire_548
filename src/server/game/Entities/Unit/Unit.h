@@ -982,6 +982,7 @@ public:
     SpellInfo const* GetSpellInfo() const;
     SpellSchoolMask GetSchoolMask() const;
 
+    Spell* GetSpell() const { return _spell; }
     DamageInfo* GetDamageInfo() const { return _damageInfo; }
     HealInfo* GetHealInfo() const { return _healInfo; }
 

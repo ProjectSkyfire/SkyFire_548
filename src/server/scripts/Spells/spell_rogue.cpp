@@ -17,6 +17,7 @@
 #include "SpellMgr.h"
 #include "ObjectAccessor.h"
 #include "EventProcessor.h"
+#include "Spell.h"
 
 enum RogueSpells
 {
@@ -29,7 +30,9 @@ enum RogueSpells
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
     SPELL_ROGUE_COMBO_POINT                         = 139546,
+    SPELL_ROGUE_CRIMSON_TEMPEST                     = 121411,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
+    SPELL_ROGUE_FAN_OF_KNIVES                       = 51723,
     SPELL_ROGUE_KILLING_SPREE                       = 51690,
     SPELL_ROGUE_MAIN_GAUCHE                         = 86392,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
@@ -39,11 +42,17 @@ enum RogueSpells
     SPELL_ROGUE_NIGHTSTALKER_TALENT                 = 14062,
     SPELL_ROGUE_REDIRECT                            = 73981,
     SPELL_ROGUE_REVEALING_STRIKE                    = 84617,
+    SPELL_ROGUE_SAP                                 = 6770,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
     SPELL_ROGUE_SHADOW_BLADES                       = 121471,
     SPELL_ROGUE_SINISTER_STRIKE                     = 1752,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_SPRINT                              = 2983,
+    SPELL_ROGUE_STEALTH                             = 1784,
+    SPELL_ROGUE_SUBTERFUGE                          = 115192,
+    SPELL_ROGUE_SUBTERFUGE_STEALTH                  = 115191,
+    SPELL_ROGUE_SUBTERFUGE_TALENT                   = 108208,
+    SPELL_ROGUE_SUBTERFUGE_VANISH                   = 115193,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
 };
@@ -546,11 +555,13 @@ public:
         void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             RogueStealthHelpers::HandleStealthApply(GetTarget());
+            GetTarget()->ForceValuesUpdateAtIndex(UNIT_FIELD_SHAPESHIFT_FORM);
         }
 
         void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             RogueStealthHelpers::HandleStealthRemove(GetTarget());
+            GetTarget()->ForceValuesUpdateAtIndex(UNIT_FIELD_SHAPESHIFT_FORM);
         }
 
         void Register() OVERRIDE
@@ -563,6 +574,165 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_rog_stealth_AuraScript();
+    }
+};
+
+// Shared Subterfuge break logic for 115191 / 115193
+class spell_rog_subterfuge_break_AuraScript : public AuraScript
+{
+protected:
+    bool _breakImmediately;
+
+    spell_rog_subterfuge_break_AuraScript() : _breakImmediately(false) { }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        _breakImmediately = false;
+
+        SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+        if (!spellInfo)
+            return !GetTarget()->HasAura(SPELL_ROGUE_SUBTERFUGE);
+
+        Spell const* procSpell = eventInfo.GetSpell();
+
+        // Food / drink from consumable items should drop Subterfuge stealth immediately
+        if (procSpell && procSpell->m_CastItem)
+        {
+            ItemTemplate const* proto = procSpell->m_CastItem->GetTemplate();
+            if (proto->Class == ITEM_CLASS_CONSUMABLE && proto->SubClass == ITEM_SUBCLASS_FOOD_DRINK)
+            {
+                _breakImmediately = true;
+                return true;
+            }
+        }
+
+        if (eventInfo.GetTypeMask() & TAKEN_HIT_PROC_FLAG_MASK)
+        {
+            // Vanish (115193) tolerates incoming damage without breaking into Subterfuge
+            if (GetId() == SPELL_ROGUE_SUBTERFUGE_VANISH)
+                return false;
+
+            DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo && !damageInfo->GetDamage() && eventInfo.GetActor()
+                && !eventInfo.GetActor()->IsValidAttackTarget(GetTarget()))
+                return false;
+
+            if (spellInfo->Id == SPELL_ROGUE_SAP)
+                _breakImmediately = true;
+
+            if (spellInfo->GetAllEffectsMechanicMask() & ((1 << MECHANIC_DISORIENTED) | (1 << MECHANIC_FREEZE)))
+                _breakImmediately = true;
+
+            if (_breakImmediately)
+                return true;
+        }
+        else if (eventInfo.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK)
+        {
+            if (spellInfo->AttributesEx & SPELL_ATTR1_NOT_BREAK_STEALTH)
+                return false;
+
+            if (spellInfo->IsPositive())
+            {
+                if (procSpell && procSpell->IsTriggered())
+                    return false;
+                if (spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE)
+                    return false;
+            }
+            else if (procSpell)
+            {
+                if (procSpell->IsTriggered() && spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE)
+                    return false;
+            }
+
+            if (spellInfo->Id == GetId())
+                return false;
+        }
+
+        return !GetTarget()->HasAura(SPELL_ROGUE_SUBTERFUGE);
+    }
+
+    void HandleProc(ProcEventInfo& /*eventInfo*/)
+    {
+        if (!_breakImmediately)
+        {
+            PreventDefaultAction();
+            GetTarget()->CastSpell(GetTarget(), SPELL_ROGUE_SUBTERFUGE, true);
+        }
+    }
+};
+
+// 115191 - Stealth (Subterfuge)
+class spell_rog_stealth_subterfuge : public SpellScriptLoader
+{
+public:
+    spell_rog_stealth_subterfuge() : SpellScriptLoader("spell_rog_stealth_subterfuge") { }
+
+    class spell_rog_stealth_subterfuge_AuraScript : public spell_rog_subterfuge_break_AuraScript
+    {
+        PrepareAuraScript(spell_rog_stealth_subterfuge_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_SUBTERFUGE) ||
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_NIGHTSTALKER))
+                return false;
+            return true;
+        }
+
+        void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            RogueStealthHelpers::HandleStealthApply(GetTarget());
+            GetTarget()->ForceValuesUpdateAtIndex(UNIT_FIELD_SHAPESHIFT_FORM);
+        }
+
+        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            RogueStealthHelpers::HandleStealthRemove(GetTarget());
+            GetTarget()->ForceValuesUpdateAtIndex(UNIT_FIELD_SHAPESHIFT_FORM);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_rog_stealth_subterfuge_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_stealth_subterfuge_AuraScript::HandleEffectRemove, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL);
+            DoCheckProc += AuraCheckProcFn(spell_rog_stealth_subterfuge_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_stealth_subterfuge_AuraScript::HandleProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_stealth_subterfuge_AuraScript();
+    }
+};
+
+// 51723 - Fan of Knives, 121411 - Crimson Tempest
+class spell_rog_subterfuge_cast_trigger : public SpellScriptLoader
+{
+public:
+    spell_rog_subterfuge_cast_trigger() : SpellScriptLoader("spell_rog_subterfuge_cast_trigger") { }
+
+    class spell_rog_subterfuge_cast_trigger_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_subterfuge_cast_trigger_SpellScript);
+
+        void ActivateSubterfuge()
+        {
+            Unit* rogue = GetCaster();
+            if (rogue->HasAura(SPELL_ROGUE_SUBTERFUGE_STEALTH) || rogue->HasAura(SPELL_ROGUE_SUBTERFUGE_VANISH))
+                if (!rogue->HasAura(SPELL_ROGUE_SUBTERFUGE))
+                    rogue->CastSpell(rogue, SPELL_ROGUE_SUBTERFUGE, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCast += SpellCastFn(spell_rog_subterfuge_cast_trigger_SpellScript::ActivateSubterfuge);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_subterfuge_cast_trigger_SpellScript();
     }
 };
 
@@ -875,6 +1045,8 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_restless_blades();
     new spell_rog_rupture();
     new spell_rog_stealth();
+    new spell_rog_stealth_subterfuge();
+    new spell_rog_subterfuge_cast_trigger();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
 }

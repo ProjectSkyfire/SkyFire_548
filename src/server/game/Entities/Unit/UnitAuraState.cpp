@@ -771,6 +771,16 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
         if ((aura->GetSpellInfo()->AuraInterruptFlags & flag) && (!except || aura->GetId() != except)
             && !(flag & AURA_INTERRUPT_FLAG_MOVE && HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, aura->GetSpellInfo())))
         {
+            // Subterfuge Stealth / Vanish: do not strip here — spell scripts convert into Subterfuge (115192)
+            uint32 const auraId = aura->GetId();
+            if (auraId == 115191 || auraId == 115193)
+            {
+                if (flag & (AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_MELEE_ATTACK |
+                    AURA_INTERRUPT_FLAG_SPELL_ATTACK | AURA_INTERRUPT_FLAG_TAKE_DAMAGE |
+                    AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
+                    continue;
+            }
+
             uint32 removedAuras = m_removedAurasCount;
             RemoveAura(aura);
             if (m_removedAurasCount > removedAuras + 1)
