@@ -50,6 +50,8 @@ enum RogueSpells
     SPELL_ROGUE_SAP                                 = 6770,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
     SPELL_ROGUE_SHADOW_BLADES                       = 121471,
+    SPELL_ROGUE_SHADOW_FOCUS                        = 112942,
+    SPELL_ROGUE_SHADOW_FOCUS_TALENT                 = 108209,
     SPELL_ROGUE_SHADOW_SIGHT                        = 34709,
     SPELL_ROGUE_SINISTER_STRIKE                     = 1752,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
@@ -80,6 +82,9 @@ namespace RogueStealthHelpers
 
         if (rogue->HasAura(SPELL_ROGUE_NIGHTSTALKER_TALENT))
             rogue->CastSpell(rogue, SPELL_ROGUE_NIGHTSTALKER, true);
+
+        if (rogue->HasAura(SPELL_ROGUE_SHADOW_FOCUS_TALENT))
+            rogue->CastSpell(rogue, SPELL_ROGUE_SHADOW_FOCUS, true);
     }
 
     inline void HandleStealthRemove(Unit* rogue)
@@ -93,6 +98,8 @@ namespace RogueStealthHelpers
         // Keep Nightstalker briefly so Ambush/Garrote still see the damage bonus
         if (Aura* nightstalker = rogue->GetAura(SPELL_ROGUE_NIGHTSTALKER))
             nightstalker->SetDuration(100);
+
+        rogue->RemoveAurasDueToSpell(SPELL_ROGUE_SHADOW_FOCUS);
     }
 }
 
