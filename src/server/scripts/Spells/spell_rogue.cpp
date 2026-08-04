@@ -18,10 +18,12 @@
 #include "ObjectAccessor.h"
 #include "EventProcessor.h"
 #include "Spell.h"
+#include "Containers.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "InstanceScript.h"
+#include <set>
 
 enum RogueSpells
 {
@@ -38,7 +40,12 @@ enum RogueSpells
     SPELL_ROGUE_CRIMSON_TEMPEST_DOT                 = 122233,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
     SPELL_ROGUE_FAN_OF_KNIVES                       = 51723,
+    SPELL_ROGUE_GLYPH_OF_KILLING_SPREE              = 63252,
+    SPELL_ROGUE_KIDNEY_SHOT                         = 408,
     SPELL_ROGUE_KILLING_SPREE                       = 51690,
+    SPELL_ROGUE_KILLING_SPREE_DAMAGE                = 57841,
+    SPELL_ROGUE_KILLING_SPREE_DAMAGE_AURA           = 61851,
+    SPELL_ROGUE_KILLING_SPREE_TELEPORT              = 57840,
     SPELL_ROGUE_MAIN_GAUCHE                         = 86392,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
@@ -46,6 +53,7 @@ enum RogueSpells
     SPELL_ROGUE_NIGHTSTALKER                        = 130493,
     SPELL_ROGUE_NIGHTSTALKER_TALENT                 = 14062,
     SPELL_ROGUE_REDIRECT                            = 73981,
+    SPELL_ROGUE_REVEALED_WEAKNESS                   = 115238,
     SPELL_ROGUE_REVEALING_STRIKE                    = 84617,
     SPELL_ROGUE_SAP                                 = 6770,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
@@ -1239,6 +1247,305 @@ public:
     }
 };
 
+struct KillingSpreeInvalidTargetCheck
+{
+    explicit KillingSpreeInvalidTargetCheck(Unit* caster) : _caster(caster) { }
+
+    bool operator()(WorldObject* target) const
+    {
+        Unit* unit = target->ToUnit();
+        if (!unit || !_caster->IsValidAttackTarget(unit))
+            return true;
+
+        if (unit->HasInvisibilityAura() || unit->HasStealthAura())
+            return true;
+
+        if (unit->IsTotem())
+            return true;
+
+        switch (unit->GetCreatureType())
+        {
+            case CREATURE_TYPE_CRITTER:
+            case CREATURE_TYPE_NON_COMBAT_PET:
+            case CREATURE_TYPE_WILD_PET:
+                return true;
+            default:
+                break;
+        }
+
+        if (unit->isFeared() || unit->HasAuraType(SPELL_AURA_MOD_FEAR_2) || unit->HasAuraType(SPELL_AURA_MOD_CONFUSE))
+            return true;
+
+        return !_caster->IsWithinLOSInMap(unit);
+    }
+
+private:
+    Unit* _caster;
+};
+
+// 51690 - Killing Spree
+class spell_rog_killing_spree : public SpellScriptLoader
+{
+public:
+    spell_rog_killing_spree() : SpellScriptLoader("spell_rog_killing_spree") { }
+
+    class spell_rog_killing_spree_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_killing_spree_AuraScript);
+
+        bool Load() OVERRIDE
+        {
+            _caster = GetUnitOwner()->ToPlayer();
+            _mainTarget = 0;
+            _glyphed = false;
+            return _caster != nullptr;
+        }
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (_caster->HasAura(SPELL_ROGUE_GLYPH_OF_KILLING_SPREE))
+            {
+                _glyphed = true;
+                _caster->GetPosition(&_startPos);
+            }
+
+            _caster->CastSpell(_caster, SPELL_ROGUE_KILLING_SPREE_DAMAGE_AURA, true);
+
+            if (_caster->HasAura(SPELL_ROGUE_SUBTERFUGE_STEALTH) || _caster->HasAura(SPELL_ROGUE_SUBTERFUGE_VANISH))
+            {
+                if (!_caster->HasAura(SPELL_ROGUE_SUBTERFUGE))
+                    _caster->CastSpell(_caster, SPELL_ROGUE_SUBTERFUGE, true);
+            }
+            else
+                _caster->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (_glyphed && _caster->GetExactDist(&_startPos) < 100.0f)
+                _caster->NearTeleportTo(_startPos.GetPositionX(), _startPos.GetPositionY(), _startPos.GetPositionZ(), _startPos.GetOrientation());
+
+            _caster->RemoveAurasDueToSpell(SPELL_ROGUE_KILLING_SPREE_DAMAGE_AURA);
+        }
+
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
+        {
+            PreventDefaultAction();
+
+            KillingSpreeInvalidTargetCheck notValidTarget(_caster);
+            Unit* target = nullptr;
+
+            if (_mainTarget)
+            {
+                target = ObjectAccessor::GetUnit(*_caster, _mainTarget);
+                if (!target || !target->IsAlive())
+                    target = nullptr;
+            }
+            else
+            {
+                while (!_targets.empty())
+                {
+                    uint64 guid = Skyfire::Containers::SelectRandomContainerElement(_targets);
+                    target = ObjectAccessor::GetUnit(*_caster, guid);
+                    if (target && target->IsAlive() && !notValidTarget(target))
+                        break;
+
+                    target = nullptr;
+                    _targets.erase(guid);
+                }
+            }
+
+            if (target)
+            {
+                _caster->CastSpell(target, SPELL_ROGUE_KILLING_SPREE_TELEPORT, true);
+                if (!_mainTarget || !notValidTarget(target))
+                {
+                    _caster->CastSpell(target, SPELL_ROGUE_KILLING_SPREE_DAMAGE, true);
+                    if (Unit* selection = _caster->GetSelectedUnit())
+                        _caster->Attack(selection, true);
+                }
+                else
+                    _caster->AttackStop();
+            }
+            else
+            {
+                SetDuration(0);
+                _caster->AttackStop();
+            }
+        }
+
+    public:
+        void AddTarget(Unit* unit)
+        {
+            _targets.insert(unit->GetGUID());
+            if (unit->GetGUID() == _caster->GetTarget() || (!_caster->GetTarget() && !_mainTarget))
+                if (!_caster->HasAura(SPELL_ROGUE_BLADE_FLURRY))
+                    _mainTarget = unit->GetGUID();
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_rog_killing_spree_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_killing_spree_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_killing_spree_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+
+    private:
+        std::set<uint64> _targets;
+        uint64 _mainTarget;
+        bool _glyphed;
+        Position _startPos;
+        Player* _caster;
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_killing_spree_AuraScript();
+    }
+};
+
+typedef spell_rog_killing_spree::spell_rog_killing_spree_AuraScript KillingSpreeAuraScript;
+
+// 51690 - Killing Spree (target selector / cast checks)
+class spell_rog_killing_spree_target_selector : public SpellScriptLoader
+{
+public:
+    spell_rog_killing_spree_target_selector() : SpellScriptLoader("spell_rog_killing_spree_target_selector") { }
+
+    class spell_rog_killing_spree_target_selector_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_killing_spree_target_selector_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            Player* rogue = GetCaster()->ToPlayer();
+            if (!rogue)
+                return SPELL_FAILED_DONT_REPORT;
+
+            Unit* target = rogue->GetSelectedUnit();
+            if (!target)
+                return SPELL_FAILED_BAD_TARGETS;
+
+            if (!rogue->IsValidAttackTarget(target))
+                return SPELL_FAILED_BAD_TARGETS;
+
+            if (!target->IsWithinDist3d(rogue, GetSpellInfo()->GetMaxRange(false)))
+                return SPELL_FAILED_OUT_OF_RANGE;
+
+            if (!rogue->IsWithinLOSInMap(target))
+                return SPELL_FAILED_LINE_OF_SIGHT;
+
+            return SPELL_CAST_OK;
+        }
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(KillingSpreeInvalidTargetCheck(GetCaster()));
+            if (targets.empty() || GetCaster()->GetVehicleBase())
+            {
+                if (Player* rogue = GetCaster()->ToPlayer())
+                    rogue->GetGlobalCooldownMgr().CancelGlobalCooldown(GetSpellInfo());
+                FinishCast(SPELL_FAILED_OUT_OF_RANGE);
+            }
+        }
+
+        void AddTarget(SpellEffIndex /*effIndex*/)
+        {
+            if (Aura* aura = GetCaster()->GetAura(SPELL_ROGUE_KILLING_SPREE))
+                if (KillingSpreeAuraScript* script = dynamic_cast<KillingSpreeAuraScript*>(aura->GetScriptByName("spell_rog_killing_spree")))
+                    script->AddTarget(GetHitUnit());
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_killing_spree_target_selector_SpellScript::CheckCast);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rog_killing_spree_target_selector_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnEffectHitTarget += SpellEffectFn(spell_rog_killing_spree_target_selector_SpellScript::AddTarget, EFFECT_1, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_killing_spree_target_selector_SpellScript();
+    }
+};
+
+// 408 - Kidney Shot (Revealing Strike duration)
+class spell_rog_kidney_shot : public SpellScriptLoader
+{
+public:
+    spell_rog_kidney_shot() : SpellScriptLoader("spell_rog_kidney_shot") { }
+
+    class spell_rog_kidney_shot_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_kidney_shot_AuraScript);
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (AuraEffect const* revealing = GetTarget()->GetAuraEffect(SPELL_ROGUE_REVEALING_STRIKE, EFFECT_2, GetCasterGUID()))
+            {
+                int32 duration = GetAura()->GetDuration();
+                AddPct(duration, revealing->GetAmount());
+                GetAura()->SetMaxDuration(duration);
+                GetAura()->SetDuration(duration);
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_rog_kidney_shot_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_kidney_shot_AuraScript();
+    }
+};
+
+// 1752 - Sinister Strike (Revealing Strike extra combo point)
+class spell_rog_sinister_strike : public SpellScriptLoader
+{
+public:
+    spell_rog_sinister_strike() : SpellScriptLoader("spell_rog_sinister_strike") { }
+
+    class spell_rog_sinister_strike_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_sinister_strike_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_REVEALING_STRIKE) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_REVEALED_WEAKNESS);
+        }
+
+        void HandleHit()
+        {
+            Unit* target = GetHitUnit();
+            Unit* caster = GetCaster();
+            if (!target || !caster)
+                return;
+
+            Aura* revealing = target->GetAura(SPELL_ROGUE_REVEALING_STRIKE, caster->GetGUID());
+            if (!revealing)
+                return;
+
+            if (roll_chance_i(revealing->GetSpellInfo()->ProcChance))
+                caster->CastSpell(target, SPELL_ROGUE_REVEALED_WEAKNESS, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_rog_sinister_strike_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_sinister_strike_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -1251,10 +1558,14 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
     new spell_rog_fan_of_knives();
+    new spell_rog_kidney_shot();
+    new spell_rog_killing_spree();
+    new spell_rog_killing_spree_target_selector();
     new spell_rog_master_of_subtlety();
     new spell_rog_recuperate();
     new spell_rog_restless_blades();
     new spell_rog_rupture();
+    new spell_rog_sinister_strike();
     new spell_rog_stealth();
     new spell_rog_stealth_subterfuge();
     new spell_rog_subterfuge_cast_trigger();
