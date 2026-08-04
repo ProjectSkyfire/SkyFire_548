@@ -20,17 +20,22 @@
 
 enum RogueSpells
 {
+    SPELL_ROGUE_ADRENALINE_RUSH                     = 13750,
     SPELL_ROGUE_BLADE_FLURRY                        = 13877,
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
     SPELL_ROGUE_COMBO_POINT                         = 139546,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
+    SPELL_ROGUE_KILLING_SPREE                       = 51690,
     SPELL_ROGUE_MAIN_GAUCHE                         = 86392,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
+    SPELL_ROGUE_REDIRECT                            = 73981,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
+    SPELL_ROGUE_SHADOW_BLADES                       = 121471,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
+    SPELL_ROGUE_SPRINT                              = 2983,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
 };
@@ -707,6 +712,52 @@ public:
     }
 };
 
+// 79096 - Restless Blades
+class spell_rog_restless_blades : public SpellScriptLoader
+{
+public:
+    spell_rog_restless_blades() : SpellScriptLoader("spell_rog_restless_blades") { }
+
+    class spell_rog_restless_blades_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_restless_blades_AuraScript);
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        {
+            Player* rogue = GetUnitOwner()->ToPlayer();
+            if (!rogue)
+                return;
+
+            int8 comboPoints = rogue->GetComboPoints();
+            if (comboPoints <= 0)
+                return;
+
+            int32 cooldownReduction = aurEff->GetAmount() * comboPoints;
+            static uint32 const restlessBladeSpells[] =
+            {
+                SPELL_ROGUE_ADRENALINE_RUSH,
+                SPELL_ROGUE_KILLING_SPREE,
+                SPELL_ROGUE_REDIRECT,
+                SPELL_ROGUE_SHADOW_BLADES,
+                SPELL_ROGUE_SPRINT
+            };
+
+            for (uint32 spellId : restlessBladeSpells)
+                rogue->ModifySpellCooldown(spellId, -cooldownReduction);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectProc += AuraEffectProcFn(spell_rog_restless_blades_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_restless_blades_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -718,6 +769,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_deadly_poison();
     new spell_rog_master_of_subtlety();
     new spell_rog_recuperate();
+    new spell_rog_restless_blades();
     new spell_rog_rupture();
     new spell_rog_stealth();
     new spell_rog_tricks_of_the_trade();
