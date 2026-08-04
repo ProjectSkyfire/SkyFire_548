@@ -146,7 +146,7 @@ public:
                         if (!runes.empty())
                         {
                             std::set<uint8>::iterator itr = runes.begin();
-                            std::advance(itr, std::rand() % (runes.size() - 1));
+                            std::advance(itr, std::rand() % runes.size());
                             _player->SetRuneCooldown((*itr), 0);
                             _player->ResyncRunes(MAX_RUNES);
                         }
@@ -1043,9 +1043,13 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_death_pact();
     new spell_dk_death_strike();
     new spell_dk_death_strike_enabler();
+    new spell_dk_gorefiends_grasp();
     new spell_dk_ghoul_explode();
     new spell_dk_icebound_fortitude();
     new spell_dk_necrotic_strike();
+    new spell_dk_raise_dead();
+    new spell_dk_runic_corruption();
+    new spell_dk_runic_empowerment();
     new spell_dk_rune_tap_party();
     new spell_dk_scent_of_blood();
     new spell_dk_scourge_strike(); // 5.4.8 18414
