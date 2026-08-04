@@ -10,9 +10,11 @@
  */
 
 #include "Player.h"
+#include "Item.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "SpellMgr.h"
 
 enum RogueSpells
 {
@@ -20,9 +22,11 @@ enum RogueSpells
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
+    SPELL_ROGUE_MAIN_GAUCHE                         = 86392,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
+    SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
@@ -596,10 +600,56 @@ public:
     }
 };
 
+// 35551 - Combat Potency
+class spell_rog_combat_potency : public SpellScriptLoader
+{
+public:
+    spell_rog_combat_potency() : SpellScriptLoader("spell_rog_combat_potency") { }
+
+    class spell_rog_combat_potency_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_combat_potency_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            Player* player = eventInfo.GetActor() ? eventInfo.GetActor()->ToPlayer() : NULL;
+            if (!player)
+                return false;
+
+            if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+            {
+                if (spellInfo->Id != SPELL_ROGUE_MAIN_GAUCHE && spellInfo->Id != SPELL_ROGUE_SHADOW_BLADE_OFFHAND)
+                    return false;
+            }
+            else if (!(eventInfo.GetTypeMask() & PROC_FLAG_DONE_OFFHAND_ATTACK))
+                return false;
+
+            float offHandSpeed = player->GetAttackTime(WeaponAttackType::OFF_ATTACK) / float(IN_MILLISECONDS);
+            if (Item* offItem = player->GetWeaponForAttack(WeaponAttackType::OFF_ATTACK))
+                if (ItemTemplate const* proto = offItem->GetTemplate())
+                    offHandSpeed = float(proto->Delay) / float(IN_MILLISECONDS);
+
+            // ~20% at 1.4s OH weapon speed; slower weapons scale up proportionally
+            return roll_chance_f(20.0f * offHandSpeed / 1.4f);
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_combat_potency_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_combat_potency_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
     new spell_rog_cheat_death();
+    new spell_rog_combat_potency();
     new spell_rog_crippling_poison();
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
