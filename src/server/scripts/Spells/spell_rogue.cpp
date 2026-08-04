@@ -35,6 +35,7 @@ enum RogueSpells
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
     SPELL_ROGUE_COMBO_POINT                         = 139546,
     SPELL_ROGUE_CRIMSON_TEMPEST                     = 121411,
+    SPELL_ROGUE_CRIMSON_TEMPEST_DOT                 = 122233,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
     SPELL_ROGUE_FAN_OF_KNIVES                       = 51723,
     SPELL_ROGUE_KILLING_SPREE                       = 51690,
@@ -810,6 +811,52 @@ public:
     }
 };
 
+// 51723 - Fan of Knives
+class spell_rog_fan_of_knives : public SpellScriptLoader
+{
+public:
+    spell_rog_fan_of_knives() : SpellScriptLoader("spell_rog_fan_of_knives") { }
+
+    class spell_rog_fan_of_knives_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_fan_of_knives_SpellScript);
+
+        void FilterComboTargets(std::list<WorldObject*>& targets)
+        {
+            if (targets.empty())
+                return;
+
+            Unit* preferred = NULL;
+            if (Player* rogue = GetCaster()->ToPlayer())
+            {
+                if (uint64 comboGuid = rogue->GetComboTarget())
+                    preferred = ObjectAccessor::GetUnit(*rogue, comboGuid);
+
+                if (!preferred)
+                {
+                    if (Unit* selected = ObjectAccessor::GetUnit(*rogue, rogue->GetTarget()))
+                        if (rogue->IsValidAttackTarget(selected))
+                            preferred = selected;
+                }
+            }
+
+            targets.clear();
+            if (preferred)
+                targets.push_back(preferred);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rog_fan_of_knives_SpellScript::FilterComboTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_fan_of_knives_SpellScript();
+    }
+};
+
 // 51723 - Fan of Knives, 121411 - Crimson Tempest
 class spell_rog_subterfuge_cast_trigger : public SpellScriptLoader
 {
@@ -1144,6 +1191,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_crippling_poison();
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
+    new spell_rog_fan_of_knives();
     new spell_rog_master_of_subtlety();
     new spell_rog_recuperate();
     new spell_rog_restless_blades();
