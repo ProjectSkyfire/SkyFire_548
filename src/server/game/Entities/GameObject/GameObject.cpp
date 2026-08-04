@@ -64,6 +64,12 @@ GameObject::~GameObject()
     //    CleanupsBeforeDelete();
 }
 
+bool ForcedGoDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
+{
+    m_owner.ForcedDespawn();
+    return true;
+}
+
 bool GameObject::AIM_Initialize()
 {
     if (m_AI)
@@ -88,6 +94,8 @@ std::string GameObject::GetAIName() const
 
 void GameObject::CleanupsBeforeDelete(bool /*finalCleanup*/)
 {
+    m_Events.KillAllEvents(false);
+
     if (IsInWorld())
         RemoveFromWorld();
 
@@ -287,6 +295,8 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
 
 void GameObject::Update(uint32 diff)
 {
+    m_Events.Update(diff);
+
     if (AI())
         AI()->UpdateAI(diff);
     else if (!AIM_Initialize())
@@ -1267,6 +1277,19 @@ void GameObject::Respawn()
         m_respawnTime = time(NULL);
         GetMap()->RemoveGORespawnTime(m_DBTableGuid);
     }
+}
+
+void GameObject::ForcedDespawn(uint32 msTimeToDespawn /*= 0*/)
+{
+    if (msTimeToDespawn)
+    {
+        ForcedGoDespawnDelayEvent* pEvent = new ForcedGoDespawnDelayEvent(*this);
+        m_Events.AddEvent(pEvent, m_Events.CalculateTime(msTimeToDespawn));
+        return;
+    }
+
+    SetRespawnTime(GetGOData() ? GetGOData()->spawntimesecs : 1);
+    UpdateObjectVisibility();
 }
 
 bool GameObject::ActivateToQuest(Player* target) const

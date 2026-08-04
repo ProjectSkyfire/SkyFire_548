@@ -702,6 +702,8 @@ public:
         m_respawnDelayTime = respawn > 0 ? respawn : 0;
     }
     void Respawn();
+    /// Temporarily despawn; respawns after DB spawntimesecs (or 1s if none).
+    void ForcedDespawn(uint32 msTimeToDespawn = 0);
     bool isSpawned() const
     {
         return m_respawnDelayTime == 0 ||
@@ -766,6 +768,8 @@ public:
 
     uint32 GetUseCount() const { return m_usetimes; }
     uint32 GetUniqueUseCount() const { return m_unique_users.size(); }
+
+    EventProcessor m_Events;
 
     void SaveRespawnTime() OVERRIDE;
 
@@ -891,4 +895,15 @@ private:
     }
     GameObjectAI* m_AI;
 };
+
+class ForcedGoDespawnDelayEvent : public BasicEvent
+{
+public:
+    ForcedGoDespawnDelayEvent(GameObject& owner) : BasicEvent(), m_owner(owner) { }
+    bool Execute(uint64 e_time, uint32 p_time) OVERRIDE;
+
+private:
+    GameObject& m_owner;
+};
+
 #endif
