@@ -527,9 +527,51 @@ void AuraEffect::HandleModPowerRegen(AuraApplication const* aurApp, uint8 mode, 
     // other powers are not immediate effects - implemented in Player::Regenerate, Creature::Regenerate
 }
 
-void AuraEffect::HandleModPowerRegenPCT(AuraApplication const* aurApp, uint8 mode, bool apply) const
+void AuraEffect::HandleModPowerRegenPCT(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
 {
-    HandleModPowerRegen(aurApp, mode, apply);
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+    if (target->GetTypeId() != TypeID::TYPEID_PLAYER)
+        return;
+
+    Player* player = target->ToPlayer();
+    Powers power = Powers(GetMiscValue());
+
+    if (power == POWER_MANA)
+    {
+        player->UpdateManaRegen();
+        return;
+    }
+
+    if (power == POWER_RUNES)
+    {
+        player->UpdateRuneRegen(RuneType(GetMiscValueB()));
+        return;
+    }
+
+    // Energy / Focus (Blade Flurry, Adrenaline Rush, etc.): bake % regen into the
+    // flat modifier field. Player::Regenerate adds that field each tick.
+    uint32 powerIndex = player->GetPowerIndex(power);
+    if (powerIndex == MAX_POWERS)
+        return;
+
+    float baseRegen = 0.0f;
+    switch (power)
+    {
+        case POWER_ENERGY:
+            baseRegen = 10.0f;
+            break;
+        case POWER_FOCUS:
+            baseRegen = 6.0f;
+            break;
+        default:
+            return;
+    }
+
+    float multiplier = player->GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, power);
+    player->SetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex, baseRegen * (multiplier - 1.0f));
 }
 
 void AuraEffect::HandleAuraModIncreaseHealth(AuraApplication const* aurApp, uint8 mode, bool apply) const

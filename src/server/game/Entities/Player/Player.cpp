@@ -2607,12 +2607,15 @@ void Player::Regenerate(Powers power)
         }
         case POWER_FOCUS:
         {
-            addvalue += (6.0f + CalculatePct(6.0f, rangedHaste)) * sWorld->getRate(Rates::RATE_POWER_FOCUS);
+            float flatMod = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex);
+            addvalue += (6.0f + CalculatePct(6.0f, rangedHaste) + flatMod) * sWorld->getRate(Rates::RATE_POWER_FOCUS);
             break;
         }
         case POWER_ENERGY:                                              // Regenerate energy (rogue) & (monk)
         {
-            addvalue += ((0.01f * m_regenTimer) + CalculatePct(0.01f, meleeHaste)) * sWorld->getRate(Rates::RATE_POWER_ENERGY);
+            float flatMod = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER + powerIndex);
+            addvalue += ((0.01f * m_regenTimer) + CalculatePct(0.01f, meleeHaste) + flatMod * 0.001f * m_regenTimer)
+                * sWorld->getRate(Rates::RATE_POWER_ENERGY);
             break;
         }
         case POWER_RUNIC_POWER:
@@ -2660,7 +2663,9 @@ void Player::Regenerate(Powers power)
     }
 
     // Mana regen calculated in Player::UpdateManaRegen()
-    if (power != POWER_MANA)
+    // Energy / Focus % modifiers are baked into UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER
+    // by AuraEffect::HandleModPowerRegenPCT (Blade Flurry, Adrenaline Rush, ...).
+    if (power != POWER_MANA && power != POWER_ENERGY && power != POWER_FOCUS)
     {
         AuraEffectList const& ModPowerRegenPCTAuras = GetAuraEffectsByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
         for (AuraEffectList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
@@ -2670,6 +2675,12 @@ void Player::Regenerate(Powers power)
         // Butchery requires combat for this effect
         if (power != POWER_RUNIC_POWER || IsInCombat())
             addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * ((power != POWER_ENERGY) ? m_regenTimerCount : m_regenTimer) / (5 * IN_MILLISECONDS);
+    }
+    else if (power == POWER_ENERGY || power == POWER_FOCUS)
+    {
+        // Flat per-5-seconds modifiers (SPELL_AURA_MOD_POWER_REGEN)
+        int32 regenTimer = (power == POWER_ENERGY) ? int32(m_regenTimer) : int32(m_regenTimerCount);
+        addvalue += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, power) * regenTimer / (5 * IN_MILLISECONDS);
     }
 
     if (addvalue < 0.0f)
