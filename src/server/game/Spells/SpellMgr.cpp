@@ -3578,6 +3578,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 79147:
                 spellInfo->Effects[EFFECT_1].Effect = 0;
                 break;
+            // Burst of Speed: usable in stealth; DBC only has DISPEL_AURAS_ON_IMMUNITY.
+            case 108212:
+                spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
+                break;
             // Shattering Throw / Shattering Blow damage spells: pierce invulnerability so
             // spell_warr_shattering_throw can strip Ice Block/Divine Shield then deal damage.
             // Linked missiles 64380/65941 already have these attrs in DBC.
