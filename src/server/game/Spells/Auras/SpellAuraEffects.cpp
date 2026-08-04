@@ -619,11 +619,12 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 m_canBeRecalculated = false;
             }
             break;
-        // Passive weapon spellmods (e.g. Seasoned Soldier cost reduction) only while the
-        // required weapon is equipped. Damage % for these spells is handled separately
-        // via Player::_ApplyWeaponDependentAuraMods.
+        // Passive weapon spellmods (e.g. Seasoned Soldier cost reduction) and Assassin's
+        // Resolve energy/damage only while the required weapon is equipped.
         case SPELL_AURA_ADD_FLAT_MODIFIER:
         case SPELL_AURA_ADD_PCT_MODIFIER:
+        case SPELL_AURA_MOD_INCREASE_MAX_POWER_FLAT:
+        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
             if (caster && m_spellInfo->IsPassive() && m_spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON)
                 if (Player* player = caster->ToPlayer())
                     if (!player->HasItemFitToSpellRequirements(m_spellInfo))

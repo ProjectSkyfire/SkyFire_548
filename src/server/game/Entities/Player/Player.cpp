@@ -8819,7 +8819,13 @@ public:
 
     bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) OVERRIDE
     {
-        AuraType const types[] = { SPELL_AURA_ADD_FLAT_MODIFIER, SPELL_AURA_ADD_PCT_MODIFIER };
+        AuraType const types[] =
+        {
+            SPELL_AURA_ADD_FLAT_MODIFIER,
+            SPELL_AURA_ADD_PCT_MODIFIER,
+            SPELL_AURA_MOD_INCREASE_MAX_POWER_FLAT,
+            SPELL_AURA_MOD_DAMAGE_PERCENT_DONE
+        };
         for (AuraType type : types)
         {
             Unit::AuraEffectList const& effects = _owner.GetAuraEffectsByType(type);
