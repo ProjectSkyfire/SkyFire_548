@@ -21,6 +21,10 @@
 enum RogueSpells
 {
     SPELL_ROGUE_ADRENALINE_RUSH                     = 13750,
+    SPELL_ROGUE_BANDITS_GUILE_DAMAGE                = 84748,
+    SPELL_ROGUE_BANDITS_GUILE_DEEP                  = 84747,
+    SPELL_ROGUE_BANDITS_GUILE_MODERATE              = 84746,
+    SPELL_ROGUE_BANDITS_GUILE_SHALLOW               = 84745,
     SPELL_ROGUE_BLADE_FLURRY                        = 13877,
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
@@ -32,8 +36,10 @@ enum RogueSpells
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
     SPELL_ROGUE_REDIRECT                            = 73981,
+    SPELL_ROGUE_REVEALING_STRIKE                    = 84617,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
     SPELL_ROGUE_SHADOW_BLADES                       = 121471,
+    SPELL_ROGUE_SINISTER_STRIKE                     = 1752,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_SPRINT                              = 2983,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
@@ -628,6 +634,79 @@ public:
     }
 };
 
+// 84654 - Bandit's Guile
+class spell_rog_bandits_guile : public SpellScriptLoader
+{
+public:
+    spell_rog_bandits_guile() : SpellScriptLoader("spell_rog_bandits_guile") { }
+
+    class spell_rog_bandits_guile_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_bandits_guile_AuraScript);
+
+        bool Load() OVERRIDE
+        {
+            _insightCounter = 0;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+            if (!spellInfo)
+                return false;
+
+            if (spellInfo->Id != SPELL_ROGUE_REVEALING_STRIKE && spellInfo->Id != SPELL_ROGUE_SINISTER_STRIKE)
+                return false;
+
+            return !GetUnitOwner()->HasAura(SPELL_ROGUE_BANDITS_GUILE_DEEP);
+        }
+
+        void HandleProc(ProcEventInfo& /*eventInfo*/)
+        {
+            PreventDefaultAction();
+            ++_insightCounter;
+
+            Unit* rogue = GetUnitOwner();
+            uint32 level = 0;
+            if (rogue->HasAura(SPELL_ROGUE_BANDITS_GUILE_SHALLOW))
+                level = 1;
+            else if (rogue->HasAura(SPELL_ROGUE_BANDITS_GUILE_MODERATE))
+                level = 2;
+
+            if (_insightCounter == 4)
+            {
+                _insightCounter = 0;
+
+                if (level)
+                    rogue->RemoveAurasDueToSpell(SPELL_ROGUE_BANDITS_GUILE_SHALLOW + level - 1);
+
+                rogue->CastSpell(rogue, SPELL_ROGUE_BANDITS_GUILE_SHALLOW + level, true);
+                rogue->CastCustomSpell(SPELL_ROGUE_BANDITS_GUILE_DAMAGE, SPELLVALUE_BASE_POINT0, int32((level + 1) * 10), rogue, true);
+            }
+            else if (level)
+            {
+                rogue->CastSpell(rogue, SPELL_ROGUE_BANDITS_GUILE_SHALLOW + level - 1, true);
+                rogue->CastCustomSpell(SPELL_ROGUE_BANDITS_GUILE_DAMAGE, SPELLVALUE_BASE_POINT0, int32(level * 10), rogue, true);
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_bandits_guile_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_bandits_guile_AuraScript::HandleProc);
+        }
+
+    private:
+        uint32 _insightCounter;
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_bandits_guile_AuraScript();
+    }
+};
+
 // 35551 - Combat Potency
 class spell_rog_combat_potency : public SpellScriptLoader
 {
@@ -760,6 +839,7 @@ public:
 
 void AddSC_rogue_spell_scripts()
 {
+    new spell_rog_bandits_guile();
     new spell_rog_blade_flurry();
     new spell_rog_cheat_death();
     new spell_rog_combat_potency();
