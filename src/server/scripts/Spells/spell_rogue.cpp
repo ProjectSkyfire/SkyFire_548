@@ -35,6 +35,8 @@ enum RogueSpells
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE          = 31223,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC         = 31666,
+    SPELL_ROGUE_NIGHTSTALKER                        = 130493,
+    SPELL_ROGUE_NIGHTSTALKER_TALENT                 = 14062,
     SPELL_ROGUE_REDIRECT                            = 73981,
     SPELL_ROGUE_REVEALING_STRIKE                    = 84617,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
@@ -45,6 +47,37 @@ enum RogueSpells
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
 };
+
+namespace RogueStealthHelpers
+{
+    inline void HandleStealthApply(Unit* rogue)
+    {
+        if (!rogue)
+            return;
+
+        if (AuraEffect const* aurEff = rogue->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0))
+        {
+            int32 basepoints0 = aurEff->GetAmount();
+            rogue->CastCustomSpell(rogue, SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT, &basepoints0, NULL, NULL, true);
+        }
+
+        if (rogue->HasAura(SPELL_ROGUE_NIGHTSTALKER_TALENT))
+            rogue->CastSpell(rogue, SPELL_ROGUE_NIGHTSTALKER, true);
+    }
+
+    inline void HandleStealthRemove(Unit* rogue)
+    {
+        if (!rogue)
+            return;
+
+        if (rogue->HasAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE))
+            rogue->CastSpell(rogue, SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC, true);
+
+        // Keep Nightstalker briefly so Ambush/Garrote still see the damage bonus
+        if (Aura* nightstalker = rogue->GetAura(SPELL_ROGUE_NIGHTSTALKER))
+            nightstalker->SetDuration(100);
+    }
+}
 
 // 139569 - Combo Point Delayed (Ruthlessness / similar)
 class DelayedRogueComboPointEvent : public BasicEvent
@@ -504,36 +537,26 @@ public:
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE) ||
                 !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT) ||
-                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC))
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC) ||
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_NIGHTSTALKER))
                 return false;
             return true;
         }
 
         void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            Unit* target = GetTarget();
-
-            // Master of Subtlety
-            if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE, EFFECT_0))
-            {
-                int32 basepoints0 = aurEff->GetAmount();
-                target->CastCustomSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT, &basepoints0, NULL, NULL, true);
-            }
+            RogueStealthHelpers::HandleStealthApply(GetTarget());
         }
 
         void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            Unit* target = GetTarget();
-
-            // Master of subtlety
-            if (target->HasAura(SPELL_ROGUE_MASTER_OF_SUBTLETY_PASSIVE))
-                target->CastSpell(target, SPELL_ROGUE_MASTER_OF_SUBTLETY_PERIODIC, true);
+            RogueStealthHelpers::HandleStealthRemove(GetTarget());
         }
 
         void Register() OVERRIDE
         {
-            AfterEffectApply += AuraEffectApplyFn(spell_rog_stealth_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
-            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_stealth_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            AfterEffectApply += AuraEffectApplyFn(spell_rog_stealth_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_stealth_AuraScript::HandleEffectRemove, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
