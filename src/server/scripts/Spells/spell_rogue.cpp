@@ -42,7 +42,9 @@ enum RogueSpells
     SPELL_ROGUE_ENVENOM                             = 32645,
     SPELL_ROGUE_FAN_OF_KNIVES                       = 51723,
     SPELL_ROGUE_GARROTE                             = 703,
+    SPELL_ROGUE_GLYPH_OF_HEMORRHAGING_VEINS         = 146631,
     SPELL_ROGUE_GLYPH_OF_KILLING_SPREE              = 63252,
+    SPELL_ROGUE_HEMORRHAGE_DOT                      = 89775,
     SPELL_ROGUE_HONOR_AMONG_THIEVES                 = 51699,
     SPELL_ROGUE_KIDNEY_SHOT                         = 408,
     SPELL_ROGUE_KILLING_SPREE                       = 51690,
@@ -59,6 +61,8 @@ enum RogueSpells
     SPELL_ROGUE_REVEALED_WEAKNESS                   = 115238,
     SPELL_ROGUE_REVEALING_STRIKE                    = 84617,
     SPELL_ROGUE_RUPTURE                             = 1943,
+    SPELL_ROGUE_SANGUINARY_VEIN                     = 79147,
+    SPELL_ROGUE_SANGUINARY_VEIN_DEBUFF              = 124271,
     SPELL_ROGUE_SAP                                 = 6770,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
     SPELL_ROGUE_SHADOW_BLADES                       = 121471,
@@ -1746,6 +1750,69 @@ public:
     }
 };
 
+// 1943, 703, 122233, 89775 - Sanguinary Vein (called by bleed DoTs)
+class spell_rog_sanguinary_vein : public SpellScriptLoader
+{
+public:
+    spell_rog_sanguinary_vein() : SpellScriptLoader("spell_rog_sanguinary_vein") { }
+
+    class spell_rog_sanguinary_vein_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_sanguinary_vein_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_SANGUINARY_VEIN) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_SANGUINARY_VEIN_DEBUFF);
+        }
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            // Glyph of Hemorrhaging Veins: Hemorrhage DoT only counts with the glyph
+            if (GetId() == SPELL_ROGUE_HEMORRHAGE_DOT && !caster->HasAura(SPELL_ROGUE_GLYPH_OF_HEMORRHAGING_VEINS))
+                return;
+
+            if (caster->HasAura(SPELL_ROGUE_SANGUINARY_VEIN))
+                caster->CastSpell(target, SPELL_ROGUE_SANGUINARY_VEIN_DEBUFF, true);
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            if (target->HasAura(SPELL_ROGUE_RUPTURE, GetCasterGUID()) ||
+                target->HasAura(SPELL_ROGUE_GARROTE, GetCasterGUID()) ||
+                target->HasAura(SPELL_ROGUE_CRIMSON_TEMPEST_DOT, GetCasterGUID()))
+                return;
+
+            if (caster->HasAura(SPELL_ROGUE_GLYPH_OF_HEMORRHAGING_VEINS) &&
+                target->HasAura(SPELL_ROGUE_HEMORRHAGE_DOT, GetCasterGUID()))
+                return;
+
+            target->RemoveAurasDueToSpell(SPELL_ROGUE_SANGUINARY_VEIN_DEBUFF, GetCasterGUID());
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_rog_sanguinary_vein_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_sanguinary_vein_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_sanguinary_vein_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -1766,6 +1833,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_recuperate();
     new spell_rog_restless_blades();
     new spell_rog_rupture();
+    new spell_rog_sanguinary_vein();
     new spell_rog_sinister_strike();
     new spell_rog_stealth();
     new spell_rog_stealth_subterfuge();
