@@ -39,7 +39,9 @@ enum RogueSpells
     SPELL_ROGUE_CRIMSON_TEMPEST                     = 121411,
     SPELL_ROGUE_CRIMSON_TEMPEST_DOT                 = 122233,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
+    SPELL_ROGUE_ENVENOM                             = 32645,
     SPELL_ROGUE_FAN_OF_KNIVES                       = 51723,
+    SPELL_ROGUE_GARROTE                             = 703,
     SPELL_ROGUE_GLYPH_OF_KILLING_SPREE              = 63252,
     SPELL_ROGUE_KIDNEY_SHOT                         = 408,
     SPELL_ROGUE_KILLING_SPREE                       = 51690,
@@ -55,6 +57,7 @@ enum RogueSpells
     SPELL_ROGUE_REDIRECT                            = 73981,
     SPELL_ROGUE_REVEALED_WEAKNESS                   = 115238,
     SPELL_ROGUE_REVEALING_STRIKE                    = 84617,
+    SPELL_ROGUE_RUPTURE                             = 1943,
     SPELL_ROGUE_SAP                                 = 6770,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
     SPELL_ROGUE_SHADOW_BLADES                       = 121471,
@@ -72,7 +75,10 @@ enum RogueSpells
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628,
     SPELL_ROGUE_VANISH                              = 1856,
-    SPELL_ROGUE_VANISH_AURA                         = 11327
+    SPELL_ROGUE_VANISH_AURA                         = 11327,
+    SPELL_ROGUE_VENOMOUS_VIM                        = 51637,
+    SPELL_ROGUE_VENOMOUS_WOUND                      = 79136,
+    SPELL_ROGUE_VENOMOUS_WOUNDS                     = 79134
 };
 
 namespace RogueStealthHelpers
@@ -305,8 +311,13 @@ public:
         void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
         {
             PreventDefaultAction();
-            if (Aura* aur = GetTarget()->GetAura(SPELL_ROGUE_SLICE_AND_DICE))
-                aur->SetDuration(aur->GetSpellInfo()->GetMaxDuration(), true);
+            // Refresh Slice and Dice to its 5 combo point maximum (36 seconds).
+            if (Aura* sliceAndDice = GetTarget()->GetAura(SPELL_ROGUE_SLICE_AND_DICE))
+            {
+                int32 duration = 36 * IN_MILLISECONDS;
+                sliceAndDice->SetMaxDuration(duration);
+                sliceAndDice->SetDuration(duration);
+            }
         }
 
         void Register() OVERRIDE
@@ -543,9 +554,25 @@ public:
             }
         }
 
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            if (!caster || !caster->HasAura(SPELL_ROGUE_VENOMOUS_WOUNDS))
+                return;
+
+            if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_DEATH)
+                return;
+
+            // 5 Energy per remaining second of Rupture
+            int32 energy = 5 * GetAura()->GetDuration() / IN_MILLISECONDS;
+            if (energy > 0)
+                caster->CastCustomSpell(SPELL_ROGUE_VENOMOUS_VIM, SPELLVALUE_BASE_POINT0, energy, caster, true);
+        }
+
         void Register() OVERRIDE
         {
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_rog_rupture_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_rupture_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -1546,6 +1573,77 @@ public:
     }
 };
 
+// 79134 - Venomous Wounds
+class spell_rog_venomous_wounds : public SpellScriptLoader
+{
+public:
+    spell_rog_venomous_wounds() : SpellScriptLoader("spell_rog_venomous_wounds") { }
+
+    class spell_rog_venomous_wounds_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_venomous_wounds_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_VENOMOUS_WOUND) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_VENOMOUS_VIM) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_GARROTE) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_RUPTURE);
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (!(eventInfo.GetTypeMask() & PROC_FLAG_DONE_PERIODIC))
+                return false;
+
+            SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+            Unit* target = eventInfo.GetActionTarget();
+            if (!spellInfo || !target)
+                return false;
+
+            if (spellInfo->Id != SPELL_ROGUE_GARROTE && spellInfo->Id != SPELL_ROGUE_RUPTURE)
+                return false;
+
+            // Garrote does not trigger if the enemy also has your Rupture
+            if (spellInfo->Id == SPELL_ROGUE_GARROTE && target->HasAura(SPELL_ROGUE_RUPTURE, GetCasterGUID()))
+                return false;
+
+            Unit::AuraApplicationMap const& auras = target->GetAppliedAuras();
+            for (Unit::AuraApplicationMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            {
+                if (itr->second->GetBase()->GetCasterGUID() != GetCasterGUID())
+                    continue;
+                if (itr->second->GetBase()->GetSpellInfo()->Dispel == DISPEL_POISON)
+                    return true;
+            }
+            return false;
+        }
+
+        void HandleProc(ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            Unit* caster = GetUnitOwner();
+            Unit* target = eventInfo.GetProcTarget();
+            if (!caster || !target)
+                return;
+
+            caster->CastSpell(target, SPELL_ROGUE_VENOMOUS_WOUND, true);
+            caster->CastCustomSpell(SPELL_ROGUE_VENOMOUS_VIM, SPELLVALUE_BASE_POINT0, 10, caster, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_venomous_wounds_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_venomous_wounds_AuraScript::HandleProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_venomous_wounds_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -1573,4 +1671,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_tricks_of_the_trade_proc();
     new spell_rog_vanish();
     new spell_rog_vanish_initial();
+    new spell_rog_venomous_wounds();
 }
