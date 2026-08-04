@@ -141,11 +141,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (caster)
                         target->GetMotionMaster()->MoveFall();
                     break;
-                case 51701: // Honor Among Thieves
-                    if (target->GetTypeId() == TypeID::TYPEID_PLAYER)
-                        if (Unit* spellTarget = ObjectAccessor::GetUnit(*target, target->ToPlayer()->GetComboTarget()))
-                            target->CastSpell(spellTarget, Skyfire::Spells::GetAuraDummyTriggeredSpellId(GetId()), true);
-                    break;
                 case 71563:
                     if (Aura* newAura = target->AddAura(Skyfire::Spells::GetAuraDummyTriggeredSpellId(GetId()), target))
                         newAura->SetStackAmount(newAura->GetSpellInfo()->StackAmount);

@@ -43,6 +43,7 @@ enum RogueSpells
     SPELL_ROGUE_FAN_OF_KNIVES                       = 51723,
     SPELL_ROGUE_GARROTE                             = 703,
     SPELL_ROGUE_GLYPH_OF_KILLING_SPREE              = 63252,
+    SPELL_ROGUE_HONOR_AMONG_THIEVES                 = 51699,
     SPELL_ROGUE_KIDNEY_SHOT                         = 408,
     SPELL_ROGUE_KILLING_SPREE                       = 51690,
     SPELL_ROGUE_KILLING_SPREE_DAMAGE                = 57841,
@@ -72,6 +73,7 @@ enum RogueSpells
     SPELL_ROGUE_SUBTERFUGE_STEALTH                  = 115191,
     SPELL_ROGUE_SUBTERFUGE_TALENT                   = 108208,
     SPELL_ROGUE_SUBTERFUGE_VANISH                   = 115193,
+    SPELL_ROGUE_THROW                               = 121733,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628,
     SPELL_ROGUE_VANISH                              = 1856,
@@ -129,6 +131,33 @@ public:
         if (Player* player = ObjectAccessor::FindPlayer(_playerGuid))
             if (Unit* target = ObjectAccessor::GetUnit(*player, _targetGuid))
                 player->CastSpell(target, SPELL_ROGUE_COMBO_POINT, true);
+        return true;
+    }
+
+private:
+    uint64 _playerGuid;
+    uint64 _targetGuid;
+};
+
+class DelayedHonorAmongThievesEvent : public BasicEvent
+{
+public:
+    DelayedHonorAmongThievesEvent(uint64 playerGuid, uint64 targetGuid)
+        : _playerGuid(playerGuid), _targetGuid(targetGuid) { }
+
+    bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) OVERRIDE
+    {
+        Player* player = ObjectAccessor::FindPlayer(_playerGuid);
+        if (!player || !player->IsInCombat())
+            return true;
+
+        // Apply ICD after the cast. Adding it beforehand makes CheckCast fail with
+        // SPELL_FAILED_NOT_READY (triggered casts still honor player spell cooldowns).
+        if (Unit* target = ObjectAccessor::GetUnit(*player, _targetGuid))
+        {
+            player->CastSpell(target, SPELL_ROGUE_HONOR_AMONG_THIEVES, true);
+            player->AddSpellCooldown(SPELL_ROGUE_HONOR_AMONG_THIEVES, 0, time(NULL) + 2);
+        }
         return true;
     }
 
@@ -1644,6 +1673,79 @@ public:
     }
 };
 
+// 51701 - Honor Among Thieves
+class spell_rog_honor_among_thieves : public SpellScriptLoader
+{
+public:
+    spell_rog_honor_among_thieves() : SpellScriptLoader("spell_rog_honor_among_thieves") { }
+
+    class spell_rog_honor_among_thieves_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_honor_among_thieves_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_HONOR_AMONG_THIEVES);
+        }
+
+        bool Load() OVERRIDE
+        {
+            return GetUnitOwner()->GetTypeId() == TypeID::TYPEID_PLAYER;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (!(eventInfo.GetHitMask() & PROC_EX_CRITICAL_HIT))
+                return false;
+
+            if (eventInfo.GetSpellInfo() && eventInfo.GetSpellInfo()->Id == SPELL_ROGUE_THROW)
+                return false;
+
+            return GetUnitOwner()->IsInCombat();
+        }
+
+        void HandleProc(ProcEventInfo& /*eventInfo*/)
+        {
+            Player* rogue = GetUnitOwner()->ToPlayer();
+            if (!rogue)
+                return;
+
+            // Proc cooldown is applied to the actor, not the aura owner — enforce ICD on the rogue.
+            if (rogue->HasSpellCooldown(SPELL_ROGUE_HONOR_AMONG_THIEVES))
+                return;
+
+            Unit* target = NULL;
+            if (uint64 comboGuid = rogue->GetComboTarget())
+                target = ObjectAccessor::GetUnit(*rogue, comboGuid);
+            if (!target)
+                target = rogue->GetVictim();
+            if (!target)
+            {
+                if (Unit* selected = rogue->GetSelectedUnit())
+                    if (rogue->IsValidAttackTarget(selected))
+                        target = selected;
+            }
+
+            if (!target)
+                return;
+
+            rogue->m_Events.AddEvent(new DelayedHonorAmongThievesEvent(rogue->GetGUID(), target->GetGUID()),
+                rogue->m_Events.CalculateTime(1));
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_honor_among_thieves_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_honor_among_thieves_AuraScript::HandleProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_honor_among_thieves_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -1656,6 +1758,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
     new spell_rog_fan_of_knives();
+    new spell_rog_honor_among_thieves();
     new spell_rog_kidney_shot();
     new spell_rog_killing_spree();
     new spell_rog_killing_spree_target_selector();
