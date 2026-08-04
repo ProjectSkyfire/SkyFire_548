@@ -1420,22 +1420,22 @@ public:
         {
             Player* rogue = GetCaster()->ToPlayer();
             if (!rogue)
-                return SPELL_FAILED_DONT_REPORT;
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
 
             Unit* target = rogue->GetSelectedUnit();
             if (!target)
-                return SPELL_FAILED_BAD_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
             if (!rogue->IsValidAttackTarget(target))
-                return SPELL_FAILED_BAD_TARGETS;
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
 
             if (!target->IsWithinDist3d(rogue, GetSpellInfo()->GetMaxRange(false)))
-                return SPELL_FAILED_OUT_OF_RANGE;
+                return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
 
             if (!rogue->IsWithinLOSInMap(target))
-                return SPELL_FAILED_LINE_OF_SIGHT;
+                return SpellCastResult::SPELL_FAILED_LINE_OF_SIGHT;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
 
         void FilterTargets(std::list<WorldObject*>& targets)
@@ -1445,7 +1445,7 @@ public:
             {
                 if (Player* rogue = GetCaster()->ToPlayer())
                     rogue->GetGlobalCooldownMgr().CancelGlobalCooldown(GetSpellInfo());
-                FinishCast(SPELL_FAILED_OUT_OF_RANGE);
+                FinishCast(SpellCastResult::SPELL_FAILED_OUT_OF_RANGE);
             }
         }
 
