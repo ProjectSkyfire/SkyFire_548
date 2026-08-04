@@ -79,22 +79,49 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                     unitTarget->RemoveMovementImpairingAuras();
                     unitTarget->RemoveAurasByType(SPELL_AURA_MOD_STALKED);
 
+                    // Interrupt spells currently targeting the vanishing unit
+                    {
+                        UnitList targets;
+                        Skyfire::AnyUnfriendlyUnitInObjectRangeCheck u_check(unitTarget, unitTarget, unitTarget->GetMap()->GetVisibilityRange());
+                        Skyfire::UnitListSearcher<Skyfire::AnyUnfriendlyUnitInObjectRangeCheck> searcher(unitTarget, targets, u_check);
+                        unitTarget->VisitNearbyObject(unitTarget->GetMap()->GetVisibilityRange(), searcher);
+                        for (UnitList::iterator iter = targets.begin(); iter != targets.end(); ++iter)
+                        {
+                            if (!(*iter)->HasUnitState(UNIT_STATE_CASTING))
+                                continue;
+
+                            for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
+                            {
+                                if ((*iter)->GetCurrentSpell(i)
+                                    && (*iter)->GetCurrentSpell(i)->m_targets.GetUnitTargetGUID() == unitTarget->GetGUID())
+                                    (*iter)->InterruptSpell(CurrentSpellTypes(i), false);
+                            }
+                        }
+                    }
+
                     // If this spell is given to an NPC, it must handle the rest using its own AI
                     if (unitTarget->GetTypeId() != TypeID::TYPEID_PLAYER)
                         return;
 
-                    // See if we already are stealthed. If so, we're done.
-                    if (unitTarget->HasAura(triggerRule->CastSpellId))
+                    uint32 const subterfugeTalent = 108208;
+                    uint32 const subterfugeVanish = 115193;
+                    uint32 vanishAuraId = unitTarget->HasSpell(subterfugeTalent) ? subterfugeVanish : triggerRule->CastSpellId;
+
+                    // Already in this Vanish state
+                    if (unitTarget->HasAura(vanishAuraId))
                         return;
 
-                    // Reset cooldown on stealth if needed
-                    if (unitTarget->ToPlayer()->HasSpellCooldown(triggerRule->CastSpellId))
-                        unitTarget->ToPlayer()->RemoveSpellCooldown(triggerRule->CastSpellId);
+                    // Drop normal stealth so Vanish aura can replace it
+                    unitTarget->RemoveAurasDueToSpell(1784);
+                    unitTarget->RemoveAurasDueToSpell(115191);
 
-                    if (unitTarget->IsInCombat())
+                    if (!unitTarget->GetInstanceScript() || !unitTarget->GetInstanceScript()->IsEncounterInProgress())
+                    {
                         unitTarget->CombatStop();
+                        unitTarget->getHostileRefManager().deleteReferences();
+                    }
 
-                    unitTarget->CastSpell(unitTarget, triggerRule->CastSpellId, true);
+                    unitTarget->CastSpell(unitTarget, vanishAuraId, true);
                     return;
                 }
                 case Skyfire::Spells::TRIGGER_SPELL_RULE_DEMONIC_EMPOWERMENT_SUCCUBUS:

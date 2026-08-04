@@ -18,6 +18,10 @@
 #include "ObjectAccessor.h"
 #include "EventProcessor.h"
 #include "Spell.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
+#include "InstanceScript.h"
 
 enum RogueSpells
 {
@@ -45,6 +49,7 @@ enum RogueSpells
     SPELL_ROGUE_SAP                                 = 6770,
     SPELL_ROGUE_SHADOW_BLADE_OFFHAND                = 121474,
     SPELL_ROGUE_SHADOW_BLADES                       = 121471,
+    SPELL_ROGUE_SHADOW_SIGHT                        = 34709,
     SPELL_ROGUE_SINISTER_STRIKE                     = 1752,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_SPRINT                              = 2983,
@@ -54,7 +59,9 @@ enum RogueSpells
     SPELL_ROGUE_SUBTERFUGE_TALENT                   = 108208,
     SPELL_ROGUE_SUBTERFUGE_VANISH                   = 115193,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
-    SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
+    SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628,
+    SPELL_ROGUE_VANISH                              = 1856,
+    SPELL_ROGUE_VANISH_AURA                         = 11327
 };
 
 namespace RogueStealthHelpers
@@ -706,6 +713,103 @@ public:
     }
 };
 
+// 11327 / 115193 - Vanish
+class spell_rog_vanish : public SpellScriptLoader
+{
+public:
+    spell_rog_vanish() : SpellScriptLoader("spell_rog_vanish") { }
+
+    class spell_rog_vanish_AuraScript : public spell_rog_subterfuge_break_AuraScript
+    {
+        PrepareAuraScript(spell_rog_vanish_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_STEALTH) ||
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_SUBTERFUGE_STEALTH) ||
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_SUBTERFUGE) ||
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_NIGHTSTALKER))
+                return false;
+            return true;
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+                if (spellInfo->HasAura(SPELL_AURA_MOD_STEALTH))
+                    return false;
+
+            return spell_rog_subterfuge_break_AuraScript::CheckProc(eventInfo);
+        }
+
+        void HandleEffectApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            RogueStealthHelpers::HandleStealthApply(GetTarget());
+            GetTarget()->ForceValuesUpdateAtIndex(UNIT_FIELD_SHAPESHIFT_FORM);
+        }
+
+        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* owner = GetTarget();
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            {
+                uint32 spellId = owner->HasSpell(SPELL_ROGUE_SUBTERFUGE_TALENT)
+                    ? SPELL_ROGUE_SUBTERFUGE_STEALTH
+                    : SPELL_ROGUE_STEALTH;
+                if (!owner->HasAura(spellId))
+                    owner->CastSpell(owner, spellId, true);
+            }
+            else
+            {
+                RogueStealthHelpers::HandleStealthRemove(owner);
+                owner->ForceValuesUpdateAtIndex(UNIT_FIELD_SHAPESHIFT_FORM);
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_rog_vanish_AuraScript::HandleEffectApply, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_rog_vanish_AuraScript::HandleEffectRemove, EFFECT_1, SPELL_AURA_MOD_STEALTH, AURA_EFFECT_HANDLE_REAL);
+            DoCheckProc += AuraCheckProcFn(spell_rog_vanish_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_rog_vanish_AuraScript::HandleProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_vanish_AuraScript();
+    }
+};
+
+// 1856 - Vanish (cast)
+class spell_rog_vanish_initial : public SpellScriptLoader
+{
+public:
+    spell_rog_vanish_initial() : SpellScriptLoader("spell_rog_vanish_initial") { }
+
+    class spell_rog_vanish_initial_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_vanish_initial_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (GetCaster()->HasAura(SPELL_ROGUE_SHADOW_SIGHT))
+                return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            return SpellCastResult::SPELL_CAST_OK;
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_vanish_initial_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_vanish_initial_SpellScript();
+    }
+};
+
 // 51723 - Fan of Knives, 121411 - Crimson Tempest
 class spell_rog_subterfuge_cast_trigger : public SpellScriptLoader
 {
@@ -1049,4 +1153,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_subterfuge_cast_trigger();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
+    new spell_rog_vanish();
+    new spell_rog_vanish_initial();
 }

@@ -29,7 +29,7 @@ namespace Spells
             uint32 SpellId;
         };
 
-        uint32 const SPELL_STEALTH = 1784;
+        uint32 const SPELL_VANISH_AURA = 11327;
         uint32 const SPELL_LESSER_INVISIBILITY = 7870;
         uint32 const SPELL_BRITTLE_ARMOR_STACK = 24575;
         uint32 const SPELL_MERCURIAL_SHIELD_STACK = 26464;
@@ -67,7 +67,8 @@ namespace Spells
 
         TriggerSpellRule const TriggerSpellRules[] =
         {
-            { 18461, TRIGGER_SPELL_RULE_VANISH, SPELL_STEALTH, 0 },
+            // 1856 triggers missing Spell.dbc entry 18461; rule key stays 18461 and applies Vanish aura 11327
+            { 18461, TRIGGER_SPELL_RULE_VANISH, SPELL_VANISH_AURA, 0 },
             { 54437, TRIGGER_SPELL_RULE_DEMONIC_EMPOWERMENT_SUCCUBUS, SPELL_LESSER_INVISIBILITY, 0 },
             { 29284, TRIGGER_SPELL_RULE_STACK_TRIGGER, 0, SPELL_BRITTLE_ARMOR_STACK },
             { 29286, TRIGGER_SPELL_RULE_STACK_TRIGGER, 0, SPELL_MERCURIAL_SHIELD_STACK },

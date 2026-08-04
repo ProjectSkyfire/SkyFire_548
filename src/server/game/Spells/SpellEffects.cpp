@@ -234,7 +234,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectUnlockGuildVaultTab,                      //173 SPELL_EFFECT_UNLOCK_GUILD_VAULT_TAB
     &Spell::EffectNULL,                                     //174 SPELL_EFFECT_174
     &Spell::EffectNULL,                                     //175 SPELL_EFFECT_175          one spell: Wild Fixation (125570)
-    &Spell::EffectNULL,                                     //176 SPELL_EFFECT_176
+    &Spell::EffectSanctuary,                                //176 SPELL_EFFECT_176 - Vanish sanctuary
     &Spell::EffectNULL,                                     //177 SPELL_EFFECT_177
     &Spell::EffectUnused,                                   //178 SPELL_EFFECT_178          unused
     &Spell::EffectCreateAreaTrigger,                        //179 SPELL_EFFECT_CREATE_AREATRIGGER
