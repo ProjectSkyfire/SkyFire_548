@@ -32,7 +32,11 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
     bool is_air_ok = creature->CanFly();
 
     const float angle = float(rand_norm()) * static_cast<float>(M_PI * 2.0f);
-    const float range = float(rand_norm()) * wander_distance;
+    // Avoid near-zero steps: tiny XY deltas make the Z tolerance fail every retry.
+    float range = float(rand_norm()) * wander_distance;
+    if (wander_distance > 0.0f && range < wander_distance * 0.3f)
+        range = wander_distance * 0.3f;
+
     const float distanceX = range * std::cos(angle);
     const float distanceY = range * std::sin(angle);
 
@@ -54,7 +58,10 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
 
         // Problem here, we must fly above the ground and water, not under. Let's try on next tick
         if (levelZ >= destZ)
+        {
+            i_nextMoveTime.Reset(200);
             return;
+        }
     }
     //else if (is_water_ok)                                 // 3D system under water and above ground (swimming mode)
     else                                                    // 2D only
@@ -78,11 +85,12 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
 
                 // let's forget this bad coords where a z cannot be find and retry at next tick
                 if (fabs(destZ - respZ) > travelDistZ)
+                {
+                    i_nextMoveTime.Reset(200);
                     return;
+                }
             }
         }
-
-        creature->UpdateAllowedPositionZ(destX, destY, destZ);
     }
 
     if (is_air_ok)
@@ -93,7 +101,8 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
     creature->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
     Movement::MoveSplineInit init(creature);
-    init.MoveTo(destX, destY, destZ);
+    // Direct move: pathfinding can reject valid short wander points (Launch then no-ops).
+    init.MoveTo(destX, destY, destZ, false);
     init.SetWalk(true);
     init.Launch();
 

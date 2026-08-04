@@ -1822,6 +1822,25 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             if (!targets)
                 break;
 
+            auto applyRandomMove = [](Creature* creature, uint32 distance)
+            {
+                if (distance)
+                {
+                    // Persist so evade / Initialize restores wander.
+                    creature->SetRespawnRadius(float(distance));
+                    creature->SetDefaultMovementType(RANDOM_MOTION_TYPE);
+                    creature->StopMoving();
+                    creature->GetMotionMaster()->MoveRandom(float(distance));
+                }
+                else
+                {
+                    creature->SetRespawnRadius(0.0f);
+                    creature->SetDefaultMovementType(IDLE_MOTION_TYPE);
+                    creature->StopMoving();
+                    creature->GetMotionMaster()->MoveIdle();
+                }
+            };
+
             bool foundTarget = false;
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
@@ -1829,21 +1848,12 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 if (IsCreature((*itr)))
                 {
                     foundTarget = true;
-
-                    if (e.action.moveRandom.distance)
-                        (*itr)->ToCreature()->GetMotionMaster()->MoveRandom((float)e.action.moveRandom.distance);
-                    else
-                        (*itr)->ToCreature()->GetMotionMaster()->MoveIdle();
+                    applyRandomMove((*itr)->ToCreature(), e.action.moveRandom.distance);
                 }
             }
 
             if (!foundTarget && me && IsCreature(me))
-            {
-                if (e.action.moveRandom.distance)
-                    me->GetMotionMaster()->MoveRandom((float)e.action.moveRandom.distance);
-                else
-                    me->GetMotionMaster()->MoveIdle();
-            }
+                applyRandomMove(me, e.action.moveRandom.distance);
 
             delete targets;
             break;

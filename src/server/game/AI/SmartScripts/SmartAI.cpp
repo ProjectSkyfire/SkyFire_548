@@ -5,6 +5,7 @@
 
 #include "Cell.h"
 #include "CellImpl.h"
+#include "CreatureGroups.h"
 #include "DatabaseEnv.h"
 #include "GridDefines.h"
 #include "GridNotifiers.h"
@@ -552,6 +553,21 @@ int SmartAI::Permissible(const Creature* creature)
 void SmartAI::JustReachedHome()
 {
     GetScript()->ProcessEventsFor(SMART_EVENT_REACHED_HOME);
+
+    if (HasEscortState(SMART_ESCORT_ESCORTING) || mFollowGuid)
+        return;
+
+    // Restore idle-slot default (random / waypoint / idle), including wander from action 89.
+    if (CreatureGroup* formation = me->GetFormation())
+    {
+        if (formation->getLeader() != me && formation->isFormed())
+        {
+            me->GetMotionMaster()->MoveIdle();
+            return;
+        }
+    }
+
+    me->GetMotionMaster()->Initialize();
 }
 
 void SmartAI::EnterCombat(Unit* enemy)
@@ -588,9 +604,7 @@ void SmartAI::AttackStart(Unit* who)
         if (me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_ACTIVE) == POINT_MOTION_TYPE)
             me->GetMotionMaster()->MovementExpired();
 
-        if (me->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_IDLE) == RANDOM_MOTION_TYPE)
-            me->GetMotionMaster()->MoveIdle();
-
+        // Do not MoveIdle() over RANDOM_MOTION_TYPE — that permanently kills SAI/DB wander.
         if (mCanCombatMove)
             me->GetMotionMaster()->MoveChase(who);
 
