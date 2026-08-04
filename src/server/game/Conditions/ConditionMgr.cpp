@@ -138,6 +138,22 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
             }
             break;
         }
+        case CONDITION_QUEST_OBJECTIVE_PROGRESS:
+        {
+            if (Player* player = object->ToPlayer())
+            {
+                uint32 questId = sObjectMgr->GetQuestObjectiveQuestId(ConditionValue1);
+                if (!questId)
+                    break;
+
+                // Quest must be in the player's log
+                if (player->FindQuestSlot(questId) >= MAX_QUEST_LOG_SIZE)
+                    break;
+
+                condMeets = player->GetQuestObjectiveCounter(ConditionValue1) == ConditionValue3;
+            }
+            break;
+        }
         case CONDITION_ACTIVE_EVENT:
             condMeets = sGameEventMgr->IsActiveEvent(ConditionValue1);
             break;
@@ -382,6 +398,9 @@ uint32 Condition::GetSearcherTypeMaskForCondition()
             mask |= GRID_MAP_TYPE_MASK_PLAYER;
             break;
         case CONDITION_QUEST_NONE:
+            mask |= GRID_MAP_TYPE_MASK_PLAYER;
+            break;
+        case CONDITION_QUEST_OBJECTIVE_PROGRESS:
             mask |= GRID_MAP_TYPE_MASK_PLAYER;
             break;
         case CONDITION_ACTIVE_EVENT:
@@ -1754,6 +1773,34 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                 SF_LOG_ERROR("sql.sql", "Quest condition has useless data in value2 (%u)!", cond->ConditionValue2);
             if (cond->ConditionValue3)
                 SF_LOG_ERROR("sql.sql", "Quest condition has useless data in value3 (%u)!", cond->ConditionValue3);
+            break;
+        }
+        case CONDITION_QUEST_OBJECTIVE_PROGRESS:
+        {
+            if (!sObjectMgr->QuestObjectiveExists(cond->ConditionValue1))
+            {
+                SF_LOG_ERROR("sql.sql", "QuestObjectiveProgress condition points to non-existing quest objective (%u), skipped.", cond->ConditionValue1);
+                return false;
+            }
+
+            uint32 questId = sObjectMgr->GetQuestObjectiveQuestId(cond->ConditionValue1);
+            Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+            QuestObjective const* objective = quest ? quest->GetQuestObjective(cond->ConditionValue1) : NULL;
+            if (!objective)
+            {
+                SF_LOG_ERROR("sql.sql", "QuestObjectiveProgress condition points to quest objective (%u) not attached to quest (%u), skipped.", cond->ConditionValue1, questId);
+                return false;
+            }
+
+            if (int32(cond->ConditionValue3) > objective->Amount)
+            {
+                SF_LOG_ERROR("sql.sql", "QuestObjectiveProgress condition has quest objective count %u in value3, but quest objective %u has a maximum of %d, skipped.",
+                    cond->ConditionValue3, cond->ConditionValue1, objective->Amount);
+                return false;
+            }
+
+            if (cond->ConditionValue2)
+                SF_LOG_ERROR("sql.sql", "QuestObjectiveProgress condition has useless data in value2 (%u)!", cond->ConditionValue2);
             break;
         }
         case CONDITION_ACTIVE_EVENT:

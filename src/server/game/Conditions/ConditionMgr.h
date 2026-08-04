@@ -61,7 +61,9 @@ enum ConditionTypes
     CONDITION_HP_VAL                = 37,                   // hpVal            ComparisonType 0                  true if unit's hp matches given value
     CONDITION_HP_PCT                = 38,                   // hpPct            ComparisonType 0                  true if unit's hp matches given pct
     CONDITION_TERRAIN_SWAP          = 39,                   // terrainSwap      0              0                  true if object is in terrainswap
-    CONDITION_MAX                   = 40                    // MAX
+    // 40-47 reserved to align with TrinityCore condition ids
+    CONDITION_QUEST_OBJECTIVE_PROGRESS = 48,                // objectiveId      0              progressValue      true if player has quest objective progress equal to ConditionValue3 (quest in log)
+    CONDITION_MAX                   = 49                    // MAX
 };
 
 /*! Documentation on implementing a new ConditionSourceType:
