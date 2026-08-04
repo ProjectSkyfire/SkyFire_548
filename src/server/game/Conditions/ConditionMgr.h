@@ -61,7 +61,14 @@ enum ConditionTypes
     CONDITION_HP_VAL                = 37,                   // hpVal            ComparisonType 0                  true if unit's hp matches given value
     CONDITION_HP_PCT                = 38,                   // hpPct            ComparisonType 0                  true if unit's hp matches given pct
     CONDITION_TERRAIN_SWAP          = 39,                   // terrainSwap      0              0                  true if object is in terrainswap
-    // 40-47 reserved to align with TrinityCore condition ids
+    CONDITION_IN_WATER              = 40,                   // 0                0              0                  true if unit in water
+    CONDITION_UNUSED_41             = 41,                   // TC/LoA TERRAIN_SWAP — use CONDITION_TERRAIN_SWAP (39)
+    CONDITION_STAND_STATE           = 42,                   // stateType        state          0                  true if unit matches sit/stand state (0,x: exact state x; 1,0: any standing; 1,1: any sitting)
+    CONDITION_UNUSED_43             = 43,                   // TC/LoA DAILY_QUEST_DONE — deferred until daily quest cooldown storage is restored
+    CONDITION_CHARMED               = 44,                   // 0                0              0                  true if unit is currently charmed
+    CONDITION_PET_TYPE              = 45,                   // mask             0              0                  true if player has a pet of given type(s)
+    CONDITION_TAXI                  = 46,                   // 0                0              0                  true if player is on taxi / in flight
+    CONDITION_QUESTSTATE            = 47,                   // quest_id         state_mask     0                  true if player is in any of the provided quest states (1=none, 2=complete, 8=incomplete, 32=failed, 64=rewarded)
     CONDITION_QUEST_OBJECTIVE_PROGRESS = 48,                // objectiveId      0              progressValue      true if player has quest objective progress equal to ConditionValue3 (quest in log)
     CONDITION_MAX                   = 49                    // MAX
 };
