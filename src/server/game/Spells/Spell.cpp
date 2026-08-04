@@ -2806,7 +2806,7 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint32 effMask)
     if (!m_hitTriggerSpells.empty())
     {
         int _duration = 0;
-        for (HitTriggerSpellList::const_iterator i = m_hitTriggerSpells.begin(); i != m_hitTriggerSpells.end(); ++i)
+        for (HitTriggerSpellList::iterator i = m_hitTriggerSpells.begin(); i != m_hitTriggerSpells.end();)
         {
             if (CanExecuteTriggersOnHit(effMask, i->triggeredByAura) && roll_chance_i(i->chance))
             {
@@ -2829,6 +2829,12 @@ void Spell::DoTriggersOnSpellHit(Unit* unit, uint32 effMask)
                     }
                 }
             }
+
+            // Ruthlessness / Relentless Strikes: only one target may consume the trigger
+            if (i->triggeredByAura->Id == 14161 || i->triggeredByAura->Id == 58423)
+                i = m_hitTriggerSpells.erase(i);
+            else
+                ++i;
         }
     }
 

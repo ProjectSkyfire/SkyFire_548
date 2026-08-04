@@ -15,12 +15,15 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
+#include "ObjectAccessor.h"
+#include "EventProcessor.h"
 
 enum RogueSpells
 {
     SPELL_ROGUE_BLADE_FLURRY                        = 13877,
     SPELL_ROGUE_BLADE_FLURRY_EXTRA_ATTACK           = 22482,
     SPELL_ROGUE_CHEAT_DEATH_COOLDOWN                = 31231,
+    SPELL_ROGUE_COMBO_POINT                         = 139546,
     SPELL_ROGUE_CRIPPLING_POISON                    = 3409,
     SPELL_ROGUE_MAIN_GAUCHE                         = 86392,
     SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT   = 31665,
@@ -30,6 +33,26 @@ enum RogueSpells
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST       = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC            = 59628
+};
+
+// 139569 - Combo Point Delayed (Ruthlessness / similar)
+class DelayedRogueComboPointEvent : public BasicEvent
+{
+public:
+    DelayedRogueComboPointEvent(uint64 playerGuid, uint64 targetGuid)
+        : _playerGuid(playerGuid), _targetGuid(targetGuid) { }
+
+    bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) OVERRIDE
+    {
+        if (Player* player = ObjectAccessor::FindPlayer(_playerGuid))
+            if (Unit* target = ObjectAccessor::GetUnit(*player, _targetGuid))
+                player->CastSpell(target, SPELL_ROGUE_COMBO_POINT, true);
+        return true;
+    }
+
+private:
+    uint64 _playerGuid;
+    uint64 _targetGuid;
 };
 
 enum RogueSpellIcons
@@ -645,11 +668,51 @@ public:
     }
 };
 
+// 139569 - Combo Point Delayed (Ruthlessness)
+class spell_rog_combo_point_delayed : public SpellScriptLoader
+{
+public:
+    spell_rog_combo_point_delayed() : SpellScriptLoader("spell_rog_combo_point_delayed") { }
+
+    class spell_rog_combo_point_delayed_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_combo_point_delayed_SpellScript);
+
+        void HandleHit()
+        {
+            Player* caster = GetCaster() ? GetCaster()->ToPlayer() : NULL;
+            if (!caster)
+                return;
+
+            Unit* target = GetHitUnit();
+            if (!target && caster->GetComboTarget())
+                target = ObjectAccessor::GetUnit(*caster, caster->GetComboTarget());
+
+            if (!target)
+                return;
+
+            caster->m_Events.AddEvent(new DelayedRogueComboPointEvent(caster->GetGUID(), target->GetGUID()),
+                caster->m_Events.CalculateTime(1));
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_rog_combo_point_delayed_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_combo_point_delayed_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
     new spell_rog_cheat_death();
     new spell_rog_combat_potency();
+    new spell_rog_combo_point_delayed();
     new spell_rog_crippling_poison();
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
