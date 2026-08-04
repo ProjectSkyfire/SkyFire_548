@@ -71,6 +71,7 @@ enum RogueSpells
     SPELL_ROGUE_SHADOW_FOCUS                        = 112942,
     SPELL_ROGUE_SHADOW_FOCUS_TALENT                 = 108209,
     SPELL_ROGUE_SHADOW_SIGHT                        = 34709,
+    SPELL_ROGUE_SHADOWSTEP                          = 36554,
     SPELL_ROGUE_SINISTER_STRIKE                     = 1752,
     SPELL_ROGUE_SLICE_AND_DICE                      = 5171,
     SPELL_ROGUE_SPRINT                              = 2983,
@@ -1752,6 +1753,47 @@ public:
     }
 };
 
+// 36554 - Shadowstep
+class spell_rog_shadowstep : public SpellScriptLoader
+{
+public:
+    spell_rog_shadowstep() : SpellScriptLoader("spell_rog_shadowstep") { }
+
+    class spell_rog_shadowstep_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_shadowstep_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            if (GetCaster()->HasUnitState(UNIT_STATE_ROOT))
+                return SpellCastResult::SPELL_FAILED_ROOTED;
+
+            // Antipersonnel Cannon (Strand of the Ancients)
+            if (Unit* target = GetExplTargetUnit())
+            {
+                if (target->GetEntry() == 27894)
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+
+                // "Auto Self Cast" can make the client select the caster
+                if (target == GetCaster())
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+            }
+
+            return SpellCastResult::SPELL_CAST_OK;
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_shadowstep_SpellScript::CheckCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_shadowstep_SpellScript();
+    }
+};
+
 // 16511 - Hemorrhage
 class spell_rog_hemorrhage : public SpellScriptLoader
 {
@@ -1895,6 +1937,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_restless_blades();
     new spell_rog_rupture();
     new spell_rog_sanguinary_vein();
+    new spell_rog_shadowstep();
     new spell_rog_sinister_strike();
     new spell_rog_stealth();
     new spell_rog_stealth_subterfuge();

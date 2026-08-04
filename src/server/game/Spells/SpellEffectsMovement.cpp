@@ -169,6 +169,14 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     uint32 mapid = destTarget->GetMapId();
     if (mapid == MAPID_INVALID)
         mapid = unitTarget->GetMapId();
+
+    // Same-map spell teleports (Shadowstep, Blink, etc.) must not CombatStop —
+    // that fires SMSG_CANCEL_COMBAT between SPELL_GO and MOVE_TELEPORT and drops
+    // the departure smoke/visual for observers.
+    uint32 options = 0;
+    if (mapid == unitTarget->GetMapId())
+        options |= TELE_TO_NOT_LEAVE_COMBAT;
+
     float x, y, z, orientation;
     destTarget->GetPosition(x, y, z, orientation);
     if (!orientation && m_targets.GetUnitTarget())
@@ -176,7 +184,11 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     SF_LOG_DEBUG("spells", "Spell::EffectTeleportUnits - teleport unit to %u %f %f %f %f\n", mapid, x, y, z, orientation);
 
     if (unitTarget->GetTypeId() == TypeID::TYPEID_PLAYER)
-        unitTarget->ToPlayer()->TeleportTo(mapid, x, y, z, orientation, unitTarget == m_caster ? TELE_TO_SPELL : 0);
+    {
+        if (unitTarget == m_caster)
+            options |= TELE_TO_SPELL;
+        unitTarget->ToPlayer()->TeleportTo(mapid, x, y, z, orientation, options);
+    }
     else if (mapid == unitTarget->GetMapId())
         unitTarget->NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
     else
