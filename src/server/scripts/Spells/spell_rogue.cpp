@@ -42,8 +42,10 @@ enum RogueSpells
     SPELL_ROGUE_ENVENOM                             = 32645,
     SPELL_ROGUE_FAN_OF_KNIVES                       = 51723,
     SPELL_ROGUE_GARROTE                             = 703,
+    SPELL_ROGUE_GLYPH_OF_HEMORRHAGE                 = 56807,
     SPELL_ROGUE_GLYPH_OF_HEMORRHAGING_VEINS         = 146631,
     SPELL_ROGUE_GLYPH_OF_KILLING_SPREE              = 63252,
+    SPELL_ROGUE_HEMORRHAGE                          = 16511,
     SPELL_ROGUE_HEMORRHAGE_DOT                      = 89775,
     SPELL_ROGUE_HONOR_AMONG_THIEVES                 = 51699,
     SPELL_ROGUE_KIDNEY_SHOT                         = 408,
@@ -1750,6 +1752,64 @@ public:
     }
 };
 
+// 16511 - Hemorrhage
+class spell_rog_hemorrhage : public SpellScriptLoader
+{
+public:
+    spell_rog_hemorrhage() : SpellScriptLoader("spell_rog_hemorrhage") { }
+
+    class spell_rog_hemorrhage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_hemorrhage_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_HEMORRHAGE_DOT);
+        }
+
+        void HandleOnHit()
+        {
+            Player* caster = GetCaster()->ToPlayer();
+            if (!caster)
+                return;
+
+            if (Item* weapon = caster->GetWeaponForAttack(WeaponAttackType::BASE_ATTACK))
+                if (weapon->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
+                    SetHitDamage(int32(GetHitDamage() * 1.45f));
+        }
+
+        void HandleAfterHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            // Glyph of Hemorrhage: only apply the bleed if the target is already bleeding
+            if (caster->HasAura(SPELL_ROGUE_GLYPH_OF_HEMORRHAGE) && !target->HasAuraState(AURA_STATE_BLEEDING))
+                return;
+
+            // 50% of direct damage over 8 ticks
+            int32 damage = GetHitDamage() / 2 / 8;
+            if (damage <= 0)
+                return;
+
+            caster->CastCustomSpell(SPELL_ROGUE_HEMORRHAGE_DOT, SPELLVALUE_BASE_POINT0, damage, target, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_rog_hemorrhage_SpellScript::HandleOnHit);
+            AfterHit += SpellHitFn(spell_rog_hemorrhage_SpellScript::HandleAfterHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_hemorrhage_SpellScript();
+    }
+};
+
 // 1943, 703, 122233, 89775 - Sanguinary Vein (called by bleed DoTs)
 class spell_rog_sanguinary_vein : public SpellScriptLoader
 {
@@ -1825,6 +1885,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
     new spell_rog_fan_of_knives();
+    new spell_rog_hemorrhage();
     new spell_rog_honor_among_thieves();
     new spell_rog_kidney_shot();
     new spell_rog_killing_spree();

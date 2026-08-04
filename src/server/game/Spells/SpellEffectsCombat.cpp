@@ -1059,19 +1059,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             }
             break;
         }
-        case SPELLFAMILY_ROGUE:
-        {
-            // Hemorrhage
-            if (m_spellInfo->SpellFamilyFlags[0] & 0x2000000)
-            {
-                // 72% more damage with daggers
-                if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
-                    if (Item* item = m_caster->ToPlayer()->GetWeaponForAttack(m_attackType, true))
-                        if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
-                            totalDamagePercentMod *= 1.45f;
-            }
-            break;
-        }
         case SPELLFAMILY_SHAMAN:
         {
             // Skyshatter Harness item set bonus
