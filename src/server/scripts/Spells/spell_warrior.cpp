@@ -18,6 +18,9 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "Map.h"
+#include "PathGenerator.h"
+#include <cmath>
 
 enum WarriorSpells
 {
@@ -1356,6 +1359,72 @@ public:
     }
 };
 
+// 6544 - Heroic Leap (reject invalid destinations the client already paints as unusable)
+class spell_warr_heroic_leap : public SpellScriptLoader
+{
+public:
+    spell_warr_heroic_leap() : SpellScriptLoader("spell_warr_heroic_leap") { }
+
+    class spell_warr_heroic_leap_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_heroic_leap_SpellScript);
+
+        SpellCastResult CheckDestination()
+        {
+            Unit* caster = GetCaster();
+            WorldLocation const* dest = GetExplTargetDest();
+            if (!dest)
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+
+            if (caster->HasUnitState(UNIT_STATE_ROOT))
+                return SpellCastResult::SPELL_FAILED_ROOTED;
+
+            // Cannot leap onto elevated ledges / up vertical faces (client paints these invalid).
+            if (dest->GetPositionZ() > caster->GetPositionZ() + 4.0f)
+                return SpellCastResult::SPELL_FAILED_NOPATH;
+
+            // Siegecrafter Blackfuse platforms (SoO) — LoA parity.
+            if (caster->GetMapId() == 1136 && dest->GetPositionZ() > -308.0f && dest->GetPositionZ() < -290.0f
+                && dest->GetPositionX() > 1900.0f)
+                return SpellCastResult::SPELL_FAILED_NOPATH;
+
+            // Wall / cliff-face clicks: client dest Z sits mid-face while map ground
+            // under that XY is the floor far below (or missing). Matches the cursor
+            // "circle with a line" visual the client already shows as unusable.
+            float const ground = caster->GetMap()->GetHeight(caster->GetPhaseMask(),
+                dest->GetPositionX(), dest->GetPositionY(), dest->GetPositionZ() + 2.0f, true);
+            if (ground <= INVALID_HEIGHT || std::fabs(dest->GetPositionZ() - ground) > 2.5f)
+                return SpellCastResult::SPELL_FAILED_NOPATH;
+
+            // Instances: require a navmesh path (TC parity). Outdoor skips this so
+            // leaps across gaps / down cliffs still work without a walkable path.
+            if (caster->GetMap()->Instanceable())
+            {
+                float const range = GetSpellInfo()->GetMaxRange(true, caster) * 1.5f;
+                PathGenerator path(caster);
+                path.SetPathLengthLimit(range);
+                bool const ok = path.CalculatePath(dest->GetPositionX(), dest->GetPositionY(), dest->GetPositionZ());
+                if (path.GetPathType() & PATHFIND_SHORT)
+                    return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
+                if (!ok || (path.GetPathType() & PATHFIND_NOPATH))
+                    return SpellCastResult::SPELL_FAILED_NOPATH;
+            }
+
+            return SpellCastResult::SPELL_CAST_OK;
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCheckCast += SpellCheckCastFn(spell_warr_heroic_leap_SpellScript::CheckDestination);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_warr_heroic_leap_SpellScript();
+    }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -1363,6 +1432,7 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_concussion_blow();
     new spell_warr_deep_wounds();
     new spell_warr_execute();
+    new spell_warr_heroic_leap();
     new spell_warr_improved_spell_reflection();
     new spell_warr_intimidating_shout();
     new spell_warr_last_stand();

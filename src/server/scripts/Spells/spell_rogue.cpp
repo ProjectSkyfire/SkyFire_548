@@ -2174,58 +2174,6 @@ public:
     }
 };
 
-// Poison applications - Master Poisoner
-class spell_rog_master_poisoner : public SpellScriptLoader
-{
-public:
-    spell_rog_master_poisoner() : SpellScriptLoader("spell_rog_master_poisoner") { }
-
-    class spell_rog_master_poisoner_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_rog_master_poisoner_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
-        {
-            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_POISONER) &&
-                sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_POISONER_DEBUFF);
-        }
-
-        void HandleHit()
-        {
-            Player* player = GetCaster()->ToPlayer();
-            Unit* target = GetHitUnit();
-            if (!player || !target)
-                return;
-
-            if (player->HasAura(SPELL_ROGUE_MASTER_POISONER))
-                player->CastSpell(target, SPELL_ROGUE_MASTER_POISONER_DEBUFF, true);
-
-            // Deadly Brew: certain poisons also apply Crippling Poison
-            switch (GetSpellInfo()->Id)
-            {
-                case 5760:   // Mind-numbing Poison
-                case 112961: // Leeching Poison
-                case 113952: // Paralytic Poison
-                    if (player->HasAura(SPELL_ROGUE_DEADLY_BREW))
-                        player->CastSpell(target, SPELL_ROGUE_CRIPPLING_POISON, true);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        void Register() OVERRIDE
-        {
-            OnHit += SpellHitFn(spell_rog_master_poisoner_SpellScript::HandleHit);
-        }
-    };
-
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_rog_master_poisoner_SpellScript();
-    }
-};
-
 // 2094 - Blind (Glyph of Blind removes DoTs)
 class spell_rog_blind : public SpellScriptLoader
 {
