@@ -2792,7 +2792,7 @@ public:
     }
     bool IsFalling() const;
 
-    void RewardRage(uint32 baseRage, bool attacker);
+    void RewardRage(float baseRage, bool attacker);
 
     virtual float GetFollowAngle() const
     {

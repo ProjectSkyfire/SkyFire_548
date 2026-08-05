@@ -125,24 +125,37 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     // Rage from Damage made (only from direct weapon damage)
-    if (cleanDamage && damagetype == DIRECT_DAMAGE && this != victim && getPowerType() == POWER_RAGE)
+    // MoP: normalized rage/sec by stance — Battle 3.5, Berserker 1.75, Defensive none from whites.
+    if (cleanDamage && cleanDamage->hitOutCome != MeleeHitOutcome::MELEE_HIT_MISS
+        && damagetype == DIRECT_DAMAGE && this != victim && getPowerType() == POWER_RAGE)
     {
-        uint32 rage = uint32(GetAttackTime(cleanDamage->attackType) / 1000 * 8.125f);
-        switch (cleanDamage->attackType)
+        float ragePerSecond = 1.75f;
+        if (GetTypeId() == TypeID::TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
         {
-            case WeaponAttackType::OFF_ATTACK:
+            if (HasAura(2457))          // Battle Stance
+                ragePerSecond = 3.5f;
+            else if (HasAura(2458))     // Berserker Stance
+                ragePerSecond = 1.75f;
+            else if (HasAura(71))       // Defensive Stance — tick rage only, not white hits
+                ragePerSecond = 0.0f;
+            else
+                ragePerSecond = 3.5f;    // fallback: treat as Battle
+        }
+
+        if (ragePerSecond > 0.0f)
+        {
+            float rage = GetAttackTime(cleanDamage->attackType) / 1000.0f * ragePerSecond;
+            switch (cleanDamage->attackType)
             {
-                rage /= 2;
-                RewardRage(rage, true);
-                break;
+                case WeaponAttackType::OFF_ATTACK:
+                    rage *= 0.5f;
+                    // fallthrough
+                case WeaponAttackType::BASE_ATTACK:
+                    RewardRage(rage, true);
+                    break;
+                default:
+                    break;
             }
-            case WeaponAttackType::BASE_ATTACK:
-            {
-                RewardRage(rage, true);
-                break;
-            }
-            default:
-                break;
         }
     }
 
@@ -150,7 +163,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     {
         // Rage from absorbed damage
         if (cleanDamage && cleanDamage->absorbed_damage && victim->getPowerType() == POWER_RAGE)
-            victim->RewardRage(cleanDamage->absorbed_damage, false);
+            victim->RewardRage(float(cleanDamage->absorbed_damage), false);
 
         return 0;
     }
@@ -251,7 +264,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (this != victim && victim->getPowerType() == POWER_RAGE)
         {
             uint32 rage_damage = damage + (cleanDamage ? cleanDamage->absorbed_damage : 0);
-            victim->RewardRage(rage_damage, false);
+            victim->RewardRage(float(rage_damage), false);
         }
 
         if (GetTypeId() == TypeID::TYPEID_PLAYER)

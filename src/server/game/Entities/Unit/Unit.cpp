@@ -8928,8 +8928,8 @@ void Unit::SendRemoveFromThreatListOpcode(HostileReference* pHostileReference)
     SendMessageToSet(&data, false);
 }
 
-// baseRage means damage taken when attacker = false
-void Unit::RewardRage(uint32 baseRage, bool attacker)
+// baseRage: weapon-speed rage for attacker=true, damage taken for attacker=false
+void Unit::RewardRage(float baseRage, bool attacker)
 {
     float addRage;
 
@@ -8941,16 +8941,22 @@ void Unit::RewardRage(uint32 baseRage, bool attacker)
     }
     else
     {
-        // Calculate rage from health and damage taken
-        //! ToDo: Check formula
-        addRage = floor(0.5f + (25.7f * baseRage / GetMaxHealth()));
-        // MoP: Berserker Rage no longer doubles rage from damage taken;
-        // it applies Enrage (12880), which grants flat rage on cast.
+        // MoP warriors only generate rage from damage taken in Berserker Stance.
+        // (Bear form and other rage users keep damage-taken rage.)
+        if (GetTypeId() == TypeID::TYPEID_PLAYER && getClass() == CLASS_WARRIOR && !HasAura(2458))
+            return;
+
+        // MoP: 1 rage per 1% of maximum health lost
+        if (!GetMaxHealth())
+            return;
+
+        addRage = 100.0f * baseRage / float(GetMaxHealth());
+        // MoP: Berserker Rage applies Enrage (12880) instead of doubling damage-taken rage.
     }
 
     addRage *= sWorld->getRate(Rates::RATE_POWER_RAGE_INCOME);
 
-    ModifyPower(POWER_RAGE, uint32(addRage * 10));
+    ModifyPower(POWER_RAGE, int32(addRage * 10.0f));
 }
 
 void Unit::StopAttackFaction(uint32 faction_id)
