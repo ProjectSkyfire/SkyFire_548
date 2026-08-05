@@ -91,6 +91,7 @@ enum RogueSpells
     SPELL_ROGUE_DISMANTLE                           = 51722,
     SPELL_ROGUE_EVASION                             = 5277,
     SPELL_ROGUE_PREPARATION                         = 14185,
+    SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE         = 98440,
 };
 
 namespace RogueStealthHelpers
@@ -2010,6 +2011,38 @@ public:
     }
 };
 
+// 14181 - Relentless Strikes (triggered SCRIPT_EFFECT -> energize)
+class spell_rog_relentless_strikes : public SpellScriptLoader
+{
+public:
+    spell_rog_relentless_strikes() : SpellScriptLoader("spell_rog_relentless_strikes") { }
+
+    class spell_rog_relentless_strikes_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_relentless_strikes_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE);
+        }
+
+        void HandleHit()
+        {
+            GetCaster()->CastSpell(GetCaster(), SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_rog_relentless_strikes_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_relentless_strikes_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -2031,6 +2064,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_preparation();
     new spell_rog_recuperate();
     new spell_rog_redirect();
+    new spell_rog_relentless_strikes();
     new spell_rog_restless_blades();
     new spell_rog_rupture();
     new spell_rog_sanguinary_vein();
