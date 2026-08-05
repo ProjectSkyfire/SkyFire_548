@@ -15,12 +15,95 @@ enum HunterSpells
 {
     SPELL_HUNTER_CRIPPLING_POISON       = 30981,   // Viper
     SPELL_HUNTER_DEADLY_POISON          = 34655,   // Venomous Snake
+    SPELL_HUNTER_DIRE_BEAST_FOCUS       = 120694,
     SPELL_HUNTER_MIND_NUMBING_POISON    = 25810    // Viper
 };
 
 enum HunterCreatures
 {
+    NPC_HUNTER_DIRE_BEAST               = 62005,
     NPC_HUNTER_VIPER                    = 19921
+};
+
+class npc_dire_beast : public CreatureScript
+{
+public:
+    npc_dire_beast() : CreatureScript("npc_dire_beast") { }
+
+    struct npc_dire_beastAI : public ScriptedAI
+    {
+        npc_dire_beastAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetReactState(REACT_ASSIST);
+        }
+
+        void IsSummonedBy(Unit* summoner) OVERRIDE
+        {
+            if (!summoner || summoner->GetTypeId() != TypeID::TYPEID_PLAYER || summoner->getClass() != CLASS_HUNTER)
+            {
+                me->DespawnOrUnsummon();
+                return;
+            }
+
+            me->SetReactState(REACT_ASSIST);
+            me->setFaction(summoner->getFaction());
+
+            if (Unit* victim = summoner->GetVictim())
+                AttackStart(victim);
+            else if (Unit* attacker = summoner->getAttackerForHelper())
+                AttackStart(attacker);
+        }
+
+        void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType damageType) OVERRIDE
+        {
+            if (!damage || damageType == NODAMAGE)
+                return;
+
+            if (Unit* owner = GetHunterOwner())
+                owner->EnergizeBySpell(owner, SPELL_HUNTER_DIRE_BEAST_FOCUS, 5, POWER_FOCUS);
+        }
+
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        {
+            Unit* owner = GetHunterOwner();
+            if (!owner || !owner->IsAlive())
+            {
+                me->DespawnOrUnsummon();
+                return;
+            }
+
+            if (!me->GetVictim())
+            {
+                if (Unit* victim = owner->GetVictim())
+                    AttackStart(victim);
+                else if (Unit* attacker = owner->getAttackerForHelper())
+                    AttackStart(attacker);
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        Unit* GetHunterOwner() const
+        {
+            Unit* owner = me->GetOwner();
+            if (!owner && me->IsSummon())
+                owner = me->ToTempSummon()->GetSummoner();
+
+            if (!owner || owner->GetTypeId() != TypeID::TYPEID_PLAYER || owner->getClass() != CLASS_HUNTER)
+                return NULL;
+
+            return owner;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_dire_beastAI(creature);
+    }
 };
 
 class npc_pet_hunter_snake_trap : public CreatureScript
@@ -130,5 +213,6 @@ class npc_pet_hunter_snake_trap : public CreatureScript
 
 void AddSC_hunter_pet_scripts()
 {
+    new npc_dire_beast();
     new npc_pet_hunter_snake_trap();
 }

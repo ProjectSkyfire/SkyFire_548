@@ -30,6 +30,7 @@
 #include "Pet.h"
 #include "PetAI.h"
 #include "Player.h"
+#include "PvpPower.h"
 #include "QuestDef.h"
 #include "ReputationMgr.h"
 #include "Spell.h"
@@ -49,6 +50,21 @@
 #include "WorldSession.h"
 
 #include <math.h>
+
+namespace
+{
+    bool IsPvpPowerTarget(Unit const* victim)
+    {
+        if (!victim)
+            return false;
+
+        if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
+            return true;
+
+        Unit* owner = victim->GetOwner();
+        return owner && owner->GetTypeId() == TypeID::TYPEID_PLAYER;
+    }
+}
 
 uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack) const
 {
@@ -250,7 +266,12 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     float tmpDamage = (int32(pdamage) + DoneTotal) * DoneTotalMod;
     // apply spellmod to Done damage (flat and pct)
     if (Player* modOwner = GetSpellModOwner())
+    {
         modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, tmpDamage);
+
+        if (IsPvpPowerTarget(victim))
+            AddPct(tmpDamage, modOwner->GetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE));
+    }
 
     return uint32(std::max(tmpDamage, 0.0f));
 }
@@ -473,7 +494,12 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     float heal = float(int32(healamount) + DoneTotal) * DoneTotalMod;
     // apply spellmod to Done amount
     if (Player* modOwner = GetSpellModOwner())
+    {
         modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, heal);
+
+        if (IsPvpPowerTarget(victim))
+            AddPct(heal, modOwner->GetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING));
+    }
 
     return uint32(std::max(heal, 0.0f));
 }
@@ -670,10 +696,15 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
     float tmpDamage = float(int32(pdamage) + DoneFlatBenefit) * DoneTotalMod;
 
-    // apply spellmod to Done damage
-    if (spellProto)
-        if (Player* modOwner = GetSpellModOwner())
+    if (Player* modOwner = GetSpellModOwner())
+    {
+        // apply spellmod to Done damage
+        if (spellProto)
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+
+        if (IsPvpPowerTarget(victim))
+            AddPct(tmpDamage, modOwner->GetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE));
+    }
 
     // bonus result can be negative
     return uint32(std::max(tmpDamage, 0.0f));

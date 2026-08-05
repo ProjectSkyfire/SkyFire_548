@@ -574,6 +574,42 @@ public:
     }
 };
 
+// 324 - Lightning Shield
+class spell_sha_lightning_shield : public SpellScriptLoader
+{
+public:
+    spell_sha_lightning_shield() : SpellScriptLoader("spell_sha_lightning_shield") { }
+
+    class spell_sha_lightning_shield_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_sha_lightning_shield_AuraScript);
+
+        void HandleProc(ProcEventInfo& eventInfo)
+        {
+            if (Unit* actor = eventInfo.GetActor())
+            {
+                if (actor->IsTotem())
+                {
+                    PreventDefaultAction();
+                    return;
+                }
+            }
+
+            GetAura()->SetUsingCharges(false);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnProc += AuraProcFn(spell_sha_lightning_shield_AuraScript::HandleProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_sha_lightning_shield_AuraScript();
+    }
+};
+
 // 60103 - Lava Lash
 /// Updated 4.3.4
 class spell_sha_lava_lash : public SpellScriptLoader
@@ -993,6 +1029,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_item_lightning_shield();
     new spell_sha_item_lightning_shield_trigger();
     new spell_sha_item_mana_surge();
+    new spell_sha_lightning_shield();
     new spell_sha_lava_lash();
     new spell_sha_lava_surge();
     new spell_sha_lava_surge_proc();

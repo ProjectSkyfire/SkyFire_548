@@ -1785,15 +1785,9 @@ public:
     void CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 damage, SpellInfo const* spellInfo, WeaponAttackType attackType = WeaponAttackType::BASE_ATTACK, bool crit = false);
     void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss);
 
-    // player or player's pet resilience (-1%)
-    uint32 GetCritDamageReduction(uint32 damage) const
-    {
-        return GetCombatRatingDamageReduction(CombatRating::CR_RESILIENCE_CRIT_TAKEN, 2.2f, 33.0f, damage);
-    }
-    uint32 GetDamageReduction(uint32 damage) const
-    {
-        return GetCombatRatingDamageReduction(CombatRating::CR_RESILIENCE_PLAYER_DAMAGE_TAKEN, 2.0f, 100.0f, damage);
-    }
+    // player or player's pet resilience
+    uint32 GetCritDamageReduction(uint32 damage) const;
+    uint32 GetDamageReduction(uint32 damage) const;
 
     void ApplyResilience(Unit const* victim, int32* damage, bool isCrit) const;
 
@@ -2964,6 +2958,7 @@ private:
 
     // player or player's pet
     float GetCombatRatingReduction(CombatRating cr) const;
+    uint32 GetCombatRatingValue(CombatRating cr) const;
     uint32 GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const;
 
 protected:

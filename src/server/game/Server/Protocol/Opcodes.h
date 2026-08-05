@@ -62,7 +62,11 @@ enum Opcodes
     CMSG_BATTLEFIELD_STATUS,
     CMSG_BATTLEMASTER_JOIN,
     CMSG_BATTLEMASTER_JOIN_ARENA,
-    CMSG_BATTLE_CHAR_BOOST,
+    CMSG_BATTLE_PAY_CHAR_BOOST,
+    CMSG_BATTLE_PAY_CONFIRM_PURCHASE_RESPONSE,
+    CMSG_BATTLE_PAY_GET_PRODUCT_LIST,
+    CMSG_BATTLE_PAY_GET_PURCHASE_LIST,
+    CMSG_BATTLE_PAY_START_PURCHASE,
     CMSG_BATTLE_PET_CAGE,
     CMSG_BATTLE_PET_DELETE_PET,
     CMSG_BATTLE_PET_LEARN,
@@ -1181,8 +1185,8 @@ inline std::string GetOpcodeNameForLogging(Opcodes id, bool isServerOpcode, uint
     }
     else
         ss << "INVALID OPCODE";
-
-    ss << " 0x" << std::hex << std::uppercase << opcode << std::nouppercase << " (" << std::dec << opcode << ")]";
+    
+    ss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << opcode << std::nouppercase << std::dec << " (" << opcode << ")]";
     return ss.str();
 }
 

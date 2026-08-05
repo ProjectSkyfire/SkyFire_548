@@ -33,6 +33,7 @@
 #include "PetAI.h"
 #include "PetTransportSupport.h"
 #include "Player.h"
+#include "PvpResilience.h"
 #include "QuestDef.h"
 #include "ReputationMgr.h"
 #include "Spell.h"
@@ -7434,6 +7435,19 @@ void Unit::ApplyResilience(Unit const* victim, int32* damage, bool isCrit) const
     *damage -= target->GetDamageReduction(*damage);
 }
 
+uint32 Unit::GetCritDamageReduction(uint32 damage) const
+{
+    return GetCombatRatingDamageReduction(CombatRating::CR_RESILIENCE_CRIT_TAKEN, 2.2f, 33.0f, damage);
+}
+
+uint32 Unit::GetDamageReduction(uint32 damage) const
+{
+    float percent = Skyfire::Combat::CalculatePvpResilienceReductionPercent(
+        getLevel(), GetCombatRatingValue(CombatRating::CR_RESILIENCE_PLAYER_DAMAGE_TAKEN));
+
+    return CalculatePct(damage, percent);
+}
+
 // Melee based spells can be miss, parry or dodge on this step
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(const Unit* victim, WeaponAttackType attType, uint32 spellId) const
@@ -7645,6 +7659,18 @@ float Unit::GetCombatRatingReduction(CombatRating cr) const
             return owner->GetRatingBonusValue(cr);
 
     return 0.0f;
+}
+
+uint32 Unit::GetCombatRatingValue(CombatRating cr) const
+{
+    if (Player const* player = ToPlayer())
+        return player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATINGS + uint8(cr));
+    // Player's pet get resilience from owner
+    else if (IsPet() && GetOwner())
+        if (Player* owner = GetOwner()->ToPlayer())
+            return owner->GetUInt32Value(PLAYER_FIELD_COMBAT_RATINGS + uint8(cr));
+
+    return 0;
 }
 
 uint32 Unit::GetCombatRatingDamageReduction(CombatRating cr, float rate, float cap, uint32 damage) const
