@@ -3582,6 +3582,13 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 108212:
                 spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
                 break;
+            // Smoke Bomb cloud (88611): apply interfere to units in cloud regardless of LOS /
+            // immunities. EFFECT_0 is targeting interference (debuff); EFFECT_1 is ally DR.
+            case 88611:
+                spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS;
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+                break;
             // Shattering Throw / Shattering Blow damage spells: pierce invulnerability so
             // spell_warr_shattering_throw can strip Ice Block/Divine Shield then deal damage.
             // Linked missiles 64380/65941 already have these attrs in DBC.

@@ -558,7 +558,8 @@ bool Unit::HasVisionObscured(Unit const* target) const
             bool failCast = true;
             for (Unit::AuraEffectList::iterator j = targetStateAuras.begin(); j != targetStateAuras.end();)
             {
-                if (((*i)->GetId() == (*j)->GetId()) && ((*i)->GetCasterGUID() == (*i)->GetCasterGUID()))
+                // Same smoke cloud (spell + caster) on both sides => targeting allowed
+                if ((*i)->GetId() == (*j)->GetId() && (*i)->GetCasterGUID() == (*j)->GetCasterGUID())
                 {
                     failCast = false;
                     j = targetStateAuras.erase(j);
@@ -573,12 +574,11 @@ bool Unit::HasVisionObscured(Unit const* target) const
         }
     }
 
-    if (!targetStateAuras.empty()) // target has some aura that caster not
-    {
-        for (Unit::AuraEffectList::const_iterator i = targetStateAuras.begin(); i != targetStateAuras.end(); ++i)
-            if (!(*i)->GetCaster() || !IsFriendlyTo((*i)->GetCaster()))
+    // target has some aura that caster not (cannot target into/out of hostile smoke)
+    for (Unit::AuraEffectList::const_iterator i = targetStateAuras.begin(); i != targetStateAuras.end(); ++i)
+        if (Unit* auraCaster = (*i)->GetCaster())
+            if (!IsFriendlyTo(auraCaster))
                 return true;
-    }
 
     return false;
 }
@@ -3918,6 +3918,12 @@ bool Unit::_IsValidAttackTarget(Unit const* target, SpellInfo const* bySpell, Wo
 
     Player const* playerAffectingAttacker = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? GetAffectingPlayer() : NULL;
     Player const* playerAffectingTarget = target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE) ? target->GetAffectingPlayer() : NULL;
+
+    // Smoke Bomb (and similar): block melee/auto-attack into or out of the cloud.
+    // Allies of the smoke caster are exempt inside HasVisionObscured. AoE spells are
+    // handled separately; only check here when there is no bySpell or it is single-target.
+    if ((!bySpell || !bySpell->IsAffectingArea()) && HasVisionObscured(target))
+        return false;
 
     // check duel - before sanctuary checks
     if (playerAffectingAttacker && playerAffectingTarget)

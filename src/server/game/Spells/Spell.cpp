@@ -5785,6 +5785,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
                 if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
                     return SpellCastResult::SPELL_FAILED_LINE_OF_SIGHT;
+
+            // Smoke Bomb / similar: interfere targeting between inside and outside cloud
+            if (!IsTriggered() || GetCurrentContainer() == CURRENT_AUTOREPEAT_SPELL)
+                if (m_caster->HasVisionObscured(target))
+                    return SpellCastResult::SPELL_FAILED_VISION_OBSCURED;
         }
     }
 

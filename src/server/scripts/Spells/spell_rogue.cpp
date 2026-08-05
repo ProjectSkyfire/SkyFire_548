@@ -23,6 +23,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "InstanceScript.h"
+#include "DynamicObject.h"
 #include <set>
 
 enum RogueSpells
@@ -100,6 +101,8 @@ enum RogueSpells
     SPELL_ROGUE_NERVE_STRIKE_EFFECT                 = 112947,
     SPELL_ROGUE_PREPARATION                         = 14185,
     SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE         = 98440,
+    SPELL_ROGUE_SMOKE_BOMB_AURA                     = 76577,
+    SPELL_ROGUE_SMOKE_BOMB_INTERFERE                = 88611,
     SPELL_ROGUE_WOUND_POISON                        = 8680,
 };
 
@@ -2355,6 +2358,44 @@ public:
     }
 };
 
+// 76577 / 128829 - Smoke Bomb (periodic applies interfere targeting cloud)
+class spell_rog_smoke_bomb : public SpellScriptLoader
+{
+public:
+    spell_rog_smoke_bomb() : SpellScriptLoader("spell_rog_smoke_bomb") { }
+
+    class spell_rog_smoke_bomb_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_smoke_bomb_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_SMOKE_BOMB_INTERFERE);
+        }
+
+        void HandlePeriodic(AuraEffect const* aurEff)
+        {
+            Unit* caster = GetTarget();
+            DynamicObject* dyn = caster->GetDynObject(aurEff->GetId());
+            if (!dyn)
+                return;
+
+            // Refresh interfere + ally damage reduction on everyone in the smoke cloud.
+            caster->CastSpell(dyn->GetPositionX(), dyn->GetPositionY(), dyn->GetPositionZ(), SPELL_ROGUE_SMOKE_BOMB_INTERFERE, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_smoke_bomb_AuraScript::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_smoke_bomb_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -2387,6 +2428,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_shadowstep();
     new spell_rog_shroud_of_concealment();
     new spell_rog_sinister_strike();
+    new spell_rog_smoke_bomb();
     new spell_rog_stealth();
     new spell_rog_stealth_subterfuge();
     new spell_rog_subterfuge_cast_trigger();
