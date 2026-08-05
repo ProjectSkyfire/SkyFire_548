@@ -1181,8 +1181,8 @@ inline std::string GetOpcodeNameForLogging(Opcodes id, bool isServerOpcode, uint
     }
     else
         ss << "INVALID OPCODE";
-
-    ss << " 0x" << std::hex << std::uppercase << opcode << std::nouppercase << " (" << std::dec << opcode << ")]";
+    
+    ss << " 0x" << std::hex << std::setw(4) << std::setfill('0') << std::uppercase << opcode << std::nouppercase << std::dec << " (" << opcode << ")]";
     return ss.str();
 }
 
