@@ -32,7 +32,9 @@
 #include "Platform/TimeUtils.h"
 #include "RealmAcceptor.h"
 #include "RealmList.h"
+#include "SecretMgr.h"
 #include "SystemConfig.h"
+#include "ProcessDefines.h"
 #include "Util.h"
 
 #ifdef __linux__
@@ -206,6 +208,8 @@ void usage(const char* prog)
 /// Launch the auth server
 extern int main(int argc, char** argv)
 {
+    SkyFire::Impl::CurrentServerProcessHolder::_type = SERVER_PROCESS_AUTHSERVER;
+
     bool noUseConfigDatabaseInfo = 0;
     const char* db_Host = _SKYFIRE_AUTH_DATABASE_HOST;
     const char* db_Port = _SKYFIRE_AUTH_DATABASE_PORT;
@@ -366,6 +370,8 @@ extern int main(int argc, char** argv)
     // Initialize the database connection
     if (!StartDB(db_Host, db_Port, db_User, db_Password, authDB, noUseConfigDatabaseInfo))
         return 1;
+
+    sSecretMgr->Initialize();
 
     // Get the list of realms for the server
     sRealmList->Initialize(sConfigMgr->GetIntDefault("RealmsStateUpdateDelay", 20));

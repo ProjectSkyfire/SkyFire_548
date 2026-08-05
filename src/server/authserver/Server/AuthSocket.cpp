@@ -4,12 +4,13 @@
 */
 
 #include <algorithm>
-
+#include "AES.h"
 #include "AuthCodes.h"
 #include "AuthPatchTransfer.h"
 #include "AuthSocket.h"
 #include "ByteBuffer.h"
 #include "Common.h"
+#include "CryptoGenerics.h"
 #include "CryptoRandom.h"
 #include "CryptoHash.h"
 #include "Configuration/Config.h"
@@ -18,7 +19,11 @@
 #include "Log.h"
 #include "NetworkAddress.h"
 #include "openssl/crypto.h"
+#include "MD5.h"
+#include <algorithm>
+#include <openssl/md5.h>
 #include "RealmList.h"
+#include "SecretMgr.h"
 #include "TOTP.h"
 
 enum eAuthCmd
@@ -387,6 +392,25 @@ bool AuthSocket::_HandleLogonChallenge()
                 }
             }
 
+            uint8 securityFlags = 0;
+            // Check if a TOTP token is needed
+            if (!fields[7].IsNull())
+            {
+                securityFlags = 4;
+                _totpSecret = fields[7].GetBinary();
+
+                if (auto const& secret = sSecretMgr->GetSecret(SECRET_TOTP_MASTER_KEY))
+                {
+                    bool success = SkyFire::Crypto::AEDecrypt<SkyFire::Crypto::AES>(*_totpSecret, *secret);
+                    if (!success)
+                    {
+                        pkt << uint8(AuthResult::WOW_FAIL_DB_BUSY);
+                        SF_LOG_ERROR("server.authserver", "[AuthChallenge] Account '%s' has invalid ciphertext for TOTP token key stored", _login.c_str());
+                        locked = true;
+                    }
+                }
+            }
+
             if (!locked)
             {
                 //set expired bans to inactive
@@ -436,12 +460,6 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt.append(_srp6->N);
                     pkt.append(_srp6->s);
                     pkt.append(unk3.ToByteArray<16>());
-                    uint8 securityFlags = 0;
-
-                    // Check if token is used
-                    _tokenKey = fields[7].GetString();
-                    if (!_tokenKey.empty())
-                        securityFlags = 4;
 
                     pkt << uint8(securityFlags);            // security flags (0x0...0x04)
 
@@ -496,11 +514,12 @@ bool AuthSocket::_HandleLogonProof()
     if (!socket().PeekBytes(&lp, sizeof(sAuthLogonProof_C)))
         return false;
 
-    bool needsToken = (lp.securityFlags & 0x04) || !_tokenKey.empty();
+    bool tokenSuccess = false;
+    bool sentToken = (lp.securityFlags & 0x04);
     uint8 tokenSize = 0;
     size_t requiredBytes = sizeof(sAuthLogonProof_C);
 
-    if (needsToken)
+    if (sentToken)
     {
         if (!socket().PeekBytes(&tokenSize, sizeof(tokenSize), requiredBytes))
             return false;
@@ -525,6 +544,36 @@ bool AuthSocket::_HandleLogonProof()
     if (std::optional<SessionKey> K = _srp6->VerifyChallengeResponse(lp.A, lp.clientM))
     {
          _sessionKey = *K;
+         // Check auth token
+         if (sentToken && _totpSecret)
+         {
+             uint8 size = 0;
+             if (!socket().ReadBytes(&size, sizeof(size)))
+                 return false;
+
+             std::vector<char> token(size + 1);
+             token[size] = '\0';
+             if (!socket().ReadBytes(&token[0], size))
+                 return false;
+
+             unsigned int incomingToken = atoi(&token[0]);
+
+             tokenSuccess = SkyFire::Crypto::TOTP::ValidateToken(*_totpSecret, incomingToken);
+             memset(_totpSecret->data(), 0, _totpSecret->size());
+         }
+         else if (!sentToken && !_totpSecret)
+             tokenSuccess = true;
+
+         if (!tokenSuccess)
+         {
+             ByteBuffer packet;
+             packet << uint8(AUTH_LOGON_PROOF);
+             packet << uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT);
+             packet << uint16(0);    // LoginFlags, 1 has account message
+
+             socket().QueueSend(packet.contents(), packet.size());
+             return true;
+         }
 
         SF_LOG_DEBUG("server.authserver", "'%s:%d' User '%s' successfully authenticated",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str());
@@ -543,28 +592,6 @@ bool AuthSocket::_HandleLogonProof()
 
         // Finish SRP6 and send the final result to the client
         SkyFire::Crypto::SHA1::Digest M2 = SkyFire::Crypto::SRP6::GetSessionVerifier(lp.A, lp.clientM, _sessionKey);
-
-        // Check auth token
-        if (needsToken)
-        {
-            uint8 size = 0;
-            if (!socket().ReadBytes(&size, sizeof(size)))
-                return false;
-
-            std::vector<char> token(size + 1);
-            token[size] = '\0';
-            if (!socket().ReadBytes(&token[0], size))
-                return false;
-
-            unsigned int validToken = TOTP::GenerateToken(_tokenKey);
-            unsigned int incomingToken = atoi(&token[0]);
-            if (validToken != incomingToken)
-            {
-                char data[] = { AUTH_LOGON_PROOF, uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT), 3, 0 };
-                socket().QueueSend(data, sizeof(data));
-                return false;
-            }
-        }
 
         if (_expversion & POST_BC_EXP_FLAG)                 // 2.x and 3.x clients
         {

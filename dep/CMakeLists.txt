@@ -19,6 +19,7 @@ add_subdirectory(SFMT)
 add_subdirectory(zlib)
 add_subdirectory(g3dlite)
 add_subdirectory(recastnavigation)
+add_subdirectory(argon2)
 
 if(ELUNA)
   add_subdirectory(lualib)

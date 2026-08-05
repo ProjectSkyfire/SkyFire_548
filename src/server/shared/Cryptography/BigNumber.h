@@ -7,7 +7,6 @@
 #define _AUTH_BIGNUMBER_H
 
 #include "Define.h"
-#include "Errors.h"
 #include <array>
 #include <memory>
 #include <string>
@@ -17,93 +16,112 @@ struct bignum_st;
 
 class BigNumber
 {
-public:
-    BigNumber();
-    BigNumber(BigNumber const& bn);
-    BigNumber(uint32 v) : BigNumber() { SetDword(v); }
+    public:
+        BigNumber();
+        BigNumber(BigNumber const& bn);
+        BigNumber(uint32 v) : BigNumber() { SetDword(v); }
         BigNumber(int32 v) : BigNumber() { SetDword(v); }
         BigNumber(std::string const& v) : BigNumber() { SetHexStr(v); }
+
         template<size_t Size>
         BigNumber(std::array<uint8, Size> const& v, bool littleEndian = true) : BigNumber() { SetBinary(v.data(), Size, littleEndian); }
 
-    ~BigNumber();
+        ~BigNumber();
 
-    void SetDword(int32);
-    void SetDword(uint32);
-    void SetQword(uint64);
-    void SetBinary(uint8 const* bytes, int32 len, bool littleEndian = true);
-    template<typename Container>
-    auto SetBinary(Container const& c, bool littleEndian = true) -> std::enable_if_t<!std::is_pointer_v<std::decay_t<Container>>> { SetBinary(std::data(c), std::size(c), littleEndian); }
-    void SetHexStr(char const* str);
-    void SetHexStr(std::string const& str) { SetHexStr(str.c_str()); }
+        void SetDword(int32);
+        void SetDword(uint32);
+        void SetQword(uint64);
+        void SetBinary(uint8 const* bytes, int32 len, bool littleEndian = true);
 
-    void SetRand(int32 numbits);
+        template<typename Container>
+        auto SetBinary(Container const& c, bool littleEndian = true) -> std::enable_if_t<!std::is_pointer_v<std::decay_t<Container>>> { SetBinary(std::data(c), std::size(c), littleEndian); }
 
-    BigNumber& operator=(BigNumber const& bn);
+        bool SetHexStr(char const* str);
+        bool SetHexStr(std::string const& str) { return SetHexStr(str.c_str()); }
 
-    BigNumber operator+=(BigNumber const& bn);
-    BigNumber operator+(BigNumber const& bn) const
-    {
-        BigNumber t(*this);
-        return t += bn;
-    }
+        void SetRand(int32 numbits);
 
-    BigNumber operator-=(BigNumber const& bn);
-    BigNumber operator-(BigNumber const& bn) const
-    {
-        BigNumber t(*this);
-        return t -= bn;
-    }
+        BigNumber& operator=(BigNumber const& bn);
 
-    BigNumber operator*=(BigNumber const& bn);
-    BigNumber operator*(BigNumber const& bn) const
-    {
-        BigNumber t(*this);
-        return t *= bn;
-    }
+        BigNumber& operator+=(BigNumber const& bn);
+        BigNumber operator+(BigNumber const& bn) const
+        {
+            BigNumber t(*this);
+            return t += bn;
+        }
 
-    BigNumber operator/=(BigNumber const& bn);
-    BigNumber operator/(BigNumber const& bn) const
-    {
-        BigNumber t(*this);
-        return t /= bn;
-    }
+        BigNumber& operator-=(BigNumber const& bn);
+        BigNumber operator-(BigNumber const& bn) const
+        {
+            BigNumber t(*this);
+            return t -= bn;
+        }
 
-    BigNumber operator%=(BigNumber const& bn);
-    BigNumber operator%(BigNumber const& bn) const
-    {
-        BigNumber t(*this);
-        return t %= bn;
-    }
+        BigNumber& operator*=(BigNumber const& bn);
+        BigNumber operator*(BigNumber const& bn) const
+        {
+            BigNumber t(*this);
+            return t *= bn;
+        }
 
-    bool isZero() const;
+        BigNumber& operator/=(BigNumber const& bn);
+        BigNumber operator/(BigNumber const& bn) const
+        {
+            BigNumber t(*this);
+            return t /= bn;
+        }
 
-    BigNumber ModExp(BigNumber const& bn1, BigNumber const& bn2) const;
-    BigNumber Exp(BigNumber const&) const;
+        BigNumber& operator%=(BigNumber const& bn);
+        BigNumber operator%(BigNumber const& bn) const
+        {
+            BigNumber t(*this);
+            return t %= bn;
+        }
 
-    int32 GetNumBytes(void) const;
+        BigNumber& operator<<=(int n);
+        BigNumber operator<<(int n) const
+        {
+            BigNumber t(*this);
+            return t <<= n;
+        }
 
-    struct bignum_st* BN() { return _bn; }
-    struct bignum_st const* BN() const { return _bn; }
+        int CompareTo(BigNumber const& bn) const;
+        bool operator<=(BigNumber const& bn) const { return (CompareTo(bn) <= 0); }
+        bool operator==(BigNumber const& bn) const { return (CompareTo(bn) == 0); }
+        bool operator>=(BigNumber const& bn) const { return (CompareTo(bn) >= 0); }
+        bool operator<(BigNumber const& bn) const { return (CompareTo(bn) < 0); }
+        bool operator>(BigNumber const& bn) const { return (CompareTo(bn) > 0); }
 
-    uint32 AsDword();
+        bool IsZero() const;
+        bool IsNegative() const;
 
-    void GetBytes(uint8* buf, size_t bufsize, bool littleEndian = true) const;
-    std::vector<uint8> ToByteVector(int32 minSize = 0, bool littleEndian = true) const;
+        BigNumber ModExp(BigNumber const& bn1, BigNumber const& bn2) const;
+        BigNumber Exp(BigNumber const&) const;
 
-    template<std::size_t Size>
-    std::array<uint8, Size> ToByteArray(bool littleEndian = true) const
-    {
-        std::array<uint8, Size> buf;
-        GetBytes(buf.data(), Size, littleEndian);
-        return buf;
-    }
+        int32 GetNumBytes(void) const;
 
-    char* AsHexStr() const;
-    char* AsDecStr() const;
+        struct bignum_st *BN() { return _bn; }
+        struct bignum_st const* BN() const { return _bn; }
 
-private:
-    struct bignum_st* _bn;
+        uint32 AsDword() const;
+
+        void GetBytes(uint8* buf, size_t bufsize, bool littleEndian = true) const;
+        std::vector<uint8> ToByteVector(int32 minSize = 0, bool littleEndian = true) const;
+
+        template <std::size_t Size>
+        std::array<uint8, Size> ToByteArray(bool littleEndian = true) const
+        {
+            std::array<uint8, Size> buf;
+            GetBytes(buf.data(), Size, littleEndian);
+            return buf;
+        }
+
+        std::string AsHexStr() const;
+        std::string AsDecStr() const;
+
+    private:
+        struct bignum_st *_bn;
+
 };
 #endif
 

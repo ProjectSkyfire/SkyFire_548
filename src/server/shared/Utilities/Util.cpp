@@ -558,3 +558,8 @@ void SkyFire::Impl::HexStrToByteArray(std::string const& str, uint8* out, size_t
         out[j++] = uint8(strtoul(buffer, nullptr, 16));
     }
 }
+
+bool StringEqualI(std::string_view a, std::string_view b)
+{
+    return std::equal(a.begin(), a.end(), b.begin(), b.end(), [](char c1, char c2) { return std::tolower(c1) == std::tolower(c2); });
+}

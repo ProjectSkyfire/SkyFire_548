@@ -697,6 +697,11 @@ namespace rbac
         RBAC_PERM_COMMAND_GM_NOTE = 808,
         RBAC_PERM_COMMAND_DEBUG_REST = 809,
 
+        RBAC_PERM_COMMAND_ACCOUNT_2FA                            = 894,
+        RBAC_PERM_COMMAND_ACCOUNT_2FA_SETUP                      = 895,
+        RBAC_PERM_COMMAND_ACCOUNT_2FA_REMOVE                     = 896,
+        RBAC_PERM_COMMAND_ACCOUNT_SET_2FA                        = 897,
+
         // custom permissions 1000+
         RBAC_PERM_COMMAND_BATTLEPET = 1000,
         RBAC_PERM_COMMAND_BATTLEPET_LEVELUP = 1001,

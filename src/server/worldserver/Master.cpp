@@ -34,6 +34,7 @@
 #include "Platform/TimeUtils.h"
 #include "RARunnable.h"
 #include "RealmList.h"
+#include "SecretMgr.h"
 #include "SFSoap.h"
 #include "Timer.h"
 #include "Threading/BoostAsioTaskRunner.h"
@@ -397,6 +398,8 @@ int Master::Run()
     {
         LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = (flag & ~%u) | %u WHERE id = '%d'", REALM_FLAG_OFFLINE, REALM_FLAG_INVALID, itr->first);
     }
+
+    sSecretMgr->Initialize();
 
     ///- Initialize the World
     sWorld->SetInitialWorldSettings();

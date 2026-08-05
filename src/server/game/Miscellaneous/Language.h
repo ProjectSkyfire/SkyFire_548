@@ -90,8 +90,17 @@ enum SkyFireStrings
     LANG_RBAC_PERM_DENIED = 77,
     LANG_RBAC_PERM_REVOKED = 78,
     LANG_RBAC_PERM_REVOKED_NOT_IN_LIST = 79,
-    // Free 80 - 95
+    // Free 80 - 85
 
+    LANG_UNKNOWN_ERROR                  = 87,
+    LANG_2FA_COMMANDS_NOT_SETUP         = 88,
+    LANG_2FA_ALREADY_SETUP              = 89,
+    LANG_2FA_INVALID_TOKEN              = 90,
+    LANG_2FA_SECRET_SUGGESTION          = 91,
+    LANG_2FA_SETUP_COMPLETE             = 92,
+    LANG_2FA_NOT_SETUP                  = 93,
+    LANG_2FA_REMOVE_NEED_TOKEN          = 94,
+    LANG_2FA_REMOVE_COMPLETE            = 95,
 
     LANG_GUILD_RENAME_ALREADY_EXISTS = 96,
     LANG_GUILD_RENAME_DONE = 97,
@@ -193,7 +202,11 @@ enum SkyFireStrings
     LANG_PHASING_PHASEMASK = 182,
     LANG_PHASING_REPORT_STATUS = 183,
     LANG_PHASING_NO_DEFINITIONS = 184,              // Phasing
-    // Room for more level 1              185-199 not used
+    // Room for more level 1              185-187 not used
+
+    LANG_2FA_SECRET_TOO_LONG            = 188,
+    LANG_2FA_SECRET_INVALID             = 189,
+    LANG_2FA_SECRET_SET_COMPLETE        = 190,
 
     // level 2 chat
     LANG_NO_SELECTION = 200,

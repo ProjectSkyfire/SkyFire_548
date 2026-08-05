@@ -17,6 +17,7 @@
 #include "Log.h"
 #include "Master.h"
 #include "OpenSSLProviders.h"
+#include "ProcessDefines.h"
 #include "World.h"
 
 #ifndef _SKYFIRE_CORE_CONFIG
@@ -97,6 +98,7 @@ void usage(const char* prog)
 /// Launch the Skyfire server
 extern int main(int argc, char** argv)
 {
+    SkyFire::Impl::CurrentServerProcessHolder::_type = SERVER_PROCESS_WORLDSERVER;
 
     bool noUseConfigDatabaseInfo = 0;
     const char* db_Host = _SKYFIRE_WORLD_DATABASE_HOST;

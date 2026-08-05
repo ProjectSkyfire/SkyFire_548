@@ -334,6 +334,8 @@ std::string GetAddressString(Skyfire::Net::Address const& addr);
 
 uint32 CreatePIDFile(const std::string& filename);
 
+bool StringEqualI(std::string_view str1, std::string_view str2);
+
 namespace SkyFire::Impl
 {
     std::string ByteArrayToHexStr(uint8 const* bytes, size_t length, bool reverse = false);
