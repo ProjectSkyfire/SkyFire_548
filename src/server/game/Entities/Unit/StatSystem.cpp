@@ -6,6 +6,7 @@
 #include "Creature.h"
 #include "Pet.h"
 #include "Player.h"
+#include "PvpPower.h"
 #include "SharedDefines.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
@@ -105,15 +106,11 @@ bool Player::UpdateStats(Stats stat)
 
 void Player::UpdatePvpPower()
 {
-    float precision = 100.0f;
     float value = GetRatingBonusValue(CombatRating::CR_PVP_POWER);
-    value += GetTotalAuraModifier(SPELL_AURA_MOD_RATING);
+    uint32 specializationId = GetTalentSpecialization(GetActiveSpec());
 
-    float pvpHealing = value / precision;
-    float pvpDamage = value / precision;
-
-    SetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING, pvpHealing);
-    SetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE, pvpDamage);
+    SetFloatValue(PLAYER_FIELD_PVP_POWER_HEALING, Skyfire::Combat::CalculatePvpPowerHealingPercent(value, specializationId));
+    SetFloatValue(PLAYER_FIELD_PVP_POWER_DAMAGE, Skyfire::Combat::CalculatePvpPowerDamagePercent(value, specializationId));
 }
 
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
