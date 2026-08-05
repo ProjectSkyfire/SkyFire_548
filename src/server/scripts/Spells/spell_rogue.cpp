@@ -88,8 +88,11 @@ enum RogueSpells
     SPELL_ROGUE_VENOMOUS_VIM                        = 51637,
     SPELL_ROGUE_VENOMOUS_WOUND                      = 79136,
     SPELL_ROGUE_VENOMOUS_WOUNDS                     = 79134,
+    SPELL_ROGUE_CHEAP_SHOT                          = 1833,
     SPELL_ROGUE_DISMANTLE                           = 51722,
     SPELL_ROGUE_EVASION                             = 5277,
+    SPELL_ROGUE_NERVE_STRIKE                        = 108210,
+    SPELL_ROGUE_NERVE_STRIKE_EFFECT                 = 112947,
     SPELL_ROGUE_PREPARATION                         = 14185,
     SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE         = 98440,
 };
@@ -2043,6 +2046,125 @@ public:
     }
 };
 
+// 408 Kidney Shot, 1833 Cheap Shot - Nerve Strike talent applies debuff when stun ends
+class spell_rog_nerve_strike : public SpellScriptLoader
+{
+public:
+    spell_rog_nerve_strike() : SpellScriptLoader("spell_rog_nerve_strike") { }
+
+    class spell_rog_nerve_strike_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_nerve_strike_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_NERVE_STRIKE) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_NERVE_STRIKE_EFFECT);
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            if (caster->HasAura(SPELL_ROGUE_NERVE_STRIKE))
+                caster->CastSpell(target, SPELL_ROGUE_NERVE_STRIKE_EFFECT, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_rog_nerve_strike_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_nerve_strike_AuraScript();
+    }
+};
+
+// 112947 - Nerve Strike (halve damage reduction vs players)
+class spell_rog_nerve_strike_effect : public SpellScriptLoader
+{
+public:
+    spell_rog_nerve_strike_effect() : SpellScriptLoader("spell_rog_nerve_strike_effect") { }
+
+    class spell_rog_nerve_strike_effect_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_nerve_strike_effect_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            if (GetUnitOwner()->GetCharmerOrOwnerPlayerOrPlayerItself())
+                amount /= 2;
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_rog_nerve_strike_effect_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_nerve_strike_effect_AuraScript();
+    }
+};
+
+// Poison applications - Master Poisoner
+class spell_rog_master_poisoner : public SpellScriptLoader
+{
+public:
+    spell_rog_master_poisoner() : SpellScriptLoader("spell_rog_master_poisoner") { }
+
+    class spell_rog_master_poisoner_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_master_poisoner_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_POISONER) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_MASTER_POISONER_DEBUFF);
+        }
+
+        void HandleHit()
+        {
+            Player* player = GetCaster()->ToPlayer();
+            Unit* target = GetHitUnit();
+            if (!player || !target)
+                return;
+
+            if (player->HasAura(SPELL_ROGUE_MASTER_POISONER))
+                player->CastSpell(target, SPELL_ROGUE_MASTER_POISONER_DEBUFF, true);
+
+            // Deadly Brew: certain poisons also apply Crippling Poison
+            switch (GetSpellInfo()->Id)
+            {
+                case 5760:   // Mind-numbing Poison
+                case 112961: // Leeching Poison
+                case 113952: // Paralytic Poison
+                    if (player->HasAura(SPELL_ROGUE_DEADLY_BREW))
+                        player->CastSpell(target, SPELL_ROGUE_CRIPPLING_POISON, true);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_rog_master_poisoner_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_master_poisoner_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -2061,6 +2183,8 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_killing_spree();
     new spell_rog_killing_spree_target_selector();
     new spell_rog_master_of_subtlety();
+    new spell_rog_nerve_strike();
+    new spell_rog_nerve_strike_effect();
     new spell_rog_preparation();
     new spell_rog_recuperate();
     new spell_rog_redirect();
