@@ -2204,7 +2204,12 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             Position oldPos;
             GetPosition(&oldPos);
             Relocate(x, y, z, orientation);
-            SendTeleportPacket(oldPos); // this automatically relocates to oldPos in order to broadcast the packet in the right place
+            SendTeleportPacket(oldPos); // broadcasts from oldPos, then restores destination coords
+
+            // Keep server map/grid in sync with the destination immediately. Leaving the
+            // player at the departure cell until MOVE_TELEPORT_ACK makes post-teleport
+            // speed/combat updates (Shadowstep) desync observers for tens of seconds.
+            UpdatePosition(x, y, z, orientation, true);
         }
     }
     else

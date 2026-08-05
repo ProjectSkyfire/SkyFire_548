@@ -8722,11 +8722,12 @@ void Unit::SendTeleportPacket(Position& pos)
     // SMSG_MOVE_UPDATE_TELEPORT is sent to nearby players to signal the teleport
     // SMSG_MOVE_TELEPORT is sent to self in order to trigger CMSG_MOVE_TELEPORT_ACK and update the position server side
 
-    // This oldPos actually contains the destination position if the Unit is a Player.
-    Position oldPos = { GetPositionX(), GetPositionY(), GetPositionZMinusOffset(), GetOrientation() };
+    // Players are already at the destination when TeleportTo calls this; creatures are still
+    // at the departure point and `pos` is the destination.
+    Position const preBroadcastPos = { GetPositionX(), GetPositionY(), GetPositionZMinusOffset(), GetOrientation() };
 
     if (GetTypeId() == TypeID::TYPEID_UNIT)
-        Relocate(&pos); // Relocate the unit to its new position in order to build the packets correctly.
+        Relocate(&pos); // Build packets at the destination for creatures.
 
     WorldPacket data(SMSG_MOVE_UPDATE_TELEPORT, 38);
     WriteMovementInfo(data);
@@ -8738,14 +8739,25 @@ void Unit::SendTeleportPacket(Position& pos)
         ToPlayer()->SendDirectMessage(&data2); // Send the SMSG_MOVE_TELEPORT packet to self.
     }
 
-    // Relocate the player/creature to its old position, so we can broadcast to nearby players correctly
+    // Broadcast from the departure cell so nearby observers still receive the packet,
+    // then put the unit back where packets claimed it is.
     if (GetTypeId() == TypeID::TYPEID_PLAYER)
+    {
+        // `pos` is the pre-teleport location; `preBroadcastPos` is the destination.
         Relocate(&pos);
+        SendMessageToSet(&data, false);
+        // Remaining at the old position until MOVE_TELEPORT_ACK desyncs observers:
+        // Shadowstep's speed aura (and other post-teleport updates) would apply at the
+        // departure point while clients already show the player at the destination,
+        // causing rubber-band / C2C lag until a later visibility refresh (~30-60s).
+        Relocate(&preBroadcastPos);
+    }
     else
-        Relocate(&oldPos);
-
-    // Broadcast the packet to everyone except self.
-    SendMessageToSet(&data, false);
+    {
+        Relocate(&preBroadcastPos);
+        SendMessageToSet(&data, false);
+        // Creature callers (NearTeleportTo) UpdatePosition to the destination next.
+    }
 }
 
 bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool teleport)
