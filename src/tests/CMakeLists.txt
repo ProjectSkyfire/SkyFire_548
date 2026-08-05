@@ -491,6 +491,17 @@ target_include_directories(paladin_spell_calculation_tests PRIVATE
 
 add_test(NAME paladin_spell_calculation_tests COMMAND paladin_spell_calculation_tests)
 
+add_executable(pvp_resilience_tests
+  PvpResilienceTests.cpp
+)
+
+target_include_directories(pvp_resilience_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Combat
+)
+
+add_test(NAME pvp_resilience_tests COMMAND pvp_resilience_tests)
+
 add_executable(paladin_script_registration_tests
   PaladinScriptRegistrationTests.cpp
 )
