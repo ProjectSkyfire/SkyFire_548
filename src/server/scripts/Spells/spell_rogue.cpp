@@ -1959,6 +1959,57 @@ public:
     }
 };
 
+// 73981, 110730 - Redirect
+class spell_rog_redirect : public SpellScriptLoader
+{
+public:
+    spell_rog_redirect() : SpellScriptLoader("spell_rog_redirect") { }
+
+    class spell_rog_redirect_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_redirect_SpellScript);
+
+        SpellCastResult CheckCast()
+        {
+            Player* rogue = GetCaster()->ToPlayer();
+            if (!rogue)
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+
+            if (!rogue->GetComboPoints())
+                return SpellCastResult::SPELL_FAILED_NO_COMBO_POINTS;
+
+            Unit* unitTarget = GetExplTargetUnit();
+            if (!unitTarget || !rogue->GetComboTarget() || rogue->GetComboTarget() == unitTarget->GetGUID())
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+
+            return SpellCastResult::SPELL_CAST_OK;
+        }
+
+        void HandleHit()
+        {
+            Player* rogue = GetCaster()->ToPlayer();
+            Unit* target = GetHitUnit();
+            if (!rogue || !target)
+                return;
+
+            int8 cp = rogue->GetComboPoints();
+            rogue->ClearComboPoints();
+            rogue->AddComboPoints(target, cp, GetSpell());
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_redirect_SpellScript::CheckCast);
+            OnHit += SpellHitFn(spell_rog_redirect_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_redirect_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -1979,6 +2030,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_master_of_subtlety();
     new spell_rog_preparation();
     new spell_rog_recuperate();
+    new spell_rog_redirect();
     new spell_rog_restless_blades();
     new spell_rog_rupture();
     new spell_rog_sanguinary_vein();
