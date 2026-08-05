@@ -26,6 +26,33 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 
+// 77314 - Burn Constriction Totem
+class spell_gen_burn_constriction_totem : public SpellScriptLoader
+{
+public:
+    spell_gen_burn_constriction_totem() : SpellScriptLoader("spell_gen_burn_constriction_totem") {}
+
+    class spell_gen_burn_constriction_totem_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_gen_burn_constriction_totem_SpellScript);
+
+        void SetTarget(WorldObject*& target)
+        {
+            target = GetCaster()->FindNearestCreature(41202, 10.0f, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_gen_burn_constriction_totem_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_gen_burn_constriction_totem_SpellScript();
+    }
+};
+
 // 125122 - Rice Pudding
 class spell_gen_rice_pudding : public SpellScriptLoader
 {
@@ -3739,6 +3766,7 @@ class spell_gen_override_display_power : public SpellScriptLoader
 
 void AddSC_generic_spell_scripts()
 {
+    new spell_gen_burn_constriction_totem();
     new spell_gen_rice_pudding();
     new spell_gen_rock_jump_a();
     new spell_gen_rock_jump_b();
