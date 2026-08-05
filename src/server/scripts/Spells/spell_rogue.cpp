@@ -100,6 +100,7 @@ enum RogueSpells
     SPELL_ROGUE_NERVE_STRIKE_EFFECT                 = 112947,
     SPELL_ROGUE_PREPARATION                         = 14185,
     SPELL_ROGUE_RELENTLESS_STRIKES_ENERGIZE         = 98440,
+    SPELL_ROGUE_WOUND_POISON                        = 8680,
 };
 
 namespace RogueStealthHelpers
@@ -2291,6 +2292,34 @@ public:
     }
 };
 
+// 8680 - Wound Poison (ensure healing reduction tooltip/amount is 25%)
+class spell_rog_wound_poison : public SpellScriptLoader
+{
+public:
+    spell_rog_wound_poison() : SpellScriptLoader("spell_rog_wound_poison") { }
+
+    class spell_rog_wound_poison_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_wound_poison_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            // MoP: healing effects reduced by 25%. Force amount so client tooltip is correct.
+            amount = -25;
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_rog_wound_poison_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_MOD_HEALING_PCT);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_wound_poison_AuraScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -2330,5 +2359,6 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_vanish();
     new spell_rog_vanish_initial();
     new spell_rog_venomous_wounds();
+    new spell_rog_wound_poison();
 
 }
