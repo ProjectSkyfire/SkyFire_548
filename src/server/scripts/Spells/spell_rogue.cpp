@@ -2320,6 +2320,41 @@ public:
     }
 };
 
+// 115834 - Shroud of Concealment (do not cloak combat/casting party members)
+class spell_rog_shroud_of_concealment : public SpellScriptLoader
+{
+public:
+    spell_rog_shroud_of_concealment() : SpellScriptLoader("spell_rog_shroud_of_concealment") { }
+
+    class spell_rog_shroud_of_concealment_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_shroud_of_concealment_SpellScript);
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if([](WorldObject* target)
+            {
+                Unit* unit = target->ToUnit();
+                if (!unit)
+                    return true;
+                if (unit->IsVehicle() && unit->GetTypeId() != TypeID::TYPEID_PLAYER)
+                    return true;
+                return unit->IsInCombat() || unit->HasUnitState(UNIT_STATE_CASTING);
+            });
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rog_shroud_of_concealment_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_shroud_of_concealment_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -2350,6 +2385,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_rupture();
     new spell_rog_sanguinary_vein();
     new spell_rog_shadowstep();
+    new spell_rog_shroud_of_concealment();
     new spell_rog_sinister_strike();
     new spell_rog_stealth();
     new spell_rog_stealth_subterfuge();
