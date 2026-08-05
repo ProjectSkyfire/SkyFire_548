@@ -63,7 +63,7 @@ foreach(_sf_flag_var
     sf_scrub_cached_msvc_options(${_sf_flag_var} ${SF_LEGACY_MSVC_CACHE_OPTIONS})
 endforeach()
 
-set(MSVC_EXPECTED_VERSION 19.44.35217.0)
+set(MSVC_EXPECTED_VERSION 19.42.34438.0)
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MSVC_EXPECTED_VERSION)
   message(FATAL_ERROR "MSVC: SkyFire requires version ${MSVC_EXPECTED_VERSION} (MSVC 2022) to build but found ${CMAKE_CXX_COMPILER_VERSION}")
 endif()
