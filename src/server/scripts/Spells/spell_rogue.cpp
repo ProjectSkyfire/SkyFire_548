@@ -87,7 +87,10 @@ enum RogueSpells
     SPELL_ROGUE_VANISH_AURA                         = 11327,
     SPELL_ROGUE_VENOMOUS_VIM                        = 51637,
     SPELL_ROGUE_VENOMOUS_WOUND                      = 79136,
-    SPELL_ROGUE_VENOMOUS_WOUNDS                     = 79134
+    SPELL_ROGUE_VENOMOUS_WOUNDS                     = 79134,
+    SPELL_ROGUE_DISMANTLE                           = 51722,
+    SPELL_ROGUE_EVASION                             = 5277,
+    SPELL_ROGUE_PREPARATION                         = 14185,
 };
 
 namespace RogueStealthHelpers
@@ -1915,6 +1918,47 @@ public:
     }
 };
 
+// 14185 - Preparation
+class spell_rog_preparation : public SpellScriptLoader
+{
+public:
+    spell_rog_preparation() : SpellScriptLoader("spell_rog_preparation") { }
+
+    class spell_rog_preparation_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_preparation_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_VANISH) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_SPRINT) &&
+                sSpellMgr->GetSpellInfo(SPELL_ROGUE_EVASION);
+        }
+
+        void HandleCast()
+        {
+            Player* rogue = GetCaster()->ToPlayer();
+            if (!rogue)
+                return;
+
+            rogue->RemoveSpellCooldown(SPELL_ROGUE_VANISH, true);
+            rogue->RemoveSpellCooldown(SPELL_ROGUE_SPRINT, true);
+            rogue->RemoveSpellCooldown(SPELL_ROGUE_EVASION, true);
+            rogue->RemoveSpellCooldown(SPELL_ROGUE_DISMANTLE, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnCast += SpellCastFn(spell_rog_preparation_SpellScript::HandleCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_preparation_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
@@ -1933,6 +1977,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_killing_spree();
     new spell_rog_killing_spree_target_selector();
     new spell_rog_master_of_subtlety();
+    new spell_rog_preparation();
     new spell_rog_recuperate();
     new spell_rog_restless_blades();
     new spell_rog_rupture();
@@ -1947,4 +1992,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_vanish();
     new spell_rog_vanish_initial();
     new spell_rog_venomous_wounds();
+
 }
