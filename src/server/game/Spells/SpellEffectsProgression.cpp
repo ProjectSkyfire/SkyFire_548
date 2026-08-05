@@ -114,6 +114,9 @@ void Spell::EffectLearnSpell(SpellEffIndex effIndex)
 
     uint32 spellToLearn = Skyfire::Spells::ShouldLearnSpellFromEffectDamage(m_spellInfo->Id) ?
         damage : m_spellInfo->Effects[effIndex].TriggerSpell;
+    if (!spellToLearn)
+        return;
+
     player->learnSpell(spellToLearn, false);
 
     SF_LOG_DEBUG("spells", "Spell: Player %u has learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow());
