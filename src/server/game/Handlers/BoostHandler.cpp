@@ -87,7 +87,7 @@ void WorldSession::SendBattlePayDistributionUpdate(uint64 playerGuid, int8 bonus
     SendPacket(&data);
 }
 
-void WorldSession::HandleBattleCharBoost(WorldPacket& recvData)
+void WorldSession::HandleBattlePayCharBoost(WorldPacket& recvData)
 {
     if (!HasBoost())
     {
