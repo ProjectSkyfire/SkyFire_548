@@ -90,8 +90,10 @@ enum RogueSpells
     SPELL_ROGUE_VENOMOUS_WOUNDS                     = 79134,
     SPELL_ROGUE_CHEAP_SHOT                          = 1833,
     SPELL_ROGUE_DEADLY_BREW                         = 51626,
+    SPELL_ROGUE_DIRTY_TRICKS                        = 108216,
     SPELL_ROGUE_DISMANTLE                           = 51722,
     SPELL_ROGUE_EVASION                             = 5277,
+    SPELL_ROGUE_GLYPH_OF_BLIND                      = 91299,
     SPELL_ROGUE_MASTER_POISONER                     = 58410,
     SPELL_ROGUE_MASTER_POISONER_DEBUFF              = 93068,
     SPELL_ROGUE_NERVE_STRIKE                        = 108210,
@@ -2220,10 +2222,80 @@ public:
     }
 };
 
+// 2094 - Blind (Glyph of Blind removes DoTs)
+class spell_rog_blind : public SpellScriptLoader
+{
+public:
+    spell_rog_blind() : SpellScriptLoader("spell_rog_blind") { }
+
+    class spell_rog_blind_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_blind_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_ROGUE_GLYPH_OF_BLIND);
+        }
+
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target || !caster->HasAura(SPELL_ROGUE_GLYPH_OF_BLIND))
+                return;
+
+            bool dirtyTricks = caster->HasAura(SPELL_ROGUE_DIRTY_TRICKS);
+            Unit::AuraEffectList const& periodicDamage = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+            Unit::AuraEffectList const& periodicDamagePct = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+            Unit::AuraEffectList const& periodicLeech = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_LEECH);
+
+            std::set<Aura*> toRemove;
+            auto collect = [&](Unit::AuraEffectList const& list)
+            {
+                for (AuraEffect const* aurEff : list)
+                {
+                    SpellInfo const* spellInfo = aurEff->GetSpellInfo();
+                    AuraApplication const* app = aurEff->GetBase()->GetApplicationOfTarget(target->GetGUID());
+                    if (!app || app->IsPositive() || spellInfo->Id == 32409) // SW:D
+                        continue;
+
+                    if (dirtyTricks && aurEff->GetCasterGUID() == caster->GetGUID())
+                    {
+                        if (spellInfo->Dispel == DISPEL_POISON ||
+                            (spellInfo->GetAllEffectsMechanicMask() & (1 << MECHANIC_BLEED)) ||
+                            spellInfo->Id == SPELL_ROGUE_VENOMOUS_WOUND)
+                            continue;
+                    }
+
+                    toRemove.insert(aurEff->GetBase());
+                }
+            };
+
+            collect(periodicDamage);
+            collect(periodicDamagePct);
+            collect(periodicLeech);
+
+            for (Aura* aura : toRemove)
+                target->RemoveAura(aura);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_rog_blind_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_blind_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
     new spell_rog_blade_flurry();
+    new spell_rog_blind();
     new spell_rog_cheat_death();
     new spell_rog_combat_potency();
     new spell_rog_combo_point_delayed();
