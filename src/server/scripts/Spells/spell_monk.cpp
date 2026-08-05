@@ -3258,7 +3258,7 @@ class spell_monk_tigereye_brew_stacks : public SpellScriptLoader
 
         void Register()
         {
-            AfterEffectApply += AuraEffectApplyFn(spell_monk_tigereye_brew_stacks_AuraScript::OnApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectApply += AuraEffectApplyFn(spell_monk_tigereye_brew_stacks_AuraScript::OnApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
@@ -3318,6 +3318,7 @@ void AddSC_monk_spell_scripts()
     new spell_monk_breath_of_fire();
     new spell_monk_soothing_mist();
     new spell_monk_zen_pilgrimage();
+    new spell_monk_zen_pilgrimage_return();
     new spell_monk_blackout_kick();
     new spell_monk_fortifying_brew();
     new spell_monk_touch_of_death();

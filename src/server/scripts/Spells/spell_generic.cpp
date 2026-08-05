@@ -950,6 +950,7 @@ class spell_gen_clone : public SpellScriptLoader
                 }
                 else
                 {
+                    // MoP clone spells (e.g. 45204) put SCRIPT_EFFECT on EFFECT_2.
                     OnEffectHitTarget += SpellEffectFn(spell_gen_clone_SpellScript::HandleScriptEffect, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
                     OnEffectHitTarget += SpellEffectFn(spell_gen_clone_SpellScript::HandleScriptEffect, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
                 }

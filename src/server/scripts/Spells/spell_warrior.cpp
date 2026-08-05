@@ -362,8 +362,9 @@ public:
 
         void Register() OVERRIDE
         {
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_intimidating_shout_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            // MoP: primary target is EFFECT_0/1 (unit target); AoE fear/root are EFFECT_2/3 (src area enemy).
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_intimidating_shout_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_intimidating_shout_SpellScript::FilterTargets, EFFECT_3, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
@@ -947,7 +948,6 @@ public:
         void Register() OVERRIDE
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_slam_cleave_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_warr_slam_cleave_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
@@ -983,7 +983,8 @@ public:
 
         void Register() OVERRIDE
         {
-            OnEffectProc += AuraEffectProcFn(spell_warr_sword_and_board_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+            // MoP talent 46953 uses SPELL_AURA_DUMMY, not PROC_TRIGGER_SPELL.
+            OnEffectProc += AuraEffectProcFn(spell_warr_sword_and_board_AuraScript::OnProc, EFFECT_0, SPELL_AURA_DUMMY);
         }
     };
 

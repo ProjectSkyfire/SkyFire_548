@@ -67,7 +67,8 @@ public:
 
         void Register() override
         {
-            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_dash_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_INCREASE_SPEED);
+            // MoP Dash uses SPELL_AURA_MOD_SPEED_ALWAYS (129), not MOD_INCREASE_SPEED (31).
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_dash_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_SPEED_ALWAYS);
         }
     };
 
@@ -88,14 +89,6 @@ public:
     {
         PrepareAuraScript(spell_dru_eclipse_AuraScript);
 
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_NATURES_GRACE) ||
-                !sSpellMgr->GetSpellInfo(SPELL_DRUID_NATURES_GRACE_TRIGGER))
-                return false;
-            return true;
-        }
-
         bool Load() override
         {
             return GetCaster() && GetCaster()->GetTypeId() == TypeID::TYPEID_PLAYER;
@@ -107,7 +100,10 @@ public:
             if (!caster)
                 return;
 
-            if (caster->ToPlayer()->GetAuraOfRankedSpell(SPELL_DRUID_NATURES_GRACE))
+            // Nature's Grace (16880) was removed in MoP; only reset if the spell still exists.
+            if (sSpellMgr->GetSpellInfo(SPELL_DRUID_NATURES_GRACE) &&
+                sSpellMgr->GetSpellInfo(SPELL_DRUID_NATURES_GRACE_TRIGGER) &&
+                caster->ToPlayer()->GetAuraOfRankedSpell(SPELL_DRUID_NATURES_GRACE))
                 caster->ToPlayer()->RemoveSpellCooldown(SPELL_DRUID_NATURES_GRACE_TRIGGER, true);
         }
 
@@ -264,6 +260,7 @@ public:
 
         void Register() override
         {
+            // Glyph spell 54832 uses EFFECT_0 DUMMY. Do not bind this script to Innervate (29166).
             DoCheckProc += AuraCheckProcFn(spell_dru_glyph_of_innervate_AuraScript::CheckProc);
             OnEffectProc += AuraEffectProcFn(spell_dru_glyph_of_innervate_AuraScript::HandleEffectProc, EFFECT_0, SPELL_AURA_DUMMY);
         }

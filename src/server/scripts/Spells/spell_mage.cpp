@@ -33,9 +33,10 @@ enum MageSpells
 
     SPELL_MAGE_FLAMESTRIKE                       = 2120,
 
-    SPELL_MAGE_RING_OF_FROST_SUMMON              = 82676, // obsolete SpellID
+    SPELL_MAGE_RING_OF_FROST_SUMMON              = 113724, // MoP cast spell (was 82676 in Cata)
     SPELL_MAGE_RING_OF_FROST_FREEZE              = 82691,
     SPELL_MAGE_RING_OF_FROST_DUMMY               = 91264,
+    SPELL_MAGE_RING_OF_FROST_TICK                = 136511, // periodic aura triggered by 113724
 
     SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
 
@@ -596,7 +597,6 @@ public:
         void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_living_bomb_explosion_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
-            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_living_bomb_explosion_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
@@ -755,8 +755,8 @@ uint32 const spell_mage_polymorph_cast_visual::spell_mage_polymorph_cast_visual_
     SPELL_MAGE_SHEEP_FORM
 };
 
-// 82676 - Ring of Frost
-/// Updated 4.3.4
+// 136511 - Ring of Frost (periodic, triggered by 113724)
+/// MoP: periodic aura lives on EFFECT_0 (Cata used EFFECT_1 on a different spell).
 class spell_mage_ring_of_frost : public SpellScriptLoader
 {
 public:
@@ -793,7 +793,12 @@ public:
         void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             std::list<Creature*> MinionList;
-            GetTarget()->GetAllMinionsByEntry(MinionList, GetSpellInfo()->Effects[EFFECT_0].MiscValue);
+            // MoP summon creature entry is on the cast spell (113724) EFFECT_0, not this aura.
+            SpellInfo const* summonInfo = sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_SUMMON);
+            if (!summonInfo)
+                return;
+
+            GetTarget()->GetAllMinionsByEntry(MinionList, summonInfo->Effects[EFFECT_0].MiscValue);
 
             // Get the last summoned RoF, save it and despawn older ones
             for (std::list<Creature*>::iterator itr = MinionList.begin(); itr != MinionList.end(); ++itr)
@@ -819,8 +824,8 @@ public:
 
         void Register() override
         {
-            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mage_ring_of_frost_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-            OnEffectApply += AuraEffectApplyFn(spell_mage_ring_of_frost_AuraScript::Apply, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mage_ring_of_frost_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+            OnEffectApply += AuraEffectApplyFn(spell_mage_ring_of_frost_AuraScript::Apply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
 
@@ -852,7 +857,9 @@ public:
 
         void FilterTargets(std::list<WorldObject*>& targets)
         {
-            float outRadius = sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_SUMMON)->Effects[EFFECT_0].CalcRadius();
+            // MoP: outer radius comes from cast spell 113724 EFFECT_2 dummy radius (was summon spell EFFECT_0 in Cata).
+            SpellInfo const* ringInfo = sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_SUMMON);
+            float outRadius = ringInfo ? ringInfo->Effects[EFFECT_2].CalcRadius() : 10.0f;
             float inRadius = 4.7f;
 
             for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)

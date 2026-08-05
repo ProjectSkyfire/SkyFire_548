@@ -545,9 +545,8 @@ public:
         {
             OnCheckCast += SpellCheckCastFn(spell_q26720_harris_ampule_SpellScript::CheckCast);
             OnCast += SpellCastFn(spell_q26720_harris_ampule_SpellScript::HandleAmpuleCast);
+            // MoP DBC: EFFECT_0 is SPELL_EFFECT_DUMMY only.
             OnEffectHitTarget += SpellEffectFn(spell_q26720_harris_ampule_SpellScript::HandleAmpule, EFFECT_0, SPELL_EFFECT_DUMMY);
-            OnEffectHitTarget += SpellEffectFn(spell_q26720_harris_ampule_SpellScript::HandleAmpule, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-            OnEffectHitTarget += SpellEffectFn(spell_q26720_harris_ampule_SpellScript::HandleAmpule, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
         }
     };
 
