@@ -34,6 +34,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellCalculations.h"
 #include "SpellInfo.h"
+#include "ShamanWeaponImbue.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "SpellValidation.h"
@@ -6761,6 +6762,10 @@ SpellCastResult Spell::CheckItems()
     Player* player = m_caster->ToPlayer();
     if (!player)
         return SpellCastResult::SPELL_CAST_OK;
+
+    if (!m_targets.GetItemTargetGUID() && Skyfire::Spells::IsSelfCastShamanWeaponImbue(m_spellInfo->Id))
+        if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, Skyfire::Spells::GetSelfCastShamanWeaponImbueEquipmentSlot()))
+            m_targets.SetItemTarget(item);
 
     if (!m_CastItem)
     {

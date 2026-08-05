@@ -24,6 +24,7 @@
 #include "SpellEffectMetadata.h"
 #include "SpellItemMetadata.h"
 #include "SpellMovementMetadata.h"
+#include "ShamanWeaponImbue.h"
 #include "SpellSummonMetadata.h"
 #include "SpellTargeting.h"
 #include "SpellValidation.h"
@@ -1055,6 +1056,21 @@ namespace
             "Temporary enchant spell 37360 should last 5 minutes");
         passed &= Expect(Skyfire::Spells::GetTemporaryItemEnchantDurationSeconds(12345, SPELLFAMILY_GENERIC, 999) == 3600,
             "Default temporary enchants should last one hour");
+
+        passed &= Expect(Skyfire::Spells::IsSelfCastShamanWeaponImbue(8017),
+            "Rockbiter Weapon should be treated as a self-cast shaman weapon imbue");
+        passed &= Expect(Skyfire::Spells::IsSelfCastShamanWeaponImbue(8024),
+            "Flametongue Weapon should be treated as a self-cast shaman weapon imbue");
+        passed &= Expect(Skyfire::Spells::IsSelfCastShamanWeaponImbue(8033),
+            "Frostbrand Weapon should be treated as a self-cast shaman weapon imbue");
+        passed &= Expect(Skyfire::Spells::IsSelfCastShamanWeaponImbue(8232),
+            "Windfury Weapon should be treated as a self-cast shaman weapon imbue");
+        passed &= Expect(Skyfire::Spells::IsSelfCastShamanWeaponImbue(51730),
+            "Earthliving Weapon should be treated as a self-cast shaman weapon imbue");
+        passed &= Expect(!Skyfire::Spells::IsSelfCastShamanWeaponImbue(25122),
+            "Generic wizard oil should still require an explicit item target");
+        passed &= Expect(Skyfire::Spells::GetSelfCastShamanWeaponImbueEquipmentSlot() == 15,
+            "Self-cast shaman weapon imbues should target the main-hand equipment slot");
 
         return passed;
     }
