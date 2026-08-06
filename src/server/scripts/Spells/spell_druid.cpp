@@ -49,6 +49,9 @@ enum DruidSpells
     SPELL_DRUID_SKULL_BASH_MANA_COST        = 82365,
     SPELL_DRUID_SKULL_BASH_INTERRUPT        = 93985,
     SPELL_DRUID_SKULL_BASH_CHARGE           = 93983,
+    SPELL_DRUID_RIP                         = 1079,
+    SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE     = 67598,
+    SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE_HEAL= 101024,
 };
 
 // 1850 - Dash
@@ -1059,12 +1062,69 @@ public:
     }
 };
 
+// 22568 - Ferocious Bite
+class spell_dru_ferocious_bite : public SpellScriptLoader
+{
+public:
+    spell_dru_ferocious_bite() : SpellScriptLoader("spell_dru_ferocious_bite") { }
+
+    class spell_dru_ferocious_bite_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_ferocious_bite_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_RIP)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE_HEAL);
+        }
+
+        void HandleHit()
+        {
+            Player* player = GetCaster()->ToPlayer();
+            Unit* target = GetHitUnit();
+            if (!player || !target)
+                return;
+
+            int32 energyCost = GetSpell()->GetPowerCost();
+
+            if (int32 energyBoost = player->GetPower(POWER_ENERGY))
+            {
+                energyBoost = std::min(energyBoost, 25);
+                SetHitDamage(int32(GetHitDamage() * (1.0f + energyBoost / 25.0f)));
+                player->ModifyPower(POWER_ENERGY, -energyBoost);
+                energyCost += energyBoost;
+            }
+
+            if (AuraEffect const* glyph = player->GetAuraEffect(SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE, EFFECT_1))
+                if (glyph->GetAmount() > 0)
+                    player->CastCustomSpell(SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE_HEAL, SPELLVALUE_BASE_POINT0,
+                        energyCost * 2 / glyph->GetAmount(), player, true);
+
+            if (target->GetHealthPct() < 25.0f)
+                if (Aura* rip = target->GetAura(SPELL_DRUID_RIP, player->GetGUID()))
+                    rip->RefreshDuration();
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_ferocious_bite_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_ferocious_bite_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
     new spell_dru_eclipse("spell_dru_eclipse_lunar");
     new spell_dru_eclipse("spell_dru_eclipse_solar");
     new spell_dru_eclipse_energize();
+    new spell_dru_ferocious_bite();
     new spell_dru_glyph_of_innervate();
     new spell_dru_innervate();
     new spell_dru_lacerate();
