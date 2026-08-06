@@ -116,6 +116,29 @@ target_include_directories(login_identity_tests PRIVATE
 
 add_test(NAME login_identity_tests COMMAND login_identity_tests)
 
+add_executable(totp_tests
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Auth/TOTP.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography/CryptoRandom.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging/Errors.cpp
+  TOTPTests.cpp
+)
+
+target_include_directories(totp_tests PRIVATE
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Auth
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cryptography
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Platform
+  ${OPENSSL_INCLUDE_DIR}
+)
+
+target_link_libraries(totp_tests
+  ${OPENSSL_LIBRARIES}
+)
+
+add_test(NAME totp_tests COMMAND totp_tests)
+
 add_executable(account_data_utils_tests
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities/AccountDataUtils.cpp
   AccountDataUtilsTests.cpp

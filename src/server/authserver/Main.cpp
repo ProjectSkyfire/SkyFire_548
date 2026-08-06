@@ -85,6 +85,8 @@ namespace
 
         options.AllowUpdateHashMismatch =
             sConfigMgr->GetBoolDefault("LoginDatabase.AllowUpdateHashMismatch", true);
+        options.ImportPendingUpdates =
+            sConfigMgr->GetBoolDefault("LoginDatabase.ImportPendingUpdates", false);
 
         return options;
     }

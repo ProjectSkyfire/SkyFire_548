@@ -11,11 +11,16 @@ Category: commandscripts
 EndScriptData */
 
 #include "AccountMgr.h"
+#include "Auth/TOTP.h"
 #include "Chat.h"
 #include "Language.h"
 #include "NetworkAddress.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+
+#include <cctype>
+#include <iomanip>
+#include <sstream>
 
 class account_commandscript : public CommandScript
 {
@@ -50,8 +55,17 @@ public:
         {
             { "email",          rbac::RBAC_PERM_COMMAND_ACCOUNT_CONVERT_EMAIL,   false, &HandleAccountConvertEmailCommand, "",      },
         };
+        static std::vector<ChatCommand> accountTwoFactorCommandTable =
+        {
+            { "setup",          rbac::RBAC_PERM_COMMAND_ACCOUNT_TWOFACTOR_SETUP,   false, &HandleAccountTwoFactorSetupCommand,   "", },
+            { "confirm",        rbac::RBAC_PERM_COMMAND_ACCOUNT_TWOFACTOR_CONFIRM, false, &HandleAccountTwoFactorConfirmCommand, "", },
+            { "status",         rbac::RBAC_PERM_COMMAND_ACCOUNT_TWOFACTOR_STATUS,  false, &HandleAccountTwoFactorStatusCommand,  "", },
+            { "disable",        rbac::RBAC_PERM_COMMAND_ACCOUNT_TWOFACTOR_DISABLE, false, &HandleAccountTwoFactorDisableCommand, "", },
+            { "reset",          rbac::RBAC_PERM_COMMAND_ACCOUNT_TWOFACTOR_RESET,   true,  &HandleAccountTwoFactorResetCommand,   "", },
+        };
         static std::vector<ChatCommand> accountCommandTable =
         {
+            { "2fa",            rbac::RBAC_PERM_COMMAND_ACCOUNT_TWOFACTOR,       false, NULL,                               "", accountTwoFactorCommandTable },
             { "addon",          rbac::RBAC_PERM_COMMAND_ACCOUNT_ADDON,           false, &HandleAccountAddonCommand,        "",      },
             { "boost",          rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST,           false, NULL,          "", accountBoostCommandTable },
             { "convert",        rbac::RBAC_PERM_COMMAND_ACCOUNT_CONVERT,         false, NULL,        "", accountConvertCommandTable },
@@ -68,6 +82,183 @@ public:
             { "account",        rbac::RBAC_PERM_COMMAND_ACCOUNT,                 true,  NULL,              "",  accountCommandTable },
         };
         return commandTable;
+    }
+
+    static std::string UrlEncode(std::string const& value)
+    {
+        std::ostringstream out;
+        out.fill('0');
+        out << std::hex << std::uppercase;
+
+        for (unsigned char ch : value)
+        {
+            if (std::isalnum(ch) || ch == '-' || ch == '_' || ch == '.' || ch == '~')
+                out << ch;
+            else
+                out << '%' << std::setw(2) << int(ch);
+        }
+
+        return out.str();
+    }
+
+    static bool HandleAccountTwoFactorSetupCommand(ChatHandler* handler, char const* args)
+    {
+        if (!handler->GetSession() || !*args)
+        {
+            handler->SendSysMessage(".account 2fa setup <password>");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        char* password = strtok((char*)args, " ");
+        uint32 accountId = handler->GetSession()->GetAccountId();
+        if (!password || !AccountMgr::CheckPassword(accountId, std::string(password)))
+        {
+            handler->SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        AccountTwoFactorInfo info;
+        if (AccountMgr::GetTwoFactorInfo(accountId, info) && info.Enabled)
+        {
+            handler->SendSysMessage("Two-factor authentication is already enabled.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        std::string secret = AccountMgr::StartTwoFactorSetup(accountId);
+        if (secret.empty())
+        {
+            handler->SendSysMessage("Two-factor setup failed.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        std::string accountName;
+        AccountMgr::GetName(accountId, accountName);
+        std::string const issuer = "SkyFire";
+        std::string const uri = "otpauth://totp/" + UrlEncode(issuer) + ":" + UrlEncode(accountName) +
+            "?secret=" + secret + "&issuer=" + UrlEncode(issuer) + "&digits=6&period=30";
+
+        handler->PSendSysMessage("Two-factor secret: %s", secret.c_str());
+        handler->PSendSysMessage("Authenticator URI: %s", uri.c_str());
+        handler->SendSysMessage("Add the secret to your authenticator app, then run .account 2fa confirm <code>.");
+        return true;
+    }
+
+    static bool HandleAccountTwoFactorConfirmCommand(ChatHandler* handler, char const* args)
+    {
+        if (!handler->GetSession() || !*args)
+        {
+            handler->SendSysMessage(".account 2fa confirm <code>");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        char* code = strtok((char*)args, " ");
+        if (!code || !AccountMgr::ConfirmTwoFactorSetup(handler->GetSession()->GetAccountId(), std::string(code)))
+        {
+            handler->SendSysMessage("Two-factor confirmation failed. Check the code and server time.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        handler->SendSysMessage("Two-factor authentication is now enabled.");
+        return true;
+    }
+
+    static bool HandleAccountTwoFactorStatusCommand(ChatHandler* handler, char const* /*args*/)
+    {
+        if (!handler->GetSession())
+        {
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        AccountTwoFactorInfo info;
+        if (!AccountMgr::GetTwoFactorInfo(handler->GetSession()->GetAccountId(), info))
+        {
+            handler->SendSysMessage("Two-factor authentication is disabled.");
+            return true;
+        }
+
+        handler->SendSysMessage(info.Enabled ? "Two-factor authentication is enabled." :
+            "Two-factor authentication setup is pending confirmation.");
+        return true;
+    }
+
+    static bool HandleAccountTwoFactorDisableCommand(ChatHandler* handler, char const* args)
+    {
+        if (!handler->GetSession() || !*args)
+        {
+            handler->SendSysMessage(".account 2fa disable <password> <code>");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        char* password = strtok((char*)args, " ");
+        char* code = strtok(NULL, " ");
+        uint32 accountId = handler->GetSession()->GetAccountId();
+        if (!password || !code || !AccountMgr::CheckPassword(accountId, std::string(password)))
+        {
+            handler->SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        AccountTwoFactorInfo info;
+        if (!AccountMgr::GetTwoFactorInfo(accountId, info) || !info.Enabled)
+        {
+            handler->SendSysMessage("Two-factor authentication is not enabled.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        Skyfire::Auth::TOTP::ValidationResult validation =
+            Skyfire::Auth::TOTP::ValidateToken(info.Secret, std::string(code), 1, info.LastUsedStep);
+        if (!validation.Success)
+        {
+            handler->SendSysMessage("Two-factor code is invalid.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        AccountMgr::DisableTwoFactor(accountId);
+        handler->SendSysMessage("Two-factor authentication is now disabled.");
+        return true;
+    }
+
+    static bool HandleAccountTwoFactorResetCommand(ChatHandler* handler, char const* args)
+    {
+        if (!*args)
+        {
+            handler->SendSysMessage(".account 2fa reset <accountName>");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        char* accountName = strtok((char*)args, " ");
+        if (!accountName)
+        {
+            handler->SendSysMessage(".account 2fa reset <accountName>");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        std::string normalizedName = accountName;
+        AccountMgr::normalizeString(normalizedName);
+        uint32 accountId = AccountMgr::GetId(normalizedName);
+        if (!accountId)
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, accountName);
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        AccountMgr::DisableTwoFactor(accountId);
+        handler->PSendSysMessage("Two-factor authentication has been reset for account %s.", normalizedName.c_str());
+        return true;
     }
 
     static bool HandleAccountAddonCommand(ChatHandler* handler, char const* args)

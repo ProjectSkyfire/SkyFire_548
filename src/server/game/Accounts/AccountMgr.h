@@ -30,6 +30,14 @@ enum PasswordChangeSecurity
     PW_RBAC
 };
 
+struct AccountTwoFactorInfo
+{
+    bool Exists = false;
+    bool Enabled = false;
+    std::string Secret;
+    uint64 LastUsedStep = 0;
+};
+
 #define MAX_ACCOUNT_STR 16
 #define MAX_EMAIL_STR 64
 
@@ -57,6 +65,10 @@ public:
     static AccountOpResult ConvertToEmailLogin(uint32 accountId, std::string email, std::string newPassword);
     static bool CheckPassword(uint32 accountId, std::string password);
     static bool CheckEmail(uint32 accountId, std::string newEmail);
+    static bool GetTwoFactorInfo(uint32 accountId, AccountTwoFactorInfo& info);
+    static std::string StartTwoFactorSetup(uint32 accountId);
+    static bool ConfirmTwoFactorSetup(uint32 accountId, std::string const& token, uint32 window = 1);
+    static bool DisableTwoFactor(uint32 accountId);
 
     static uint32 GetId(std::string const& username);
     static AccountTypes GetSecurity(uint32 accountId);

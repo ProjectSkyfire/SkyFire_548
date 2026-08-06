@@ -19,7 +19,7 @@
 #include "NetworkAddress.h"
 #include "openssl/crypto.h"
 #include "RealmList.h"
-#include "TOTP.h"
+#include "Auth/TOTP.h"
 
 enum eAuthCmd
 {
@@ -164,6 +164,71 @@ namespace
         EndianConvertPtr<uint16>(&packet[0]);
         return true;
     }
+
+    void QueueLogonProofFailure(RealmSocket& socket)
+    {
+        char data[4] = { AUTH_LOGON_PROOF, uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT), 3, 0 };
+        socket.QueueSend(data, sizeof(data));
+    }
+
+    void RecordFailedLogon(uint32 accountId, std::string const& login, RealmSocket& socket)
+    {
+        uint32 maxWrongPassCount = sConfigMgr->GetIntDefault("WrongPass.MaxCount", 0);
+        if (maxWrongPassCount == 0)
+            return;
+
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(accountId ? LOGIN_UPD_FAILEDLOGINS_BY_ID : LOGIN_UPD_FAILEDLOGINS);
+        if (accountId)
+            stmt->setUInt32(0, accountId);
+        else
+            stmt->setString(0, login);
+        LoginDatabase.Execute(stmt);
+
+        stmt = LoginDatabase.GetPreparedStatement(accountId ? LOGIN_SEL_FAILEDLOGINS_BY_ID : LOGIN_SEL_FAILEDLOGINS);
+        if (accountId)
+            stmt->setUInt32(0, accountId);
+        else
+            stmt->setString(0, login);
+
+        PreparedQueryResult loginfail = LoginDatabase.Query(stmt);
+        if (!loginfail)
+            return;
+
+        uint32 failedLogins = (*loginfail)[1].GetUInt32();
+        if (failedLogins < maxWrongPassCount)
+            return;
+
+        uint32 wrongPassBanTime = sConfigMgr->GetIntDefault("WrongPass.BanTime", 600);
+        bool wrongPassBanType = sConfigMgr->GetBoolDefault("WrongPass.BanType", false);
+
+        if (wrongPassBanType)
+        {
+            uint32 bannedAccountId = (*loginfail)[0].GetUInt32();
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_AUTO_BANNED);
+            stmt->setUInt32(0, bannedAccountId);
+            stmt->setUInt32(1, wrongPassBanTime);
+            LoginDatabase.Execute(stmt);
+
+            SF_LOG_DEBUG("server.authserver",
+                "'%s:%d' [AuthChallenge] account %s got banned for '%u' seconds "
+                "because it failed to authenticate '%u' times",
+                socket.getRemoteAddress().c_str(), socket.getRemotePort(), login.c_str(),
+                wrongPassBanTime, failedLogins);
+        }
+        else
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_IP_AUTO_BANNED);
+            stmt->setString(0, socket.getRemoteAddress());
+            stmt->setUInt32(1, wrongPassBanTime);
+            LoginDatabase.Execute(stmt);
+
+            SF_LOG_DEBUG("server.authserver",
+                "'%s:%d' [AuthChallenge] IP %s got banned for '%u' seconds "
+                "because account %s failed to authenticate '%u' times",
+                socket.getRemoteAddress().c_str(), socket.getRemotePort(),
+                socket.getRemoteAddress().c_str(), wrongPassBanTime, login.c_str(), failedLogins);
+        }
+    }
 }
 
 // Constructor - set the N and g values for SRP6
@@ -272,6 +337,7 @@ bool AuthSocket::_HandleLogonChallenge()
     _login = (const char*)ch->I;
     _accountId = 0;
     _accountName.clear();
+    _tokenKey.clear();
 
     Skyfire::Auth::LoginIdentity const loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(_login);
     SF_LOG_DEBUG("server.authserver", "[AuthChallenge] login identity kind: %s",
@@ -438,8 +504,21 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt.append(unk3.ToByteArray<16>());
                     uint8 securityFlags = 0;
 
-                    // Check if token is used
-                    _tokenKey = fields[7].GetString();
+                    if (sConfigMgr->GetBoolDefault("Auth2FA.Enabled", true))
+                    {
+                        PreparedStatement* twoFactorStmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_TWOFACTOR);
+                        twoFactorStmt->setUInt32(0, _accountId);
+                        if (PreparedQueryResult twoFactorResult = LoginDatabase.Query(twoFactorStmt))
+                        {
+                            Field* twoFactorFields = twoFactorResult->Fetch();
+                            if (twoFactorFields[1].GetBool())
+                                _tokenKey = twoFactorFields[0].GetString();
+                        }
+
+                        if (_tokenKey.empty() && sConfigMgr->GetBoolDefault("Auth2FA.AllowLegacyTokenKey", true))
+                            _tokenKey = fields[7].GetString();
+                    }
+
                     if (!_tokenKey.empty())
                         securityFlags = 4;
 
@@ -496,7 +575,9 @@ bool AuthSocket::_HandleLogonProof()
     if (!socket().PeekBytes(&lp, sizeof(sAuthLogonProof_C)))
         return false;
 
-    bool needsToken = (lp.securityFlags & 0x04) || !_tokenKey.empty();
+    bool serverNeedsToken = !_tokenKey.empty();
+    bool clientSentToken = (lp.securityFlags & 0x04) != 0;
+    bool needsToken = serverNeedsToken || clientSentToken;
     uint8 tokenSize = 0;
     size_t requiredBytes = sizeof(sAuthLogonProof_C);
 
@@ -524,27 +605,16 @@ bool AuthSocket::_HandleLogonProof()
 
     if (std::optional<SessionKey> K = _srp6->VerifyChallengeResponse(lp.A, lp.clientM))
     {
-         _sessionKey = *K;
+        SessionKey sessionKey = *K;
 
-        SF_LOG_DEBUG("server.authserver", "'%s:%d' User '%s' successfully authenticated",
+        SF_LOG_DEBUG("server.authserver", "'%s:%d' User '%s' password proof accepted",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str());
 
-        // Update the sessionkey, last_ip, last login time and reset number of failed logins
-        // in the account table for this account.
-        // No SQL injection (escaped user name) and IP address as received by socket
-
-        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF_BY_ID);
-        stmt->setBinary(0, _sessionKey);
-        stmt->setString(1, socket().getRemoteAddress().c_str());
-        stmt->setUInt32(2, GetLocaleByName(_localizationName));
-        stmt->setString(3, _os);
-        stmt->setUInt32(4, _accountId);
-        LoginDatabase.DirectExecute(stmt);
-
         // Finish SRP6 and send the final result to the client
-        SkyFire::Crypto::SHA1::Digest M2 = SkyFire::Crypto::SRP6::GetSessionVerifier(lp.A, lp.clientM, _sessionKey);
+        SkyFire::Crypto::SHA1::Digest M2 = SkyFire::Crypto::SRP6::GetSessionVerifier(lp.A, lp.clientM, sessionKey);
 
         // Check auth token
+        Skyfire::Auth::TOTP::ValidationResult tokenValidation;
         if (needsToken)
         {
             uint8 size = 0;
@@ -556,15 +626,32 @@ bool AuthSocket::_HandleLogonProof()
             if (!socket().ReadBytes(&token[0], size))
                 return false;
 
-            unsigned int validToken = TOTP::GenerateToken(_tokenKey);
-            unsigned int incomingToken = atoi(&token[0]);
-            if (validToken != incomingToken)
+            if (serverNeedsToken)
             {
-                char data[] = { AUTH_LOGON_PROOF, uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT), 3, 0 };
-                socket().QueueSend(data, sizeof(data));
-                return false;
+                uint32 tokenWindow = sConfigMgr->GetIntDefault("Auth2FA.TokenWindow", 1);
+                tokenValidation = Skyfire::Auth::TOTP::ValidateLoginToken(
+                    _tokenKey, std::string(&token[0]), tokenWindow);
+                if (!tokenValidation.Success)
+                {
+                    QueueLogonProofFailure(socket());
+                    RecordFailedLogon(_accountId, _login, socket());
+                    SF_LOG_DEBUG("server.authserver",
+                        "'%s:%d' [AuthChallenge] account %s tried to login with an invalid security token!",
+                        socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str());
+                    return false;
+                }
             }
         }
+
+        // Update account state only after every enabled authentication factor succeeds.
+        _sessionKey = sessionKey;
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF_BY_ID);
+        stmt->setBinary(0, _sessionKey);
+        stmt->setString(1, socket().getRemoteAddress().c_str());
+        stmt->setUInt32(2, GetLocaleByName(_localizationName));
+        stmt->setString(3, _os);
+        stmt->setUInt32(4, _accountId);
+        LoginDatabase.DirectExecute(stmt);
 
         if (_expversion & POST_BC_EXP_FLAG)                 // 2.x and 3.x clients
         {
@@ -591,69 +678,13 @@ bool AuthSocket::_HandleLogonProof()
     }
     else
     {
-        char data[4] = { AUTH_LOGON_PROOF, uint8(AuthResult::WOW_FAIL_UNKNOWN_ACCOUNT), 3, 0 };
-        socket().QueueSend(data, sizeof(data));
+        QueueLogonProofFailure(socket());
 
         SF_LOG_DEBUG("server.authserver",
             "'%s:%d' [AuthChallenge] account %s tried to login with invalid password!",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str());
 
-        uint32 MaxWrongPassCount = sConfigMgr->GetIntDefault("WrongPass.MaxCount", 0);
-        if (MaxWrongPassCount > 0)
-        {
-            //Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
-            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(_accountId ? LOGIN_UPD_FAILEDLOGINS_BY_ID : LOGIN_UPD_FAILEDLOGINS);
-            if (_accountId)
-                stmt->setUInt32(0, _accountId);
-            else
-                stmt->setString(0, _login);
-            LoginDatabase.Execute(stmt);
-
-            stmt = LoginDatabase.GetPreparedStatement(_accountId ? LOGIN_SEL_FAILEDLOGINS_BY_ID : LOGIN_SEL_FAILEDLOGINS);
-            if (_accountId)
-                stmt->setUInt32(0, _accountId);
-            else
-                stmt->setString(0, _login);
-
-            if (PreparedQueryResult loginfail = LoginDatabase.Query(stmt))
-            {
-                uint32 failed_logins = (*loginfail)[1].GetUInt32();
-
-                if (failed_logins >= MaxWrongPassCount)
-                {
-                    uint32 WrongPassBanTime = sConfigMgr->GetIntDefault("WrongPass.BanTime", 600);
-                    bool WrongPassBanType = sConfigMgr->GetBoolDefault("WrongPass.BanType", false);
-
-                    if (WrongPassBanType)
-                    {
-                        uint32 acc_id = (*loginfail)[0].GetUInt32();
-                        stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT_AUTO_BANNED);
-                        stmt->setUInt32(0, acc_id);
-                        stmt->setUInt32(1, WrongPassBanTime);
-                        LoginDatabase.Execute(stmt);
-
-                        SF_LOG_DEBUG("server.authserver",
-                            "'%s:%d' [AuthChallenge] account %s got banned for '%u' seconds "
-                            "because it failed to authenticate '%u' times",
-                            socket().getRemoteAddress().c_str(), socket().getRemotePort(), _login.c_str(),
-                            WrongPassBanTime, failed_logins);
-                    }
-                    else
-                    {
-                        stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_IP_AUTO_BANNED);
-                        stmt->setString(0, socket().getRemoteAddress());
-                        stmt->setUInt32(1, WrongPassBanTime);
-                        LoginDatabase.Execute(stmt);
-
-                        SF_LOG_DEBUG("server.authserver",
-                            "'%s:%d' [AuthChallenge] IP %s got banned for '%u' seconds "
-                            "because account %s failed to authenticate '%u' times",
-                            socket().getRemoteAddress().c_str(), socket().getRemotePort(),
-                            socket().getRemoteAddress().c_str(), WrongPassBanTime, _login.c_str(), failed_logins);
-                    }
-                }
-            }
-        }
+        RecordFailedLogon(_accountId, _login, socket());
     }
 
     return true;

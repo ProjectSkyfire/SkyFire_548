@@ -62,6 +62,35 @@ LOCK TABLES `account` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `account_twofactor`
+--
+
+DROP TABLE IF EXISTS `account_twofactor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `account_twofactor` (
+  `account_id` int unsigned NOT NULL,
+  `method` tinyint unsigned NOT NULL DEFAULT '1' COMMENT '1 TOTP',
+  `secret_base32` varchar(64) NOT NULL DEFAULT '',
+  `enabled` tinyint unsigned NOT NULL DEFAULT '0',
+  `confirmed_at` timestamp NULL DEFAULT NULL,
+  `last_used_step` bigint unsigned DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='Account two-factor authentication';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `account_twofactor`
+--
+
+LOCK TABLES `account_twofactor` WRITE;
+/*!40000 ALTER TABLE `account_twofactor` DISABLE KEYS */;
+/*!40000 ALTER TABLE `account_twofactor` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `account_login_identity`
 --
 
@@ -413,6 +442,12 @@ INSERT INTO `rbac_linked_permissions` VALUES (199,232);
 INSERT INTO `rbac_linked_permissions` VALUES (199,233);
 INSERT INTO `rbac_linked_permissions` VALUES (199,524);
 INSERT INTO `rbac_linked_permissions` VALUES (232,233);
+INSERT INTO `rbac_linked_permissions` VALUES (199,1012);
+INSERT INTO `rbac_linked_permissions` VALUES (199,1013);
+INSERT INTO `rbac_linked_permissions` VALUES (199,1014);
+INSERT INTO `rbac_linked_permissions` VALUES (199,1015);
+INSERT INTO `rbac_linked_permissions` VALUES (199,1016);
+INSERT INTO `rbac_linked_permissions` VALUES (196,1017);
 /*!40000 ALTER TABLE `rbac_linked_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -458,6 +493,12 @@ INSERT INTO `rbac_permissions` VALUES (1008,'Command: packet char start');
 INSERT INTO `rbac_permissions` VALUES (1009,'Command: packet char stop');
 INSERT INTO `rbac_permissions` VALUES (1010,'Command: debug lfg requirements');
 INSERT INTO `rbac_permissions` VALUES (1011,'Command: debug lfg flex');
+INSERT INTO `rbac_permissions` VALUES (1012,'Command: account 2fa');
+INSERT INTO `rbac_permissions` VALUES (1013,'Command: account 2fa setup');
+INSERT INTO `rbac_permissions` VALUES (1014,'Command: account 2fa confirm');
+INSERT INTO `rbac_permissions` VALUES (1015,'Command: account 2fa status');
+INSERT INTO `rbac_permissions` VALUES (1016,'Command: account 2fa disable');
+INSERT INTO `rbac_permissions` VALUES (1017,'Command: account 2fa reset');
 /*!40000 ALTER TABLE `rbac_permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 

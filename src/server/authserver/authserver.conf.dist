@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026310603
+ConfVersion=2026310605
 
 ###################################################################################################
 # SECTION INDEX
@@ -90,6 +90,32 @@ PacketLogServerControlFile = ""
 #        Default:     "PacketLogs"
 
 PacketLogServerOutputDir = "PacketLogs"
+
+#
+#    Auth2FA.Enabled
+#        Description: Enables account two-factor authentication checks during GRUNT login.
+#                     Accounts without enabled two-factor data are unaffected.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Auth2FA.Enabled = 1
+
+#
+#    Auth2FA.TokenWindow
+#        Description: Number of 30-second TOTP time steps accepted before and after the current
+#                     server time. Keep small to limit replay and guessing windows.
+#        Default:     1
+
+Auth2FA.TokenWindow = 1
+
+#
+#    Auth2FA.AllowLegacyTokenKey
+#        Description: Allows authserver to honor the legacy account.token_key field when no
+#                     enabled account_twofactor row exists.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Auth2FA.AllowLegacyTokenKey = 1
 
 #
 #    UseProcessors
@@ -206,10 +232,24 @@ LoginDatabase.AutoBaseline = 0
 LoginDatabase.AllowUpdateHashMismatch = 1
 
 #
+#    LoginDatabase.ImportPendingUpdates
+#        Description: Also imports SQL files from pending_updates/auth during auth database
+#                     startup update checks.
+#        Important:   Disabled by default. Enable only on development or staging databases.
+#                     Pending files are recorded in skyfire_db_updates by filename, the same as
+#                     normal updates. Promote verified files into updates/auth before production.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+LoginDatabase.ImportPendingUpdates = 0
+
+#
 #    LoginDatabase.SqlPath
 #        Description: Root SQL directory used by auth database setup and update checks.
 #        Example:     "D:/SkyFire/sql" or "/opt/skyfire/sql"
 #        Important:   The directory must contain updates/auth for startup update checks.
+#                     When LoginDatabase.ImportPendingUpdates is enabled, pending_updates/auth
+#                     is also scanned.
 #                     LoginDatabase.AutoSetup also requires base/auth_database.sql.
 #        Default:     "" - (No SQL directory configured)
 

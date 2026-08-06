@@ -68,6 +68,12 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_REP_ACCOUNT_LOGIN_IDENTITY, "INSERT INTO account_login_identity (account_id, identity_type, identity, identity_canonical, salt, verifier) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE account_id = VALUES(account_id), identity = VALUES(identity), salt = VALUES(salt), verifier = VALUES(verifier), updated_at = CURRENT_TIMESTAMP", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_DEL_ACCOUNT_LOGIN_IDENTITIES, "DELETE FROM account_login_identity WHERE account_id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_DEL_ACCOUNT_EMAIL_LOGIN_IDENTITIES, "DELETE FROM account_login_identity WHERE account_id = ? AND identity_type = 1", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_ACCOUNT_TWOFACTOR, "SELECT secret_base32, enabled, COALESCE(last_used_step, 0) FROM account_twofactor WHERE account_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_REP_ACCOUNT_TWOFACTOR_SETUP, "INSERT INTO account_twofactor (account_id, method, secret_base32, enabled, confirmed_at, last_used_step) VALUES (?, 1, ?, 0, NULL, NULL) ON DUPLICATE KEY UPDATE method = VALUES(method), secret_base32 = VALUES(secret_base32), enabled = 0, confirmed_at = NULL, last_used_step = NULL, updated_at = CURRENT_TIMESTAMP", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_UPD_ACCOUNT_TWOFACTOR_ENABLE, "UPDATE account_twofactor SET enabled = 1, confirmed_at = CURRENT_TIMESTAMP, last_used_step = NULL, updated_at = CURRENT_TIMESTAMP WHERE account_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_DEL_ACCOUNT_TWOFACTOR, "DELETE FROM account_twofactor WHERE account_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_UPD_ACCOUNT_TWOFACTOR_LAST_USED_STEP, "UPDATE account_twofactor SET last_used_step = ?, updated_at = CURRENT_TIMESTAMP WHERE account_id = ? AND enabled = 1", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_UPD_ACCOUNT_TOKEN_KEY_CLEAR, "UPDATE account SET token_key = '' WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_UPD_MUTE_TIME, "UPDATE account SET mutetime = ? , mutereason = ? , muteby = ? WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_UPD_MUTE_TIME_LOGIN, "UPDATE account SET mutetime = ? WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_UPD_LAST_IP, "UPDATE account SET last_ip = ? WHERE username = ?", CONNECTION_ASYNC);

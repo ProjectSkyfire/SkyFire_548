@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "AccountMgr.h"
+#include "Auth/TOTP.h"
 #include "CryptoHash.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -248,6 +249,7 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accountId)
     CharacterDatabase.Execute(stmt);
 
     DeleteLoginIdentities(accountId);
+    DisableTwoFactor(accountId);
 
     SQLTransaction trans = LoginDatabase.BeginTransaction();
 
@@ -508,6 +510,76 @@ bool AccountMgr::CheckEmail(uint32 accountId, std::string newEmail)
         return true;
 
     return false;
+}
+
+bool AccountMgr::GetTwoFactorInfo(uint32 accountId, AccountTwoFactorInfo& info)
+{
+    info = AccountTwoFactorInfo();
+    if (!accountId)
+        return false;
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_TWOFACTOR);
+    stmt->setUInt32(0, accountId);
+    PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (!result)
+        return false;
+
+    Field* fields = result->Fetch();
+    info.Exists = true;
+    info.Secret = fields[0].GetString();
+    info.Enabled = fields[1].GetBool();
+    info.LastUsedStep = fields[2].GetUInt64();
+    return true;
+}
+
+std::string AccountMgr::StartTwoFactorSetup(uint32 accountId)
+{
+    std::string username;
+    if (!GetName(accountId, username))
+        return "";
+
+    std::string secret = Skyfire::Auth::TOTP::GenerateSecret();
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_ACCOUNT_TWOFACTOR_SETUP);
+    stmt->setUInt32(0, accountId);
+    stmt->setString(1, secret);
+    LoginDatabase.DirectExecute(stmt);
+    return secret;
+}
+
+bool AccountMgr::ConfirmTwoFactorSetup(uint32 accountId, std::string const& token, uint32 window)
+{
+    AccountTwoFactorInfo info;
+    if (!GetTwoFactorInfo(accountId, info) || info.Secret.empty())
+        return false;
+
+    Skyfire::Auth::TOTP::ValidationResult validation =
+        Skyfire::Auth::TOTP::ValidateToken(info.Secret, token, window, info.LastUsedStep);
+    if (!validation.Success)
+        return false;
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_TWOFACTOR_ENABLE);
+    stmt->setUInt32(0, accountId);
+    LoginDatabase.DirectExecute(stmt);
+
+    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_TOKEN_KEY_CLEAR);
+    stmt->setUInt32(0, accountId);
+    LoginDatabase.DirectExecute(stmt);
+    return true;
+}
+
+bool AccountMgr::DisableTwoFactor(uint32 accountId)
+{
+    if (!accountId)
+        return false;
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_ACCOUNT_TWOFACTOR);
+    stmt->setUInt32(0, accountId);
+    LoginDatabase.DirectExecute(stmt);
+
+    stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_ACCOUNT_TOKEN_KEY_CLEAR);
+    stmt->setUInt32(0, accountId);
+    LoginDatabase.DirectExecute(stmt);
+    return true;
 }
 
 uint32 AccountMgr::GetCharactersCount(uint32 accountId)
