@@ -817,7 +817,10 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     uint32 procEx = (crit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT) | PROC_EX_INTERNAL_HOT;
     // ignore item heals
     if (!haveCastItem)
-        caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, WeaponAttackType::BASE_ATTACK, GetSpellInfo());
+    {
+        uint32 overheal = (heal > uint32(gain)) ? (heal - uint32(gain)) : 0;
+        caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, WeaponAttackType::BASE_ATTACK, GetSpellInfo(), NULL, overheal);
+    }
 }
 
 void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) const

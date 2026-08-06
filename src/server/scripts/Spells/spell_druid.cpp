@@ -14,6 +14,13 @@
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "Containers.h"
+#include "ObjectAccessor.h"
+#include "EventProcessor.h"
+#include "ScriptedCreature.h"
+#include "Battleground.h"
+#include "TemporarySummon.h"
+#include "PassiveAI.h"
+#include <limits>
 
 enum DruidSpells
 {
@@ -55,6 +62,26 @@ enum DruidSpells
     SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE     = 67598,
     SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE_HEAL= 101024,
     SPELL_DRUID_RAKE                        = 1822,
+    SPELL_DRUID_REJUVENATION                = 774,
+    SPELL_DRUID_MUSHROOM_BIRTH              = 94081,
+    SPELL_DRUID_MUSHROOM_INVISIBLE          = 92661,
+    SPELL_DRUID_MUSHROOM_DEATH              = 116305,
+    SPELL_DRUID_MUSHROOM_SUICIDE            = 116302,
+    SPELL_DRUID_MUSHROOM_DAMAGE             = 78777,
+    SPELL_DRUID_MUSHROOM_HEAL               = 102792,
+    SPELL_DRUID_MUSHROOM_OVERHEAL_AURA      = 138611,
+    SPELL_DRUID_MUSHROOM_ACCUMULATOR        = 138616,
+    SPELL_DRUID_MUSHROOM_BLOOM_UI_FLASH     = 138664,
+    SPELL_DRUID_FUNGAL_GROWTH               = 81283,
+    SPELL_DRUID_FUNGAL_GROWTH_SLOW          = 81282,
+    SPELL_DRUID_MUSHROOM_SLOW_VISUAL        = 94339,
+    SPELL_DRUID_WILD_MUSHROOM_RESTO         = 145205,
+    SPELL_DRUID_WILD_MUSHROOM_RESTO_GLYPH   = 147349,
+};
+
+enum DruidCreatureIds
+{
+    NPC_DRUID_WILD_MUSHROOM                 = 47649
 };
 
 // 1850 - Dash
@@ -1192,6 +1219,577 @@ public:
     }
 };
 
+class DelayedWildMushroomInvisEvent : public BasicEvent
+{
+public:
+    explicit DelayedWildMushroomInvisEvent(uint64 mushroomGuid) : _mushroomGuid(mushroomGuid) { }
+
+    bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) OVERRIDE
+    {
+        if (Creature* mushroom = HashMapHolder<Creature>::Find(_mushroomGuid))
+            if (mushroom->IsAlive())
+                mushroom->CastSpell(mushroom, SPELL_DRUID_MUSHROOM_INVISIBLE, true);
+        return true;
+    }
+
+private:
+    uint64 _mushroomGuid;
+};
+
+static void GetWildMushrooms(Unit* owner, std::list<Creature*>& mushrooms)
+{
+    owner->GetAllMinionsByEntry(mushrooms, NPC_DRUID_WILD_MUSHROOM);
+}
+
+static Creature* FindNewestWildMushroom(std::list<Creature*> const& mushrooms)
+{
+    Creature* newest = NULL;
+    uint32 newestTimer = 0;
+    for (Creature* mushroom : mushrooms)
+    {
+        if (!mushroom->IsAlive())
+            continue;
+
+        // Just-summoned mushrooms have not received birth/invis auras yet.
+        if (!mushroom->HasAura(SPELL_DRUID_MUSHROOM_BIRTH)
+            && !mushroom->HasAura(SPELL_DRUID_MUSHROOM_INVISIBLE))
+            return mushroom;
+
+        TempSummon const* summon = mushroom->ToTempSummon();
+        if (!summon)
+            continue;
+
+        uint32 timer = summon->GetTimer();
+        if (!newest || timer >= newestTimer)
+        {
+            newest = mushroom;
+            newestTimer = timer;
+        }
+    }
+    return newest;
+}
+
+static Creature* FindOldestWildMushroom(std::list<Creature*> const& mushrooms, Creature const* exclude)
+{
+    Creature* oldest = NULL;
+    uint32 oldestTimer = std::numeric_limits<uint32>::max();
+    for (Creature* mushroom : mushrooms)
+    {
+        if (mushroom == exclude || !mushroom->IsAlive())
+            continue;
+
+        TempSummon const* summon = mushroom->ToTempSummon();
+        if (!summon)
+            continue;
+
+        uint32 timer = summon->GetTimer();
+        if (timer < oldestTimer)
+        {
+            oldest = mushroom;
+            oldestTimer = timer;
+        }
+    }
+    return oldest;
+}
+
+// 88747 - Wild Mushroom (Balance)
+// 145205 - Wild Mushroom (Restoration)
+// 147349 - Wild Mushroom (Restoration with glyph)
+class spell_dru_wild_mushroom : public SpellScriptLoader
+{
+public:
+    spell_dru_wild_mushroom() : SpellScriptLoader("spell_dru_wild_mushroom") { }
+
+    class spell_dru_wild_mushroom_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_wild_mushroom_SpellScript);
+
+        int32 _amount0 = 0;
+        int32 _amount1 = 0;
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_BIRTH)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_INVISIBLE)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_ACCUMULATOR)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_OVERHEAL_AURA);
+        }
+
+        void GetBonus()
+        {
+            Unit* druid = GetCaster();
+            if (!druid)
+                return;
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(druid, mushrooms);
+            if (mushrooms.empty())
+                return;
+
+            if (!druid->HasAura(SPELL_DRUID_MUSHROOM_OVERHEAL_AURA))
+                return;
+
+            if (Aura const* aura = mushrooms.front()->GetAura(SPELL_DRUID_MUSHROOM_ACCUMULATOR))
+            {
+                if (aura->HasEffect(EFFECT_0))
+                    _amount0 = aura->GetEffect(EFFECT_0)->GetAmount();
+                if (aura->HasEffect(EFFECT_1))
+                    _amount1 = aura->GetEffect(EFFECT_1)->GetAmount();
+            }
+        }
+
+        void HandleCast()
+        {
+            Unit* druid = GetCaster();
+            if (!druid)
+                return;
+
+            uint32 spellId = GetSpellInfo()->Id;
+            if (spellId == SPELL_DRUID_WILD_MUSHROOM_RESTO || spellId == SPELL_DRUID_WILD_MUSHROOM_RESTO_GLYPH)
+                if (!druid->HasAura(SPELL_DRUID_MUSHROOM_OVERHEAL_AURA))
+                    druid->CastSpell(druid, SPELL_DRUID_MUSHROOM_OVERHEAL_AURA, true);
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(druid, mushrooms);
+            if (mushrooms.empty())
+                return;
+
+            Creature* mushroomCreature = FindNewestWildMushroom(mushrooms);
+            if (!mushroomCreature)
+                return;
+
+            TempSummon* mushroom = mushroomCreature->ToTempSummon();
+            if (!mushroom)
+                return;
+
+            // Minion InitStats does not copy owner level (unlike totems/guardians).
+            mushroom->SetLevel(druid->getLevel());
+
+            // EFFECT_0 is mushroom HP (5), not level.
+            int32 health = GetSpellInfo()->Effects[EFFECT_0].BasePoints;
+            if (health > 0)
+            {
+                mushroom->SetMaxHealth(health);
+                mushroom->SetHealth(health);
+            }
+
+            mushroom->CastSpell(mushroom, SPELL_DRUID_MUSHROOM_BIRTH, true);
+
+            int32 invisSeconds = GetSpellInfo()->Effects[EFFECT_2].BasePoints;
+            if (invisSeconds > 0)
+                mushroom->m_Events.AddEvent(new DelayedWildMushroomInvisEvent(mushroom->GetGUID()),
+                    mushroom->m_Events.CalculateTime(uint32(invisSeconds) * IN_MILLISECONDS));
+
+            if (druid->HasAura(SPELL_DRUID_MUSHROOM_OVERHEAL_AURA))
+                druid->CastCustomSpell(mushroom, SPELL_DRUID_MUSHROOM_ACCUMULATOR, &_amount0, &_amount1, NULL, true);
+
+            int32 limit = GetSpellInfo()->Effects[EFFECT_1].BasePoints;
+            if (limit <= 0)
+                limit = 1;
+
+            while (mushrooms.size() > size_t(limit))
+            {
+                Creature* oldest = FindOldestWildMushroom(mushrooms, mushroomCreature);
+                if (!oldest)
+                    break;
+
+                if (TempSummon* old = oldest->ToTempSummon())
+                    old->UnSummon();
+                mushrooms.remove(oldest);
+            }
+        }
+
+        void Register() override
+        {
+            BeforeCast += SpellCastFn(spell_dru_wild_mushroom_SpellScript::GetBonus);
+            AfterCast += SpellCastFn(spell_dru_wild_mushroom_SpellScript::HandleCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_wild_mushroom_SpellScript();
+    }
+};
+
+// 138611 - Wild Mushroom (Restoration overheal accumulator driver)
+class spell_dru_wild_mushroom_overheal : public SpellScriptLoader
+{
+public:
+    spell_dru_wild_mushroom_overheal() : SpellScriptLoader("spell_dru_wild_mushroom_overheal") { }
+
+    class spell_dru_wild_mushroom_overheal_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_wild_mushroom_overheal_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_ACCUMULATOR)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_BLOOM_UI_FLASH)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_REJUVENATION);
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+            // MoP: only Rejuvenation overhealing feeds the mushroom.
+            return spellInfo && spellInfo->Id == SPELL_DRUID_REJUVENATION;
+        }
+
+        void HandleProc(ProcEventInfo& eventInfo)
+        {
+            HealInfo* healInfo = eventInfo.GetHealInfo();
+            if (!healInfo)
+                return;
+
+            int32 over = int32(healInfo->GetOverheal());
+            Player* druid = GetUnitOwner()->ToPlayer();
+            if (!over || !druid)
+                return;
+
+            if (druid->GetMap()->IsBattlegroundOrArena())
+                if (Battleground* bg = druid->GetBattleground())
+                    if (bg->GetStatus() == STATUS_WAIT_JOIN)
+                        return;
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(druid, mushrooms);
+            if (mushrooms.empty())
+                return;
+
+            Unit* mushroom = mushrooms.front();
+            Aura* accumulator = mushroom->GetAura(SPELL_DRUID_MUSHROOM_ACCUMULATOR);
+            if (!accumulator)
+                return;
+
+            AuraEffect* scale = accumulator->GetEffect(EFFECT_0);
+            AuraEffect* bonus = accumulator->GetEffect(EFFECT_1);
+            if (!scale || !bonus)
+                return;
+
+            // EFFECT_0 of 138611 is "% of overhealing" (normally 100).
+            int32 pct = 100;
+            if (AuraEffect const* pctEff = GetEffect(EFFECT_0))
+                if (pctEff->GetAmount() > 0)
+                    pct = pctEff->GetAmount();
+
+            over = CalculatePct(over, pct);
+            if (over <= 0)
+                return;
+
+            int32 max = int32(druid->GetMaxHealth()) * 2;
+            int32 val = std::min(bonus->GetAmount() + over, max);
+            if (bonus->GetAmount() != val)
+            {
+                int32 scaleAmount = int32(val * 100.f / float(max));
+                scale->ChangeAmount(scaleAmount);
+                bonus->ChangeAmount(val);
+                // ChangeAmount does not mark dummy amounts for aura tooltip refresh.
+                accumulator->SetNeedClientUpdateForTargets();
+                if (val == max && !druid->HasAura(SPELL_DRUID_MUSHROOM_BLOOM_UI_FLASH))
+                    druid->CastSpell(druid, SPELL_DRUID_MUSHROOM_BLOOM_UI_FLASH, true);
+            }
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_dru_wild_mushroom_overheal_AuraScript::CheckProc);
+            OnProc += AuraProcFn(spell_dru_wild_mushroom_overheal_AuraScript::HandleProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_wild_mushroom_overheal_AuraScript();
+    }
+};
+
+// 47649 - Wild Mushroom
+class npc_wild_mushroom : public CreatureScript
+{
+public:
+    npc_wild_mushroom() : CreatureScript("npc_wild_mushroom") { }
+
+    struct npc_wild_mushroomAI : public ScriptedAI
+    {
+        npc_wild_mushroomAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void IsSummonedBy(Unit* /*summoner*/) override
+        {
+            // Stay planted; owned minions otherwise MoveFollow the owner after evade.
+            me->SetReactState(REACT_PASSIVE);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->AddUnitState(UNIT_STATE_ROOT);
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveIdle();
+        }
+
+        void AttackStart(Unit* /*who*/) override { }
+
+        void EnterCombat(Unit* /*who*/) override { }
+
+        void EnterEvadeMode() override
+        {
+            if (!_EnterEvadeMode())
+                return;
+
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveIdle();
+            Reset();
+        }
+
+        void JustDied(Unit* /*killer*/) override
+        {
+            me->DespawnOrUnsummon(1);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_wild_mushroomAI(creature);
+    }
+};
+
+// 102791 - Wild Mushroom: Bloom
+class spell_dru_wild_mushroom_bloom : public SpellScriptLoader
+{
+public:
+    spell_dru_wild_mushroom_bloom() : SpellScriptLoader("spell_dru_wild_mushroom_bloom") { }
+
+    class spell_dru_wild_mushroom_bloom_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_wild_mushroom_bloom_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_HEAL)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_DEATH)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_SUICIDE);
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(caster, mushrooms);
+            if (mushrooms.empty())
+                return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+            for (Creature* mushroom : mushrooms)
+                if (mushroom->IsAlive() && caster->IsWithinDistInMap(mushroom, 40.0f))
+                    return SpellCastResult::SPELL_CAST_OK;
+
+            return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
+        }
+
+        void HandleCast()
+        {
+            Unit* druid = GetCaster();
+            if (!druid)
+                return;
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(druid, mushrooms);
+            for (Creature* mushroom : mushrooms)
+            {
+                if (!mushroom->IsAlive() || !druid->IsWithinDistInMap(mushroom, 40.0f))
+                    continue;
+
+                druid->CastSpell(mushroom->GetPositionX(), mushroom->GetPositionY(), mushroom->GetPositionZ(),
+                    SPELL_DRUID_MUSHROOM_HEAL, true);
+                mushroom->CastSpell(mushroom, SPELL_DRUID_MUSHROOM_DEATH, true);
+                mushroom->DespawnOrUnsummon(500);
+            }
+
+            druid->RemoveAurasDueToSpell(SPELL_DRUID_MUSHROOM_BLOOM_UI_FLASH);
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dru_wild_mushroom_bloom_SpellScript::CheckCast);
+            OnCast += SpellCastFn(spell_dru_wild_mushroom_bloom_SpellScript::HandleCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_wild_mushroom_bloom_SpellScript();
+    }
+};
+
+// 102792 - Wild Mushroom: Bloom heal
+class spell_dru_wild_mushroom_heal : public SpellScriptLoader
+{
+public:
+    spell_dru_wild_mushroom_heal() : SpellScriptLoader("spell_dru_wild_mushroom_heal") { }
+
+    class spell_dru_wild_mushroom_heal_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_wild_mushroom_heal_SpellScript);
+
+        int32 _bonusHeal = 0;
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_ACCUMULATOR);
+        }
+
+        void SelectTargets(std::list<WorldObject*>& targets)
+        {
+            WorldLocation const* dest = GetExplTargetDest();
+            if (!dest)
+            {
+                targets.clear();
+                return;
+            }
+
+            float x = dest->GetPositionX();
+            float y = dest->GetPositionY();
+            float z = dest->GetPositionZ();
+
+            targets.remove_if([x, y, z](WorldObject* target)
+            {
+                if (!target->IsWithinLOS(x, y, z))
+                    return true;
+                return target->GetEntry() == NPC_DRUID_WILD_MUSHROOM;
+            });
+
+            _bonusHeal = 0;
+            if (targets.empty())
+                return;
+
+            Unit* druid = GetCaster();
+            if (!druid)
+                return;
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(druid, mushrooms);
+            if (mushrooms.empty())
+                return;
+
+            if (AuraEffect const* eff = mushrooms.front()->GetAuraEffect(SPELL_DRUID_MUSHROOM_ACCUMULATOR, EFFECT_1))
+                _bonusHeal = eff->GetAmount() / int32(targets.size());
+        }
+
+        void CalculateHeal(SpellEffIndex /*effIndex*/)
+        {
+            if (_bonusHeal)
+                SetHitHeal(GetHitHeal() + _bonusHeal);
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_wild_mushroom_heal_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ALLY);
+            OnEffectHitTarget += SpellEffectFn(spell_dru_wild_mushroom_heal_SpellScript::CalculateHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_wild_mushroom_heal_SpellScript();
+    }
+};
+
+// 88751 - Wild Mushroom: Detonate
+class spell_dru_wild_mushroom_detonate : public SpellScriptLoader
+{
+public:
+    spell_dru_wild_mushroom_detonate() : SpellScriptLoader("spell_dru_wild_mushroom_detonate") { }
+
+    class spell_dru_wild_mushroom_detonate_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_wild_mushroom_detonate_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_DAMAGE)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_FUNGAL_GROWTH)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_DEATH)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MUSHROOM_SUICIDE);
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(caster, mushrooms);
+            if (mushrooms.empty())
+                return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+            for (Creature* mushroom : mushrooms)
+                if (mushroom->IsAlive() && caster->IsWithinDistInMap(mushroom, 40.0f))
+                    return SpellCastResult::SPELL_CAST_OK;
+
+            return SpellCastResult::SPELL_FAILED_OUT_OF_RANGE;
+        }
+
+        void HandleCast()
+        {
+            Unit* druid = GetCaster();
+            if (!druid)
+                return;
+
+            std::list<Creature*> mushrooms;
+            GetWildMushrooms(druid, mushrooms);
+            for (Creature* mushroom : mushrooms)
+            {
+                if (!mushroom->IsAlive() || !druid->IsWithinDistInMap(mushroom, 40.0f))
+                    continue;
+
+                druid->CastSpell(mushroom, SPELL_DRUID_MUSHROOM_DAMAGE, true);
+                druid->CastSpell(mushroom->GetPositionX(), mushroom->GetPositionY(), mushroom->GetPositionZ(),
+                    SPELL_DRUID_FUNGAL_GROWTH, true);
+                mushroom->CastSpell(mushroom, SPELL_DRUID_MUSHROOM_DEATH, true);
+                // Suicide aura (116302) is 500ms and races its first tick; force despawn so
+                // the Wild Mushroom model is replaced by Fungal Growth (invisible stalker + ground FX).
+                mushroom->DespawnOrUnsummon(500);
+            }
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_dru_wild_mushroom_detonate_SpellScript::CheckCast);
+            OnCast += SpellCastFn(spell_dru_wild_mushroom_detonate_SpellScript::HandleCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_wild_mushroom_detonate_SpellScript();
+    }
+};
+
+// 43484 - Fungal Growth
+class npc_fungal_growth : public CreatureScript
+{
+public:
+    npc_fungal_growth() : CreatureScript("npc_fungal_growth") { }
+
+    struct npc_fungal_growthAI : public NullCreatureAI
+    {
+        npc_fungal_growthAI(Creature* creature) : NullCreatureAI(creature)
+        {
+            me->SetReactState(REACT_PASSIVE);
+            me->CastSpell(me, SPELL_DRUID_MUSHROOM_SLOW_VISUAL, true);
+            me->CastSpell(me, SPELL_DRUID_FUNGAL_GROWTH_SLOW, true);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_fungal_growthAI(creature);
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1217,4 +1815,11 @@ void AddSC_druid_spell_scripts()
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
     new spell_dru_t10_restoration_4p_bonus();
+    new spell_dru_wild_mushroom();
+    new spell_dru_wild_mushroom_bloom();
+    new spell_dru_wild_mushroom_detonate();
+    new spell_dru_wild_mushroom_heal();
+    new spell_dru_wild_mushroom_overheal();
+    new npc_fungal_growth();
+    new npc_wild_mushroom();
 }

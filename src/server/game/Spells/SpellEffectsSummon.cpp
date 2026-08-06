@@ -305,11 +305,16 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                             // randomize position for multiple summons
                             m_caster->GetRandomPoint(*destTarget, radius, pos);
 
-                        summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
+                        // Wild Mushroom: summon with properties as minion so owner tracks it in m_Controlled
+                        if (entry == 47649)
+                            summon = m_originalCaster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id);
+                        else
+                            summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
+
                         if (!summon)
                             continue;
 
-                        if (properties->Category == SUMMON_CATEGORY_ALLY)
+                        if (entry != 47649 && properties->Category == SUMMON_CATEGORY_ALLY)
                         {
                             summon->SetOwnerGUID(m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());

@@ -2246,6 +2246,13 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
     if (!obj->m_stealth.GetFlags())
         return true;
 
+    // Wild Mushroom Invisible (92661) is a low-amount stealth aura. Normal detection
+    // always reveals it within MAX_PLAYER_STEALTH_DETECT_RANGE; MoP expects enemies
+    // to never see stealthed mushrooms. Owner/group still see via IsAlwaysVisibleFor.
+    if (Creature const* creature = obj->ToCreature())
+        if (creature->GetEntry() == 47649)
+            return false;
+
     float distance = GetExactDist(obj);
     float combatReach = 0.0f;
 
@@ -2601,7 +2608,11 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
                         mask = UNIT_MASK_MINION;
                         break;
                     default:
-                        if (properties->Flags & 512) // Mirror Image, Summon Gargoyle
+                        // Wild Mushroom (druid): minion so owner tracks it in m_Controlled
+                        // (avoid Totem UI/display side effects from summon slot handling)
+                        if (entry == 47649)
+                            mask = UNIT_MASK_MINION;
+                        else if (properties->Flags & 512) // Mirror Image, Summon Gargoyle
                             mask = UNIT_MASK_GUARDIAN;
                         break;
                 }
