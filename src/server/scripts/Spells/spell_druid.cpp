@@ -1938,6 +1938,34 @@ public:
     }
 };
 
+// 93400 - Shooting Stars
+class spell_dru_shooting_stars : public SpellScriptLoader
+{
+public:
+    spell_dru_shooting_stars() : SpellScriptLoader("spell_dru_shooting_stars") { }
+
+    class spell_dru_shooting_stars_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_shooting_stars_SpellScript);
+
+        void HandleHit()
+        {
+            if (Player* druid = GetCaster()->ToPlayer())
+                druid->RemoveSpellCooldown(SPELL_DRUID_STARSURGE, true);
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_shooting_stars_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_shooting_stars_SpellScript();
+    }
+};
+
 // 78675 - Solar Beam, 113286 - Solar Beam (Symbiosis)
 class spell_dru_solar_beam : public SpellScriptLoader
 {
@@ -2084,6 +2112,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_rake();
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
+    new spell_dru_shooting_stars();
     new spell_dru_skull_bash();
     new spell_dru_solar_beam();
     new spell_dru_starfall_dummy();

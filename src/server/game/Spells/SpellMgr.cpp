@@ -3097,6 +3097,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 64823: // Item - Druid T8 Balance 4P Bonus
             case 69369: // Predatory Swiftness
             case 88819: // Daybreak
+            case 93400: // Shooting Stars
             case 122510: // Ultimatum
             case 132158: // Nature's Swiftness
                 spellInfo->ProcCharges = 1;
