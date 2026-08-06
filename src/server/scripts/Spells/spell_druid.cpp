@@ -20,6 +20,7 @@
 #include "Battleground.h"
 #include "TemporarySummon.h"
 #include "PassiveAI.h"
+#include <algorithm>
 #include <limits>
 
 enum DruidSpells
@@ -77,6 +78,9 @@ enum DruidSpells
     SPELL_DRUID_MUSHROOM_SLOW_VISUAL        = 94339,
     SPELL_DRUID_WILD_MUSHROOM_RESTO         = 145205,
     SPELL_DRUID_WILD_MUSHROOM_RESTO_GLYPH   = 147349,
+    SPELL_DRUID_FRENZIED_REGENERATION       = 22842,
+    SPELL_DRUID_GLYPH_OF_FRENZIED_REGEN     = 54810,
+    SPELL_DRUID_FRENZIED_REGEN_HEAL_TAKE    = 124769,
 };
 
 enum DruidCreatureIds
@@ -1790,6 +1794,84 @@ public:
     }
 };
 
+// 22842 - Frenzied Regeneration
+class spell_dru_frenzied_regeneration : public SpellScriptLoader
+{
+public:
+    spell_dru_frenzied_regeneration() : SpellScriptLoader("spell_dru_frenzied_regeneration") { }
+
+    class spell_dru_frenzied_regeneration_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_frenzied_regeneration_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_GLYPH_OF_FRENZIED_REGEN)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_FRENZIED_REGEN_HEAL_TAKE);
+        }
+
+        void HandleHit()
+        {
+            Player* druid = GetCaster()->ToPlayer();
+            if (!druid)
+                return;
+
+            // Glyph: fixed rage cost, no rage-to-health convert; +healing taken instead.
+            if (Aura const* glyph = druid->GetAura(SPELL_DRUID_GLYPH_OF_FRENZIED_REGEN))
+            {
+                SetHitHeal(0);
+                druid->CastSpell(druid, SPELL_DRUID_FRENZIED_REGEN_HEAL_TAKE, true);
+                // Tooltip ${$m3/10}: EFFECT_2 base points are rage*10 (power units).
+                int32 rageCost = glyph->GetSpellInfo()->Effects[EFFECT_2].CalcValue(druid);
+                if (rageCost > 0)
+                {
+                    int32 have = druid->GetPower(POWER_RAGE);
+                    druid->EnergizeBySpell(druid, GetSpellInfo()->Id, -std::min(rageCost, have), POWER_RAGE);
+                }
+                return;
+            }
+
+            // Convert up to EFFECT_4 rage (tooltip "60") into health. Rage is stored *10.
+            int32 maxRage = GetSpellInfo()->Effects[EFFECT_4].CalcValue(druid) * 10;
+            if (maxRage <= 0)
+                maxRage = 600;
+
+            int32 rageUsed = std::min(maxRage, druid->GetPower(POWER_RAGE));
+            int32 attackPower = int32(druid->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK));
+            int32 agility = int32(druid->GetStat(STAT_AGILITY));
+            int32 stamina = int32(druid->GetStat(STAT_STAMINA));
+
+            // EFFECT_1 = 220% of (AP - 2*Agi); EFFECT_2 = 250% of Stamina; take the larger.
+            int32 fromAttackPower = CalculatePct(std::max(attackPower - agility * 2, 0),
+                GetSpellInfo()->Effects[EFFECT_1].CalcValue(druid));
+            int32 fromStamina = CalculatePct(stamina, GetSpellInfo()->Effects[EFFECT_2].CalcValue(druid));
+            int32 healAmount = std::max(fromAttackPower, fromStamina);
+            healAmount = int32(int64(rageUsed) * healAmount / maxRage);
+
+            if (healAmount > 0)
+            {
+                healAmount = int32(druid->SpellHealingBonusDone(druid, GetSpellInfo(), uint32(healAmount), HEAL));
+                healAmount = int32(druid->SpellHealingBonusTaken(druid, GetSpellInfo(), uint32(healAmount), HEAL));
+            }
+
+            SetHitHeal(healAmount);
+
+            if (rageUsed > 0)
+                druid->EnergizeBySpell(druid, GetSpellInfo()->Id, -rageUsed, POWER_RAGE);
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_frenzied_regeneration_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_frenzied_regeneration_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1797,6 +1879,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_eclipse("spell_dru_eclipse_solar");
     new spell_dru_eclipse_energize();
     new spell_dru_ferocious_bite();
+    new spell_dru_frenzied_regeneration();
     new spell_dru_glyph_of_innervate();
     new spell_dru_innervate();
     new spell_dru_lacerate();
