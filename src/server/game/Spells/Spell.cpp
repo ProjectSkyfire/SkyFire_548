@@ -3031,10 +3031,17 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
 
         foundSpellPower = true;
         m_powerType = spellPower->powerType;
+        // Mana % costs are of base (create) mana — matching client tooltips — not current max mana.
+        // Other powers (e.g. Demonic Fury) correctly use max power.
         uint32 maxPowerForCost = 0;
         if (spellPower->ChannelCostPercentageFloat ||
             (spellPower->ManaCostPercentageFloat && (m_powerType == POWER_MANA || m_powerType == POWER_DEMONIC_FURY)))
-            maxPowerForCost = m_caster->GetMaxPower(Powers(m_powerType));
+        {
+            if (m_powerType == POWER_MANA)
+                maxPowerForCost = m_caster->GetCreateMana();
+            else
+                maxPowerForCost = m_caster->GetMaxPower(Powers(m_powerType));
+        }
 
         Skyfire::Spells::SpellPowerCostCalculationData costData =
         {

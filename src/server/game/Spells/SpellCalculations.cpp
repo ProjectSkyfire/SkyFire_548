@@ -135,6 +135,9 @@ namespace Spells
                 result.PowerCost += CalculatePct(data.CreatedHealth, data.PowerCostPercentage);
                 break;
             case POWER_MANA:
+                // Percentage mana costs are of create/base mana (client tooltip), not max mana.
+                result.PowerCost += CalculatePct(data.MaxPower, data.PowerCostPercentage);
+                break;
             case POWER_DEMONIC_FURY:
                 result.PowerCost += CalculatePct(data.MaxPower, data.PowerCostPercentage);
                 break;

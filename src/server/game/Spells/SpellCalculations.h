@@ -46,6 +46,7 @@ namespace Spells
         float ChannelCostPercentage;
         int32 PowerType;
         uint32 CreatedHealth;
+        // For POWER_MANA % costs: create/base mana. For other powers: max power.
         uint32 MaxPower;
     };
 
