@@ -33,6 +33,8 @@ enum DruidSpells
     SPELL_DRUID_INCREASED_MOONFIRE_DURATION = 38414,
     SPELL_DRUID_LIFEBLOOM_ENERGIZE          = 64372,
     SPELL_DRUID_LIFEBLOOM_FINAL_HEAL        = 33778,
+    SPELL_DRUID_LIFEBLOOM                   = 33763,
+    SPELL_DRUID_GLYPH_OF_BLOOMING           = 121840,
     SPELL_DRUID_LIVING_SEED_HEAL            = 48503,
     SPELL_DRUID_LIVING_SEED_PROC            = 48504,
     SPELL_DRUID_NATURES_GRACE               = 16880,
@@ -455,6 +457,45 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_lifebloom_AuraScript();
+    }
+};
+
+// 5185 - Healing Touch, 50464 - Nourish, 8936 - Regrowth
+// Refresh Lifebloom duration unless Glyph of Blooming is active.
+class spell_dru_lifebloom_refresh : public SpellScriptLoader
+{
+public:
+    spell_dru_lifebloom_refresh() : SpellScriptLoader("spell_dru_lifebloom_refresh") { }
+
+    class spell_dru_lifebloom_refresh_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_lifebloom_refresh_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_LIFEBLOOM);
+        }
+
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target || caster->HasAura(SPELL_DRUID_GLYPH_OF_BLOOMING))
+                return;
+
+            if (Aura* lifebloom = target->GetAura(SPELL_DRUID_LIFEBLOOM, caster->GetGUID()))
+                lifebloom->RefreshTimers();
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_lifebloom_refresh_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_lifebloom_refresh_SpellScript();
     }
 };
 
@@ -1129,6 +1170,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_innervate();
     new spell_dru_lacerate();
     new spell_dru_lifebloom();
+    new spell_dru_lifebloom_refresh();
     new spell_dru_rejuvenation();
     new spell_dru_living_seed();
     new spell_dru_living_seed_proc();
