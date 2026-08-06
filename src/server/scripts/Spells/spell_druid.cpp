@@ -1794,6 +1794,44 @@ public:
     }
 };
 
+// 779 - Swipe (Bear), 62078 - Swipe (Cat), 6807 - Maul
+// Extra damage vs bleeding targets (MoP: Swipe $s2%, Maul same script).
+class spell_dru_swipe_and_maul_bleed : public SpellScriptLoader
+{
+public:
+    spell_dru_swipe_and_maul_bleed() : SpellScriptLoader("spell_dru_swipe_and_maul_bleed") { }
+
+    class spell_dru_swipe_and_maul_bleed_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_swipe_and_maul_bleed_SpellScript);
+
+        void HandleHit()
+        {
+            Unit* target = GetHitUnit();
+            if (!target || !target->HasAuraState(AURA_STATE_BLEEDING))
+                return;
+
+            int32 bonusPct = 20;
+            // Bear/Cat Swipe store the bleed bonus on EFFECT_1 (dummy).
+            if (GetSpellInfo()->Id == 779 || GetSpellInfo()->Id == 62078)
+                bonusPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(GetCaster());
+
+            if (bonusPct > 0)
+                SetHitDamage(GetHitDamage() + CalculatePct(GetHitDamage(), bonusPct));
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_swipe_and_maul_bleed_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_swipe_and_maul_bleed_SpellScript();
+    }
+};
+
 // 22842 - Frenzied Regeneration
 class spell_dru_frenzied_regeneration : public SpellScriptLoader
 {
@@ -1897,6 +1935,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_starfall_dummy();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
+    new spell_dru_swipe_and_maul_bleed();
     new spell_dru_t10_restoration_4p_bonus();
     new spell_dru_wild_mushroom();
     new spell_dru_wild_mushroom_bloom();
