@@ -37,6 +37,10 @@ enum DruidSpells
     SPELL_DRUID_LUNAR_ECLIPSE               = 48518,
     SPELL_DRUID_LUNAR_ECLIPSE_OVERRIDE      = 107095,
     SPELL_DRUID_STARFALL                     = 48505,
+    SPELL_DRUID_SOLAR_BEAM                   = 78675,
+    SPELL_DRUID_SOLAR_BEAM_SILENCE          = 81261,
+    SPELL_DRUID_SOLAR_BEAM_SYMBIOSIS        = 113286,
+    SPELL_DRUID_SOLAR_BEAM_SILENCE_SYMBIOSIS = 113287,
     SPELL_DRUID_FERAL_CHARGE_BEAR           = 16979,
     SPELL_DRUID_FERAL_CHARGE_CAT            = 49376,
     SPELL_DRUID_GLYPH_OF_INNERVATE          = 54833,
@@ -1934,6 +1938,52 @@ public:
     }
 };
 
+// 78675 - Solar Beam, 113286 - Solar Beam (Symbiosis)
+class spell_dru_solar_beam : public SpellScriptLoader
+{
+public:
+    spell_dru_solar_beam() : SpellScriptLoader("spell_dru_solar_beam") { }
+
+    class spell_dru_solar_beam_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_solar_beam_AuraScript);
+
+        uint32 GetSilenceSpell() const
+        {
+            return GetId() == SPELL_DRUID_SOLAR_BEAM
+                ? SPELL_DRUID_SOLAR_BEAM_SILENCE
+                : SPELL_DRUID_SOLAR_BEAM_SILENCE_SYMBIOSIS;
+        }
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (caster && target)
+                caster->AddAura(GetSilenceSpell(), target);
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (caster && target)
+                target->RemoveAurasDueToSpell(GetSilenceSpell(), caster->GetGUID());
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_solar_beam_AuraScript::HandleApply, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectRemove += AuraEffectRemoveFn(spell_dru_solar_beam_AuraScript::HandleRemove, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_solar_beam_AuraScript();
+    }
+};
+
 // 22842 - Frenzied Regeneration
 class spell_dru_frenzied_regeneration : public SpellScriptLoader
 {
@@ -2035,6 +2085,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
     new spell_dru_skull_bash();
+    new spell_dru_solar_beam();
     new spell_dru_starfall_dummy();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
