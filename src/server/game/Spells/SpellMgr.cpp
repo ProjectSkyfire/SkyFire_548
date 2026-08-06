@@ -3095,6 +3095,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 54741: // Firestarter
             case 57761: // Fireball!
             case 64823: // Item - Druid T8 Balance 4P Bonus
+            case 69369: // Predatory Swiftness
             case 88819: // Daybreak
             case 132158: // Nature's Swiftness
                 spellInfo->ProcCharges = 1;
