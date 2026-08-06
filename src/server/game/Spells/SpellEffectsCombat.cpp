@@ -1033,25 +1033,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 
     switch (m_spellInfo->SpellFamilyName)
     {
-        case SPELLFAMILY_WARRIOR:
-        {
-            // Devastate (player ones)
-            if (m_spellInfo->SpellFamilyFlags[1] & 0x40)
-            {
-                // Player can apply only 58567 Sunder Armor effect.
-                bool needCast = !unitTarget->HasAura(58567, m_caster->GetGUID());
-                if (needCast)
-                    m_caster->CastSpell(unitTarget, 58567, true);
-
-                if (Aura* aur = unitTarget->GetAura(58567, m_caster->GetGUID()))
-                {
-                    if (int32 num = (needCast ? 0 : 1))
-                        aur->ModStackAmount(num);
-                    fixed_bonus += (aur->GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
-                }
-            }
-            break;
-        }
         case SPELLFAMILY_SHAMAN:
         {
             // Skyshatter Harness item set bonus
