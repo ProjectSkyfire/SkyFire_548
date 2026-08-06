@@ -2877,6 +2877,7 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
             case 63010: // Charge (Argent Tournament, NPC)
             case 68321: // Charge (Argent Tournament, NPC)
             case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
+            case 1822: // Rake (bleed initial hit ignores armor)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 break;
             case 64422: // Sonic Screech (Auriaya)

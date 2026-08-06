@@ -993,6 +993,19 @@ bool Unit::IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo const* s
                 if (spellInfo->GetEffectMechanicMask(effIndex) & (1 << MECHANIC_BLEED))
                     return false;
         }
+        else
+        {
+            // CalculateSpellDamageTaken does not pass an effect index. Still skip armor for
+            // direct school-damage bleed hits (e.g. Rake initial damage).
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            {
+                if (!spellInfo->Effects[i].IsEffect())
+                    continue;
+                if (spellInfo->Effects[i].Effect == SPELL_EFFECT_SCHOOL_DAMAGE &&
+                    (spellInfo->GetEffectMechanicMask(i) & (1 << MECHANIC_BLEED)))
+                    return false;
+            }
+        }
     }
     return true;
 }

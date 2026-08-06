@@ -54,6 +54,7 @@ enum DruidSpells
     SPELL_DRUID_RIP                         = 1079,
     SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE     = 67598,
     SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE_HEAL= 101024,
+    SPELL_DRUID_RAKE                        = 1822,
 };
 
 // 1850 - Dash
@@ -528,6 +529,38 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_lacerate_AuraScript();
+    }
+};
+
+// 1822 - Rake
+// MoP: initial and each tick use 0.3 AP. Bake tick AP into aura amount so $w2 matches damage.
+class spell_dru_rake : public SpellScriptLoader
+{
+public:
+    spell_dru_rake() : SpellScriptLoader("spell_dru_rake") { }
+
+    class spell_dru_rake_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_rake_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                canBeRecalculated = false;
+                amount += int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.3f);
+            }
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_rake_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_rake_AuraScript();
     }
 };
 
@@ -1176,6 +1209,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_living_seed_proc();
     new spell_dru_might_of_ursoc();
     new spell_dru_predatory_strikes();
+    new spell_dru_rake();
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
     new spell_dru_skull_bash();
