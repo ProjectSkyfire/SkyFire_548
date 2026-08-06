@@ -2571,7 +2571,11 @@ void WorldObject::AddObjectToRemoveList()
 TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties /*= NULL*/, uint32 duration /*= 0*/, Unit* summoner /*= NULL*/, uint32 spellId /*= 0*/, uint32 vehId /*= 0*/)
 {
     uint32 mask = UNIT_MASK_SUMMON;
-    if (properties)
+    // Force of Nature treants must be guardians so they inherit owner level/stats
+    // and combat logs attribute their damage/healing to the druid.
+    if (entry == 1964 || entry == 54983 || entry == 54984 || entry == 54985)
+        mask = UNIT_MASK_GUARDIAN;
+    else if (properties)
     {
         switch (properties->Category)
         {

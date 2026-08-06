@@ -305,8 +305,9 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                             // randomize position for multiple summons
                             m_caster->GetRandomPoint(*destTarget, radius, pos);
 
-                        // Wild Mushroom: summon with properties as minion so owner tracks it in m_Controlled
-                        if (entry == 47649)
+                        // Wild Mushroom / Force of Nature: summon with properties so
+                        // Map::SummonCreature creates a tracked minion/guardian for the owner.
+                        if (entry == 47649 || entry == 1964 || entry == 54983 || entry == 54984 || entry == 54985)
                             summon = m_originalCaster->GetMap()->SummonCreature(entry, pos, properties, duration, m_originalCaster, m_spellInfo->Id);
                         else
                             summon = m_originalCaster->SummonCreature(entry, pos, summonType, duration);
@@ -314,7 +315,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                         if (!summon)
                             continue;
 
-                        if (entry != 47649 && properties->Category == SUMMON_CATEGORY_ALLY)
+                        if (entry != 47649 && entry != 1964 && entry != 54983 && entry != 54984 && entry != 54985 && properties->Category == SUMMON_CATEGORY_ALLY)
                         {
                             summon->SetOwnerGUID(m_originalCaster->GetGUID());
                             summon->setFaction(m_originalCaster->getFaction());
@@ -1096,6 +1097,12 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
         }
 
         summon->AI()->EnterEvadeMode();
+
+        // Force of Nature treants: SummonGuardian calls EnterEvadeMode after IsSummonedBy,
+        // which would clear their first engage. Re-engage from the owner's target.
+        if ((summon->GetEntry() == 1964 || summon->GetEntry() == 54983 ||
+             summon->GetEntry() == 54984 || summon->GetEntry() == 54985) && summon->IsAIEnabled)
+            summon->AI()->IsSummonedBy(caster);
 
         ExecuteLogEffectSummonObject(i, summon);
     }

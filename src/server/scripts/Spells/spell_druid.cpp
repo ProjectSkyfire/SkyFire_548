@@ -13,6 +13,7 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "SpellMgr.h"
 #include "Containers.h"
 #include "ObjectAccessor.h"
 #include "EventProcessor.h"
@@ -20,6 +21,7 @@
 #include "Battleground.h"
 #include "TemporarySummon.h"
 #include "PassiveAI.h"
+#include "PetDefines.h"
 #include <algorithm>
 #include <limits>
 
@@ -41,6 +43,12 @@ enum DruidSpells
     SPELL_DRUID_SOLAR_BEAM_SILENCE          = 81261,
     SPELL_DRUID_SOLAR_BEAM_SYMBIOSIS        = 113286,
     SPELL_DRUID_SOLAR_BEAM_SILENCE_SYMBIOSIS = 113287,
+    SPELL_DRUID_FORCE_OF_NATURE_VISUAL      = 37846,
+    SPELL_DRUID_FORCE_OF_NATURE_ROOT        = 113770,
+    SPELL_DRUID_FORCE_OF_NATURE_WRATH       = 113769,
+    SPELL_DRUID_FORCE_OF_NATURE_SWIFTMEND   = 142421,
+    SPELL_DRUID_FORCE_OF_NATURE_HEAL        = 113828,
+    SPELL_DRUID_FORCE_OF_NATURE_TAUNT       = 113830,
     SPELL_DRUID_FERAL_CHARGE_BEAR           = 16979,
     SPELL_DRUID_FERAL_CHARGE_CAT            = 49376,
     SPELL_DRUID_GLYPH_OF_INNERVATE          = 54833,
@@ -93,7 +101,11 @@ enum DruidSpells
 
 enum DruidCreatureIds
 {
-    NPC_DRUID_WILD_MUSHROOM                 = 47649
+    NPC_DRUID_WILD_MUSHROOM                 = 47649,
+    NPC_DRUID_FORCE_OF_NATURE_BALANCE       = 1964,
+    NPC_DRUID_FORCE_OF_NATURE_RESTORATION   = 54983,
+    NPC_DRUID_FORCE_OF_NATURE_FERAL         = 54984,
+    NPC_DRUID_FORCE_OF_NATURE_GUARDIAN      = 54985
 };
 
 // 1850 - Dash
@@ -1294,6 +1306,611 @@ public:
     }
 };
 
+// 33831, 102693, 102703, 102706 - Force of Nature
+class spell_dru_force_of_nature : public SpellScriptLoader
+{
+public:
+    enum TreantRole
+    {
+        TREANT_BALANCE,
+        TREANT_RESTORATION,
+        TREANT_FERAL,
+        TREANT_GUARDIAN
+    };
+
+    spell_dru_force_of_nature(char const* scriptName, TreantRole role)
+        : SpellScriptLoader(scriptName), _role(role) { }
+
+    class spell_dru_force_of_nature_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_force_of_nature_SpellScript);
+
+    public:
+        explicit spell_dru_force_of_nature_SpellScript(TreantRole role)
+            : _role(role), _targetGuid(0) { }
+
+        void CaptureTarget()
+        {
+            if (Unit* target = GetExplTargetUnit())
+                _targetGuid = target->GetGUID();
+        }
+
+        void HandleCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = caster && _targetGuid ? ObjectAccessor::GetUnit(*caster, _targetGuid) : NULL;
+            if (!target && caster && caster->GetTypeId() == TypeID::TYPEID_PLAYER)
+                target = caster->ToPlayer()->GetSelectedUnit();
+            if (!caster || !target)
+                return;
+
+            // Resolve the summoned NPC entry from the actual SUMMON effect (not a hard-coded effect index).
+            uint32 entry = 0;
+            SpellInfo const* spellInfo = GetSpellInfo();
+            for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            {
+                if (spellInfo->Effects[i].IsEffect(SPELL_EFFECT_SUMMON))
+                {
+                    entry = spellInfo->Effects[i].MiscValue;
+                    break;
+                }
+            }
+            if (!entry)
+                entry = spellInfo->Effects[EFFECT_1].MiscValue;
+
+            std::list<Creature*> minions;
+            caster->GetAllMinionsByEntry(minions, entry);
+            if (minions.empty())
+                caster->GetCreatureListWithEntryInGrid(minions, entry, 100.0f);
+
+            TempSummon* treant = NULL;
+            uint32 newestTimer = 0;
+            for (Creature* minion : minions)
+            {
+                TempSummon* summon = minion->ToTempSummon();
+                if (!summon || !summon->IsAlive() || summon->GetSummonerGUID() != caster->GetGUID())
+                    continue;
+
+                if (!treant || summon->GetTimer() >= newestTimer)
+                {
+                    treant = summon;
+                    newestTimer = summon->GetTimer();
+                }
+            }
+
+            if (!treant)
+                return;
+
+            treant->CastSpell(treant, SPELL_DRUID_FORCE_OF_NATURE_VISUAL, true);
+            treant->SetReactState(REACT_AGGRESSIVE);
+
+            switch (_role)
+            {
+                case TREANT_BALANCE:
+                    if (treant->IsAIEnabled)
+                        treant->AI()->SetGUID(target->GetGUID());
+                    break;
+                case TREANT_RESTORATION:
+                    treant->CastSpell(target, SPELL_DRUID_FORCE_OF_NATURE_SWIFTMEND, true);
+                    break;
+                case TREANT_FERAL:
+                {
+                    float damage = spellInfo->Effects[EFFECT_0].CalcValue(caster) + 1.0f;
+                    treant->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, damage);
+                    treant->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, damage);
+                    treant->UpdateAttackPowerAndDamage();
+                    // Tooltip: immediately root the current target, then melee.
+                    treant->CastSpell(target, SPELL_DRUID_FORCE_OF_NATURE_ROOT, true);
+                    treant->Attack(target, true);
+                    treant->GetMotionMaster()->Clear(true);
+                    treant->GetMotionMaster()->MoveChase(target);
+                    if (treant->IsAIEnabled)
+                        treant->AI()->SetGUID(target->GetGUID());
+                    break;
+                }
+                case TREANT_GUARDIAN:
+                {
+                    float damage = spellInfo->Effects[EFFECT_0].CalcValue(caster) * 0.2f + 1.0f;
+                    treant->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, damage);
+                    treant->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, damage);
+                    treant->UpdateAttackPowerAndDamage();
+                    treant->CastSpell(target, SPELL_DRUID_FORCE_OF_NATURE_TAUNT, true);
+                    treant->Attack(target, true);
+                    treant->GetMotionMaster()->Clear(true);
+                    treant->GetMotionMaster()->MoveChase(target);
+                    if (treant->IsAIEnabled)
+                        treant->AI()->SetGUID(target->GetGUID());
+                    break;
+                }
+            }
+        }
+
+        void Register() override
+        {
+            BeforeCast += SpellCastFn(spell_dru_force_of_nature_SpellScript::CaptureTarget);
+            AfterCast += SpellCastFn(spell_dru_force_of_nature_SpellScript::HandleCast);
+        }
+
+    private:
+        TreantRole _role;
+        uint64 _targetGuid;
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_force_of_nature_SpellScript(_role);
+    }
+
+private:
+    TreantRole _role;
+};
+
+class npc_force_of_nature_balance : public CreatureScript
+{
+public:
+    npc_force_of_nature_balance() : CreatureScript("npc_force_of_nature_balance") { }
+
+    struct npc_force_of_nature_balanceAI : public ScriptedAI
+    {
+        explicit npc_force_of_nature_balanceAI(Creature* creature)
+            : ScriptedAI(creature), _focusGuid(0), _needRoot(false), _awaitingInitial(true) { }
+
+        void IsSummonedBy(Unit* summoner) OVERRIDE
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            if (me->HasUnitTypeMask(UNIT_MASK_MINION))
+                static_cast<Minion*>(me)->SetFollowAngle(PET_FOLLOW_ANGLE);
+
+            if (Unit* target = SelectInitialTarget(summoner))
+                EngageTarget(target);
+        }
+
+        void SetGUID(uint64 guid, int32 /*id*/) OVERRIDE
+        {
+            if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
+                EngageTarget(target);
+        }
+
+        void OwnerAttacked(Unit* target) OVERRIDE
+        {
+            if (_awaitingInitial || !target || !target->IsAlive() || !me->IsValidAttackTarget(target))
+                return;
+
+            Unit* focus = _focusGuid ? ObjectAccessor::GetUnit(*me, _focusGuid) : NULL;
+            if (focus && focus->IsAlive())
+                return;
+
+            EngageTarget(target);
+        }
+
+        void EnterEvadeMode() OVERRIDE
+        {
+            Unit* focus = _focusGuid ? ObjectAccessor::GetUnit(*me, _focusGuid) : NULL;
+            if (focus && focus->IsAlive() && me->IsValidAttackTarget(focus))
+            {
+                AttackStart(focus);
+                return;
+            }
+
+            if (Unit* owner = me->GetCharmerOrOwner())
+                FollowOwner(owner);
+            else
+                ScriptedAI::EnterEvadeMode();
+        }
+
+        void AttackStart(Unit* target) OVERRIDE
+        {
+            if (!target || !me->Attack(target, false))
+                return;
+
+            float castRange = GetSpellRange(SPELL_DRUID_FORCE_OF_NATURE_WRATH);
+            if (me->IsWithinDist(target, castRange))
+            {
+                me->StopMoving();
+                me->GetMotionMaster()->Clear(false);
+                me->SetFacingToObject(target);
+            }
+            else
+                me->GetMotionMaster()->MoveChase(target, castRange * 0.8f);
+        }
+
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        {
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            Unit* owner = me->GetCharmerOrOwner();
+            if (_awaitingInitial)
+                return;
+
+            Unit* focus = _focusGuid ? ObjectAccessor::GetUnit(*me, _focusGuid) : NULL;
+            if (!focus || !focus->IsAlive())
+            {
+                _focusGuid = 0;
+                _needRoot = false;
+                me->AttackStop();
+                me->InterruptNonMeleeSpells(false);
+
+                if (Unit* newTarget = SelectCombatTarget(owner))
+                {
+                    EngageTarget(newTarget);
+                    return;
+                }
+
+                if (owner)
+                    FollowOwner(owner);
+                return;
+            }
+
+            if (_needRoot)
+            {
+                me->CastSpell(focus, SPELL_DRUID_FORCE_OF_NATURE_ROOT, true);
+                _needRoot = false;
+            }
+
+            float castRange = GetSpellRange(SPELL_DRUID_FORCE_OF_NATURE_WRATH);
+            if (!me->IsWithinDist(focus, castRange) || !me->IsWithinLOSInMap(focus))
+            {
+                if (!me->HasUnitState(UNIT_STATE_CHASE))
+                    me->GetMotionMaster()->MoveChase(focus, castRange * 0.8f);
+                return;
+            }
+
+            if (me->isMoving() || me->HasUnitState(UNIT_STATE_CHASE))
+            {
+                me->StopMoving();
+                me->GetMotionMaster()->Clear(false);
+            }
+
+            me->SetFacingToObject(focus);
+            DoCast(focus, SPELL_DRUID_FORCE_OF_NATURE_WRATH, false);
+        }
+
+    private:
+        float GetSpellRange(uint32 spellId) const
+        {
+            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
+                return spellInfo->GetMaxRange(false);
+            return 40.0f;
+        }
+
+        Unit* SelectInitialTarget(Unit* owner) const
+        {
+            if (!owner)
+                return NULL;
+
+            if (Player* player = owner->ToPlayer())
+                if (Unit* selected = player->GetSelectedUnit())
+                    if (me->IsValidAttackTarget(selected))
+                        return selected;
+
+            if (Unit* victim = owner->GetVictim())
+                if (me->IsValidAttackTarget(victim))
+                    return victim;
+
+            return NULL;
+        }
+
+        Unit* SelectCombatTarget(Unit* owner) const
+        {
+            if (!owner || !owner->IsInCombat())
+                return NULL;
+
+            if (Unit* victim = owner->GetVictim())
+                if (me->IsValidAttackTarget(victim))
+                    return victim;
+
+            if (Player* player = owner->ToPlayer())
+                if (Unit* selected = player->GetSelectedUnit())
+                    if (me->IsValidAttackTarget(selected))
+                        return selected;
+
+            if (Unit* helper = owner->getAttackerForHelper())
+                if (me->IsValidAttackTarget(helper))
+                    return helper;
+
+            return NULL;
+        }
+
+        void EngageTarget(Unit* target)
+        {
+            _focusGuid = target->GetGUID();
+            _awaitingInitial = false;
+            _needRoot = true;
+            AttackStart(target);
+        }
+
+        void FollowOwner(Unit* owner)
+        {
+            if (!owner)
+                return;
+
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        }
+
+        uint64 _focusGuid;
+        bool _needRoot;
+        bool _awaitingInitial;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_force_of_nature_balanceAI(creature);
+    }
+};
+
+class npc_force_of_nature_restoration : public CreatureScript
+{
+public:
+    npc_force_of_nature_restoration() : CreatureScript("npc_force_of_nature_restoration") { }
+
+    struct npc_force_of_nature_restorationAI : public ScriptedAI
+    {
+        explicit npc_force_of_nature_restorationAI(Creature* creature)
+            : ScriptedAI(creature) { }
+
+        void IsSummonedBy(Unit* summoner) OVERRIDE
+        {
+            me->SetReactState(REACT_PASSIVE);
+            if (me->HasUnitTypeMask(UNIT_MASK_MINION))
+                static_cast<Minion*>(me)->SetFollowAngle(PET_FOLLOW_ANGLE);
+
+            FollowOwner(summoner);
+        }
+
+        void EnterEvadeMode() OVERRIDE
+        {
+            me->InterruptNonMeleeSpells(false);
+            if (Unit* owner = me->GetCharmerOrOwner())
+                FollowOwner(owner);
+            else
+                ScriptedAI::EnterEvadeMode();
+        }
+
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        {
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            Unit* owner = me->GetCharmerOrOwner();
+            if (!owner)
+                return;
+
+            float castRange = GetSpellRange(SPELL_DRUID_FORCE_OF_NATURE_HEAL);
+            if (!me->IsWithinDist(owner, castRange))
+            {
+                if (!me->HasUnitState(UNIT_STATE_FOLLOW) && !me->HasUnitState(UNIT_STATE_CHASE))
+                    FollowOwner(owner);
+                return;
+            }
+
+            if (me->isMoving() || me->HasUnitState(UNIT_STATE_CHASE))
+            {
+                me->StopMoving();
+                me->GetMotionMaster()->Clear(false);
+            }
+
+            // Healing Touch (113828) selects the most injured nearby friendly target.
+            DoCast(me, SPELL_DRUID_FORCE_OF_NATURE_HEAL, false);
+        }
+
+    private:
+        float GetSpellRange(uint32 spellId) const
+        {
+            if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
+                return spellInfo->GetMaxRange(true);
+            return 40.0f;
+        }
+
+        void FollowOwner(Unit* owner)
+        {
+            if (!owner)
+                return;
+
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_force_of_nature_restorationAI(creature);
+    }
+};
+
+class npc_force_of_nature_melee : public CreatureScript
+{
+public:
+    enum MeleeRole
+    {
+        MELEE_FERAL,
+        MELEE_GUARDIAN
+    };
+
+    npc_force_of_nature_melee(char const* scriptName, MeleeRole role)
+        : CreatureScript(scriptName), _role(role) { }
+
+    struct npc_force_of_nature_meleeAI : public ScriptedAI
+    {
+        explicit npc_force_of_nature_meleeAI(Creature* creature, MeleeRole role)
+            : ScriptedAI(creature), _role(role), _focusGuid(0), _hasEngaged(false), _focusFinished(false), _didSpecial(false) { }
+
+        void IsSummonedBy(Unit* summoner) OVERRIDE
+        {
+            me->SetReactState(REACT_AGGRESSIVE);
+            if (me->HasUnitTypeMask(UNIT_MASK_MINION))
+                static_cast<Minion*>(me)->SetFollowAngle(PET_FOLLOW_ANGLE);
+
+            // Engage immediately — never MoveFollow before we have a focus (that sends them to the caster).
+            if (Unit* target = SelectInitialTarget(summoner))
+                EngageTarget(target);
+        }
+
+        void SetGUID(uint64 guid, int32 /*id*/) OVERRIDE
+        {
+            if (_focusFinished)
+                return;
+
+            if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
+                EngageTarget(target);
+        }
+
+        // Player-owned guardians evade when the owner is OOC; PetAI ignores evade. Do the same while focused.
+        void EnterEvadeMode() OVERRIDE
+        {
+            if (_hasEngaged && !_focusFinished)
+            {
+                if (Unit* focus = ObjectAccessor::GetUnit(*me, _focusGuid))
+                {
+                    if (focus->IsAlive())
+                    {
+                        StartAttackAndChase(focus);
+                        return;
+                    }
+                }
+            }
+
+            // Not engaged yet, or focus is dead: stay put (do NOT follow owner / "cast position").
+            me->AttackStop();
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveIdle();
+        }
+
+        void MoveInLineOfSight(Unit* who) OVERRIDE
+        {
+            if (_hasEngaged && !_focusFinished)
+                return;
+
+            ScriptedAI::MoveInLineOfSight(who);
+        }
+
+        void AttackStart(Unit* target) OVERRIDE
+        {
+            StartAttackAndChase(target);
+        }
+
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        {
+            Unit* owner = me->GetCharmerOrOwner();
+            if (!_hasEngaged)
+            {
+                if (Unit* target = SelectInitialTarget(owner))
+                    EngageTarget(target);
+                return;
+            }
+
+            Unit* focus = (!_focusFinished && _focusGuid) ? ObjectAccessor::GetUnit(*me, _focusGuid) : NULL;
+            if (!focus || !focus->IsAlive())
+            {
+                _focusGuid = 0;
+                _focusFinished = true;
+                me->AttackStop();
+                me->InterruptNonMeleeSpells(false);
+                if (owner)
+                    FollowOwner(owner);
+                return;
+            }
+
+            StartAttackAndChase(focus);
+
+            if (!me->IsWithinMeleeRange(focus))
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        Unit* SelectInitialTarget(Unit* owner) const
+        {
+            if (!owner)
+                return NULL;
+
+            // Prefer the unit the player has targeted (same as the FoN cast target).
+            if (uint64 targetGuid = owner->GetUInt64Value(UNIT_FIELD_TARGET))
+                if (Unit* hardTarget = ObjectAccessor::GetUnit(*me, targetGuid))
+                    if (hardTarget->IsAlive() && !me->IsFriendlyTo(hardTarget))
+                        return hardTarget;
+
+            if (Player* player = owner->ToPlayer())
+                if (Unit* selected = player->GetSelectedUnit())
+                    if (selected->IsAlive() && !me->IsFriendlyTo(selected))
+                        return selected;
+
+            if (Unit* victim = owner->GetVictim())
+                if (victim->IsAlive() && !me->IsFriendlyTo(victim))
+                    return victim;
+
+            return NULL;
+        }
+
+        void StartAttackAndChase(Unit* target)
+        {
+            if (!target)
+                return;
+
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->ClearUnitState(UNIT_STATE_EVADE);
+
+            if (!me->Attack(target, true))
+            {
+                me->SetInCombatWith(target);
+                target->SetInCombatWith(me);
+                me->SetTarget(target->GetGUID());
+            }
+
+            // Always (re)apply chase so a prior MoveFollow to the caster cannot stick.
+            if (!me->IsWithinMeleeRange(target) || me->GetVictim() != target ||
+                me->HasUnitState(UNIT_STATE_FOLLOW) || !me->HasUnitState(UNIT_STATE_CHASE))
+            {
+                me->GetMotionMaster()->Clear(true);
+                me->GetMotionMaster()->MoveChase(target);
+            }
+        }
+
+        void EngageTarget(Unit* target)
+        {
+            _focusGuid = target->GetGUID();
+            _hasEngaged = true;
+            _focusFinished = false;
+            StartAttackAndChase(target);
+
+            if (!_didSpecial)
+            {
+                if (_role == MELEE_FERAL)
+                    me->CastSpell(target, SPELL_DRUID_FORCE_OF_NATURE_ROOT, true);
+                else
+                    me->CastSpell(target, SPELL_DRUID_FORCE_OF_NATURE_TAUNT, true);
+                _didSpecial = true;
+            }
+        }
+
+        void FollowOwner(Unit* owner)
+        {
+            if (!owner)
+                return;
+
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        MeleeRole _role;
+        uint64 _focusGuid;
+        bool _hasEngaged;
+        bool _focusFinished;
+        bool _didSpecial;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_force_of_nature_meleeAI(creature, _role);
+    }
+
+private:
+    MeleeRole _role;
+};
+
 class DelayedWildMushroomInvisEvent : public BasicEvent
 {
 public:
@@ -2098,6 +2715,10 @@ void AddSC_druid_spell_scripts()
     new spell_dru_eclipse("spell_dru_eclipse_solar");
     new spell_dru_eclipse_energize();
     new spell_dru_ferocious_bite();
+    new spell_dru_force_of_nature("spell_dru_force_of_nature_balance", spell_dru_force_of_nature::TREANT_BALANCE);
+    new spell_dru_force_of_nature("spell_dru_force_of_nature_restoration", spell_dru_force_of_nature::TREANT_RESTORATION);
+    new spell_dru_force_of_nature("spell_dru_force_of_nature_feral", spell_dru_force_of_nature::TREANT_FERAL);
+    new spell_dru_force_of_nature("spell_dru_force_of_nature_guardian", spell_dru_force_of_nature::TREANT_GUARDIAN);
     new spell_dru_frenzied_regeneration();
     new spell_dru_glyph_of_innervate();
     new spell_dru_innervate();
@@ -2125,6 +2746,10 @@ void AddSC_druid_spell_scripts()
     new spell_dru_wild_mushroom_detonate();
     new spell_dru_wild_mushroom_heal();
     new spell_dru_wild_mushroom_overheal();
+    new npc_force_of_nature_balance();
+    new npc_force_of_nature_restoration();
+    new npc_force_of_nature_melee("npc_force_of_nature_feral", npc_force_of_nature_melee::MELEE_FERAL);
+    new npc_force_of_nature_melee("npc_force_of_nature_guardian", npc_force_of_nature_melee::MELEE_GUARDIAN);
     new npc_fungal_growth();
     new npc_wild_mushroom();
 }
