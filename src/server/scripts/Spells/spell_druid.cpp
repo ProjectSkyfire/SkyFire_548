@@ -46,6 +46,9 @@ enum DruidSpells
     SPELL_DRUID_STAMPEDE_CAT_STATE          = 109881,
     SPELL_DRUID_TIGER_S_FURY_ENERGIZE       = 51178,
     SPELL_DRUID_BEAR_FORM                   = 5487,
+    SPELL_DRUID_SKULL_BASH_MANA_COST        = 82365,
+    SPELL_DRUID_SKULL_BASH_INTERRUPT        = 93985,
+    SPELL_DRUID_SKULL_BASH_CHARGE           = 93983,
 };
 
 // 1850 - Dash
@@ -1014,6 +1017,48 @@ public:
     }
 };
 
+// 106839 - Skull Bash (MoP, Cat + Bear)
+// 80964 / 80965 - legacy form-specific casts still present on some characters
+class spell_dru_skull_bash : public SpellScriptLoader
+{
+public:
+    spell_dru_skull_bash() : SpellScriptLoader("spell_dru_skull_bash") { }
+
+    class spell_dru_skull_bash_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_skull_bash_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_SKULL_BASH_MANA_COST)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_SKULL_BASH_INTERRUPT)
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_SKULL_BASH_CHARGE);
+        }
+
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            caster->CastSpell(target, SPELL_DRUID_SKULL_BASH_CHARGE, true);
+            caster->CastSpell(target, SPELL_DRUID_SKULL_BASH_INTERRUPT, true);
+            caster->CastSpell(target, SPELL_DRUID_SKULL_BASH_MANA_COST, true);
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_skull_bash_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_skull_bash_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -1031,6 +1076,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_predatory_strikes();
     new spell_dru_savage_defense();
     new spell_dru_savage_roar();
+    new spell_dru_skull_bash();
     new spell_dru_starfall_dummy();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
