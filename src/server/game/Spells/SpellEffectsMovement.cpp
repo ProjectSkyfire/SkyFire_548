@@ -470,8 +470,17 @@ void Spell::EffectLeapBack(SpellEffIndex effIndex)
 
     float speedxy = float(m_spellInfo->Effects[effIndex].MiscValue) / 10;
     float speedz = float(damage / 10);
-    //1891: Disengage
-    m_caster->JumpTo(speedxy, speedz, m_spellInfo->SpellIconID != 1891);
+
+    switch (m_spellInfo->Id)
+    {
+        case 781:    // Disengage
+        case 102383: // Wild Charge (Moonkin)
+            m_caster->JumpTo(speedxy, speedz, false);
+            break;
+        default:
+            m_caster->JumpTo(speedxy, speedz, true);
+            break;
+    }
 }
 
 void Spell::EffectSendTaxi(SpellEffIndex effIndex)
