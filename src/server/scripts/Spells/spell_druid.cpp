@@ -81,6 +81,7 @@ enum DruidSpells
     SPELL_DRUID_FRENZIED_REGENERATION       = 22842,
     SPELL_DRUID_GLYPH_OF_FRENZIED_REGEN     = 54810,
     SPELL_DRUID_FRENZIED_REGEN_HEAL_TAKE    = 124769,
+    SPELL_DRUID_BEAR_HUG                    = 102795,
 };
 
 enum DruidCreatureIds
@@ -1832,6 +1833,41 @@ public:
     }
 };
 
+// 102795 - Bear Hug
+class spell_dru_bear_hug : public SpellScriptLoader
+{
+public:
+    spell_dru_bear_hug() : SpellScriptLoader("spell_dru_bear_hug") { }
+
+    class spell_dru_bear_hug_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_bear_hug_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (caster->GetShapeshiftForm() != FORM_BEAR)
+                caster->CastSpell(caster, SPELL_DRUID_BEAR_FORM, true);
+
+            // EFFECT_1 base points are % of caster max health per tick.
+            amount = int32(caster->CountPctFromMaxHealth(amount));
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_bear_hug_AuraScript::CalculateAmount, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_bear_hug_AuraScript();
+    }
+};
+
 // 22842 - Frenzied Regeneration
 class spell_dru_frenzied_regeneration : public SpellScriptLoader
 {
@@ -1913,6 +1949,7 @@ public:
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
+    new spell_dru_bear_hug();
     new spell_dru_eclipse("spell_dru_eclipse_lunar");
     new spell_dru_eclipse("spell_dru_eclipse_solar");
     new spell_dru_eclipse_energize();
