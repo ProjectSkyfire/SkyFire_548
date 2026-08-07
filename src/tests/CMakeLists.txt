@@ -549,6 +549,18 @@ target_compile_definitions(paladin_script_registration_tests PRIVATE SKYFIRE_SOU
 
 add_test(NAME paladin_script_registration_tests COMMAND paladin_script_registration_tests)
 
+add_executable(hunter_improved_serpent_sting_tests
+  HunterImprovedSerpentStingTests.cpp
+)
+
+target_include_directories(hunter_improved_serpent_sting_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+)
+
+target_compile_definitions(hunter_improved_serpent_sting_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME hunter_improved_serpent_sting_tests COMMAND hunter_improved_serpent_sting_tests)
+
 add_executable(battle_pet_packet_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePet.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePetPackets.cpp

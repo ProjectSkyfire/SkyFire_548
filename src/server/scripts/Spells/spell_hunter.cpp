@@ -32,6 +32,8 @@ enum HunterSpells
     SPELL_HUNTER_FIRE                               = 82926,
     SPELL_HUNTER_GENERIC_ENERGIZE_FOCUS             = 91954,
 
+    SPELL_HUNTER_IMPROVED_SERPENT_STING             = 82834,
+    SPELL_HUNTER_IMPROVED_SERPENT_STING_DAMAGE      = 83077,
     SPELL_HUNTER_INVIGORATION_TRIGGERED             = 53398,
     SPELL_HUNTER_LOCK_AND_LOAD                      = 56453,
     SPELL_HUNTER_MASTERS_CALL_TRIGGERED             = 62305,
@@ -43,6 +45,7 @@ enum HunterSpells
     SPELL_HUNTER_PET_CARRION_FEEDER_TRIGGERED       = 54045,
 
     SPELL_HUNTER_SERPENT_STING                      = 1978,
+    SPELL_HUNTER_SERPENT_STING_AURA                 = 118253,
 
     SPELL_HUNTER_STEADY_SHOT_FOCUS                  = 77443,
 };
@@ -271,7 +274,7 @@ public:
     }
 };
 
-// -19464 Improved Serpent Sting
+// 82834 - Improved Serpent Sting
 class spell_hun_improved_serpent_sting : public SpellScriptLoader
 {
 public:
@@ -280,6 +283,13 @@ public:
     class spell_hun_improved_serpent_sting_AuraScript : public AuraScript
     {
         PrepareAuraScript(spell_hun_improved_serpent_sting_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_IMPROVED_SERPENT_STING))
+                return false;
+            return true;
+        }
 
         void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
         {
@@ -297,13 +307,63 @@ public:
 
         void Register() OVERRIDE
         {
-            DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_hun_improved_serpent_sting_AuraScript::HandleEffectCalcSpellMod, EFFECT_0, SPELL_AURA_DUMMY);
+            DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(spell_hun_improved_serpent_sting_AuraScript::HandleEffectCalcSpellMod, EFFECT_1, SPELL_AURA_ADD_PCT_MODIFIER);
         }
     };
 
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_hun_improved_serpent_sting_AuraScript();
+    }
+};
+
+// 118253 - Serpent Sting
+class spell_hun_serpent_sting : public SpellScriptLoader
+{
+public:
+    spell_hun_serpent_sting() : SpellScriptLoader("spell_hun_serpent_sting") { }
+
+    class spell_hun_serpent_sting_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_hun_serpent_sting_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_SERPENT_STING_AURA) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HUNTER_IMPROVED_SERPENT_STING) ||
+                !sSpellMgr->GetSpellInfo(SPELL_HUNTER_IMPROVED_SERPENT_STING_DAMAGE))
+                return false;
+            return true;
+        }
+
+        void HandleEffectApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            AuraEffect const* improvedSerpentSting = caster->GetAuraEffect(SPELL_HUNTER_IMPROVED_SERPENT_STING, EFFECT_0);
+            if (!improvedSerpentSting)
+                return;
+
+            int32 const periodicTotal = aurEff->GetAmount() * int32(aurEff->GetTotalTicks());
+            int32 const instantDamage = periodicTotal * improvedSerpentSting->GetAmount() / 100;
+            if (instantDamage <= 0)
+                return;
+
+            caster->CastCustomSpell(target, SPELL_HUNTER_IMPROVED_SERPENT_STING_DAMAGE, &instantDamage, NULL, NULL, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_hun_serpent_sting_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_hun_serpent_sting_AuraScript();
     }
 };
 
@@ -794,6 +854,7 @@ void AddSC_hunter_spell_scripts()
 
     new spell_hun_ready_set_aim();
     new spell_hun_scatter_shot();
+    new spell_hun_serpent_sting();
 
     new spell_hun_steady_shot();
     new spell_hun_tame_beast();
