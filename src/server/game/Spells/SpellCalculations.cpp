@@ -8,6 +8,8 @@
 #include "SpellAuraDefines.h"
 #include "Util.h"
 
+#include <cmath>
+
 namespace Skyfire
 {
 namespace Spells
@@ -112,6 +114,17 @@ namespace Spells
     uint32 CalculateRecoveryTime(uint32 recoveryTime, uint32 categoryRecoveryTime)
     {
         return recoveryTime > categoryRecoveryTime ? recoveryTime : categoryRecoveryTime;
+    }
+
+    uint32 ScaleNpcSpellPowerCost(uint32 powerCost, float casterScalerRatio, float spellScalerRatio)
+    {
+        if (!powerCost || casterScalerRatio <= 0.0f || spellScalerRatio <= 0.0f)
+            return powerCost;
+
+        if (!std::isfinite(casterScalerRatio) || !std::isfinite(spellScalerRatio))
+            return powerCost;
+
+        return uint32(float(powerCost) * casterScalerRatio / spellScalerRatio);
     }
 
     SpellPowerCostCalculationResult CalculateSpellPowerCosts(SpellPowerCostCalculationData const& data)

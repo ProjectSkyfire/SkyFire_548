@@ -3081,7 +3081,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
                 GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(m_spellInfo->SpellLevel - 1);
                 GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(m_caster->getLevel() - 1);
                 if (spellScaler && casterScaler)
-                    tmpPowerCost *= casterScaler->ratio / spellScaler->ratio;
+                    tmpPowerCost = Skyfire::Spells::ScaleNpcSpellPowerCost(tmpPowerCost, casterScaler->ratio, spellScaler->ratio);
             }
         }
 

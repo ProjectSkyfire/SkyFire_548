@@ -616,6 +616,15 @@ namespace
         passed &= Expect(powerCostResult.PowerCost == 0,
             "Unknown percentage power type should zero the base cost");
 
+        passed &= Expect(Skyfire::Spells::ScaleNpcSpellPowerCost(90, 3.0f, 2.0f) == 135,
+            "NPC spell power cost scaling should apply valid caster and spell ratios");
+        passed &= Expect(Skyfire::Spells::ScaleNpcSpellPowerCost(90, 0.0f, 2.0f) == 90,
+            "NPC spell power cost scaling should ignore zero caster ratios");
+        passed &= Expect(Skyfire::Spells::ScaleNpcSpellPowerCost(90, 3.0f, 0.0f) == 90,
+            "NPC spell power cost scaling should ignore zero spell ratios");
+        passed &= Expect(Skyfire::Spells::ScaleNpcSpellPowerCost(90, std::numeric_limits<float>::infinity(), 2.0f) == 90,
+            "NPC spell power cost scaling should ignore non-finite caster ratios");
+
         return passed;
     }
 

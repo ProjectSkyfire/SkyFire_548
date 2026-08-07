@@ -66,6 +66,7 @@ namespace Spells
     float CalculateRadius(SpellRadiusCalculationData const& data);
     float SelectSpellRange(bool hasRangeEntry, float friendRange, float hostileRange, bool positive);
     uint32 CalculateRecoveryTime(uint32 recoveryTime, uint32 categoryRecoveryTime);
+    uint32 ScaleNpcSpellPowerCost(uint32 powerCost, float casterScalerRatio, float spellScalerRatio);
     SpellPowerCostCalculationResult CalculateSpellPowerCosts(SpellPowerCostCalculationData const& data);
 }
 }
