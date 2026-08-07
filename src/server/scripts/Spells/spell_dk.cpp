@@ -865,7 +865,7 @@ public:
         void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* caster = GetCaster())
-                amount = int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 0.7f);
+                amount = int32(caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK) * 2.25f);
         }
 
         void Register() OVERRIDE
