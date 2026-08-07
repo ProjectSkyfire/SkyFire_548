@@ -89,7 +89,12 @@ void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
         _flags |= positiveFound ? AFLAG_POSITIVE : AFLAG_NEGATIVE;
     }
 
-    if (GetBase()->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
+    // OVERRIDE_ACTIONBAR amount is the replacement spell id. Without it the client keeps
+    // the old action-bar button (e.g. Faerie Fire) while the server remaps casts correctly.
+    // Bear Form Passive3 has SPELL_ATTR8_AURA_SEND_AMOUNT in DBC; Faerie Swarm (106707) does not.
+    if ((GetBase()->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
+        || GetBase()->HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS)
+        || GetBase()->HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2))
         _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
 }
 

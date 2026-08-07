@@ -753,6 +753,15 @@ void LoadDBCStores(const std::string& dataPath)
                 sTalentSpellPosMap[talentInfo->SpellId] = TalentSpellPos(i, j);
     }
 
+    // Faerie Swarm (106707): Talent.dbc OverrideSpellID is 0, but the talent replaces
+    // Faerie Fire (770) via OVERRIDE_ACTIONBAR (amount 102355). Set OverrideSpellID so
+    // the cast remap path can resolve the passive to the castable swarm spell.
+    if (TalentEntry* faerieSwarmTalent = const_cast<TalentEntry*>(sTalentStore.LookupEntry(18575)))
+    {
+        if (faerieSwarmTalent->SpellId == 106707 && !faerieSwarmTalent->OverrideSpellID)
+            faerieSwarmTalent->OverrideSpellID = 770;
+    }
+
     LoadDBC(availableDbcLocales, bad_dbc_files, sChrSpecializationStore, dbcPath, "ChrSpecialization.dbc");
 
     // prepare fast data access to bit pos of talent ranks for use at inspecting

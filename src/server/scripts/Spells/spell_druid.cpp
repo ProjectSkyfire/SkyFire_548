@@ -82,6 +82,10 @@ enum DruidSpells
     SPELL_DRUID_MANGLE_BEAR                 = 33878,
     SPELL_DRUID_MANGLE_BEAR_STUB            = 33917,
     SPELL_DRUID_MANGLE_PASSIVE              = 93622, // Mangle! — supplies the reset chance ($93622s1%)
+    SPELL_DRUID_FAERIE_FIRE                 = 770,
+    SPELL_DRUID_FAERIE_SWARM                = 102355,
+    SPELL_DRUID_FAERIE_SWARM_SLOW           = 102354,
+    SPELL_DRUID_WEAKENED_ARMOR              = 113746,
     SPELL_DRUID_MUSHROOM_BIRTH              = 94081,
     SPELL_DRUID_MUSHROOM_INVISIBLE          = 92661,
     SPELL_DRUID_MUSHROOM_DEATH              = 116305,
@@ -110,6 +114,21 @@ enum DruidCreatureIds
     NPC_DRUID_FORCE_OF_NATURE_FERAL         = 54984,
     NPC_DRUID_FORCE_OF_NATURE_GUARDIAN      = 54985
 };
+
+// Faerie Fire / Faerie Swarm: apply 3 stacks of Weakened Armor (113746).
+static void ApplyWeakenedArmorStacks(Unit* caster, Unit* target)
+{
+    if (!caster || !target)
+        return;
+
+    if (Aura* aura = target->GetAura(SPELL_DRUID_WEAKENED_ARMOR))
+    {
+        aura->SetStackAmount(3);
+        aura->RefreshDuration();
+    }
+    else
+        caster->CastCustomSpell(SPELL_DRUID_WEAKENED_ARMOR, SPELLVALUE_AURA_STACK, 3, target, true);
+}
 
 // Lacerate / Thrash (Bear) / Faerie Fire (Bear): chance from Mangle! (93622) to clear Mangle CD.
 static void TryResetMangleCooldown(Unit* caster)
@@ -722,6 +741,7 @@ public:
 };
 
 // 770 - Faerie Fire
+// Effect 0 Dummy: apply 3 stacks of Weakened Armor.
 // In Bear Form, has a $93622s1% chance to reset Mangle (Bear).
 class spell_dru_faerie_fire : public SpellScriptLoader
 {
@@ -731,6 +751,17 @@ public:
     class spell_dru_faerie_fire_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_dru_faerie_fire_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_WEAKENED_ARMOR) != NULL
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MANGLE_PASSIVE) != NULL;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            ApplyWeakenedArmorStacks(GetCaster(), GetHitUnit());
+        }
 
         void HandleHit()
         {
@@ -743,6 +774,7 @@ public:
 
         void Register() override
         {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_faerie_fire_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             OnHit += SpellHitFn(spell_dru_faerie_fire_SpellScript::HandleHit);
         }
     };
@@ -750,6 +782,56 @@ public:
     SpellScript* GetSpellScript() const override
     {
         return new spell_dru_faerie_fire_SpellScript();
+    }
+};
+
+// 102355 - Faerie Swarm (replaces Faerie Fire via talent 106707 OVERRIDE_ACTIONBAR)
+// Effect 0 Dummy: 3 stacks of Weakened Armor + Faerie Swarm snare (102354).
+// In Bear Form, same Mangle! reset chance as Faerie Fire.
+class spell_dru_faerie_swarm : public SpellScriptLoader
+{
+public:
+    spell_dru_faerie_swarm() : SpellScriptLoader("spell_dru_faerie_swarm") { }
+
+    class spell_dru_faerie_swarm_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_faerie_swarm_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_WEAKENED_ARMOR) != NULL
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_FAERIE_SWARM_SLOW) != NULL
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_MANGLE_PASSIVE) != NULL;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            ApplyWeakenedArmorStacks(caster, target);
+            if (caster && target)
+                caster->CastSpell(target, SPELL_DRUID_FAERIE_SWARM_SLOW, true);
+        }
+
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            if (!caster || caster->GetShapeshiftForm() != FORM_BEAR)
+                return;
+
+            TryResetMangleCooldown(caster);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_faerie_swarm_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            OnHit += SpellHitFn(spell_dru_faerie_swarm_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_faerie_swarm_SpellScript();
     }
 };
 
@@ -2832,6 +2914,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_lacerate();
     new spell_dru_thrash_bear();
     new spell_dru_faerie_fire();
+    new spell_dru_faerie_swarm();
     new spell_dru_lifebloom();
     new spell_dru_lifebloom_refresh();
     new spell_dru_rejuvenation();

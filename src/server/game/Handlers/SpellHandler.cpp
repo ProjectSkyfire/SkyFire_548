@@ -1509,23 +1509,28 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     {
         for (Unit::AuraEffectList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
         {
-            if ((*itr)->IsAffectingSpell(spellInfo))
+            // Prefer MiscValue as the overridden spell id when set (modern cores);
+            // otherwise match by SpellClassMask via IsAffectingSpell.
+            bool matches = (*itr)->GetMiscValue()
+                ? uint32((*itr)->GetMiscValue()) == spellInfo->Id
+                : (*itr)->IsAffectingSpell(spellInfo);
+            if (!matches)
+                continue;
+
+            if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo((*itr)->GetAmount()))
             {
-                if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo((*itr)->GetAmount()))
-                {
-                    if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||
-                        caster->ToPlayer()->getLevel() < spellInfo->BaseLevel)
-                        continue;
+                if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||
+                    caster->ToPlayer()->getLevel() < spellInfo->BaseLevel)
+                    continue;
 
-                    if (caster->ToPlayer()->getLevel() < newInfo->SpellLevel ||
-                        caster->ToPlayer()->getLevel() < newInfo->BaseLevel)
-                        continue;
+                if (caster->ToPlayer()->getLevel() < newInfo->SpellLevel ||
+                    caster->ToPlayer()->getLevel() < newInfo->BaseLevel)
+                    continue;
 
-                    spellInfo = newInfo;
-                    spellId = newInfo->Id;
-                }
-                break;
+                spellInfo = newInfo;
+                spellId = newInfo->Id;
             }
+            break;
         }
     }
 
@@ -1580,7 +1585,23 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
             if (talentInfo->OverrideSpellID == spellId)
             {
-                if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo(talentInfo->SpellId))
+                // Talent.SpellId may be a passive OVERRIDE_ACTIONBAR aura (e.g. Faerie Swarm
+                // 106707 -> 102355). Prefer the action-bar replacement amount when present.
+                uint32 replacementId = talentInfo->SpellId;
+                if (SpellInfo const* talentSpell = sSpellMgr->GetSpellInfo(talentInfo->SpellId))
+                {
+                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    {
+                        if (talentSpell->Effects[i].IsAura(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS) ||
+                            talentSpell->Effects[i].IsAura(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2))
+                        {
+                            replacementId = uint32(talentSpell->Effects[i].BasePoints);
+                            break;
+                        }
+                    }
+                }
+
+                if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo(replacementId))
                 {
                     if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||
                         caster->ToPlayer()->getLevel() < spellInfo->BaseLevel)
