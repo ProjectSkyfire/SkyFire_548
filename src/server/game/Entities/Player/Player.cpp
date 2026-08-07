@@ -4017,7 +4017,9 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
         uint32 spellCount = 1;
 
         data.WriteBits(spellCount, 22);
-        data.WriteBit(0);
+        // SuppressMessaging: when set, client does not auto-push the spell onto the action bar
+        // (needed during dual-spec activation so saved per-spec bars are preserved).
+        data.WriteBit(IsSuppressSpellLearnMessages() ? 1 : 0);
 
         for (uint32 i = 0; i < spellCount; ++i)
             data << uint32(spell_id);
@@ -22198,107 +22200,85 @@ void Player::ActivateSpec(uint8 spec)
     UnsummonAllTotems();
     ExitVehicle();
     RemoveAllControlled();
-    /*RemoveAllAurasOnDeath();
-    if (GetPet())
-        GetPet()->RemoveAllAurasOnDeath();*/
 
-        //RemoveAllAuras(GetGUID(), NULL, false, true); // removes too many auras
-        //ExitVehicle(); // should be impossible to switch specs from inside a vehicle..
-
-        // Let client clear his current Actions
+    // Let client clear his current Actions
     SendActionButtons(2);
-    // m_actionButtons.clear() is called in the next _LoadActionButtons
-    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
+    // m_actionButtons.clear() is called in the next _LoadActions
+
+    // Suppress LEARNED_SPELL auto-bar placement while swapping talents/spec spells.
+    SetSuppressSpellLearnMessages(true);
+
+    // Unlearn only talents belonging to the currently active talent map (keep map entries for swap-back).
+    for (PlayerTalentMap::iterator itr = GetTalentMap(GetActiveSpec())->begin(); itr != GetTalentMap(GetActiveSpec())->end(); ++itr)
     {
-        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
-
-        if (!talentInfo)
+        if (itr->second->state == PLAYERSPELL_REMOVED)
             continue;
 
-        /*TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
-
-        if (!talentTabInfo)
+        SpellInfo const* spellEntry = sSpellMgr->GetSpellInfo(itr->first);
+        if (!spellEntry)
             continue;
 
-        // unlearn only talents for character class
-        // some spell learned by one class as normal spells or know at creation but another class learn it as talent,
-        // to prevent unexpected lost normal learned spell skip another class talents
-        if ((getClassMask() & talentTabInfo->ClassMask) == 0)
-            continue;
+        removeSpell(spellEntry->Id, true);
 
-        for (int8 rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+            if (spellEntry->Effects[i].TriggerSpell > 0 && spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
+                removeSpell(spellEntry->Effects[i].TriggerSpell, true);
+    }
+
+    // Remove specialization spells for the outgoing specialization.
+    if (uint32 oldSpecialization = GetTalentSpecialization(GetActiveSpec()))
+    {
+        if (std::vector<uint32> const* oldSpecSpells = GetSpecializationSpells(oldSpecialization))
         {
-            // skip non-existant talent ranks
-            if (talentInfo->RankID[rank] == 0)
-                continue;
-            removeSpell(talentInfo->RankID[rank], true); // removes the talent, and all dependant, learned, and chained spells..
-            if (const SpellInfo* _spellEntry = sSpellMgr->GetSpellInfo(talentInfo->RankID[rank]))
-                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)                  // search through the SpellInfo for valid trigger spells
-                    if (_spellEntry->Effects[i].TriggerSpell > 0 && _spellEntry->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL)
-                        removeSpell(_spellEntry->Effects[i].TriggerSpell, true); // and remove any spells that the talent teaches
-            // if this talent rank can be found in the PlayerTalentMap, mark the talent as removed so it gets deleted
-            //PlayerTalentMap::iterator plrTalent = m_talents[m_activeSpec]->find(talentInfo->RankID[rank]);
-            //if (plrTalent != m_talents[m_activeSpec]->end())
-            //    plrTalent->second->state = PLAYERSPELL_REMOVED;
-        }*/
+            for (uint32 spellId : *oldSpecSpells)
+                if (HasSpell(spellId))
+                    removeSpell(spellId, true);
+        }
     }
-    /*
-    // Remove spec specific spells
-    for (uint32 i = 0; i < MAX_TALENT_TABS; ++i)
-    {
-        uint32 const* talentTabs = GetClassSpecializations(getClass());
-        std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(talentTabs[i]);
-        if (specSpells)
-            for (size_t i = 0; i < specSpells->size(); ++i)
-                removeSpell(specSpells->at(i), true);
 
-        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentTabs[i]);
-        for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
-            if (uint32 mastery = talentTabInfo->MasterySpellId[i])
-                removeSpell(mastery, true);
-    }
-    */
-    // set glyphs
+    // Remove glyph auras for the outgoing spec.
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
-        // remove secondary glyph
         if (uint32 oldglyph = GetGlyph(GetActiveSpec(), slot))
             if (GlyphPropertiesEntry const* old_gp = sGlyphPropertiesStore.LookupEntry(oldglyph))
                 RemoveAurasDueToSpell(old_gp->SpellId);
 
     SetActiveSpec(spec);
+    SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, GetTalentSpecialization(GetActiveSpec()));
+    UpdateTalentSpecializationManaBonus();
+
+    // Learn only talents stored on the incoming talent map.
     uint32 spentTalents = 0;
-
-    for (uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
+    for (PlayerTalentMap::iterator itr = GetTalentMap(GetActiveSpec())->begin(); itr != GetTalentMap(GetActiveSpec())->end(); ++itr)
     {
-        TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
-
-        if (!talentInfo)
+        if (itr->second->state == PLAYERSPELL_REMOVED)
             continue;
 
-        // learn only talents for character class
-        if (talentInfo->playerClass != getClass())
-            continue;
-
-        learnSpell(talentInfo->SpellId, false); // add the talent to the PlayerSpellMap
+        learnSpell(itr->first, false);
+        ++spentTalents;
     }
-    /*
-        std::vector<uint32> const* specSpells = GetTalentTreePrimarySpells(GetTalentSpecialization(GetActiveSpec()));
-        if (specSpells)
-            for (size_t i = 0; i < specSpells->size(); ++i)
-                learnSpell(specSpells->at(i), false);
 
-        if (CanUseMastery())
-            if (TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(GetTalentSpecialization(GetActiveSpec())))
-                for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
-                    if (uint32 mastery = talentTabInfo->MasterySpellId[i])
-                        learnSpell(mastery, false);
-    */
-    // set glyphs
+    // Learn specialization spells for the incoming specialization.
+    if (uint32 newSpecialization = GetTalentSpecialization(GetActiveSpec()))
+    {
+        if (std::vector<uint32> const* newSpecSpells = GetSpecializationSpells(newSpecialization))
+        {
+            for (uint32 spellId : *newSpecSpells)
+            {
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+                if (!spellInfo || spellInfo->SpellLevel > getLevel())
+                    continue;
+
+                if (!HasSpell(spellId))
+                    learnSpell(spellId, true);
+            }
+        }
+    }
+
+    // Apply glyphs for the incoming spec.
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
     {
         uint32 glyph = GetGlyph(GetActiveSpec(), slot);
 
-        // apply primary glyph
         if (glyph)
             if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyph))
                 CastSpell(this, gp->SpellId, true);
@@ -22318,15 +22298,14 @@ void Player::ActivateSpec(uint8 spec)
     }
 
     SendActionButtons(1);
+    SetSuppressSpellLearnMessages(false);
 
     Powers pw = getPowerType();
     if (pw != POWER_MANA)
         SetPower(POWER_MANA, 0); // Mana must be 0 even if it isn't the active power type.
 
     SetPower(pw, 0);
-
-    // if (!sTalentTabStore.LookupEntry(GetTalentSpecialization(GetActiveSpec())))
-     //    ResetTalents(true);
+    UpdatePvpPower();
 }
 
 void Player::ResetTimeSync()

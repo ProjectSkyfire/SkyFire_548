@@ -2064,6 +2064,8 @@ public:
     void SendInitialSpells();
     bool addSpell(uint32 spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false);
     void learnSpell(uint32 spell_id, bool dependent);
+    void SetSuppressSpellLearnMessages(bool suppress) { m_suppressSpellLearnMessages = suppress; }
+    bool IsSuppressSpellLearnMessages() const { return m_suppressSpellLearnMessages; }
     void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true);
     void resetSpells(bool myClassOnly = false);
     void learnDefaultSpells();
@@ -3432,6 +3434,7 @@ protected:
     PlayerTalentInfo* _talentMgr;
 
     ActionButtonList m_actionButtons;
+    bool m_suppressSpellLearnMessages = false;
 
     float m_auraBaseMod[BASEMOD_END][MOD_END];
     int16 m_baseRatingValue[MAX_COMBAT_RATING];

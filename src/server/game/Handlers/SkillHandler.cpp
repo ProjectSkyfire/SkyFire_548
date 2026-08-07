@@ -33,12 +33,16 @@ void WorldSession::HandeSetTalentSpecialization(WorldPacket& recvData)
     _player->UpdatePvpPower();
     _player->SendTalentsInfoData();
 
+    // Do not auto-push newly learned specialization spells onto the action bar;
+    // dual-spec keeps per-spec bars that the player arranged.
+    _player->SetSuppressSpellLearnMessages(true);
     std::list<uint32> learnList = GetSpellsForLevels(0, _player->getRaceMask(), _player->GetTalentSpecialization(_player->GetActiveSpec()), 0, _player->getLevel());
     for (std::list<uint32>::const_iterator iter = learnList.begin(); iter != learnList.end(); ++iter)
     {
         if (!_player->HasSpell(*iter))
             _player->learnSpell(*iter, true);
     }
+    _player->SetSuppressSpellLearnMessages(false);
 
     _player->SaveToDB();
 }
