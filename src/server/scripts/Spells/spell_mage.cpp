@@ -22,7 +22,6 @@ enum MageSpells
     SPELL_MAGE_FROSTJAW                          = 102051,
     SPELL_MAGE_COLD_SNAP                         = 11958,
     SPELL_MAGE_FROST_NOVA                        = 122,
-    SPELL_MAGE_IGNITE                            = 12654,
     SPELL_MAGE_SLOW                              = 31589,
     SPELL_MAGE_SQUIRREL_FORM                     = 32813,
     SPELL_MAGE_GIRAFFE_FORM                      = 32816,
@@ -606,53 +605,6 @@ public:
     }
 };
 
-// -11119 - Ignite
-class spell_mage_ignite : public SpellScriptLoader
-{
-public:
-    spell_mage_ignite() : SpellScriptLoader("spell_mage_ignite") { }
-
-    class spell_mage_ignite_AuraScript : public AuraScript
-    {
-        PrepareAuraScript(spell_mage_ignite_AuraScript);
-
-        bool Validate(SpellInfo const* /*spellInfo*/) override
-        {
-            if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_IGNITE))
-                return false;
-            return true;
-        }
-
-        bool CheckProc(ProcEventInfo& eventInfo)
-        {
-            return eventInfo.GetProcTarget();
-        }
-
-        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
-        {
-            PreventDefaultAction();
-
-            SpellInfo const* igniteDot = sSpellMgr->GetSpellInfo(SPELL_MAGE_IGNITE);
-            int32 pct = 8 * GetSpellInfo()->GetRank();
-
-            int32 amount = int32(CalculatePct(eventInfo.GetDamageInfo()->GetDamage(), pct) / igniteDot->GetMaxTicks());
-            amount += eventInfo.GetProcTarget()->GetRemainingPeriodicAmount(eventInfo.GetActor()->GetGUID(), SPELL_MAGE_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
-            GetTarget()->CastCustomSpell(SPELL_MAGE_IGNITE, SPELLVALUE_BASE_POINT0, amount, eventInfo.GetProcTarget(), true, NULL, aurEff);
-        }
-
-        void Register() override
-        {
-            DoCheckProc += AuraCheckProcFn(spell_mage_ignite_AuraScript::CheckProc);
-            OnEffectProc += AuraEffectProcFn(spell_mage_ignite_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
-        }
-    };
-
-    AuraScript* GetAuraScript() const override
-    {
-        return new spell_mage_ignite_AuraScript();
-    }
-};
-
 // 86181 - Nether Vortex
 class spell_mage_nether_vortex : public SpellScriptLoader
 {
@@ -1031,7 +983,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_cold_snap();
     new spell_mage_conjure_refreshment_table();
     new spell_mage_conjure_refreshment();
-    new spell_mage_ignite();
     new spell_mage_glyph_of_ice_block();
     new spell_mage_glyph_of_polymorph();
     new spell_mage_living_bomb();
