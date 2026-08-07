@@ -79,6 +79,9 @@ enum DruidSpells
     SPELL_DRUID_GLYPH_OF_FEROCIOUS_BITE_HEAL= 101024,
     SPELL_DRUID_RAKE                        = 1822,
     SPELL_DRUID_REJUVENATION                = 774,
+    SPELL_DRUID_MANGLE_BEAR                 = 33878,
+    SPELL_DRUID_MANGLE_BEAR_STUB            = 33917,
+    SPELL_DRUID_MANGLE_PASSIVE              = 93622, // Mangle! — supplies the reset chance ($93622s1%)
     SPELL_DRUID_MUSHROOM_BIRTH              = 94081,
     SPELL_DRUID_MUSHROOM_INVISIBLE          = 92661,
     SPELL_DRUID_MUSHROOM_DEATH              = 116305,
@@ -107,6 +110,29 @@ enum DruidCreatureIds
     NPC_DRUID_FORCE_OF_NATURE_FERAL         = 54984,
     NPC_DRUID_FORCE_OF_NATURE_GUARDIAN      = 54985
 };
+
+// Lacerate / Thrash (Bear) / Faerie Fire (Bear): chance from Mangle! (93622) to clear Mangle CD.
+static void TryResetMangleCooldown(Unit* caster)
+{
+    Player* player = caster ? caster->ToPlayer() : NULL;
+    if (!player)
+        return;
+
+    int32 chance = 25;
+    if (SpellInfo const* manglePassive = sSpellMgr->GetSpellInfo(SPELL_DRUID_MANGLE_PASSIVE))
+        if (manglePassive->Effects[EFFECT_0].IsEffect())
+            chance = manglePassive->Effects[EFFECT_0].CalcValue(caster);
+
+    if (chance <= 0)
+        chance = 25;
+
+    if (!roll_chance_i(chance))
+        return;
+
+    // Clear both the real Bear Mangle and the action-bar stub clients may track.
+    player->RemoveSpellCooldown(SPELL_DRUID_MANGLE_BEAR, true);
+    player->RemoveSpellCooldown(SPELL_DRUID_MANGLE_BEAR_STUB, true);
+}
 
 // 1850 - Dash
 class spell_dru_dash : public SpellScriptLoader
@@ -616,10 +642,26 @@ public:
 
 // 33745 - Lacerate
 // Bake AP into DoT amount so client $w1 tooltip and ticks match MoP (AP * 0.0512 / tick).
+// Each hit has a $93622s1% chance to reset Mangle (Bear).
 class spell_dru_lacerate : public SpellScriptLoader
 {
 public:
     spell_dru_lacerate() : SpellScriptLoader("spell_dru_lacerate") { }
+
+    class spell_dru_lacerate_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_lacerate_SpellScript);
+
+        void HandleHit()
+        {
+            TryResetMangleCooldown(GetCaster());
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_lacerate_SpellScript::HandleHit);
+        }
+    };
 
     class spell_dru_lacerate_AuraScript : public AuraScript
     {
@@ -640,9 +682,74 @@ public:
         }
     };
 
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_lacerate_SpellScript();
+    }
+
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_lacerate_AuraScript();
+    }
+};
+
+// 77758 - Thrash (Bear)
+// Each hit has a $93622s1% chance to reset Mangle (Bear).
+class spell_dru_thrash_bear : public SpellScriptLoader
+{
+public:
+    spell_dru_thrash_bear() : SpellScriptLoader("spell_dru_thrash_bear") { }
+
+    class spell_dru_thrash_bear_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_thrash_bear_SpellScript);
+
+        void HandleHit()
+        {
+            TryResetMangleCooldown(GetCaster());
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_thrash_bear_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_thrash_bear_SpellScript();
+    }
+};
+
+// 770 - Faerie Fire
+// In Bear Form, has a $93622s1% chance to reset Mangle (Bear).
+class spell_dru_faerie_fire : public SpellScriptLoader
+{
+public:
+    spell_dru_faerie_fire() : SpellScriptLoader("spell_dru_faerie_fire") { }
+
+    class spell_dru_faerie_fire_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_faerie_fire_SpellScript);
+
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            if (!caster || caster->GetShapeshiftForm() != FORM_BEAR)
+                return;
+
+            TryResetMangleCooldown(caster);
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_faerie_fire_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_faerie_fire_SpellScript();
     }
 };
 
@@ -2723,6 +2830,8 @@ void AddSC_druid_spell_scripts()
     new spell_dru_glyph_of_innervate();
     new spell_dru_innervate();
     new spell_dru_lacerate();
+    new spell_dru_thrash_bear();
+    new spell_dru_faerie_fire();
     new spell_dru_lifebloom();
     new spell_dru_lifebloom_refresh();
     new spell_dru_rejuvenation();
