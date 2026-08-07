@@ -2100,6 +2100,7 @@ public:
 
     bool ResetTalents(bool noCost = false, bool resetTalents = true, bool resetSpecialization = true);
     bool RemoveTalent(uint32 talentId);
+    bool HasTalentSpellCooldown(SpellInfo const* talentSpellInfo) const;
 
     uint32 GetNextResetTalentsCost() const;
     uint32 GetNextResetSpecializationCost() const;

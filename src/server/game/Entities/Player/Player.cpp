@@ -4678,6 +4678,11 @@ bool Player::RemoveTalent(uint32 talentId)
     uint32 spellId = talent->SpellId;
 
     SpellInfo const* unlearnSpellProto = sSpellMgr->GetSpellInfo(spellId);
+    if (!unlearnSpellProto)
+        return false;
+
+    if (HasTalentSpellCooldown(unlearnSpellProto))
+        return false;
 
     removeSpell(spellId, true);
 
@@ -4697,6 +4702,23 @@ bool Player::RemoveTalent(uint32 talentId)
 
     SendTalentsInfoData();
     return true;
+}
+
+bool Player::HasTalentSpellCooldown(SpellInfo const* talentSpellInfo) const
+{
+    if (!talentSpellInfo)
+        return false;
+
+    if (HasSpellCooldown(talentSpellInfo->Id))
+        return true;
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (talentSpellInfo->Effects[i].Effect == SPELL_EFFECT_LEARN_SPELL &&
+            talentSpellInfo->Effects[i].TriggerSpell > 0 &&
+            HasSpellCooldown(talentSpellInfo->Effects[i].TriggerSpell))
+            return true;
+
+    return false;
 }
 
 void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const

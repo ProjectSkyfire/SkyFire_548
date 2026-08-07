@@ -561,6 +561,14 @@ target_compile_definitions(hunter_improved_serpent_sting_tests PRIVATE SKYFIRE_S
 
 add_test(NAME hunter_improved_serpent_sting_tests COMMAND hunter_improved_serpent_sting_tests)
 
+add_executable(talent_cooldown_removal_tests
+  TalentCooldownRemovalTests.cpp
+)
+
+target_compile_definitions(talent_cooldown_removal_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME talent_cooldown_removal_tests COMMAND talent_cooldown_removal_tests)
+
 add_executable(death_knight_anti_magic_zone_tests
   DeathKnightAntiMagicZoneTests.cpp
 )

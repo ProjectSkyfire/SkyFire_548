@@ -270,5 +270,8 @@ void Spell::EffectRemoveTalent(SpellEffIndex /*effIndex*/)
 
     // Blizz sends talentId as glyphIndex
     if (player)
-        player->RemoveTalent(m_glyphIndex);
+    {
+        if (!player->RemoveTalent(m_glyphIndex))
+            player->SendTalentsInfoData();
+    }
 }
