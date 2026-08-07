@@ -86,6 +86,9 @@ enum DruidSpells
     SPELL_DRUID_FAERIE_SWARM                = 102355,
     SPELL_DRUID_FAERIE_SWARM_SLOW           = 102354,
     SPELL_DRUID_WEAKENED_ARMOR              = 113746,
+    SPELL_DRUID_YSERAS_GIFT                 = 145108,
+    SPELL_DRUID_YSERAS_GIFT_HEAL_SELF       = 145109,
+    SPELL_DRUID_YSERAS_GIFT_HEAL_ALLY       = 145110,
     SPELL_DRUID_MUSHROOM_BIRTH              = 94081,
     SPELL_DRUID_MUSHROOM_INVISIBLE          = 92661,
     SPELL_DRUID_MUSHROOM_DEATH              = 116305,
@@ -2896,6 +2899,91 @@ public:
     }
 };
 
+// 145108 - Ysera's Gift
+// Every 5 sec: heal self for 5% max health, or the most injured nearby raid ally if at full health.
+class spell_dru_yseras_gift : public SpellScriptLoader
+{
+public:
+    spell_dru_yseras_gift() : SpellScriptLoader("spell_dru_yseras_gift") { }
+
+    class spell_dru_yseras_gift_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_yseras_gift_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_YSERAS_GIFT_HEAL_SELF) != NULL
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_YSERAS_GIFT_HEAL_ALLY) != NULL;
+        }
+
+        void HandlePeriodic(AuraEffect const* aurEff)
+        {
+            Unit* target = GetTarget();
+            if (!target)
+                return;
+
+            int32 healAmount = int32(target->CountPctFromMaxHealth(aurEff->GetAmount()));
+            if (healAmount <= 0)
+                return;
+
+            if (!target->IsFullHealth())
+                target->CastCustomSpell(SPELL_DRUID_YSERAS_GIFT_HEAL_SELF, SPELLVALUE_BASE_POINT0, healAmount, target, true, NULL, aurEff);
+            else
+                target->CastCustomSpell(SPELL_DRUID_YSERAS_GIFT_HEAL_ALLY, SPELLVALUE_BASE_POINT0, healAmount, target, true, NULL, aurEff);
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_yseras_gift_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_yseras_gift_AuraScript();
+    }
+};
+
+// 145110 - Ysera's Gift (ally heal): only the most injured raid member in range.
+class spell_dru_yseras_gift_heal_ally : public SpellScriptLoader
+{
+public:
+    spell_dru_yseras_gift_heal_ally() : SpellScriptLoader("spell_dru_yseras_gift_heal_ally") { }
+
+    class spell_dru_yseras_gift_heal_ally_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_yseras_gift_heal_ally_SpellScript);
+
+        void SelectTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if([](WorldObject* obj)
+            {
+                Unit* unit = obj->ToUnit();
+                return !unit || !unit->IsAlive() || unit->IsFullHealth();
+            });
+
+            if (targets.size() <= 1)
+                return;
+
+            targets.sort([](WorldObject* a, WorldObject* b)
+            {
+                return Skyfire::HealthPctOrderPred()(a->ToUnit(), b->ToUnit());
+            });
+            targets.resize(1);
+        }
+
+        void Register() override
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_dru_yseras_gift_heal_ally_SpellScript::SelectTargets, EFFECT_0, TARGET_UNIT_CASTER_AREA_RAID);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_yseras_gift_heal_ally_SpellScript();
+    }
+};
+
 void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
@@ -2938,6 +3026,8 @@ void AddSC_druid_spell_scripts()
     new spell_dru_wild_mushroom_detonate();
     new spell_dru_wild_mushroom_heal();
     new spell_dru_wild_mushroom_overheal();
+    new spell_dru_yseras_gift();
+    new spell_dru_yseras_gift_heal_ally();
     new npc_force_of_nature_balance();
     new npc_force_of_nature_restoration();
     new npc_force_of_nature_melee("npc_force_of_nature_feral", npc_force_of_nature_melee::MELEE_FERAL);
