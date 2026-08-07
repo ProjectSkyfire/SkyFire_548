@@ -635,7 +635,120 @@ public:
     }
 };
 
+/*#####
+## npc_barrent_wounded_defender
+#####*/
+
+enum BackInTheFight
+{
+    QUEST_BACK_IN_THE_FIGHT                 = 24944,
+    NPC_WOUNDED_DEFENDER                   = 38805,
+
+    ACTION_WOUNDED_DEFENDER_HEALED         = 1,
+
+    EVENT_WOUNDED_DEFENDER_TALK            = 1,
+    EVENT_WOUNDED_DEFENDER_LEAVE           = 2,
+
+    TALK_WOUNDED_DEFENDER_HEALED           = 0
+};
+
+struct npc_barrent_wounded_defender : public ScriptedAI
+{
+    npc_barrent_wounded_defender(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() OVERRIDE
+    {
+        _events.Reset();
+        _playerGUID = 0;
+        _healed = false;
+        me->SetStandState(UNIT_STAND_STATE_SLEEP);
+    }
+
+    void SetGUID(uint64 guid, int32 /*type*/) OVERRIDE
+    {
+        _playerGUID = guid;
+    }
+
+    void DoAction(int32 action) OVERRIDE
+    {
+        if (action != ACTION_WOUNDED_DEFENDER_HEALED || _healed)
+            return;
+
+        _healed = true;
+        me->SetStandState(UNIT_STAND_STATE_STAND);
+
+        if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+            if (player->GetQuestStatus(QUEST_BACK_IN_THE_FIGHT) == QUEST_STATUS_INCOMPLETE)
+                player->KilledMonsterCredit(NPC_WOUNDED_DEFENDER, me->GetGUID());
+
+        _events.ScheduleEvent(EVENT_WOUNDED_DEFENDER_TALK, 2 * IN_MILLISECONDS);
+        _events.ScheduleEvent(EVENT_WOUNDED_DEFENDER_LEAVE, 4 * IN_MILLISECONDS);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_WOUNDED_DEFENDER_TALK:
+                    Talk(TALK_WOUNDED_DEFENDER_HEALED);
+                    break;
+                case EVENT_WOUNDED_DEFENDER_LEAVE:
+                {
+                    Position pos;
+                    me->GetNearPosition(pos, 15.0f, frand(0.0f, 2.0f * M_PI));
+                    me->GetMotionMaster()->MovePoint(0, pos);
+                    me->DespawnOrUnsummon(8 * IN_MILLISECONDS);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    EventMap _events;
+    uint64 _playerGUID;
+    bool _healed;
+};
+
+/*#####
+## spell_barrens_bandage
+#####*/
+
+class spell_barrens_bandage : public SpellScript
+{
+    PrepareSpellScript(spell_barrens_bandage);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        if (Player* caster = GetCaster()->ToPlayer())
+            if (Creature* target = GetHitCreature())
+                if (target->GetEntry() == NPC_WOUNDED_DEFENDER)
+                {
+                    target->AI()->SetGUID(caster->GetGUID());
+                    target->AI()->DoAction(ACTION_WOUNDED_DEFENDER_HEALED);
+                }
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_barrens_bandage::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_the_barrens()
 {
     new npc_wizzlecrank_shredder();
+    RegisterCreatureAI(npc_barrent_wounded_defender);
+    RegisterSpellScript(spell_barrens_bandage);
 }
