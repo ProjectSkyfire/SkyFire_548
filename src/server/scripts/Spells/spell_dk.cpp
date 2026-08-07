@@ -46,9 +46,15 @@ enum DeathKnightSpells
     SPELL_DK_RUNIC_EMPOWERMENT = 81229,
     SPELL_DK_RUNIC_POWER_ENERGIZE = 49088,
     SPELL_DK_RUNE_TAP = 48982,
+    SPELL_DK_SCENT_OF_BLOOD_PASSIVE = 49509,
     SPELL_DK_SCENT_OF_BLOOD = 50421,
     SPELL_DK_SCOURGE_STRIKE_TRIGGERED = 70890,
     SPELL_DK_UNHOLY_PRESENCE = 48265,
+};
+
+enum DeathKnightSpellValues
+{
+    SCENT_OF_BLOOD_DEATH_STRIKE_BONUS_PCT = 20,
 };
 
 // Gorefiend's Grasp - 108199
@@ -707,7 +713,17 @@ public:
                 if (AuraEffect const* aurEff = GetCaster()->GetAuraEffectOfRankedSpell(SPELL_DK_IMPROVED_DEATH_STRIKE, EFFECT_2))
                     heal = AddPct(heal, aurEff->GetAmount());
 
-                heal = std::max(heal, int32(GetCaster()->CountPctFromMaxHealth(GetEffectValue())));
+                int32 minimumHeal = int32(GetCaster()->CountPctFromMaxHealth(GetEffectValue()));
+
+                if (Aura* scentOfBlood = GetCaster()->GetAura(SPELL_DK_SCENT_OF_BLOOD))
+                {
+                    uint8 const scentOfBloodStacks = scentOfBlood->GetStackAmount();
+                    AddPct(heal, scentOfBloodStacks * SCENT_OF_BLOOD_DEATH_STRIKE_BONUS_PCT);
+                    AddPct(minimumHeal, scentOfBloodStacks * SCENT_OF_BLOOD_DEATH_STRIKE_BONUS_PCT);
+                    GetCaster()->RemoveAura(SPELL_DK_SCENT_OF_BLOOD);
+                }
+
+                heal = std::max(heal, minimumHeal);
                 GetCaster()->CastCustomSpell(SPELL_DK_DEATH_STRIKE_HEAL, SPELLVALUE_BASE_POINT0, heal, GetCaster(), true);
             }
 
@@ -946,7 +962,7 @@ public:
     }
 };
 
-// 50421 - Scent of Blood
+// 49509 - Scent of Blood
 class spell_dk_scent_of_blood : public SpellScriptLoader
 {
 public:
@@ -958,21 +974,27 @@ public:
 
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCENT_OF_BLOOD))
+            if (!sSpellMgr->GetSpellInfo(SPELL_DK_SCENT_OF_BLOOD_PASSIVE) ||
+                !sSpellMgr->GetSpellInfo(SPELL_DK_SCENT_OF_BLOOD))
                 return false;
             return true;
         }
 
-        void OnProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        bool CheckProc(ProcEventInfo& eventInfo)
         {
-            PreventDefaultAction();
-            GetTarget()->CastSpell(GetTarget(), SPELL_DK_SCENT_OF_BLOOD, true, NULL, aurEff);
-            GetTarget()->RemoveAuraFromStack(GetId());
+            uint32 const procFlags = eventInfo.GetTypeMask();
+            if (!(procFlags & PROC_FLAG_DONE_MELEE_AUTO_ATTACK))
+                return false;
+
+            if (!(procFlags & PROC_FLAG_DONE_MAINHAND_ATTACK) || (procFlags & PROC_FLAG_DONE_OFFHAND_ATTACK))
+                return false;
+
+            return (eventInfo.GetHitMask() & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) != 0;
         }
 
         void Register() OVERRIDE
         {
-            OnEffectProc += AuraEffectProcFn(spell_dk_scent_of_blood_AuraScript::OnProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+            DoCheckProc += AuraCheckProcFn(spell_dk_scent_of_blood_AuraScript::CheckProc);
         }
     };
 

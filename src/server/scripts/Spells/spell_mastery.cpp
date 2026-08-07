@@ -54,8 +54,6 @@ enum MasterySpells
     MASTERY_SPELL_COMBO_BREAKER_1       = 118864,
     MASTERY_SPELL_COMBO_BREAKER_2       = 116768,
 
-    SPELL_DK_SCENT_OF_BLOOD             = 50421,
-
     MASTERY_SPELL_LIGHTNING_BOLT        = 45284,
     MASTERY_SPELL_CHAIN_LIGHTNING       = 45297,
     MASTERY_SPELL_LAVA_BURST            = 77451,
@@ -211,9 +209,6 @@ public:
                             float Mastery = _plr->GetFloatValue(PLAYER_FIELD_MASTERY) * 6.25f / 100.0f;
 
                             int32 bp = -int32(GetHitDamage() * Mastery);
-
-                            if (Aura* scentOfBlood = _plr->GetAura(SPELL_DK_SCENT_OF_BLOOD))
-                                AddPct(bp, (scentOfBlood->GetStackAmount() * 20));
 
                             if (AuraEffect* bloodShield = target->GetAuraEffect(MASTERY_SPELL_BLOOD_SHIELD, EFFECT_0))
                                 bp += bloodShield->GetAmount();
