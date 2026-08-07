@@ -36,7 +36,6 @@ enum Northshire
     NPC_BLACKROCK_BATTLE_WORG = 49871,      //Blackrock Battle Worg NPC ID
     NPC_STORMWIND_INFANTRY    = 49869,      //Stormwind Infantry NPC ID
     WORG_FIGHTING_FACTION     = 232,        //Faction used by worgs to be able to attack infantry
-    WORG_FACTION_RESTORE      = 32,         //Default Blackrock Battle Worg Faction
     WORG_GROWL                = 2649,       //Worg Growl Spell
     AI_HEALTH_MIN             = 85,         //Minimum health for AI staged fight between Blackrock Battle Worgs and Stormwind Infantry
     SAY_INFANTRY_YELL         = 1,          //Stormwind Infantry Yell phrase from Group 1
@@ -296,7 +295,7 @@ public:
         {
             tSeek = std::rand() % 2000 + 1000;
             tGrowl = std::rand() % 10000 + 8500;
-            me->setFaction(WORG_FACTION_RESTORE);//Restore our faction on reset
+            me->RestoreFaction();
         }
 
         void DamageTaken(Unit* who, uint32& damage) OVERRIDE
@@ -352,7 +351,7 @@ public:
             }
             else
             {
-                me->setFaction(WORG_FACTION_RESTORE);//Reset my faction if not in combat
+                me->RestoreFaction();
                 return;
             }
         }
