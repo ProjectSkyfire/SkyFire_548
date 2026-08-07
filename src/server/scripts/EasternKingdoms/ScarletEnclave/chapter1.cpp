@@ -1064,16 +1064,25 @@ enum eyeOfAcherus
     EVENT_LAUNCH = 3,
     EVENT_REGAIN_CONTROL = 4,
 
+    ACTION_RECALL_EYE_OF_ACHERUS = 1,
+    ACTION_CANCEL_EYE_OF_ACHERUS = 2,
+
     EYE_TEXT_LAUNCH = 0,
     EYE_TEXT_CONTROL = 1,
 
     EYE_POINT_DESTINATION_1 = 0,
     EYE_POINT_DESTINATION_2 = 1,
+    EYE_POINT_RECALL_LICH_KING = 2,
+
+    NPC_EYE_OF_ACHERUS = 28511,
 
     SPELL_THE_EYE_OF_ACHERUS = 51852,
     SPELL_EYE_VISUAL = 51892,
     SPELL_EYE_FLIGHT_BOOST = 51923,
     SPELL_EYE_FLIGHT = 51890,
+    SPELL_RECALL_EYE_OF_ACHERUS = 52694,
+
+    EYE_LAUNCH_SPEED_RATE = 10,
 };
 
 class npc_eye_of_acherus : public CreatureScript
@@ -1092,20 +1101,42 @@ public:
         {
             creature->SetDisplayId(creature->GetCreatureTemplate()->Modelid1);
 
-            if (Player* owner = me->GetCharmerOrOwner()->ToPlayer())
+            if (me->GetCharmerOrOwnerPlayerOrPlayerItself() && me->GetCharmInfo())
                 me->GetCharmInfo()->InitPossessCreateSpells();
 
             creature->SetReactState(REACT_PASSIVE);
         }
 
         EventMap events;
+        bool ReturningHome;
+        bool SkipOwnerAuraRemove;
+
+        void ApplyOwnerControlSpeeds(Player* player)
+        {
+            for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
+                me->SetSpeed(UnitMoveType(i), player->GetSpeedRate(UnitMoveType(i)), true);
+
+            if (me->GetSpeedRate(MOVE_FLIGHT) < 5.0f)
+                me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
+        }
+
+        void ApplyLaunchMovement()
+        {
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
+            me->SetSpeed(MOVE_RUN, float(EYE_LAUNCH_SPEED_RATE), true);
+            me->SetSpeed(MOVE_FLIGHT, float(EYE_LAUNCH_SPEED_RATE), true);
+        }
 
         void InitializeAI() OVERRIDE
         {
             events.Reset();
+            ReturningHome = false;
+            SkipOwnerAuraRemove = false;
+
             events.ScheduleEvent(EVENT_REMOVE_CONTROL, 500);
             events.ScheduleEvent(EVENT_SPEAK_1, 4000);
-            events.ScheduleEvent(EVENT_LAUNCH, 7000);
+            events.ScheduleEvent(EVENT_LAUNCH, 5000);
 
             DoCast(SPELL_EYE_VISUAL);
             DoCast(SPELL_EYE_FLIGHT);
@@ -1115,21 +1146,71 @@ public:
         {
             if (!apply)
             {
-                me->GetCharmerOrOwner()->RemoveAurasDueToSpell(SPELL_THE_EYE_OF_ACHERUS);
-                me->GetCharmerOrOwner()->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+                if (Unit* owner = me->GetCharmerOrOwner())
+                {
+                    if (!SkipOwnerAuraRemove)
+                        owner->RemoveAurasDueToSpell(SPELL_THE_EYE_OF_ACHERUS);
+
+                    owner->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+                }
             }
         }
 
         void MovementInform(uint32 type, uint32 point) OVERRIDE
         {
-            if (type == POINT_MOTION_TYPE && point == EYE_POINT_DESTINATION_2)
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            switch (point)
+            {
+            case EYE_POINT_DESTINATION_2:
                 events.ScheduleEvent(EVENT_REGAIN_CONTROL, 1000);
+                break;
+            case EYE_POINT_RECALL_LICH_KING:
+                if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    player->RemoveAurasDueToSpell(SPELL_THE_EYE_OF_ACHERUS);
+                break;
+            default:
+                break;
+            }
         }
 
         void JustSummoned(Creature* creature) OVERRIDE
         {
             if (Unit* target = creature->SelectNearbyTarget())
                 creature->AI()->AttackStart(target);
+        }
+
+        void DoAction(int32 action) OVERRIDE
+        {
+            if (action == ACTION_CANCEL_EYE_OF_ACHERUS)
+            {
+                ReturningHome = true;
+                SkipOwnerAuraRemove = true;
+                events.Reset();
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                me->GetMotionMaster()->Clear(false);
+
+                return;
+            }
+
+            if (action != ACTION_RECALL_EYE_OF_ACHERUS || ReturningHome)
+                return;
+
+            ReturningHome = true;
+            events.Reset();
+            ApplyLaunchMovement();
+
+            if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+            {
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                player->SetMover(player);
+                player->SetClientControl(me, 0);
+            }
+
+            me->GetMotionMaster()->Clear(false);
+            const Position EYE_RECALL_RETURN = { 2351.565186f, -5670.172363f, 426.027588f, 3.78736f };
+            me->GetMotionMaster()->MovePoint(EYE_POINT_RECALL_LICH_KING, EYE_RECALL_RETURN, false);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -1142,6 +1223,7 @@ public:
                 if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
                 {
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+                    player->SetMover(player);
                     player->SetClientControl(me, 0);
                 }
                 break;
@@ -1150,23 +1232,21 @@ public:
                 break;
             case EVENT_LAUNCH:
             {
-                me->SetSpeed(MOVE_FLIGHT, 5.0f, true);
-
-                const Position EYE_DESTINATION_1 = { me->GetPositionX() - 40.0f, me->GetPositionY(), me->GetPositionZ() + 10.0f, 0.0f };
                 const Position EYE_DESTINATION_2 = { 1768.0f, -5876.0f, 153.0f, 0.0f };
 
-                me->GetMotionMaster()->MovePoint(EYE_POINT_DESTINATION_1, EYE_DESTINATION_1);
-                me->GetMotionMaster()->MovePoint(EYE_POINT_DESTINATION_2, EYE_DESTINATION_2);
+                ApplyLaunchMovement();
+                me->GetMotionMaster()->MovePoint(EYE_POINT_DESTINATION_2, EYE_DESTINATION_2, false);
                 break;
             }
             case EVENT_REGAIN_CONTROL:
                 if (Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
                 {
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-                    me->SetSpeed(MOVE_FLIGHT, 3.3f, true);
 
                     me->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
                     player->SetClientControl(me, 1);
+                    player->SetMover(me);
+                    ApplyOwnerControlSpeeds(player);
                     Talk(EYE_TEXT_CONTROL, player);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);
                     me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_PLAYER_VEHICLE);
@@ -1175,6 +1255,95 @@ public:
             }
         }
     };
+};
+
+class spell_q12641_the_eye_of_acherus : public SpellScriptLoader
+{
+public:
+    spell_q12641_the_eye_of_acherus() : SpellScriptLoader("spell_q12641_the_eye_of_acherus") { }
+
+    class spell_q12641_the_eye_of_acherus_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_q12641_the_eye_of_acherus_AuraScript);
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Player* player = GetTarget()->ToPlayer();
+            if (!player)
+                return;
+
+            Position eyePosition;
+            bool returnToEye = false;
+
+            if (Unit* charm = player->GetCharm())
+            {
+                if (charm->GetEntry() == NPC_EYE_OF_ACHERUS && charm->GetMapId() == player->GetMapId())
+                {
+                    charm->GetPosition(&eyePosition);
+                    returnToEye = true;
+                }
+            }
+
+            player->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+            player->StopCastingCharm();
+            player->StopCastingBindSight();
+            player->SetMover(player);
+            player->SetClientControl(player, 1);
+
+            if (returnToEye)
+                player->NearTeleportTo(eyePosition.GetPositionX(), eyePosition.GetPositionY(), eyePosition.GetPositionZ(), eyePosition.GetOrientation(), true);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_q12641_the_eye_of_acherus_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PHASE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_q12641_the_eye_of_acherus_AuraScript();
+    }
+};
+
+class spell_q12641_recall_eye_of_acherus : public SpellScriptLoader
+{
+public:
+    spell_q12641_recall_eye_of_acherus() : SpellScriptLoader("spell_q12641_recall_eye_of_acherus") { }
+
+    class spell_q12641_recall_eye_of_acherus_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q12641_recall_eye_of_acherus_SpellScript);
+
+        void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            Player* player = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player || !player->HasAura(SPELL_THE_EYE_OF_ACHERUS))
+                return;
+
+            Unit* charm = player->GetCharm();
+            if (!charm || charm->GetEntry() != NPC_EYE_OF_ACHERUS)
+                return;
+
+            if (Creature* eye = charm->ToCreature())
+                if (eye->AI())
+                    eye->AI()->DoAction(ACTION_RECALL_EYE_OF_ACHERUS);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q12641_recall_eye_of_acherus_SpellScript::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_q12641_recall_eye_of_acherus_SpellScript();
+    }
 };
 
 class spell_q12641_death_comes_from_on_high_summon_ghouls : public SpellScriptLoader
@@ -1221,5 +1390,7 @@ void AddSC_the_scarlet_enclave_c1()
     new npc_scarlet_miner();
     new npc_scarlet_miner_cart();
     new npc_eye_of_acherus();
+    new spell_q12641_the_eye_of_acherus();
+    new spell_q12641_recall_eye_of_acherus();
     new spell_q12641_death_comes_from_on_high_summon_ghouls();
 }

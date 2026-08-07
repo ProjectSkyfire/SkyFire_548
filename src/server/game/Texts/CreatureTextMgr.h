@@ -180,7 +180,13 @@ void CreatureTextMgr::SendChatPacket(WorldObject* source, Builder const& builder
                 if (!whisperTarget || whisperTarget->GetTypeId() != TypeID::TYPEID_PLAYER)
                     return;
 
-                localizer(const_cast<Player*>(whisperTarget->ToPlayer()));
+                Player* player = const_cast<Player*>(whisperTarget->ToPlayer());
+                if (!player->GetSession())
+                    return;
+
+                WorldPacket data;
+                builder(&data, player->GetSession()->GetSessionDbLocaleIndex());
+                player->SendDirectMessage(&data);
                 return;
             }
             break;
