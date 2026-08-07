@@ -89,6 +89,11 @@ enum DruidSpells
     SPELL_DRUID_YSERAS_GIFT                 = 145108,
     SPELL_DRUID_YSERAS_GIFT_HEAL_SELF       = 145109,
     SPELL_DRUID_YSERAS_GIFT_HEAL_ALLY       = 145110,
+    SPELL_DRUID_SOUL_OF_THE_FOREST          = 114107,
+    SPELL_DRUID_SOUL_OF_THE_FOREST_HASTE    = 114108,
+    SPELL_DRUID_SOUL_OF_THE_FOREST_ENERGIZE = 114113,
+    SPELL_DRUID_ASTRAL_INSIGHT              = 145138,
+    SPELL_DRUID_CELESTIAL_ALIGNMENT         = 112071,
     SPELL_DRUID_MUSHROOM_BIRTH              = 94081,
     SPELL_DRUID_MUSHROOM_INVISIBLE          = 92661,
     SPELL_DRUID_MUSHROOM_DEATH              = 116305,
@@ -2899,6 +2904,257 @@ public:
     }
 };
 
+// 114107 - Soul of the Forest
+// Balance: Wrath / Starfire / Starsurge have a chance to grant Astral Insight.
+class spell_dru_soul_of_the_forest : public SpellScriptLoader
+{
+public:
+    spell_dru_soul_of_the_forest() : SpellScriptLoader("spell_dru_soul_of_the_forest") { }
+
+    class spell_dru_soul_of_the_forest_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_soul_of_the_forest_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_ASTRAL_INSIGHT) != NULL;
+        }
+
+        bool CheckProc(ProcEventInfo& /*eventInfo*/)
+        {
+            Player* druid = GetUnitOwner()->ToPlayer();
+            return druid && druid->GetTalentSpecialization(druid->GetActiveSpec()) == SPEC_DRUID_BALANCE;
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+        {
+            if (!roll_chance_i(aurEff->GetAmount()))
+                return;
+
+            GetUnitOwner()->CastSpell(GetUnitOwner(), SPELL_DRUID_ASTRAL_INSIGHT, true);
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_dru_soul_of_the_forest_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_dru_soul_of_the_forest_AuraScript::HandleProc, EFFECT_2, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_soul_of_the_forest_AuraScript();
+    }
+};
+
+// 33878 - Mangle (Bear)
+// Guardian Soul of the Forest: +30% Rage, +15% damage.
+class spell_dru_soul_of_the_forest_mangle : public SpellScriptLoader
+{
+public:
+    spell_dru_soul_of_the_forest_mangle() : SpellScriptLoader("spell_dru_soul_of_the_forest_mangle") { }
+
+    class spell_dru_soul_of_the_forest_mangle_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_soul_of_the_forest_mangle_SpellScript);
+
+        bool Load() override
+        {
+            Player* caster = GetCaster()->ToPlayer();
+            return caster && caster->GetTalentSpecialization(caster->GetActiveSpec()) == SPEC_DRUID_GUARDIAN;
+        }
+
+        void HandleRage(SpellEffIndex effIndex)
+        {
+            AuraEffect const* rageBonus = GetCaster()->GetAuraEffect(SPELL_DRUID_SOUL_OF_THE_FOREST, EFFECT_4);
+            if (!rageBonus)
+                return;
+
+            int32 rage = GetEffectValue();
+            AddPct(rage, rageBonus->GetAmount());
+            PreventHitDefaultEffect(effIndex);
+            GetCaster()->EnergizeBySpell(GetCaster(), GetSpellInfo()->Id, rage, POWER_RAGE);
+        }
+
+        void HandleHit()
+        {
+            AuraEffect const* damageBonus = GetCaster()->GetAuraEffect(SPELL_DRUID_SOUL_OF_THE_FOREST, EFFECT_5);
+            if (!damageBonus)
+                return;
+
+            int32 damage = GetHitDamage();
+            AddPct(damage, damageBonus->GetAmount());
+            SetHitDamage(damage);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_dru_soul_of_the_forest_mangle_SpellScript::HandleRage, EFFECT_2, SPELL_EFFECT_ENERGIZE);
+            OnHit += SpellHitFn(spell_dru_soul_of_the_forest_mangle_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_soul_of_the_forest_mangle_SpellScript();
+    }
+};
+
+// 1079 - Rip, 22568 - Ferocious Bite, 22570 - Maim, 52610 / 127538 - Savage Roar
+// Feral Soul of the Forest: finishing moves refund 4 Energy per combo point.
+class spell_dru_soul_of_the_forest_feral : public SpellScriptLoader
+{
+public:
+    spell_dru_soul_of_the_forest_feral() : SpellScriptLoader("spell_dru_soul_of_the_forest_feral") { }
+
+    class spell_dru_soul_of_the_forest_feral_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_soul_of_the_forest_feral_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_SOUL_OF_THE_FOREST_ENERGIZE) != NULL;
+        }
+
+        bool Load() override
+        {
+            Player* caster = GetCaster()->ToPlayer();
+            return caster && caster->GetTalentSpecialization(caster->GetActiveSpec()) == SPEC_DRUID_FERAL;
+        }
+
+        void HandleHit()
+        {
+            Player* caster = GetCaster()->ToPlayer();
+            AuraEffect const* energyPerCp = caster->GetAuraEffect(SPELL_DRUID_SOUL_OF_THE_FOREST, EFFECT_0);
+            if (!energyPerCp)
+                return;
+
+            int8 comboPoints = caster->GetComboPoints();
+            if (comboPoints <= 0)
+                return;
+
+            int32 energy = comboPoints * energyPerCp->GetAmount();
+            caster->CastCustomSpell(SPELL_DRUID_SOUL_OF_THE_FOREST_ENERGIZE, SPELLVALUE_BASE_POINT0, energy, caster, true);
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_soul_of_the_forest_feral_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_soul_of_the_forest_feral_SpellScript();
+    }
+};
+
+// 18562 - Swiftmend
+// Restoration Soul of the Forest: grant 100% spell haste for the next spell.
+class spell_dru_swiftmend : public SpellScriptLoader
+{
+public:
+    spell_dru_swiftmend() : SpellScriptLoader("spell_dru_swiftmend") { }
+
+    class spell_dru_swiftmend_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_dru_swiftmend_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_SOUL_OF_THE_FOREST_HASTE) != NULL;
+        }
+
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            if (!caster->HasAura(SPELL_DRUID_SOUL_OF_THE_FOREST))
+                return;
+
+            caster->CastSpell(caster, SPELL_DRUID_SOUL_OF_THE_FOREST_HASTE, true);
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_dru_swiftmend_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_dru_swiftmend_SpellScript();
+    }
+};
+
+// 127663 - Astral Communion
+// Periodic eclipse energize; with Astral Insight (Soul of the Forest), grant ±100 instantly and end.
+class spell_dru_astral_communion : public SpellScriptLoader
+{
+public:
+    spell_dru_astral_communion() : SpellScriptLoader("spell_dru_astral_communion") { }
+
+    class spell_dru_astral_communion_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_astral_communion_AuraScript);
+
+        bool _hasAstralInsight = false;
+        bool _towardLunar = true;
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE) != NULL
+                && sSpellMgr->GetSpellInfo(SPELL_DRUID_ASTRAL_INSIGHT) != NULL;
+        }
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* druid = GetUnitOwner();
+            bool hasLunarMarker = druid->HasAura(SPELL_DRUID_LUNAR_ECLIPSE_MARKER);
+            bool hasSolarMarker = druid->HasAura(SPELL_DRUID_SOLAR_ECLIPSE_MARKER);
+
+            // Match Wrath/Starfire direction: lunar marker (or neither) fills lunar (negative).
+            _towardLunar = hasLunarMarker || !hasSolarMarker;
+
+            if (druid->HasAura(SPELL_DRUID_ASTRAL_INSIGHT))
+            {
+                _hasAstralInsight = true;
+                HandleTick(NULL);
+            }
+        }
+
+        void HandleTick(AuraEffect const* /*aurEff*/)
+        {
+            Unit* druid = GetUnitOwner();
+            if (druid->HasAura(SPELL_DRUID_CELESTIAL_ALIGNMENT))
+                return;
+
+            int32 eclipse = _hasAstralInsight ? 100 : 25;
+            if (_towardLunar)
+                eclipse = -eclipse;
+
+            druid->CastCustomSpell(druid, SPELL_DRUID_ECLIPSE_GENERAL_ENERGIZE, &eclipse, NULL, NULL, true);
+
+            if (_hasAstralInsight)
+            {
+                _hasAstralInsight = false;
+                druid->RemoveAurasDueToSpell(SPELL_DRUID_ASTRAL_INSIGHT);
+                SetDuration(1);
+            }
+        }
+
+        void Register() override
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_dru_astral_communion_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_dru_astral_communion_AuraScript::HandleTick, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_astral_communion_AuraScript();
+    }
+};
+
 // 145108 - Ysera's Gift
 // Every 5 sec: heal self for 5% max health, or the most injured nearby raid ally if at full health.
 class spell_dru_yseras_gift : public SpellScriptLoader
@@ -3016,11 +3272,16 @@ void AddSC_druid_spell_scripts()
     new spell_dru_shooting_stars();
     new spell_dru_skull_bash();
     new spell_dru_solar_beam();
+    new spell_dru_soul_of_the_forest();
+    new spell_dru_soul_of_the_forest_feral();
+    new spell_dru_soul_of_the_forest_mangle();
     new spell_dru_starfall_dummy();
     new spell_dru_survival_instincts();
     new spell_dru_swift_flight_passive();
+    new spell_dru_swiftmend();
     new spell_dru_swipe_and_maul_bleed();
     new spell_dru_t10_restoration_4p_bonus();
+    new spell_dru_astral_communion();
     new spell_dru_wild_mushroom();
     new spell_dru_wild_mushroom_bloom();
     new spell_dru_wild_mushroom_detonate();
