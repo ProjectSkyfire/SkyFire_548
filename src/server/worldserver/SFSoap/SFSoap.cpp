@@ -24,7 +24,8 @@ void SFSoapRunnable::Run()
     if (!soap_valid_socket(soap_bind(&soap, _host.c_str(), _port, 100)))
     {
         SF_LOG_ERROR("network.soap", "Couldn't bind to %s:%d", _host.c_str(), _port);
-        exit(-1);
+        soap_done(&soap);
+        return;
     }
 
     SF_LOG_INFO("network.soap", "Bound to http://%s:%d", _host.c_str(), _port);
