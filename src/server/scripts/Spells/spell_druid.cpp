@@ -81,7 +81,7 @@ enum DruidSpells
     SPELL_DRUID_REJUVENATION                = 774,
     SPELL_DRUID_MANGLE_BEAR                 = 33878,
     SPELL_DRUID_MANGLE_BEAR_STUB            = 33917,
-    SPELL_DRUID_MANGLE_PASSIVE              = 93622, // Mangle! — supplies the reset chance ($93622s1%)
+    SPELL_DRUID_MANGLE_PASSIVE              = 93622, // Mangle! — supplies the 25% reset chance
     SPELL_DRUID_FAERIE_FIRE                 = 770,
     SPELL_DRUID_FAERIE_SWARM                = 102355,
     SPELL_DRUID_FAERIE_SWARM_SLOW           = 102354,
@@ -661,7 +661,7 @@ public:
 
 // 33745 - Lacerate
 // Bake AP into DoT amount so client $w1 tooltip and ticks match MoP (AP * 0.0512 / tick).
-// Each hit has a $93622s1% chance to reset Mangle (Bear).
+// Each hit has a 25% chance (Mangle! 93622) to reset Mangle (Bear).
 class spell_dru_lacerate : public SpellScriptLoader
 {
 public:
@@ -713,7 +713,7 @@ public:
 };
 
 // 77758 - Thrash (Bear)
-// Each hit has a $93622s1% chance to reset Mangle (Bear).
+// Each hit has a 25% chance (Mangle! 93622) to reset Mangle (Bear).
 class spell_dru_thrash_bear : public SpellScriptLoader
 {
 public:
@@ -742,7 +742,7 @@ public:
 
 // 770 - Faerie Fire
 // Effect 0 Dummy: apply 3 stacks of Weakened Armor.
-// In Bear Form, has a $93622s1% chance to reset Mangle (Bear).
+// In Bear Form, has a 25% chance (Mangle! 93622) to reset Mangle (Bear).
 class spell_dru_faerie_fire : public SpellScriptLoader
 {
 public:
