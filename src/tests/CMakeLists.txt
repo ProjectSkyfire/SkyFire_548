@@ -561,6 +561,18 @@ target_compile_definitions(hunter_improved_serpent_sting_tests PRIVATE SKYFIRE_S
 
 add_test(NAME hunter_improved_serpent_sting_tests COMMAND hunter_improved_serpent_sting_tests)
 
+add_executable(death_knight_anti_magic_zone_tests
+  DeathKnightAntiMagicZoneTests.cpp
+)
+
+target_include_directories(death_knight_anti_magic_zone_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+)
+
+target_compile_definitions(death_knight_anti_magic_zone_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME death_knight_anti_magic_zone_tests COMMAND death_knight_anti_magic_zone_tests)
+
 add_executable(battle_pet_packet_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePet.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePetPackets.cpp

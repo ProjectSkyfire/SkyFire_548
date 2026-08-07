@@ -13,10 +13,14 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "DynamicObject.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 
 enum DeathKnightSpells
 {
-    SPELL_DK_ANTI_MAGIC_SHELL_TALENT = 51052,
+    SPELL_DK_ANTI_MAGIC_ZONE_AREA = 51052,
+    SPELL_DK_ANTI_MAGIC_ZONE_REDUCTION = 145629,
 
     SPELL_DK_BLOOD_GORGED_HEAL = 50454,
     SPELL_DK_BLOOD_PRESENCE = 48263,
@@ -355,23 +359,29 @@ public:
 
         bool Load() OVERRIDE
         {
-            absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue(GetCaster());
+            SpellInfo const* reductionSpell = sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_ZONE_REDUCTION);
+            if (!reductionSpell)
+                return false;
+
+            int32 const reductionPct = reductionSpell->Effects[EFFECT_0].CalcValue(GetCaster());
+            absorbPct = uint32(reductionPct < 0 ? -reductionPct : reductionPct);
             return true;
         }
 
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            if (!sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT))
+            if (!sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_ZONE_AREA))
                 return false;
+
+            if (!sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_ZONE_REDUCTION))
+                return false;
+
             return true;
         }
 
         void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
-            SpellInfo const* talentSpell = sSpellMgr->GetSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT);
-            amount = talentSpell->Effects[EFFECT_0].CalcValue(GetCaster());
-            if (Player* player = GetCaster()->ToPlayer())
-                amount += int32(2 * player->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK));
+            amount = -1;
         }
 
         void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
@@ -391,6 +401,35 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_dk_anti_magic_zone_AuraScript();
+    }
+};
+
+class spell_dk_anti_magic_zone_dynamic : public DynamicObjectScript
+{
+public:
+    spell_dk_anti_magic_zone_dynamic() : DynamicObjectScript("spell_dk_anti_magic_zone_dynamic") { }
+
+    void OnUpdate(DynamicObject* dynObj, uint32 /*diff*/) OVERRIDE
+    {
+        if (dynObj->GetSpellId() != SPELL_DK_ANTI_MAGIC_ZONE_AREA)
+            return;
+
+        Unit* caster = dynObj->GetCaster();
+        if (!caster)
+            return;
+
+        float const radius = dynObj->GetRadius();
+        std::list<Unit*> targets;
+        Skyfire::AnyFriendlyUnitInObjectRangeCheck check(dynObj, caster, radius);
+        Skyfire::UnitListSearcher<Skyfire::AnyFriendlyUnitInObjectRangeCheck> searcher(dynObj, targets, check);
+        dynObj->VisitNearbyObject(radius, searcher);
+
+        for (std::list<Unit*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+        {
+            Unit* target = *itr;
+            if (!target->HasAura(SPELL_DK_ANTI_MAGIC_ZONE_REDUCTION, caster->GetGUID()))
+                caster->AddAura(SPELL_DK_ANTI_MAGIC_ZONE_REDUCTION, target);
+        }
     }
 };
 
@@ -1036,6 +1075,7 @@ void AddSC_deathknight_spell_scripts()
     new spell_dk_anti_magic_shell_raid();
     new spell_dk_anti_magic_shell_self();
     new spell_dk_anti_magic_zone();
+    new spell_dk_anti_magic_zone_dynamic();
     new spell_dk_blood_gorged();
     new spell_dk_death_coil();
     new spell_dk_death_gate();
