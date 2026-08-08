@@ -758,7 +758,7 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase, bool phaseid)
     }
 }
 
-void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
+void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except, Unit const* attacker)
 {
     if (!(m_interruptMask & flag))
         return;
@@ -778,6 +778,14 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except)
                 if (flag & (AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_MELEE_ATTACK |
                     AURA_INTERRUPT_FLAG_SPELL_ATTACK | AURA_INTERRUPT_FLAG_TAKE_DAMAGE |
                     AURA_INTERRUPT_FLAG_DIRECT_DAMAGE))
+                    continue;
+            }
+
+            // Dirty Tricks: Blind / Gouge ignore the caster's Poison and Bleed damage
+            if (except && attacker && (auraId == 2094 || auraId == 1776) &&
+                (flag & (AURA_INTERRUPT_FLAG_TAKE_DAMAGE | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE | AURA_INTERRUPT_FLAG_HITBYSPELL)))
+            {
+                if (ShouldDirtyTricksIgnoreCrowdControlBreak(auraId, aura->GetCasterGUID(), attacker, sSpellMgr->GetSpellInfo(except)))
                     continue;
             }
 

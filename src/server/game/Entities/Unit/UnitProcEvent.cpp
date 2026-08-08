@@ -557,6 +557,15 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
                     case SPELL_AURA_MOD_ROOT:
                     case SPELL_AURA_TRANSFORM:
                     {
+                        // Dirty Tricks: Blind / Gouge ignore the caster's Poison and Bleed damage
+                        // (CC break for these auras is amount-based here, not only AuraInterruptFlags)
+                        if (isVictim && procSpell && target &&
+                            (Id == 2094 || Id == 1776) &&
+                            (triggeredByAura->GetAuraType() == SPELL_AURA_MOD_CONFUSE ||
+                             triggeredByAura->GetAuraType() == SPELL_AURA_MOD_STUN) &&
+                            ShouldDirtyTricksIgnoreCrowdControlBreak(Id, i->aura->GetCasterGUID(), target, procSpell))
+                            break;
+
                         // chargeable mods are breaking on hit
                         if (useCharges)
                             takeCharges = true;

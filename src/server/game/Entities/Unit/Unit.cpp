@@ -41,6 +41,7 @@
 #include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include "SpellValidation.h"
 #include "TemporarySummon.h"
 #include "Totem.h"
 #include "Transport.h"
@@ -593,6 +594,78 @@ bool Unit::HasAuraTypeWithFamilyFlags(AuraType auraType, uint32 familyName, uint
             if (iterSpellProto->SpellFamilyName == familyName && iterSpellProto->SpellFamilyFlags[0] & familyFlags)
                 return true;
     return false;
+}
+
+bool Unit::HasDirtyTricks() const
+{
+    if (HasAura(108216)) // Dirty Tricks
+        return true;
+
+    if (Player const* player = ToPlayer())
+        return player->HasSpell(108216);
+
+    return false;
+}
+
+bool Unit::IsPoisonOrBleedSpell(SpellInfo const* spell)
+{
+    if (!spell)
+        return false;
+
+    if (spell->Dispel == DISPEL_POISON)
+        return true;
+
+    if (Skyfire::Spells::HasMechanic(spell->GetAllEffectsMechanicMask(), MECHANIC_BLEED))
+        return true;
+
+    switch (spell->Id)
+    {
+        case 703:    // Garrote
+        case 1943:   // Rupture
+        case 2818:   // Deadly Poison
+        case 8680:   // Wound Poison
+        case 79136:  // Venomous Wound
+        case 89775:  // Hemorrhage (DoT)
+        case 113780: // Deadly Poison (instant)
+        case 121411: // Crimson Tempest
+        case 122233: // Crimson Tempest (DoT)
+            return true;
+        default:
+            break;
+    }
+
+    if (spell->SpellFamilyName == SPELLFAMILY_ROGUE)
+    {
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        {
+            switch (spell->Effects[i].ApplyAuraName)
+            {
+                case SPELL_AURA_PERIODIC_DAMAGE:
+                case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+                case SPELL_AURA_PERIODIC_LEECH:
+                    return true;
+                default:
+                    break;
+            }
+        }
+
+        // Instant poison / Envenom style nature damage
+        if (spell->GetSchoolMask() & SPELL_SCHOOL_MASK_NATURE)
+            return true;
+    }
+
+    return false;
+}
+
+bool Unit::ShouldDirtyTricksIgnoreCrowdControlBreak(uint32 ccAuraId, uint64 ccCasterGUID, Unit const* attacker, SpellInfo const* damageSpell) const
+{
+    if ((ccAuraId != 2094 && ccAuraId != 1776) || !attacker || !damageSpell) // Blind / Gouge
+        return false;
+
+    if (ccCasterGUID != attacker->GetGUID() || !attacker->HasDirtyTricks())
+        return false;
+
+    return IsPoisonOrBleedSpell(damageSpell);
 }
 
 bool Unit::HasBreakableByDamageAuraType(AuraType type, uint32 excludeAura) const

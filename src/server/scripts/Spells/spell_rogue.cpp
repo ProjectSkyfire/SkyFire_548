@@ -2199,7 +2199,7 @@ public:
             if (!caster || !target || !caster->HasAura(SPELL_ROGUE_GLYPH_OF_BLIND))
                 return;
 
-            bool dirtyTricks = caster->HasAura(SPELL_ROGUE_DIRTY_TRICKS);
+            bool dirtyTricks = caster->HasDirtyTricks();
             Unit::AuraEffectList const& periodicDamage = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
             Unit::AuraEffectList const& periodicDamagePct = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
             Unit::AuraEffectList const& periodicLeech = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_LEECH);
@@ -2214,13 +2214,9 @@ public:
                     if (!app || app->IsPositive() || spellInfo->Id == 32409) // SW:D
                         continue;
 
-                    if (dirtyTricks && aurEff->GetCasterGUID() == caster->GetGUID())
-                    {
-                        if (spellInfo->Dispel == DISPEL_POISON ||
-                            (spellInfo->GetAllEffectsMechanicMask() & (1 << MECHANIC_BLEED)) ||
-                            spellInfo->Id == SPELL_ROGUE_VENOMOUS_WOUND)
-                            continue;
-                    }
+                    if (dirtyTricks && aurEff->GetCasterGUID() == caster->GetGUID() &&
+                        Unit::IsPoisonOrBleedSpell(spellInfo))
+                        continue;
 
                     toRemove.insert(aurEff->GetBase());
                 }
@@ -2243,6 +2239,43 @@ public:
     SpellScript* GetSpellScript() const OVERRIDE
     {
         return new spell_rog_blind_SpellScript();
+    }
+};
+
+// 2094 - Blind, 1776 - Gouge: Dirty Tricks keeps Poison/Bleed from breaking these CCs via aura proc
+class spell_rog_dirty_tricks : public SpellScriptLoader
+{
+public:
+    spell_rog_dirty_tricks() : SpellScriptLoader("spell_rog_dirty_tricks") { }
+
+    class spell_rog_dirty_tricks_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_rog_dirty_tricks_AuraScript);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            Unit* caster = GetCaster();
+            Unit* actor = eventInfo.GetActor();
+            SpellInfo const* damageSpell = eventInfo.GetSpellInfo();
+            if (!caster || !actor || !damageSpell)
+                return true;
+
+            if (!caster->HasDirtyTricks() || actor->GetGUID() != caster->GetGUID())
+                return true;
+
+            // Prevent the amount-based CC break proc for our own poison/bleed damage
+            return !Unit::IsPoisonOrBleedSpell(damageSpell);
+        }
+
+        void Register() OVERRIDE
+        {
+            DoCheckProc += AuraCheckProcFn(spell_rog_dirty_tricks_AuraScript::CheckProc);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_rog_dirty_tricks_AuraScript();
     }
 };
 
@@ -2432,6 +2465,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_crippling_poison();
     new spell_rog_cut_to_the_chase();
     new spell_rog_deadly_poison();
+    new spell_rog_dirty_tricks();
     new spell_rog_fan_of_knives();
     new spell_rog_hemorrhage();
     new spell_rog_honor_among_thieves();
