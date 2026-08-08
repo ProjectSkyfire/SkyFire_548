@@ -1917,7 +1917,7 @@ public:
     }
 };
 
-enum HuoSpiritOfFire
+enum HuoSpiritOfFire // NOSONAR - plain enum matches the codebase convention for script ID constants
 {
     QUEST_HUO_THE_SPIRIT_OF_FIRE  = 29422,
     ITEM_HUOS_OFFERINGS           = 72583,
@@ -2626,7 +2626,7 @@ void AddSC_wandering_island()
     new AreaTrigger_at_temple_of_five_dawns();
     new npc_huo();
     new spell_item_huo_offering();
-    new item_huos_offerings();
+    new item_huos_offerings(); // NOSONAR - script self-registers with ScriptMgr; pointer intentionally owned by the script system for the process lifetime
     new npc_li_fei();
     new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
