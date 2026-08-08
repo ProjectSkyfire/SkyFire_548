@@ -7692,6 +7692,8 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
         switch (form)
         {
             case FORM_CAT:
+            {
+                bool const kingOfTheJungle = HasAura(102543); // Incarnation: King of the Jungle
                 // Based on Hair color
                 if (getRace() == RACE_NIGHTELF)
                 {
@@ -7700,17 +7702,17 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     {
                         case 7: // Violet
                         case 8:
-                            return 29405;
+                            return kingOfTheJungle ? 43764 : 29405;
                         case 3: // Light Blue
-                            return 29406;
+                            return kingOfTheJungle ? 43763 : 29406;
                         case 0: // Green
                         case 1: // Light Green
                         case 2: // Dark Green
-                            return 29407;
+                            return kingOfTheJungle ? 43762 : 29407;
                         case 4: // White
-                            return 29408;
+                            return kingOfTheJungle ? 43765 : 29408;
                         default: // original - Dark Blue
-                            return 892;
+                            return kingOfTheJungle ? 43761 : 892;
                     }
                 }
                 else if (getRace() == RACE_TROLL)
@@ -7720,19 +7722,19 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     {
                         case 0: // Red
                         case 1:
-                            return 33668;
+                            return kingOfTheJungle ? 43776 : 33668;
                         case 2: // Yellow
                         case 3:
-                            return 33667;
+                            return kingOfTheJungle ? 43778 : 33667;
                         case 4: // Blue
                         case 5:
                         case 6:
-                            return 33666;
+                            return kingOfTheJungle ? 43773 : 33666;
                         case 7: // Purple
                         case 10:
-                            return 33665;
+                            return kingOfTheJungle ? 43775 : 33665;
                         default: // original - white
-                            return 33669;
+                            return kingOfTheJungle ? 43777 : 33669;
                     }
                 }
                 else if (getRace() == RACE_WORGEN)
@@ -7745,17 +7747,17 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         switch (skinColor)
                         {
                             case 1: // Brown
-                                return 33662;
+                                return kingOfTheJungle ? 43781 : 33662;
                             case 2: // Black
                             case 7:
-                                return 33661;
+                                return kingOfTheJungle ? 43780 : 33661;
                             case 4: // yellow
-                                return 33664;
+                                return kingOfTheJungle ? 43784 : 33664;
                             case 3: // White
                             case 5:
-                                return 33663;
+                                return kingOfTheJungle ? 43785 : 33663;
                             default: // original - Gray
-                                return 33660;
+                                return kingOfTheJungle ? 43782 : 33660;
                         }
                     }
                     // Female
@@ -7765,17 +7767,17 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         {
                             case 5: // Brown
                             case 6:
-                                return 33662;
+                                return kingOfTheJungle ? 43781 : 33662;
                             case 7: // Black
                             case 8:
-                                return 33661;
+                                return kingOfTheJungle ? 43780 : 33661;
                             case 3: // yellow
                             case 4:
-                                return 33664;
+                                return kingOfTheJungle ? 43784 : 33664;
                             case 2: // White
-                                return 33663;
+                                return kingOfTheJungle ? 43785 : 33663;
                             default: // original - Gray
-                                return 33660;
+                                return kingOfTheJungle ? 43782 : 33660;
                         }
                     }
                 }
@@ -7792,24 +7794,24 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                             case 13:
                             case 14:
                             case 18: // Completly White
-                                return 29409;
+                                return kingOfTheJungle ? 43769 : 29409;
                             case 9: // Light Brown
                             case 10:
                             case 11:
-                                return 29410;
+                                return kingOfTheJungle ? 43770 : 29410;
                             case 6: // Brown
                             case 7:
                             case 8:
-                                return 29411;
+                                return kingOfTheJungle ? 43768 : 29411;
                             case 0: // Dark
                             case 1:
                             case 2:
                             case 3: // Dark Grey
                             case 4:
                             case 5:
-                                return 29412;
+                                return kingOfTheJungle ? 43766 : 29412;
                             default: // original - Grey
-                                return 8571;
+                                return kingOfTheJungle ? 43767 : 8571;
                         }
                     }
                     // Female
@@ -7818,20 +7820,20 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         switch (skinColor)
                         {
                             case 10: // White
-                                return 29409;
+                                return kingOfTheJungle ? 43769 : 29409;
                             case 6: // Light Brown
                             case 7:
-                                return 29410;
+                                return kingOfTheJungle ? 43770 : 29410;
                             case 4: // Brown
                             case 5:
-                                return 29411;
+                                return kingOfTheJungle ? 43768 : 29411;
                             case 0: // Dark
                             case 1:
                             case 2:
                             case 3:
-                                return 29412;
+                                return kingOfTheJungle ? 43766 : 29412;
                             default: // original - Grey
-                                return 8571;
+                                return kingOfTheJungle ? 43767 : 8571;
                         }
                     }
                 }
@@ -7839,7 +7841,10 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 892;
                 else
                     return 8571;
+            }
             case FORM_BEAR:
+            {
+                bool const ursocsSon = HasAura(102558); // Incarnation: Son of Ursoc
                 // Based on Hair color
                 if (getRace() == RACE_NIGHTELF)
                 {
@@ -7849,15 +7854,15 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         case 0: // Green
                         case 1: // Light Green
                         case 2: // Dark Green
-                            return 29413; // 29415?
+                            return ursocsSon ? 43759 : 29413;
                         case 6: // Dark Blue
-                            return 29414;
+                            return ursocsSon ? 43756 : 29414;
                         case 4: // White
-                            return 29416;
+                            return ursocsSon ? 43760 : 29416;
                         case 3: // Light Blue
-                            return 29417;
+                            return ursocsSon ? 43757 : 29417;
                         default: // original - Violet
-                            return 2281;
+                            return ursocsSon ? 43758 : 2281;
                     }
                 }
                 else if (getRace() == RACE_TROLL)
@@ -7867,20 +7872,20 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     {
                         case 0: // Red
                         case 1:
-                            return 33657;
+                            return ursocsSon ? 43748 : 33657;
                         case 2: // Yellow
                         case 3:
-                            return 33659;
+                            return ursocsSon ? 43750 : 33659;
                         case 7: // Purple
                         case 10:
-                            return 33656;
+                            return ursocsSon ? 43747 : 33656;
                         case 8: // White
                         case 9:
                         case 11:
                         case 12:
-                            return 33658;
+                            return ursocsSon ? 43749 : 33658;
                         default: // original - Blue
-                            return 33655;
+                            return ursocsSon ? 43746 : 33655;
                     }
                 }
                 else if (getRace() == RACE_WORGEN)
@@ -7893,17 +7898,17 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         switch (skinColor)
                         {
                             case 1: // Brown
-                                return 33652;
+                                return ursocsSon ? 43752 : 33652;
                             case 2: // Black
                             case 7:
-                                return 33651;
+                                return ursocsSon ? 43751 : 33651;
                             case 4: // Yellow
-                                return 33653;
+                                return ursocsSon ? 43755 : 33653;
                             case 3: // White
                             case 5:
-                                return 33654;
+                                return ursocsSon ? 43754 : 33654;
                             default: // original - Gray
-                                return 33650;
+                                return ursocsSon ? 43753 : 33650;
                         }
                     }
                     // Female
@@ -7913,17 +7918,17 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         {
                             case 5: // Brown
                             case 6:
-                                return 33652;
+                                return ursocsSon ? 43752 : 33652;
                             case 7: // Black
                             case 8:
-                                return 33651;
+                                return ursocsSon ? 43751 : 33651;
                             case 3: // yellow
                             case 4:
-                                return 33654;
+                                return ursocsSon ? 43755 : 33654;
                             case 2: // White
-                                return 33653;
+                                return ursocsSon ? 43754 : 33653;
                             default: // original - Gray
-                                return 33650;
+                                return ursocsSon ? 43753 : 33650;
                         }
                     }
                 }
@@ -7939,25 +7944,25 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                             case 0: // Dark (Black)
                             case 1:
                             case 2:
-                                return 29418;
+                                return ursocsSon ? 43741 : 29418;
                             case 3: // White
                             case 4:
                             case 5:
                             case 12:
                             case 13:
                             case 14:
-                                return 29419;
+                                return ursocsSon ? 43743 : 29419;
                             case 9: // Light Brown/Grey
                             case 10:
                             case 11:
                             case 15:
                             case 16:
                             case 17:
-                                return 29420;
+                                return ursocsSon ? 43745 : 29420;
                             case 18: // Completly White
-                                return 29421;
+                                return ursocsSon ? 43744 : 29421;
                             default: // original - Brown
-                                return 2289;
+                                return ursocsSon ? 43742 : 2289;
                         }
                     }
                     // Female
@@ -7967,19 +7972,19 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                         {
                             case 0: // Dark (Black)
                             case 1:
-                                return 29418;
+                                return ursocsSon ? 43741 : 29418;
                             case 2: // White
                             case 3:
-                                return 29419;
+                                return ursocsSon ? 43743 : 29419;
                             case 6: // Light Brown/Grey
                             case 7:
                             case 8:
                             case 9:
-                                return 29420;
+                                return ursocsSon ? 43745 : 29420;
                             case 10: // Completly White
-                                return 29421;
+                                return ursocsSon ? 43744 : 29421;
                             default: // original - Brown
-                                return 2289;
+                                return ursocsSon ? 43742 : 2289;
                         }
                     }
                 }
@@ -7987,6 +7992,7 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 2281;
                 else
                     return 2289;
+            }
             case FORM_FLIGHT:
                 if (Player::TeamForRace(getRace()) == ALLIANCE)
                     return 20857;
@@ -7998,9 +8004,39 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form) const
                     return 37730;
                 return 21244;
             case FORM_MOONKIN:
-                if (Player::TeamForRace(getRace()) == ALLIANCE)
-                    return 37173;
-                return 37174;
+            {
+                bool const chosenOfElune = HasAura(102560); // Incarnation: Chosen of Elune
+                bool const glyphOfStars = HasAura(114301);  // Glyph of Stars
+                if (getRace() == RACE_TROLL)
+                {
+                    if (chosenOfElune)
+                        return 43789;
+                    if (!glyphOfStars)
+                        return 37174;
+                }
+                else if (getRace() == RACE_TAUREN)
+                {
+                    if (chosenOfElune)
+                        return 43786;
+                    if (!glyphOfStars)
+                        return 15375;
+                }
+                else if (getRace() == RACE_NIGHTELF)
+                {
+                    if (chosenOfElune)
+                        return 43790;
+                    if (!glyphOfStars)
+                        return 15374;
+                }
+                else if (getRace() == RACE_WORGEN)
+                {
+                    if (chosenOfElune)
+                        return 43787;
+                    if (!glyphOfStars)
+                        return 37173;
+                }
+                break; // Glyph of Stars / unknown race: SpellShapeshiftForm model
+            }
             case FORM_TRAVEL:
                 if (Player::TeamForRace(getRace()) == ALLIANCE)
                     return 40816;

@@ -432,7 +432,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleUnused,                                    //380 unused (5.4.2)
     &AuraEffect::HandleNULL,                                      //381 SPELL_AURA_381 (used in spell 21741) (5.4.2)
     &AuraEffect::HandleNULL,                                      //382 SPELL_AURA_382
-    &AuraEffect::HandleNULL,                                      //383 SPELL_AURA_383
+    &AuraEffect::HandleNoImmediateEffect,                         //383 SPELL_AURA_IGNORE_SPELL_COOLDOWN implemented in Player::HasSpellCooldown / AddSpellAndCategoryCooldowns
     &AuraEffect::HandleUnused,                                    //384 unused (5.4.2)
     &AuraEffect::HandleNULL,                                      //385 SPELL_AURA_385
     &AuraEffect::HandleNULL,                                      //386 SPELL_AURA_386 (used in spell 117915) (5.4.2)

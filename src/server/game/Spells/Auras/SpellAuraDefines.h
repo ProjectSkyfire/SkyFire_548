@@ -428,7 +428,7 @@ enum AuraType
     // 380 unused
     SPELL_AURA_381 = 381,
     SPELL_AURA_382 = 382,
-    SPELL_AURA_383 = 383,
+    SPELL_AURA_IGNORE_SPELL_COOLDOWN = 383,
     // 384 unused
     SPELL_AURA_385 = 385,
     SPELL_AURA_386 = 386,

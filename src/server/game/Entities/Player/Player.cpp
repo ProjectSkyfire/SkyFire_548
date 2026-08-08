@@ -17660,6 +17660,14 @@ void Player::UpdatePvP(bool state, bool override)
 
 bool Player::HasSpellCooldown(uint32 spell_id) const
 {
+    if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id))
+    {
+        Unit::AuraEffectList const& ignoreCooldown = GetAuraEffectsByType(SPELL_AURA_IGNORE_SPELL_COOLDOWN);
+        for (Unit::AuraEffectList::const_iterator itr = ignoreCooldown.begin(); itr != ignoreCooldown.end(); ++itr)
+            if ((*itr)->IsAffectingSpell(spellInfo))
+                return false;
+    }
+
     SpellCooldowns::const_iterator itr = m_spellCooldowns.find(spell_id);
     return itr != m_spellCooldowns.end() && itr->second.end > time(NULL);
 }
@@ -17673,6 +17681,11 @@ uint32 Player::GetSpellCooldownDelay(uint32 spell_id) const
 
 void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
 {
+    Unit::AuraEffectList const& ignoreCooldown = GetAuraEffectsByType(SPELL_AURA_IGNORE_SPELL_COOLDOWN);
+    for (Unit::AuraEffectList::const_iterator itr = ignoreCooldown.begin(); itr != ignoreCooldown.end(); ++itr)
+        if ((*itr)->IsAffectingSpell(spellInfo))
+            return;
+
     // Consume a category charge first (Double Time / Roll / etc.).
     bool const consumedCharge = ConsumeSpellCharge(spellInfo);
 
