@@ -247,10 +247,11 @@ float Player::GetHealthBonusFromStamina()
 }
 void Player::UpdateTalentSpecializationManaBonus()
 {
-    if (getPowerType() == POWER_MANA)
-    {
-        UpdateMaxPower(POWER_MANA);                         // Update max Mana (to add/reset bonus from specialization)
-    }
+    // Always refresh max mana: Balance/Resto use a 5x create-mana multiplier, while
+    // Feral/Guardian do not. Spec swap can happen in Cat/Bear (active power is
+    // Energy/Rage), so gating on getPowerType() == MANA left mana stuck until
+    // leaving form or relogging.
+    UpdateMaxPower(POWER_MANA);
 }
 
 float Player::GetManaSpecializationMultiplier()
