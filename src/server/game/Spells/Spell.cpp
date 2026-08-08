@@ -5784,9 +5784,15 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         if (target != m_caster)
         {
-            // Must be behind the target
+            // Must be behind the target (Ambush etc.). Cloak and Dagger opens from any facing.
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
-                return SpellCastResult::SPELL_FAILED_NOT_BEHIND;
+            {
+                bool const cloakAndDagger = m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE
+                    && (m_spellInfo->SpellFamilyFlags[0] & 0x00000700)
+                    && m_caster->HasAura(138106);
+                if (!cloakAndDagger)
+                    return SpellCastResult::SPELL_FAILED_NOT_BEHIND;
+            }
 
             // Target must be facing you
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
@@ -6722,7 +6728,14 @@ SpellCastResult Spell::CheckRange(bool strict)
 
         if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER &&
             (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(static_cast<float>(M_PI), target))
-            return !(_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SpellCastResult::SPELL_FAILED_UNIT_NOT_INFRONT : SpellCastResult::SPELL_FAILED_DONT_REPORT;
+        {
+            // Cloak and Dagger: Ambush / Garrote / Cheap Shot may start from outside melee arc.
+            bool const cloakAndDagger = m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE
+                && (m_spellInfo->SpellFamilyFlags[0] & 0x00000700)
+                && m_caster->HasAura(138106);
+            if (!cloakAndDagger)
+                return !(_triggeredCastFlags & TRIGGERED_DONT_REPORT_CAST_ERROR) ? SpellCastResult::SPELL_FAILED_UNIT_NOT_INFRONT : SpellCastResult::SPELL_FAILED_DONT_REPORT;
+        }
     }
 
     if (m_targets.HasDst() && !m_targets.HasTraj())

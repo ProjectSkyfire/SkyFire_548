@@ -90,6 +90,9 @@ enum RogueSpells
     SPELL_ROGUE_VENOMOUS_WOUND                      = 79136,
     SPELL_ROGUE_VENOMOUS_WOUNDS                     = 79134,
     SPELL_ROGUE_CHEAP_SHOT                          = 1833,
+    SPELL_ROGUE_AMBUSH                              = 8676,
+    SPELL_ROGUE_CLOAK_AND_DAGGER                    = 138106,
+    SPELL_ROGUE_CLOAK_AND_DAGGER_TELEPORT           = 132987,
     SPELL_ROGUE_DEADLY_BREW                         = 51626,
     SPELL_ROGUE_DIRTY_TRICKS                        = 108216,
     SPELL_ROGUE_DISMANTLE                           = 51722,
@@ -2344,12 +2347,85 @@ public:
     }
 };
 
+// 703 - Garrote, 1833 - Cheap Shot, 8676 - Ambush
+// Cloak and Dagger (138106): extend range (DBC) and teleport behind the target.
+class spell_rog_cloak_and_dagger : public SpellScriptLoader
+{
+public:
+    spell_rog_cloak_and_dagger() : SpellScriptLoader("spell_rog_cloak_and_dagger") { }
+
+    class spell_rog_cloak_and_dagger_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_cloak_and_dagger_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_ROGUE_CLOAK_AND_DAGGER) ||
+                !sSpellMgr->GetSpellInfo(SPELL_ROGUE_CLOAK_AND_DAGGER_TELEPORT))
+                return false;
+            return true;
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetExplTargetUnit();
+            if (!target)
+                return SpellCastResult::SPELL_FAILED_DONT_REPORT;
+
+            if (!caster->HasAura(SPELL_ROGUE_CLOAK_AND_DAGGER))
+                return SpellCastResult::SPELL_CAST_OK;
+
+            // Rooted: can still open if already in melee (and behind for Ambush); no teleport.
+            if (caster->HasUnitState(UNIT_STATE_ROOT))
+            {
+                if (!caster->IsWithinMeleeRange(target))
+                    return SpellCastResult::SPELL_FAILED_ROOTED;
+
+                if (GetSpellInfo()->Id == SPELL_ROGUE_AMBUSH && target->HasInArc(static_cast<float>(M_PI), caster))
+                    return SpellCastResult::SPELL_FAILED_ROOTED;
+            }
+
+            return SpellCastResult::SPELL_CAST_OK;
+        }
+
+        void HandleHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target)
+                return;
+
+            if (!caster->HasAura(SPELL_ROGUE_CLOAK_AND_DAGGER))
+                return;
+
+            // Cannot step through shadows while rooted.
+            if (caster->HasUnitState(UNIT_STATE_ROOT))
+                return;
+
+            caster->CastSpell(target, SPELL_ROGUE_CLOAK_AND_DAGGER_TELEPORT, true);
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(spell_rog_cloak_and_dagger_SpellScript::CheckCast);
+            OnHit += SpellHitFn(spell_rog_cloak_and_dagger_SpellScript::HandleHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override
+    {
+        return new spell_rog_cloak_and_dagger_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_bandits_guile();
     new spell_rog_blade_flurry();
     new spell_rog_blind();
     new spell_rog_cheat_death();
+    new spell_rog_cloak_and_dagger();
     new spell_rog_combat_potency();
     new spell_rog_combo_point_delayed();
     new spell_rog_crimson_tempest();
