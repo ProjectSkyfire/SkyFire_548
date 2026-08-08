@@ -112,6 +112,7 @@ enum DruidSpells
     SPELL_DRUID_GLYPH_OF_FRENZIED_REGEN     = 54810,
     SPELL_DRUID_FRENZIED_REGEN_HEAL_TAKE    = 124769,
     SPELL_DRUID_BEAR_HUG                    = 102795,
+    SPELL_DRUID_CENARION_WARD_HEAL          = 102352,
 };
 
 enum DruidCreatureIds
@@ -971,6 +972,49 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_living_seed_proc_AuraScript();
+    }
+};
+
+// 102351 - Cenarion Ward
+// Dummy aura procs on damage taken; default HandleDummyAuraProc casts the heal on the
+// attacker. Redirect the HoT (102352) onto the ward bearer and consume the charge.
+class spell_dru_cenarion_ward : public SpellScriptLoader
+{
+public:
+    spell_dru_cenarion_ward() : SpellScriptLoader("spell_dru_cenarion_ward") { }
+
+    class spell_dru_cenarion_ward_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_cenarion_ward_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_DRUID_CENARION_WARD_HEAL))
+                return false;
+            return true;
+        }
+
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+        {
+            PreventDefaultAction();
+
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (!caster || !target)
+                return;
+
+            caster->CastSpell(target, SPELL_DRUID_CENARION_WARD_HEAL, true);
+        }
+
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_dru_cenarion_ward_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_dru_cenarion_ward_AuraScript();
     }
 };
 
@@ -3244,6 +3288,7 @@ void AddSC_druid_spell_scripts()
 {
     new spell_dru_dash();
     new spell_dru_bear_hug();
+    new spell_dru_cenarion_ward();
     new spell_dru_eclipse("spell_dru_eclipse_lunar");
     new spell_dru_eclipse("spell_dru_eclipse_solar");
     new spell_dru_eclipse_energize();
