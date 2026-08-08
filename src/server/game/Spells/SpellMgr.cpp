@@ -3550,6 +3550,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 5420: // Tree of Life (Passive)
                 spellInfo->Stances = 1 << (FORM_TREE - 1);
                 break;
+            // Ursol's Vortex: CREATE_AREATRIGGER has no radius; EFFECT_0 holds the 8yd area.
+            case 102793:
+                spellInfo->Effects[EFFECT_1].RadiusEntry = spellInfo->Effects[EFFECT_0].RadiusEntry;
+                spellInfo->Effects[EFFECT_1].MaxRadiusEntry = spellInfo->Effects[EFFECT_0].MaxRadiusEntry;
+                break;
             case 49376: // Feral Charge (Cat Form)
                 spellInfo->AttributesEx3 &= ~SPELL_ATTR3_CANT_TRIGGER_PROC;
                 break;

@@ -22,8 +22,13 @@
 #include "TemporarySummon.h"
 #include "PassiveAI.h"
 #include "PetDefines.h"
+#include "DynamicObject.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include <algorithm>
 #include <limits>
+#include <unordered_map>
+#include <unordered_set>
 
 enum DruidSpells
 {
@@ -113,6 +118,9 @@ enum DruidSpells
     SPELL_DRUID_FRENZIED_REGEN_HEAL_TAKE    = 124769,
     SPELL_DRUID_BEAR_HUG                    = 102795,
     SPELL_DRUID_CENARION_WARD_HEAL          = 102352,
+    SPELL_DRUID_URSOLS_VORTEX               = 102793,
+    SPELL_DRUID_URSOLS_VORTEX_SNARE         = 127797,
+    SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST     = 118283,
 };
 
 enum DruidCreatureIds
@@ -973,6 +981,88 @@ public:
     {
         return new spell_dru_living_seed_proc_AuraScript();
     }
+};
+
+// 102793 - Ursol's Vortex
+// CREATE_AREATRIGGER is spawned as a DynamicObject (no aura). Apply the snare while
+// enemies remain inside and pull them back to the center the first time they leave.
+class spell_dru_ursols_vortex_dynamic : public DynamicObjectScript
+{
+public:
+    spell_dru_ursols_vortex_dynamic() : DynamicObjectScript("spell_dru_ursols_vortex_dynamic") { }
+
+    void OnUpdate(DynamicObject* dynObj, uint32 /*diff*/) override
+    {
+        if (dynObj->GetSpellId() != SPELL_DRUID_URSOLS_VORTEX)
+            return;
+
+        Unit* caster = dynObj->GetCaster();
+        if (!caster)
+            return;
+
+        float const radius = dynObj->GetRadius();
+        if (radius <= 0.0f)
+            return;
+
+        uint64 const dynGuid = dynObj->GetGUID();
+        std::unordered_set<uint64>& inside = _unitsInside[dynGuid];
+
+        std::list<Unit*> targets;
+        Skyfire::AnyAoETargetUnitInObjectRangeCheck check(dynObj, caster, radius);
+        Skyfire::UnitListSearcher<Skyfire::AnyAoETargetUnitInObjectRangeCheck> searcher(dynObj, targets, check);
+        dynObj->VisitNearbyObject(radius, searcher);
+
+        std::unordered_set<uint64> current;
+        for (Unit* target : targets)
+        {
+            if (!target)
+                continue;
+
+            current.insert(target->GetGUID());
+            if (!target->HasAura(SPELL_DRUID_URSOLS_VORTEX_SNARE, caster->GetGUID()))
+                caster->CastSpell(target, SPELL_DRUID_URSOLS_VORTEX_SNARE, true);
+        }
+
+        // DynObject expire skips OnUpdate; clean snares on the last ticks instead.
+        bool const vortexEnding = dynObj->GetDuration() <= 200;
+
+        for (uint64 guid : inside)
+        {
+            if (current.find(guid) != current.end())
+                continue;
+
+            Unit* target = ObjectAccessor::GetUnit(*dynObj, guid);
+            if (!target)
+                continue;
+
+            if (!vortexEnding && !target->HasAura(SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST))
+            {
+                if (SpellInfo const* jumpInfo = sSpellMgr->GetSpellInfo(SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST))
+                {
+                    if (!target->IsImmunedToSpell(jumpInfo) && !target->IsImmunedToDamage(jumpInfo)
+                        && caster->MagicSpellHitResult(target, jumpInfo) == SPELL_MISS_NONE)
+                        target->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(),
+                            SPELL_DRUID_URSOLS_VORTEX_JUMP_DEST, true);
+                }
+            }
+
+            target->RemoveAurasDueToSpell(SPELL_DRUID_URSOLS_VORTEX_SNARE, caster->GetGUID());
+        }
+
+        if (vortexEnding)
+        {
+            for (uint64 guid : current)
+                if (Unit* target = ObjectAccessor::GetUnit(*dynObj, guid))
+                    target->RemoveAurasDueToSpell(SPELL_DRUID_URSOLS_VORTEX_SNARE, caster->GetGUID());
+
+            _unitsInside.erase(dynGuid);
+        }
+        else
+            inside.swap(current);
+    }
+
+private:
+    std::unordered_map<uint64, std::unordered_set<uint64>> _unitsInside;
 };
 
 // 102351 - Cenarion Ward
@@ -3289,6 +3379,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_dash();
     new spell_dru_bear_hug();
     new spell_dru_cenarion_ward();
+    new spell_dru_ursols_vortex_dynamic();
     new spell_dru_eclipse("spell_dru_eclipse_lunar");
     new spell_dru_eclipse("spell_dru_eclipse_solar");
     new spell_dru_eclipse_energize();
