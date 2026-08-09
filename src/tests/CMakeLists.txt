@@ -150,6 +150,14 @@ target_include_directories(account_data_utils_tests PRIVATE
 
 add_test(NAME account_data_utils_tests COMMAND account_data_utils_tests)
 
+add_executable(account_data_update_handler_tests
+  AccountDataUpdateHandlerTests.cpp
+)
+
+target_compile_definitions(account_data_update_handler_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME account_data_update_handler_tests COMMAND account_data_update_handler_tests)
+
 add_executable(world_auth_identity_tests
   WorldAuthIdentityTests.cpp
 )
