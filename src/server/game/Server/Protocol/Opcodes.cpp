@@ -1083,7 +1083,6 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_TUTORIAL_FLAGS,                                 0x1B90, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_UI_TIME,                                        0x0027, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_UPDATE_ACCOUNT_DATA,                            0x0AAE, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE,                   0x0000, STATUS_UNHANDLED); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_UPDATE_ACTION_BUTTONS,                          0x081A, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_UPDATE_COMBO_POINTS,                            0x082F, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_UPDATE_CURRENCY,                                0x129E, STATUS_NEVER    ); // 5.4.8 18414
