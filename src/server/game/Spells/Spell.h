@@ -77,6 +77,8 @@ struct SpellDestination
     SpellDestination(Position const& pos);
     SpellDestination(WorldObject const& wObj);
 
+    void Relocate(Position const& pos);
+
     WorldLocation _position;
     uint64 _transportGUID;
     WorldLocation _transportOffset;
@@ -210,7 +212,9 @@ public:
     void SetDst(Position const& pos);
     void SetDst(WorldObject const& wObj);
     void SetDst(SpellCastTargets const& spellTargets);
+    void SetDst(SpellDestination const& dest);
     void ModDst(Position const& pos);
+    void ModDst(SpellDestination const& dest);
     void RemoveDst();
 
     bool HasSrc() const { return GetTargetMask() & TARGET_FLAG_SOURCE_LOCATION; }
@@ -723,6 +727,7 @@ protected:
     void CallScriptAfterHitHandlers();
     void CallScriptObjectAreaTargetSelectHandlers(std::list<WorldObject*>& targets, SpellEffIndex effIndex);
     void CallScriptObjectTargetSelectHandlers(WorldObject*& target, SpellEffIndex effIndex);
+    void CallScriptDestinationTargetSelectHandlers(SpellDestination& target, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType);
     bool CheckScriptEffectImplicitTargets(uint32 effIndex, uint32 effIndexToCheck);
     std::list<SpellScript*> m_loadedScripts;
 

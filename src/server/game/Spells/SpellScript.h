@@ -123,6 +123,7 @@ enum SpellScriptHookType
     SPELL_SCRIPT_HOOK_AFTER_HIT,
     SPELL_SCRIPT_HOOK_OBJECT_AREA_TARGET_SELECT,
     SPELL_SCRIPT_HOOK_OBJECT_TARGET_SELECT,
+    SPELL_SCRIPT_HOOK_DESTINATION_TARGET_SELECT,
     SPELL_SCRIPT_HOOK_CHECK_CAST,
     SPELL_SCRIPT_HOOK_BEFORE_CAST,
     SPELL_SCRIPT_HOOK_ON_CAST,
@@ -146,7 +147,8 @@ public:
             typedef void(CLASSNAME::*SpellHitFnType)(); \
             typedef void(CLASSNAME::*SpellCastFnType)(); \
             typedef void(CLASSNAME::*SpellObjectAreaTargetSelectFnType)(std::list<WorldObject*>&); \
-            typedef void(CLASSNAME::*SpellObjectTargetSelectFnType)(WorldObject*&);
+            typedef void(CLASSNAME::*SpellObjectTargetSelectFnType)(WorldObject*&); \
+            typedef void(CLASSNAME::*SpellDestinationTargetSelectFnType)(SpellDestination&);
 
     SPELLSCRIPT_FUNCTION_TYPE_DEFINES(SpellScript)
 
@@ -191,12 +193,14 @@ public:
     class TargetHook : public _SpellScript::EffectHook
     {
     public:
-        TargetHook(uint8 _effectIndex, uint16 _targetType, bool _area);
+        TargetHook(uint8 _effectIndex, uint16 _targetType, bool _area, bool _dest = false);
         bool CheckEffect(SpellInfo const* spellInfo, uint8 effIndex);
         std::string ToString();
+        uint16 GetTarget() const { return targetType; }
     protected:
         uint16 targetType;
         bool area;
+        bool dest;
     };
 
     class ObjectAreaTargetSelectHandler : public TargetHook
@@ -217,13 +221,23 @@ public:
         SpellObjectTargetSelectFnType pObjectTargetSelectHandlerScript;
     };
 
+    class DestinationTargetSelectHandler : public TargetHook
+    {
+    public:
+        DestinationTargetSelectHandler(SpellDestinationTargetSelectFnType _DestinationTargetSelectHandlerScript, uint8 _effIndex, uint16 _targetType);
+        void Call(SpellScript* spellScript, SpellDestination& target);
+    private:
+        SpellDestinationTargetSelectFnType DestinationTargetSelectHandlerScript;
+    };
+
 #define SPELLSCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME) \
         class CastHandlerFunction : public SpellScript::CastHandler { public: CastHandlerFunction(SpellCastFnType _pCastHandlerScript) : SpellScript::CastHandler((SpellScript::SpellCastFnType)_pCastHandlerScript) { } }; \
         class CheckCastHandlerFunction : public SpellScript::CheckCastHandler { public: CheckCastHandlerFunction(SpellCheckCastFnType _checkCastHandlerScript) : SpellScript::CheckCastHandler((SpellScript::SpellCheckCastFnType)_checkCastHandlerScript) { } }; \
         class EffectHandlerFunction : public SpellScript::EffectHandler { public: EffectHandlerFunction(SpellEffectFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : SpellScript::EffectHandler((SpellScript::SpellEffectFnType)_pEffectHandlerScript, _effIndex, _effName) { } }; \
         class HitHandlerFunction : public SpellScript::HitHandler { public: HitHandlerFunction(SpellHitFnType _pHitHandlerScript) : SpellScript::HitHandler((SpellScript::SpellHitFnType)_pHitHandlerScript) { } }; \
         class ObjectAreaTargetSelectHandlerFunction : public SpellScript::ObjectAreaTargetSelectHandler { public: ObjectAreaTargetSelectHandlerFunction(SpellObjectAreaTargetSelectFnType _pObjectAreaTargetSelectHandlerScript, uint8 _effIndex, uint16 _targetType) : SpellScript::ObjectAreaTargetSelectHandler((SpellScript::SpellObjectAreaTargetSelectFnType)_pObjectAreaTargetSelectHandlerScript, _effIndex, _targetType) { } }; \
-        class ObjectTargetSelectHandlerFunction : public SpellScript::ObjectTargetSelectHandler { public: ObjectTargetSelectHandlerFunction(SpellObjectTargetSelectFnType _pObjectTargetSelectHandlerScript, uint8 _effIndex, uint16 _targetType) : SpellScript::ObjectTargetSelectHandler((SpellScript::SpellObjectTargetSelectFnType)_pObjectTargetSelectHandlerScript, _effIndex, _targetType) { } };
+        class ObjectTargetSelectHandlerFunction : public SpellScript::ObjectTargetSelectHandler { public: ObjectTargetSelectHandlerFunction(SpellObjectTargetSelectFnType _pObjectTargetSelectHandlerScript, uint8 _effIndex, uint16 _targetType) : SpellScript::ObjectTargetSelectHandler((SpellScript::SpellObjectTargetSelectFnType)_pObjectTargetSelectHandlerScript, _effIndex, _targetType) { } }; \
+        class DestinationTargetSelectHandlerFunction : public SpellScript::DestinationTargetSelectHandler { public: DestinationTargetSelectHandlerFunction(SpellDestinationTargetSelectFnType _DestinationTargetSelectHandlerScript, uint8 _effIndex, uint16 _targetType) : SpellScript::DestinationTargetSelectHandler((SpellScript::SpellDestinationTargetSelectFnType)_DestinationTargetSelectHandlerScript, _effIndex, _targetType) { } };
 
 #define PrepareSpellScript(CLASSNAME) SPELLSCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) SPELLSCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME)
 public:
@@ -287,11 +301,17 @@ public:
     HookList<ObjectTargetSelectHandler> OnObjectTargetSelect;
 #define SpellObjectTargetSelectFn(F, I, N) ObjectTargetSelectHandlerFunction(&F, I, N)
 
+    // example: OnDestinationTargetSelect += SpellDestinationTargetSelectFn(class::function, EffectIndexSpecifier, TargetsNameSpecifier);
+    // where function is void function(SpellDestination& target)
+    HookList<DestinationTargetSelectHandler> OnDestinationTargetSelect;
+#define SpellDestinationTargetSelectFn(F, I, N) DestinationTargetSelectHandlerFunction(&F, I, N)
+
     // hooks are executed in following order, at specified event of spell:
     // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
     // 2. OnCheckCast - allows to override result of CheckCast function
     // 3a. OnObjectAreaTargetSelect - executed just before adding selected targets to final target list (for area targets)
     // 3b. OnObjectTargetSelect - executed just before adding selected target to final target list (for single unit targets)
+    // 3c. OnDestinationTargetSelect - executed just before adding selected destination to final target list (for dest targets)
     // 4. OnCast - executed just before spell is launched (creates missile) or executed
     // 5. AfterCast - executed after spell missile is launched and immediate spell actions are done
     // 6. OnEffectLaunch - executed just before specified effect handler call - when spell missile is launched

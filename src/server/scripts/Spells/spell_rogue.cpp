@@ -1552,6 +1552,45 @@ public:
     }
 };
 
+// 57840 - Killing Spree (teleport): keep the landing spot out of geometry
+class spell_rog_killing_spree_teleport : public SpellScriptLoader
+{
+public:
+    spell_rog_killing_spree_teleport() : SpellScriptLoader("spell_rog_killing_spree_teleport") { }
+
+    class spell_rog_killing_spree_teleport_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_rog_killing_spree_teleport_SpellScript);
+
+        void SelectDest(SpellDestination& dest)
+        {
+            Unit* target = GetExplTargetUnit();
+            if (!target)
+                return;
+
+            Position pos = *target;
+            float dist = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(GetCaster());
+            target->MovePositionToFirstCollision(pos, dist, float(M_PI));
+
+            // Steep wall / pit: fall back to the target's feet rather than a bad Z
+            if (std::fabs(pos.GetPositionZ() - target->GetPositionZ()) > 2.5f)
+                pos.Relocate(*target);
+
+            dest.Relocate(pos);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_rog_killing_spree_teleport_SpellScript::SelectDest, EFFECT_0, TARGET_DEST_TARGET_BACK);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_rog_killing_spree_teleport_SpellScript();
+    }
+};
+
 // 408 - Kidney Shot (Revealing Strike duration)
 class spell_rog_kidney_shot : public SpellScriptLoader
 {
@@ -2472,6 +2511,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_kidney_shot();
     new spell_rog_killing_spree();
     new spell_rog_killing_spree_target_selector();
+    new spell_rog_killing_spree_teleport();
     new spell_rog_master_of_subtlety();
     new spell_rog_master_poisoner();
     new spell_rog_nerve_strike();

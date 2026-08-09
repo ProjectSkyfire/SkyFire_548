@@ -89,6 +89,11 @@ SpellDestination::SpellDestination(WorldObject const& wObj)
     _position.SetOrientation(wObj.GetOrientation());
 }
 
+void SpellDestination::Relocate(Position const& pos)
+{
+    _position.Relocate(pos);
+}
+
 SpellCastTargets::SpellCastTargets() : m_elevation(0), m_speed(0), m_strTarget()
 {
     m_objectTarget = NULL;
@@ -420,6 +425,12 @@ void SpellCastTargets::SetDst(SpellCastTargets const& spellTargets)
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
 }
 
+void SpellCastTargets::SetDst(SpellDestination const& dest)
+{
+    m_dst = dest;
+    m_targetMask |= TARGET_FLAG_DEST_LOCATION;
+}
+
 void SpellCastTargets::ModDst(Position const& pos)
 {
     ASSERT(m_targetMask & TARGET_FLAG_DEST_LOCATION);
@@ -431,6 +442,12 @@ void SpellCastTargets::ModDst(Position const& pos)
         m_dst._transportOffset.RelocateOffset(offset);
     }
     m_dst._position.Relocate(pos);
+}
+
+void SpellCastTargets::ModDst(SpellDestination const& dest)
+{
+    ASSERT(m_targetMask & TARGET_FLAG_DEST_LOCATION);
+    m_dst = dest;
 }
 
 void SpellCastTargets::RemoveDst()
@@ -1030,7 +1047,11 @@ void Spell::SelectImplicitNearbyTargets(SpellEffIndex effIndex, SpellImplicitTar
                 if (m_spellInfo->RequiresSpellFocus)
                 {
                     if (focusObject)
-                        m_targets.SetDst(*focusObject);
+                    {
+                        SpellDestination dest(*focusObject);
+                        CallScriptDestinationTargetSelectHandlers(dest, effIndex, targetType);
+                        m_targets.SetDst(dest);
+                    }
                     return;
                 }
                 break;
@@ -1059,8 +1080,12 @@ void Spell::SelectImplicitNearbyTargets(SpellEffIndex effIndex, SpellImplicitTar
                 AddGOTarget(gobjTarget, effMask);
             break;
         case TARGET_OBJECT_TYPE_DEST:
-            m_targets.SetDst(*target);
+        {
+            SpellDestination dest(*target);
+            CallScriptDestinationTargetSelectHandlers(dest, effIndex, targetType);
+            m_targets.SetDst(dest);
             break;
+        }
         default:
             ASSERT(false && "Spell::SelectImplicitNearbyTargets: received not implemented target object type");
             break;
@@ -1388,31 +1413,32 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
 
 void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
+    SpellDestination dest(*m_caster);
+
     switch (targetType.GetTarget())
     {
         case TARGET_DEST_CASTER:
-            m_targets.SetDst(*m_caster);
-            return;
+            break;
         case TARGET_DEST_HOME:
             if (Player* playerCaster = m_caster->ToPlayer())
-                m_targets.SetDst(playerCaster->m_homebindX, playerCaster->m_homebindY, playerCaster->m_homebindZ, playerCaster->GetOrientation(), playerCaster->m_homebindMapId);
-            return;
+                dest = SpellDestination(playerCaster->m_homebindX, playerCaster->m_homebindY, playerCaster->m_homebindZ, playerCaster->GetOrientation(), playerCaster->m_homebindMapId);
+            break;
         case TARGET_DEST_DB:
             if (SpellTargetPosition const* st = sSpellMgr->GetSpellTargetPosition(m_spellInfo->Id, effIndex))
             {
                 /// @todo fix this check
                 if (m_spellInfo->HasEffect(SPELL_EFFECT_TELEPORT_UNITS) || m_spellInfo->HasEffect(SPELL_EFFECT_BIND))
-                    m_targets.SetDst(st->target_X, st->target_Y, st->target_Z, st->target_Orientation, (int32)st->target_mapId);
+                    dest = SpellDestination(st->target_X, st->target_Y, st->target_Z, st->target_Orientation, (int32)st->target_mapId);
                 else if (st->target_mapId == m_caster->GetMapId())
-                    m_targets.SetDst(st->target_X, st->target_Y, st->target_Z, st->target_Orientation);
+                    dest = SpellDestination(st->target_X, st->target_Y, st->target_Z, st->target_Orientation);
             }
             else
             {
                 SF_LOG_DEBUG("spells", "SPELL: unknown target coordinates for spell ID %u", m_spellInfo->Id);
                 WorldObject* target = m_targets.GetObjectTarget();
-                m_targets.SetDst(target ? *target : *m_caster);
+                dest = SpellDestination(target ? *target : *m_caster);
             }
-            return;
+            break;
         case TARGET_DEST_CASTER_FISHING:
         {
             float min_dis = m_spellInfo->GetMinRange(true);
@@ -1440,60 +1466,68 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
                 return;
             }
 
-            m_targets.SetDst(x, y, liquidLevel, m_caster->GetOrientation());
-            return;
+            dest = SpellDestination(x, y, liquidLevel, m_caster->GetOrientation());
+            break;
         }
         default:
+        {
+            float dist;
+            float angle = targetType.CalcDirectionAngle();
+            float objSize = m_caster->GetObjectSize();
+            if (targetType.GetTarget() == TARGET_DEST_CASTER_SUMMON)
+                dist = PET_FOLLOW_DIST;
+            else
+                dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
+
+            if (dist < objSize)
+                dist = objSize;
+            else if (targetType.GetTarget() == TARGET_DEST_CASTER_RANDOM)
+                dist = objSize + (dist - objSize) * (float)rand_norm();
+
+            Position pos = dest._position;
+            if (targetType.GetTarget() == TARGET_DEST_CASTER_FRONT_LEAP)
+                m_caster->GetFirstCollisionPosition(pos, dist, angle);
+            else
+                m_caster->MovePositionToFirstCollision(pos, dist, angle);
+            dest.Relocate(pos);
             break;
+        }
     }
 
-    float dist;
-    float angle = targetType.CalcDirectionAngle();
-    float objSize = m_caster->GetObjectSize();
-    if (targetType.GetTarget() == TARGET_DEST_CASTER_SUMMON)
-        dist = PET_FOLLOW_DIST;
-    else
-        dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
-
-    if (dist < objSize)
-        dist = objSize;
-    else if (targetType.GetTarget() == TARGET_DEST_CASTER_RANDOM)
-        dist = objSize + (dist - objSize) * (float)rand_norm();
-
-    Position pos;
-    if (targetType.GetTarget() == TARGET_DEST_CASTER_FRONT_LEAP)
-        m_caster->GetFirstCollisionPosition(pos, dist, angle);
-    else
-        m_caster->GetNearPosition(pos, dist, angle);
-    m_targets.SetDst(*m_caster);
-    m_targets.ModDst(pos);
+    CallScriptDestinationTargetSelectHandlers(dest, effIndex, targetType);
+    m_targets.SetDst(dest);
 }
 
 void Spell::SelectImplicitTargetDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
     WorldObject* target = m_targets.GetObjectTarget();
+    SpellDestination dest(*target);
+
     switch (targetType.GetTarget())
     {
         case TARGET_DEST_TARGET_ENEMY:
         case TARGET_DEST_TARGET_ANY:
-            m_targets.SetDst(*target);
-            return;
-        default:
             break;
+        default:
+        {
+            float angle = targetType.CalcDirectionAngle();
+            float dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
+            if (targetType.GetTarget() == TARGET_DEST_TARGET_RANDOM)
+                dist *= (float)rand_norm();
+
+            // Stand behind the target, outside its bounding radius
+            if (targetType.GetTarget() == TARGET_DEST_TARGET_BACK)
+                dist += target->GetObjectSize();
+
+            Position pos = dest._position;
+            target->MovePositionToFirstCollision(pos, dist, angle);
+            dest.Relocate(pos);
+            break;
+        }
     }
 
-    float angle = targetType.CalcDirectionAngle();
-    float objSize = target->GetObjectSize();
-    float dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
-    if (dist < objSize)
-        dist = objSize;
-    else if (targetType.GetTarget() == TARGET_DEST_TARGET_RANDOM)
-        dist = objSize + (dist - objSize) * (float)rand_norm();
-
-    Position pos;
-    target->GetNearPosition(pos, dist, angle);
-    m_targets.SetDst(*target);
-    m_targets.ModDst(pos);
+    CallScriptDestinationTargetSelectHandlers(dest, effIndex, targetType);
+    m_targets.SetDst(dest);
 }
 
 void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
@@ -1502,8 +1536,9 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
     // can only happen if previous destination target could not be set for some reason
     // (not found nearby target, or channel target for example
     // maybe we should abort the spell in such case?
-    if (!m_targets.HasDst())
-        m_targets.SetDst(*m_caster);
+    CheckDst();
+
+    SpellDestination dest(*m_targets.GetDst());
 
     switch (targetType.GetTarget())
     {
@@ -1516,17 +1551,21 @@ void Spell::SelectImplicitDestDestTargets(SpellEffIndex effIndex, SpellImplicitT
             SelectImplicitTrajTargets();
             return;
         default:
+        {
+            float angle = targetType.CalcDirectionAngle();
+            float dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
+            if (targetType.GetTarget() == TARGET_DEST_DEST_RANDOM)
+                dist *= (float)rand_norm();
+
+            Position pos = dest._position;
+            m_caster->MovePosition(pos, dist, angle);
+            dest.Relocate(pos);
             break;
+        }
     }
 
-    float angle = targetType.CalcDirectionAngle();
-    float dist = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
-    if (targetType.GetTarget() == TARGET_DEST_DEST_RANDOM)
-        dist *= (float)rand_norm();
-
-    Position pos = *m_targets.GetDstPos();
-    m_caster->MovePosition(pos, dist, angle);
-    m_targets.ModDst(pos);
+    CallScriptDestinationTargetSelectHandlers(dest, effIndex, targetType);
+    m_targets.ModDst(dest);
 }
 
 void Spell::SelectImplicitCasterObjectTargets(SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
@@ -7989,6 +8028,20 @@ void Spell::CallScriptObjectTargetSelectHandlers(WorldObject*& target, SpellEffI
     }
 }
 
+void Spell::CallScriptDestinationTargetSelectHandlers(SpellDestination& target, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
+{
+    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_DESTINATION_TARGET_SELECT);
+        std::list<SpellScript::DestinationTargetSelectHandler>::iterator hookItrEnd = (*scritr)->OnDestinationTargetSelect.end(), hookItr = (*scritr)->OnDestinationTargetSelect.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+            if (hookItr->IsEffectAffected(m_spellInfo, effIndex) && targetType.GetTarget() == hookItr->GetTarget())
+                hookItr->Call(*scritr, target);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
 bool Spell::CheckScriptEffectImplicitTargets(uint32 effIndex, uint32 effIndexToCheck)
 {
     // Skip if there are not any script
@@ -8007,6 +8060,12 @@ bool Spell::CheckScriptEffectImplicitTargets(uint32 effIndex, uint32 effIndexToC
         for (; areaTargetSelectHookItr != areaTargetSelectHookEnd; ++areaTargetSelectHookItr)
             if (((*areaTargetSelectHookItr).IsEffectAffected(m_spellInfo, effIndex) && !(*areaTargetSelectHookItr).IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
                 (!(*areaTargetSelectHookItr).IsEffectAffected(m_spellInfo, effIndex) && (*areaTargetSelectHookItr).IsEffectAffected(m_spellInfo, effIndexToCheck)))
+                return false;
+
+        std::list<SpellScript::DestinationTargetSelectHandler>::iterator destSelectHookEnd = (*itr)->OnDestinationTargetSelect.end(), destSelectHookItr = (*itr)->OnDestinationTargetSelect.begin();
+        for (; destSelectHookItr != destSelectHookEnd; ++destSelectHookItr)
+            if (((*destSelectHookItr).IsEffectAffected(m_spellInfo, effIndex) && !(*destSelectHookItr).IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
+                (!(*destSelectHookItr).IsEffectAffected(m_spellInfo, effIndex) && (*destSelectHookItr).IsEffectAffected(m_spellInfo, effIndexToCheck)))
                 return false;
     }
     return true;
