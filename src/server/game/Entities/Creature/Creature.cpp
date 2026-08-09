@@ -1582,10 +1582,21 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
         return;
     }
 
+    // Capture before JUST_DIED (which clears setActive). RemoveCorpse relocates to spawn;
+    // without staying active, DEAD creatures outside player range never Update → no respawn/path.
+    bool const wasActive = isActiveObject();
+
     if (IsAlive())
         setDeathState(DeathState::JUST_DIED);
 
+    // Instant corpse removal: do not wait corpseDelay on top of spawntimesecs.
+    m_corpseRemoveTime = time(NULL);
+    m_respawnTime = time(NULL) + m_respawnDelay;
+
     RemoveCorpse(false);
+
+    if (wasActive)
+        setActive(true);
 }
 
 void Creature::DespawnOrUnsummon(uint32 msTimeToDespawn /*= 0*/)
@@ -2549,6 +2560,11 @@ void Creature::UpdateMovementFlags()
         return;
 
     uint32 inhabitType = GetCreatureTemplate()->InhabitType;
+
+    // Hover / levitating units (rowboats, etc.): skip per-tick fly/gravity/swim churn.
+    // Must run before CanFly — AIR inhabit calls SetFlying/SetAnimTier every tick and bobs.
+    if (HasUnitMovementFlag(MOVEMENTFLAG_HOVER) || HasUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY))
+        return;
 
     if (CanFly() && !IsFalling())
     {

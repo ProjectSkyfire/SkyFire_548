@@ -216,10 +216,11 @@ void Vehicle::ApplyAllImmunities()
     // Different immunities for vehicles goes below
     switch (GetVehicleInfo()->m_ID)
     {
-        // code below prevents a bug with movable cannons
+        // Stationary cannons: keep the vehicle rooted so the controlling player cannot drive it.
         case 160: // Strand of the Ancients
         case 244: // Wintergrasp
         case 510: // Isle of Conquest
+        case 651: // Northwatch Shore Battery (quest 24939)
             _me->SetControlled(true, UNIT_STATE_ROOT);
             // why we need to apply this? we can simple add immunities to slow mechanic in DB
             _me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
@@ -392,7 +393,9 @@ void Vehicle::InstallAccessory(uint32 entry, int8 seatId, bool minion, TempSummo
     if (minion)
         accessory->AddUnitTypeMask(UNIT_MASK_ACCESSORY);
 
-    (void)_me->HandleSpellClick(accessory, seatId);
+    // Prefer EnterVehicle over spellclick: click-cast can fail on faction/assist checks and
+    // Abort() instantly despawns the accessory (flash-in then vanish until a later Reset).
+    accessory->EnterVehicle(_me, seatId);
 
     /// If for some reason adding accessory to vehicle fails it will unsummon in
     /// @VehicleJoinEvent::Abort

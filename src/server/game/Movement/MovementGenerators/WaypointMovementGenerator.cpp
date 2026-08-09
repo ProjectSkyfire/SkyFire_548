@@ -119,6 +119,17 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
         i_currentNode = (i_currentNode + 1) % i_path->size();
     }
 
+    // Respawn/path-start often sits on the first DB point. Skip nodes we already occupy so we
+    // launch toward the next real destination instead of a zero-length spline (which can stall).
+    while (i_currentNode < i_path->size() - 1)
+    {
+        WaypointData const* here = i_path->at(i_currentNode);
+        if (creature->GetExactDist(here->x, here->y, here->z) > 2.0f)
+            break;
+        i_currentNode++;
+        m_isArrivalDone = false;
+    }
+
     WaypointData const* node = i_path->at(i_currentNode);
 
     m_isArrivalDone = false;
@@ -174,13 +185,15 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
     }
     else
     {
-        if (creature->IsStopped())
-            Stop(STOP_TIME_FOR_PLAYER);
-        else if (creature->movespline->Finalized())
+        // Prefer Finalized over IsStopped: a zero-length MoveTo clears MOVING while finalized,
+        // and the old order applied STOP_TIME_FOR_PLAYER (3 min) before advancing the path.
+        if (creature->movespline->Finalized())
         {
             OnArrived(creature);
             return StartMove(creature);
         }
+        if (creature->IsStopped())
+            Stop(STOP_TIME_FOR_PLAYER);
     }
     return true;
 }

@@ -8498,7 +8498,13 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     if (player && player->duel && player->duel->isMounted)
         player->DuelComplete(DuelCompleteType::DUEL_FLED);
 
-    SetDisableGravity(false);                   // SMSG_MOVE_GRAVITY_ENABLE
+    // Boarding sends gravity-disable to the client. If the server flag is already clear,
+    // SetDisableGravity(false) no-ops and the client stays levitating (walking on air at seat Z).
+    if (IsLevitating())
+        SetDisableGravity(false);               // SMSG_MOVE_GRAVITY_ENABLE
+    else if (player)
+        Movement::PacketSender(this, SMSG_SPLINE_MOVE_GRAVITY_ENABLE, SMSG_MOVE_GRAVITY_ENABLE).Send();
+
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
     Position pos;
@@ -8510,18 +8516,20 @@ void Unit::_ExitVehicle(Position const* exitPosition)
 
     AddUnitState(UNIT_STATE_MOVE);
 
-    if (player)
-        player->SetFallInformation(0, GetPositionZ());
+    float seatZ = pos.GetPositionZ();
+    float floorZ = seatZ;
+    GetMap()->GetWaterOrGroundLevel(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), &floorZ);
 
-    float height = pos.GetPositionZ();
+    if (player)
+        player->SetFallInformation(0, seatZ);
 
     Movement::MoveSplineInit init(this);
 
-    // Creatures without inhabit type air should begin falling after exiting the vehicle
-    if (GetTypeId() == TypeID::TYPEID_UNIT && !CanFly() && height > GetMap()->GetWaterOrGroundLevel(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), &height) + 0.1f)
+    // Land on ground/water. Moving to seatZ (old bug) left players stuck at cannon height.
+    if (!CanFly() && seatZ > floorZ + 0.1f)
         init.SetFall();
 
-    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
+    init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), floorZ, false);
     init.SetFacing(GetOrientation());
     init.SetTransportExit();
     init.Launch();
