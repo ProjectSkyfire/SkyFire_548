@@ -12408,6 +12408,8 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
     SetByteValue(PLAYER_FIELD_ARENA_FACTION, 0, fields[5].GetUInt8());
     SetByteValue(PLAYER_FIELD_ARENA_FACTION, 1, fields[45].GetUInt8());
     SetUInt32Value(PLAYER_FIELD_PLAYER_FLAGS, fields[11].GetUInt32());
+    if (HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
+        SetPvP(true);
     SetInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fields[44].GetUInt32());
     SetInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID, fields[60].GetUInt32());
     SetUInt32Value(PLAYER_FIELD_VIRTUAL_PLAYER_REALM, GetSession()->GetVirtualRealmID());

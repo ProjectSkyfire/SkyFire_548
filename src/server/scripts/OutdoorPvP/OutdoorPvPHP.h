@@ -73,6 +73,8 @@ const go_type HPTowerFlags[HP_TOWER_NUM] =
     {183515, 530, -289.610f, 3696.83f, 75.9447f, 3.12414f, 0.0f, 0.0f, 0.999962f, 0.008727f} // 2 stadium
 };
 
+const uint32 HP_WORLDSTATE_TOWER[HP_TOWER_NUM] = {20120, 20121, 20122};
+
 class OPvPCapturePointHP : public OPvPCapturePoint
 {
     public:
@@ -86,6 +88,10 @@ class OPvPCapturePointHP : public OPvPCapturePoint
         void HandlePlayerLeave(Player* player) OVERRIDE;
 
     private:
+        void SyncTowerFlagArtKit(uint32 artkit);
+        void SaveTowerState() const;
+        void RestoreTowerState();
+
         OutdoorPvPHPTowerType m_TowerType;
 };
 

@@ -7,11 +7,14 @@
 #include "OutdoorPvPHP.h"
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"
+#include "GameObject.h"
 #include "Player.h"
 #include "WorldPacket.h"
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Language.h"
+
+#include <list>
 
 const uint32 HP_LANG_LOSE_A[HP_TOWER_NUM] = {LANG_OPVP_HP_LOSE_BROKENHILL_A, LANG_OPVP_HP_LOSE_OVERLOOK_A, LANG_OPVP_HP_LOSE_STADIUM_A};
 
@@ -45,6 +48,7 @@ OPvPCapturePointHP::OPvPCapturePointHP(OutdoorPvP* pvp, OutdoorPvPHPTowerType ty
         HPTowerFlags[type].rot1,
         HPTowerFlags[type].rot2,
         HPTowerFlags[type].rot3);
+    RestoreTowerState();
 }
 
 OutdoorPvPHP::OutdoorPvPHP()
@@ -69,6 +73,88 @@ bool OutdoorPvPHP::SetupOutdoorPvP()
     AddCapturePoint(new OPvPCapturePointHP(this, HP_TOWER_STADIUM));
 
     return true;
+}
+
+void OPvPCapturePointHP::SaveTowerState() const
+{
+    switch (m_State)
+    {
+        case OBJECTIVESTATE_NEUTRAL:
+        case OBJECTIVESTATE_ALLIANCE:
+        case OBJECTIVESTATE_HORDE:
+            sWorld->setWorldState(HP_WORLDSTATE_TOWER[m_TowerType], m_State);
+            break;
+        case OBJECTIVESTATE_NEUTRAL_ALLIANCE_CHALLENGE:
+        case OBJECTIVESTATE_NEUTRAL_HORDE_CHALLENGE:
+        case OBJECTIVESTATE_ALLIANCE_HORDE_CHALLENGE:
+        case OBJECTIVESTATE_HORDE_ALLIANCE_CHALLENGE:
+            break;
+    }
+}
+
+void OPvPCapturePointHP::RestoreTowerState()
+{
+    uint32 const state = uint32(sWorld->getWorldState(HP_WORLDSTATE_TOWER[m_TowerType]));
+    uint32 capturePointArtKit = 21;
+    uint32 towerFlagArtKit = HP_TowerArtKit_N[m_TowerType];
+
+    switch (state)
+    {
+        case OBJECTIVESTATE_ALLIANCE:
+        {
+            m_State = OBJECTIVESTATE_ALLIANCE;
+            m_team = TEAM_ALLIANCE;
+            m_value = m_maxValue;
+            capturePointArtKit = 2;
+            towerFlagArtKit = HP_TowerArtKit_A[m_TowerType];
+
+            uint32 allianceTowers = ((OutdoorPvPHP*)m_PvP)->GetAllianceTowersControlled();
+            if (allianceTowers < HP_TOWER_NUM)
+                ((OutdoorPvPHP*)m_PvP)->SetAllianceTowersControlled(++allianceTowers);
+            break;
+        }
+        case OBJECTIVESTATE_HORDE:
+        {
+            m_State = OBJECTIVESTATE_HORDE;
+            m_team = TEAM_HORDE;
+            m_value = -m_maxValue;
+            capturePointArtKit = 1;
+            towerFlagArtKit = HP_TowerArtKit_H[m_TowerType];
+
+            uint32 hordeTowers = ((OutdoorPvPHP*)m_PvP)->GetHordeTowersControlled();
+            if (hordeTowers < HP_TOWER_NUM)
+                ((OutdoorPvPHP*)m_PvP)->SetHordeTowersControlled(++hordeTowers);
+            break;
+        }
+        case OBJECTIVESTATE_NEUTRAL:
+        default:
+            m_State = OBJECTIVESTATE_NEUTRAL;
+            m_team = TEAM_NEUTRAL;
+            m_value = 0.0f;
+            break;
+    }
+
+    m_OldState = m_State;
+    GameObject::SetGoArtKit(capturePointArtKit, m_capturePoint, m_capturePointGUID);
+    SyncTowerFlagArtKit(towerFlagArtKit);
+}
+
+void OPvPCapturePointHP::SyncTowerFlagArtKit(uint32 artkit)
+{
+    uint64 const flagGuid = m_Objects[m_TowerType];
+    if (!flagGuid)
+        return;
+
+    GameObject* scriptedFlag = HashMapHolder<GameObject>::Find(flagGuid);
+    GameObject::SetGoArtKit(artkit, scriptedFlag, GUID_LOPART(flagGuid));
+    if (!scriptedFlag)
+        return;
+
+    std::list<GameObject*> towerFlags;
+    scriptedFlag->GetGameObjectListWithEntryInGrid(towerFlags, HPTowerFlags[m_TowerType].entry, 5.0f);
+    for (std::list<GameObject*>::const_iterator itr = towerFlags.begin(); itr != towerFlags.end(); ++itr)
+        if (*itr)
+            (*itr)->SetGoArtKit(artkit);
 }
 
 void OutdoorPvPHP::HandlePlayerEnterZone(Player* player, uint32 zone)
@@ -241,16 +327,9 @@ void OPvPCapturePointHP::ChangeState()
         break;
     }
 
-    GameObject* flag = HashMapHolder<GameObject>::Find(m_capturePointGUID);
-    GameObject* flag2 = HashMapHolder<GameObject>::Find(m_Objects[m_TowerType]);
-    if (flag)
-    {
-        flag->SetGoArtKit(artkit);
-    }
-    if (flag2)
-    {
-        flag2->SetGoArtKit(artkit2);
-    }
+    GameObject::SetGoArtKit(artkit, m_capturePoint, m_capturePointGUID);
+    SyncTowerFlagArtKit(artkit2);
+    SaveTowerState();
 
     // send world state update
     if (field)

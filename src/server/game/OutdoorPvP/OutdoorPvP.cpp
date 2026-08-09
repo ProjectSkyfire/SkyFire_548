@@ -15,6 +15,7 @@
 #include "ObjectMgr.h"
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"
+#include "Player.h"
 #include "WorldPacket.h"
 
 OPvPCapturePoint::OPvPCapturePoint(OutdoorPvP* pvp) :
@@ -25,6 +26,11 @@ OPvPCapturePoint::OPvPCapturePoint(OutdoorPvP* pvp) :
 
 bool OPvPCapturePoint::HandlePlayerEnter(Player* player)
 {
+    player->SetFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+    player->RemoveFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER);
+    if (!player->IsPvP() || player->pvpInfo.EndTimer)
+        player->UpdatePvP(true, true);
+
     if (m_capturePoint)
     {
         player->SendUpdateWorldState(m_capturePoint->GetGOInfo()->capturePoint.worldState1, 1);

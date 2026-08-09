@@ -525,6 +525,14 @@ target_include_directories(pvp_resilience_tests PRIVATE
 
 add_test(NAME pvp_resilience_tests COMMAND pvp_resilience_tests)
 
+add_executable(pvp_toggle_handler_tests
+  PvpToggleHandlerTests.cpp
+)
+
+target_compile_definitions(pvp_toggle_handler_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME pvp_toggle_handler_tests COMMAND pvp_toggle_handler_tests)
+
 add_executable(pvp_power_tests
   PvpPowerTests.cpp
 )

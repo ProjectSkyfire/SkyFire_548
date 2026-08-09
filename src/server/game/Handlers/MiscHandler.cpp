@@ -1124,8 +1124,17 @@ void WorldSession::HandleSetPvP(WorldPacket& recvData)
     SetPvPRequest request = ReadSetPvPRequest(recvData);
     if (request.hasStatus)
     {
-        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, request.newPvPStatus);
-        GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !request.newPvPStatus);
+        Player* player = GetPlayer();
+        player->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, request.newPvPStatus);
+        player->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, !request.newPvPStatus);
+
+        if (request.newPvPStatus)
+        {
+            if (!player->IsPvP() || player->pvpInfo.EndTimer)
+                player->UpdatePvP(true, true);
+        }
+        else if (!player->pvpInfo.IsHostile && player->IsPvP() && !player->pvpInfo.EndTimer)
+            player->pvpInfo.EndTimer = time(NULL);
     }
 }
 void WorldSession::HandleTogglePvP(WorldPacket& /*recvData*/)

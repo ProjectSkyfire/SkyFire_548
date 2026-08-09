@@ -1797,7 +1797,7 @@ uint32 ObjectMgr::AddGOData(uint32 entry, uint32 mapId, float x, float y, float 
     data.animprogress = 100;
     data.spawnMask = 1;
     data.go_state = GOState::GO_STATE_READY;
-    data.phaseid = 169;
+    data.phaseid = 0;
     data.phaseGroup = 0;
     data.artKit = goinfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT ? 21 : 0;
     data.dbData = false;
