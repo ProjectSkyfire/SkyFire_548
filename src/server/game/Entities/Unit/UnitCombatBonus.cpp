@@ -231,6 +231,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? WeaponAttackType::RANGED_ATTACK : WeaponAttackType::BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == WeaponAttackType::BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
+                if (GetTypeId() == TypeID::TYPEID_PLAYER)
+                {
+                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    {
+                        if (spellProto->Effects[i].IsScaledByComboPoints())
+                        {
+                            if (uint8 cp = ToPlayer()->GetComboPoints())
+                                APbonus *= cp;
+                            break;
+                        }
+                    }
+                }
                 DoneTotal += int32(bonus->ap_dot_bonus * stack * ApCoeffMod * APbonus);
             }
         }
@@ -242,14 +254,26 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                 WeaponAttackType attType = (spellProto->IsRangedWeaponSpell() && spellProto->DmgClass != SPELL_DAMAGE_CLASS_MELEE) ? WeaponAttackType::RANGED_ATTACK : WeaponAttackType::BASE_ATTACK;
                 float APbonus = float(victim->GetTotalAuraModifier(attType == WeaponAttackType::BASE_ATTACK ? SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS : SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS));
                 APbonus += GetTotalAttackPowerValue(attType);
+                if (GetTypeId() == TypeID::TYPEID_PLAYER)
+                {
+                    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    {
+                        if (spellProto->Effects[i].IsScaledByComboPoints())
+                        {
+                            if (uint8 cp = ToPlayer()->GetComboPoints())
+                                APbonus *= cp;
+                            break;
+                        }
+                    }
+                }
                 DoneTotal += int32(bonus->ap_bonus * stack * ApCoeffMod * APbonus);
             }
         }
     }
-    // Default calculation
-    if (DoneAdvertisedBenefit)
+    // Default SP coefficient. spell_bonus_data direct/dot of -1 means "no SP scaling".
+    if (DoneAdvertisedBenefit && coeff >= 0.0f)
     {
-        if (!bonus || coeff < 0)
+        if (!bonus)
             coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
 
         float factorMod = CalculateLevelPenalty(spellProto) * stack;

@@ -208,35 +208,15 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_ROGUE:
             {
-                // Envenom
-                if (m_spellInfo->SpellFamilyFlags[1] & 0x00000008)
+                // Envenom / Eviscerate: AP scaling is spell_bonus_data (ap_bonus * CP).
+                // Item set 37169: flat bonus per combo point.
+                if (m_spellInfo->SpellFamilyFlags[1] & 0x00000008 ||
+                    m_spellInfo->SpellFamilyFlags[0] & 0x00020000)
                 {
                     if (Player* player = m_caster->ToPlayer())
-                    {
-                        // consume from stack dozes not more that have combo-points
                         if (uint32 combo = player->GetComboPoints())
-                        {
-                            // Eviscerate and Envenom Bonus Damage (item set effect)
-                            if (m_caster->HasAura(37169))
+                            if (m_caster->HasAura(37169)) // Eviscerate and Envenom Bonus Damage (item set)
                                 damage += combo * 40;
-                        }
-                    }
-                }
-                // Eviscerate
-                else if (m_spellInfo->SpellFamilyFlags[0] & 0x00020000)
-                {
-                    if (Player* player = m_caster->ToPlayer())
-                    {
-                        if (uint32 combo = player->GetComboPoints())
-                        {
-                            float ap = m_caster->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK);
-                            damage += std::rand() % int32(ap * combo * 0.07f) + int32(ap * combo * 0.03f);
-
-                            // Eviscerate and Envenom Bonus Damage (item set effect)
-                            if (m_caster->HasAura(37169))
-                                damage += combo * 40;
-                        }
-                    }
                 }
                 break;
             }
@@ -1118,7 +1098,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     }
 
     bool normalized = false;
-    float weaponDamagePercentMod = 1.0f;
+    float weaponDamagePercentMod = 0.0f;
     for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
     {
         switch (m_spellInfo->Effects[j].Effect)
@@ -1132,7 +1112,8 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 normalized = true;
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                ApplyPct(weaponDamagePercentMod, CalculateDamage(j, unitTarget));
+                // Percent points (e.g. Sinister Strike 240), not a 1.0-based multiplier
+                weaponDamagePercentMod += float(CalculateDamage(j, unitTarget));
                 break;
             default:
                 break;                                      // not weapon damage effect, just skip
@@ -1163,29 +1144,11 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 
     int32 weaponDamage = m_caster->CalculateDamage(m_attackType, normalized, true);
 
-    // Sequence is important
-    for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
-    {
-        // We assume that a spell have at most one fixed_bonus
-        // and at most one weaponDamagePercentMod
-        switch (m_spellInfo->Effects[j].Effect)
-        {
-            case SPELL_EFFECT_WEAPON_DAMAGE:
-            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-            {
-                weaponDamage += fixed_bonus;
-                break;
-            }
-            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-            {
-                weaponDamage = int32(weaponDamage * weaponDamagePercentMod);
-                break;
-            }
-            default:
-                break;                                      // not weapon damage effect, just skip
-        }
-    }
+    // Tooltip form: (weapon damage * pct%) + flat bonus — do not multiply flat by the pct.
+    // Sinister Strike: "$m1 damage in addition to $m3% of your normal weapon damage".
+    if (weaponDamagePercentMod)
+        ApplyPct(weaponDamage, weaponDamagePercentMod);
+    weaponDamage += fixed_bonus;
 
     if (spell_bonus)
         weaponDamage += spell_bonus;

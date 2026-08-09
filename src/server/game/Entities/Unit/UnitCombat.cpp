@@ -1656,13 +1656,22 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool add
         }
     }
 
+    // rand() % max + min yields [min, min+max), roughly doubling weapon damage.
+    // Roll inside the real [min, max] interval instead.
+    if (min_damage < 1.0f)
+        min_damage = 1.0f;
+    if (max_damage < 1.0f)
+        max_damage = 1.0f;
+
     if (min_damage > max_damage)
         std::swap(min_damage, max_damage);
 
-    if (max_damage == 0.0f)
-        max_damage = 5.0f;
+    uint32 const minDmg = uint32(min_damage);
+    uint32 const maxDmg = uint32(max_damage);
+    if (maxDmg <= minDmg)
+        return minDmg;
 
-    return std::rand() % (uint32)max_damage + (uint32)min_damage;
+    return minDmg + uint32(std::rand() % (maxDmg - minDmg + 1));
 }
 
 float Unit::CalculateLevelPenalty(SpellInfo const* spellProto) const

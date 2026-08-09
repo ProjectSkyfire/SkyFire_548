@@ -112,6 +112,25 @@ bool SpellEffectInfo::IsUnitOwnedAuraEffect() const
     return IsAreaAuraEffect() || Effect == SPELL_EFFECT_APPLY_AURA;
 }
 
+bool SpellEffectInfo::IsScaledByComboPoints() const
+{
+    if (ComboScalingMultiplier != 0.0f)
+        return true;
+
+    // Finishers that scale AP with combo points but may lack ComboScaling data
+    switch (_spellInfo->Id)
+    {
+        case 2098:  // Eviscerate
+        case 32645: // Envenom
+        case 26679: // Deadly Throw
+            return true;
+        default:
+            break;
+    }
+
+    return false;
+}
+
 int32 SpellEffectInfo::CalcValue(Unit const* caster, int32 const* bp, Unit const* target) const
 {
     float basePointsPerLevel = RealPointsPerLevel;
