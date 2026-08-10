@@ -17,7 +17,7 @@
 #include "SkillDiscovery.h"
 #include "Battleground.h"
 
- // 77314 - Burn Constriction Totem
+ // 72940 - Paxton's Torch
 class spell_item_paxtons_torch : public SpellScriptLoader
 {
 public:
