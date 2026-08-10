@@ -134,14 +134,14 @@ UPDATE `creature` SET `MovementType`=1 WHERE `guid` BETWEEN @CGUID-2 AND @CGUID-
 
 -- Emerald Boa
 SET @CGUID := 104856;
-DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID-3 AND @CGUID-0;
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID-2 AND @CGUID-0;
 INSERT INTO `creature` (`guid`, `id`, `map`, `position_x`, `position_y`, `position_z`, `orientation`) VALUES
 (@CGUID-0, 49725, 1, -1883.11022, -2724.91015, 95.45731, 3.08764),
 (@CGUID-1, 49725, 1, -1832.55065, -2767.12646, 86.29451, 5.60612),
 (@CGUID-2, 49725, 1, -1947.18554, -2720.21093, 95.02212, 2.41478);
 
-UPDATE `creature` SET `spawndist`=5 WHERE `guid` BETWEEN @CGUID-3 AND @CGUID-0;
-UPDATE `creature` SET `MovementType`=1 WHERE `guid` BETWEEN @CGUID-3 AND @CGUID-0;
+UPDATE `creature` SET `spawndist`=5 WHERE `guid` BETWEEN @CGUID-2 AND @CGUID-0;
+UPDATE `creature` SET `MovementType`=1 WHERE `guid` BETWEEN @CGUID-2 AND @CGUID-0;
 
 -- Small Frog
 SET @CGUID := 104858;
