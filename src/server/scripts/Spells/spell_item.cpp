@@ -17,6 +17,37 @@
 #include "SkillDiscovery.h"
 #include "Battleground.h"
 
+ // 77314 - Burn Constriction Totem
+class spell_item_paxtons_torch : public SpellScriptLoader
+{
+public:
+    spell_item_paxtons_torch() : SpellScriptLoader("spell_item_paxtons_torch") {}
+
+    class spell_item_paxtons_torch_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_item_paxtons_torch_SpellScript);
+
+        void SetTarget(WorldObject*& target)
+        {
+            target = GetCaster();
+            if (GetCaster()->FindNearestCreature(38818, 15.0f, true))
+                target = GetCaster()->FindNearestCreature(38818, 15.0f, true);
+            if (GetCaster()->FindNearestCreature(38820, 25.0f, true))
+                target = GetCaster()->FindNearestCreature(38820, 25.0f, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_item_paxtons_torch_SpellScript::SetTarget, EFFECT_0, TARGET_UNIT_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_item_paxtons_torch_SpellScript();
+    }
+};
+
 // Generic script for handling item dummy effects which trigger another spell.
 class spell_item_trigger_spell : public SpellScriptLoader
 {
@@ -2497,6 +2528,8 @@ public:
 
 void AddSC_item_spell_scripts()
 {
+    //
+    new spell_item_paxtons_torch();
     // 23074 Arcanite Dragonling
     new spell_item_trigger_spell("spell_item_arcanite_dragonling", SPELL_ARCANITE_DRAGONLING);
     // 23133 Gnomish Battle Chicken
