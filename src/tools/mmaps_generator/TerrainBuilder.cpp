@@ -157,7 +157,7 @@ namespace MMAP
         }
 
         // data used later
-        uint8 holes[16][16][8];
+        uint16 holes[16][16];
         memset(holes, 0, sizeof(holes));
         uint8 liquid_type[16][16];
         memset(liquid_type, 0, sizeof(liquid_type));
@@ -584,15 +584,17 @@ namespace MMAP
         coord[2] = v[index2];
     }
     /**************************************************************************/
-    bool TerrainBuilder::isHole(int square, uint8 const holes[16][16][8])
+    bool TerrainBuilder::isHole(int square, uint16 const holes[16][16])
     {
         int row = square / 128;
         int col = square % 128;
         int cellRow = row / 8;     // 8 squares per cell
         int cellCol = col / 8;
-        int holeRow = row % 8;
-        int holeCol = (square - (row * 128 + cellCol * 8));
-        return holes[cellRow][cellCol][holeRow] & (1 << holeCol);
+        // each cell's 16-bit hole mask covers a 4x4 grid of 2x2-square quads
+        int holeRow = (row % 8) / 2;
+        int holeCol = (col % 8) / 2;
+        int holeBit = holeRow * 4 + holeCol;
+        return (holes[cellRow][cellCol] & (1 << holeBit)) != 0;
     }
 
     /**************************************************************************/
