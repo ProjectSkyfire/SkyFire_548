@@ -33,25 +33,6 @@
 //-----------------------------------------------------------------------------
 // Local functions - platform-specific functions
 
-#ifndef STORMLIB_WINDOWS
-
-#ifndef STORMLIB_WIIU
-static thread_local DWORD dwLastError = ERROR_SUCCESS;
-#else
-static DWORD dwLastError = ERROR_SUCCESS;
-#endif
-
-DWORD GetLastError()
-{
-    return dwLastError;
-}
-
-void SetLastError(DWORD dwErrCode)
-{
-    dwLastError = dwErrCode;
-}
-#endif
-
 static DWORD StringToInt(const char * szString)
 {
     DWORD dwValue = 0;
@@ -78,7 +59,7 @@ static void CreateNameWithSuffix(LPTSTR szBuffer, size_t cchMaxChars, LPCTSTR sz
         *szBuffer++ = '.';
 
     // Append the number
-    IntToString(szBuffer, szBufferEnd - szBuffer + 1, nValue);
+    SMemIntToStr(szBuffer, szBufferEnd - szBuffer + 1, nValue);
 }
 
 //-----------------------------------------------------------------------------
@@ -118,7 +99,7 @@ static bool BaseFile_Create(TFileStream * pStream)
         if(handle == -1)
         {
             pStream->Base.File.hFile = INVALID_HANDLE_VALUE;
-            dwLastError = errno;
+            SErrSetLastError(errno);
             return false;
         }
 
@@ -132,7 +113,7 @@ static bool BaseFile_Create(TFileStream * pStream)
     return true;
 }
 
-static bool BaseFile_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD dwStreamFlags)
+static bool BaseFile_Open(TFileStream * pStream, LPCTSTR szFileName, DWORD dwStreamFlags)
 {
 #ifdef STORMLIB_WINDOWS
     {
@@ -171,7 +152,7 @@ static bool BaseFile_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD
         if(handle == -1)
         {
             pStream->Base.File.hFile = INVALID_HANDLE_VALUE;
-            dwLastError = errno;
+            SErrSetLastError(errno);
             return false;
         }
 
@@ -179,7 +160,7 @@ static bool BaseFile_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD
         if(fstat64(handle, &fileinfo) == -1)
         {
             pStream->Base.File.hFile = INVALID_HANDLE_VALUE;
-            dwLastError = errno;
+            SErrSetLastError(errno);
             close(handle);
             return false;
         }
@@ -249,7 +230,7 @@ static bool BaseFile_Read(
             bytes_read = read((intptr_t)pStream->Base.File.hFile, pvBuffer, (size_t)dwBytesToRead);
             if(bytes_read == -1)
             {
-                dwLastError = errno;
+                SErrSetLastError(errno);
                 return false;
             }
 
@@ -262,7 +243,7 @@ static bool BaseFile_Read(
     // If the number of bytes read doesn't match to required amount, return false
     pStream->Base.File.FilePos = ByteOffset + dwBytesRead;
     if(dwBytesRead != dwBytesToRead)
-        SetLastError(ERROR_HANDLE_EOF);
+        SErrSetLastError(ERROR_HANDLE_EOF);
     return (dwBytesRead == dwBytesToRead);
 }
 
@@ -318,7 +299,7 @@ static bool BaseFile_Write(TFileStream * pStream, ULONGLONG * pByteOffset, const
         bytes_written = write((intptr_t)pStream->Base.File.hFile, pvBuffer, (size_t)dwBytesToWrite);
         if(bytes_written == -1)
         {
-            dwLastError = errno;
+            SErrSetLastError(errno);
             return false;
         }
 
@@ -334,7 +315,7 @@ static bool BaseFile_Write(TFileStream * pStream, ULONGLONG * pByteOffset, const
         pStream->Base.File.FileSize = pStream->Base.File.FilePos;
 
     if(dwBytesWritten != dwBytesToWrite)
-        SetLastError(ERROR_DISK_FULL);
+        SErrSetLastError(ERROR_DISK_FULL);
     return (dwBytesWritten == dwBytesToWrite);
 }
 
@@ -353,7 +334,7 @@ static bool BaseFile_Resize(TFileStream * pStream, ULONGLONG NewFileSize)
 
         // Set the position at the new file size
         dwNewPos = SetFilePointer(pStream->Base.File.hFile, (LONG)NewFileSize, &FileSizeHi, FILE_BEGIN);
-        if(dwNewPos == INVALID_SET_FILE_POINTER && GetLastError() != ERROR_SUCCESS)
+        if(dwNewPos == INVALID_SET_FILE_POINTER && SErrGetLastError() != ERROR_SUCCESS)
             return false;
 
         // Set the current file pointer as the end of the file
@@ -373,7 +354,7 @@ static bool BaseFile_Resize(TFileStream * pStream, ULONGLONG NewFileSize)
     {
         if(ftruncate64((intptr_t)pStream->Base.File.hFile, (off64_t)NewFileSize) == -1)
         {
-            dwLastError = errno;
+            SErrSetLastError(errno);
             return false;
         }
 
@@ -417,7 +398,7 @@ static bool BaseFile_Replace(TFileStream * pStream, TFileStream * pNewStream)
     // "rename" on Linux also works if the target file exists
     if(rename(pNewStream->szFileName, pStream->szFileName) == -1)
     {
-        dwLastError = errno;
+        SErrSetLastError(errno);
         return false;
     }
 
@@ -599,7 +580,7 @@ static bool BaseMap_Open(TFileStream * pStream, LPCTSTR szFileName, DWORD dwStre
 
     // Did the mapping fail?
     if(bResult == false)
-        dwLastError = errno;
+        SErrSetLastError(errno);
     return bResult;
 
 #else
@@ -667,9 +648,59 @@ static void BaseMap_Init(TFileStream * pStream)
 }
 
 //-----------------------------------------------------------------------------
+// Local functions - base MPQ file support
+
+static bool BaseMpq_Read(TFileStream * pStream, ULONGLONG * pByteOffset, void * pvBuffer, DWORD dwBytesToRead)
+{
+    ULONGLONG ByteOffset64;
+    DWORD dwByteOffsetLo;
+    DWORD dwByteOffsetHi;
+    DWORD dwBytesRead = 0;
+
+    // Get the byte offset
+    ByteOffset64 = (pByteOffset != NULL) ? pByteOffset[0] : pStream->Base.File.FilePos;
+    dwByteOffsetHi = (DWORD)(ByteOffset64 >> 0x20);
+    dwByteOffsetLo = (DWORD)(ByteOffset64 & 0xFFFFFFFF);
+
+    // Set the new file pointer
+    if(SFileSetFilePointer(pStream->Base.Mpq.hFile, dwByteOffsetLo, (LONG *)(&dwByteOffsetHi), FILE_BEGIN) != dwByteOffsetLo)
+        return false;
+    pStream->Base.File.FilePos = MAKE_OFFSET64(dwByteOffsetHi, dwByteOffsetLo);
+
+    // Read the file data
+    if(!SFileReadFile(pStream->Base.Mpq.hFile, pvBuffer, dwBytesToRead, &dwBytesRead, NULL))
+        return false;
+
+    // Update the file position
+    pStream->Base.File.FilePos += dwBytesRead;
+    return true;
+}
+
+static void BaseMpq_Close(TFileStream * pStream)
+{
+    if(pStream->Base.Mpq.hFile != NULL)
+        SFileCloseFile(pStream->Base.Mpq.hFile);
+    pStream->Base.Mpq.hFile = NULL;
+}
+
+// Initializes base functions for the mapped file
+static void BaseMpq_Init(TFileStream * pStream)
+{
+    // Supply the stream functions
+    pStream->BaseOpen    = NULL;                // Implemented in FileStream_OpenFileArchive
+    pStream->BaseRead    = BaseMpq_Read;
+    pStream->BaseGetSize = BaseFile_GetSize;    // Reuse BaseFile function
+    pStream->BaseGetPos  = BaseFile_GetPos;     // Reuse BaseFile function
+    pStream->BaseClose   = BaseMpq_Close;
+
+    // HTTP files are read-only
+    pStream->dwFlags |= STREAM_FLAG_READ_ONLY;
+}
+
+//-----------------------------------------------------------------------------
 // Local functions - base HTTP file support
 
-static const TCHAR * BaseHttp_ExtractServerName(const TCHAR * szFileName, TCHAR * szServerName)
+static LPCTSTR BaseHttp_ExtractServerName(LPCTSTR szFileName, TCHAR * szServerName)
 {
     // Check for HTTP
     if(!_tcsnicmp(szFileName, _T("http://"), 7))
@@ -692,7 +723,7 @@ static const TCHAR * BaseHttp_ExtractServerName(const TCHAR * szFileName, TCHAR 
     return szFileName;
 }
 
-static bool BaseHttp_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD dwStreamFlags)
+static bool BaseHttp_Open(TFileStream * pStream, LPCTSTR szFileName, DWORD dwStreamFlags)
 {
 #ifdef STORMLIB_WINDOWS
 
@@ -748,7 +779,7 @@ static bool BaseHttp_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD
                         if(_tcscmp(StatusCode, _T("200")))
                         {
                             InternetCloseHandle(hRequest);
-                            SetLastError(ERROR_FILE_NOT_FOUND);
+                            SErrSetLastError(ERROR_FILE_NOT_FOUND);
                             return false;
                         }
                     }
@@ -793,7 +824,7 @@ static bool BaseHttp_Open(TFileStream * pStream, const TCHAR * szFileName, DWORD
 #else
 
     // Not supported
-    SetLastError(ERROR_NOT_SUPPORTED);
+    SErrSetLastError(ERROR_NOT_SUPPORTED);
     pStream = pStream;
     return false;
 
@@ -861,7 +892,7 @@ static bool BaseHttp_Read(
 
     // If the number of bytes read doesn't match the required amount, return false
     if(dwTotalBytesRead != dwBytesToRead)
-        SetLastError(ERROR_HANDLE_EOF);
+        SErrSetLastError(ERROR_HANDLE_EOF);
     return (dwTotalBytesRead == dwBytesToRead);
 
 #else
@@ -871,7 +902,7 @@ static bool BaseHttp_Read(
     pByteOffset = pByteOffset;
     pvBuffer = pvBuffer;
     dwBytesToRead = dwBytesToRead;
-    SetLastError(ERROR_NOT_SUPPORTED);
+    SErrSetLastError(ERROR_NOT_SUPPORTED);
     return false;
 
 #endif
@@ -945,7 +976,7 @@ static bool BlockStream_Read(
     EndOffset = ByteOffset + dwBytesToRead;
     if(EndOffset > pStream->StreamSize)
     {
-        SetLastError(ERROR_HANDLE_EOF);
+        SErrSetLastError(ERROR_HANDLE_EOF);
         return false;
     }
 
@@ -962,7 +993,7 @@ static bool BlockStream_Read(
     TransferBuffer = BlockBuffer = STORM_ALLOC(BYTE, (BlockCount * BlockSize));
     if(TransferBuffer == NULL)
     {
-        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        SErrSetLastError(ERROR_NOT_ENOUGH_MEMORY);
         return false;
     }
 
@@ -1040,7 +1071,7 @@ static bool BlockStream_Read(
     else
     {
         // If the block read failed, set the last error
-        SetLastError(ERROR_FILE_INCOMPLETE);
+        SErrSetLastError(ERROR_FILE_INCOMPLETE);
     }
 
     // Call the callback to indicate we are done
@@ -1078,10 +1109,11 @@ static void BlockStream_Close(TBlockStream * pStream)
 //-----------------------------------------------------------------------------
 // File stream allocation function
 
-static STREAM_INIT StreamBaseInit[4] =
+static STREAM_INIT StreamBaseInit[5] =
 {
     BaseFile_Init,
     BaseMap_Init,
+    BaseMpq_Init,
     BaseHttp_Init,
     BaseNone_Init
 };
@@ -1090,13 +1122,13 @@ static STREAM_INIT StreamBaseInit[4] =
 // The stream structure is created as flat block, variable length
 // The file name is placed after the end of the stream structure data
 static TFileStream * AllocateFileStream(
-    const TCHAR * szFileName,
+    LPCTSTR szFileName,
     size_t StreamSize,
     DWORD dwStreamFlags)
 {
     TFileStream * pMaster = NULL;
     TFileStream * pStream;
-    const TCHAR * szNextFile = szFileName;
+    LPCTSTR szNextFile = szFileName;
     size_t FileNameSize;
 
     // Sanity check
@@ -1117,7 +1149,7 @@ static TFileStream * AllocateFileStream(
         // Don't allow another master file in the string
         if(_tcschr(szNextFile + 1, _T('*')) != NULL)
         {
-            SetLastError(ERROR_INVALID_PARAMETER);
+            SErrSetLastError(ERROR_INVALID_PARAMETER);
             return NULL;
         }
 
@@ -1440,10 +1472,9 @@ static bool FlatStream_CreateMirror(TBlockStream * pStream)
     return true;
 }
 
-static TFileStream * FlatStream_Open(const TCHAR * szFileName, DWORD dwStreamFlags)
+static TFileStream * FlatStream_Open(LPCTSTR szFileName, DWORD dwStreamFlags)
 {
     TBlockStream * pStream;
-    ULONGLONG ByteOffset = 0;
 
     // Create new empty stream
     pStream = (TBlockStream *)AllocateFileStream(szFileName, sizeof(TBlockStream), dwStreamFlags);
@@ -1456,7 +1487,7 @@ static TFileStream * FlatStream_Open(const TCHAR * szFileName, DWORD dwStreamFla
         if(!FlatStream_CreateMirror(pStream))
         {
             FileStream_Close(pStream);
-            SetLastError(ERROR_FILE_NOT_FOUND);
+            SErrSetLastError(ERROR_FILE_NOT_FOUND);
             return NULL;
         }
     }
@@ -1495,6 +1526,8 @@ static TFileStream * FlatStream_Open(const TCHAR * szFileName, DWORD dwStreamFla
     }
     else
     {
+        ULONGLONG ByteOffset = 0;
+
         // Reset the base position to zero
         pStream->BaseRead(pStream, &ByteOffset, NULL, 0);
 
@@ -1765,7 +1798,7 @@ static void PartStream_Close(TBlockStream * pStream)
 
         // Make sure that the header is properly BSWAPed
         BSWAP_ARRAY32_UNSIGNED(&PartHeader, sizeof(PART_FILE_HEADER));
-        IntToString(PartHeader.GameBuildNumber, _countof(PartHeader.GameBuildNumber), pStream->BuildNumber);
+        SMemIntToStr(PartHeader.GameBuildNumber, _countof(PartHeader.GameBuildNumber), pStream->BuildNumber);
 
         // Write the part header
         pStream->BaseWrite(pStream, &ByteOffset, &PartHeader, sizeof(PART_FILE_HEADER));
@@ -1860,7 +1893,7 @@ static bool PartStream_CreateMirror(TBlockStream * pStream)
 }
 
 
-static TFileStream * PartStream_Open(const TCHAR * szFileName, DWORD dwStreamFlags)
+static TFileStream * PartStream_Open(LPCTSTR szFileName, DWORD dwStreamFlags)
 {
     TBlockStream * pStream;
 
@@ -1875,7 +1908,7 @@ static TFileStream * PartStream_Open(const TCHAR * szFileName, DWORD dwStreamFla
         if(!PartStream_CreateMirror(pStream))
         {
             FileStream_Close(pStream);
-            SetLastError(ERROR_FILE_NOT_FOUND);
+            SErrSetLastError(ERROR_FILE_NOT_FOUND);
             return NULL;
         }
     }
@@ -1892,7 +1925,7 @@ static TFileStream * PartStream_Open(const TCHAR * szFileName, DWORD dwStreamFla
         if(!PartStream_LoadBitmap(pStream))
         {
             FileStream_Close(pStream);
-            SetLastError(ERROR_BAD_FORMAT);
+            SErrSetLastError(ERROR_BAD_FORMAT);
             return NULL;
         }
     }
@@ -2177,7 +2210,7 @@ static bool MpqeStream_BlockRead(
     return true;
 }
 
-static TFileStream * MpqeStream_Open(const TCHAR * szFileName, DWORD dwStreamFlags)
+static TFileStream * MpqeStream_Open(LPCTSTR szFileName, DWORD dwStreamFlags)
 {
     TEncryptedStream * pStream;
 
@@ -2212,7 +2245,7 @@ static TFileStream * MpqeStream_Open(const TCHAR * szFileName, DWORD dwStreamFla
 
     // Cleanup the stream and return
     FileStream_Close(pStream);
-    SetLastError(ERROR_UNKNOWN_FILE_KEY);
+    SErrSetLastError(ERROR_UNKNOWN_FILE_KEY);
     return NULL;
 }
 
@@ -2306,7 +2339,7 @@ static void Block4Stream_Close(TBlockStream * pStream)
     return;
 }
 
-static TFileStream * Block4Stream_Open(const TCHAR * szFileName, DWORD dwStreamFlags)
+static TFileStream * Block4Stream_Open(LPCTSTR szFileName, DWORD dwStreamFlags)
 {
     TBaseProviderData * NewBaseArray = NULL;
     ULONGLONG RemainderBlock;
@@ -2358,7 +2391,7 @@ static TFileStream * Block4Stream_Open(const TCHAR * szFileName, DWORD dwStreamF
             NewBaseArray = STORM_ALLOC(TBaseProviderData, dwBaseFiles + 1);
             if(NewBaseArray == NULL)
             {
-                SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+                SErrSetLastError(ERROR_NOT_ENOUGH_MEMORY);
                 return NULL;
             }
 
@@ -2413,7 +2446,7 @@ static TFileStream * Block4Stream_Open(const TCHAR * szFileName, DWORD dwStreamF
     if(dwBaseFiles == 0)
     {
         FileStream_Close(pStream);
-        SetLastError(ERROR_FILE_NOT_FOUND);
+        SErrSetLastError(ERROR_FILE_NOT_FOUND);
         pStream = NULL;
     }
 
@@ -2441,7 +2474,7 @@ static TFileStream * Block4Stream_Open(const TCHAR * szFileName, DWORD dwStreamF
  */
 
 TFileStream * FileStream_CreateFile(
-    const TCHAR * szFileName,
+    LPCTSTR szFileName,
     DWORD dwStreamFlags)
 {
     TFileStream * pStream;
@@ -2449,7 +2482,7 @@ TFileStream * FileStream_CreateFile(
     // We only support creation of flat, local file
     if((dwStreamFlags & (STREAM_PROVIDERS_MASK)) != (STREAM_PROVIDER_FLAT | BASE_PROVIDER_FILE))
     {
-        SetLastError(ERROR_NOT_SUPPORTED);
+        SErrSetLastError(ERROR_NOT_SUPPORTED);
         return NULL;
     }
 
@@ -2497,7 +2530,7 @@ TFileStream * FileStream_CreateFile(
  */
 
 TFileStream * FileStream_OpenFile(
-    const TCHAR * szFileName,
+    LPCTSTR szFileName,
     DWORD dwStreamFlags)
 {
     DWORD dwProvider = dwStreamFlags & STREAM_PROVIDERS_MASK;
@@ -2523,9 +2556,61 @@ TFileStream * FileStream_OpenFile(
             return Block4Stream_Open(szFileName, dwStreamFlags);
 
         default:
-            SetLastError(ERROR_INVALID_PARAMETER);
+            SErrSetLastError(ERROR_INVALID_PARAMETER);
             return NULL;
     }
+}
+
+TFileStream * FileStream_OpenFileArchive(HANDLE hParentMpq, LPCSTR szFileName)
+{
+    TFileStream * pStream = NULL;
+    size_t FileNameSize = strlen(szFileName) + 1;
+    size_t StreamSize = sizeof(TFileStream);
+    HANDLE hFile = NULL;
+    DWORD dwFileSizeHi = 0;
+    DWORD dwFileSizeLo;
+
+    // Allocate the stream structure for the given stream type
+    pStream = (TFileStream *)STORM_ALLOC(BYTE, StreamSize + (FileNameSize * sizeof(TCHAR)));
+    if(pStream != NULL)
+    {
+        if(SFileOpenFileEx(hParentMpq, szFileName, 0, &hFile))
+        {
+            // Retrieve the file size
+            dwFileSizeLo = SFileGetFileSize(hFile, &dwFileSizeHi);
+
+            // Zero the entire structure
+            memset(pStream, 0, StreamSize);
+            pStream->dwFlags = STREAM_FLAG_READ_ONLY | STREAM_PROVIDER_FLAT | BASE_PROVIDER_MPQ;
+
+            // Initialize the file name
+            pStream->szFileName = (LPTSTR)((BYTE *)pStream + StreamSize);
+            StringCopy(pStream->szFileName, FileNameSize, szFileName);
+
+            // Initialize the stream
+            pStream->Base.Mpq.FileSize = MAKE_OFFSET64(dwFileSizeHi, dwFileSizeLo);
+            pStream->Base.Mpq.FileTime = 0;
+            pStream->Base.Mpq.FilePos = 0;
+            pStream->Base.Mpq.hFile = hFile;
+
+            // Initialize the stream base
+            StreamBaseInit[pStream->dwFlags & 0x03](pStream);
+
+            // Stream functions just copy the base functions
+            pStream->StreamRead    = pStream->BaseRead;
+            pStream->StreamWrite   = pStream->BaseWrite;
+            pStream->StreamResize  = pStream->BaseResize;
+            pStream->StreamGetSize = pStream->BaseGetSize;
+            pStream->StreamGetPos  = pStream->BaseGetPos;
+            pStream->StreamClose   = pStream->BaseClose;
+            return pStream;
+        }
+
+        // Free the memory structure
+        STORM_FREE(pStream);
+        pStream = NULL;
+    }
+    return pStream;
 }
 
 /**
@@ -2533,7 +2618,7 @@ TFileStream * FileStream_OpenFile(
  *
  * \a pStream Pointer to an open stream
  */
-const TCHAR * FileStream_GetFileName(TFileStream * pStream)
+LPCTSTR FileStream_GetFileName(TFileStream * pStream)
 {
     assert(pStream != NULL);
     return pStream->szFileName;
@@ -2546,7 +2631,7 @@ const TCHAR * FileStream_GetFileName(TFileStream * pStream)
  * \a pdwStreamProvider Pointer to a DWORD variable that receives stream provider (STREAM_PROVIDER_XXX)
  */
 
-size_t FileStream_Prefix(const TCHAR * szFileName, DWORD * pdwProvider)
+size_t FileStream_Prefix(LPCTSTR szFileName, DWORD * pdwProvider)
 {
     size_t nPrefixLength1 = 0;
     size_t nPrefixLength2 = 0;
@@ -2635,7 +2720,7 @@ bool FileStream_SetCallback(TFileStream * pStream, SFILE_DOWNLOAD_CALLBACK pfnCa
 
     if(pStream->BlockRead == NULL)
     {
-        SetLastError(ERROR_NOT_SUPPORTED);
+        SErrSetLastError(ERROR_NOT_SUPPORTED);
         return false;
     }
 
@@ -2733,7 +2818,7 @@ bool FileStream_GetBitmap(TFileStream * pStream, void * pvBitmap, DWORD cbBitmap
 
     // Set last error value and return
     if(bResult == false)
-        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        SErrSetLastError(ERROR_INSUFFICIENT_BUFFER);
     return bResult;
 }
 
@@ -2753,8 +2838,8 @@ bool FileStream_GetBitmap(TFileStream * pStream, void * pvBitmap, DWORD cbBitmap
  *
  * \returns
  * - If the function reads the required amount of bytes, it returns true.
- * - If the function reads less than required bytes, it returns false and GetLastError() returns ERROR_HANDLE_EOF
- * - If the function fails, it reads false and GetLastError() returns an error code different from ERROR_HANDLE_EOF
+ * - If the function reads less than required bytes, it returns false and SErrGetLastError() returns ERROR_HANDLE_EOF
+ * - If the function fails, it reads false and SErrGetLastError() returns an error code different from ERROR_HANDLE_EOF
  */
 bool FileStream_Read(TFileStream * pStream, ULONGLONG * pByteOffset, void * pvBuffer, DWORD dwBytesToRead)
 {
@@ -2778,7 +2863,7 @@ bool FileStream_Write(TFileStream * pStream, ULONGLONG * pByteOffset, const void
 {
     if(pStream->dwFlags & STREAM_FLAG_READ_ONLY)
     {
-        SetLastError(ERROR_ACCESS_DENIED);
+        SErrSetLastError(ERROR_ACCESS_DENIED);
         return false;
     }
 
@@ -2808,7 +2893,7 @@ bool FileStream_SetSize(TFileStream * pStream, ULONGLONG NewFileSize)
 {
     if(pStream->dwFlags & STREAM_FLAG_READ_ONLY)
     {
-        SetLastError(ERROR_ACCESS_DENIED);
+        SErrSetLastError(ERROR_ACCESS_DENIED);
         return false;
     }
 
@@ -2868,14 +2953,14 @@ bool FileStream_Replace(TFileStream * pStream, TFileStream * pNewStream)
     // Only supported on flat files
     if((pStream->dwFlags & STREAM_PROVIDERS_MASK) != (STREAM_PROVIDER_FLAT | BASE_PROVIDER_FILE))
     {
-        SetLastError(ERROR_NOT_SUPPORTED);
+        SErrSetLastError(ERROR_NOT_SUPPORTED);
         return false;
     }
 
     // Not supported on read-only streams
     if(pStream->dwFlags & STREAM_FLAG_READ_ONLY)
     {
-        SetLastError(ERROR_ACCESS_DENIED);
+        SErrSetLastError(ERROR_ACCESS_DENIED);
         return false;
     }
 

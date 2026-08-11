@@ -97,7 +97,7 @@ static bool OpenLocalFile(const char * szFileName, HANDLE * PtrFile)
         else
         {
             FileStream_Close(pStream);
-            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            SErrSetLastError(ERROR_NOT_ENOUGH_MEMORY);
         }
     }
     *PtrFile = NULL;
@@ -155,11 +155,19 @@ bool OpenPatchedFile(HANDLE hMpq, const char * szFileName, HANDLE * PtrFile)
                     hf = hfPatch;
                 }
             }
+
+            // If the opened file has the delete marker, we don't open the file
+            if(hfBase && hf && hf->pFileEntry->dwFlags & MPQ_FILE_DELETE_MARKER)
+            {
+                SFileCloseFile((HANDLE)(hfBase));
+                SErrSetLastError(ERROR_FILE_DELETED);
+                hfBase = NULL;
+            }
         }
     }
     else
     {
-        SetLastError(ERROR_FILE_NOT_FOUND);
+        SErrSetLastError(ERROR_FILE_NOT_FOUND);
     }
 
     // Give the updated base MPQ
@@ -389,7 +397,7 @@ bool WINAPI SFileOpenFileEx(HANDLE hMpq, const char * szFileName, DWORD dwSearch
 
     // Return error code
     if(dwErrCode != ERROR_SUCCESS)
-        SetLastError(dwErrCode);
+        SErrSetLastError(dwErrCode);
     return (dwErrCode == ERROR_SUCCESS);
 }
 
@@ -413,7 +421,7 @@ bool WINAPI SFileCloseFile(HANDLE hFile)
 
     if(!IsValidFileHandle(hFile))
     {
-        SetLastError(ERROR_INVALID_HANDLE);
+        SErrSetLastError(ERROR_INVALID_HANDLE);
         return false;
     }
 

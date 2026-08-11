@@ -18,6 +18,7 @@ EXPORTS
     SFileCloseArchive
 
     SFileAddListFile
+    SFileAddListFileEntries
 
     SFileSetCompactCallback
     SFileCompactArchive
@@ -32,9 +33,11 @@ EXPORTS
     SFileOpenPatchArchive
     SFileIsPatchedArchive
 
+    SFileOpenFileArchive
     SFileOpenFileEx
-    SFileGetFileSize
+    SFileGetFileArchive
     SFileSetFilePointer
+    SFileGetFileSize
     SFileReadFile
     SFileCloseFile
 
@@ -69,6 +72,9 @@ EXPORTS
     SFileSetFileLocale
     SFileSetDataCompression
     SFileSetAddFileCallback
+
+    SMemUTF8ToFileName
+    SMemFileNameToUTF8
 
     SCompImplode
     SCompExplode

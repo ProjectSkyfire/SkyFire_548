@@ -32,6 +32,7 @@ set(SRC_FILES
            src/SFilePatchArchives.cpp
            src/SFileReadFile.cpp
            src/SFileVerify.cpp
+           src/SMemUtf8.cpp
            src/libtomcrypt/src/pk/rsa/rsa_verify_simple.c
            src/libtomcrypt/src/misc/crypt_libc.c
 )
@@ -301,6 +302,7 @@ endif()
 
 add_library(storm STATIC ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
 target_link_libraries(storm ${LINK_LIBS})
+target_compile_definitions(storm INTERFACE __STORMLIB_NO_STATIC_LINK__)
 
 if(UNIX)
     set_target_properties(storm PROPERTIES SOVERSION 0)

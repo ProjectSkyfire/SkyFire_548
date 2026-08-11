@@ -482,7 +482,7 @@ DWORD ConvertMpqHeaderToFormat4(
 
     // If version 1.0 is forced, then the format version is forced to be 1.0
     // Reason: Storm.dll in Warcraft III ignores format version value
-    if((MapType == MapTypeWarcraft3) || (dwFlags & MPQ_OPEN_FORCE_MPQ_V1))
+    if((MapType == MapTypeStarcraft) || (MapType == MapTypeWarcraft3) || (dwFlags & MPQ_OPEN_FORCE_MPQ_V1))
         wFormatVersion = MPQ_FORMAT_VERSION_1;
 
     // Don't accept format 3 for Starcraft II maps
@@ -497,11 +497,20 @@ DWORD ConvertMpqHeaderToFormat4(
             // Make sure that the MPQ Header is properly swapped
             BSWAP_TMPQHEADER(pHeader, MPQ_FORMAT_VERSION_1);
 
-            // Check for blatantly wrong MPQ header by the hash table position
+            // Check for blatantly wrong MPQ header by the tables position
             if(((ByteOffset + pHeader->dwHashTablePos) & 0xFFFFFFFF) > FileSize)
                 return ERROR_FAKE_MPQ_HEADER;
             if(((ByteOffset + pHeader->dwBlockTablePos) & 0xFFFFFFFF) > FileSize)
                 return ERROR_FAKE_MPQ_HEADER;
+
+            // Check for blatantly wrong MPQ header by the tables size
+            if(MapType == MapTypeStarcraft)
+            {
+                if((pHeader->dwHashTableSize * sizeof(TMPQHash)) & 0xF0000000)
+                    return ERROR_FAKE_MPQ_HEADER;
+                if((pHeader->dwBlockTableSize * sizeof(TMPQBlock)) & 0xF0000000)
+                    return ERROR_FAKE_MPQ_HEADER;
+            }
 
             // Check for malformed MPQ header version 1.0
             if(pHeader->wFormatVersion != MPQ_FORMAT_VERSION_1 || pHeader->dwHeaderSize != MPQ_HEADER_SIZE_V1)
@@ -586,6 +595,9 @@ DWORD ConvertMpqHeaderToFormat4(
             pHeader->BlockTableSize64 = (pHeader->dwBlockTableSize * sizeof(TMPQBlock));
             BlockTablePos64 = MAKE_OFFSET64(pHeader->wBlockTablePosHi, pHeader->dwBlockTablePos);
 
+            // Supply the 64-bit archive size for signature verification
+            pHeader->ArchiveSize64 = pHeader->dwArchiveSize;
+
             // We require the block table to follow hash table
             if(BlockTablePos64 >= HashTablePos64)
             {
@@ -600,7 +612,6 @@ DWORD ConvertMpqHeaderToFormat4(
             }
             else
             {
-                pHeader->ArchiveSize64 = pHeader->dwArchiveSize;
                 ha->dwFlags |= MPQ_FLAG_MALFORMED;
             }
 
@@ -651,7 +662,7 @@ DWORD ConvertMpqHeaderToFormat4(
             // Size of the block table
             if(BlockTablePos64)
             {
-                if(BlockTablePos64 > FileSize)
+                if(BlockTablePos64 > FileSize || BlockTablePos64 >= MaxOffset)
                     return ERROR_FILE_CORRUPT;
                 pHeader->BlockTableSize64 = MaxOffset - BlockTablePos64;
                 MaxOffset = BlockTablePos64;
@@ -660,7 +671,7 @@ DWORD ConvertMpqHeaderToFormat4(
             // Size of the hash table
             if(HashTablePos64)
             {
-                if(HashTablePos64 > FileSize)
+                if(HashTablePos64 > FileSize || HashTablePos64 >= MaxOffset)
                     return ERROR_FILE_CORRUPT;
                 pHeader->HashTableSize64 = MaxOffset - HashTablePos64;
                 MaxOffset = HashTablePos64;
@@ -1029,7 +1040,7 @@ static DWORD BuildFileTableFromBlockTable(
                 pHash->dwBlockIndex = dwNewIndex;
 
                 // Dump the relocation entry
-//              printf("Relocating hash entry %08X-%08X: %08X -> %08X\n", pHash->dwName1, pHash->dwName2, dwBlockIndex, dwNewIndex);
+//              printf("Relocating hash entry %08X-%08X: %08X -> %08X\n", pHash->dwHashCheck1, pHash->dwHashCheck2, dwBlockIndex, dwNewIndex);
             }
 
             // Get the pointer to the file entry and the block entry
@@ -1291,7 +1302,7 @@ static DWORD SaveMpqTable(
     BSWAP_ARRAY32_UNSIGNED(pMpqTable, Size);
     FileOffset = ha->MpqPos + ByteOffset;
     if(!FileStream_Write(ha->pStream, &FileOffset, pMpqTable, (DWORD)Size))
-        dwErrCode = GetLastError();
+        dwErrCode = SErrGetLastError();
 
     // Free the compressed table, if any
     if(pCompressed != NULL)
@@ -1362,7 +1373,7 @@ static DWORD SaveExtTable(
     if(FileStream_Write(ha->pStream, &FileOffset, pExtTable, dwTableSize))
         cbTotalSize += dwTableSize;
     else
-        dwErrCode = GetLastError();
+        dwErrCode = SErrGetLastError();
 
     // We have to write raw data MD5
     if(dwErrCode == ERROR_SUCCESS && ha->pHeader->dwRawChunkSize != 0)
@@ -2222,11 +2233,11 @@ DWORD RenameFileEntry(
         lcFileLocale = SFILE_MAKE_LCID(pHashEntry->Locale, pHashEntry->Platform);
 
         // Mark the hash table entry as deleted
-        pHashEntry->dwName1      = 0xFFFFFFFF;
-        pHashEntry->dwName2      = 0xFFFFFFFF;
+        pHashEntry->dwHashCheck1 = 0xFFFFFFFF;
+        pHashEntry->dwHashCheck2 = 0xFFFFFFFF;
         pHashEntry->Locale       = 0xFFFF;
         pHashEntry->Platform     = 0xFF;
-        pHashEntry->Reserved     = 0xFF;
+        pHashEntry->Flags        = 0xFF;
         pHashEntry->dwBlockIndex = HASH_ENTRY_DELETED;
     }
 
@@ -2263,11 +2274,11 @@ DWORD DeleteFileEntry(TMPQArchive * ha, TMPQFile * hf)
             return ERROR_NOT_SUPPORTED;
 
         // Mark the hash table entry as deleted
-        pHashEntry->dwName1      = 0xFFFFFFFF;
-        pHashEntry->dwName2      = 0xFFFFFFFF;
+        pHashEntry->dwHashCheck1 = 0xFFFFFFFF;
+        pHashEntry->dwHashCheck2 = 0xFFFFFFFF;
         pHashEntry->Locale       = 0xFFFF;
         pHashEntry->Platform     = 0xFF;
-        pHashEntry->Reserved     = 0xFF;
+        pHashEntry->Flags        = 0xFF;
         pHashEntry->dwBlockIndex = HASH_ENTRY_DELETED;
     }
 
@@ -2506,7 +2517,8 @@ TMPQHetTable * LoadHetTable(TMPQArchive * ha)
     TMPQHeader * pHeader = ha->pHeader;
 
     // If the HET table position is not 0, we expect the table to be present
-    if(pHeader->HetTablePos64 && pHeader->HetTableSize64)
+    // Alsom the HET table must have a reasonable size
+    if(pHeader->HetTablePos64 && pHeader->HetTableSize64 && pHeader->HetTableSize64 < BET_TABLE_MAX_SIZE)
     {
         // Attempt to load the HET table (Hash Extended Table)
         pExtTable = LoadExtTable(ha, pHeader->HetTablePos64, (size_t)pHeader->HetTableSize64, HET_TABLE_SIGNATURE, MPQ_KEY_HASH_TABLE);
@@ -2528,7 +2540,7 @@ TMPQBetTable * LoadBetTable(TMPQArchive * ha)
     TMPQHeader * pHeader = ha->pHeader;
 
     // If the BET table position is not 0, we expect the table to be present
-    if(pHeader->BetTablePos64 && pHeader->BetTableSize64)
+    if(pHeader->BetTablePos64 && pHeader->BetTableSize64 && pHeader->BetTableSize64 < BET_TABLE_MAX_SIZE)
     {
         // Attempt to load the HET table (Hash Extended Table)
         pExtTable = LoadExtTable(ha, pHeader->BetTablePos64, (size_t)pHeader->BetTableSize64, BET_TABLE_SIGNATURE, MPQ_KEY_BLOCK_TABLE);
@@ -2616,7 +2628,7 @@ static DWORD BuildFileTable_Classic(TMPQArchive * ha)
             // Load the hi-block table. It is not encrypted, nor compressed
             ByteOffset = ha->MpqPos + pHeader->HiBlockTablePos64;
             if(!FileStream_Read(ha->pStream, &ByteOffset, pHiBlockTable, dwTableSize))
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
 
             // Now merge the hi-block table to the file table
             if(dwErrCode == ERROR_SUCCESS)
@@ -3139,7 +3151,7 @@ DWORD SaveMPQTables(TMPQArchive * ha)
         BSWAP_ARRAY16_UNSIGNED(pHiBlockTable, HiBlockTableSize64);
 
         if(!FileStream_Write(ha->pStream, &ByteOffset, pHiBlockTable, (DWORD)HiBlockTableSize64))
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
         TablePos += HiBlockTableSize64;
     }
 
@@ -3149,7 +3161,7 @@ DWORD SaveMPQTables(TMPQArchive * ha)
         ULONGLONG FileSize = ha->MpqPos + TablePos;
 
         if(!FileStream_SetSize(ha->pStream, FileSize))
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
     }
 
     // Write the MPQ header
@@ -3172,7 +3184,7 @@ DWORD SaveMPQTables(TMPQArchive * ha)
         BSWAP_TMPQHEADER(&SaveMpqHeader, MPQ_FORMAT_VERSION_3);
         BSWAP_TMPQHEADER(&SaveMpqHeader, MPQ_FORMAT_VERSION_4);
         if(!FileStream_Write(ha->pStream, &ha->MpqPos, &SaveMpqHeader, pHeader->dwHeaderSize))
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
     }
 
     // Clear the changed flag

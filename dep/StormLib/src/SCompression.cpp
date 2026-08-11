@@ -101,7 +101,14 @@ void Compress_ZLIB(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, in
 
     // Keep compilers happy
     STORMLIB_UNUSED(pCmpType);
-    STORMLIB_UNUSED(nCmpLevel);
+
+    int level = Z_DEFAULT_COMPRESSION;  // ZLIB usually decides this is 6 (Compression level used by WoW MPQs)
+    if (nCmpLevel == 1) {
+        level = 9;
+    }
+    else if (nCmpLevel == 2) {
+        level = 1;
+    }
 
     // Fill the stream structure for zlib
     z.next_in   = (Bytef *)pvInBuffer;
@@ -134,8 +141,9 @@ void Compress_ZLIB(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffer, in
     // Initialize the compression.
     // Storm.dll uses zlib version 1.1.3
     // Wow.exe uses zlib version 1.2.3
+    // WC3:R, SC:R, and D2:R use zlib version 1.2.11
     nResult = deflateInit2(&z,
-                            6,                  // Compression level used by WoW MPQs
+                            level,
                             Z_DEFLATED,
                             windowBits,
                             8,
@@ -238,10 +246,9 @@ static void Compress_PKLIB(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBu
     TDataInfo Info;                                      // Data information
     char * work_buf = STORM_ALLOC(char, CMP_BUFFER_SIZE);// Pklib's work buffer
     unsigned int dict_size;                              // Dictionary size
-    unsigned int ctype = CMP_BINARY;                     // Compression type
+    unsigned int ctype = (pCmpType && *pCmpType == DATA_TYPE_TEXT) ? CMP_ASCII : CMP_BINARY; // Compression type
 
     // Keep compilers happy
-    STORMLIB_UNUSED(pCmpType);
     STORMLIB_UNUSED(nCmpLevel);
 
     // Handle no-memory condition
@@ -678,7 +685,7 @@ int WINAPI SCompImplode(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffe
     // Check for valid parameters
     if(!pcbOutBuffer || *pcbOutBuffer < cbInBuffer || !pvOutBuffer || !pvInBuffer)
     {
-        SetLastError(ERROR_INVALID_PARAMETER);
+        SErrSetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
@@ -710,7 +717,7 @@ int WINAPI SCompExplode(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffe
     // Check for valid parameters
     if(!pcbOutBuffer || *pcbOutBuffer < cbInBuffer || !pvOutBuffer || !pvInBuffer)
     {
-        SetLastError(ERROR_INVALID_PARAMETER);
+        SErrSetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
@@ -729,7 +736,7 @@ int WINAPI SCompExplode(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuffe
     // Perform decompression
     if(!Decompress_PKLIB(pvOutBuffer, &cbOutBuffer, pvInBuffer, cbInBuffer))
     {
-        SetLastError(ERROR_FILE_CORRUPT);
+        SErrSetLastError(ERROR_FILE_CORRUPT);
         return 0;
     }
 
@@ -781,7 +788,7 @@ int WINAPI SCompCompress(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuff
     // Check for valid parameters
     if(!pcbOutBuffer || *pcbOutBuffer < cbInBuffer || !pvOutBuffer || !pvInBuffer)
     {
-        SetLastError(ERROR_INVALID_PARAMETER);
+        SErrSetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
 
@@ -817,7 +824,7 @@ int WINAPI SCompCompress(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuff
         // If at least one of the compressions remaing unknown, return an error
         if(uCompressionMask != 0)
         {
-            SetLastError(ERROR_NOT_SUPPORTED);
+            SErrSetLastError(ERROR_NOT_SUPPORTED);
             return 0;
         }
     }
@@ -831,7 +838,7 @@ int WINAPI SCompCompress(void * pvOutBuffer, int * pcbOutBuffer, void * pvInBuff
             pbWorkBuffer = STORM_ALLOC(unsigned char, *pcbOutBuffer);
             if(pbWorkBuffer == NULL)
             {
-                SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+                SErrSetLastError(ERROR_NOT_ENOUGH_MEMORY);
                 return 0;
             }
         }
@@ -980,7 +987,7 @@ static int SCompDecompressInternal(
     // If at least one of the compressions remaing unknown, return an error
     if(nCompressCount == 0 || uCompressionMask2 != 0)
     {
-        SetLastError(ERROR_NOT_SUPPORTED);
+        SErrSetLastError(ERROR_NOT_SUPPORTED);
         return 0;
     }
 
@@ -990,7 +997,7 @@ static int SCompDecompressInternal(
         pbWorkBuffer = STORM_ALLOC(unsigned char, cbOutBuffer);
         if(pbWorkBuffer == NULL)
         {
-            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            SErrSetLastError(ERROR_NOT_ENOUGH_MEMORY);
             return 0;
         }
     }
@@ -1013,7 +1020,7 @@ static int SCompDecompressInternal(
             nResult = table[i].Decompress(pbOutput, &cbOutBuffer, pbInput, cbInLength);
             if(nResult == 0 || cbOutBuffer == 0)
             {
-                SetLastError(ERROR_FILE_CORRUPT);
+                SErrSetLastError(ERROR_FILE_CORRUPT);
                 nResult = 0;
                 break;
             }
@@ -1050,7 +1057,10 @@ int WINAPI SCompDecompress2(void * pvOutBuffer, int * pcbOutBuffer, void * pvInB
 
     // Verify buffer sizes
     if(*pcbOutBuffer < cbInBuffer || cbInBuffer < 1)
+    {
+        SErrSetLastError(ERROR_INVALID_PARAMETER);
         return 0;
+    }
 
     // If the outputbuffer is as big as input buffer, just copy the block
     if(*pcbOutBuffer == cbInBuffer)
@@ -1114,7 +1124,7 @@ int WINAPI SCompDecompress2(void * pvOutBuffer, int * pcbOutBuffer, void * pvInB
             break;
 
         default:
-            SetLastError(ERROR_FILE_CORRUPT);
+            SErrSetLastError(ERROR_FILE_CORRUPT);
             return 0;
     }
 
@@ -1124,7 +1134,7 @@ int WINAPI SCompDecompress2(void * pvOutBuffer, int * pcbOutBuffer, void * pvInB
         pbWorkBuffer = STORM_ALLOC(unsigned char, *pcbOutBuffer);
         if(pbWorkBuffer == NULL)
         {
-            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            SErrSetLastError(ERROR_NOT_ENOUGH_MEMORY);
             return 0;
         }
     }
@@ -1148,7 +1158,7 @@ int WINAPI SCompDecompress2(void * pvOutBuffer, int * pcbOutBuffer, void * pvInB
         STORM_FREE(pbWorkBuffer);
 
     if(nResult == 0)
-        SetLastError(ERROR_FILE_CORRUPT);
+        SErrSetLastError(ERROR_FILE_CORRUPT);
     return nResult;
 }
 

@@ -116,14 +116,14 @@ static DWORD CopyNonMpqData(
         // Read from the source stream
         if(!FileStream_Read(pSrcStream, &ByteOffset, DataBuffer, dwToRead))
         {
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
             break;
         }
 
         // Write to the target stream
         if(!FileStream_Write(pTrgStream, NULL, DataBuffer, dwToRead))
         {
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
             break;
         }
 
@@ -175,7 +175,7 @@ static DWORD CopyMpqFileSectors(
     {
         BSWAP_ARRAY32_UNSIGNED(hf->pPatchInfo, sizeof(DWORD) * 3);
         if(!FileStream_Write(pNewStream, NULL, hf->pPatchInfo, hf->pPatchInfo->dwLength))
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
 
         // Save the size of the patch info
         dwPatchSize = hf->pPatchInfo->dwLength;
@@ -202,7 +202,7 @@ static DWORD CopyMpqFileSectors(
 
             BSWAP_ARRAY32_UNSIGNED(SectorOffsetsCopy, dwSectorOffsLen);
             if(!FileStream_Write(pNewStream, NULL, SectorOffsetsCopy, dwSectorOffsLen))
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
 
             dwBytesToCopy -= dwSectorOffsLen;
             dwCmpSize += dwSectorOffsLen;
@@ -244,7 +244,7 @@ static DWORD CopyMpqFileSectors(
             // Read the file sector
             if(!FileStream_Read(ha->pStream, &RawFilePos, hf->pbFileSector, dwRawDataInSector))
             {
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
                 break;
             }
 
@@ -262,7 +262,7 @@ static DWORD CopyMpqFileSectors(
             // Now write the sector back to the file
             if(!FileStream_Write(pNewStream, NULL, hf->pbFileSector, dwRawDataInSector))
             {
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
                 break;
             }
 
@@ -289,10 +289,10 @@ static DWORD CopyMpqFileSectors(
         if(dwCrcLength != 0)
         {
             if(!FileStream_Read(ha->pStream, NULL, hf->SectorChksums, dwCrcLength))
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
 
             if(!FileStream_Write(pNewStream, NULL, hf->SectorChksums, dwCrcLength))
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
 
             // Update compact progress
             if(ha->pfnCompactCB != NULL)
@@ -321,10 +321,10 @@ static DWORD CopyMpqFileSectors(
         if(pbExtraData != NULL)
         {
             if(!FileStream_Read(ha->pStream, NULL, pbExtraData, dwBytesToCopy))
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
 
             if(!FileStream_Write(pNewStream, NULL, pbExtraData, dwBytesToCopy))
-                dwErrCode = GetLastError();
+                dwErrCode = SErrGetLastError();
 
             // Include these extra data in the compressed size
             dwCmpSize += dwBytesToCopy;
@@ -462,17 +462,23 @@ DWORD WINAPI SFileGetMaxFileCount(HANDLE hMpq)
 
 bool WINAPI SFileSetMaxFileCount(HANDLE hMpq, DWORD dwMaxFileCount)
 {
-    TMPQArchive * ha = (TMPQArchive *)hMpq;
-    DWORD dwNewHashTableSize = 0;
+    TMPQArchive * ha;
     DWORD dwErrCode = ERROR_SUCCESS;
 
+    // Calculate the hash table size for the new file limit
+    DWORD dwNewHashTableSize = GetNearestPowerOfTwo(dwMaxFileCount);
+
     // Test the valid parameters
-    if(!IsValidMpqHandle(hMpq))
+    if((ha = IsValidMpqHandle(hMpq)) == NULL)
         dwErrCode = ERROR_INVALID_HANDLE;
     if(ha->dwFlags & MPQ_FLAG_READ_ONLY)
         dwErrCode = ERROR_ACCESS_DENIED;
-    if(dwMaxFileCount < ha->dwFileTableSize)
+    if(dwNewHashTableSize < ha->dwFileTableSize)
         dwErrCode = ERROR_DISK_FULL;
+
+    // Are there some files open?
+    if(ha->dwFileCount)
+        dwErrCode = ERROR_ACCESS_DENIED;
 
     // ALL file names must be known in order to be able to rebuild hash table
     if(dwErrCode == ERROR_SUCCESS && ha->pHashTable != NULL)
@@ -480,9 +486,6 @@ bool WINAPI SFileSetMaxFileCount(HANDLE hMpq, DWORD dwMaxFileCount)
         dwErrCode = CheckIfAllFilesKnown(ha);
         if(dwErrCode == ERROR_SUCCESS)
         {
-            // Calculate the hash table size for the new file limit
-            dwNewHashTableSize = GetNearestPowerOfTwo(dwMaxFileCount);
-
             // Rebuild both file tables
             dwErrCode = RebuildFileTable(ha, dwNewHashTableSize);
         }
@@ -501,7 +504,7 @@ bool WINAPI SFileSetMaxFileCount(HANDLE hMpq, DWORD dwMaxFileCount)
 
     // Return the error
     if(dwErrCode != ERROR_SUCCESS)
-        SetLastError(dwErrCode);
+        SErrSetLastError(dwErrCode);
     return (dwErrCode == ERROR_SUCCESS);
 }
 
@@ -514,7 +517,7 @@ bool WINAPI SFileSetCompactCallback(HANDLE hMpq, SFILE_COMPACT_CALLBACK pfnCompa
 
     if (!IsValidMpqHandle(hMpq))
     {
-        SetLastError(ERROR_INVALID_HANDLE);
+        SErrSetLastError(ERROR_INVALID_HANDLE);
         return false;
     }
 
@@ -537,6 +540,10 @@ bool WINAPI SFileCompactArchive(HANDLE hMpq, const TCHAR * szListFile, bool /* b
     if(!IsValidMpqHandle(hMpq))
         dwErrCode = ERROR_INVALID_HANDLE;
     if(ha->dwFlags & MPQ_FLAG_READ_ONLY)
+        dwErrCode = ERROR_ACCESS_DENIED;
+
+    // Are there some files open?
+    if(ha->dwFileCount)
         dwErrCode = ERROR_ACCESS_DENIED;
 
     // If the MPQ is changed at this moment, we have to flush the archive
@@ -574,7 +581,7 @@ bool WINAPI SFileCompactArchive(HANDLE hMpq, const TCHAR * szListFile, bool /* b
         // Create temporary file
         pTempStream = FileStream_CreateFile(szTempFile, STREAM_PROVIDER_FLAT | BASE_PROVIDER_FILE);
         if(pTempStream == NULL)
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
     }
 
     // Write the data before MPQ user data (if any)
@@ -615,7 +622,7 @@ bool WINAPI SFileCompactArchive(HANDLE hMpq, const TCHAR * szListFile, bool /* b
         BSWAP_TMPQHEADER(&SaveMpqHeader, MPQ_FORMAT_VERSION_3);
         BSWAP_TMPQHEADER(&SaveMpqHeader, MPQ_FORMAT_VERSION_4);
         if(!FileStream_Write(pTempStream, NULL, &SaveMpqHeader, ha->pHeader->dwHeaderSize))
-            dwErrCode = GetLastError();
+            dwErrCode = SErrGetLastError();
 
         // Update the progress
         ha->CompactBytesProcessed += ha->pHeader->dwHeaderSize;
@@ -649,6 +656,6 @@ bool WINAPI SFileCompactArchive(HANDLE hMpq, const TCHAR * szListFile, bool /* b
     if(pFileKeys != NULL)
         STORM_FREE(pFileKeys);
     if(dwErrCode != ERROR_SUCCESS)
-        SetLastError(dwErrCode);
+        SErrSetLastError(dwErrCode);
     return (dwErrCode == ERROR_SUCCESS);
 }

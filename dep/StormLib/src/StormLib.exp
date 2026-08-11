@@ -13,6 +13,7 @@ _SFileFlushArchive
 _SFileCloseArchive
 
 _SFileAddListFile
+_SFileAddListFileEntries
 
 _SFileSetCompactCallback
 _SFileCompactArchive

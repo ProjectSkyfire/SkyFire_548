@@ -154,14 +154,15 @@ extern LCID  g_lcFileLocale;                    // Preferred file locale and pla
 //-----------------------------------------------------------------------------
 // Conversion to uppercase/lowercase (and "/" to "\")
 
-extern unsigned char AsciiToLowerTable[256];
-extern unsigned char AsciiToUpperTable[256];
+extern const unsigned char AsciiToLowerTable[256];
+extern const unsigned char AsciiToUpperTable[256];
+extern const unsigned char SMemCharToByte[0x80];
 
 //-----------------------------------------------------------------------------
 // Safe string functions
 
 template <typename XCHAR, typename XINT>
-XCHAR * IntToString(XCHAR * szBuffer, size_t cchMaxChars, XINT nValue, size_t nDigitCount = 0)
+XCHAR * SMemIntToStr(XCHAR * szBuffer, size_t cchMaxChars, XINT nValue, size_t nDigitCount = 0)
 {
     XCHAR * szBufferEnd = szBuffer + cchMaxChars - 1;
     XCHAR szNumberRev[0x20];
@@ -197,6 +198,72 @@ XCHAR * IntToString(XCHAR * szBuffer, size_t cchMaxChars, XINT nValue, size_t nD
     return szBuffer;
 }
 
+template <typename XCHAR>
+DWORD SMemBinToStr(XCHAR * szBuffer, size_t cchBuffer, const void * pvBinary, size_t cbBinary)
+{
+    const unsigned char * pbBinary = (const unsigned char *)pvBinary;
+    const char * SMemIntToHex = "0123456789abcdef";
+
+    // The size of the string must be enough to hold the binary + EOS
+    if(cchBuffer < ((cbBinary * 2) + 1))
+        return ERROR_INSUFFICIENT_BUFFER;
+
+    // Convert the string to the array of MD5
+    // Copy the blob data as text
+    for(size_t i = 0; i < cbBinary; i++)
+    {
+        *szBuffer++ = SMemIntToHex[pbBinary[0] >> 0x04];
+        *szBuffer++ = SMemIntToHex[pbBinary[0] & 0x0F];
+        pbBinary++;
+    }
+
+    // Terminate the string
+    *szBuffer = 0;
+    return ERROR_SUCCESS;
+}
+
+template <typename XCHAR>
+DWORD SMemStrToBin(const XCHAR * szString, void * pvBinary, size_t cbBinary, size_t * PtrBinary = NULL)
+{
+    LPBYTE pbBinary = (LPBYTE)pvBinary;
+    LPBYTE pbBinaryEnd = pbBinary + cbBinary;
+    LPBYTE pbSaveBinary = pbBinary;
+
+    // Verify parameter
+    if(szString != NULL && szString[0] != 0)
+    {
+        // Work as long as we have at least 2 characters ready
+        while(szString[0] != 0 && szString[1] != 0)
+        {
+            // Convert both to unsigned char to get rid of negative indexes produced by szString[x]
+            BYTE StringByte0 = (BYTE)szString[0];
+            BYTE StringByte1 = (BYTE)szString[1];
+
+            // Each character must be within the range of 0x00-0x7F
+            if(StringByte0 >= 0x80 || StringByte1 >= 0x80)
+                return ERROR_INVALID_PARAMETER;
+            if(SMemCharToByte[StringByte0] == 0xFF || SMemCharToByte[StringByte1] == 0xFF)
+                return ERROR_INVALID_PARAMETER;
+
+            // Overflow check
+            if(pbBinary >= pbBinaryEnd)
+                return ERROR_INSUFFICIENT_BUFFER;
+
+            *pbBinary++ = (SMemCharToByte[StringByte0] << 0x04) | SMemCharToByte[StringByte1];
+            szString += 2;
+        }
+
+        // Odd number of chars?
+        if(szString[0] != 0 && szString[1] == 0)
+            return ERROR_INVALID_PARAMETER;
+    }
+
+    // Give the length
+    if(PtrBinary != NULL)
+        PtrBinary[0] = pbBinary - pbSaveBinary;
+    return ERROR_SUCCESS;
+}
+
 char * StringCopy(char * szTarget, size_t cchTarget, const char * szSource);
 void StringCat(char * szTarget, size_t cchTargetMax, const char * szSource);
 void StringCreatePseudoFileName(char * szBuffer, size_t cchMaxChars, unsigned int nIndex, const char * szExtension);
@@ -208,6 +275,12 @@ void StringCopy(TCHAR * szTarget, size_t cchTarget, const TCHAR * szSource);
 void StringCat(TCHAR * szTarget, size_t cchTargetMax, const TCHAR * szSource);
 void StringCat(TCHAR * szTarget, size_t cchTargetMax, const char * szSource);
 #endif
+
+//-----------------------------------------------------------------------------
+// UTF-8 support
+
+DWORD  UTF8_DecodeCodePoint(const BYTE * pbString, const BYTE * pbStringEnd, DWORD & dwCodePoint, size_t & ccBytesEaten, DWORD dwFlags = 0);
+size_t UTF8_EncodeCodePoint(DWORD dwCodePoint, LPBYTE Utf8Buffer);
 
 //-----------------------------------------------------------------------------
 // Encryption and decryption functions
@@ -260,7 +333,7 @@ DWORD ConvertMpqHeaderToFormat4(TMPQArchive * ha, ULONGLONG MpqOffset, ULONGLONG
 
 bool IsValidHashEntry(TMPQArchive * ha, TMPQHash * pHash);
 
-TMPQHash * FindFreeHashEntry(TMPQArchive * ha, DWORD dwStartIndex, DWORD dwName1, DWORD dwName2, LCID lcFileLocale);
+TMPQHash * FindFreeHashEntry(TMPQArchive * ha, DWORD dwStartIndex, DWORD dwHashCheck1, DWORD dwHashCheck2, LCID lcFileLocale);
 TMPQHash * GetFirstHashEntry(TMPQArchive * ha, const char * szFileName);
 TMPQHash * GetNextHashEntry(TMPQArchive * ha, TMPQHash * pFirstHash, TMPQHash * pPrevHash);
 TMPQHash * AllocateHashEntry(TMPQArchive * ha, TFileEntry * pFileEntry, LCID lcFileLocale);
@@ -293,7 +366,7 @@ void FreeBetTable(TMPQBetTable * pBetTable);
 
 // Functions for finding files in the file table
 TFileEntry * GetFileEntryLocale(TMPQArchive * ha, const char * szFileName, LCID lcFileLocale, LPDWORD PtrHashIndex = NULL);
-TFileEntry * GetFileEntryExact(TMPQArchive * ha, const char * szFileName, LCID lcFileLocale, LPDWORD PtrHashIndex);
+TFileEntry * GetFileEntryExact(TMPQArchive * ha, const char * szFileName, LCID lcFileLocale, LPDWORD PtrHashIndex = NULL);
 
 // Allocates file name in the file entry
 void AllocateFileName(TMPQArchive * ha, TFileEntry * pFileEntry, const char * szFileName);
@@ -337,8 +410,10 @@ DWORD WriteSectorOffsets(TMPQFile * hf);
 DWORD WriteSectorChecksums(TMPQFile * hf);
 DWORD WriteMemDataMD5(TFileStream * pStream, ULONGLONG RawDataOffs, void * pvRawData, DWORD dwRawDataSize, DWORD dwChunkSize, LPDWORD pcbTotalSize);
 DWORD WriteMpqDataMD5(TFileStream * pStream, ULONGLONG RawDataOffs, DWORD dwRawDataSize, DWORD dwChunkSize);
+
+bool DereferenceArchiveFiles(TMPQArchive * ha);
+bool DereferenceArchive(TMPQArchive * ha);
 void FreeFileHandle(TMPQFile *& hf);
-void FreeArchiveHandle(TMPQArchive *& ha);
 
 //-----------------------------------------------------------------------------
 // Patch functions
@@ -445,6 +520,14 @@ void DumpFileTable(TFileEntry * pFileTable, DWORD dwFileTableSize);
 #define DumpFileTable(t, s)         /* */
 
 #endif
+
+/*
+#ifdef _DEBUG
+void SFileLog(const char * format, ...);
+#else
+inline void SFileLog(...) {}
+#endif
+*/
 
 #endif // __STORMCOMMON_H__
 

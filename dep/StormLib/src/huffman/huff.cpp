@@ -1,11 +1,11 @@
 /*****************************************************************************/
-/* huffman.cpp                       Copyright (c) Ladislav Zezula 1998-2003 */
+/* huff.cpp                          Copyright (c) Ladislav Zezula 1998-2026 */
 /*---------------------------------------------------------------------------*/
-/* This module contains Huffmann (de)compression methods                     */
+/* This module contains Adaptive (Dynamic) Huffmann coding, following the    */
+/* Fahler-Gallager-Knuth variant                                             */
 /*                                                                           */
 /* Authors : Ladislav Zezula (ladik@zezula.net)                              */
 /*           ShadowFlare     (BlakFlare@hotmail.com)                         */
-/*                                                                           */
 /*---------------------------------------------------------------------------*/
 /*   Date    Ver   Who  Comment                                              */
 /* --------  ----  ---  -------                                              */
@@ -14,6 +14,7 @@
 /* 19.11.03  1.01  Dan  Big endian handling                                  */
 /* 08.12.03  2.01  Dan  High-memory handling (> 0x80000000)                  */
 /* 09.01.13  3.00  Lad  Refactored, beautified, documented :-)               */
+/* 07.04.26  3.01  Lad  Explained a bit more                                 */
 /*****************************************************************************/
 
 #include <assert.h>
@@ -22,15 +23,15 @@
 #include "huff.h"
 
 //-----------------------------------------------------------------------------
-// Local defined
+// Local defines
 
 #define HUFF_DECOMPRESS_ERROR   0x1FF
 
 //-----------------------------------------------------------------------------
 // Table of byte-to-weight values
 
-// Table for (de)compression. Every compression type has 258 entries
-static unsigned char ByteToWeight_00[] =
+// Table generic/sparse data distribution (DATA_TYPE_SPARSE)
+static const unsigned char DataDistribution_Sparse[] =
 {
     0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -51,8 +52,8 @@ static unsigned char ByteToWeight_00[] =
     0x00, 0x00
 };
 
-// Data for compression type 0x01
-static unsigned char ByteToWeight_01[] =
+// Table for general binary data distribution (DATA_TYPE_BINARY)
+static const unsigned char DataDistribution_Binary[] =
 {
     0x54, 0x16, 0x16, 0x0D, 0x0C, 0x08, 0x06, 0x05, 0x06, 0x05, 0x06, 0x03, 0x04, 0x04, 0x03, 0x05,
     0x0E, 0x0B, 0x14, 0x13, 0x13, 0x09, 0x0B, 0x06, 0x05, 0x04, 0x03, 0x02, 0x03, 0x02, 0x02, 0x02,
@@ -73,8 +74,8 @@ static unsigned char ByteToWeight_01[] =
     0x00, 0x00
 };
 
-// Data for compression type 0x02
-static unsigned char ByteToWeight_02[] =
+// Table for text distribution (DATA_TYPE_TEXT)
+static const unsigned char DataDistribution_Text[] =
 {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x27, 0x00, 0x00, 0x23, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -95,8 +96,8 @@ static unsigned char ByteToWeight_02[] =
     0x00, 0x00
 };
 
-// Data for compression type 0x03
-static unsigned char ByteToWeight_03[] =
+// Table for general purpose distribution (DATA_TYPE_GENERAL)
+static const unsigned char DataDistribution_General[] =
 {
     0xFF, 0x0B, 0x07, 0x05, 0x0B, 0x02, 0x02, 0x02, 0x06, 0x02, 0x02, 0x01, 0x04, 0x02, 0x01, 0x03,
     0x09, 0x01, 0x01, 0x01, 0x03, 0x04, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01, 0x02, 0x01, 0x01, 0x01,
@@ -117,8 +118,8 @@ static unsigned char ByteToWeight_03[] =
     0x00, 0x00
 };
 
-// Data for compression type 0x04
-static unsigned char ByteToWeight_04[] =
+// Table for 4-bit ADPCM audio samples (DATA_TYPE_ADPCM_4)
+static const unsigned char DataDistribution_ADPCM_4[] =
 {
     0xFF, 0xFB, 0x98, 0x9A, 0x84, 0x85, 0x63, 0x64, 0x3E, 0x3E, 0x22, 0x22, 0x13, 0x13, 0x18, 0x17,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -139,8 +140,8 @@ static unsigned char ByteToWeight_04[] =
     0x00, 0x00
 };
 
-// Data for compression type 0x05
-static unsigned char ByteToWeight_05[] =
+// Table for 6-bit ADPCM audio samples (DATA_TYPE_ADPCM_6)
+static const unsigned char DataDistribution_ADPCM_6[] =
 {
     0xFF, 0xF1, 0x9D, 0x9E, 0x9A, 0x9B, 0x9A, 0x97, 0x93, 0x93, 0x8C, 0x8E, 0x86, 0x88, 0x80, 0x82,
     0x7C, 0x7C, 0x72, 0x73, 0x69, 0x6B, 0x5F, 0x60, 0x55, 0x56, 0x4A, 0x4B, 0x40, 0x41, 0x37, 0x37,
@@ -161,8 +162,8 @@ static unsigned char ByteToWeight_05[] =
     0x00, 0x00
 };
 
-    // Data for compression type 0x06
-static unsigned char ByteToWeight_06[] =
+// Table for 3-bit stereo audio (DATA_TYPE_STEREO_3)
+static const unsigned char DataDistribution_Stereo_3[] =
 {
     0xC3, 0xCB, 0xF5, 0x41, 0xFF, 0x7B, 0xF7, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -183,8 +184,8 @@ static unsigned char ByteToWeight_06[] =
     0x00, 0x00
 };
 
-// Data for compression type 0x07
-static unsigned char ByteToWeight_07[] =
+// Table for 4-bit stereo audio (DATA_TYPE_STEREO_4)
+static const unsigned char DataDistribution_Stereo_4[] =
 {
     0xC3, 0xD9, 0xEF, 0x3D, 0xF9, 0x7C, 0xE9, 0x1E, 0xFD, 0xAB, 0xF1, 0x2C, 0xFC, 0x5B, 0xFE, 0x17,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -205,8 +206,8 @@ static unsigned char ByteToWeight_07[] =
     0x00, 0x00
 };
 
-// Data for compression type 0x08
-static unsigned char ByteToWeight_08[] =
+// Table for 5-bit stereo audio (DATA_TYPE_STEREO_5)
+static const unsigned char DataDistribution_Stereo_5[] =
 {
     0xBA, 0xC5, 0xDA, 0x33, 0xE3, 0x6D, 0xD8, 0x18, 0xE5, 0x94, 0xDA, 0x23, 0xDF, 0x4A, 0xD1, 0x10,
     0xEE, 0xAF, 0xE4, 0x2C, 0xEA, 0x5A, 0xDE, 0x15, 0xF4, 0x87, 0xE9, 0x21, 0xF6, 0x43, 0xFC, 0x12,
@@ -227,18 +228,20 @@ static unsigned char ByteToWeight_08[] =
     0x00, 0x00
 };
 
-static unsigned char * WeightTables[0x09] =
+static const unsigned char * DataDistributions[0x09] =
 {
-    ByteToWeight_00,
-    ByteToWeight_01,
-    ByteToWeight_02,
-    ByteToWeight_03,
-    ByteToWeight_04,
-    ByteToWeight_05,
-    ByteToWeight_06,
-    ByteToWeight_07,
-    ByteToWeight_08
+    DataDistribution_Sparse,        // Generic / sparse
+    DataDistribution_Binary,        // Generic binary data
+    DataDistribution_Text,          // Text data
+    DataDistribution_General,       // General purpose
+    DataDistribution_ADPCM_4,       // 4-bit ADPCM audio samples
+    DataDistribution_ADPCM_6,       // 6-bit ADPCM audio samples
+    DataDistribution_Stereo_3,      // 3-bit stereo audio
+    DataDistribution_Stereo_4,      // 4-bit stereo audio
+    DataDistribution_Stereo_5       // 5-bit stereo audio
 };
+
+#define MAX_DATA_TYPE   (sizeof(DataDistributions) / sizeof(DataDistributions[0]))
 
 //-----------------------------------------------------------------------------
 // Debug/diagnostics
@@ -314,7 +317,7 @@ bool TInputStream::Get8Bits(unsigned int & ByteValue)
         BitCount += 8;
     }
 
-    // Return the lowest 8 its
+    // Return the lowest 8 bits
     ByteValue = (BitBuffer & 0xFF);
     BitBuffer >>= 8;
     BitCount -= 8;
@@ -424,10 +427,10 @@ void THTreeItem::RemoveItem()
 
 THuffmannTree::THuffmannTree(bool bCompression)
 {
-    pFirst = pLast = LIST_HEAD();
+    ListHead.pNext = ListHead.pPrev = LIST_HEAD();
     MinValidValue = 1;
     ItemsUsed = 0;
-    bIsCmp0 = 0;
+    bIsSparseData = false;
 
     memset(ItemsByByte, 0, sizeof(ItemsByByte));
 
@@ -442,7 +445,7 @@ THuffmannTree::THuffmannTree(bool bCompression)
 THuffmannTree::~THuffmannTree()
 {
     // Our Huffmann tree does not use any memory allocations,
-    // so we don't need to do eny code in the destructor
+    // so we don't need to do any code in the destructor
 }
 
 void THuffmannTree::LinkTwoItems(THTreeItem * pItem1, THTreeItem * pItem2)
@@ -453,10 +456,10 @@ void THuffmannTree::LinkTwoItems(THTreeItem * pItem1, THTreeItem * pItem2)
     pItem1->pNext = pItem2;
 }
 
-// Inserts item into the tree (?)
+// Inserts item into the weight-sorted linked list
 void THuffmannTree::InsertItem(THTreeItem * pNewItem, TInsertPoint InsertPoint, THTreeItem * pInsertPoint)
 {
-    // Remove the item from the tree
+    // Remove the item from the linked list
     pNewItem->RemoveItem();
 
     if(pInsertPoint == NULL)
@@ -469,10 +472,7 @@ void THuffmannTree::InsertItem(THTreeItem * pNewItem, TInsertPoint InsertPoint, 
             return;
 
         case InsertBefore:
-            pNewItem->pNext = pInsertPoint;             // Set next item (or pointer to pointer to first item)
-            pNewItem->pPrev = pInsertPoint->pPrev;      // Set prev item (or last item in the tree)
-            pInsertPoint->pPrev->pNext = pNewItem;
-            pInsertPoint->pPrev = pNewItem;             // Set the next/last item
+            LinkTwoItems(pInsertPoint->pPrev, pNewItem);
             return;
     }
 }
@@ -505,7 +505,7 @@ THTreeItem * THuffmannTree::CreateNewItem(unsigned int DecompressedValue, unsign
         // Allocate new item from the item pool
         pNewItem = &ItemBuffer[ItemsUsed++];
 
-        // Insert this item to the top of the tree
+        // Insert this item into the weight-sorted list
         InsertItem(pNewItem, InsertPoint, NULL);
 
         // Fill the rest of the item
@@ -525,7 +525,7 @@ unsigned int THuffmannTree::FixupItemPosByWeight(THTreeItem * pNewItem, unsigned
     if(pNewItem->Weight < MaxWeight)
     {
         // Find an item that has higher weight than this one
-        pHigherItem = FindHigherOrEqualItem(pLast, pNewItem->Weight);
+        pHigherItem = FindHigherOrEqualItem(ListHead.pPrev, pNewItem->Weight);
 
         // Remove the item and put it to the new position
         pNewItem->RemoveItem();
@@ -540,32 +540,33 @@ unsigned int THuffmannTree::FixupItemPosByWeight(THTreeItem * pNewItem, unsigned
     return MaxWeight;
 }
 
-// Builds Huffman tree. Called with the first 8 bits loaded from input stream
-bool THuffmannTree::BuildTree(unsigned int CompressionType)
+// Builds Huffman tree from pre-initialized weight table for the given data type
+bool THuffmannTree::BuildTree(unsigned int DataType)
 {
+    const unsigned char * DataDistTable;
     THTreeItem * pNewItem;
     THTreeItem * pChildLo;
     THTreeItem * pChildHi;
-    unsigned char * WeightTable;
-    unsigned int MaxWeight;                     // [ESP+10] - The greatest character found in table
+    unsigned int MaxWeight;
 
     // Clear all pointers in HTree item array
     memset(ItemsByByte, 0, sizeof(ItemsByByte));
     MaxWeight = 0;
 
-    // Ensure that the compression type is in range
-    if((CompressionType & 0x0F) > 0x08)
+    // The check confirms that the lower 4 bits of DataType do not exceed the bounds of DataDistributions
+    // DataDistributions has _countof(DataDistributions) entries, indexed by (DataType & 0x0F)
+    if((DataType = (DataType & 0x0F)) >= MAX_DATA_TYPE)
         return false;
-    WeightTable  = WeightTables[CompressionType & 0x0F];
+    DataDistTable = DataDistributions[DataType];
 
     // Build the linear list of entries that is sorted by byte weight
     for(unsigned int i = 0; i < 0x100; i++)
     {
-        // Skip all the bytes which are zero.
-        if(WeightTable[i] != 0)
+        // Skip all the bytes which are zero
+        if(DataDistTable[i] != 0)
         {
             // Create new tree item
-            ItemsByByte[i] = pNewItem = CreateNewItem(i, WeightTable[i], InsertAfter);
+            ItemsByByte[i] = pNewItem = CreateNewItem(i, DataDistTable[i], InsertAfter);
 
             // We need to put the item to the right place in the list
             MaxWeight = FixupItemPosByWeight(pNewItem, MaxWeight);
@@ -578,7 +579,7 @@ bool THuffmannTree::BuildTree(unsigned int CompressionType)
 
     // Now we need to build the tree. We start at the last entry
     // and go backwards to the first one
-    pChildLo = pLast;
+    pChildLo = ListHead.pPrev;
 
     // Work as long as both children are valid
     // pChildHi is child with higher weight, pChildLo is the one with lower weight
@@ -659,7 +660,7 @@ void THuffmannTree::IncWeightsAndRebalance(THTreeItem * pItem)
 
 bool THuffmannTree::InsertNewBranchAndRebalance(unsigned int Value1, unsigned int Value2)
 {
-    THTreeItem * pLastItem = pLast;
+    THTreeItem * pLastItem = ListHead.pPrev;
     THTreeItem * pChildHi;
     THTreeItem * pChildLo;
 
@@ -693,7 +694,7 @@ void THuffmannTree::EncodeOneByte(TOutputStream * os, THTreeItem * pItem)
     unsigned int BitBuffer = 0;
     unsigned int BitCount = 0;
 
-    // Put 1's as long as there is parent
+    // Walk from leaf to root, collecting 0/1 bits based on child position
     while(pParent != NULL)
     {
         // Fill the bit buffer
@@ -738,11 +739,11 @@ unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
     else
     {
         // Just a sanity check
-        if(pFirst == LIST_HEAD())
+        if(ListHead.pNext == LIST_HEAD())
             return HUFF_DECOMPRESS_ERROR;
 
         // We don't have the quick-link item, we need to parse the tree from its root
-        pItem = pFirst;
+        pItem = ListHead.pNext;
     }
 
     // Step down the tree until we find a terminal item
@@ -751,7 +752,7 @@ unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
         unsigned int BitValue = 0;
 
         // If the next bit in the compressed stream is set, we get the higher-weight
-        // child. Otherwise, get the lower-weight child.
+        // child. Otherwise, get the lower-weight child
         if(!is->Get1Bit(BitValue))
             return HUFF_DECOMPRESS_ERROR;
 
@@ -798,19 +799,19 @@ unsigned int THuffmannTree::DecodeOneByte(TInputStream * is)
     return pItem->DecompressedValue;
 }
 
-unsigned int THuffmannTree::Compress(TOutputStream * os, void * pvInBuffer, int cbInBuffer, int CompressionType)
+unsigned int THuffmannTree::Compress(TOutputStream * os, void * pvInBuffer, int cbInBuffer, int DataType)
 {
     unsigned char * pbInBufferEnd = (unsigned char *)pvInBuffer + cbInBuffer;
     unsigned char * pbInBuffer = (unsigned char *)pvInBuffer;
     unsigned char * pbOutBuff = os->pbOutBuffer;
     unsigned char InputByte;
 
-    if(!BuildTree(CompressionType))
+    if(!BuildTree(DataType))
         return 0;
-    bIsCmp0 = (CompressionType == 0);
+    bIsSparseData = (DataType == DATA_TYPE_SPARSE);
 
     // Store the compression type into output buffer
-    os->PutBits(CompressionType, 8);
+    os->PutBits(DataType, 8);
 
     // Process the entire input buffer
     while(pbInBuffer < pbInBufferEnd)
@@ -821,16 +822,16 @@ unsigned int THuffmannTree::Compress(TOutputStream * os, void * pvInBuffer, int 
         // Do we have an item for such input value?
         if(ItemsByByte[InputByte] == NULL)
         {
-            // Encode the relationship
+            // Encode the NYT (Not Yet Transmitted) escape symbol
             EncodeOneByte(os, ItemsByByte[0x101]);
 
             // Store the loaded byte into output stream
             os->PutBits(InputByte, 8);
 
-            if(!InsertNewBranchAndRebalance(pLast->DecompressedValue, InputByte))
+            if(!InsertNewBranchAndRebalance(ListHead.pPrev->DecompressedValue, InputByte))
                 return 0;
 
-            if(bIsCmp0)
+            if(bIsSparseData)
             {
                 IncWeightsAndRebalance(ItemsByByte[InputByte]);
                 continue;
@@ -843,7 +844,7 @@ unsigned int THuffmannTree::Compress(TOutputStream * os, void * pvInBuffer, int 
             EncodeOneByte(os, ItemsByByte[InputByte]);
         }
 
-        if(bIsCmp0)
+        if(bIsSparseData)
         {
             IncWeightsAndRebalance(ItemsByByte[InputByte]);
         }
@@ -857,25 +858,25 @@ unsigned int THuffmannTree::Compress(TOutputStream * os, void * pvInBuffer, int 
     return (unsigned int)(os->pbOutBuffer - pbOutBuff);
 }
 
-// Decompression using Huffman tree (1500E450)
+// Decompression using adaptive Huffman tree
 unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLength, TInputStream * is)
 {
     unsigned char * pbOutBufferEnd = (unsigned char *)pvOutBuffer + cbOutLength;
     unsigned char * pbOutBuffer = (unsigned char *)pvOutBuffer;
     unsigned int DecompressedValue = 0;
-    unsigned int CompressionType = 0;
+    unsigned int DataType = 0;
 
-    // Test the output length. Must not be NULL.
+    // Test the output length. Must not be zero
     if(cbOutLength == 0)
         return 0;
 
     // Get the compression type from the input stream
-    if(!is->Get8Bits(CompressionType))
+    if(!is->Get8Bits(DataType))
         return 0;
-    bIsCmp0 = (CompressionType == 0) ? 1 : 0;
+    bIsSparseData = (DataType == DATA_TYPE_SPARSE);
 
     // Build the Huffman tree
-    if(!BuildTree(CompressionType))
+    if(!BuildTree(DataType))
         return 0;
 
     // Process the entire input buffer until end of the stream
@@ -885,17 +886,17 @@ unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLen
         if(DecompressedValue == HUFF_DECOMPRESS_ERROR)
             return 0;
 
-        // Huffman tree needs to be modified
+        // NYT escape: the next 8 bits contain a new, previously unseen byte
         if(DecompressedValue == 0x101)
         {
             // The decompressed byte is stored in the next 8 bits
             if(!is->Get8Bits(DecompressedValue))
                 return 0;
 
-            if(!InsertNewBranchAndRebalance(pLast->DecompressedValue, DecompressedValue))
+            if(!InsertNewBranchAndRebalance(ListHead.pPrev->DecompressedValue, DecompressedValue))
                 return 0;
 
-            if(bIsCmp0 == 0)
+            if(!bIsSparseData)
                 IncWeightsAndRebalance(ItemsByByte[DecompressedValue]);
         }
 
@@ -904,7 +905,7 @@ unsigned int THuffmannTree::Decompress(void * pvOutBuffer, unsigned int cbOutLen
             break;
         *pbOutBuffer++ = (unsigned char)DecompressedValue;
 
-        if(bIsCmp0)
+        if(bIsSparseData)
         {
             IncWeightsAndRebalance(ItemsByByte[DecompressedValue]);
         }
