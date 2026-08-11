@@ -37,7 +37,9 @@ enum VileTouch
     SPELL_ENTANGLING_ROOTS = 33844,
     SPELL_SUMMON_NATURES_BITE = 92573,
     SPELL_CLEANSE_SPIRIT = 66056,
-    SPELL_POISON = 11918
+    SPELL_POISON = 11918,
+    SPELL_SUMMON_TARINDRELLA_AURA = 92237,
+    SPELL_TARINDRELLAS_NATURE_TELEPORT = 92420
 };
 
 #define TARINDRELLA_TEXT_ON_COMPLETE "This totem has been corrupting the eggs! It seems a greater threat looms. The Gnarlpine remain tainted by something most foul."
@@ -48,6 +50,20 @@ class npc_tarindrella : public CreatureScript
 {
 public:
     npc_tarindrella() : CreatureScript("npc_tarindrella") { }
+
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest) OVERRIDE
+    {
+        if (quest->GetQuestId() == QUEST_SIGNS_OF_THINGS_TO_COME)
+        {
+            // 92420 teleports its caster to spell_target_position. Cast as the player
+            // so they arrive in front of Dentaria; creature cast only moves Tarindrella.
+            player->CastSpell(player, SPELL_TARINDRELLAS_NATURE_TELEPORT, true);
+            player->RemoveAurasDueToSpell(SPELL_SUMMON_TARINDRELLA_AURA);
+            creature->DespawnOrUnsummon();
+        }
+
+        return true;
+    }
 
     bool OnQuestReward(Player * player, Creature * creature, Quest const* quest, uint32 /*opt*/) OVERRIDE
     {
