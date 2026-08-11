@@ -962,7 +962,7 @@ void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFla
         data.WriteGuidMask(UserGUID, 0, 5, 4, 6, 1, 3, 2);
         data.FlushBits();
         data.WriteGuidBytes(UserGUID, 4, 5, 7, 1, 2, 3, 6, 0);
-        data << ChannelName;
+        data.WriteString(ChannelName);
         SendToAllButOne(&data, UserGUID);
     }
     else
@@ -975,7 +975,7 @@ void Channel::JoinNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFla
         data << uint8(ChannelFlags);
         data.WriteGuidBytes(UserGUID, 7, 3);
         data << uint32(ChannelID);
-        data << GetName();
+        data.WriteString(GetName());
         data.WriteGuidBytes(UserGUID, 1, 4);
         data << uint8(UserFlags);
         SendToAll(&data);
@@ -994,7 +994,7 @@ void Channel::LeaveNotify(ObjectGuid UserGUID, uint32 ChannelID, uint8 ChannelFl
     data.WriteGuidBytes(UserGUID, 6, 5);
     data << uint32(ChannelID);
     data.WriteGuidBytes(UserGUID, 2, 7, 0);
-    data << ChannelName;
+    data.WriteString(ChannelName);
     data.WriteGuidBytes(UserGUID, 3);
 
     if (IsConstant())

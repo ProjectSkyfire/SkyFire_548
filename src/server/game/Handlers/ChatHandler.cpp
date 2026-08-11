@@ -805,11 +805,10 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recvData)
     uint8 unk;
     //SF_LOG_DEBUG("network", "WORLD: Received CMSG_CHAT_IGNORED");
 
-    recvData.ReadGuidMask(guid, 5);
     recvData >> unk;                                       // probably related to spam reporting
-    recvData.ReadGuidMask(guid, 0, 1, 3, 6, 7, 4, 2);
+    recvData.ReadGuidMask(guid, 5, 0, 1, 3, 6, 7, 4, 2);
 
-    recvData.ReadGuidBytes(guid, 2, 0, 3, 4, 7, 6, 0, 5);
+    recvData.ReadGuidBytes(guid, 2, 0, 3, 4, 7, 6, 1, 5);
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     if (!player || !player->GetSession())
@@ -830,7 +829,7 @@ void WorldSession::SendPlayerNotFoundNotice(std::string const& name)
     WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size() + 2);
     data.WriteBits(name.size(), 9);
     data.FlushBits();
-    data << name;
+    data.WriteString(name);
     SendPacket(&data);
 }
 
@@ -839,7 +838,7 @@ void WorldSession::SendPlayerAmbiguousNotice(std::string const& name)
     WorldPacket data(SMSG_CHAT_PLAYER_AMBIGUOUS, name.size() + 2);
     data.WriteBits(name.size(), 9);
     data.FlushBits();
-    data << name;
+    data.WriteString(name);
     SendPacket(&data);
 }
 
