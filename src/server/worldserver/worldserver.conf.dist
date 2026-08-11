@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2026272801
+ConfVersion=2026081100
 
 ###################################################################################################
 # SECTION INDEX
@@ -433,11 +433,11 @@ PlayerSave.Stats.SaveOnlyOnLogout = 1
 
 #
 #    mmap.enablePathFinding
-#        Description: Enable/Disable pathfinding using mmaps - experimental
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
+#        Description: Enable/Disable pathfinding using mmaps.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
 
-mmap.enablePathFinding = 0
+mmap.enablePathFinding = 1
 
 #
 #    vmap.enableLOS
