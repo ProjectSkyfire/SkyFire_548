@@ -91,6 +91,9 @@ Map* MapManager::CreateBaseMap(uint32 id)
     if (!map)
     {
         MapEntry const* entry = sMapStore.LookupEntry(id);
+        if (!entry)
+            return NULL;
+
         if (entry->entrance_map != -1)
         {
             CreateBaseMap(entry->entrance_map);
