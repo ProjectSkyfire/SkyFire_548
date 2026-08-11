@@ -129,12 +129,19 @@ void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTempl
     if (transport->mapsUsed.size() > 1)
     {
         for (std::set<uint32>::const_iterator itr = transport->mapsUsed.begin(); itr != transport->mapsUsed.end(); ++itr)
-            ASSERT(!sMapStore.LookupEntry(*itr)->Instanceable());
+        {
+            MapEntry const* mapEntry = sMapStore.LookupEntry(*itr);
+            ASSERT(mapEntry && !mapEntry->Instanceable());
+        }
 
         transport->inInstance = false;
     }
     else
-        transport->inInstance = sMapStore.LookupEntry(*transport->mapsUsed.begin())->Instanceable();
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(*transport->mapsUsed.begin());
+        ASSERT(mapEntry);
+        transport->inInstance = mapEntry->Instanceable();
+    }
 
     // last to first is always "teleport", even for closed paths
     keyFrames.back().Teleport = true;
