@@ -2899,6 +2899,7 @@ public:
     void UpdateVisibilityOf(T* target, UpdateData& data, std::set<Unit*>& visibleNow);
     void UpdatePhasing();
     uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
+    bool hasForcedMovement_;
 
     bool HasAtLoginFlag(AtLoginFlags f) const
     {
@@ -3188,7 +3189,10 @@ public:
         These methods are only sent to the current unit.
         */
     void SendMovementSetCanTransitionBetweenSwimAndFly(bool apply);
+    void SendMovementSetCanTurnWhileFalling(bool apply);
     void SendMovementSetCollisionHeight(float height);
+    void SendApplyMovementForce(bool apply, Position const& source, float force = 0.0f);
+    bool HasForcedMovement() const { return hasForcedMovement_; }
 
     bool CanFly() const override { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
 

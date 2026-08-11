@@ -488,6 +488,14 @@ target_include_directories(spell_book_packet_tests PRIVATE
 
 add_test(NAME spell_book_packet_tests COMMAND spell_book_packet_tests)
 
+add_executable(movement_opcode_table_tests
+  MovementOpcodeTableTests.cpp
+)
+
+target_compile_definitions(movement_opcode_table_tests PRIVATE SKYFIRE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+
+add_test(NAME movement_opcode_table_tests COMMAND movement_opcode_table_tests)
+
 add_executable(spell_charge_persistence_tests
   SpellChargePersistenceTests.cpp
 )

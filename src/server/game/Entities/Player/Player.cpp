@@ -657,6 +657,8 @@ Player::Player(WorldSession* session) : Unit(true)
     for (uint8 i = 0; i < MAX_MOVE_TYPE; ++i)
         m_forced_speed_changes[i] = 0;
 
+    hasForcedMovement_ = false;
+
     m_stableSlots = 0;
 
     /////////////////// Instance System /////////////////////
@@ -22986,13 +22988,107 @@ void Player::SendMovementSetCanTransitionBetweenSwimAndFly(bool apply)
         SMSG_MOVE_UNSET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY).Send();
 }
 
+void Player::SendMovementSetCanTurnWhileFalling(bool apply)
+{
+    Movement::PacketSender(this, NULL_OPCODE, apply ?
+        SMSG_MOVE_SET_CAN_TURN_WHILE_FALLING :
+        SMSG_MOVE_UNSET_CAN_TURN_WHILE_FALLING).Send();
+}
+
 void Player::SendMovementSetCollisionHeight(float height)
 {
     static MovementStatusElements const extraElements[] = { MSEExtraFloat, MSEExtraFloat2 };
     Movement::ExtraMovementStatusElement extra(extraElements);
-    extra.Data.floatData = height;
-    extra.Data.floatData2 = 1;
+    extra.Data.floatData = 1;
+    extra.Data.floatData2 = height;
     Movement::PacketSender(this, NULL_OPCODE, SMSG_MOVE_SET_COLLISION_HEIGHT, SMSG_MOVE_UPDATE_COLLISION_HEIGHT, &extra).Send();
+}
+
+void Player::SendApplyMovementForce(bool apply, Position const& source, float force /*= 0.0f*/)
+{
+    uint32 const movementForceId = 268441055;
+    ObjectGuid playerGuid = GetGUID();
+
+    if (apply)
+    {
+        if (HasForcedMovement())
+            return;
+
+        WorldPacket data(SMSG_MOVE_APPLY_MOVEMENT_FORCE, 1 + 8 + 7 * 4);
+
+        data.WriteBit(playerGuid[2]);
+        data.WriteBit(playerGuid[3]);
+        data.WriteBits(1, 2);
+        data.WriteBit(playerGuid[7]);
+        data.WriteBit(playerGuid[5]);
+        data.WriteBit(playerGuid[0]);
+        data.WriteBit(playerGuid[1]);
+        data.WriteBit(playerGuid[6]);
+        data.WriteBit(playerGuid[4]);
+
+        data.FlushBits();
+
+        data.WriteByteSeq(playerGuid[6]);
+        data << float(source.GetPositionY());
+        data.WriteByteSeq(playerGuid[4]);
+        data << float(source.GetPositionZ());
+        data << m_movementCounter++;
+        data << movementForceId;
+        data.WriteByteSeq(playerGuid[5]);
+        data << force;
+        data.WriteByteSeq(playerGuid[0]);
+        data.WriteByteSeq(playerGuid[7]);
+        data.WriteByteSeq(playerGuid[1]);
+        data.WriteByteSeq(playerGuid[3]);
+        data.WriteByteSeq(playerGuid[2]);
+        data << uint32(0);
+        data << float(source.GetPositionX());
+
+        SendDirectMessage(&data);
+
+        static MovementStatusElements const extraElements[] = { MSEExtraFloat, MSEExtraInt32, MSEExtraFloat2 };
+        Movement::ExtraMovementStatusElement extra(extraElements);
+        extra.Data.floatData = source.GetPositionX();
+        extra.Data.extraInt32Data = movementForceId;
+        extra.Data.floatData2 = force;
+        Movement::PacketSender(this, NULL_OPCODE, NULL_OPCODE, SMSG_MOVE_UPDATE_APPLY_MOVEMENT_FORCE, &extra).Send();
+
+        hasForcedMovement_ = true;
+    }
+    else
+    {
+        if (!HasForcedMovement())
+            return;
+
+        WorldPacket data(SMSG_MOVE_REMOVE_MOVEMENT_FORCE, 2 * 4 + 1 + 8);
+
+        data.WriteBit(playerGuid[1]);
+        data.WriteBit(playerGuid[2]);
+        data.WriteBit(playerGuid[4]);
+        data.WriteBit(playerGuid[7]);
+        data.WriteBit(playerGuid[6]);
+        data.WriteBit(playerGuid[0]);
+        data.WriteBit(playerGuid[5]);
+        data.WriteBit(playerGuid[3]);
+
+        data.FlushBits();
+
+        data.WriteByteSeq(playerGuid[4]);
+        data.WriteByteSeq(playerGuid[7]);
+        data.WriteByteSeq(playerGuid[0]);
+        data << m_movementCounter++;
+        data.WriteByteSeq(playerGuid[1]);
+        data.WriteByteSeq(playerGuid[3]);
+        data.WriteByteSeq(playerGuid[5]);
+        data << movementForceId;
+        data.WriteByteSeq(playerGuid[6]);
+        data.WriteByteSeq(playerGuid[2]);
+
+        SendDirectMessage(&data);
+        Movement::PacketSender(this, NULL_OPCODE, NULL_OPCODE, SMSG_MOVE_UPDATE_REMOVE_MOVEMENT_FORCE).Send();
+
+        hasForcedMovement_ = false;
+    }
 }
 
 float Player::GetCollisionHeight(bool mounted) const
