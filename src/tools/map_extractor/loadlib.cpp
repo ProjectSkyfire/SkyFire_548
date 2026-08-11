@@ -99,19 +99,17 @@ void ChunkedFile::parseChunks()
     while (ptr < GetData() + GetDataSize())
     {
         u_map_fcc header = *(u_map_fcc*)ptr;
-        uint32 size = 0;
-        if (IsInterestingChunk(header))
+        // every chunk has a fourcc+size header regardless of whether we care about its
+        // contents, so size must always be read to correctly skip past unrecognized chunks
+        uint32 size = *(uint32*)(ptr + 4);
+        if (IsInterestingChunk(header) && size <= data_size)
         {
-            size = *(uint32*)(ptr + 4);
-            if (size <= data_size)
-            {
-                std::swap(header.fcc_txt[0], header.fcc_txt[3]);
-                std::swap(header.fcc_txt[1], header.fcc_txt[2]);
+            std::swap(header.fcc_txt[0], header.fcc_txt[3]);
+            std::swap(header.fcc_txt[1], header.fcc_txt[2]);
 
-                FileChunk* chunk = new FileChunk{ ptr, size };
-                chunk->parseSubChunks();
-                chunks.insert({ std::string(header.fcc_txt, 4), chunk });
-            }
+            FileChunk* chunk = new FileChunk{ ptr, size };
+            chunk->parseSubChunks();
+            chunks.insert({ std::string(header.fcc_txt, 4), chunk });
         }
 
         // move to next chunk
@@ -142,19 +140,17 @@ void FileChunk::parseSubChunks()
     while (ptr < data + size)
     {
         u_map_fcc header = *(u_map_fcc*)ptr;
-        uint32 subsize = 0;
-        if (IsInterestingChunk(header))
+        // every chunk has a fourcc+size header regardless of whether we care about its
+        // contents, so subsize must always be read to correctly skip past unrecognized chunks
+        uint32 subsize = *(uint32*)(ptr + 4);
+        if (IsInterestingChunk(header) && subsize < size)
         {
-            subsize = *(uint32*)(ptr + 4);
-            if (subsize < size)
-            {
-                std::swap(header.fcc_txt[0], header.fcc_txt[3]);
-                std::swap(header.fcc_txt[1], header.fcc_txt[2]);
+            std::swap(header.fcc_txt[0], header.fcc_txt[3]);
+            std::swap(header.fcc_txt[1], header.fcc_txt[2]);
 
-                FileChunk* chunk = new FileChunk{ ptr, subsize };
-                chunk->parseSubChunks();
-                subchunks.insert({ std::string(header.fcc_txt, 4), chunk });
-            }
+            FileChunk* chunk = new FileChunk{ ptr, subsize };
+            chunk->parseSubChunks();
+            subchunks.insert({ std::string(header.fcc_txt, 4), chunk });
         }
 
         // move to next chunk
