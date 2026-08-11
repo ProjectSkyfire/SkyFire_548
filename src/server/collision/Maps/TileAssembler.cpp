@@ -163,6 +163,11 @@ namespace VMAP
                         success = success && ModelSpawn::writeToFile(tilefile, spawn2);
                         // MapTree nodes to update when loading tile:
                         std::map<uint32, uint32>::iterator nIdx = modelNodeIdx.find(spawn2.ID);
+                        if (success && nIdx == modelNodeIdx.end())
+                        {
+                            printf("Model spawn %u missing from map tree node index (bounds calculation likely failed earlier)\n", spawn2.ID);
+                            success = false;
+                        }
                         if (success && fwrite(&nIdx->second, sizeof(uint32), 1, tilefile) != 1) success = false;
                     }
                     fclose(tilefile);
