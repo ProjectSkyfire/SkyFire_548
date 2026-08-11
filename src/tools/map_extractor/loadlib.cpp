@@ -96,12 +96,18 @@ bool IsInterestingChunk(u_map_fcc const& fcc)
 void ChunkedFile::parseChunks()
 {
     uint8* ptr = GetData();
-    while (ptr < GetData() + GetDataSize())
+    uint8* end = GetData() + GetDataSize();
+    while (ptr + 8 <= end)
     {
         u_map_fcc header = *(u_map_fcc*)ptr;
         // every chunk has a fourcc+size header regardless of whether we care about its
         // contents, so size must always be read to correctly skip past unrecognized chunks
         uint32 size = *(uint32*)(ptr + 4);
+        // a corrupt/garbage size could overflow "ptr += size + 8" back to little or no
+        // forward movement, looping forever; bail out once it no longer fits the buffer
+        if (size > (uint32)(end - ptr - 8))
+            break;
+
         if (IsInterestingChunk(header) && size <= data_size)
         {
             std::swap(header.fcc_txt[0], header.fcc_txt[3]);
@@ -137,12 +143,18 @@ FileChunk::~FileChunk()
 void FileChunk::parseSubChunks()
 {
     uint8* ptr = data + 8; // skip self
-    while (ptr < data + size)
+    uint8* end = data + size;
+    while (ptr + 8 <= end)
     {
         u_map_fcc header = *(u_map_fcc*)ptr;
         // every chunk has a fourcc+size header regardless of whether we care about its
         // contents, so subsize must always be read to correctly skip past unrecognized chunks
         uint32 subsize = *(uint32*)(ptr + 4);
+        // a corrupt/garbage subsize could overflow "ptr += subsize + 8" back to little or no
+        // forward movement, looping forever; bail out once it no longer fits the buffer
+        if (subsize > (uint32)(end - ptr - 8))
+            break;
+
         if (IsInterestingChunk(header) && subsize < size)
         {
             std::swap(header.fcc_txt[0], header.fcc_txt[3]);
