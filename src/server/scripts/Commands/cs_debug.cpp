@@ -95,8 +95,6 @@ public:
             { "areatriggers",  rbac::RBAC_PERM_COMMAND_DEBUG_AREATRIGGERS,  false, &HandleDebugAreaTriggersCommand,     "", },
             { "los",           rbac::RBAC_PERM_COMMAND_DEBUG_LOS,           false, &HandleDebugLoSCommand,              "", },
             { "moveflags",     rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleDebugMoveflagsCommand,        "", },
-            { "movementforce", rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS,     false, &HandleDebugMovementForceCommand,   "", },
-            { "canturnwhilefalling", rbac::RBAC_PERM_COMMAND_DEBUG_MOVEFLAGS, false, &HandleDebugCanTurnWhileFallingCommand, "", },
             { "rest",          rbac::RBAC_PERM_COMMAND_DEBUG_REST,          false, &HandleDebugRestCommand,             "", },
             { "transport",     rbac::RBAC_PERM_COMMAND_DEBUG_TRANSPORT,     false, &HandleDebugTransportCommand,        "", },
         };
@@ -1407,37 +1405,6 @@ public:
             handler->PSendSysMessage(LANG_MOVEFLAGS_SET, target->GetUnitMovementFlags(), target->GetExtraUnitMovementFlags());
         }
 
-        return true;
-    }
-
-    static bool HandleDebugMovementForceCommand(ChatHandler* handler, char const* args)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-        if (!player)
-            return false;
-
-        char* applyArg = args && *args ? strtok((char*)args, " ") : NULL;
-        bool apply = !applyArg || atoi(applyArg) != 0;
-
-        char* forceArg = strtok(NULL, " \n");
-        float force = forceArg ? float(atof(forceArg)) : 5.0f;
-
-        player->SendApplyMovementForce(apply, *player, force);
-        handler->PSendSysMessage("SendApplyMovementForce(%s, force=%.2f) sent.", apply ? "apply" : "remove", force);
-        return true;
-    }
-
-    static bool HandleDebugCanTurnWhileFallingCommand(ChatHandler* handler, char const* args)
-    {
-        Player* player = handler->GetSession()->GetPlayer();
-        if (!player)
-            return false;
-
-        char* applyArg = args && *args ? strtok((char*)args, " ") : NULL;
-        bool apply = !applyArg || atoi(applyArg) != 0;
-
-        player->SendMovementSetCanTurnWhileFalling(apply);
-        handler->PSendSysMessage("SendMovementSetCanTurnWhileFalling(%s) sent.", apply ? "apply" : "remove");
         return true;
     }
 
