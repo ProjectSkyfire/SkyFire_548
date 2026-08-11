@@ -187,13 +187,21 @@ void HandleArgs(int argc, char* arg[])
         {
             case 'i':
                 if (c + 1 < argc)                            // all ok
+                {
+                    if (strlen(arg[c + 1]) >= sizeof(input_path))
+                        Usage(arg[0]);
                     strcpy(input_path, arg[c++ + 1]);
+                }
                 else
                     Usage(arg[0]);
                 break;
             case 'o':
                 if (c + 1 < argc)                            // all ok
+                {
+                    if (strlen(arg[c + 1]) >= sizeof(output_path))
+                        Usage(arg[0]);
                     strcpy(output_path, arg[c++ + 1]);
+                }
                 else
                     Usage(arg[0]);
                 break;
