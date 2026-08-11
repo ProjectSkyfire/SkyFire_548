@@ -2208,10 +2208,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             Relocate(x, y, z, orientation);
             SendTeleportPacket(oldPos); // broadcasts from oldPos, then restores destination coords
 
-            // Keep server map/grid in sync with the destination immediately. Leaving the
-            // player at the departure cell until MOVE_TELEPORT_ACK makes post-teleport
-            // speed/combat updates (Shadowstep) desync observers for tens of seconds.
+            // SendTeleportPacket leaves us at the destination coords, but grid membership is
+            // still the departure cell. PlayerRelocation only loads/moves grids when old and
+            // new cells differ, so call it from the departure position or nearby objects never
+            // get created (empty world until the player walks into a loaded cell / relogs).
+            Relocate(oldPos);
             UpdatePosition(x, y, z, orientation, true);
+            UpdateObjectVisibility(true);
         }
     }
     else

@@ -456,6 +456,9 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
     WorldLocation const& dest = plMover->GetTeleportDest();
 
     plMover->UpdatePosition(dest, true);
+    // Near teleports can finish with the player already at dest coords; force a full
+    // visibility refresh so creates for the destination cell are sent after ACK.
+    plMover->UpdateObjectVisibility(true);
 
     uint32 newzone, newarea;
     plMover->GetZoneAndAreaId(newzone, newarea);
