@@ -17,6 +17,7 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 
+#include <cstring>
 #include <functional>
 #include <thread>
 #include <vector>
@@ -28,8 +29,8 @@ namespace DisableMgr
     bool IsDisabledFor(DisableType /*type*/, uint32 /*entry*/, Unit const* /*unit*/, uint8 /*flags*/ /*= 0*/) { return false; }
 }
 
-#define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
-#define MMAP_VERSION 5.2f
+#define MMAP_MAGIC 0x4d4d4151   // 'MMAQ'
+#define MMAP_VERSION 5.3f
 
 struct MmapTileHeader
 {
@@ -48,6 +49,7 @@ namespace MMAP
     MapBuilder::MapBuilder(float maxWalkableAngle, bool skipLiquid,
         bool skipContinents, bool skipJunkMaps, bool skipBattlegrounds,
         bool debugOutput, bool bigBaseUnit, const char* offMeshFilePath) :
+        m_mapDbcLoaded       (false),
         m_terrainBuilder     (NULL),
         m_debugOutput        (debugOutput),
         m_offMeshFilePath    (offMeshFilePath),
@@ -62,6 +64,7 @@ namespace MMAP
 
         m_rcContext = new rcContext(false);
 
+        loadMapDbcData();
         discoverTiles();
     }
 
@@ -76,6 +79,68 @@ namespace MMAP
 
         delete m_terrainBuilder;
         delete m_rcContext;
+    }
+
+    // Map.dbc field layout, see MapEntryfmt in src/server/game/DataStores/DBCfmt.h ("nxixxsixxxxiffxixxi")
+    #define MAP_DBC_MAP_TYPE_BATTLEGROUND 3
+    #define MAP_DBC_CONTINENT_FLAG 0x01000000
+
+    /**************************************************************************/
+    void MapBuilder::loadMapDbcData()
+    {
+        FILE* file = fopen("dbc/Map.dbc", "rb");
+        if (!file)
+        {
+            printf("Could not open dbc/Map.dbc - continent/battleground detection will be disabled.\n"
+                   "Run the map extractor with dbc extraction enabled first.\n");
+            return;
+        }
+
+        char magic[4];
+        uint32 recordCount, fieldCount, recordSize, stringBlockSize;
+        if (fread(magic, 1, 4, file) != 4 || memcmp(magic, "WDBC", 4) != 0 ||
+            fread(&recordCount, sizeof(uint32), 1, file) != 1 ||
+            fread(&fieldCount, sizeof(uint32), 1, file) != 1 ||
+            fread(&recordSize, sizeof(uint32), 1, file) != 1 ||
+            fread(&stringBlockSize, sizeof(uint32), 1, file) != 1 ||
+            fieldCount < 4 || recordSize != fieldCount * sizeof(uint32))
+        {
+            printf("dbc/Map.dbc has an unexpected format - continent/battleground detection will be disabled.\n");
+            fclose(file);
+            return;
+        }
+
+        std::vector<uint32> record(fieldCount);
+        for (uint32 i = 0; i < recordCount; ++i)
+        {
+            if (fread(record.data(), sizeof(uint32), fieldCount, file) != fieldCount)
+            {
+                printf("dbc/Map.dbc is truncated - continent/battleground detection may be incomplete.\n");
+                break;
+            }
+
+            MapDbcEntry entry;
+            entry.mapType = record[2];
+            entry.flags = record[3];
+            m_mapDbcData[record[0]] = entry;
+        }
+
+        fclose(file);
+        m_mapDbcLoaded = !m_mapDbcData.empty();
+    }
+
+    /**************************************************************************/
+    bool MapBuilder::isContinentMap(uint32 mapID)
+    {
+        std::map<uint32, MapDbcEntry>::const_iterator itr = m_mapDbcData.find(mapID);
+        return itr != m_mapDbcData.end() && (itr->second.flags & MAP_DBC_CONTINENT_FLAG) != 0;
+    }
+
+    /**************************************************************************/
+    bool MapBuilder::isBattlegroundMap(uint32 mapID)
+    {
+        std::map<uint32, MapDbcEntry>::const_iterator itr = m_mapDbcData.find(mapID);
+        return itr != m_mapDbcData.end() && itr->second.mapType == MAP_DBC_MAP_TYPE_BATTLEGROUND;
     }
 
     /**************************************************************************/
@@ -846,17 +911,12 @@ namespace MMAP
     bool MapBuilder::shouldSkipMap(uint32 mapID)
     {
         if (m_skipContinents)
-            switch (mapID)
-            {
-                case 0:    // Eastern Kingdoms
-                case 1:    // Kalimdor
-                case 530:  // Outland
-                case 571:  // Northrend
-                case 870:  // Pandaria
-                    return true;
-                default:
-                    break;
-            }
+        {
+            if (!m_mapDbcLoaded)
+                printf("Warning: dbc/Map.dbc not loaded, cannot determine if map %u is a continent.\n", mapID);
+            else if (isContinentMap(mapID))
+                return true;
+        }
 
         if (m_skipJunkMaps)
             switch (mapID)
@@ -888,28 +948,12 @@ namespace MMAP
             }
 
         if (m_skipBattlegrounds)
-            switch (mapID)
-            {
-                case 30:    // Alterac Valley
-                case 37:    // Azshara Crater
-                case 489:   // Warsong Gulch
-                case 529:   // Arathi Basin
-                case 566:   // Eye of the Storm
-                case 607:   // Strand of the Ancients
-                case 628:   // Isle of Conquest
-                case 726:   // Twin Peaks
-                case 727:   // Silvershard Mines
-                case 728:   // The Battle for Gilneas (Old Map)
-                case 761:   // The Battle for Gilneas
-                case 968:   // Rated Eye of the Storm
-                case 998:   // Temple of Kotmogu
-                case 1010:  // Mists of Pandaria CTF3
-                case 1101:  // DefenseOfTheAleHouseBG
-                case 1105:  // Deepwind Gorge
-                    return true;
-                default:
-                    break;
-            }
+        {
+            if (!m_mapDbcLoaded)
+                printf("Warning: dbc/Map.dbc not loaded, cannot determine if map %u is a battleground.\n", mapID);
+            else if (isBattlegroundMap(mapID))
+                return true;
+        }
 
         return false;
     }

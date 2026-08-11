@@ -4372,8 +4372,8 @@ enum class PartyResult
     ERR_PARTY_LFG_TELEPORT_IN_COMBAT = 30
 };
 
-const uint32 MMAP_MAGIC = 0x4d4d4150; // 'MMAP'
-#define MMAP_VERSION 5.2f
+const uint32 MMAP_MAGIC = 0x4d4d4151; // 'MMAQ'
+#define MMAP_VERSION 5.3f
 
 struct MmapTileHeader
 {

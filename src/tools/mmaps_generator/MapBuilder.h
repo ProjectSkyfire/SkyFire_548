@@ -91,6 +91,20 @@ namespace MMAP
             bool isTransportMap(uint32 mapID);
             bool shouldSkipTile(uint32 mapID, uint32 tileX, uint32 tileY);
 
+            // reads dbc/Map.dbc directly (as extracted by the map extractor) to answer
+            // isContinentMap/isBattlegroundMap without a hardcoded id list
+            void loadMapDbcData();
+            bool isContinentMap(uint32 mapID);
+            bool isBattlegroundMap(uint32 mapID);
+
+            struct MapDbcEntry
+            {
+                uint32 mapType;
+                uint32 flags;
+            };
+            std::map<uint32, MapDbcEntry> m_mapDbcData;
+            bool m_mapDbcLoaded;
+
             TerrainBuilder* m_terrainBuilder;
             TileList m_tiles;
 
