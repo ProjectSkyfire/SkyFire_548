@@ -513,7 +513,7 @@ void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 {
     SF_LOG_DEBUG("maps", "InstanceSaveMgr::_ResetInstance %u, %u", mapid, instanceId);
     Map const* map = sMapMgr->CreateBaseMap(mapid);
-    if (!map->Instanceable())
+    if (!map || !map->Instanceable())
         return;
 
     InstanceSaveHashMap::iterator itr = m_instanceSaveById.find(instanceId);
@@ -540,7 +540,7 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, DifficultyID difficulty,
 {
     // global reset for all instances of the given map
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
-    if (!mapEntry->Instanceable())
+    if (!mapEntry || !mapEntry->Instanceable())
         return;
 
     time_t now = time(NULL);
