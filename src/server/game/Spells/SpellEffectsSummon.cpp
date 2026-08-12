@@ -398,6 +398,13 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
     // "kill" original creature
     creatureTarget->DespawnOrUnsummon();
 
+    // caster have pet now - must happen before AddToMap(), same order as Pet::LoadPetFromDB(),
+    // otherwise the CreateObject snapshot the client receives for the pet is built while the
+    // minion/charm-control fields (m_ControlledByPlayer, owner's UNIT_FIELD_SUMMON, ...) are
+    // still unset, and the client never registers the creature as a controllable pet until the
+    // next full login resync (pet visible/following, but no action bar / talents / pet selection)
+    m_caster->SetMinion(pet, true);
+
     uint8 level = (creatureTarget->getLevel() < (m_caster->getLevel() - 5)) ? (m_caster->getLevel() - 5) : creatureTarget->getLevel();
 
     // prepare visual effect for levelup
@@ -409,14 +416,12 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
 
-    // caster have pet now
-    m_caster->SetMinion(pet, true);
-
     pet->InitTalentForLevel();
 
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
     {
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+        pet->CleanupActionBar();                            // same as Pet::LoadPetFromDB() before PetSpellInitialize()
         m_caster->ToPlayer()->PetSpellInitialize();
     }
 }
@@ -979,17 +984,18 @@ void Spell::EffectCreateTamedPet(SpellEffIndex effIndex)
     unitTarget->GetClosePoint(px, py, pz, pet->GetObjectSize(), PET_FOLLOW_DIST, pet->GetFollowAngle());
     pet->Relocate(px, py, pz, unitTarget->GetOrientation());
 
+    // unitTarget has pet now - must happen before AddToMap(), see Spell::EffectTameCreature()
+    unitTarget->SetMinion(pet, true);
+
     // add to world
     pet->GetMap()->AddToMap(pet->ToCreature());
-
-    // unitTarget has pet now
-    unitTarget->SetMinion(pet, true);
 
     pet->InitTalentForLevel();
 
     if (unitTarget->GetTypeId() == TypeID::TYPEID_PLAYER)
     {
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+        pet->CleanupActionBar();
         unitTarget->ToPlayer()->PetSpellInitialize();
     }
 }
