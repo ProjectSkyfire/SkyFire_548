@@ -66,6 +66,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_sulfuron_harbinger.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_magmadar.cpp
   EasternKingdoms/BlackrockMountain/MoltenCore/boss_shazzrah.cpp
+  EasternKingdoms/Gilneas/gilneas.cpp
   EasternKingdoms/Gnomeregan/instance_gnomeregan.cpp
   EasternKingdoms/Gnomeregan/gnomeregan.cpp
   EasternKingdoms/Gnomeregan/gnomeregan.h
