@@ -6,9 +6,12 @@
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "GameObjectAI.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "SharedDefines.h"
+#include "TemporarySummon.h"
 #include "Util.h"
 #include <unordered_set>
 
@@ -815,6 +818,330 @@ public:
     }
 };
 
+/*######
+## Quest 14204 - From the Shadows
+######*/
+
+enum FromTheShadows
+{
+    NPC_GILNEAN_MASTIFF                = 35631,
+    NPC_BLOODFANG_LURKER               = 35463,
+
+    QUEST_FROM_THE_SHADOWS             = 14204,
+
+    ITEM_GILNEAN_MASTIFF_COLLAR        = 48707,
+
+    SPELL_SUMMON_GILNEAN_MASTIFF       = 67807,
+    SPELL_MASTIFF_ATTACK_LURKER        = 67805,
+    SPELL_LURKER_SHADOWSTALKER_STEALTH = 34189,
+    SPELL_LURKER_ENRAGE                = 8599,
+
+    CD_LURKER_ENRAGE                   = 30000,
+};
+
+/*######
+## npc_lorna_crowley_p4 - quest 14204 accept; clears a hunter's active pet and
+## charms the tracking mastiff to the player immediately. The collar item
+## (granted natively via the quest's SourceItemId) is then used to command
+## the mastiff to expose and attack the nearest stealthed Bloodfang Lurker.
+######*/
+
+class npc_lorna_crowley_p4 : public CreatureScript
+{
+public:
+    npc_lorna_crowley_p4() : CreatureScript("npc_lorna_crowley_p4") { }
+
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) OVERRIDE
+    {
+        if (quest->GetQuestId() != QUEST_FROM_THE_SHADOWS)
+            return true;
+
+        if (player->getClass() == CLASS_HUNTER && player->GetPet())
+            player->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
+
+        player->CastSpell(player, SPELL_SUMMON_GILNEAN_MASTIFF, true);
+
+        return true;
+    }
+};
+
+/*######
+## npc_gilnean_mastiff - the player's tracking pet for quest 14204; strips the
+## Bloodfang Lurkers' stealth on command so the player can engage them
+######*/
+
+class npc_gilnean_mastiff : public CreatureScript
+{
+public:
+    npc_gilnean_mastiff() : CreatureScript("npc_gilnean_mastiff") { }
+
+    struct npc_gilnean_mastiffAI : public ScriptedAI
+    {
+        npc_gilnean_mastiffAI(Creature* creature) : ScriptedAI(creature), _followCheckTimer(0) { }
+
+        uint32 _followCheckTimer;
+
+        void Reset() OVERRIDE
+        {
+            me->GetCharmInfo()->InitEmptyActionBar(false);
+            me->GetCharmInfo()->SetActionBar(0, SPELL_MASTIFF_ATTACK_LURKER, ACT_DISABLED);
+            me->SetReactState(REACT_DEFENSIVE);
+            me->GetCharmInfo()->SetIsFollowing(true);
+            _followCheckTimer = 2000;
+
+            // Reset() is also where a stuck-in-evade creature lands every time it
+            // exits evade mode, and Creature::Update() skips UpdateAI() entirely
+            // while IsInEvadeMode() is true - so the catch-up teleport has to live
+            // here too, or a mastiff that keeps evading on a broken path never
+            // gets a chance to run the check in UpdateAI at all.
+            if (Unit* owner = me->GetCharmerOrOwner())
+            {
+                if (me->GetDistance(owner) > 15.0f)
+                    me->NearTeleportTo(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), owner->GetOrientation());
+
+                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
+        }
+
+        // Triggered by using the Gilnean Mastiff Collar. Player target selection
+        // can't pick out a stealthed Lurker at all, so a player-issued attack has
+        // nothing to act on. The mastiff's own FindNearestCreature is a
+        // server-side lookup and isn't blocked by client-side stealth, so it
+        // sniffs one out and reveals it directly on the player's command.
+        bool RevealNearbyLurker()
+        {
+            if (me->IsInCombat())
+                return false;
+
+            Creature* lurker = me->FindNearestCreature(NPC_BLOODFANG_LURKER, 15.0f, true);
+            if (!lurker)
+                return false;
+
+            lurker->RemoveAura(SPELL_LURKER_SHADOWSTALKER_STEALTH);
+            lurker->AddThreat(me, 1.0f);
+            me->AddThreat(lurker, 1.0f);
+            AttackStart(lurker);
+            return true;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            Unit* owner = me->GetCharmerOrOwner();
+            Player* ownerPlayer = owner ? owner->ToPlayer() : NULL;
+            if (ownerPlayer && ownerPlayer->GetQuestStatus(QUEST_FROM_THE_SHADOWS) == QUEST_STATUS_REWARDED)
+            {
+                me->DespawnOrUnsummon(1);
+                return;
+            }
+
+            // Stairwells/cellar transitions in this zone have gaps in the static
+            // navmesh, so a normal pathfound follow can get permanently stuck.
+            // Checked unconditionally (not just while idle) since a broken path
+            // can also strand it mid-"chase" with a phantom victim.
+            if (owner)
+            {
+                if (_followCheckTimer <= diff)
+                {
+                    if (me->GetDistance(owner) > 15.0f)
+                    {
+                        me->NearTeleportTo(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), owner->GetOrientation());
+                        if (!me->IsInCombat())
+                            me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                    }
+                    _followCheckTimer = 2000;
+                }
+                else
+                    _followCheckTimer -= diff;
+            }
+
+            if (!UpdateVictim())
+            {
+                me->GetCharmInfo()->SetIsFollowing(true);
+                me->SetReactState(REACT_DEFENSIVE);
+
+                if (owner && me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+                    me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+
+                return;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) OVERRIDE
+        {
+            if (spell->Id != SPELL_MASTIFF_ATTACK_LURKER)
+                return;
+
+            target->RemoveAura(SPELL_LURKER_SHADOWSTALKER_STEALTH);
+            target->AddThreat(me, 1.0f);
+            me->AddThreat(target, 1.0f);
+            AttackStart(target);
+        }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            me->DespawnOrUnsummon(1);
+        }
+
+        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        {
+            Reset();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_gilnean_mastiffAI(creature);
+    }
+};
+
+/*######
+## item_gilnean_mastiff_collar - commands the player's mastiff to reveal and
+## attack the nearest Bloodfang Lurker. Handled entirely in script (returning
+## true suppresses the native item-use spell cast) so this doesn't depend on
+## any spell effect data at all.
+######*/
+
+class item_gilnean_mastiff_collar : public ItemScript
+{
+public:
+    item_gilnean_mastiff_collar() : ItemScript("item_gilnean_mastiff_collar") { }
+
+    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const& /*targets*/) OVERRIDE
+    {
+        Guardian* mastiff = player->GetGuardianPet();
+        if (!mastiff || mastiff->GetEntry() != NPC_GILNEAN_MASTIFF)
+            return true;
+
+        CAST_AI(npc_gilnean_mastiff::npc_gilnean_mastiffAI, mastiff->AI())->RevealNearbyLurker();
+        return true;
+    }
+};
+
+/*######
+## npc_gilnean_mastiff_recall_trigger - invisible catch-all at the top of the
+## cellar stairs; players on 14204 whose mastiff isn't nearby get a fresh one
+## re-summoned here, working around the stairwell's broken navmesh
+######*/
+
+class npc_gilnean_mastiff_recall_trigger : public CreatureScript
+{
+public:
+    npc_gilnean_mastiff_recall_trigger() : CreatureScript("npc_gilnean_mastiff_recall_trigger") { }
+
+    struct npc_gilnean_mastiff_recall_triggerAI : public ScriptedAI
+    {
+        npc_gilnean_mastiff_recall_triggerAI(Creature* creature) : ScriptedAI(creature), _checkTimer(0) { }
+
+        uint32 _checkTimer;
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (_checkTimer > diff)
+            {
+                _checkTimer -= diff;
+                return;
+            }
+            _checkTimer = 1000;
+
+            std::list<Player*> players;
+            Skyfire::AnyPlayerInObjectRangeCheck checker(me, 8.0f);
+            Skyfire::PlayerListSearcher<Skyfire::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
+            me->VisitNearbyWorldObject(8.0f, searcher);
+
+            for (Player* player : players)
+            {
+                if (player->GetQuestStatus(QUEST_FROM_THE_SHADOWS) != QUEST_STATUS_INCOMPLETE)
+                    continue;
+
+                Guardian* pet = player->GetGuardianPet();
+                if (pet && player->GetDistance(pet) <= 20.0f)
+                    continue;
+
+                if (pet)
+                    pet->DespawnOrUnsummon(1);
+
+                player->CastSpell(player, SPELL_SUMMON_GILNEAN_MASTIFF, true);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_gilnean_mastiff_recall_triggerAI(creature);
+    }
+};
+
+/*######
+## npc_bloodfang_lurker - stealthed quest kill-target; ambushes a nearby idle
+## player once it settles back near its home spot, and can enrage at low health
+######*/
+
+class npc_bloodfang_lurker : public CreatureScript
+{
+public:
+    npc_bloodfang_lurker() : CreatureScript("npc_bloodfang_lurker") { }
+
+    struct npc_bloodfang_lurkerAI : public ScriptedAI
+    {
+        npc_bloodfang_lurkerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint32 _enrageTimer;
+        uint32 _seekTimer;
+        bool _willEnrage;
+
+        void Reset() OVERRIDE
+        {
+            _enrageTimer = 0;
+            _willEnrage = BsohtRand(0, 1) != 0;
+            _seekTimer = BsohtRand(5000, 10000);
+            DoCast(me, SPELL_LURKER_SHADOWSTALKER_STEALTH);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (_seekTimer <= diff)
+            {
+                if (me->IsAlive() && !me->IsInCombat() && me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) <= 2.0f)
+                {
+                    if (Player* player = me->SelectNearestPlayer(2.0f))
+                    {
+                        if (!player->IsInCombat())
+                        {
+                            AttackStart(player);
+                            _seekTimer = BsohtRand(5000, 10000);
+                        }
+                    }
+                }
+            }
+            else
+                _seekTimer -= diff;
+
+            if (!UpdateVictim())
+                return;
+
+            if (_enrageTimer <= diff)
+            {
+                if (_willEnrage && me->GetHealthPct() <= 30.0f)
+                {
+                    DoCast(me, SPELL_LURKER_ENRAGE);
+                    _enrageTimer = CD_LURKER_ENRAGE;
+                }
+            }
+            else
+                _enrageTimer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_bloodfang_lurkerAI(creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     new go_merchant_square_door();
@@ -826,4 +1153,9 @@ void AddSC_gilneas()
     new npc_worgen_alpha_c2();
     new npc_josiah_avery();
     new npc_josiah_avery_trigger();
+    new npc_lorna_crowley_p4();
+    new npc_gilnean_mastiff();
+    new item_gilnean_mastiff_collar();
+    new npc_gilnean_mastiff_recall_trigger();
+    new npc_bloodfang_lurker();
 }
