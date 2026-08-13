@@ -295,6 +295,7 @@ public:
         uint32 _spawnTimer;
         uint32 _eventTimer;
         uint32 _waveInterval;
+        uint64 _playerGUID;
         bool _eventActive;
         bool _firstWave;
 
@@ -304,13 +305,15 @@ public:
             _firstWave = true;
             _spawnTimer = 0;
             _eventTimer = 0;
+            _playerGUID = 0;
             _waveInterval = BsohtRand(9000, 15000);
         }
 
-        void StartEvent()
+        void StartEvent(uint64 playerGUID)
         {
             _eventActive = true;
             _eventTimer = EVENT_BSOHT_DURATION;
+            _playerGUID = playerGUID;
         }
 
         void SummonNextWave()
@@ -365,6 +368,8 @@ public:
             if (_eventTimer <= diff)
             {
                 _eventActive = false;
+                if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
+                    player->AreaExploredOrEventHappens(QUEST_BY_THE_SKIN_OF_HIS_TEETH);
                 return;
             }
             _eventTimer -= diff;
@@ -402,7 +407,7 @@ public:
         creature->CastSpell(player, SPELL_BSOHT_BUFF, true);
 
         if (Creature* dempsey = creature->FindNearestCreature(NPC_SEAN_DEMPSEY, 100.0f))
-            CAST_AI(npc_sean_dempsey::npc_sean_dempseyAI, dempsey->AI())->StartEvent();
+            CAST_AI(npc_sean_dempsey::npc_sean_dempseyAI, dempsey->AI())->StartEvent(player->GetGUID());
 
         return true;
     }
@@ -657,6 +662,159 @@ public:
     }
 };
 
+/*######
+## Quest 14159 - The Rebel Lord's Arsenal
+######*/
+
+enum RebelLordsArsenal
+{
+    NPC_JOSIAH_AVERY_P2                = 35369,
+    NPC_JOSIAH_AVERY_P4                = 35370,
+    NPC_JOSIAH_AVERY_TRIGGER           = 50415,
+    NPC_LORNA_CROWLEY_P4                = 35378,
+
+    QUEST_REBEL_LORDS_ARSENAL          = 14159,
+
+    SPELL_ARSENAL_COSMETIC_ATTACK      = 69873,
+    SPELL_ARSENAL_SHOOT                = 6660,
+    SPELL_WORGEN_BITE                  = 72870,
+    SPELL_SUMMON_JOSIAH_AVERY          = 67350,
+    SPELL_GET_SHOT                     = 67349,
+    SPELL_PHASE_QUEST_2                = 59073,
+
+    PHASE_JOSIAH_AVERY_REVEAL          = 171,
+
+    SAY_JOSIAH_AVERY_TRIGGER_BITTEN    = 0,
+};
+
+/*######
+## npc_josiah_avery - quest 14159 turn-in; marks the player as bitten and
+## summons his phase-4 double for the worgen-reveal cutscene
+######*/
+
+class npc_josiah_avery : public CreatureScript
+{
+public:
+    npc_josiah_avery() : CreatureScript("npc_josiah_avery") { }
+
+    bool OnQuestReward(Player* player, Creature* creature, Quest const* quest, uint32 /*opt*/) OVERRIDE
+    {
+        if (quest->GetQuestId() != QUEST_REBEL_LORDS_ARSENAL)
+            return true;
+
+        creature->AddAura(SPELL_WORGEN_BITE, player);
+        player->RemoveAura(SPELL_PHASE_QUEST_2);
+        player->SetPhased(PHASE_JOSIAH_AVERY_REVEAL, true, true);
+
+        creature->SetPhased(PHASE_JOSIAH_AVERY_REVEAL, true, true);
+        creature->CastSpell(creature, SPELL_SUMMON_JOSIAH_AVERY, true);
+        creature->SetPhased(PHASE_JOSIAH_AVERY_REVEAL, true, false);
+
+        return true;
+    }
+};
+
+/*######
+## npc_josiah_avery_trigger - waits for a bitten player to approach both Lorna
+## Crowley and the phase-4 Josiah Avery double, then runs the reveal: Avery
+## "attacks" the player, gets knocked back, and is shot down by Lorna.
+######*/
+
+class npc_josiah_avery_trigger : public CreatureScript
+{
+public:
+    npc_josiah_avery_trigger() : CreatureScript("npc_josiah_avery_trigger") { }
+
+    struct npc_josiah_avery_triggerAI : public ScriptedAI
+    {
+        npc_josiah_avery_triggerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint8 _step;
+        uint32 _stepTimer;
+        uint64 _playerGUID;
+
+        void Reset() OVERRIDE
+        {
+            _step = 0;
+            _stepTimer = 0;
+            _playerGUID = 0;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (_step == 0)
+            {
+                Creature* lorna = me->FindNearestCreature(NPC_LORNA_CROWLEY_P4, 60.0f);
+                Creature* avery = me->FindNearestCreature(NPC_JOSIAH_AVERY_P4, 80.0f);
+                if (!lorna || !avery)
+                    return;
+
+                Player* player = me->SelectNearestPlayer(50.0f);
+                if (!player || !player->HasAura(SPELL_WORGEN_BITE))
+                    return;
+
+                _playerGUID = player->GetGUID();
+                _stepTimer = 200;
+                _step = 1;
+                return;
+            }
+
+            if (_stepTimer > diff)
+            {
+                _stepTimer -= diff;
+                return;
+            }
+
+            Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID);
+            Creature* lorna = me->FindNearestCreature(NPC_LORNA_CROWLEY_P4, 60.0f);
+            Creature* avery = me->FindNearestCreature(NPC_JOSIAH_AVERY_P4, 80.0f);
+            if (!player || !lorna || !avery)
+            {
+                Reset();
+                return;
+            }
+
+            switch (_step)
+            {
+                case 1:
+                    Talk(SAY_JOSIAH_AVERY_TRIGGER_BITTEN, player);
+                    _stepTimer = 1200;
+                    break;
+                case 2:
+                    avery->SetOrientation(avery->GetAngle(player));
+                    avery->CastSpell(player, SPELL_ARSENAL_COSMETIC_ATTACK, true);
+                    player->GetMotionMaster()->MoveKnockbackFrom(avery->GetPositionX(), avery->GetPositionY(), 22.0f, 8.0f);
+                    avery->getThreatManager().resetAllAggro();
+                    _stepTimer = 600;
+                    break;
+                case 3:
+                    avery->GetMotionMaster()->MoveJump(-1791.94f, 1427.29f, 12.4584f, 18.0f, 7.0f);
+                    _stepTimer = 200;
+                    break;
+                case 4:
+                    lorna->CastSpell(avery, SPELL_ARSENAL_SHOOT, true);
+                    _stepTimer = 200;
+                    break;
+                case 5:
+                    avery->CastSpell(avery, SPELL_GET_SHOT, true);
+                    avery->setDeathState(DeathState::JUST_DIED);
+                    player->SaveToDB();
+                    avery->DespawnOrUnsummon(1000);
+                    me->DespawnOrUnsummon(1000);
+                    Reset();
+                    return;
+            }
+
+            ++_step;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_josiah_avery_triggerAI(creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     new go_merchant_square_door();
@@ -666,4 +824,6 @@ void AddSC_gilneas()
     new npc_worgen_runt_c2();
     new npc_worgen_alpha_c1();
     new npc_worgen_alpha_c2();
+    new npc_josiah_avery();
+    new npc_josiah_avery_trigger();
 }
