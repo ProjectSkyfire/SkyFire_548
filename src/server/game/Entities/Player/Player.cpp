@@ -23000,11 +23000,18 @@ void Player::SendMovementSetCanTurnWhileFalling(bool apply)
 
 void Player::SendMovementSetCollisionHeight(float height)
 {
+    // SET and UPDATE layouts place Height/Scale in opposite MSEExtraElement order.
     static MovementStatusElements const extraElements[] = { MSEExtraFloat, MSEExtraFloat2 };
-    Movement::ExtraMovementStatusElement extra(extraElements);
-    extra.Data.floatData = 1;
-    extra.Data.floatData2 = height;
-    Movement::PacketSender(this, NULL_OPCODE, SMSG_MOVE_SET_COLLISION_HEIGHT, SMSG_MOVE_UPDATE_COLLISION_HEIGHT, &extra).Send();
+
+    Movement::ExtraMovementStatusElement setExtra(extraElements);
+    setExtra.Data.floatData = height; // Height
+    setExtra.Data.floatData2 = 1.0f;   // Scale
+    Movement::PacketSender(this, NULL_OPCODE, SMSG_MOVE_SET_COLLISION_HEIGHT, NULL_OPCODE, &setExtra).Send();
+
+    Movement::ExtraMovementStatusElement updateExtra(extraElements);
+    updateExtra.Data.floatData = 1.0f;   // Scale
+    updateExtra.Data.floatData2 = height; // Height
+    Movement::PacketSender(this, NULL_OPCODE, NULL_OPCODE, SMSG_MOVE_UPDATE_COLLISION_HEIGHT, &updateExtra).Send();
 }
 
 void Player::SendApplyMovementForce(bool apply, Position const& source, float force /*= 0.0f*/)
