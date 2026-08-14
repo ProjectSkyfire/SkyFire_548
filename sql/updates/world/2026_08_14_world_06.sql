@@ -12,7 +12,7 @@ UPDATE `quest_template` SET `RequestItemsText`='Your mission is not complete unt
 UPDATE `quest_template` SET `OfferRewardText`='Most excellent, $n! You have brought hope to Loch Modan. With Grawmug dead, we stand a better chance of seeing the Troggs eliminated from the land.' WHERE `Id`=26148;
 
 -- Bigger and Uglier
-UPDATE `sf_world`.`quest_template` SET `OfferRewardText`='I knew the second I laid eyes on you, $n, that you would make Ironforge proud. You have served our people well. I salute you, $n.' WHERE `Id`=26147;
+UPDATE `quest_template` SET `OfferRewardText`='I knew the second I laid eyes on you, $n, that you would make Ironforge proud. You have served our people well. I salute you, $n.' WHERE `Id`=26147;
 
 -- Onward to Thelsamar
 UPDATE `quest_template` SET `RequestItemsText`='What can I do for you?' WHERE `Id`=26176;
