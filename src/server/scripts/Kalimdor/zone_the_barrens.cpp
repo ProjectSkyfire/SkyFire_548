@@ -20,6 +20,7 @@ EndContentData */
 #include "ScriptedEscortAI.h"
 #include "Player.h"
 #include "SpellInfo.h"
+#include "SpellScript.h"
 
 /*######
 ## npc_beaten_corpse
@@ -746,9 +747,45 @@ class spell_barrens_bandage : public SpellScript
     }
 };
 
+/*#####
+## spell_q25027_bramblestaff
+## 73141 is a dummy with no server handler, so the quest needs one here to award credit and hand off
+## the vine RP to Three-Tooth's SAI. Same pattern as spell_barrens_bandage.
+#####*/
+
+enum YouFlickedAFineVine
+{
+    SPELL_BRAMBLESTAFF                      = 73141,
+    NPC_THREE_TOOTH                         = 38941,
+    ACTION_THREE_TOOTH_BRAMBLESTAFF         = 1
+};
+
+class spell_q25027_bramblestaff : public SpellScript
+{
+    PrepareSpellScript(spell_q25027_bramblestaff);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        Creature* target = GetHitCreature();
+        if (!target || target->GetEntry() != NPC_THREE_TOOTH || !target->IsAIEnabled)
+            return;
+
+        if (Player* player = GetCaster()->ToPlayer())
+            player->KilledMonsterCredit(NPC_THREE_TOOTH);
+
+        target->AI()->DoAction(ACTION_THREE_TOOTH_BRAMBLESTAFF);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_q25027_bramblestaff::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_the_barrens()
 {
     new npc_wizzlecrank_shredder();
     RegisterCreatureAI(npc_barrent_wounded_defender);
     RegisterSpellScript(spell_barrens_bandage);
+    RegisterSpellScript(spell_q25027_bramblestaff);
 }
