@@ -75,9 +75,18 @@ UPDATE `creature` SET
     `spawntimesecs`=300
 WHERE `guid`=149553 AND `id`=38826;
 
--- Quest helm only (wipe any junk rows on this loot id)
+-- Karga loot (MoP Classic drop rates) + quest helm
 DELETE FROM `creature_loot_template` WHERE `entry`=38663;
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
+(38663, 1708, 5.07, 1, 0, 1, 1),
+(38663, 1710, 13.87, 1, 0, 1, 1),
+(38663, 3771, 5.87, 1, 0, 1, 1),
+(38663, 3779, 0.27, 1, 0, 1, 1),
+(38663, 3798, 0.27, 1, 0, 1, 1),
+(38663, 4306, 43.2, 1, 0, 1, 2),
+(38663, 6661, 2.13, 1, 0, 1, 1),
+(38663, 12974, 5.07, 1, 0, 1, 1),
+(38663, 14608, 1.87, 1, 0, 1, 1),
 (38663, 52036, -100, 1, 0, 1, 1);
 
 -- Dialogue (sniff + encounter lines)
