@@ -643,6 +643,24 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                 target->ToPlayer()->RemoveTemporarySpell(shapeInfo->stanceSpell[i]);
         }
     }
+
+    // Some auras (e.g. Druid's Dash, spell 1850) gate their amount on the
+    // caster's CURRENT shapeshift form, calculated once when the aura first
+    // applies (AuraEffect::CalculateAmount) and never revisited afterward.
+    // That covers the case where such an aura is already active and the
+    // caster later leaves the form some other way (the aura should drop its
+    // bonus, but nothing tells it to re-check). The opposite case - the aura
+    // applying before entering the form - is handled at the point that aura
+    // itself applies (see spell_dru_dash's own AfterEffectApply hook for why
+    // that needs a separate fix); this one only needs to run when a form is
+    // actually being left, so applying auras aren't recalculated against a
+    // stale form here as well.
+    if (!apply)
+    {
+        Unit::AuraEffectList const speedAlwaysAuras(target->GetAuraEffectsByType(SPELL_AURA_MOD_SPEED_ALWAYS));
+        for (AuraEffect* speedAura : speedAlwaysAuras)
+            speedAura->RecalculateAmount();
+    }
 }
 
 void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, bool apply) const
