@@ -22,6 +22,7 @@ enum HighGuid
     HIGHGUID_CORPSE = 0xF101,                      // blizz F100
     HIGHGUID_AREATRIGGER = 0xF102,                      // blizz F100
     HIGHGUID_BATTLEGROUND = 0x1F1,                       // new 4.x
+    HIGHGUID_LOOT = 0xF19,                       // blizz F190 (loot object of a lootable source)
     HIGHGUID_MO_TRANSPORT = 0x1FC,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
     HIGHGUID_GROUP = 0x1F5,
     HIGHGUID_GUILD = 0x1FF                        // new 4.x
@@ -53,6 +54,7 @@ inline bool IS_TRANSPORT_GUID(uint64 guid);
 inline bool IS_MO_TRANSPORT_GUID(uint64 guid);
 inline bool IS_GROUP_GUID(uint64 guid);
 inline bool IS_AREATRIGGER_GUID(uint64 guid);
+inline bool IS_LOOT_GUID(uint64 guid);
 
 // l - OBJECT_FIELD_GUID
 // e - OBJECT_FIELD_ENTRY_ID for GO (except GAMEOBJECT_TYPE_MO_TRANSPORT) and creatures or UNIT_FIELD_PET_NUMBER for pets
@@ -187,6 +189,11 @@ bool IS_AREATRIGGER_GUID(uint64 guid)
     return GUID_HIPART(guid) == HIGHGUID_AREATRIGGER;
 }
 
+bool IS_LOOT_GUID(uint64 guid)
+{
+    return GUID_HIPART(guid) == HIGHGUID_LOOT;
+}
+
 uint64 MAKE_NEW_GUID(uint32 l, uint32 e, uint32 h)
 {
     return uint64(uint64(l) | (uint64(e) << 32) | (uint64(h) << ((h == HIGHGUID_CORPSE || h == HIGHGUID_AREATRIGGER) ? 48 : 52)));
@@ -221,6 +228,7 @@ bool IsGuidHaveEnPart(uint64 guid)
         case HIGHGUID_CORPSE:
         case HIGHGUID_GROUP:
         case HIGHGUID_GUILD:
+        case HIGHGUID_LOOT:
             return false;
         case HIGHGUID_GAMEOBJECT:
         case HIGHGUID_TRANSPORT:
@@ -250,6 +258,7 @@ char const* GetLogNameForGuid(uint64 guid)
         case HIGHGUID_MO_TRANSPORT: return "mo_transport";
         case HIGHGUID_GROUP:        return "group";
         case HIGHGUID_GUILD:        return "guild";
+        case HIGHGUID_LOOT:         return "loot";
         case HIGHGUID_AREATRIGGER:  return "areatrigger";
         default:
             return "<unknown>";

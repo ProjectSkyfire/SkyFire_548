@@ -687,6 +687,32 @@ target_include_directories(loot_count_tests PRIVATE
 
 add_test(NAME loot_count_tests COMMAND loot_count_tests)
 
+add_executable(loot_packet_encoding_tests
+  LootPacketEncodingTests.cpp
+)
+
+target_include_directories(loot_packet_encoding_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${CMAKE_SOURCE_DIR}/src/server/game/Loot
+)
+
+add_test(NAME loot_packet_encoding_tests COMMAND loot_packet_encoding_tests)
+
+add_executable(loot_object_guid_tests
+  LootObjectGuidTests.cpp
+)
+
+target_include_directories(loot_object_guid_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Platform
+  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object
+)
+
+add_test(NAME loot_object_guid_tests COMMAND loot_object_guid_tests)
+
 add_executable(aggro_distance_tests
   AggroDistanceTests.cpp
 )
