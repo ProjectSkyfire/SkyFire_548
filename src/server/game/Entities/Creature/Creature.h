@@ -193,16 +193,24 @@ typedef UNORDERED_MAP<uint32, CreatureTemplate> CreatureTemplateContainer;
 #pragma pack(push, 1)
 #endif
 
-// Defines base stats for creatures (used to calculate HP/mana/armor).
+// Defines base stats for creatures (used to calculate HP/mana/armor/damage).
 struct CreatureBaseStats
 {
     uint32 BaseHealth[MAX_CREATURE_BASE_HP];
+    float BaseDamage[MAX_CREATURE_BASE_DAMAGE];
     uint32 BaseMana;
     uint32 BaseArmor;
+    uint32 AttackPower;
+    uint32 RangedAttackPower;
 
     // Helpers
 
     uint32 GenerateHealth(CreatureTemplate const* info) const;
+
+    float GenerateBaseDamage(CreatureTemplate const* info) const
+    {
+        return BaseDamage[CURRENT_CONTENT_EXP];
+    }
 
     uint32 GenerateMana(CreatureTemplate const* info) const
     {

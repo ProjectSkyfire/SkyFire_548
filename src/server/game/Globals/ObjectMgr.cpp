@@ -8592,7 +8592,11 @@ CreatureBaseStats const* ObjectMgr::GetCreatureBaseStats(uint8 level, uint8 unit
             BaseArmor = 1;
             for (uint8 j = 0; j < MAX_CREATURE_BASE_HP; ++j)
                 BaseHealth[j] = 1;
+            for (uint8 j = 0; j < MAX_CREATURE_BASE_DAMAGE; ++j)
+                BaseDamage[j] = 0.0f;
             BaseMana = 0;
+            AttackPower = 0;
+            RangedAttackPower = 0;
         }
     };
     static const DefaultCreatureBaseStats def_stats;
@@ -8602,8 +8606,10 @@ CreatureBaseStats const* ObjectMgr::GetCreatureBaseStats(uint8 level, uint8 unit
 void ObjectMgr::LoadCreatureClassLevelStats()
 {
     uint32 oldMSTime = getMSTime();
-    //                                                 0      1           2                   3                7         8
-    QueryResult result = WorldDatabase.Query("SELECT level, class, OldContentBaseHP, CurrentContentBaseHP, basemana, basearmor FROM creature_classlevelstats");
+    //                                                 0      1        2        3        4        5        6         7          8
+    QueryResult result = WorldDatabase.Query("SELECT level, class, basehp0, basehp1, basehp2, basehp3, basehp4, basemana, basearmor, "
+        //                                           9            10            11            12            13            14            15
+        "damage_base, damage_exp1, damage_exp2, damage_exp3, damage_exp4, attackpower, rangedattackpower FROM creature_classlevelstats");
 
     if (!result)
     {
@@ -8622,10 +8628,16 @@ void ObjectMgr::LoadCreatureClassLevelStats()
         CreatureBaseStats stats;
 
         for (uint8 i = 0; i < MAX_CREATURE_BASE_HP; ++i)
-            stats.BaseHealth[i] = fields[i + 2].GetUInt32();
+            stats.BaseHealth[i] = fields[2 + i].GetUInt32();
 
-        stats.BaseMana = fields[4].GetUInt32();
-        stats.BaseArmor = fields[5].GetUInt32();
+        stats.BaseMana = fields[7].GetUInt32();
+        stats.BaseArmor = fields[8].GetUInt32();
+
+        for (uint8 i = 0; i < MAX_CREATURE_BASE_DAMAGE; ++i)
+            stats.BaseDamage[i] = fields[9 + i].GetFloat();
+
+        stats.AttackPower = fields[14].GetUInt32();
+        stats.RangedAttackPower = fields[15].GetUInt32();
 
         if (!Class || ((1 << (Class - 1)) & CLASSMASK_ALL_CREATURES) == 0)
             SF_LOG_ERROR("sql.sql", "Creature base stats for level %u has invalid class %u", Level, Class);

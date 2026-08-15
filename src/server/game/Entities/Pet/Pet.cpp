@@ -904,7 +904,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
     {
         // remove elite bonuses included in DB values
         CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(petlevel, cinfo->unit_class);
-        SetCreateHealth(stats->BaseHealth[(CURRENT_CONTENT_EXP == cinfo->expansion) ? 1 : 0]);
+        SetCreateHealth(stats->BaseHealth[CURRENT_CONTENT_EXP]);
         SetCreateMana(stats->BaseMana);
 
         SetCreateStat(STAT_STRENGTH, 22);

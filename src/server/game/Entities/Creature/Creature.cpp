@@ -121,10 +121,10 @@ bool AssistDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 
 uint32 CreatureBaseStats::GenerateHealth(CreatureTemplate const* info) const
 {
-    if (info->ModLevel == true)
-        return uint32(ceil(BaseHealth[1] * info->ModHealth));
-    else
-        return uint32(ceil(BaseHealth[CURRENT_CONTENT_EXP == info->expansion ? 1 : 0] * info->ModHealth));
+    // MoP uses the current client health curve for all creatures.  The
+    // template expansion controls content/XP, not which historical health
+    // curve the 5.4.8 client displays.
+    return uint32(ceil(BaseHealth[CURRENT_CONTENT_EXP] * info->ModHealth));
 }
 
 CreatureBaseStats const* CreatureBaseStats::GetBaseStats(uint8 level, uint8 unitClass)
