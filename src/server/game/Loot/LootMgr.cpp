@@ -8,6 +8,8 @@
 #include "Log.h"
 #include "LootCount.h"
 #include "LootMgr.h"
+#include "LootPacketEncoding.h"
+#include "ObjectDefines.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "SharedDefines.h"
@@ -16,6 +18,7 @@
 #include "UnaryFunction.h"
 #include "Util.h"
 #include "World.h"
+#include <atomic>
 
 static Rates const qualityToRate[MAX_ITEM_QUALITY] =
 {
@@ -415,12 +418,24 @@ void Loot::AddItem(LootStoreItem const& item)
     }
 }
 
+// The 5.4.8 client keys its loot window, and every request it sends back, on this GUID.
+// It must be distinct from the looted object so that area looting can tell sources apart.
+uint64 Loot::GenerateGUID()
+{
+    static std::atomic<uint32> lootObjectCounter(0);
+
+    _guid = MAKE_NEW_GUID(++lootObjectCounter, 0, HIGHGUID_LOOT);
+    return _guid;
+}
+
 // Calls processor of corresponding LootTemplate (which handles everything including references)
 bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError, uint16 lootMode /*= LOOT_MODE_DEFAULT*/)
 {
     // Must be provided
     if (!lootOwner)
         return false;
+
+    GenerateGUID();
 
     LootTemplate const* tab = store.GetLootFor(lootId);
 
@@ -597,6 +612,18 @@ QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player, bool pres
 
 //===================================================
 
+// Removal notices must name the loot object the client was handed, not the looted source.
+uint64 Loot::GetNotifyGUID(ObjectGuid lootGuid, Player* player) const
+{
+    if (_guid)
+        return _guid;
+
+    if (uint64 guid = uint64(lootGuid))
+        return guid;
+
+    return player->GetLootGUID();
+}
+
 void Loot::NotifyItemRemoved(uint8 lootIndex, ObjectGuid lootGuid)
 {
     // notify all players that are looting this that the item was removed
@@ -608,7 +635,7 @@ void Loot::NotifyItemRemoved(uint8 lootIndex, ObjectGuid lootGuid)
         ++i_next;
         if (Player* player = ObjectAccessor::FindPlayer(*i))
         {
-            uint64 notifyGuid = uint64(lootGuid) ? uint64(lootGuid) : player->GetLootGUID();
+            uint64 notifyGuid = GetNotifyGUID(lootGuid, player);
             player->SendNotifyLootItemRemoved(lootIndex, notifyGuid);
         }
         else
@@ -626,7 +653,7 @@ void Loot::NotifyMoneyRemoved(ObjectGuid lootGuid)
         ++i_next;
         if (Player* player = ObjectAccessor::FindPlayer(*i))
         {
-            uint64 notifyGuid = uint64(lootGuid) ? uint64(lootGuid) : player->GetLootGUID();
+            uint64 notifyGuid = GetNotifyGUID(lootGuid, player);
             player->SendNotifyLootMoneyRemoved(notifyGuid);
         }
         else
@@ -661,8 +688,7 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex, ObjectGuid lootGuid)
 
                 if (j < pql.size())
                 {
-                    uint64 notifyGuid = uint64(lootGuid) ? uint64(lootGuid) : player->GetLootGUID();
-                    player->SendNotifyLootItemRemoved(items.size() + j, notifyGuid);
+                    player->SendNotifyLootItemRemoved(items.size() + j, GetNotifyGUID(lootGuid, player));
                 }
             }
         }
@@ -837,27 +863,18 @@ bool Loot::hasOverThresholdItem() const
     return false;
 }
 
-void LootItem::WriteBitDataPart(PermissionTypes permission, LootSlotType SlotType, ByteBuffer* buff)
+void LootItem::WriteBitDataPart(LootSlotType slotType, ByteBuffer* buff)
 {
-    bool hasSlotType = bool(SlotType);
-    buff->WriteBits(uint8(permission), 3);
-    buff->WriteBit(0); // canTradeToTapList
-    buff->WriteBit(!hasSlotType);
-    buff->WriteBit(0); // Contains Slot - Always sent
-    buff->WriteBits(0, 2); // Unk 2 bits
+    Skyfire::Looting::WriteLootItemBitData(uint8(slotType), buff);
 }
 
-void LootItem::WriteBasicDataPart(LootSlotType SlotType, uint8 slot, ByteBuffer* buff)
+void LootItem::WriteBasicDataPart(uint8 slot, ByteBuffer* buff)
 {
     *buff << uint32(randomSuffix);
     *buff << uint32(count);
     *buff << uint32(itemid);
     *buff << uint32(4); // Send situ size
     *buff << uint32(0); // Blizz always send 0 uint32 as situ (read in packet handler)
-
-    bool hasSlotType = bool(SlotType);
-    if (hasSlotType)
-        *buff << uint8(SlotType);
 
     *buff << uint32(randomPropertyId);
     *buff << uint8(slot);
@@ -866,7 +883,7 @@ void LootItem::WriteBasicDataPart(LootSlotType SlotType, uint8 slot, ByteBuffer*
 
 void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, bool isAoE)
 {
-    ObjectGuid lootGuid = guid;
+    ObjectGuid lootGuid = loot.GetGUID() ? loot.GetGUID() : loot.GenerateGUID();
 
     if (permission == PermissionTypes::NONE_PERMISSION)
     {
@@ -891,8 +908,9 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
         data->WriteBit(lootGuid[5]);
         data->WriteBit(guid[3]);
         data->WriteBit(lootGuid[4]);
-        data->WriteBit(1); // Missing unk8
+        data->WriteBit(0); // has loot method and threshold
         data->WriteBit(guid[2]);
+        Skyfire::Looting::WriteLootResponseMethodThresholdBits(data);
         data->FlushBits();
         data->WriteByteSeq(lootGuid[2]);
         data->WriteByteSeq(lootGuid[7]);
@@ -970,8 +988,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
                     else
                         continue; // item shall not be displayed.
 
-                    loot.items[i].WriteBitDataPart(permission, slotType, data);
-                    loot.items[i].WriteBasicDataPart(slotType, i, &itemBuff);
+                    loot.items[i].WriteBitDataPart(slotType, data);
+                    loot.items[i].WriteBasicDataPart(i, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -987,8 +1005,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
                         // item shall not be displayed.
                         continue;
 
-                    loot.items[i].WriteBitDataPart(permission, LootSlotType::LOOT_SLOT_TYPE_ALLOW_LOOT, data);
-                    loot.items[i].WriteBasicDataPart(LootSlotType::LOOT_SLOT_TYPE_ALLOW_LOOT, i, &itemBuff);
+                    loot.items[i].WriteBitDataPart(LootSlotType::LOOT_SLOT_TYPE_ALLOW_LOOT, data);
+                    loot.items[i].WriteBasicDataPart(i, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1015,8 +1033,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
             {
                 if (!loot.items[i].is_looted && !loot.items[i].freeforall && loot.items[i].conditions.empty() && loot.items[i].AllowedForPlayer(viewer))
                 {
-                    loot.items[i].WriteBitDataPart(permission, slotType, data);
-                    loot.items[i].WriteBasicDataPart(slotType, i, &itemBuff);
+                    loot.items[i].WriteBitDataPart(slotType, data);
+                    loot.items[i].WriteBasicDataPart(i, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1062,8 +1080,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
                         }
                     }
 
-                    item.WriteBitDataPart(permission, finalSlotType, data);
-                    item.WriteBasicDataPart(finalSlotType, index, &itemBuff);
+                    item.WriteBitDataPart(finalSlotType, data);
+                    item.WriteBasicDataPart(index, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1079,8 +1097,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
                 LootItem& item = loot.items[fi->index];
                 if (!fi->is_looted && !item.is_looted)
                 {
-                    item.WriteBitDataPart(PermissionTypes::OWNER_PERMISSION, slotType, data);
-                    item.WriteBasicDataPart(slotType, fi->index, &itemBuff);
+                    item.WriteBitDataPart(slotType, data);
+                    item.WriteBasicDataPart(fi->index, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1117,8 +1135,8 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
                         }
                     }
 
-                    item.WriteBitDataPart(permission, finalSlotType, data);
-                    item.WriteBasicDataPart(finalSlotType, ci->index, &itemBuff);
+                    item.WriteBitDataPart(finalSlotType, data);
+                    item.WriteBasicDataPart(ci->index, &itemBuff);
                     ++itemsShown;
                 }
             }
@@ -1133,8 +1151,9 @@ void LootView::WriteData(ObjectGuid guid, LootType lootType, WorldPacket* data, 
     data->WriteBit(lootGuid[5]);
     data->WriteBit(guid[3]);
     data->WriteBit(lootGuid[4]);
-    data->WriteBit(1); // Missing unk8
+    data->WriteBit(0); // has loot method and threshold
     data->WriteBit(guid[2]);
+    Skyfire::Looting::WriteLootResponseMethodThresholdBits(data);
 
     data->FlushBits();
 

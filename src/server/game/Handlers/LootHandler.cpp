@@ -58,8 +58,8 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
         uint8 lootSlot;
         recvData >> lootSlot;
 
-        uint64 guid = guids[i];
-        if (!player->IsLootingObject(guid))
+        uint64 guid = player->ResolveLootObject(guids[i]);
+        if (!guid || !player->IsLootingObject(guid))
             continue;
 
         if (IS_GAMEOBJECT_GUID(guid))
@@ -334,8 +334,9 @@ void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)
     recvData.ReadGuidMask(guid, 7, 4, 2, 3, 0, 5, 6, 1);
     recvData.ReadGuidBytes(guid, 0, 6, 4, 2, 5, 3, 7, 1);
 
-    if (GetPlayer()->IsLootingObject(guid) || GetPlayer()->GetLootGUID() == guid)
-        DoLootRelease(guid);
+    uint64 lguid = GetPlayer()->ResolveLootObject(guid);
+    if (lguid && (GetPlayer()->IsLootingObject(lguid) || GetPlayer()->GetLootGUID() == lguid))
+        DoLootRelease(lguid);
 }
 
 void WorldSession::DoLootRelease(uint64 lguid)
@@ -496,6 +497,8 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
     uint64 lootguid, target_playerguid;
 
     recvData >> lootguid >> slotid >> target_playerguid;
+
+    lootguid = _player->ResolveLootObject(lootguid);
 
     if (!_player->GetGroup() || _player->GetGroup()->GetLooterGuid() != _player->GetGUID())
     {
