@@ -83,8 +83,10 @@ enum class LootSlotType
     LOOT_SLOT_TYPE_ROLL_ONGOING = 0,                        // roll is ongoing. player cannot loot.
     LOOT_SLOT_TYPE_LOCKED = 1,                        // item is shown in red. player cannot loot.
     LOOT_SLOT_TYPE_MASTER = 2,                        // item can only be distributed by group loot master.
-    LOOT_SLOT_TYPE_ALLOW_LOOT = 5,                        // player can loot the item.
-    LOOT_SLOT_TYPE_OWNER = 6                         // ignore binding confirmation and etc, for single player looting
+    // 18414 only ever sends 3, 4, 5 and 7 here. Corpse loot uses 3, and the client will
+    // not auto-loot a slot whose type it does not recognise.
+    LOOT_SLOT_TYPE_ALLOW_LOOT = 3,                        // player can loot the item.
+    LOOT_SLOT_TYPE_OWNER = 3                         // ignore binding confirmation and etc, for single player looting
 };
 
 class Player;
@@ -145,8 +147,8 @@ struct LootItem
     const AllowedLooterSet& GetAllowedLooters() const { return allowedGUIDs; }
 
     // Write packet data
-    void WriteBitDataPart(PermissionTypes permission, LootSlotType hasSlotType, ByteBuffer* buff);
-    void WriteBasicDataPart(LootSlotType slotType, uint8 slot, ByteBuffer* buff);
+    void WriteBitDataPart(LootSlotType slotType, ByteBuffer* buff);
+    void WriteBasicDataPart(uint8 slot, ByteBuffer* buff);
 };
 
 struct QuestItem
@@ -291,8 +293,12 @@ struct Loot
     //  Only set for inventory items that can be right-click looted
     uint32 containerID;
 
-    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), roundRobinPlayer(0), loot_type(LootType::LOOT_CORPSE), maxDuplicates(1), containerID(0) { }
+    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), roundRobinPlayer(0), loot_type(LootType::LOOT_CORPSE), maxDuplicates(1), containerID(0), _guid(0) { }
     ~Loot() { clear(); }
+
+    // The client identifies an open loot window by this GUID, not by the looted object.
+    uint64 GetGUID() const { return _guid; }
+    uint64 GenerateGUID();
 
     // For deleting items at loot removal since there is no backward interface to the Item()
     void DeleteLootItemFromContainerItemDB(uint32 itemID);
@@ -331,6 +337,7 @@ struct Loot
     bool empty() const { return items.empty() && gold == 0; }
     bool isLooted() const { return gold == 0 && unlootedCount == 0; }
 
+    uint64 GetNotifyGUID(ObjectGuid lootGuid, Player* player) const;
     void NotifyItemRemoved(uint8 lootIndex, ObjectGuid lootGuid = 0);
     void NotifyQuestItemRemoved(uint8 questIndex, ObjectGuid lootGuid = 0);
     void NotifyMoneyRemoved(ObjectGuid lootGuid = 0);
@@ -362,6 +369,8 @@ private:
 
     // All rolls are registered here. They need to know, when the loot is not valid anymore
     LootValidatorRefManager i_LootValidatorRefManager;
+
+    uint64 _guid;
 };
 
 struct LootView

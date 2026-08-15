@@ -2439,6 +2439,11 @@ public:
     }
     void RemoveLootedObject(uint64 guid);
 
+    // The client answers with the loot object GUID it was sent, so map it back to the source.
+    void RegisterLootObject(uint64 lootObjectGuid, uint64 objectGuid);
+    uint64 ResolveLootObject(uint64 guid) const;
+    uint64 GetLootObjectGUID(uint64 objectGuid) const;
+
     void RemovedInsignia(Player* looterPlr);
 
     WorldSession* GetSession() const
@@ -3384,6 +3389,7 @@ protected:
     void outDebugValues() const;
     uint64 m_lootGuid;
     std::set<uint64> m_lootView;
+    std::map<uint64 /*lootObjectGuid*/, uint64 /*objectGuid*/> m_lootObjects;
 
     uint32 m_team;
     uint32 m_nextSave;
