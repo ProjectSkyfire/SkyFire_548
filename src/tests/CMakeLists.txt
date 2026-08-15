@@ -687,6 +687,17 @@ target_include_directories(loot_count_tests PRIVATE
 
 add_test(NAME loot_count_tests COMMAND loot_count_tests)
 
+add_executable(aggro_distance_tests
+  AggroDistanceTests.cpp
+)
+
+target_include_directories(aggro_distance_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Creature
+)
+
+add_test(NAME aggro_distance_tests COMMAND aggro_distance_tests)
+
 add_executable(darkmoon_shooting_gallery_tests
   DarkmoonShootingGalleryTests.cpp
 )

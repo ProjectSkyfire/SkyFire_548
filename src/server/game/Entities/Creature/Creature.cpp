@@ -9,6 +9,7 @@
 #include "CellImpl.h"
 #include "Common.h"
 #include "Creature.h"
+#include "AggroDistance.h"
 #include "CreatureAI.h"
 #include "CreatureAISelector.h"
 #include "CreatureGroups.h"
@@ -1415,39 +1416,17 @@ bool Creature::CanStartAttack(Unit const* who, bool force) const
 float Creature::GetAttackDistance(Unit const* player) const
 {
     float aggroRate = sWorld->getRate(Rates::RATE_CREATURE_AGGRO);
-    if (aggroRate == 0)
-        return 0.0f;
-
     uint32 playerlevel = player->getLevelForTarget(this);
     uint32 creaturelevel = getLevelForTarget(player);
-
-    int32 leveldif = int32(playerlevel) - int32(creaturelevel);
-
-    // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
-    if (leveldif < -25)
-        leveldif = -25;
-
-    // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
-    float RetDistance = 20;
-
-    // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
-    // radius grow if playlevel < creaturelevel
-    RetDistance -= (float)leveldif;
+    float detectionModifier = 0.0f;
 
     if (creaturelevel + 5 <= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
     {
-        // detect range auras
-        RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
-
-        // detected range auras
-        RetDistance += player->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
+        detectionModifier += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
+        detectionModifier += player->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
     }
 
-    // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
-    if (RetDistance < 5)
-        RetDistance = 5;
-
-    return (RetDistance * aggroRate);
+    return Skyfire::Aggro::CalculateAttackDistance(playerlevel, creaturelevel, detectionModifier, aggroRate);
 }
 
 void Creature::setDeathState(DeathState s)
