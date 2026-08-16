@@ -452,8 +452,8 @@ void ObjectMgr::LoadCreatureTemplates()
         "spell1, spell2, spell3, spell4, spell5, spell6, spell7, spell8, PetSpellDataId, VehicleId, mingold, maxgold, AIName, MovementType, "
         //                                             69          70         71         72            73            74          75           76          77          78           79          80
         "InhabitType, HoverHeight, Health_mod, Mana_mod, Mana_mod_extra, Armor_mod, RacialLeader, questItem1, questItem2, questItem3, questItem4, questItem5, "
-        //                                            81           82          83               84                85           86
-        " questItem6, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName, ModLevel "
+        //                                            81           82          83               84                85           86        87          88
+        " questItem6, movementId, RegenHealth, mechanic_immune_mask, flags_extra, ScriptName, ModLevel, detection_range "
         "FROM creature_template;");
 
     if (!result)
@@ -557,6 +557,7 @@ void ObjectMgr::LoadCreatureTemplates()
         creatureTemplate.flags_extra = fields[85].GetUInt32();
         creatureTemplate.ScriptID = GetScriptId(fields[86].GetCString());
         creatureTemplate.ModLevel = fields[87].GetBool();
+        creatureTemplate.DetectionRange = fields[88].GetFloat();
 
         ++count;
     } while (result->NextRow());
@@ -891,6 +892,12 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
     {
         SF_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong value (%f) in `HoverHeight`", cInfo->Entry, cInfo->HoverHeight);
         const_cast<CreatureTemplate*>(cInfo)->HoverHeight = 1.0f;
+    }
+
+    if (cInfo->DetectionRange <= 0.0f || cInfo->DetectionRange > MAX_AGGRO_RADIUS)
+    {
+        SF_LOG_ERROR("sql.sql", "Creature (Entry: %u) has wrong value (%f) in `detection_range`, set to %f.", cInfo->Entry, cInfo->DetectionRange, DEFAULT_DETECTION_RANGE);
+        const_cast<CreatureTemplate*>(cInfo)->DetectionRange = DEFAULT_DETECTION_RANGE;
     }
 
     if (cInfo->VehicleId)

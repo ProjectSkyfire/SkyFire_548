@@ -1398,7 +1398,11 @@ bool Creature::CanStartAttack(Unit const* who, bool force) const
         if (!_IsTargetAcceptable(who))
             return false;
 
-        if (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance))
+        if (IsNeutralToAll())
+            return false;
+
+        // measured between both centers, so the detection range is not silently widened by either model's size
+        if (!IsInMap(who) || !InSamePhase(who) || GetExactDist(who) > GetAttackDistance(who) + m_CombatDistance)
             return false;
     }
 
@@ -1418,10 +1422,8 @@ float Creature::GetAttackDistance(Unit const* player) const
     int32 creaturelevel = int32(getLevelForTarget(player));
     int32 leveldif = creaturelevel - playerlevel;
 
-    // "The aggro radius of a mob having the same level as the player is roughly 20 yards".
-    // The callers add both combat reaches on top of this distance, so drop our own reach here
-    // to keep large models from aggroing further than small ones.
-    float baseAggroDistance = 20.0f - GetCombatReach();
+    // Blizzard sets the radius per creature; starting zones use much shorter ranges than the rest of the world
+    float baseAggroDistance = GetCreatureTemplate()->DetectionRange;
 
     // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
     float RetDistance = baseAggroDistance + float(leveldif);
@@ -1435,9 +1437,10 @@ float Creature::GetAttackDistance(Unit const* player) const
         RetDistance += player->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
     }
 
-    // Creatures above the level cap of their own expansion (bosses) must not out-range regular creatures
+    // Creatures above the level cap of their own expansion (bosses) must not out-range regular creatures.
+    // Templates whose cap sits below the target's level carry an unusable `exp`, so they are left alone.
     int32 expansionMaxLevel = int32(GetMaxLevelForExpansion(GetCreatureTemplate()->expansion));
-    if (expansionMaxLevel > 0 && creaturelevel > expansionMaxLevel)
+    if (creaturelevel > expansionMaxLevel && expansionMaxLevel >= playerlevel)
         RetDistance = baseAggroDistance + float(expansionMaxLevel - playerlevel);
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)", the maximum is 45 yards
