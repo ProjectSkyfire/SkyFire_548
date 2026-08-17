@@ -129,6 +129,7 @@ struct CreatureTemplate
     uint32  flags_extra;
     uint32  ScriptID;
     bool    ModLevel;
+    float   DetectionRange;                                 // aggro radius against a target of the same level
     uint32  GetRandomValidModelId() const;
     uint32  GetFirstValidModelId() const;
 
@@ -428,6 +429,9 @@ typedef std::map<uint32, time_t> CreatureSpellCooldowns;
 
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
+
+// aggro radius against a target of the same level, used when `detection_range` holds no usable value
+#define DEFAULT_DETECTION_RANGE 20.0f
 
 #define MAX_VENDOR_ITEMS 150                                // Limitation in 4.x.x item count in SMSG_LIST_INVENTORY
 

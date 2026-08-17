@@ -13,6 +13,7 @@
 #include "CreatureAISelector.h"
 #include "CreatureGroups.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "Formulas.h"
 #include "GameEventMgr.h"
 #include "GossipDef.h"
@@ -1397,12 +1398,11 @@ bool Creature::CanStartAttack(Unit const* who, bool force) const
         if (!_IsTargetAcceptable(who))
             return false;
 
-        if (who->IsInCombat() && IsWithinDist(who, ATTACK_DISTANCE))
-            if (Unit* victim = who->getAttackerForHelper())
-                if (IsWithinDistInMap(victim, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_CREATURE_FAMILY_ASSISTANCE_RADIUS)))
-                    force = true;
+        if (IsNeutralToAll())
+            return false;
 
-        if (!force && (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance)))
+        // measured between both centers, so the detection range is not silently widened by either model's size
+        if (!IsInMap(who) || !InSamePhase(who) || GetExactDist(who) > GetAttackDistance(who) + m_CombatDistance)
             return false;
     }
 
@@ -1418,23 +1418,17 @@ float Creature::GetAttackDistance(Unit const* player) const
     if (aggroRate == 0)
         return 0.0f;
 
-    uint32 playerlevel = player->getLevelForTarget(this);
-    uint32 creaturelevel = getLevelForTarget(player);
+    int32 playerlevel = int32(player->getLevelForTarget(this));
+    int32 creaturelevel = int32(getLevelForTarget(player));
+    int32 leveldif = creaturelevel - playerlevel;
 
-    int32 leveldif = int32(playerlevel) - int32(creaturelevel);
-
-    // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
-    if (leveldif < -25)
-        leveldif = -25;
-
-    // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
-    float RetDistance = 20;
+    // Blizzard sets the radius per creature; starting zones use much shorter ranges than the rest of the world
+    float baseAggroDistance = GetCreatureTemplate()->DetectionRange;
 
     // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
-    // radius grow if playlevel < creaturelevel
-    RetDistance -= (float)leveldif;
+    float RetDistance = baseAggroDistance + float(leveldif);
 
-    if (creaturelevel + 5 <= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
+    if (creaturelevel + 5 <= int32(sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL)))
     {
         // detect range auras
         RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
@@ -1443,9 +1437,14 @@ float Creature::GetAttackDistance(Unit const* player) const
         RetDistance += player->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
     }
 
-    // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
-    if (RetDistance < 5)
-        RetDistance = 5;
+    // Creatures above the level cap of their own expansion (bosses) must not out-range regular creatures.
+    // Templates whose cap sits below the target's level carry an unusable `exp`, so they are left alone.
+    int32 expansionMaxLevel = int32(GetMaxLevelForExpansion(GetCreatureTemplate()->expansion));
+    if (creaturelevel > expansionMaxLevel && expansionMaxLevel >= playerlevel)
+        RetDistance = baseAggroDistance + float(expansionMaxLevel - playerlevel);
+
+    // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)", the maximum is 45 yards
+    RetDistance = std::max(ATTACK_DISTANCE, std::min(RetDistance, MAX_AGGRO_RADIUS));
 
     return (RetDistance * aggroRate);
 }
