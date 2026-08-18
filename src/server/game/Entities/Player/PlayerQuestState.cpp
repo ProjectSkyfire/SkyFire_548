@@ -2200,7 +2200,10 @@ bool Player::HasQuestForItem(uint32 itemId) const
                         if (itemId == (*citr)->ObjectId && GetQuestObjectiveCounter((*citr)->Id) < uint32((*citr)->Amount))
                             return true;
             }
-            else
+            // Deliberately not an `else`: a quest can have an item objective AND a source
+            // item. The container that yields the objective item is registered in
+            // RequiredSourceItemId, so gating this branch behind `else` hid such containers
+            // from HasQuestForItem() and LootMgr refused to drop them.
             {
                 // This part - for ReqSource
                 for (uint8 j = 0; j < QUEST_SOURCE_ITEM_IDS_COUNT; ++j)
