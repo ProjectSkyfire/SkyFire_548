@@ -433,7 +433,9 @@ PlayerSave.Stats.SaveOnlyOnLogout = 1
 
 #
 #    mmap.enablePathFinding
-#        Description: Enable/Disable pathfinding using mmaps - experimental
+#        Description: Enable/Disable pathfinding using mmaps.
+#                     MMAP tiles must match the core MMAP_VERSION (currently 5.3).
+#                     After updating map tools, regenerate mmaps or tiles will fail to load.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 

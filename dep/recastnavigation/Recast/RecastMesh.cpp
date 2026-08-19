@@ -1319,6 +1319,12 @@ bool rcMergePolyMeshes(rcContext* ctx, rcPolyMesh** meshes, const int nmeshes, r
 		const unsigned short ox = (unsigned short)floorf((pmesh->bmin[0]-mesh.bmin[0])/mesh.cs+0.5f);
 		const unsigned short oz = (unsigned short)floorf((pmesh->bmin[2]-mesh.bmin[2])/mesh.cs+0.5f);
 		
+		bool isMinX = (ox == 0);
+		bool isMinZ = (oz == 0);
+		bool isMaxX = ((unsigned short)floorf((mesh.bmax[0] - pmesh->bmax[0]) / mesh.cs + 0.5f)) == 0;
+		bool isMaxZ = ((unsigned short)floorf((mesh.bmax[2] - pmesh->bmax[2]) / mesh.cs + 0.5f)) == 0;
+		bool isOnBorder = (isMinX || isMinZ || isMaxX || isMaxZ);
+		
 		for (int j = 0; j < pmesh->nverts; ++j)
 		{
 			unsigned short* v = &pmesh->verts[j*3];
@@ -1338,6 +1344,33 @@ bool rcMergePolyMeshes(rcContext* ctx, rcPolyMesh** meshes, const int nmeshes, r
 			{
 				if (src[k] == RC_MESH_NULL_IDX) break;
 				tgt[k] = vremap[src[k]];
+			}
+			
+			// buildMeshAdjacency below only rewrites edges shared by two polys, so
+			// portals carried over here survive and become the tile's DT_EXT_LINK edges.
+			if (isOnBorder)
+			{
+				for (int k = mesh.nvp; k < mesh.nvp*2; ++k)
+				{
+					if (src[k] & 0x8000 && src[k] != 0xffff)
+					{
+						switch (src[k] & 0xf)
+						{
+						case 0: // Portal x-
+							if (isMinX) tgt[k] = src[k];
+							break;
+						case 1: // Portal z+
+							if (isMaxZ) tgt[k] = src[k];
+							break;
+						case 2: // Portal x+
+							if (isMaxX) tgt[k] = src[k];
+							break;
+						case 3: // Portal z-
+							if (isMinZ) tgt[k] = src[k];
+							break;
+						}
+					}
+				}
 			}
 		}
 	}

@@ -4374,7 +4374,7 @@ enum class PartyResult
 };
 
 const uint32 MMAP_MAGIC = 0x4d4d4150; // 'MMAP'
-#define MMAP_VERSION 5.2f
+#define MMAP_VERSION 5.3f
 
 struct MmapTileHeader
 {
