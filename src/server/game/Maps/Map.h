@@ -176,10 +176,14 @@ class GridMap
     uint8 m_liquidWidth;
     uint8 m_liquidHeight;
 
+    // Terrain hole mask (16-bit legacy MCNK holes, 16x16 cells)
+    uint16* m_holes;
 
     bool loadAreaData(FILE* in, uint32 offset, uint32 size);
     bool loadHeightData(FILE* in, uint32 offset, uint32 size);
     bool loadLiquidData(FILE* in, uint32 offset, uint32 size);
+    bool loadHolesData(FILE* in, uint32 offset, uint32 size);
+    bool isHole(int row, int col) const;
 
     // Get height functions and pointers
     typedef float (GridMap::* GetHeightPtr) (float x, float y) const;
@@ -191,7 +195,8 @@ class GridMap
 
 public:
     GridMap() : m_flags(0), m_V9(NULL), m_V8(NULL), m_gridHeight(INVALID_HEIGHT), m_gridIntHeightMultiplier(0.0f), m_areaMap(NULL), m_liquidLevel(INVALID_HEIGHT),
-        m_liquidEntry(NULL), m_liquidFlags(NULL), m_liquidMap(NULL), m_gridArea(0), m_liquidType(0), m_liquidOffX(0), m_liquidOffY(0), m_liquidWidth(0), m_liquidHeight(0)
+        m_liquidEntry(NULL), m_liquidFlags(NULL), m_liquidMap(NULL), m_gridArea(0), m_liquidType(0), m_liquidOffX(0), m_liquidOffY(0), m_liquidWidth(0), m_liquidHeight(0),
+        m_holes(NULL)
     {
         m_gridGetHeight = &GridMap::getHeightFromFlat;
     }
@@ -202,6 +207,7 @@ public:
 
     uint16 getArea(float x, float y) const;
     inline float getHeight(float x, float y) const { return (this->*m_gridGetHeight)(x, y); }
+    bool isHoleAt(float x, float y) const;
     float getLiquidLevel(float x, float y) const;
     uint8 getTerrainType(float x, float y) const;
     ZLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData* data = 0);
@@ -310,6 +316,9 @@ public:
     // some calls like isInWater should not use vmaps due to processor power
     // can return INVALID_HEIGHT if under z+2 z coord not found height
     float GetHeight(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
+    // ADT height with no z+2 "already under the surface" skip (needed for slope paths).
+    float GetRawTerrainHeight(float x, float y) const;
+    bool IsTerrainHole(float x, float y) const;
 
     ZLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData* data = 0) const;
 
