@@ -10,10 +10,45 @@
 #include <cassert>
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 
 extern HANDLE WorldMpq;
 
-Model::Model(std::string &filename) : filename(filename), vertices(0), indices(0)
+namespace
+{
+    bool RangeInFile(uint32 offset, uint32 bytes, size_t fileSize)
+    {
+        return uint64(offset) + bytes <= fileSize;
+    }
+
+    bool LoadBoundingCollision(MPQFile& f, uint32 m2start, ModelHeader const& header, Vec3D*& vertices, uint16*& indices, uint32& nVertices, uint32& nIndices)
+    {
+        if (!header.nBoundingTriangles || !header.nBoundingVertices)
+            return false;
+        if (!RangeInFile(m2start + header.ofsBoundingVertices, header.nBoundingVertices * 12, f.getSize()))
+            return false;
+        if (!RangeInFile(m2start + header.ofsBoundingTriangles, header.nBoundingTriangles * 2, f.getSize()))
+            return false;
+
+        f.seek(m2start);
+        f.seekRelative(header.ofsBoundingVertices);
+        vertices = new Vec3D[header.nBoundingVertices];
+        f.read(vertices, header.nBoundingVertices * 12);
+        for (uint32 i = 0; i < header.nBoundingVertices; ++i)
+            vertices[i] = fixCoordSystem(vertices[i]);
+
+        f.seek(m2start);
+        f.seekRelative(header.ofsBoundingTriangles);
+        indices = new uint16[header.nBoundingTriangles];
+        f.read(indices, header.nBoundingTriangles * 2);
+        nVertices = header.nBoundingVertices;
+        nIndices = header.nBoundingTriangles;
+        return true;
+    }
+
+}
+
+Model::Model(std::string &filename) : filename(filename), vertices(0), indices(0), nVertices(0), nIndices(0)
 {
     memset(&header, 0, sizeof(header));
 }
@@ -25,35 +60,35 @@ bool Model::open()
     if (f.isEof())
     {
         f.close();
-        // Do not show this error on console to avoid confusion, the extractor can continue working even if some models fail to load
-        //printf("Error loading model %s\n", filename.c_str());
         return false;
     }
 
     _unload();
+    nVertices = 0;
+    nIndices = 0;
 
-    memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
-    if (header.nBoundingTriangles > 0)
+    // MoP wraps MD20 in an MD21 chunk. Offsets are relative to the MD20 header.
+    uint32 m2start = 0;
+    char const* ptr = f.getBuffer();
+    while (m2start + 4 < f.getSize() && memcmp(ptr, "MD20", 4) != 0)
     {
-        f.seek(0);
-        f.seekRelative(header.ofsBoundingVertices);
-        vertices = new Vec3D[header.nBoundingVertices];
-        f.read(vertices,header.nBoundingVertices*12);
-        for (uint32 i=0; i<header.nBoundingVertices; i++)
-            vertices[i] = fixCoordSystem(vertices[i]);
-        f.seek(0);
-        f.seekRelative(header.ofsBoundingTriangles);
-        indices = new uint16[header.nBoundingTriangles];
-        f.read(indices,header.nBoundingTriangles*2);
-        f.close();
+        ++m2start;
+        ++ptr;
+        if (m2start + sizeof(ModelHeader) > f.getSize())
+        {
+            f.close();
+            return false;
+        }
     }
-    else
-    {
-        //printf("not included %s\n", filename.c_str());
-        f.close();
-        return false;
-    }
-    return true;
+
+    memcpy(&header, f.getBuffer() + m2start, sizeof(ModelHeader));
+
+    // Only the bounding volume is real collision. Models without one are walked
+    // through by the client, so giving them geometry desyncs server and client.
+    bool const boundingOk = LoadBoundingCollision(f, m2start, header, vertices, indices, nVertices, nIndices);
+
+    f.close();
+    return boundingOk;
 }
 
 bool Model::ConvertToVMAPModel(const char * outfilename)
@@ -66,7 +101,6 @@ bool Model::ConvertToVMAPModel(const char * outfilename)
         return false;
     }
     fwrite(szRawVMAPMagic, 8, 1, output);
-    uint32 nVertices = header.nBoundingVertices;
     fwrite(&nVertices, sizeof(int), 1, output);
     uint32 nofgroups = 1;
     fwrite(&nofgroups,sizeof(uint32), 1, output);
@@ -79,24 +113,23 @@ bool Model::ConvertToVMAPModel(const char * outfilename)
     wsize = sizeof(branches) + sizeof(uint32) * branches;
     fwrite(&wsize, sizeof(int), 1, output);
     fwrite(&branches,sizeof(branches), 1, output);
-    uint32 nIndexes = header.nBoundingTriangles;
-    fwrite(&nIndexes,sizeof(uint32), 1, output);
+    fwrite(&nIndices,sizeof(uint32), 1, output);
     fwrite("INDX",4, 1, output);
-    wsize = sizeof(uint32) + sizeof(unsigned short) * nIndexes;
+    wsize = sizeof(uint32) + sizeof(unsigned short) * nIndices;
     fwrite(&wsize, sizeof(int), 1, output);
-    fwrite(&nIndexes, sizeof(uint32), 1, output);
-    if (nIndexes > 0)
+    fwrite(&nIndices, sizeof(uint32), 1, output);
+    if (nIndices > 0)
     {
-        for (uint32 i = 0; i < nIndexes; ++i)
+        for (uint32 i = 0; i < nIndices; ++i)
         {
-            if ((i % 3) - 1 == 0 && i + 1 < nIndexes)
+            if ((i % 3) - 1 == 0 && i + 1 < nIndices)
             {
                 uint16 tmp = indices[i];
                 indices[i] = indices[i + 1];
                 indices[i + 1] = tmp;
             }
         }
-        fwrite(indices, sizeof(unsigned short), nIndexes, output);
+        fwrite(indices, sizeof(unsigned short), nIndices, output);
     }
 
     fwrite("VERT", 4, 1, output);

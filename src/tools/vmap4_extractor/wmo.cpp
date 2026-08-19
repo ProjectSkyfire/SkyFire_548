@@ -341,9 +341,14 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE *output, WMORoot *rootWMO, bool precise
         memset(IndexRenum, 0xFF, nVertices*sizeof(int));
         for (int i=0; i<nTriangles; ++i)
         {
-            // Skip no collision triangles
-            if (MOPY[2*i]&WMO_MATERIAL_NO_COLLISION ||
-              !(MOPY[2*i]&(WMO_MATERIAL_HINT|WMO_MATERIAL_COLLIDE_HIT)) )
+            // Keep colliding render faces. Requiring HINT|COLLIDE_HIT drops most
+            // Cata/MoP walkable WMO terrain (Teldrassil canopy, Azshara cliff faces).
+            uint8 const flags = MOPY[2 * i];
+            if (flags & WMO_MATERIAL_NO_COLLISION)
+                continue;
+            bool const isRenderFace = (flags & WMO_MATERIAL_RENDER) && !(flags & WMO_MATERIAL_DETAIL);
+            bool const isHintHit = (flags & (WMO_MATERIAL_HINT | WMO_MATERIAL_COLLIDE_HIT)) != 0;
+            if (!isRenderFace && !isHintHit)
                 continue;
             // Use this triangle
             for (int j=0; j<3; ++j)

@@ -29,6 +29,8 @@ public:
     ModelHeader header;
     Vec3D* vertices;
     uint16* indices;
+    uint32 nVertices;
+    uint32 nIndices;
 
     bool open();
     bool ConvertToVMAPModel(char const* outfilename);

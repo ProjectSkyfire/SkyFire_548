@@ -56,6 +56,11 @@ void ExtractGameobjectModels()
     std::string path;
 
     FILE * model_list = fopen((basepath + "temp_gameobject_models").c_str(), "wb");
+    if (!model_list)
+    {
+        printf("Fatal error: Could not open temp_gameobject_models for writing!\n");
+        exit(1);
+    }
 
     for (DBCFile::Iterator it = dbc.begin(); it != dbc.end(); ++it)
     {

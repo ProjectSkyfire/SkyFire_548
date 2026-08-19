@@ -96,22 +96,26 @@ bool IsInterestingChunk(u_map_fcc const& fcc)
 void ChunkedFile::parseChunks()
 {
     uint8* ptr = GetData();
-    while (ptr < GetData() + GetDataSize())
+    uint8* end = GetData() + GetDataSize();
+    while (ptr + 8 <= end)
     {
         u_map_fcc header = *(u_map_fcc*)ptr;
-        uint32 size = 0;
-        if (IsInterestingChunk(header))
-        {
-            size = *(uint32*)(ptr + 4);
-            if (size <= data_size)
-            {
-                std::swap(header.fcc_txt[0], header.fcc_txt[3]);
-                std::swap(header.fcc_txt[1], header.fcc_txt[2]);
+        // every chunk has a fourcc+size header regardless of whether we care about its
+        // contents, so size must always be read to correctly skip past unrecognized chunks
+        uint32 size = *(uint32*)(ptr + 4);
+        // a corrupt/garbage size could overflow "ptr += size + 8" back to little or no
+        // forward movement, looping forever; bail out once it no longer fits the buffer
+        if (size > (uint32)(end - ptr - 8))
+            break;
 
-                FileChunk* chunk = new FileChunk{ ptr, size };
-                chunk->parseSubChunks();
-                chunks.insert({ std::string(header.fcc_txt, 4), chunk });
-            }
+        if (IsInterestingChunk(header) && size <= data_size)
+        {
+            std::swap(header.fcc_txt[0], header.fcc_txt[3]);
+            std::swap(header.fcc_txt[1], header.fcc_txt[2]);
+
+            FileChunk* chunk = new FileChunk{ ptr, size };
+            chunk->parseSubChunks();
+            chunks.insert({ std::string(header.fcc_txt, 4), chunk });
         }
 
         // move to next chunk
@@ -138,23 +142,34 @@ FileChunk::~FileChunk()
 
 void FileChunk::parseSubChunks()
 {
-    uint8* ptr = data + 8; // skip self
-    while (ptr < data + size)
+    // size is the payload after fourcc+size. Subchunks occupy [data+8, data+8+size).
+    uint8* ptr = data + 8;
+    uint8* end = data + 8 + size;
+
+    // MCNK (on-disk KNCM) has a 0x80-byte header after fourcc+size. Starting at
+    // data+8 treats flags/ix as a subchunk and never finds MCVT.
+    if (data[0] == 'K' && data[1] == 'N' && data[2] == 'C' && data[3] == 'M')
+        ptr = data + 8 + 0x80;
+
+    while (ptr + 8 <= end)
     {
         u_map_fcc header = *(u_map_fcc*)ptr;
-        uint32 subsize = 0;
-        if (IsInterestingChunk(header))
-        {
-            subsize = *(uint32*)(ptr + 4);
-            if (subsize < size)
-            {
-                std::swap(header.fcc_txt[0], header.fcc_txt[3]);
-                std::swap(header.fcc_txt[1], header.fcc_txt[2]);
+        // every chunk has a fourcc+size header regardless of whether we care about its
+        // contents, so subsize must always be read to correctly skip past unrecognized chunks
+        uint32 subsize = *(uint32*)(ptr + 4);
+        // a corrupt/garbage subsize could overflow "ptr += subsize + 8" back to little or no
+        // forward movement, looping forever; bail out once it no longer fits the buffer
+        if (subsize > (uint32)(end - ptr - 8))
+            break;
 
-                FileChunk* chunk = new FileChunk{ ptr, subsize };
-                chunk->parseSubChunks();
-                subchunks.insert({ std::string(header.fcc_txt, 4), chunk });
-            }
+        if (IsInterestingChunk(header) && subsize < size)
+        {
+            std::swap(header.fcc_txt[0], header.fcc_txt[3]);
+            std::swap(header.fcc_txt[1], header.fcc_txt[2]);
+
+            FileChunk* chunk = new FileChunk{ ptr, subsize };
+            chunk->parseSubChunks();
+            subchunks.insert({ std::string(header.fcc_txt, 4), chunk });
         }
 
         // move to next chunk

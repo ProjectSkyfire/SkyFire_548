@@ -156,8 +156,8 @@ namespace MMAP
             return false;
         }
 
-        // data used later
-        uint8 holes[16][16][8];
+        // data used later — 16-bit legacy MCNK hole mask per cell (not the 64-bit high-res format)
+        uint16 holes[16][16];
         memset(holes, 0, sizeof(holes));
         uint8 liquid_type[16][16];
         memset(liquid_type, 0, sizeof(liquid_type));
@@ -219,9 +219,10 @@ namespace MMAP
             // hole data
             if (fheader.holesSize != 0)
             {
-                memset(holes, 0, fheader.holesSize);
+                memset(holes, 0, sizeof(holes));
                 fseek(mapFile, fheader.holesOffset, SEEK_SET);
-                if (fread(holes, fheader.holesSize, 1, mapFile) != 1)
+                uint32 const toRead = fheader.holesSize < sizeof(holes) ? fheader.holesSize : uint32(sizeof(holes));
+                if (fread(holes, toRead, 1, mapFile) != 1)
                     printf("TerrainBuilder::loadMap: Failed to read some data expected 1, read 0\n");
             }
 
@@ -584,15 +585,20 @@ namespace MMAP
         coord[2] = v[index2];
     }
     /**************************************************************************/
-    bool TerrainBuilder::isHole(int square, uint8 const holes[16][16][8])
+    static uint16 const holetab_h[4] = { 0x1111, 0x2222, 0x4444, 0x8888 };
+    static uint16 const holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
+
+    bool TerrainBuilder::isHole(int square, uint16 const holes[16][16])
     {
         int row = square / 128;
         int col = square % 128;
         int cellRow = row / 8;     // 8 squares per cell
         int cellCol = col / 8;
-        int holeRow = row % 8;
-        int holeCol = (square - (row * 128 + cellCol * 8));
-        return holes[cellRow][cellCol][holeRow] & (1 << holeCol);
+        // each cell's 16-bit hole mask covers a 4x4 grid of 2x2-square quads
+        int holeRow = row % 8 / 2;
+        int holeCol = (square - (row * 128 + cellCol * 8)) / 2;
+        uint16 hole = holes[cellRow][cellCol];
+        return (hole & holetab_h[holeCol] & holetab_v[holeRow]) != 0;
     }
 
     /**************************************************************************/
