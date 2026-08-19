@@ -27,7 +27,8 @@ protected:
     TargetedMovementGeneratorMedium(Unit* target, float offset, float angle) :
         TargetedMovementGeneratorBase(target), i_path(NULL),
         i_recheckDistance(0), i_offset(offset), i_angle(angle),
-        i_recalculateTravel(false), i_targetReached(false)
+        i_recalculateTravel(false), i_targetReached(false), i_steeringLastChainedSplineId(0),
+        i_lastAimX(0.0f), i_lastAimY(0.0f), i_lastAimZ(0.0f), i_hasLastAim(false)
     {
     }
     ~TargetedMovementGeneratorMedium() { delete i_path; }
@@ -47,6 +48,11 @@ protected:
     float i_angle;
     bool i_recalculateTravel : 1;
     bool i_targetReached : 1;
+    uint32 i_steeringLastChainedSplineId;
+    float i_lastAimX;
+    float i_lastAimY;
+    float i_lastAimZ;
+    bool i_hasLastAim;
 };
 
 template<class T>
@@ -69,6 +75,7 @@ public:
     static void _clearUnitStateMove(T* u) { u->ClearUnitState(UNIT_STATE_CHASE_MOVE); }
     static void _addUnitStateMove(T* u) { u->AddUnitState(UNIT_STATE_CHASE_MOVE); }
     bool EnableWalking() const { return false; }
+    bool UseSteering() const { return false; }
     bool _lostTarget(T* u) const { return u->GetVictim() != this->GetTarget(); }
     void _reachTarget(T*);
 };
@@ -93,6 +100,7 @@ public:
     static void _clearUnitStateMove(T* u) { u->ClearUnitState(UNIT_STATE_FOLLOW_MOVE); }
     static void _addUnitStateMove(T* u) { u->AddUnitState(UNIT_STATE_FOLLOW_MOVE); }
     bool EnableWalking() const;
+    bool UseSteering() const { return false; }
     bool _lostTarget(T*) const { return false; }
     void _reachTarget(T*) { }
 private:

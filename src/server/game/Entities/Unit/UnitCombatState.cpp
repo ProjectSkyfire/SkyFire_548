@@ -158,6 +158,9 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
         ToCreature()->SendAIReaction(AI_REACTION_HOSTILE);
         ToCreature()->CallAssistance();
+        // So the 10s kite window starts at pull, not at the first landed hit.
+        if (!GetLastDamagedTime())
+            SetLastDamagedTime(time(NULL));
     }
 
     // delay offhand weapon attack to next attack time

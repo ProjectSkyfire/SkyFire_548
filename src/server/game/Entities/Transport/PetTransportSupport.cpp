@@ -70,11 +70,6 @@ namespace PetTransport
         return petInWorld && petOnOwnerTransport && offsetRefreshed;
     }
 
-    bool ShouldApplySplineGroundClamp(bool hasTransport, bool isCreature, bool isFalling)
-    {
-        return isCreature && !isFalling && !hasTransport;
-    }
-
     bool ShouldTryBoardPetBeforeOwnerRangeRemoval(bool ownerHasTransport, bool petExists, bool petOnOwnerTransport)
     {
         return ownerHasTransport && petExists && !petOnOwnerTransport;

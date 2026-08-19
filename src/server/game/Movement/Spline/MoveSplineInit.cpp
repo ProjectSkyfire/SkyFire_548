@@ -64,7 +64,8 @@ namespace Movement
             real_position = move_spline.ComputePosition();
 
         // should i do the things that user should do? - no.
-        if (args.path.empty())
+        // Launch requires two vertices. Stay put instead of Validate spam.
+        if (args.path.size() <= 1)
             return 0;
 
         // correct first vertex
@@ -80,10 +81,9 @@ namespace Movement
 
         if (!args.HasVelocity)
         {
-            // If spline is initialized with SetWalk method it only means we need to select
-            // walk move speed for it but not add walk flag to unit
+            // SetWalk only selects walk speed; it does not add MOVEMENTFLAG_WALKING.
             uint32 moveFlagsForSpeed = moveFlags;
-            if (args.flags.walkmode)
+            if (args.walk)
                 moveFlagsForSpeed |= MOVEMENTFLAG_WALKING;
             else
                 moveFlagsForSpeed &= ~MOVEMENTFLAG_WALKING;
@@ -129,7 +129,9 @@ namespace Movement
         // Elevators also use MOVEMENTFLAG_ONTRANSPORT but we do not keep track of their position changes
         args.TransformForTransport = unit->GetTransGUID();
         // mix existing state into new
-        args.flags.walkmode = unit->m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALKING);
+        args.walk = unit->m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALKING);
+        if (unit->GetTypeId() == TypeID::TYPEID_UNIT)
+            args.flags.canswim = unit->ToCreature()->CanSwim();
         args.flags.flying = unit->m_movementInfo.HasMovementFlag(MovementFlags(MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_DISABLE_GRAVITY));
         args.flags.smoothGroundPath = true; // enabled by default, CatmullRom mode or client config "pathSmoothing" will disable this
     }
@@ -160,11 +162,15 @@ namespace Movement
         {
             PathGenerator path(unit);
             bool result = path.CalculatePath(dest.x, dest.y, dest.z, forceDestination);
-            if (result && !(path.GetPathType() & PATHFIND_NOPATH))
+            if (result && !(path.GetPathType() & PATHFIND_NOPATH) && path.GetPath().size() > 1)
             {
                 MovebyPath(path.GetPath());
                 return;
             }
+            // Mesh refused this dest (ledge/gap or 1-point). Do not fall through
+            // to a 2-point shortcut unless the caller forced the destination.
+            if (!forceDestination)
+                return;
         }
 
         args.path_Idx_offset = 0;

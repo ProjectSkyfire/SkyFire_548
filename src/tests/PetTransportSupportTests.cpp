@@ -84,22 +84,6 @@ namespace
         return passed;
     }
 
-    bool TestTransportedSplineSkipsTerrainClamp()
-    {
-        bool passed = true;
-
-        passed &= Expect(!Skyfire::PetTransport::ShouldApplySplineGroundClamp(true, true, false),
-            "Transported creature splines should not be clamped to terrain or water");
-        passed &= Expect(Skyfire::PetTransport::ShouldApplySplineGroundClamp(false, true, false),
-            "Non-transported creature splines should keep normal terrain clamp behavior");
-        passed &= Expect(!Skyfire::PetTransport::ShouldApplySplineGroundClamp(false, false, false),
-            "Non-creature splines are outside this terrain clamp path");
-        passed &= Expect(!Skyfire::PetTransport::ShouldApplySplineGroundClamp(false, true, true),
-            "Falling splines should keep the existing no-clamp behavior");
-
-        return passed;
-    }
-
     bool TestTransportedPetsAreNotRemovedAsOutOfRange()
     {
         bool passed = true;
@@ -267,7 +251,6 @@ int main()
     passed &= TestFollowerPositionClampsNegativeDistances();
     passed &= TestOnlyControlledLivingOwnerHunterPetsMirrorTransport();
     passed &= TestPassengerOffsetLimitUsesAbsoluteCoordinates();
-    passed &= TestTransportedSplineSkipsTerrainClamp();
     passed &= TestTransportedPetsAreNotRemovedAsOutOfRange();
     passed &= TestMountedPetTemporaryUnsummonRules();
     passed &= TestLoadedHunterPetsAttachToOwnerTransport();

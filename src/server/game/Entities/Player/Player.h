@@ -3173,6 +3173,9 @@ public:
 
     float GetAverageItemLevel();
     bool isDebugAreaTriggers;
+    bool isDebugChaseLive;
+    uint64 debugChaseCreatureGuid;
+    uint32 debugChaseLastReportMSTime;
 
     void ClearWhisperWhiteList()
     {

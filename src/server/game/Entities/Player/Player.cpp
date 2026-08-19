@@ -727,6 +727,9 @@ Player::Player(WorldSession* session) : Unit(true)
         m_powerFraction[i] = 0;
 
     isDebugAreaTriggers = false;
+    isDebugChaseLive = false;
+    debugChaseCreatureGuid = 0;
+    debugChaseLastReportMSTime = 0;
 
     m_WeeklyQuestChanged = false;
 

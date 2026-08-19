@@ -15,7 +15,10 @@
 
 void UnitAI::AttackStart(Unit* victim)
 {
-    if (victim && me->Attack(victim, true))
+    if (!victim || me->HasUnitState(UNIT_STATE_FLEEING | UNIT_STATE_CONFUSED | UNIT_STATE_STUNNED))
+        return;
+
+    if (me->Attack(victim, true))
         me->GetMotionMaster()->MoveChase(victim);
 }
 
@@ -27,10 +30,12 @@ void UnitAI::AttackStartCaster(Unit* victim, float dist)
 
 void UnitAI::DoMeleeAttackIfReady()
 {
-    if (me->HasUnitState(UNIT_STATE_CASTING))
+    if (me->HasUnitState(UNIT_STATE_CANNOT_AUTOATTACK) || me->HasUnitState(UNIT_STATE_CASTING))
         return;
 
     Unit* victim = me->GetVictim();
+    if (!victim)
+        return;
     //Make sure our attack is ready and we aren't currently casting before checking distance
     if (me->isAttackReady() && me->IsWithinMeleeRange(victim))
     {

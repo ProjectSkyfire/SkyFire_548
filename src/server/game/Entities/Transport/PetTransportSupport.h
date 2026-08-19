@@ -28,7 +28,6 @@ namespace PetTransport
     bool ShouldResumePetFollowOnTransport(bool ownerHasTransport, bool petOnOwnerTransport, bool petInWorld);
     bool ShouldClearMountedPetStunForTransport(bool ownerMounted, bool ownerHasTransport, bool petStunned);
     bool ShouldSendTransportEnterSpline(bool petInWorld, bool petOnOwnerTransport, bool offsetRefreshed);
-    bool ShouldApplySplineGroundClamp(bool hasTransport, bool isCreature, bool isFalling);
     bool ShouldTryBoardPetBeforeOwnerRangeRemoval(bool ownerHasTransport, bool petExists, bool petOnOwnerTransport);
     bool ShouldRemovePetForOwnerRange(bool petExists, bool petPossessed, bool petOnOwnerTransport,
         bool isWithinVisibilityRange, bool transportExitGraceActive = false);

@@ -33,14 +33,16 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T* owner)
     PathGenerator path(owner);
     path.SetPathLengthLimit(30.0f);
     bool result = path.CalculatePath(x, y, z);
-    if (!result || (path.GetPathType() & PATHFIND_NOPATH))
-    {
-        i_nextCheckTime.Reset(100);
-        return;
-    }
 
     Movement::MoveSplineInit init(owner);
-    init.MovebyPath(path.GetPath());
+    if (result && !(path.GetPathType() & PATHFIND_NOPATH) && path.GetPath().size() > 1)
+        init.MovebyPath(path.GetPath());
+    else
+    {
+        // Mesh can refuse a fear dest (ledge / 1-point) especially if chase left
+        // a stale start. Still run a 2-point line so they do not stand still.
+        init.MoveTo(x, y, z, false);
+    }
     init.SetWalk(false);
     int32 traveltime = init.Launch();
     i_nextCheckTime.Reset(traveltime + (std::rand() % 1500 + 800));

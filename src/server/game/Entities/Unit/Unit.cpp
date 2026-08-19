@@ -394,16 +394,14 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (arrived)
         DisableSpline();
 
-    m_movesplineTimer.Update(t_diff);
-    if (m_movesplineTimer.Passed() || arrived)
-        UpdateSplinePosition();
+    // Commit the interpolated point every tick. A 400ms GetPosition lag made
+    // melee LOS fail while the client already showed the creature in contact,
+    // which is the follow-without-attack (and then fear-won't-run) state.
+    UpdateSplinePosition();
 }
 
 void Unit::UpdateSplinePosition()
 {
-    uint32 const positionUpdateDelay = 400;
-
-    m_movesplineTimer.Reset(positionUpdateDelay);
     Movement::Location loc = movespline->ComputePosition();
     bool const hasTransport = GetTransGUID() != 0;
     if (hasTransport)
@@ -420,29 +418,6 @@ void Unit::UpdateSplinePosition()
 
     if (HasUnitState(UNIT_STATE_CANNOT_TURN))
         loc.orientation = GetOrientation();
-
-    // Ground spline paths can interpolate below terrain on hills; snap server position to vmap.
-    if (Skyfire::PetTransport::ShouldApplySplineGroundClamp(hasTransport, GetTypeId() == TypeID::TYPEID_UNIT, movespline->isFalling()))
-    {
-        Creature const* creature = ToCreature();
-        CreatureTemplate const* cInfo = creature->GetCreatureTemplate();
-        if (cInfo && !(cInfo->InhabitType & INHABIT_AIR) && !creature->CanFly()
-            && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER | MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY))
-        {
-            float ground = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z + 5.0f, true);
-            float floor = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z, true);
-            if (ground > INVALID_HEIGHT || floor > INVALID_HEIGHT)
-            {
-                float const terrainZ = (ground > INVALID_HEIGHT && floor > INVALID_HEIGHT)
-                    ? (fabs(ground - loc.z) <= fabs(floor - loc.z) ? ground : floor)
-                    : (floor > INVALID_HEIGHT ? floor : ground);
-                if (loc.z < terrainZ)
-                    loc.z = terrainZ;
-                else
-                    UpdateAllowedPositionZ(loc.x, loc.y, loc.z);
-            }
-        }
-    }
 
     UpdatePosition(loc.x, loc.y, loc.z, loc.orientation);
 }
@@ -485,9 +460,34 @@ bool Unit::IsWithinMeleeRange(const Unit* obj, float dist) const
     if (!obj || !IsInMap(obj) || !InSamePhase(obj))
         return false;
 
-    float dx = GetPositionX() - obj->GetPositionX();
-    float dy = GetPositionY() - obj->GetPositionY();
-    float dz = GetPositionZ() - obj->GetPositionZ();
+    // GetPosition() only commits every 400ms while a spline is running. Chase
+    // follows the live interpolated point, so the client already shows melee
+    // while this check still thinks we are 2-3 yards back and refuses to swing.
+    float x = GetPositionX();
+    float y = GetPositionY();
+    float z = GetPositionZ();
+    if (!movespline->Finalized())
+    {
+        Movement::Location const loc = movespline->ComputePosition();
+        x = loc.x;
+        y = loc.y;
+        z = loc.z;
+    }
+
+    float ox = obj->GetPositionX();
+    float oy = obj->GetPositionY();
+    float oz = obj->GetPositionZ();
+    if (!obj->movespline->Finalized())
+    {
+        Movement::Location const loc = obj->movespline->ComputePosition();
+        ox = loc.x;
+        oy = loc.y;
+        oz = loc.z;
+    }
+
+    float dx = x - ox;
+    float dy = y - oy;
+    float dz = z - oz;
     float distsq = dx * dx + dy * dy + dz * dz;
 
     float sizefactor = GetMeleeReach() + obj->GetMeleeReach();
@@ -1564,10 +1564,12 @@ bool Unit::isInBackInMap(Unit const* target, float distance, float arc) const
 
 bool Unit::isInAccessiblePlaceFor(Creature const* c) const
 {
-    if (IsInWater())
-        return c->CanSwim();
-    else
-        return c->CanWalk() || c->CanFly();
+    // Flyers can always close. Walk-only and swim-only still count as
+    // accessible across the waterline: they path to the habitat edge and
+    // stay in combat instead of dropping threat the moment a toe hits water.
+    if (c->CanFly())
+        return true;
+    return c->CanWalk() || c->CanSwim();
 }
 
 bool Unit::IsInWater() const
@@ -4716,7 +4718,12 @@ Unit* Creature::SelectVictim()
 
     if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
     {
-        SetInFront(target);
+        // Facing the victim while a chase spline is active fights movement
+        // orientation and looks like a back-and-forth snap on the client.
+        // Out of melee this is the pull-from-distance twitch-turn: SetInFront
+        // snaps orientation, then MoveChase launches. Turn with the spline.
+        if (IsStopped() && IsWithinMeleeRange(target))
+            SetInFront(target);
         return target;
     }
 
@@ -4724,9 +4731,17 @@ Unit* Creature::SelectVictim()
     // Mob may not be in range to attack or may have dropped target. In any case,
     //  don't evade if damage received within the last 10 seconds
     // Does not apply to world bosses to prevent kiting to cities
+    // selectNextVictim() is null when the player walked out of ThreatRadius
+    // (into the lake). Keep the current victim for the grace window so we do
+    // not evade on the same tick they went out of reach.
     if (!isWorldBoss() && !GetInstanceId())
         if (time(NULL) - GetLastDamagedTime() <= MAX_AGGRO_RESET_TIME)
-            return target;
+        {
+            if (Unit* victim = GetVictim())
+                return victim;
+            if (target)
+                return target;
+        }
 
     // last case when creature must not go to evade mode:
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list

@@ -101,6 +101,10 @@ namespace Movement
          */
         void SetWalk(bool enable);
 
+        /* Enables swim animation on the spline (CanSwim flag). Disabled by default
+         */
+        void SetCanSwim(bool enable);
+
         /* Makes movement cyclic. Disabled by default
          */
         void SetCyclic();
@@ -125,6 +129,10 @@ namespace Movement
          */
         void SetOrientationFixed(bool enable);
 
+        /* Client ground-smoothing fights frequent chase relaunches and looks like facing snaps.
+         */
+        void DisableSmoothGroundPath();
+
         /* Sets the velocity (in case you want to have custom movement velocity)
          * if no set, speed will be selected based on unit's speeds and current movement mode
          * Has no effect if falling mode enabled
@@ -144,7 +152,8 @@ namespace Movement
     };
 
     inline void MoveSplineInit::SetFly() { args.flags.EnableFlying(); }
-    inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable; }
+    inline void MoveSplineInit::SetWalk(bool enable) { args.walk = enable; }
+    inline void MoveSplineInit::SetCanSwim(bool enable) { args.flags.canswim = enable; }
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom(); }
     inline void MoveSplineInit::SetUncompressed() { args.flags.uncompressedPath = true; }
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true; }
@@ -153,6 +162,7 @@ namespace Movement
     inline void MoveSplineInit::SetTransportEnter() { args.flags.EnableTransportEnter(); }
     inline void MoveSplineInit::SetTransportExit() { args.flags.EnableTransportExit(); }
     inline void MoveSplineInit::SetOrientationFixed(bool enable) { args.flags.orientationFixed = enable; }
+    inline void MoveSplineInit::DisableSmoothGroundPath() { args.flags.smoothGroundPath = false; }
 
     inline void MoveSplineInit::MovebyPath(const PointsArray& controls, int32 path_offset)
     {

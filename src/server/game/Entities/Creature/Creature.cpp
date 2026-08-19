@@ -1981,14 +1981,20 @@ bool Creature::CanCreatureAttack(Unit const* victim, bool /*force*/) const
     if (!victim->IsInMap(this))
         return false;
 
-    if (!IsValidAttackTarget(victim))
-        return false;
+    // Already on this victim: do not drop combat for LOS/visibility/habitat
+    // the moment they step into water. Leash below still applies.
+    bool const currentVictim = (GetVictim() == victim);
+    if (!currentVictim)
+    {
+        if (!IsValidAttackTarget(victim))
+            return false;
 
-    if (!victim->isInAccessiblePlaceFor(this))
-        return false;
+        if (!victim->isInAccessiblePlaceFor(this))
+            return false;
 
-    if (IsAIEnabled && !AI()->CanAIAttack(victim))
-        return false;
+        if (IsAIEnabled && !AI()->CanAIAttack(victim))
+            return false;
+    }
 
     if (sMapStore.LookupEntry(GetMapId())->IsInstance())
         return true;
@@ -1998,8 +2004,21 @@ bool Creature::CanCreatureAttack(Unit const* victim, bool /*force*/) const
 
     if (Unit* unit = GetCharmerOrOwner())
         return victim->IsWithinDist(unit, dist);
-    else
-        return victim->IsInDist(&m_homePosition, dist);
+
+    // 2D: a bank-to-lake Z drop (Goretusk spawn ~75, Everstill ~41) was
+    // enough to exceed ThreatRadius the moment the player entered the water.
+    if (victim->IsInDist2d(&m_homePosition, dist))
+        return true;
+
+    // Land mob at the waterline: home can already be 60y behind after a
+    // chase. Keep the current victim while they are still next to us.
+    if (currentVictim && !CanSwim()
+        && (victim->IsInWater() || victim->IsUnderWater()
+            || victim->HasUnitMovementFlag(MOVEMENTFLAG_SWIMMING))
+        && victim->IsInDist2d(GetPositionX(), GetPositionY(), dist))
+        return true;
+
+    return false;
 }
 
 CreatureAddon const* Creature::GetCreatureAddon() const
@@ -2566,10 +2585,17 @@ void Creature::UpdateMovementFlags()
     if (!(inhabitType & INHABIT_AIR) && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
     {
         MovementGeneratorType const curMove = GetMotionMaster()->GetCurrentMovementGeneratorType();
-        if (curMove == CHASE_MOTION_TYPE)
+        if (curMove == CHASE_MOTION_TYPE || curMove == FOLLOW_MOTION_TYPE)
         {
             if (inhabitType & INHABIT_WATER)
-                SetSwim(IsInWater());
+            {
+                bool const inWater = IsInWater() || IsUnderWater();
+                SetSwim(inWater);
+                if (inWater)
+                    SetAnimTier(ANIM_TIER_SWIM);
+                else if (!CanFly())
+                    SetAnimTier(ANIM_TIER_GROUND);
+            }
             return;
         }
         if (!IsInCombat() && (curMove == IDLE_MOTION_TYPE || curMove == RANDOM_MOTION_TYPE))
@@ -2597,7 +2623,11 @@ void Creature::UpdateMovementFlags()
     if (!isInAir)
         SetFall(false);
 
-    SetSwim((inhabitType & INHABIT_WATER) && IsInWater());
+    SetSwim((inhabitType & INHABIT_WATER) && (IsInWater() || IsUnderWater()));
+    if ((inhabitType & INHABIT_WATER) && (IsInWater() || IsUnderWater()))
+        SetAnimTier(ANIM_TIER_SWIM);
+    else if (!CanFly() && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
+        SetAnimTier(ANIM_TIER_GROUND);
 }
 
 void Creature::SetObjectScale(float scale)

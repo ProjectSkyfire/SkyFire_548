@@ -66,30 +66,24 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
     //else if (is_water_ok)                                 // 3D system under water and above ground (swimming mode)
     else                                                    // 2D only
     {
-        // 10.0 is the max that vmap high can check (MAX_CAN_FALL_DISTANCE)
-        travelDistZ = travelDistZ >= 100.0f ? 10.0f : sqrtf(travelDistZ);
+        float const maxDeltaZ = std::max(wander_distance, 5.0f) + 6.0f;
+        float const adtZ = map->GetRawTerrainHeight(destX, destY);
+        // Probe from the home layer. Looking from respZ+maxDeltaZ (16-21 yards)
+        // makes GetHeight prefer tree/canopy vmaps over the ground.
+        destZ = map->GetHeight(creature->GetPhaseMask(), destX, destY, respZ + 2.0f, true);
 
-        // The fastest way to get an accurate result 90% of the time.
-        // Better result can be obtained like 99% accuracy with a ray light, but the cost is too high and the code is too long.
-        destZ = map->GetHeight(creature->GetPhaseMask(), destX, destY, respZ + travelDistZ - 2.0f, false);
+        // Uphill ADT is skipped when the query sits below it (z+2 < gridHeight).
+        if (adtZ > INVALID_HEIGHT && (destZ <= INVALID_HEIGHT || (adtZ > destZ + 1.0f && fabs(adtZ - respZ) <= maxDeltaZ)))
+            destZ = adtZ;
 
-        if (fabs(destZ - respZ) > travelDistZ)              // Map check
+        // Keep low walkable doodads (roots ~3 yards) but not trunks/canopy.
+        if (adtZ > INVALID_HEIGHT && destZ > adtZ + 3.5f && destZ > respZ + 3.5f)
+            destZ = adtZ;
+
+        if (destZ <= INVALID_HEIGHT || fabs(destZ - respZ) > maxDeltaZ)
         {
-            // Vmap Horizontal or above
-            destZ = map->GetHeight(creature->GetPhaseMask(), destX, destY, respZ - 2.0f, true);
-
-            if (fabs(destZ - respZ) > travelDistZ)
-            {
-                // Vmap Higher
-                destZ = map->GetHeight(creature->GetPhaseMask(), destX, destY, respZ + travelDistZ - 2.0f, true);
-
-                // let's forget this bad coords where a z cannot be find and retry at next tick
-                if (fabs(destZ - respZ) > travelDistZ)
-                {
-                    i_nextMoveTime.Reset(200);
-                    return;
-                }
-            }
+            i_nextMoveTime.Reset(200);
+            return;
         }
     }
 
@@ -101,8 +95,7 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature* creature)
     creature->AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
     Movement::MoveSplineInit init(creature);
-    // Direct move: pathfinding can reject valid short wander points (Launch then no-ops).
-    init.MoveTo(destX, destY, destZ, false);
+    init.MoveTo(destX, destY, destZ, true);
     init.SetWalk(true);
     init.Launch();
 

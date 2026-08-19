@@ -69,6 +69,7 @@ public:
         static std::vector<ChatCommand> debugCommandTable =
         {
             { "boat",           rbac::RBAC_PERM_COMMAND_DEBUG_BG,            false, NULL,                                "", boatCommandTable },
+            { "chase",         rbac::RBAC_PERM_COMMAND_DEBUG,               false, &HandleDebugChaseCommand,            "", },
             { "lfg",            rbac::RBAC_PERM_COMMAND_DEBUG_LFG_REQUIREMENTS, true,  NULL,                             "", debugLfgCommandTable },
             { "setbit",        rbac::RBAC_PERM_COMMAND_DEBUG_SETBIT,        false, &HandleDebugSet32BitCommand,         "", },
             { "threat",        rbac::RBAC_PERM_COMMAND_DEBUG_THREAT,        false, &HandleDebugThreatListCommand,       "", },
@@ -507,6 +508,53 @@ public:
             player->isDebugAreaTriggers = false;
         }
         return true;
+    }
+
+    static bool HandleDebugChaseCommand(ChatHandler* handler, char const* args)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        if (!*args || !stricmp(args, "status"))
+        {
+            if (!player->isDebugChaseLive)
+            {
+                handler->SendSysMessage("Live chase debug is OFF.");
+                handler->SendSysMessage("Usage: .debug chase on|off|status");
+                return true;
+            }
+
+            handler->PSendSysMessage("Live chase debug is ON for creature GUID " UI64FMTD ".", player->debugChaseCreatureGuid);
+            return true;
+        }
+
+        if (!stricmp(args, "off"))
+        {
+            player->isDebugChaseLive = false;
+            player->debugChaseCreatureGuid = 0;
+            player->debugChaseLastReportMSTime = 0;
+            handler->SendSysMessage("Live chase debug is OFF.");
+            return true;
+        }
+
+        if (!stricmp(args, "on"))
+        {
+            Creature* creature = handler->getSelectedCreature();
+            if (!creature)
+            {
+                handler->SendSysMessage(LANG_SELECT_CREATURE);
+                handler->SetSentErrorMessage(true);
+                return false;
+            }
+
+            player->isDebugChaseLive = true;
+            player->debugChaseCreatureGuid = creature->GetGUID();
+            player->debugChaseLastReportMSTime = 0;
+            handler->PSendSysMessage("Live chase debug is ON for %s (GUID " UI64FMTD ").", creature->GetName().c_str(), creature->GetGUID());
+            return true;
+        }
+
+        handler->SendSysMessage("Usage: .debug chase on|off|status");
+        handler->SetSentErrorMessage(true);
+        return false;
     }
 
     //Send notification in channel

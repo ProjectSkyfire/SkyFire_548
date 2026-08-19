@@ -49,15 +49,21 @@ public:
     // option setters - use optional
     void SetUseStraightPath(bool useStraightPath) { _useStraightPath = useStraightPath; }
     void SetPathLengthLimit(float distance) { _pointPathLimit = std::min<uint32>(uint32(distance / SMOOTH_PATH_STEP_SIZE), MAX_POINT_PATH_LENGTH); }
+    void SetChaseSteering(bool enable) { _useChaseSteering = enable; }
+    void ShortenPathUntilDist(G3D::Vector3 const& target, float dist);
+    void DropSidewaysStart(G3D::Vector3 const& from, G3D::Vector3 const& aim);
 
     // result getters
     G3D::Vector3 const& GetStartPosition() const { return _startPosition; }
     G3D::Vector3 const& GetEndPosition() const { return _endPosition; }
     G3D::Vector3 const& GetActualEndPosition() const { return _actualEndPosition; }
+    G3D::Vector3 const& GetSteeringTarget() const { return _steeringTarget; }
 
     Movement::PointsArray const& GetPath() const { return _pathPoints; }
 
     PathType GetPathType() const { return _type; }
+    bool IsUsingChaseSteering() const { return _steeringActive; }
+    uint32 GetRawPathPointCount() const { return _rawPathPointCount; }
 
 private:
     dtPolyRef _pathPolyRefs[MAX_PATH_LENGTH];   // array of detour polygon references
@@ -67,12 +73,16 @@ private:
     PathType _type;                     // tells what kind of path this is
 
     bool _useStraightPath;  // type of path will be generated
+    bool _useChaseSteering;
+    bool _steeringActive;
     bool _forceDestination; // when set, we will always arrive at given point
     uint32 _pointPathLimit; // limit point path size; min(this, MAX_POINT_PATH_LENGTH)
+    uint32 _rawPathPointCount;
 
     G3D::Vector3 _startPosition;        // {x, y, z} of current location
     G3D::Vector3 _endPosition;          // {x, y, z} of the destination
     G3D::Vector3 _actualEndPosition;    // {x, y, z} of the closest possible point to given destination
+    G3D::Vector3 _steeringTarget;       // short-horizon chase target chosen from the full path
 
     Unit const* const _sourceUnit;          // the unit that is moving
     dtNavMesh const* _navMesh;              // the nav mesh
@@ -83,9 +93,16 @@ private:
     void SetStartPosition(G3D::Vector3 const& point) { _startPosition = point; }
     void SetEndPosition(G3D::Vector3 const& point) { _actualEndPosition = point; _endPosition = point; }
     void SetActualEndPosition(G3D::Vector3 const& point) { _actualEndPosition = point; }
-    void NormalizePath();
     void DensifyGroundPath();
-    static float ResolveTerrainZ(Unit const* unit, float x, float y, float z);
+    void DensifySwimPath();
+    void FinalizePathElevation();
+    void SettleLandPointsToTerrain();
+    void SmoothVerticalHops();
+    float ResolveTerrainZ(float x, float y, float interpolatedZ) const;
+    bool CanSwimAt(float x, float y, float z) const;
+    bool HabitatAllowsPoint(float x, float y, float z, bool allowWater, bool allowLand) const;
+    void ClampPathToHabitat();
+    bool CanBuildDirectShortcut(G3D::Vector3 const& from, G3D::Vector3 const& to) const;
 
     void Clear()
     {
