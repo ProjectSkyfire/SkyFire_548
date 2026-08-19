@@ -194,6 +194,17 @@ public:
             cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), object->GetInstanceId(),
             zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
 
+        float const adtZ = map->GetRawTerrainHeight(object->GetPositionX(), object->GetPositionY());
+        handler->PSendSysMessage("Height: unit=%.3f adt=%.3f getHeight=%.3f groundFromSky=%.3f dAdt=%.3f hole=%u",
+            object->GetPositionZ(), adtZ, floorZ, groundZ, object->GetPositionZ() - adtZ,
+            map->IsTerrainHole(object->GetPositionX(), object->GetPositionY()) ? 1 : 0);
+        if (floorZ <= INVALID_HEIGHT)
+            handler->PSendSysMessage("Note: GetHeight failed from unit Z (under ADT or no vmap floor). adt=%.3f dAdt=%.3f",
+                adtZ, object->GetPositionZ() - adtZ);
+        else if (object->GetPositionZ() - floorZ > 2.0f)
+            handler->PSendSysMessage("Note: unit is %.1f yards above server GetHeight. NPCs using that height will look underground.",
+                object->GetPositionZ() - floorZ);
+
         LiquidData liquidStatus;
         ZLiquidStatus status = map->getLiquidStatus(object->GetPositionX(), object->GetPositionY(), object->GetPositionZ(), MAP_ALL_LIQUIDS, &liquidStatus);
 
