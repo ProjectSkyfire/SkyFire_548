@@ -73,6 +73,10 @@ namespace Movement
         args.initialOrientation = real_position.orientation;
         move_spline.onTransport = (unit->GetTransGUID() != 0);
 
+        // Fear can leave MOVEMENTFLAG_ROOT without UNIT_STATE_ROOT. Clear it
+        // or the client ignores this spline and they stand aggroed.
+        unit->ClearStrayMovementRoot();
+
         uint32 moveFlags = unit->m_movementInfo.GetMovementFlags();
         moveFlags |= MOVEMENTFLAG_FORWARD;
 

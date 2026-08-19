@@ -2674,6 +2674,9 @@ public:
     float GetPositionZMinusOffset() const;
 
     void SetControlled(bool apply, UnitState state);
+    // Fear can leave MOVEMENTFLAG_ROOT without UNIT_STATE_ROOT. Clear it so
+    // a new spline is not ignored by the client.
+    void ClearStrayMovementRoot();
 
     void AddComboPointHolder(uint32 lowguid)
     {

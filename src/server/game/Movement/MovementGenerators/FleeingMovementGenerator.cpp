@@ -114,6 +114,7 @@ void FleeingMovementGenerator<Creature>::DoFinalize(Creature* owner)
 {
     owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+    owner->StopMoving();
     if (owner->GetVictim())
         owner->SetTarget(owner->GetVictim()->GetGUID());
 }
@@ -158,6 +159,7 @@ void TimedFleeingMovementGenerator::Finalize(Unit* owner)
 {
     owner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     owner->ClearUnitState(UNIT_STATE_FLEEING | UNIT_STATE_FLEEING_MOVE);
+    owner->StopMoving();
     if (Unit* victim = owner->GetVictim())
     {
         if (owner->IsAlive())

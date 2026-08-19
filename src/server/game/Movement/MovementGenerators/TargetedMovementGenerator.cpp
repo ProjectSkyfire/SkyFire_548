@@ -190,6 +190,15 @@ namespace
         return std::sqrt(dx * dx + dy * dy);
     }
 
+    float ChaseXYDistance(Unit const* owner, Unit const* target)
+    {
+        float ox, oy;
+        GetOwnerLiveXY(owner, ox, oy);
+        float const dx = ox - target->GetPositionX();
+        float const dy = oy - target->GetPositionY();
+        return std::sqrt(dx * dx + dy * dy);
+    }
+
     bool ChaseShouldRepath(Unit const* owner, Unit const* target,
         float lastAimX, float lastAimY, float lastAimZ, bool hasLastAim)
     {
@@ -297,7 +306,10 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
         return;
 
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
+    {
+        i_recalculateTravel = true;
         return;
+    }
 
     if (owner->GetTypeId() == TypeID::TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner->ToCreature()))
         return;
@@ -400,12 +412,20 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
         && owner->HasUnitState(UNIT_STATE_FOLLOW));
 
     bool result = i_path->CalculatePath(x, y, z, forceDest);
-    if (!result || (i_path->GetPathType() & PATHFIND_NOPATH))
+    bool const steeringChase = ((D*)this)->UseSteering();
+    bool const inMeleeNow = owner->IsWithinMeleeRange(i_target.getTarget())
+        && ChaseXYDistance(owner, i_target.getTarget()) <= ChaseMeleeStopDistance(owner, i_target.getTarget()) + 2.0f;
+    bool const noPath = !result || (i_path->GetPathType() & PATHFIND_NOPATH);
+    bool const tooShort = i_path->GetPath().size() < 2;
+
+    // Recast NOPATH used to return here even when a 2-point shortcut existed.
+    // Fear already falls back to MoveTo; chase sat aggroed until the player
+    // stepped onto a connected poly (215607 scream resume, rare long pulls).
+    if ((noPath || tooShort) && (!steeringChase || inMeleeNow))
     {
-        // Cant reach target
         i_recalculateTravel = true;
         if (owner->GetTypeId() == TypeID::TYPEID_UNIT)
-            ReportLiveChaseDebug(owner->ToCreature(), i_target.getTarget(), i_path, "nopath", false, true);
+            ReportLiveChaseDebug(owner->ToCreature(), i_target.getTarget(), i_path, noPath ? "nopath" : "short-path", false, true);
         return;
     }
 
@@ -413,14 +433,12 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     // hitbox instead of running through them. Do not trim the start of the path.
     // In melee the start is already inside the stop radius, so shorten is a
     // no-op; dest must be the near-side ring (see GetSteeringChaseDest).
-    bool const steeringChase = ((D*)this)->UseSteering();
-    bool const inMeleeNow = owner->IsWithinMeleeRange(i_target.getTarget());
-    if (steeringChase && !inMeleeNow)
+    if (!tooShort && steeringChase && !inMeleeNow)
     {
         float meleeDist = ChaseMeleeStopDistance(owner, i_target.getTarget());
         i_path->ShortenPathUntilDist(G3D::Vector3(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ()), meleeDist);
     }
-    if (steeringChase)
+    if (!tooShort && steeringChase)
     {
         float lx, ly;
         GetOwnerLiveXY(owner, lx, ly);
@@ -428,18 +446,23 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
             G3D::Vector3(i_target->GetPositionX(), i_target->GetPositionY(), i_target->GetPositionZ()));
     }
 
-    if (i_path->GetPath().size() < 2)
+    if (!tooShort && i_path->GetPath().size() < 2)
     {
         // Already on top of the target: wait for the next 400ms tick instead of
         // retrying every AI update (that is the inbound close-in stutter).
-        if (!steeringChase)
-            i_recalculateTravel = true;
-        if (owner->GetTypeId() == TypeID::TYPEID_UNIT)
-            ReportLiveChaseDebug(owner->ToCreature(), i_target.getTarget(), i_path, "short-path", false, true);
-        return;
+        if (!steeringChase || inMeleeNow)
+        {
+            if (!steeringChase)
+                i_recalculateTravel = true;
+            if (owner->GetTypeId() == TypeID::TYPEID_UNIT)
+                ReportLiveChaseDebug(owner->ToCreature(), i_target.getTarget(), i_path, "short-path", false, true);
+            return;
+        }
     }
 
-    if (steeringChase && updateDestination && !owner->movespline->Finalized())
+    if (steeringChase && updateDestination && !owner->movespline->Finalized()
+        && i_steeringLastChainedSplineId && i_steeringLastChainedSplineId == owner->movespline->GetId()
+        && i_path->GetPath().size() >= 2)
     {
         G3D::Vector3 const& newDest = i_path->GetPath().back();
         G3D::Vector3 const curDest = owner->movespline->FinalDestination();
@@ -453,13 +476,17 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
         }
     }
 
+    owner->ClearStrayMovementRoot();
     D::_addUnitStateMove(owner);
     i_targetReached = false;
     i_recalculateTravel = false;
     owner->AddUnitState(UNIT_STATE_CHASE);
 
     Movement::MoveSplineInit init(owner);
-    init.MovebyPath(i_path->GetPath());
+    if (tooShort || i_path->GetPath().size() < 2)
+        init.MoveTo(x, y, z, false);
+    else
+        init.MovebyPath(i_path->GetPath());
     init.SetWalk(((D*)this)->EnableWalking());
 
     // Retail chase never sets SmoothGroundPath. The client extra-smooths vertices;
@@ -505,6 +532,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     // Never SetFacing/Final_Target during chase or follow. The client treats that
     // as a spin-to-face at spline end, which reads as 360 snaps while kiting.
     init.Launch();
+    i_steeringLastChainedSplineId = owner->movespline->GetId();
     if (updateDestination)
     {
         i_lastAimX = i_target->GetPositionX();
@@ -528,6 +556,7 @@ bool TargetedMovementGeneratorMedium<T, D>::DoUpdate(T* owner, uint32 time_diff)
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
     {
         D::_clearUnitStateMove(owner);
+        i_recalculateTravel = true;
         return true;
     }
 
@@ -556,7 +585,8 @@ bool TargetedMovementGeneratorMedium<T, D>::DoUpdate(T* owner, uint32 time_diff)
     {
         i_recheckDistance.Update(time_diff);
         Unit* target = i_target.getTarget();
-        bool const inMelee = owner->IsWithinMeleeRange(target);
+        bool const inMelee = owner->IsWithinMeleeRange(target)
+            && ChaseXYDistance(owner, target) <= ChaseMeleeStopDistance(owner, target) + 2.0f;
         bool const targetMoving = TargetIsActivelyMoving(target, i_lastAimX, i_lastAimY, i_hasLastAim);
         if (!inMelee)
         {
@@ -614,7 +644,8 @@ bool TargetedMovementGeneratorMedium<T, D>::DoUpdate(T* owner, uint32 time_diff)
     }
 
     Unit* target = i_target.getTarget();
-    bool const inMelee = owner->IsWithinMeleeRange(target);
+    bool const inMelee = owner->IsWithinMeleeRange(target)
+        && (!steeringChase || ChaseXYDistance(owner, target) <= ChaseMeleeStopDistance(owner, target) + 2.0f);
 
     // Keep auto-attack armed the whole time we are in contact. Following a
     // moving player never "arrives", so the old finalize-only Attack() left
@@ -672,9 +703,14 @@ void ChaseMovementGenerator<Player>::DoInitialize(Player* owner)
 template<>
 void ChaseMovementGenerator<Creature>::DoInitialize(Creature* owner)
 {
+    owner->ClearStrayMovementRoot();
+    owner->StopMoving();
     owner->SetWalk(false);
     owner->AddUnitState(UNIT_STATE_CHASE | UNIT_STATE_CHASE_MOVE);
     this->i_steeringLastChainedSplineId = 0;
+    this->i_hasLastAim = false;
+    this->i_recalculateTravel = true;
+    this->i_recheckDistance.Reset(0);
     _setTargetLocation(owner, true);
 }
 

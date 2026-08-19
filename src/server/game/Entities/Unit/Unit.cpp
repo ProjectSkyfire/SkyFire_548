@@ -6904,6 +6904,14 @@ void Unit::SetStunned(bool apply)
     }
 }
 
+void Unit::ClearStrayMovementRoot()
+{
+    if (HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
+        return;
+    if (HasUnitMovementFlag(MOVEMENTFLAG_ROOT))
+        SetRooted(false);
+}
+
 void Unit::SetRooted(bool apply, bool packetOnly /*= false*/)
 {
     if (!packetOnly)
