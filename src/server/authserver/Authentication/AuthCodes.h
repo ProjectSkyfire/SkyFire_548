@@ -80,6 +80,22 @@ enum LoginResult
     LOGIN_SSO_FAILED = 0x27,
 };
 
+// Wire result for AUTH_MIGRATE_ACCOUNT, the launcher-facing pre-login
+// account migration command (authnet). Not part of the classic GRUNT
+// protocol - this is only ever sent to/from the SkyFire Launcher.
+enum class AuthMigrateResult : uint8
+{
+    MIGRATE_OK = 0x00,
+    MIGRATE_NAME_NOT_EXIST = 0x01,
+    MIGRATE_PASS_INCORRECT = 0x02,
+    MIGRATE_PASS_TOO_LONG = 0x03,
+    MIGRATE_EMAIL_TOO_LONG = 0x04,
+    MIGRATE_EMAIL_INVALID = 0x05,
+    MIGRATE_EMAIL_ALREADY_EXIST = 0x06,
+    MIGRATE_ACCOUNT_BANNED = 0x07,
+    MIGRATE_FAILED = 0xFF
+};
+
 enum ExpansionFlags
 {
     POST_BC_EXP_FLAG = 0x2,

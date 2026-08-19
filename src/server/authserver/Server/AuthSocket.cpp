@@ -5,6 +5,7 @@
 
 #include <algorithm>
 
+#include "Auth/AccountIdentity.h"
 #include "AuthCodes.h"
 #include "AuthPatchTransfer.h"
 #include "AuthSocket.h"
@@ -30,7 +31,10 @@ enum eAuthCmd
     REALM_LIST = 0x10,
     XFER_ACCEPT = 0x32,
     XFER_RESUME = 0x33,
-    XFER_CANCEL = 0x34
+    XFER_CANCEL = 0x34,
+    // Launcher-facing pre-login account migration (authnet). Not part of the
+    // classic GRUNT protocol - a real WoW client never sends this.
+    AUTH_MIGRATE_ACCOUNT = 0x40
 };
 
 enum eStatus
@@ -126,10 +130,11 @@ const AuthHandler table[] =
     { REALM_LIST,               STATUS_AUTHED,    &AuthSocket::_HandleRealmList         },
     { XFER_ACCEPT,              STATUS_CONNECTED, &AuthSocket::_HandleXferAccept        },
     { XFER_RESUME,              STATUS_CONNECTED, &AuthSocket::_HandleXferResume        },
-    { XFER_CANCEL,              STATUS_CONNECTED, &AuthSocket::_HandleXferCancel        }
+    { XFER_CANCEL,              STATUS_CONNECTED, &AuthSocket::_HandleXferCancel        },
+    { AUTH_MIGRATE_ACCOUNT,     STATUS_CONNECTED, &AuthSocket::_HandleMigrateAccount    }
 };
 
-#define AUTH_TOTAL_COMMANDS 8
+#define AUTH_TOTAL_COMMANDS 9
 
 namespace
 {
@@ -1028,4 +1033,117 @@ bool AuthSocket::_HandleXferAccept()
     }
 
     return false;
+}
+
+// Launcher-facing pre-login account migration (authnet). Converts a legacy
+// username account to email login, reusing the same identity/verifier logic
+// the in-game ".account convert email" command uses.
+//
+// Wire format, request: cmd(1) + size(uint16 LE, bytes following) +
+//   [len(1) + username] + [len(1) + oldPassword] + [len(1) + email] + [len(1) + newPassword]
+// Wire format, response: cmd(1) + AuthMigrateResult(1)
+bool AuthSocket::_HandleMigrateAccount()
+{
+    SF_LOG_DEBUG("server.authserver", "Entering _HandleMigrateAccount");
+
+    const size_t headerSize = 3; // cmd(1) + size(2)
+    if (socket().GetAvailableBytes() < headerSize)
+        return false;
+
+    std::vector<uint8> header(headerSize);
+    if (!socket().PeekBytes(&header[0], header.size()))
+        return false;
+
+    uint16 bodySize = uint16(header[1]) | (uint16(header[2]) << 8);
+    const uint16 maxBodySize = 4 * (1 + MAX_EMAIL_STR);
+    if (bodySize > maxBodySize)
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' Migrate account request too large (%u bytes)",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), bodySize);
+        socket().Close();
+        return false;
+    }
+
+    if (socket().GetAvailableBytes() < headerSize + bodySize)
+        return false;
+
+    std::vector<uint8> packet(headerSize + bodySize);
+    if (!socket().ReadBytes(&packet[0], packet.size()))
+        return false;
+
+    size_t offset = headerSize;
+    auto readField = [&packet, &offset](std::string& out, size_t maxLen) -> bool
+    {
+        if (offset >= packet.size())
+            return false;
+
+        uint8 len = packet[offset++];
+        if (len > maxLen || offset + len > packet.size())
+            return false;
+
+        out.assign(reinterpret_cast<char const*>(&packet[offset]), len);
+        offset += len;
+        return true;
+    };
+
+    std::string username, oldPassword, email, newPassword;
+    if (!readField(username, MAX_ACCOUNT_STR) || !readField(oldPassword, MAX_ACCOUNT_STR) ||
+        !readField(email, MAX_EMAIL_STR) || !readField(newPassword, MAX_ACCOUNT_STR))
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' Malformed migrate account request",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort());
+        socket().Close();
+        return false;
+    }
+
+    AuthMigrateResult result = AuthMigrateResult::MIGRATE_FAILED;
+    uint32 accountId = Skyfire::Auth::GetId(username);
+    if (!accountId)
+    {
+        result = AuthMigrateResult::MIGRATE_NAME_NOT_EXIST;
+    }
+    else
+    {
+        PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
+        stmt->setUInt32(0, accountId);
+        if (LoginDatabase.Query(stmt))
+        {
+            result = AuthMigrateResult::MIGRATE_ACCOUNT_BANNED;
+        }
+        else if (!Skyfire::Auth::CheckPassword(accountId, oldPassword))
+        {
+            RecordFailedLogon(accountId, username, socket());
+            result = AuthMigrateResult::MIGRATE_PASS_INCORRECT;
+        }
+        else
+        {
+            switch (Skyfire::Auth::ConvertToEmailLogin(accountId, email, newPassword))
+            {
+                case Skyfire::Auth::AccountOpResult::AOR_OK:
+                    result = AuthMigrateResult::MIGRATE_OK;
+                    SF_LOG_INFO("server.authserver", "'%s:%d' Account %u migrated to email login via authnet",
+                        socket().getRemoteAddress().c_str(), socket().getRemotePort(), accountId);
+                    break;
+                case Skyfire::Auth::AccountOpResult::AOR_PASS_TOO_LONG:
+                    result = AuthMigrateResult::MIGRATE_PASS_TOO_LONG;
+                    break;
+                case Skyfire::Auth::AccountOpResult::AOR_EMAIL_TOO_LONG:
+                    result = AuthMigrateResult::MIGRATE_EMAIL_TOO_LONG;
+                    break;
+                case Skyfire::Auth::AccountOpResult::AOR_EMAIL_INVALID:
+                    result = AuthMigrateResult::MIGRATE_EMAIL_INVALID;
+                    break;
+                case Skyfire::Auth::AccountOpResult::AOR_EMAIL_ALREADY_EXIST:
+                    result = AuthMigrateResult::MIGRATE_EMAIL_ALREADY_EXIST;
+                    break;
+                default:
+                    result = AuthMigrateResult::MIGRATE_FAILED;
+                    break;
+            }
+        }
+    }
+
+    char response[2] = { char(uint8(AUTH_MIGRATE_ACCOUNT)), char(uint8(result)) };
+    socket().QueueSend(response, sizeof(response));
+    return true;
 }
