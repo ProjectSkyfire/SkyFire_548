@@ -63,6 +63,32 @@ RealmServerPort = 3724
 BindIP = "0.0.0.0"
 
 #
+#    Authnet.Enabled
+#        Description: Enable the authnet listener (launcher-facing,
+#                      Battle.net-style login). Passive probe only for now -
+#                      logs the first frame's header from each connection
+#                      and closes; does not yet authenticate anything.
+#                      The classic GRUNT listener (RealmServerPort/BindIP
+#                      above) is unaffected either way.
+#        Default:     0 - (Disabled)
+
+Authnet.Enabled = 0
+
+#
+#    Authnet.BindIP
+#        Description: Bind the authnet listener to IP/hostname.
+#        Default:     "0.0.0.0" - (Bind to all IPs on the system)
+
+Authnet.BindIP = "0.0.0.0"
+
+#
+#    Authnet.Port
+#        Description: TCP port for the authnet listener.
+#        Default:     1119
+
+Authnet.Port = 1119
+
+#
 #    PidFile
 #        Description: Auth server PID file.
 #        Example:     "./authserver.pid"  - (Enabled)

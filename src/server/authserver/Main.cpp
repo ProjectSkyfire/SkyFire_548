@@ -21,6 +21,7 @@
 #include <filesystem>
 #include <memory>
 
+#include "AuthnetAcceptor.h"
 #include "Common.h"
 #include "Database/DatabaseSetup/DatabaseSetup.h"
 #include "Database/DatabaseSetup/DatabaseSetupRuntime.h"
@@ -395,6 +396,28 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
+    // Authnet: separate, disabled-by-default listener for the launcher's
+    // Battle.net-style login path. Never affects the classic listener above.
+    AuthnetAcceptor authnetAcceptor;
+    if (sConfigMgr->GetBoolDefault("Authnet.Enabled", false))
+    {
+        int32 authnetPort = sConfigMgr->GetIntDefault("Authnet.Port", 1119);
+        if (authnetPort < 0 || authnetPort > 0xFFFF)
+        {
+            SF_LOG_ERROR("server.authserver", "Authnet.Port out of allowed range (1-65535)");
+            return 1;
+        }
+
+        std::string authnetBindIp = sConfigMgr->GetStringDefault("Authnet.BindIP", "0.0.0.0");
+        if (!authnetAcceptor.Open(uint16(authnetPort), authnetBindIp))
+        {
+            SF_LOG_ERROR("server.authserver", "Authnet listener can not bind to %s:%d", authnetBindIp.c_str(), authnetPort);
+            return 1;
+        }
+
+        SF_LOG_INFO("server.authserver", "Authnet passive probe listening on %s:%d", authnetBindIp.c_str(), authnetPort);
+    }
+
     // Register authservers's signal handlers
     std::signal(SIGINT, AuthServerSignalHandler);
     std::signal(SIGTERM, AuthServerSignalHandler);
@@ -477,6 +500,7 @@ extern int main(int argc, char** argv)
     while (!stopEvent)
     {
         acceptor.Update();
+        authnetAcceptor.Update();
         Skyfire::SleepForMilliseconds(100);
 
         if ((++loopCounter) == numLoops)
@@ -488,6 +512,7 @@ extern int main(int argc, char** argv)
     }
 
     acceptor.Close();
+    authnetAcceptor.Close();
 
     // Close the Database Pool and library
     StopDB();
