@@ -18,6 +18,32 @@
 #include "WorldSession.h"
 #include <vector>
 
+namespace
+{
+    // Reforge UI reads modifiers when SMSG_REFORGE_RESULT arrives. Inventory
+    // items only flush on the next tick, so push the item now.
+    // VALUES carries restore-to-zero dynamic fields (CREATE omits 0 unless the
+    // change flag is set). CREATE then refreshes a newly slotted piece the same
+    // way a bag swap does, so an open window does not keep the old snapshot.
+    void SendReforgeItemUpdate(Player* player, Item* item)
+    {
+        if (!player || !item || !player->GetSession())
+            return;
+
+        UpdateData valuesUpd(player->GetMapId());
+        item->BuildValuesUpdateBlockForPlayer(&valuesUpd, player);
+        if (valuesUpd.HasData())
+        {
+            WorldPacket packet;
+            valuesUpd.BuildPacket(&packet);
+            player->GetSession()->SendPacket(&packet);
+        }
+
+        item->SendUpdateToPlayer(player);
+        item->ClearUpdateMask(true);
+    }
+}
+
 void WorldSession::HandleSplitItemOpcode(WorldPacket& recvData)
 {
     //SF_LOG_DEBUG("network", "WORLD: CMSG_SPLIT_ITEM");
@@ -1816,9 +1842,14 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
         if (item->IsEquipped())
             player->ApplyReforgeEnchantment(item, false);
         item->SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0, 0);
-        if (!item->GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1)) // check transmog on item before remove
-            item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 0);
+        // SetFlag(..., 0) is a no-op; the client keeps showing Restore until
+        // the reforge bit is actually cleared (keep transmog bit 2 if present).
+        if (!item->GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 1))
+            item->SetUInt32Value(ITEM_FIELD_MODIFIERS_MASK, 0);
+        else
+            item->RemoveFlag(ITEM_FIELD_MODIFIERS_MASK, 1);
         item->SetState(ITEM_CHANGED, player);
+        SendReforgeItemUpdate(player, item);
         SendReforgeResult(true);
         return;
     }
@@ -1849,6 +1880,7 @@ void WorldSession::HandleReforgeItemOpcode(WorldPacket& recvData)
     item->SetFlag(ITEM_FIELD_MODIFIERS_MASK, 1);
     item->SetState(ITEM_CHANGED, player);
 
+    SendReforgeItemUpdate(player, item);
     SendReforgeResult(true);
 
     if (item->IsEquipped())

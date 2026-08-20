@@ -859,7 +859,12 @@ void Object::BuildDynamicValuesUpdate(uint8 updateType, ByteBuffer* data, Player
     {
         for (int index = 0; index < 32; index++)
         {
-            bool sendValue = isCreate ? m_dynamicTab[i][index] != 0 : m_dynamicChange[i][index];
+            // CREATE normally skips zeros. Restore sets reforge id 0, and the
+            // client keeps the old id unless that zero is sent (neck Restore
+            // left the window on Restore). Include fields that just changed.
+            bool sendValue = isCreate
+                ? (m_dynamicTab[i][index] != 0 || m_dynamicChange[i][index])
+                : m_dynamicChange[i][index];
 
             // Client expects researchSiteProgress entries for every active researchSites index,
             // including zero progress on a fresh digsite.
