@@ -6,8 +6,8 @@
 #ifndef SF_ACCOUNT_IDENTITY_H
 #define SF_ACCOUNT_IDENTITY_H
 
+#include "Authentication/SRP6.h"
 #include "Define.h"
-#include "SRP6.h"
 
 #include <string>
 
