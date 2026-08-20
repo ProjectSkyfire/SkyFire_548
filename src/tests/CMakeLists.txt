@@ -166,6 +166,14 @@ target_compile_definitions(world_auth_identity_tests PRIVATE SKYFIRE_SOURCE_DIR=
 
 add_test(NAME world_auth_identity_tests COMMAND world_auth_identity_tests)
 
+add_executable(character_creation_realm_limit_tests
+  CharacterCreationRealmLimitTests.cpp
+)
+
+target_compile_definitions(character_creation_realm_limit_tests PRIVATE SKYFIRE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+add_test(NAME character_creation_realm_limit_tests COMMAND character_creation_realm_limit_tests)
+
 add_executable(account_email_conversion_tests
   AccountEmailConversionTests.cpp
 )

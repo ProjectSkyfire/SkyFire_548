@@ -802,7 +802,7 @@ public:
 protected:
     void _UpdateGameTime();
     // callback for UpdateRealmCharacters
-    void _UpdateRealmCharCount(PreparedQueryResult resultCharCount);
+    void _UpdateRealmCharCount(uint32 accountId, PreparedQueryResult resultCharCount);
 
     void InitDailyQuestResetTime();
     void InitWeeklyQuestResetTime();
@@ -897,9 +897,18 @@ private:
 
     std::map<uint32, CharacterNameData> _characterNameDataMap;
     void LoadCharacterNameData();
+    void SyncRealmCharacterCounts();
 
     void ProcessQueryCallbacks();
-    std::vector<PreparedQueryResultFuture> m_realmCharCallbacks;
+    struct RealmCharCountCallback
+    {
+        RealmCharCountCallback(uint32 accountId, PreparedQueryResultFuture const& result) : AccountId(accountId), Result(result) { }
+
+        uint32 AccountId;
+        PreparedQueryResultFuture Result;
+    };
+
+    std::vector<RealmCharCountCallback> m_realmCharCallbacks;
 };
 
 typedef std::map<uint32, std::string> RealmNameMap;
