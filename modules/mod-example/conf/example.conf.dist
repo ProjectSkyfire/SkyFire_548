@@ -1,0 +1,12 @@
+[worldserver]
+
+########################################
+# mod-example configuration
+########################################
+#
+#    Example.Enable
+#        Description: Enable the example module's login logging.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Example.Enable = 1

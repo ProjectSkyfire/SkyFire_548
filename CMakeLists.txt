@@ -127,3 +127,8 @@ add_subdirectory(dep)
 
 # add core sources
 add_subdirectory(src)
+
+# add modules (must come after src so the 'game' target is available)
+if(MODULES AND SERVERS)
+  add_subdirectory(modules)
+endif()

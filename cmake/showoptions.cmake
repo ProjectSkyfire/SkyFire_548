@@ -40,6 +40,13 @@ else()
   message("* Build with scripts     : No")
 endif()
 
+if( MODULES )
+  message("* Build with modules     : Yes (default)")
+  add_definitions(-DSF_MODULES)
+else()
+  message("* Build with modules     : No")
+endif()
+
 if( ELUNA )
   message("* Build Eluna LuaEngine  : Yes")
   add_definitions(-DELUNA)

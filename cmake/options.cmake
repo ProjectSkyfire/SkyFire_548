@@ -5,6 +5,7 @@
 
 option(SERVERS            "Build worldserver and authserver"                            1)
 option(SCRIPTS            "Build core with scripts included"                            1)
+option(MODULES            "Build modules from the top-level modules/ directory"         1)
 option(TOOLS              "Build map/vmap/mmap extraction/assembler tools"              0)
 option(PACKET_LOG_SERVER  "Build packetlogserver companion packet logging tool"          1)
 option(ELUNA              "Build Eluna Lua Engine support"                              0)

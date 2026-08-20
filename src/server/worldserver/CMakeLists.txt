@@ -189,6 +189,14 @@ elseif(TARGET Boost::boost)
   target_link_libraries(worldserver Boost::boost)
 endif()
 
+# Link modules built from the top-level modules/ directory (see modules/CMakeLists.txt).
+# 'modules' provides AddModulesScripts(), which is referenced by the game library.
+# Guard on the MODULES option (known at parse time); the 'modules' target itself is
+# created later via add_subdirectory(modules) and resolves at generate time.
+if(MODULES)
+  target_link_libraries(worldserver modules)
+endif()
+
 if( WIN32 )
   if ( MSVC )
     skyfire_copy_windows_runtime_dependencies(worldserver)
