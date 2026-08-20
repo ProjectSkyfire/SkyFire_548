@@ -96,9 +96,9 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
         data.WriteGuidMask(itemId, 1);
         data.WriteGuidMask(creatorGuid, 2);
         data.WriteGuidMask(itemId, 2);
-        data.WriteGuidMask(creatorGuid, 2, 0);
+        data.WriteGuidMask(creatorGuid, 5, 0);
         data.WriteGuidMask(itemId, 6, 5);
-        data.WriteGuidMask(creatorGuid, 2);
+        data.WriteGuidMask(creatorGuid, 4);
         data.WriteGuidMask(itemId, 7, 3, 4, 0);
         data.WriteGuidMask(creatorGuid, 6, 7);
 
@@ -107,24 +107,24 @@ void WorldSession::HandleVoidStorageQuery(WorldPacket& recvData)
         itemData.WriteGuidBytes(creatorGuid, 6);
         itemData.WriteGuidBytes(itemId, 2);
 
-        itemData << uint32(item->ItemSuffixFactor); //= 32
+        itemData << uint32(0); // upgrade
 
         itemData.WriteGuidBytes(itemId, 7, 3);
         itemData.WriteGuidBytes(creatorGuid, 0);
 
-        itemData << uint32(0); //= 16 - UpgradeID
+        itemData << uint32(item->ItemEntry);
 
         itemData.WriteGuidBytes(itemId, 0);
 
-        itemData << uint32(item->ItemRandomPropertyId); //= 24
+        itemData << uint32(item->ItemSuffixFactor);
 
         itemData.WriteGuidBytes(creatorGuid, 2, 5, 3);
 
-        itemData << uint32(item->ItemEntry); //= 28
+        itemData << uint32(i); // slot
 
         itemData.WriteGuidBytes(itemId, 5, 1);
 
-        itemData << uint32(i); //= 20
+        itemData << uint32(item->ItemRandomPropertyId);
 
         itemData.WriteGuidBytes(itemId, 4);
         itemData.WriteGuidBytes(creatorGuid, 1);
@@ -315,6 +315,7 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
         data.WriteGuidMask(creatorGuid, 1);
         data.WriteGuidMask(itemId, 1);
         data.WriteGuidMask(creatorGuid, 2);
+        data.WriteGuidMask(itemId, 2);
     }
 
     data.FlushBits();
@@ -327,10 +328,10 @@ void WorldSession::HandleVoidStorageTransfer(WorldPacket& recvData)
         data.WriteGuidBytes(creatorGuid, 5);
         data << uint32(depositItems[i].first.ItemEntry);
         data.WriteGuidBytes(creatorGuid, 6, 3);
-        data << uint32(depositItems[i].first.ItemSuffixFactor);
+        data << uint32(depositItems[i].first.ItemRandomPropertyId);
         data.WriteGuidBytes(creatorGuid, 2);
         data.WriteGuidBytes(itemId, 5);
-        data << uint32(depositItems[i].first.ItemRandomPropertyId);
+        data << uint32(depositItems[i].first.ItemSuffixFactor);
         data.WriteGuidBytes(itemId, 3);
         data.WriteGuidBytes(creatorGuid, 7, 4, 1);
         data.WriteGuidBytes(itemId, 0, 4, 6);
@@ -398,7 +399,7 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
     }
 
     uint8 oldSlot;
-    if (!player->GetVoidStorageItem(itemId, oldSlot))
+    if (newSlot >= VOID_STORAGE_MAX_SLOT || !player->GetVoidStorageItem(itemId, oldSlot))
     {
         SF_LOG_DEBUG("network", "WORLD: HandleVoidSwapItem - Player (GUID: %u, name: %s) requested swapping an invalid item (slot: %u, itemid: " UI64FMTD ").", player->GetGUIDLow(), player->GetName().c_str(), newSlot, uint64(itemId));
         return;
@@ -411,7 +412,7 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
     if (usedDestSlot)
         itemIdDest = player->GetVoidStorageItem(newSlot)->ItemId;
 
-    if (!player->SwapVoidStorageItem(oldSlot, newSlot))
+    if (oldSlot != newSlot && !player->SwapVoidStorageItem(oldSlot, newSlot))
     {
         SendVoidStorageTransferResult(VoidTransferError::VOID_TRANSFER_ERROR_INTERNAL_ERROR_1);
         return;
@@ -419,26 +420,22 @@ void WorldSession::HandleVoidSwapItem(WorldPacket& recvData)
 
     WorldPacket data(SMSG_VOID_ITEM_SWAP_RESPONSE, 1 + (usedSrcSlot + usedDestSlot) * (1 + 7 + 4));
 
+    // 18414 Read sub_140457C10: packed GUIDs are always present. Has-guid and slot-present
+    // bits are inverted. Slot-present order is dest then src; so are the uint32 payloads.
     data.WriteBit(!usedSrcSlot);
-
     data.WriteGuidMask(itemId, 4, 1, 6, 0, 3, 7, 2, 5);
-
     data.WriteBit(!usedDestSlot);
-
     data.WriteGuidMask(itemIdDest, 6, 0, 3, 2, 1, 5, 7, 4);
-
-    data.WriteBit(!false); //VoidItemSlotA
     data.WriteBit(!usedDestSlot);
-
+    data.WriteBit(!usedSrcSlot);
     data.FlushBits();
 
     data.WriteGuidBytes(itemIdDest, 3, 7, 2, 5, 0, 1, 4, 6);
     data.WriteGuidBytes(itemId, 0, 2, 7, 5, 6, 4, 3, 1);
 
-    //if (VoidItemSlotA)
-    //    data << uint32(VoidItemSlotA);
-
     if (usedDestSlot)
+        data << uint32(oldSlot);
+    if (usedSrcSlot)
         data << uint32(newSlot);
 
     SendPacket(&data);

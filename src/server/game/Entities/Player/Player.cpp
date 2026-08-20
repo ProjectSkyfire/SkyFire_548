@@ -15057,28 +15057,29 @@ void Player::_SaveVoidStorage(SQLTransaction& trans)
     PreparedStatement* stmt = NULL;
     uint32 lowGuid = GetGUIDLow();
 
+    // Delete every slot first, then write occupied ones. Mixed DELETE/REPLACE in
+    // slot order can hit UNIQUE(playerGuid, slot) and drop the moved item.
     for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
     {
-        if (!_voidStorageItems[i]) // unused item
-        {
-            // DELETE FROM void_storage WHERE slot = ? AND playerGuid = ?
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_VOID_STORAGE_ITEM_BY_SLOT);
-            stmt->setUInt8(0, i);
-            stmt->setUInt32(1, lowGuid);
-        }
-        else
-        {
-            // REPLACE INTO character_inventory (itemId, playerGuid, itemEntry, slot, creatorGuid) VALUES (?, ?, ?, ?, ?)
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_VOID_STORAGE_ITEM);
-            stmt->setUInt64(0, _voidStorageItems[i]->ItemId);
-            stmt->setUInt32(1, lowGuid);
-            stmt->setUInt32(2, _voidStorageItems[i]->ItemEntry);
-            stmt->setUInt8(3, i);
-            stmt->setUInt32(4, _voidStorageItems[i]->CreatorGuid);
-            stmt->setUInt32(5, _voidStorageItems[i]->ItemRandomPropertyId);
-            stmt->setUInt32(6, _voidStorageItems[i]->ItemSuffixFactor);
-        }
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_VOID_STORAGE_ITEM_BY_SLOT);
+        stmt->setUInt8(0, i);
+        stmt->setUInt32(1, lowGuid);
+        trans->Append(stmt);
+    }
 
+    for (uint8 i = 0; i < VOID_STORAGE_MAX_SLOT; ++i)
+    {
+        if (!_voidStorageItems[i])
+            continue;
+
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_CHAR_VOID_STORAGE_ITEM);
+        stmt->setUInt64(0, _voidStorageItems[i]->ItemId);
+        stmt->setUInt32(1, lowGuid);
+        stmt->setUInt32(2, _voidStorageItems[i]->ItemEntry);
+        stmt->setUInt8(3, i);
+        stmt->setUInt32(4, _voidStorageItems[i]->CreatorGuid);
+        stmt->setUInt32(5, _voidStorageItems[i]->ItemRandomPropertyId);
+        stmt->setUInt32(6, _voidStorageItems[i]->ItemSuffixFactor);
         trans->Append(stmt);
     }
 }
@@ -22967,7 +22968,7 @@ void Player::AddVoidStorageItemAtSlot(uint8 slot, const VoidStorageItem& item)
         return;
     }
 
-    _voidStorageItems[slot] = new VoidStorageItem(item.ItemId, item.ItemId,
+    _voidStorageItems[slot] = new VoidStorageItem(item.ItemId, item.ItemEntry,
         item.CreatorGuid, item.ItemRandomPropertyId, item.ItemSuffixFactor);
 }
 
