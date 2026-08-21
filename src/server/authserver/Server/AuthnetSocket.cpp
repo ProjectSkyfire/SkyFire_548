@@ -7,17 +7,20 @@
 #include "Log.h"
 #include "Util.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace
 {
-    // Generous safety cap against a runaway/hostile sender - not a protocol
-    // limit. A real first message has been observed well under this.
     constexpr size_t MaxCapturedBytes = 8192;
+
+    constexpr uint8 FixedTrailer[] = { 0x40, 0x01, 0x49, 0x01, 0x18, 0x00, 0x24 };
+    constexpr size_t FixedEnvelopePrefixLen = 62;
+    constexpr size_t TokenLen = 4;
 }
 
 AuthnetSocket::AuthnetSocket(RealmSocket& socket) :
-    socket_(socket)
+    socket_(socket), _responded(false)
 {
 }
 
@@ -37,14 +40,6 @@ void AuthnetSocket::OnClose(void)
 
 void AuthnetSocket::OnRead(void)
 {
-    // Deliberately does not try to interpret any framing (length prefix,
-    // header/body boundary) - an earlier version guessed at that and
-    // truncated a real message as a result. Instead: drain whatever is
-    // available on this read, append it to what's been captured so far
-    // across any prior reads on this same connection, and log the
-    // cumulative total every time. Never responds, so the client can't
-    // progress past this first message into the later, credential-bearing
-    // RPC call.
     size_t available = socket().GetAvailableBytes();
     if (available == 0)
         return;
@@ -67,4 +62,39 @@ void AuthnetSocket::OnRead(void)
     SF_LOG_INFO("server.authserver", "'%s:%d' authnet passive probe: %zu new byte(s), %zu total so far: %s",
         socket().getRemoteAddress().c_str(), socket().getRemotePort(), available, _captured.size(),
         ByteArrayToHexStr(_captured).c_str());
+
+    TrySendProbeResponse();
+}
+
+void AuthnetSocket::TrySendProbeResponse(void)
+{
+    if (_responded)
+        return;
+
+    if (_captured.size() < FixedEnvelopePrefixLen)
+        return;
+
+    auto trailerIt = std::search(_captured.begin(), _captured.end(),
+        std::begin(FixedTrailer), std::end(FixedTrailer));
+    if (trailerIt == _captured.end())
+        return;
+
+    size_t trailerOffset = size_t(trailerIt - _captured.begin());
+    size_t tokenOffset = trailerOffset + sizeof(FixedTrailer);
+    if (_captured.size() < tokenOffset + TokenLen)
+        return;
+
+    std::vector<uint8> response;
+    response.reserve(FixedEnvelopePrefixLen + 2 + TokenLen);
+    response.insert(response.end(), _captured.begin(), _captured.begin() + FixedEnvelopePrefixLen);
+    response.push_back(0x00);
+    response.push_back(0x00);
+    response.insert(response.end(), _captured.begin() + tokenOffset, _captured.begin() + tokenOffset + TokenLen);
+
+    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending experimental %zu-byte response: %s",
+        socket().getRemoteAddress().c_str(), socket().getRemotePort(), response.size(),
+        ByteArrayToHexStr(response).c_str());
+
+    socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+    _responded = true;
 }
