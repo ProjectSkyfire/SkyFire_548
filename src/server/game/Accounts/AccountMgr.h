@@ -6,14 +6,16 @@
 #ifndef SF_ACCMGR_H
 #define SF_ACCMGR_H
 
-#include "Auth/AccountIdentity.h"
+#include "Auth/AccountOpResult.h"
 #include "Common.h"
 #include "Platform/Singleton.h"
 #include "RBAC.h"
 
-// AccountOpResult, MAX_ACCOUNT_STR, and MAX_EMAIL_STR live in the shared
-// Auth/AccountIdentity module so the authserver can reuse account-identity
-// operations (e.g. pre-login migration) without linking the game module.
+// AccountOpResult, MAX_ACCOUNT_STR, and MAX_EMAIL_STR live in the shared,
+// dependency-free Auth/AccountOpResult module - deliberately not the full
+// Auth/AccountIdentity.h (which pulls in SRP6/OpenSSL), since AccountMgr.h
+// is included practically everywhere and doesn't need those declarations
+// itself; only AccountMgr.cpp's implementation does.
 using AccountOpResult = Skyfire::Auth::AccountOpResult;
 
 enum PasswordChangeSecurity

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "AccountMgr.h"
+#include "Auth/AccountIdentity.h"
 #include "Auth/TOTP.h"
 #include "CryptoHash.h"
 #include "Config.h"
