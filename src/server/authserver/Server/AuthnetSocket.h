@@ -10,12 +10,14 @@
 #include "RealmSocket.h"
 
 // Passive probe for authnet (the launcher-facing Battle.net-style login
-// path). Logs the first frame's header bytes from a real connection and
-// closes - this build's exact Header field layout (service_id/method_id/
-// token/size) isn't confirmed precisely enough yet to safely determine
-// where the header ends and a body begins, so this deliberately does not
-// try to read past the header or synthesize a response. See the authnet
-// roadmap and its client login probe research note.
+// path). Accumulates and logs everything a real connection sends, across
+// as many read events as it takes, rather than assuming a specific frame
+// boundary - an earlier version tried to interpret a length-prefixed
+// header and close immediately after, which risked (and in practice did)
+// truncate a message that arrived across more than one read. Still never
+// sends a response, so the client can't progress to the later,
+// credential-bearing RPC call. See the authnet roadmap and its client
+// login probe research note.
 class AuthnetSocket : public RealmSocket::Session
 {
 public:
@@ -30,7 +32,7 @@ private:
     RealmSocket& socket_;
     RealmSocket& socket(void) { return socket_; }
 
-    bool _loggedHeader;
+    std::vector<uint8> _captured;
 };
 
 #endif
