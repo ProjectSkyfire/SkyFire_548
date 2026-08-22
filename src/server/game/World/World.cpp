@@ -2961,44 +2961,48 @@ void World::SyncRealmCharacterCounts()
 {
     SF_LOG_INFO("server.loading", "Synchronizing realm character counts");
 
-    LoginDatabase.DirectExecute("UPDATE realmcharacters SET numchars = 0 WHERE realmid IN (SELECT id FROM realmlist)");
+    PreparedStatement* initStmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_REALM_CHARACTERS_INIT);
+    LoginDatabase.DirectExecute(initStmt);
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_REALM_CHARACTERS_INIT);
-    LoginDatabase.DirectExecute(stmt);
-
-    QueryResult result = CharacterDatabase.Query("SELECT account, realm, COUNT(guid) FROM characters WHERE account <> 0 AND deleteDate IS NULL GROUP BY account, realm");
-    if (!result)
+    for (std::map<uint32, std::string>::const_iterator realmItr = realmNameStore.begin(); realmItr != realmNameStore.end(); ++realmItr)
     {
-        SF_LOG_INFO("server.loading", "Synchronized 0 realm character count records");
-        return;
-    }
+        uint32 const realmId = realmItr->first;
 
-    uint32 count = 0;
-    SQLTransaction trans = LoginDatabase.BeginTransaction();
+        LoginDatabase.DirectPExecute("UPDATE realmcharacters SET numchars = 0 WHERE realmid = %u", realmId);
 
-    do
-    {
-        Field* fields = result->Fetch();
-        uint32 accountId = fields[0].GetUInt32();
-        uint32 realm = fields[1].GetUInt32();
-        uint8 charCount = uint8(fields[2].GetUInt64());
+        QueryResult result = CharacterDatabase.PQuery(
+            "SELECT account, COUNT(guid) FROM characters WHERE account <> 0 AND realm = %u AND deleteInfos_Name IS NULL GROUP BY account",
+            realmId);
 
-        if (realmNameStore.find(realm) == realmNameStore.end())
+        if (!result)
+        {
+            SF_LOG_INFO("server.loading", "Synchronized 0 realm character count records for realm %u (%s)", realmId, realmItr->second.c_str());
             continue;
+        }
 
-        stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_REALM_CHARACTERS);
-        stmt->setUInt8(0, charCount);
-        stmt->setUInt32(1, accountId);
-        stmt->setUInt32(2, realm);
-        trans->Append(stmt);
-        ++count;
+        uint32 count = 0;
+        SQLTransaction trans = LoginDatabase.BeginTransaction();
+
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 accountId = fields[0].GetUInt32();
+            uint8 charCount = uint8(fields[1].GetUInt64());
+
+            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_REALM_CHARACTERS);
+            stmt->setUInt8(0, charCount);
+            stmt->setUInt32(1, accountId);
+            stmt->setUInt32(2, realmId);
+            trans->Append(stmt);
+            ++count;
+        }
+        while (result->NextRow());
+
+        if (count)
+            LoginDatabase.DirectCommitTransaction(trans);
+
+        SF_LOG_INFO("server.loading", "Synchronized %u realm character count records for realm %u (%s)", count, realmId, realmItr->second.c_str());
     }
-    while (result->NextRow());
-
-    if (count)
-        LoginDatabase.DirectCommitTransaction(trans);
-
-    SF_LOG_INFO("server.loading", "Synchronized %u realm character count records", count);
 }
 
 void World::InitWeeklyQuestResetTime()
