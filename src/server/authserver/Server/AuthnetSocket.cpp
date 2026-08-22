@@ -14,9 +14,9 @@ namespace
 {
     constexpr size_t MaxCapturedBytes = 8192;
 
-    constexpr uint8 FixedTrailer[] = { 0x40, 0x01, 0x49, 0x01, 0x18, 0x00, 0x24 };
+    constexpr uint8 FixedTrailer[] = { 0x40, 0x01, 0x49, 0x01, 0x18, 0x00 };
     constexpr size_t FixedEnvelopePrefixLen = 62;
-    constexpr size_t TokenLen = 4;
+    constexpr size_t TokenLen = 5;
 }
 
 AuthnetSocket::AuthnetSocket(RealmSocket& socket) :
