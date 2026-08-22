@@ -119,12 +119,13 @@ int main()
         "World startup should have a realm character count sync.");
     passed &= Expect(Contains(world, "SyncRealmCharacterCounts();"),
         "World startup should invoke the realm character count sync.");
-    passed &= Expect(Contains(syncRealmCharacterCounts, "UPDATE realmcharacters SET numchars = 0 WHERE realmid IN (SELECT id FROM realmlist)") &&
-        Contains(syncRealmCharacterCounts, "LOGIN_INS_REALM_CHARACTERS_INIT") &&
+    passed &= Expect(Contains(syncRealmCharacterCounts, "LOGIN_INS_REALM_CHARACTERS_INIT") &&
+        Contains(syncRealmCharacterCounts, "realmNameStore.begin()") &&
+        Contains(syncRealmCharacterCounts, "UPDATE realmcharacters SET numchars = 0 WHERE realmid = %u") &&
+        Contains(syncRealmCharacterCounts, "deleteInfos_Name IS NULL") &&
         Contains(syncRealmCharacterCounts, "if (count)") &&
-        Contains(syncRealmCharacterCounts, "LoginDatabase.DirectCommitTransaction(trans)") &&
-        Contains(syncRealmCharacterCounts, "SELECT account, realm, COUNT(guid) FROM characters WHERE account <> 0 AND deleteDate IS NULL GROUP BY account, realm"),
-        "World startup should rebuild realmcharacters from grouped character counts.");
+        Contains(syncRealmCharacterCounts, "LoginDatabase.DirectCommitTransaction(trans)"),
+        "World startup should rebuild realmcharacters per local realm without wiping other realms.");
     passed &= Expect(Contains(loginDatabase, "SELECT r.id, a.id, 0 FROM realmlist r CROSS JOIN account a LEFT JOIN realmcharacters rc ON rc.realmid = r.id AND rc.acctid = a.id WHERE rc.acctid IS NULL"),
         "Realm character init should create missing rows per account and per realm, not just per account.");
 
