@@ -85,8 +85,11 @@ void AuthnetSocket::TrySendProbeResponse(void)
         return;
 
     std::vector<uint8> response;
-    response.reserve(FixedEnvelopePrefixLen + 2 + TokenLen);
-    response.insert(response.end(), _captured.begin(), _captured.begin() + FixedEnvelopePrefixLen);
+    response.reserve(4 + 2 + TokenLen);
+    response.push_back(0x00);
+    response.push_back(0x00);
+    response.push_back(0x00);
+    response.push_back(0x00);
     response.push_back(0x00);
     response.push_back(0x00);
     response.insert(response.end(), _captured.begin() + tokenOffset, _captured.begin() + tokenOffset + TokenLen);
