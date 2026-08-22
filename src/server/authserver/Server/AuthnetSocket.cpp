@@ -95,6 +95,6 @@ void AuthnetSocket::TrySendProbeResponse(void)
         socket().getRemoteAddress().c_str(), socket().getRemotePort(), response.size(),
         ByteArrayToHexStr(response).c_str());
 
-    socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+    socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size(), true);
     _responded = true;
 }

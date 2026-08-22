@@ -50,7 +50,7 @@ RealmSocket::Session::~Session(void) { }
 RealmSocket::RealmSocket(std::unique_ptr<RealmSocketHandle> socket, std::string remoteAddress, uint16 remotePort) :
     _socket(std::move(socket)), _readBuffer(), _inputBuffer(), _inputReadPos(0), _session(),
     _remoteAddress(std::move(remoteAddress)), _packetLogAccountName(), _remotePort(remotePort), _writeQueue(),
-    _writeInProgress(false), _closed(false), _closeNotified(false)
+    _writeInProgress(false), _closeWhenWritesFlush(false), _closed(false), _closeNotified(false)
 {
     _inputBuffer.reserve(4096);
 }
@@ -125,7 +125,7 @@ void RealmSocket::DiscardBytes(size_t len)
     _inputReadPos = std::min(_inputReadPos + len, _inputBuffer.size());
 }
 
-bool RealmSocket::QueueSend(void const* buf, size_t len)
+bool RealmSocket::QueueSend(void const* buf, size_t len, bool closeWhenSent)
 {
     if (buf == NULL || len == 0)
         return true;
@@ -139,8 +139,10 @@ bool RealmSocket::QueueSend(void const* buf, size_t len)
 
     std::shared_ptr<RealmSocket> self = shared_from_this();
     boost::asio::post(_socket->get_executor(),
-        [self, data = std::move(data)]() mutable
+        [self, data = std::move(data), closeWhenSent]() mutable
         {
+            if (closeWhenSent)
+                self->_closeWhenWritesFlush = true;
             self->QueueWrite(std::move(data));
         });
 
@@ -238,7 +240,13 @@ void RealmSocket::HandleWrite(boost::system::error_code const& error)
     }
 
     if (!_writeQueue.empty())
+    {
         StartAsyncWrite();
+        return;
+    }
+
+    if (_closeWhenWritesFlush)
+        CloseSocket();
 }
 
 bool RealmSocket::IsOpen(void) const
