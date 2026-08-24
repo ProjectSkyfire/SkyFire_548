@@ -65,7 +65,7 @@ BindIP = "0.0.0.0"
 #
 #    Authnet.Enabled
 #        Description: Enable the authnet listener (launcher-facing,
-#                      Battle.net-style login). Passive probe only for now -
+#                      authnet-style login). Passive probe only for now -
 #                      logs the first frame's header from each connection
 #                      and closes; does not yet authenticate anything.
 #                      The classic GRUNT listener (RealmServerPort/BindIP

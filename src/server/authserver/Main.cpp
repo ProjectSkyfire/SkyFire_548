@@ -397,7 +397,7 @@ extern int main(int argc, char** argv)
     }
 
     // Authnet: separate, disabled-by-default listener for the launcher's
-    // Battle.net-style login path. Never affects the classic listener above.
+    // Authnet-style login path. Never affects the classic listener above.
     AuthnetAcceptor authnetAcceptor;
     if (sConfigMgr->GetBoolDefault("Authnet.Enabled", false))
     {
