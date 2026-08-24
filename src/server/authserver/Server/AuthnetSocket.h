@@ -24,6 +24,7 @@ private:
     RealmSocket& socket(void) { return socket_; }
 
     void TrySendProbeResponse(void);
+    void LogDecodedRequest(void);
 
     std::vector<uint8> _captured;
     bool _responded;

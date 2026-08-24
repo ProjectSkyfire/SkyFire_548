@@ -4,6 +4,7 @@
 */
 
 #include "AuthnetSocket.h"
+#include "Authentication/BsnBitStream.h"
 #include "Log.h"
 #include "Util.h"
 
@@ -66,6 +67,47 @@ void AuthnetSocket::OnRead(void)
     TrySendProbeResponse();
 }
 
+void AuthnetSocket::LogDecodedRequest(void)
+{
+    using namespace Skyfire::Authnet;
+
+    BitReader reader(_captured.data(), _captured.size());
+
+    uint32 prefix = 0;
+    std::string program, platform, locale;
+    uint32 componentCount = 0;
+
+    if (!reader.ReadBits(11, prefix) || !reader.ReadFourCC(program) ||
+        !reader.ReadFourCC(platform) || !reader.ReadFourCC(locale) ||
+        !reader.ReadBits(6, componentCount))
+    {
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet decode: request too short for header",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort());
+        return;
+    }
+
+    SF_LOG_INFO("server.authserver",
+        "'%s:%d' authnet decode: prefix=0x%03X program=%s platform=%s locale=%s components=%u",
+        socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+        prefix, program.c_str(), platform.c_str(), locale.c_str(), componentCount);
+
+    for (uint32 i = 0; i < componentCount; ++i)
+    {
+        std::string compProgram, compPlatform;
+        uint32 build = 0;
+        if (!reader.ReadFourCC(compProgram) || !reader.ReadFourCC(compPlatform) || !reader.ReadUInt32(build))
+        {
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet decode: truncated at component %u",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), i);
+            return;
+        }
+
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet decode: component[%u] = %s.%s.%u",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+            i, compProgram.c_str(), compPlatform.c_str(), build);
+    }
+}
+
 void AuthnetSocket::TrySendProbeResponse(void)
 {
     if (_responded)
@@ -83,6 +125,8 @@ void AuthnetSocket::TrySendProbeResponse(void)
     size_t tokenOffset = trailerOffset + sizeof(FixedTrailer);
     if (_captured.size() < tokenOffset + TokenLen)
         return;
+
+    LogDecodedRequest();
 
     std::vector<uint8> response;
     response.reserve(4 + 2 + TokenLen);
