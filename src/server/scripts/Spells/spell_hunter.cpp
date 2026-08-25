@@ -10,13 +10,20 @@
  */
 
 #include "Pet.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "DBCStores.h"
+#include "EventProcessor.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "ObjectAccessor.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "PetDefines.h"
+
+#include <algorithm>
 
 enum HunterSpells
 {
@@ -48,11 +55,61 @@ enum HunterSpells
     SPELL_HUNTER_SERPENT_STING_AURA                 = 118253,
 
     SPELL_HUNTER_STEADY_SHOT_FOCUS                  = 77443,
+
+    SPELL_HUNTER_STAMPEDE                           = 121818,
+    SPELL_HUNTER_STAMPEDE_DAMAGE_REDUCTION          = 130201,
+    SPELL_HUNTER_GLYPH_OF_STAMPEDE                  = 57902,
+
+    SPELL_HUNTER_GLAIVE_TOSS_AURA                   = 117050,
+    SPELL_HUNTER_GLAIVE_TOSS_RIGHT                  = 120755,
+    SPELL_HUNTER_GLAIVE_TOSS_LEFT                   = 120756,
+    SPELL_HUNTER_GLAIVE_TOSS_DAMAGE_RIGHT           = 121414,
+    SPELL_HUNTER_GLAIVE_TOSS_DAMAGE_LEFT            = 120761,
 };
 
 enum HunterCreatures
 {
     NPC_HUNTER_DIRE_BEAST                           = 62005
+};
+
+static uint32 GetGlaiveTossDamageSpell(uint32 missileSpellId)
+{
+    return missileSpellId == SPELL_HUNTER_GLAIVE_TOSS_RIGHT
+        ? SPELL_HUNTER_GLAIVE_TOSS_DAMAGE_RIGHT
+        : SPELL_HUNTER_GLAIVE_TOSS_DAMAGE_LEFT;
+}
+
+static uint32 GetGlaiveTossOppositeMissile(uint32 missileSpellId)
+{
+    return missileSpellId == SPELL_HUNTER_GLAIVE_TOSS_RIGHT
+        ? SPELL_HUNTER_GLAIVE_TOSS_LEFT
+        : SPELL_HUNTER_GLAIVE_TOSS_RIGHT;
+}
+
+class DelayedGlaiveTossReturnEvent : public BasicEvent
+{
+public:
+    DelayedGlaiveTossReturnEvent(uint64 hunterGuid, uint64 targetGuid, uint32 bounceMissileSpell)
+        : _hunterGuid(hunterGuid), _targetGuid(targetGuid), _bounceMissileSpell(bounceMissileSpell) { }
+
+    bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) OVERRIDE
+    {
+        Player* hunter = ObjectAccessor::FindPlayer(_hunterGuid);
+        if (!hunter)
+            return true;
+
+        Unit* target = ObjectAccessor::GetUnit(*hunter, _targetGuid);
+        if (!target || !hunter->IsValidAttackTarget(target))
+            return true;
+
+        hunter->CastSpell(hunter, GetGlaiveTossDamageSpell(_bounceMissileSpell), true);
+        return true;
+    }
+
+private:
+    uint64 _hunterGuid;
+    uint64 _targetGuid;
+    uint32 _bounceMissileSpell;
 };
 
 class spell_hun_a_murder_of_crows : public SpellScriptLoader
@@ -836,6 +893,349 @@ public:
     }
 };
 
+// 121818 - Stampede
+class spell_hun_stampede : public SpellScriptLoader
+{
+public:
+    spell_hun_stampede() : SpellScriptLoader("spell_hun_stampede") { }
+
+    class spell_hun_stampede_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_stampede_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_HUNTER_STAMPEDE_DAMAGE_REDUCTION))
+                return false;
+            return true;
+        }
+
+        void ApplyStampedePetScale(Pet* pet, Player* player)
+        {
+            if (!pet || !player)
+                return;
+
+            // Stats/level are already set during LoadPetFromDB. Do not call InitStatsForLevel
+            // again here — that can re-apply undersized family minScale if level is wrong.
+            float scale = 1.0f;
+            if (Pet* active = player->GetPet())
+                scale = active->GetObjectScale();
+
+            // Stampede pets are full-power summons: never below CreatureFamily maxScale.
+            if (CreatureTemplate const* cinfo = pet->GetCreatureTemplate())
+                if (CreatureFamilyEntry const* family = sCreatureFamilyStore.LookupEntry(cinfo->family))
+                    if (family->maxScale > 0.0f)
+                        scale = std::max(scale, family->maxScale);
+
+            pet->SetObjectScale(scale);
+            pet->SetHealth(pet->GetMaxHealth());
+            if (pet->getPowerType() == POWER_FOCUS)
+                pet->SetPower(POWER_FOCUS, pet->GetMaxPower(POWER_FOCUS));
+        }
+
+        void InitStampedePet(Pet* pet, Unit* target, int32 duration)
+        {
+            if (!pet || !target)
+                return;
+
+            // Ensure spawn is at the enemy even if load relocated to the owner.
+            Position spawnPos;
+            target->GetRandomNearPosition(spawnPos, PET_FOLLOW_DIST + target->GetObjectSize());
+            pet->NearTeleportTo(spawnPos.GetPositionX(), spawnPos.GetPositionY(), spawnPos.GetPositionZ(),
+                spawnPos.GetOrientation());
+
+            pet->SetDuration(duration);
+
+            if (Player* owner = pet->GetOwner())
+                ApplyStampedePetScale(pet, owner);
+
+            // Assist: only fight the Stampede / hunter target (no nearest-hostile aggro).
+            pet->SetReactState(REACT_ASSIST);
+            if (CharmInfo* ci = pet->GetCharmInfo())
+            {
+                ci->SetCommandState(COMMAND_FOLLOW);
+                ci->SetIsCommandAttack(true);
+                ci->SetIsCommandFollow(false);
+                ci->SetIsAtStay(false);
+                ci->SetIsFollowing(false);
+                ci->SetIsReturning(false);
+            }
+
+            // Treant-style engage: always chase. Do not call PetAI::AttackStart after Attack() —
+            // Attack() already on the same victim makes DoAttack no-op and skips MoveChase.
+            pet->ClearUnitState(UNIT_STATE_EVADE);
+            pet->AttackStop();
+            if (!pet->Attack(target, true))
+            {
+                pet->SetInCombatWith(target);
+                target->SetInCombatWith(pet);
+                pet->SetTarget(target->GetGUID());
+                pet->AddUnitState(UNIT_STATE_MELEE_ATTACKING);
+            }
+            pet->GetMotionMaster()->Clear(true);
+            pet->GetMotionMaster()->MoveChase(target);
+
+            if (target->GetCharmerOrOwnerPlayerOrPlayerItself() || pet->GetMap()->IsBattlegroundOrArena())
+                pet->CastSpell(pet, SPELL_HUNTER_STAMPEDE_DAMAGE_REDUCTION, true);
+        }
+
+        Pet* SummonStampedeClone(Player* player, uint32 petNumber, Position const& spawnPos)
+        {
+            Pet* pet = new Pet(player, PetType::HUNTER_PET);
+            if (!pet->LoadPetFromDB(player, 0, petNumber, false, -1, true, &spawnPos))
+            {
+                delete pet;
+                return NULL;
+            }
+            return pet;
+        }
+
+        Unit* ResolveStampedeTarget(Player* player)
+        {
+            // Stampede's OnHit unit is often the caster (dummy / summon effects). Use the
+            // explicit enemy the hunter cast at / has selected.
+            if (Unit* expl = GetExplTargetUnit())
+                if (player->IsValidAttackTarget(expl))
+                    return expl;
+
+            if (Unit* selected = player->GetSelectedUnit())
+                if (player->IsValidAttackTarget(selected))
+                    return selected;
+
+            if (Unit* victim = player->GetVictim())
+                if (player->IsValidAttackTarget(victim))
+                    return victim;
+
+            return NULL;
+        }
+
+        void HandleAfterCast()
+        {
+            Player* player = GetCaster() ? GetCaster()->ToPlayer() : NULL;
+            if (!player)
+                return;
+
+            Unit* target = ResolveStampedeTarget(player);
+            if (!target)
+                return;
+
+            Pet* currentPet = player->GetPet();
+            if (!currentPet || !currentPet->GetCharmInfo())
+                return;
+
+            int32 duration = player->CalcSpellDuration(GetSpellInfo());
+            if (duration <= 0)
+                duration = 20 * IN_MILLISECONDS;
+
+            uint8 const currentSlot = currentPet->GetSlot();
+            uint32 const currentPetNumber = currentPet->GetCharmInfo()->GetPetNumber();
+            bool const glyph = player->HasAura(SPELL_HUNTER_GLYPH_OF_STAMPEDE);
+
+            for (int8 slot = PET_SAVE_FIRST_ACTIVE_SLOT; slot <= PET_SAVE_LAST_ACTIVE_SLOT; ++slot)
+            {
+                if (uint8(slot) == currentSlot)
+                    continue;
+
+                Position spawnPos;
+                target->GetRandomNearPosition(spawnPos, PET_FOLLOW_DIST + target->GetObjectSize());
+
+                Pet* pet = NULL;
+                if (glyph)
+                    pet = SummonStampedeClone(player, currentPetNumber, spawnPos);
+                else
+                {
+                    pet = new Pet(player, PetType::HUNTER_PET);
+                    if (!pet->LoadPetFromDB(player, 0, 0, false, slot, true, &spawnPos))
+                    {
+                        delete pet;
+                        pet = SummonStampedeClone(player, currentPetNumber, spawnPos);
+                    }
+                }
+
+                InitStampedePet(pet, target, duration);
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterCast += SpellCastFn(spell_hun_stampede_SpellScript::HandleAfterCast);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_hun_stampede_SpellScript();
+    }
+};
+
+// Glaive Toss damage - 120761 / 121414
+class spell_hun_glaive_toss_damage : public SpellScriptLoader
+{
+public:
+    spell_hun_glaive_toss_damage() : SpellScriptLoader("spell_hun_glaive_toss_damage") { }
+
+    class spell_hun_glaive_toss_damage_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_glaive_toss_damage_SpellScript);
+
+        uint64 _mainTargetGUID;
+
+        bool Load() OVERRIDE
+        {
+            _mainTargetGUID = 0;
+            return true;
+        }
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.clear();
+
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            std::list<Unit*> targetList;
+            float const radius = 50.0f;
+            Skyfire::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck u_check(caster, radius);
+            Skyfire::UnitListSearcher<Skyfire::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> searcher(caster, targetList, u_check);
+            caster->VisitNearbyObject(radius, searcher);
+
+            for (Unit* unit : targetList)
+            {
+                if (unit->HasAura(SPELL_HUNTER_GLAIVE_TOSS_AURA, caster->GetGUID()))
+                {
+                    _mainTargetGUID = unit->GetGUID();
+                    break;
+                }
+            }
+
+            if (!_mainTargetGUID)
+            {
+                for (Unit* unit : targetList)
+                {
+                    if (unit->HasAura(SPELL_HUNTER_GLAIVE_TOSS_AURA))
+                    {
+                        _mainTargetGUID = unit->GetGUID();
+                        break;
+                    }
+                }
+            }
+
+            if (!_mainTargetGUID)
+                return;
+
+            Unit* mainTarget = ObjectAccessor::GetUnit(*caster, _mainTargetGUID);
+            if (!mainTarget)
+                return;
+
+            targets.push_back(mainTarget);
+            for (Unit* unit : targetList)
+            {
+                if (unit == mainTarget)
+                    continue;
+                if (!caster->IsValidAttackTarget(unit))
+                    continue;
+                if (unit->IsInBetween(caster, mainTarget, 5.0f))
+                    targets.push_back(unit);
+            }
+        }
+
+        void HandleOnHit()
+        {
+            if (!_mainTargetGUID)
+                return;
+
+            Unit* mainTarget = ObjectAccessor::GetUnit(*GetCaster(), _mainTargetGUID);
+            if (!mainTarget || GetHitUnit() != mainTarget)
+                return;
+
+            SetHitDamage(GetHitDamage() * 4);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hun_glaive_toss_damage_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hun_glaive_toss_damage_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+            OnHit += SpellHitFn(spell_hun_glaive_toss_damage_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_hun_glaive_toss_damage_SpellScript();
+    }
+};
+
+// Glaive Toss missiles - 120755 / 120756
+class spell_hun_glaive_toss_missile : public SpellScriptLoader
+{
+public:
+    spell_hun_glaive_toss_missile() : SpellScriptLoader("spell_hun_glaive_toss_missile") { }
+
+    class spell_hun_glaive_toss_missile_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hun_glaive_toss_missile_SpellScript);
+
+        void HandleAfterCast()
+        {
+            Unit* caster = GetCaster();
+            Unit* originalCaster = GetOriginalCaster();
+            if (!caster || !originalCaster)
+                return;
+
+            Player* hunter = originalCaster->ToPlayer();
+            if (!hunter)
+                return;
+
+            uint32 const missileId = GetSpellInfo()->Id;
+            uint32 const damageSpell = GetGlaiveTossDamageSpell(missileId);
+
+            // Outbound glaive: mark primary, hit the line once, schedule the return pass.
+            if (caster == originalCaster)
+            {
+                Unit* target = GetExplTargetUnit();
+                if (target)
+                    hunter->AddAura(SPELL_HUNTER_GLAIVE_TOSS_AURA, target);
+
+                hunter->CastSpell(hunter, damageSpell, true);
+
+                if (target)
+                {
+                    uint32 const bounceSpell = GetGlaiveTossOppositeMissile(missileId);
+                    float const speed = GetSpellInfo()->Speed > 0.0f ? GetSpellInfo()->Speed : 18.0f;
+                    uint32 const delay = std::max<uint32>(50, uint32((hunter->GetExactDist2d(target) / speed) * 1000.0f));
+
+                    hunter->m_Events.AddEvent(new DelayedGlaiveTossReturnEvent(hunter->GetGUID(), target->GetGUID(), bounceSpell),
+                        hunter->m_Events.CalculateTime(delay));
+                }
+                return;
+            }
+        }
+
+        void HandleOnHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target || caster != GetOriginalCaster())
+                return;
+
+            // Keep client bounce visuals in sync; return damage is handled above.
+            target->CastSpell(caster, GetGlaiveTossOppositeMissile(GetSpellInfo()->Id), true, NULL, NULL, caster->GetGUID());
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterCast += SpellCastFn(spell_hun_glaive_toss_missile_SpellScript::HandleAfterCast);
+            OnHit += SpellHitFn(spell_hun_glaive_toss_missile_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_hun_glaive_toss_missile_SpellScript();
+    }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_a_murder_of_crows();
@@ -843,6 +1243,9 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_cobra_shot();
     new spell_hun_dire_beast();
     new spell_hun_fire();
+
+    new spell_hun_glaive_toss_damage();
+    new spell_hun_glaive_toss_missile();
 
     new spell_hun_improved_serpent_sting();
     new spell_hun_last_stand_pet();
@@ -856,6 +1259,7 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_scatter_shot();
     new spell_hun_serpent_sting();
 
+    new spell_hun_stampede();
     new spell_hun_steady_shot();
     new spell_hun_tame_beast();
 }

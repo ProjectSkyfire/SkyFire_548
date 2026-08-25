@@ -167,14 +167,18 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (meleeAttack)
         SendMeleeAttackStart(victim);
 
-    // Let the pet know we've started attacking someting. Handles melee attacks only
+    // Let the pet know we've started attacking something. Handles melee attacks only
     // Spells such as auto-shot and others handled in WorldSession::HandleCastSpellOpcode
+    // Include Stampede temporaries (controlled but not GetPet()).
     if (this->GetTypeId() == TypeID::TYPEID_PLAYER)
     {
-        Pet* playerPet = this->ToPlayer()->GetPet();
-
-        if (playerPet && playerPet->IsAlive())
-            playerPet->AI()->OwnerAttacked(victim);
+        for (Unit* controlled : m_Controlled)
+        {
+            Pet* pet = controlled->ToPet();
+            if (!pet || !pet->IsAlive() || !pet->AI())
+                continue;
+            pet->AI()->OwnerAttacked(victim);
+        }
     }
 
     return true;

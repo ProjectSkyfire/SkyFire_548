@@ -88,7 +88,7 @@ void Pet::StartTransportExitGrace(uint32 duration)
     m_transportExitGraceTimer = duration;
 }
 
-bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool current, int8 slot)
+bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool current, int8 slot, bool temporary, Position const* spawnPos)
 {
     m_loading = true;
 
@@ -177,9 +177,20 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     if (!Create(guid, map, /*owner->GetPhaseMask(),*/ petEntry, petId))
         return false;
 
-    float px, py, pz;
-    owner->GetClosePoint(px, py, pz, GetObjectSize(), PET_FOLLOW_DIST, GetFollowAngle());
-    Relocate(px, py, pz, owner->GetOrientation());
+    float px, py, pz, po;
+    if (spawnPos)
+    {
+        px = spawnPos->GetPositionX();
+        py = spawnPos->GetPositionY();
+        pz = spawnPos->GetPositionZ();
+        po = spawnPos->GetOrientation();
+    }
+    else
+    {
+        owner->GetClosePoint(px, py, pz, GetObjectSize(), PET_FOLLOW_DIST, GetFollowAngle());
+        po = owner->GetOrientation();
+    }
+    Relocate(px, py, pz, po);
 
     if (!IsPositionValid())
     {
@@ -200,7 +211,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         return true;
     }
 
-    m_charmInfo->SetPetNumber(petId, IsPermanentPetFor(owner));
+    // Load spells/cooldowns against the real character_pet id first. Stampede remaps to a
+    // unique charm number after load so despawn never rewrites character_pet.
+    m_charmInfo->SetPetNumber(petId, !temporary && IsPermanentPetFor(owner));
 
     SetDisplayId(fields[3].GetUInt32());
     SetNativeDisplayId(fields[3].GetUInt32());
@@ -240,10 +253,27 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
 
     SynchronizeLevelWithOwner();
 
+    // Stampede: match the hunter's level (Call Pet can lag by 5) and force adult family scale.
+    if (temporary)
+    {
+        GivePetLevel(owner->getLevel());
+        if (CreatureFamilyEntry const* family = sCreatureFamilyStore.LookupEntry(GetCreatureTemplate()->family))
+            if (family->maxScale > 0.0f)
+                SetObjectScale(std::max(GetObjectScale(), family->maxScale));
+    }
+
     SetReactState(ReactStates(fields[6].GetUInt8()));
     SetCanModifyStats(true);
 
-    if (getPetType() == PetType::SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
+    if (temporary)
+    {
+        SetHealth(GetMaxHealth());
+        if (getPowerType() == POWER_FOCUS)
+            SetPower(POWER_FOCUS, GetMaxPower(POWER_FOCUS));
+        else
+            SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    }
+    else if (getPetType() == PetType::SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     else
     {
@@ -259,6 +289,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     }
 
     // Mark this pet as the currently summoned one; keep its Call Pet / stable slot.
+    // Stampede temporaries must not rewrite active flags in character_pet.
+    if (!temporary)
     {
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
@@ -268,10 +300,21 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_PET_ACTIVE_BY_ID);
         stmt->setUInt32(0, ownerid);
-        stmt->setUInt32(1, m_charmInfo->GetPetNumber());
+        stmt->setUInt32(1, petId);
         trans->Append(stmt);
 
         CharacterDatabase.CommitTransaction(trans);
+    }
+
+    // Stampede: identify as temp before SetMinion so the real Call Pet pet is kept.
+    if (temporary)
+    {
+        SetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL, 121818);
+        int32 duration = 20 * IN_MILLISECONDS;
+        if (SpellInfo const* stampedeInfo = sSpellMgr->GetSpellInfo(121818))
+            if (stampedeInfo->GetDuration() > 0)
+                duration = stampedeInfo->GetDuration();
+        SetDuration(duration);
     }
 
     // Send fake summon spell cast - this is needed for correct cooldown application for spells
@@ -292,9 +335,11 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     */
 
     owner->SetMinion(this, true);
-    Skyfire::PetTransport::AttachHunterPetToOwnerTransport(owner, this, owner->GetTransport());
+    if (!temporary)
+        Skyfire::PetTransport::AttachHunterPetToOwnerTransport(owner, this, owner->GetTransport());
     map->AddToMap(this->ToCreature());
-    Skyfire::PetTransport::BoardOwnerHunterPet(owner, owner->GetTransport());
+    if (!temporary)
+        Skyfire::PetTransport::BoardOwnerHunterPet(owner, owner->GetTransport());
 
     uint16 specId = fields[16].GetUInt16();
     SetSpec(specId);
@@ -305,7 +350,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     _LoadAuras(timediff);
 
     // load action bar, if data broken will fill later by default spells.
-    if (!isTemporarySummon)
+    // Stampede temps must still load the real pet's spells/passives (isTemporarySummon is about
+    // CreatedBySpell duration, not the Stampede temporary flag).
+    if (!isTemporarySummon || temporary)
     {
         m_charmInfo->LoadPetActionBar(fields[12].GetString());
 
@@ -314,19 +361,27 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         _LoadSpellCooldowns();
         LearnPetPassives();
         InitLevelupSpellsForLevel();
-        CastPetAuras(current);
+        // Stampede must not strip owner pet-change auras (current=false would RemovePetAura).
+        CastPetAuras(temporary ? true : current);
     }
+
+    // Remap charm number only after spells/cooldowns loaded from character_pet.
+    if (temporary)
+        m_charmInfo->SetPetNumber(sObjectMgr->GeneratePetNumber(), false);
 
     CleanupActionBar();                                     // remove unknown spells from action bar after load
 
     SF_LOG_DEBUG("entities.pet", "New Pet has guid %u", GetGUIDLow());
 
-    owner->PetSpellInitialize();
+    if (!temporary)
+    {
+        owner->PetSpellInitialize();
 
-    if (owner->GetGroup())
-        owner->SetGroupUpdateFlag(GROUP_UPDATE_PET);
+        if (owner->GetGroup())
+            owner->SetGroupUpdateFlag(GROUP_UPDATE_PET);
+    }
 
-    if (getPetType() == PetType::HUNTER_PET)
+    if (getPetType() == PetType::HUNTER_PET && !temporary)
     {
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_DECLINED_NAME);
         stmt->setUInt32(0, owner->GetGUIDLow());
@@ -346,7 +401,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     }
 
     //set last used pet number (for use in BG's)
-    if (owner->GetTypeId() == TypeID::TYPEID_PLAYER && isControlled() && !isTemporarySummoned() && (getPetType() == PetType::SUMMON_PET || getPetType() == PetType::HUNTER_PET))
+    if (!temporary && owner->GetTypeId() == TypeID::TYPEID_PLAYER && isControlled() && !isTemporarySummoned() && (getPetType() == PetType::SUMMON_PET || getPetType() == PetType::HUNTER_PET))
         owner->ToPlayer()->SetLastPetNumber(petId);
 
     m_loading = false;
@@ -357,6 +412,10 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
 void Pet::SavePetToDB(PetSaveMode mode)
 {
     if (!GetEntry())
+        return;
+
+    // Stampede copies must never rewrite or delete character_pet rows.
+    if (IsStampedeTemporary())
         return;
 
     // save only fully controlled creature
@@ -620,8 +679,8 @@ void Pet::Update(uint32 diff)
                 petInVisibilityRange = IsWithinDistInMap(owner, GetMap()->GetVisibilityRange());
             }
 
-            if (!owner || Skyfire::PetTransport::ShouldRemovePetForOwnerRange(true, isPossessed(), petOnOwnerTransport,
-                    petInVisibilityRange, HasTransportExitGrace()) || (isControlled() && !owner->GetPetGUID()))
+            if (!owner || (!IsStampedeTemporary() && Skyfire::PetTransport::ShouldRemovePetForOwnerRange(true, isPossessed(), petOnOwnerTransport,
+                    petInVisibilityRange, HasTransportExitGrace())) || (isControlled() && !owner->GetPetGUID() && !IsStampedeTemporary()))
                 //if (!owner || (!IsWithinDistInMap(owner, GetMap()->GetVisibilityDistance()) && (owner->GetCharmGUID() && (owner->GetCharmGUID() != GetGUID()))) || (isControlled() && !owner->GetPetGUID()))
             {
                 Remove(PET_SAVE_NOT_IN_SLOT, true);
@@ -630,7 +689,8 @@ void Pet::Update(uint32 diff)
 
             if (isControlled())
             {
-                if (owner->GetPetGUID() != GetGUID())
+                // Stampede extras share the hunter but are not GetPet(); do not cull them.
+                if (owner->GetPetGUID() != GetGUID() && !IsStampedeTemporary())
                 {
                     SF_LOG_ERROR("entities.pet", "Pet %u is not pet of owner %s, removed", GetEntry(), GetOwner()->GetName().c_str());
                     Remove(getPetType() == PetType::HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT);
@@ -644,7 +704,7 @@ void Pet::Update(uint32 diff)
                     m_duration -= diff;
                 else
                 {
-                    Remove(getPetType() != PetType::SUMMON_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT);
+                    Remove(IsStampedeTemporary() || getPetType() == PetType::SUMMON_PET ? PET_SAVE_NOT_IN_SLOT : PET_SAVE_AS_DELETED);
                     return;
                 }
             }
@@ -911,7 +971,12 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
         else if (getLevel() <= cFamily->minScaleLevel)
             scale = cFamily->minScale;
         else
-            scale = cFamily->minScale + float(getLevel() - cFamily->minScaleLevel) / cFamily->maxScaleLevel * (cFamily->maxScale - cFamily->minScale);
+        {
+            uint32 const levelSpan = cFamily->maxScaleLevel > cFamily->minScaleLevel
+                ? (cFamily->maxScaleLevel - cFamily->minScaleLevel) : 1;
+            scale = cFamily->minScale + float(getLevel() - cFamily->minScaleLevel) / float(levelSpan)
+                * (cFamily->maxScale - cFamily->minScale);
+        }
 
         SetObjectScale(scale);
     }

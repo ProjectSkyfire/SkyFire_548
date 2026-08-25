@@ -39,6 +39,8 @@ public:
     void setPetType(PetType type) { m_petType = type; }
     bool isControlled() const;
     bool isTemporarySummoned() const { return m_duration > 0; }
+    // Stampede (121818) extras: temporary pets that must not replace GetPet() or touch character_pet.
+    bool IsStampedeTemporary() const { return m_duration > 0 && GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL) == 121818; }
 
     bool IsPermanentPetFor(Player* owner) const;        // pet have tab in character windows and set UNIT_FIELD_PET_NUMBER
 
@@ -46,7 +48,8 @@ public:
     bool CreateBaseAtCreature(Creature* creature);
     bool CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit* owner);
     bool CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map/*, uint32 phaseMask*/);
-    bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, int8 slot = -1);
+    // temporary: Stampede extras. spawnPos: if set, spawn there instead of at the owner.
+    bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, int8 slot = -1, bool temporary = false, Position const* spawnPos = NULL);
     bool isBeingLoaded() const { return m_loading; }
     void SavePetToDB(PetSaveMode mode);
     void Remove(PetSaveMode mode, bool returnreagent = false);

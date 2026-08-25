@@ -15922,14 +15922,19 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     }
 
     // only if current pet in slot
-    pet->SavePetToDB(mode);
+    bool const wasCurrentPet = (GetPetGUID() == pet->GetGUID());
+    bool const stampedeTemp = pet->IsStampedeTemporary();
+
+    if (!stampedeTemp)
+        pet->SavePetToDB(mode);
 
     SetMinion(pet, false);
 
     pet->AddObjectToRemoveList();
     pet->m_removed = true;
 
-    if (pet->isControlled())
+    // Do not clear the real pet's action bar when a Stampede copy despawns.
+    if (pet->isControlled() && wasCurrentPet)
     {
         ObjectGuid Guid;
         WorldPacket data(SMSG_PET_SPELLS_MESSAGE, 8);
@@ -15967,7 +15972,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
             SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
-    if (getClass() == CLASS_HUNTER && GetSession())
+    if (getClass() == CLASS_HUNTER && GetSession() && wasCurrentPet)
         GetSession()->SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_ACTIVE_SLOT);
 }
 

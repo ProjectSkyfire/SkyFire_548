@@ -2544,7 +2544,12 @@ void Unit::SetMinion(Minion* minion, bool apply)
         }
 
         // Can only have one pet. If a new one is summoned, dismiss the old one.
-        if (minion->IsGuardianPet())
+        // Stampede (121818) temporary pets are extras and must not replace GetPet().
+        bool isStampedeTemp = false;
+        if (Pet* petMinion = minion->ToPet())
+            isStampedeTemp = petMinion->IsStampedeTemporary();
+
+        if (minion->IsGuardianPet() && !isStampedeTemp)
         {
             if (Guardian* oldPet = GetGuardianPet())
             {
