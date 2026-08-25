@@ -2300,6 +2300,68 @@ public:
     }
 };
 
+// 65797 - Starfall (Vengeance of Elune). Dummy hits enemies and triggers effect value (65822).
+class spell_q14005_vengeance_of_elune_starfall : public SpellScriptLoader
+{
+public:
+    spell_q14005_vengeance_of_elune_starfall() : SpellScriptLoader("spell_q14005_vengeance_of_elune_starfall") { }
+
+    class spell_q14005_vengeance_of_elune_starfall_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q14005_vengeance_of_elune_starfall_SpellScript);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Unit* target = GetHitUnit())
+                    caster->CastSpell(target, uint32(GetEffectValue()), true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q14005_vengeance_of_elune_starfall_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_q14005_vengeance_of_elune_starfall_SpellScript();
+    }
+};
+
+// 66166 - Cancel Vengeance of Elune (quest 14005 RewardSpellCast)
+class spell_q14005_cancel_vengeance_of_elune : public SpellScriptLoader
+{
+public:
+    spell_q14005_cancel_vengeance_of_elune() : SpellScriptLoader("spell_q14005_cancel_vengeance_of_elune") { }
+
+    class spell_q14005_cancel_vengeance_of_elune_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_q14005_cancel_vengeance_of_elune_SpellScript);
+
+        enum SpellIds
+        {
+            SPELL_VENGEANCE_OF_ELUNE = 65602
+        };
+
+        void HandleScript(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* target = GetHitUnit())
+                target->RemoveAurasDueToSpell(SPELL_VENGEANCE_OF_ELUNE);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q14005_cancel_vengeance_of_elune_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_q14005_cancel_vengeance_of_elune_SpellScript();
+    }
+};
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -2356,4 +2418,6 @@ void AddSC_quest_spell_scripts()
     new spell_q12919_gymers_throw();
     new spell_q28813_get_our_boys_back_dummy();
     new spell_q28813_set_health_random();
+    new spell_q14005_vengeance_of_elune_starfall();
+    new spell_q14005_cancel_vengeance_of_elune();
 }
