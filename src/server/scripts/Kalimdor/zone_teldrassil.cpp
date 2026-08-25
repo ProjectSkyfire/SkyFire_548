@@ -27,6 +27,7 @@ enum VileTouch
 {
     QUEST_VILE_TOUCH = 28727,
     QUEST_SIGNS_OF_THINGS_TO_COME = 28728,
+    QUEST_THE_VENGEANCE_OF_ELUNE = 14005,
 
     NPC_GITHYISS = 1994,
 
@@ -39,7 +40,8 @@ enum VileTouch
     SPELL_CLEANSE_SPIRIT = 66056,
     SPELL_POISON = 11918,
     SPELL_SUMMON_TARINDRELLA_AURA = 92237,
-    SPELL_TARINDRELLAS_NATURE_TELEPORT = 92420
+    SPELL_TARINDRELLAS_NATURE_TELEPORT = 92420,
+    SPELL_FORCECAST_VENGEANCE_OF_ELUNE = 66027
 };
 
 #define TARINDRELLA_TEXT_ON_COMPLETE "This totem has been corrupting the eggs! It seems a greater threat looms. The Gnarlpine remain tainted by something most foul."
@@ -61,6 +63,8 @@ public:
             player->RemoveAurasDueToSpell(SPELL_SUMMON_TARINDRELLA_AURA);
             creature->DespawnOrUnsummon();
         }
+        else if (quest->GetQuestId() == QUEST_THE_VENGEANCE_OF_ELUNE)
+            creature->CastSpell(player, SPELL_FORCECAST_VENGEANCE_OF_ELUNE, true);
 
         return true;
     }
@@ -282,9 +286,91 @@ public:
     };
 };
 
+/*####
+# npc_bough_of_corruption - Quest 14005 The Vengeance of Elune
+####*/
+
+enum BoughOfCorruption
+{
+    NPC_BOUGH_OF_CORRUPTION     = 34521,
+    SPELL_ABSORB_CORRUPTION     = 66015,
+    SPELL_EXPLODING_DEATH_AURA  = 66025,
+    SPELL_SUICIDE               = 7,
+    SPELL_TIDAL_PULL            = 65984,
+    SPELL_STARFALL_EFFECT       = 65822,
+    SPELL_MOONLIGHT             = 65912,
+    SPELL_BURSTING_SEED_ALLY    = 65605
+};
+
+class npc_bough_of_corruption : public CreatureScript
+{
+public:
+    npc_bough_of_corruption() : CreatureScript("npc_bough_of_corruption") { }
+
+    struct npc_bough_of_corruptionAI : public ScriptedAI
+    {
+        npc_bough_of_corruptionAI(Creature* creature) : ScriptedAI(creature), _absorbCount(0), _dying(false) { }
+
+        void Reset() OVERRIDE
+        {
+            _absorbCount = 0;
+            _dying = false;
+        }
+
+        void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
+        {
+            if (!spell || _dying || !caster)
+                return;
+
+            switch (spell->Id)
+            {
+                case SPELL_TIDAL_PULL:
+                case SPELL_STARFALL_EFFECT:
+                case SPELL_MOONLIGHT:
+                case SPELL_BURSTING_SEED_ALLY:
+                    break;
+                default:
+                    return;
+            }
+
+            // Sniff: two Absorb Corruption casts, then Exploding Death Aura + Suicide.
+            // Suicide is self-instakill and skips loot/kill credit unless we grant it here —
+            // Vengeance abilities often deal little/no HP damage toward m_PlayerDamageReq.
+            if (_absorbCount < 2)
+            {
+                DoCast(me, SPELL_ABSORB_CORRUPTION, true);
+                ++_absorbCount;
+            }
+
+            if (_absorbCount >= 2)
+            {
+                _dying = true;
+                if (Player* player = caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    me->SetLootRecipient(player);
+                    me->LowerPlayerDamageReq(me->GetHealth());
+                    player->KilledMonsterCredit(NPC_BOUGH_OF_CORRUPTION, me->GetGUID());
+                }
+                DoCast(me, SPELL_EXPLODING_DEATH_AURA, true);
+                DoCast(me, SPELL_SUICIDE, true);
+            }
+        }
+
+    private:
+        uint8 _absorbCount;
+        bool _dying;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_bough_of_corruptionAI(creature);
+    }
+};
+
 void AddSC_teldrassil()
 {
     new npc_githyiss();
     new npc_tarindrella();
     new npc_mist();
+    new npc_bough_of_corruption();
 }
