@@ -416,6 +416,7 @@ public:
 
     // TODO: Pet stable
     void HandleRequestStabledPetsOpcode(WorldPacket& recvPacket);
+    void HandleSetPetSlot(WorldPacket& recvPacket);
     void HandleStablePet(WorldPacket& recvPacket);
     void HandleStablePetCallback(PreparedQueryResult result);
     void HandleUnstablePet(WorldPacket& recvPacket);
@@ -426,6 +427,7 @@ public:
     void HandleStableSwapPetCallback(PreparedQueryResult result, uint32 petId);
     void SendStablePet(uint64 guid);
     void SendStablePetCallback(PreparedQueryResult result, uint64 guid);
+    void SendPetList(uint64 npcGuid, uint8 firstSlot, uint8 lastSlot);
     void SendStableResult(uint8 guid);
     bool CheckStableMaster(uint64 guid);
 

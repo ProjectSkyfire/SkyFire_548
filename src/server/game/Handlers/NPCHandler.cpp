@@ -26,6 +26,8 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+#include <vector>
+
 enum StableResultCode
 {
     STABLE_ERR_MONEY = 0x01,                         // "you don't have enough money"
@@ -501,65 +503,98 @@ void WorldSession::HandleRequestStabledPetsOpcode(WorldPacket& recvData)
 
 void WorldSession::SendStablePet(uint64 guid)
 {
-    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_PET_SLOTS_DETAIL);
+    // Stable master: full active + stable list for UI.
+    SendPetList(guid, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
 
-    stmt->setUInt32(0, _player->GetGUIDLow());
-    stmt->setUInt8(1, PET_SAVE_FIRST_STABLE_SLOT);
-    stmt->setUInt8(2, PET_SAVE_LAST_STABLE_SLOT);
-
-    _sendStabledPetCallback.SetParam(guid);
-    _sendStabledPetCallback.SetFutureResult(CharacterDatabase.AsyncQuery(stmt));
+    // Client SetPetSlot sets an in-flight lock cleared only by SMSG_STABLE_RESULT (or
+    // PET_SLOT_UPDATED). If the server dies mid-move, that lock sticks for the WoW process
+    // and later drops silently no-op with no CMSG. Any result byte clears it; 0 is silent.
+    if (guid)
+        SendStableResult(0);
 }
 
-void WorldSession::SendStablePetCallback(PreparedQueryResult result, uint64 guid)
+void WorldSession::SendStablePetCallback(PreparedQueryResult /*result*/, uint64 guid)
 {
-    if (!GetPlayer())
+    // Kept for query callback wiring; MoP list is built synchronously in SendPetList.
+    SendStablePet(guid);
+}
+
+void WorldSession::SendPetList(uint64 npcGuid, uint8 firstSlot, uint8 lastSlot)
+{
+    if (!_player)
         return;
 
-    SF_LOG_DEBUG("network", "WORLD: Recv MSG_LIST_STABLED_PETS Send.");
+    SF_LOG_DEBUG("network", "WORLD: Send SMSG_PET_STABLE_LIST (slots %u-%u).", firstSlot, lastSlot);
 
-    WorldPacket data(SMSG_PET_STABLE_LIST, 200);           // guess size
+    // Layout verified against retail 18414 SMSG_PET_STABLE_LIST in private_parser example sniffs.
+    // Non-zero StableMaster GUID makes the client treat this as an open stable-master interaction
+    // (PetStable UI). Login / tame / dismiss / Call Pet must send GUID 0 so m_petList still updates
+    // for Call Pet icons without popping the stable window. Only real stable-master visits pass npcGuid.
+    ObjectGuid guid = npcGuid;
 
-    data << uint64(guid);
+    QueryResult result = CharacterDatabase.PQuery(
+        "SELECT id, entry, level, name, modelid, slot FROM character_pet WHERE owner = %u AND slot >= %u AND slot <= %u ORDER BY slot",
+        _player->GetGUIDLow(), uint32(firstSlot), uint32(lastSlot));
 
-    Pet* pet = _player->GetPet();
-
-    size_t wpos = data.wpos();
-    data << uint8(0);                                       // place holder for slot show number
-
-    data << uint8(GetPlayer()->m_stableSlots);
-
-    uint8 num = 0;                                          // counter for place holder
-
-    // not let move dead pet in slot
-    if (pet && pet->IsAlive() && pet->getPetType() == PetType::HUNTER_PET)
+    struct PetListEntry
     {
-        data << uint32(0);                                  // 4.x unknown, some kind of order?
-        data << uint32(pet->GetCharmInfo()->GetPetNumber());
-        data << uint32(pet->GetEntry());
-        data << uint32(pet->getLevel());
-        data << pet->GetName();                             // petname
-        data << uint8(1);                                   // 1 = current, 2/3 = in stable (any from 4, 5, ... create problems with proper show)
-        ++num;
-    }
+        uint32 petNumber = 0;
+        uint32 entry = 0;
+        uint32 level = 0;
+        uint32 modelId = 0;
+        uint32 slot = 0;
+        uint8 petStableState = 1;
+        std::string name;
+    };
 
+    std::vector<PetListEntry> pets;
     if (result)
     {
         do
         {
             Field* fields = result->Fetch();
+            PetListEntry pet;
+            pet.petNumber = fields[0].GetUInt32();
+            pet.entry = fields[1].GetUInt32();
+            pet.level = fields[2].GetUInt16();
+            pet.name = fields[3].GetString();
+            pet.modelId = fields[4].GetUInt32();
+            pet.slot = fields[5].GetUInt8();
 
-            data << uint32(fields[1].GetUInt32());          // petnumber
-            data << uint32(fields[2].GetUInt32());          // creature entry
-            data << uint32(fields[3].GetUInt16());          // level
-            data << fields[4].GetString();                  // name
-            data << uint8(2);                               // 1 = current, 2/3 = in stable (any from 4, 5, ... create problems with proper show)
+            if (!pet.modelId)
+            {
+                if (CreatureTemplate const* cInfo = sObjectMgr->GetCreatureTemplate(pet.entry))
+                    pet.modelId = cInfo->GetFirstValidModelId();
+            }
 
-            ++num;
+            // 1 = active Call Pet slot, 2 = stabled (matches retail 18414)
+            pet.petStableState = IsActivePetSlot(int8(pet.slot)) ? 1 : 2;
+            pets.push_back(std::move(pet));
         } while (result->NextRow());
     }
 
-    data.put<uint8>(wpos, num);                             // set real data to placeholder
+    WorldPacket data(SMSG_PET_STABLE_LIST, 200);
+    ByteBuffer buff;
+
+    data.WriteGuidMask(guid, 3, 0, 4, 7, 2, 1, 6, 5);
+    data.WriteBits(pets.size(), 19);
+    for (PetListEntry const& pet : pets)
+        data.WriteBits(pet.name.size(), 8);
+    data.FlushBits();
+
+    for (PetListEntry const& pet : pets)
+    {
+        buff << uint32(pet.entry);
+        buff << uint32(pet.level);
+        buff << uint8(pet.petStableState);
+        buff << uint32(pet.modelId);
+        buff.WriteString(pet.name);
+        buff << uint32(pet.petNumber);
+        buff << uint32(pet.slot);
+    }
+
+    data.append(buff);
+    data.WriteGuidBytes(guid, 3, 5, 7, 2, 0, 4, 1, 6);
     SendPacket(&data);
 }
 
@@ -568,6 +603,166 @@ void WorldSession::SendStableResult(uint8 res)
     WorldPacket data(SMSG_STABLE_RESULT, 1);
     data << uint8(res);
     SendPacket(&data);
+}
+
+void WorldSession::HandleSetPetSlot(WorldPacket& recvData)
+{
+    SF_LOG_DEBUG("network", "WORLD: Recv CMSG_SET_PET_SLOT");
+
+    uint32 petNumber = 0;
+    int8 newSlot = -1;
+    ObjectGuid npcGUID;
+
+    recvData >> petNumber;
+    recvData >> newSlot;
+    recvData.ReadGuidMask(npcGUID, 5, 7, 3, 2, 6, 1, 0, 4);
+    recvData.ReadGuidBytes(npcGUID, 0, 3, 2, 6, 5, 7, 4, 1);
+
+    if (!CheckStableMaster(npcGUID) ||
+        newSlot < int8(PET_SAVE_FIRST_ACTIVE_SLOT) ||
+        newSlot > int8(PET_SAVE_LAST_STABLE_SLOT))
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    if (!_player->IsAlive())
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    if (_player->HasUnitState(UNIT_STATE_DIED))
+        _player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
+
+    // Sync query — CHAR_SEL_PET_SLOT_BY_ID is ASYNC-prepared and must not use Query().
+    QueryResult result = CharacterDatabase.PQuery(
+        "SELECT slot, entry FROM character_pet WHERE owner = %u AND id = %u",
+        _player->GetGUIDLow(), petNumber);
+    if (!result)
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    Field* fields = result->Fetch();
+    uint8 const oldSlot = fields[0].GetUInt8();
+    uint32 const petEntry = fields[1].GetUInt32();
+
+    if (oldSlot == uint8(newSlot))
+    {
+        SendStableResult(STABLE_SUCCESS_STABLE);
+        return;
+    }
+
+    if (!IsActivePetSlot(oldSlot) && !IsStabledPetSlot(oldSlot))
+    {
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    // Moving into Call Pet slots requires the pet to be tameable for this hunter.
+    if (IsActivePetSlot(newSlot))
+    {
+        CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(petEntry);
+        if (!creatureInfo || !creatureInfo->IsTameable(_player->CanTameExoticPets()))
+        {
+            SendStableResult(creatureInfo && creatureInfo->IsTameable(true) ? STABLE_ERR_EXOTIC : STABLE_ERR_STABLE);
+            return;
+        }
+    }
+
+    uint32 destPetNumber = 0;
+    uint32 destPetEntry = 0;
+    if (QueryResult destResult = CharacterDatabase.PQuery(
+        "SELECT id, entry FROM character_pet WHERE owner = %u AND slot = %u",
+        _player->GetGUIDLow(), uint32(newSlot)))
+    {
+        Field* destFields = destResult->Fetch();
+        destPetNumber = destFields[0].GetUInt32();
+        destPetEntry = destFields[1].GetUInt32();
+        if (destPetNumber == petNumber)
+            destPetNumber = 0;
+    }
+
+    // Destination pet moving into an active slot also needs the exotic check.
+    if (destPetNumber && IsActivePetSlot(oldSlot))
+    {
+        CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(destPetEntry);
+        if (!creatureInfo || !creatureInfo->IsTameable(_player->CanTameExoticPets()))
+        {
+            SendStableResult(creatureInfo && creatureInfo->IsTameable(true) ? STABLE_ERR_EXOTIC : STABLE_ERR_STABLE);
+            return;
+        }
+    }
+
+    Pet* currentPet = _player->GetPet();
+    uint32 currentPetNumber = 0;
+    uint8 currentPetSlot = 0;
+    if (currentPet && currentPet->getPetType() == PetType::HUNTER_PET && currentPet->GetCharmInfo())
+    {
+        currentPetNumber = currentPet->GetCharmInfo()->GetPetNumber();
+        currentPetSlot = currentPet->GetSlot();
+    }
+
+    bool const dismissCurrent =
+        currentPetNumber &&
+        ((currentPetNumber == petNumber && IsStabledPetSlot(newSlot)) ||
+         (currentPetNumber == destPetNumber && IsStabledPetSlot(oldSlot)) ||
+         (uint8(newSlot) == currentPetSlot && IsStabledPetSlot(oldSlot)));
+
+    if (dismissCurrent)
+    {
+        if (!currentPet || !currentPet->IsAlive())
+        {
+            SendStableResult(STABLE_ERR_STABLE);
+            return;
+        }
+
+        // Save summoned pet into the slot it will occupy after the move/swap.
+        uint8 const dismissSlot = (currentPetNumber == petNumber) ? uint8(newSlot) : oldSlot;
+        _player->RemovePet(currentPet, PetSaveMode(dismissSlot));
+        currentPet = nullptr;
+
+        if (currentPetNumber == petNumber)
+        {
+            // Source pet already saved to newSlot by RemovePet; move displaced pet if any.
+            if (destPetNumber)
+                CharacterDatabase.DirectPExecute(
+                    "UPDATE character_pet SET slot = %u WHERE owner = %u AND id = %u",
+                    uint32(oldSlot), _player->GetGUIDLow(), destPetNumber);
+        }
+        else
+        {
+            // Summoned pet was the destination occupant; source pet takes newSlot.
+            CharacterDatabase.DirectPExecute(
+                "UPDATE character_pet SET slot = %u WHERE owner = %u AND id = %u",
+                uint32(newSlot), _player->GetGUIDLow(), petNumber);
+        }
+
+        SendStableResult(STABLE_SUCCESS_STABLE);
+        SendPetList(npcGUID, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
+        return;
+    }
+
+    // Apply immediately so SendPetList sees the new layout.
+    CharacterDatabase.DirectPExecute(
+        "UPDATE character_pet SET slot = %u WHERE owner = %u AND id = %u",
+        uint32(newSlot), _player->GetGUIDLow(), petNumber);
+
+    if (destPetNumber)
+        CharacterDatabase.DirectPExecute(
+            "UPDATE character_pet SET slot = %u WHERE owner = %u AND id = %u",
+            uint32(oldSlot), _player->GetGUIDLow(), destPetNumber);
+
+    // Keep the live pet's slot in sync when rearranging active pets.
+    if (currentPet && currentPetNumber == petNumber)
+        currentPet->SetSlot(uint8(newSlot));
+    else if (currentPet && currentPetNumber == destPetNumber)
+        currentPet->SetSlot(oldSlot);
+
+    SendStableResult(STABLE_SUCCESS_STABLE);
+    SendPetList(npcGUID, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
 }
 
 void WorldSession::HandleStablePet(WorldPacket& recvData)
@@ -616,7 +811,7 @@ void WorldSession::HandleStablePetCallback(PreparedQueryResult result)
     if (!GetPlayer())
         return;
 
-    uint8 freeSlot = 1;
+    uint8 freeSlot = PET_SAVE_FIRST_STABLE_SLOT;
     if (result)
     {
         do
@@ -634,10 +829,15 @@ void WorldSession::HandleStablePetCallback(PreparedQueryResult result)
         } while (result->NextRow());
     }
 
-    if (freeSlot > 0 && freeSlot <= GetPlayer()->m_stableSlots)
+    uint8 const lastUnlockedStable = uint8(PET_SAVE_FIRST_STABLE_SLOT + GetPlayer()->m_stableSlots);
+    if (GetPlayer()->m_stableSlots > 0 &&
+        freeSlot >= PET_SAVE_FIRST_STABLE_SLOT &&
+        freeSlot < lastUnlockedStable &&
+        freeSlot <= PET_SAVE_LAST_STABLE_SLOT)
     {
         _player->RemovePet(_player->GetPet(), PetSaveMode(freeSlot));
         SendStableResult(STABLE_SUCCESS_STABLE);
+        SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
     }
     else
         SendStableResult(STABLE_ERR_INVALID_SLOT);

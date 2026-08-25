@@ -6191,6 +6191,35 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_SUMMON_PET:
             {
+                // Hunter Call Pet 1-5: MiscValue 0, BasePoints = active slot 0-4
+                if (Player* player = m_caster->ToPlayer())
+                {
+                    uint32 petEntry = m_spellInfo->Effects[i].MiscValue;
+                    if (player->getClass() == CLASS_HUNTER && !petEntry)
+                    {
+                        int32 slot = m_spellInfo->Effects[i].BasePoints;
+                        if (!IsActivePetSlot(slot))
+                            return SpellCastResult::SPELL_FAILED_NO_PET;
+
+                        if (Pet* current = player->GetPet())
+                        {
+                            if (current->getPetType() == PetType::HUNTER_PET && int32(current->GetSlot()) == slot)
+                                break; // already out; effect will teleport
+                        }
+
+                        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_PET_BY_ENTRY_AND_SLOT);
+                        stmt->setUInt32(0, player->GetGUIDLow());
+                        stmt->setUInt8(1, uint8(slot));
+                        if (!CharacterDatabase.Query(stmt))
+                            return SpellCastResult::SPELL_FAILED_NO_PET;
+
+                        // Allow switching from another Call Pet slot (do not fail ALREADY_HAVE_SUMMON).
+                        if (m_caster->GetCharmGUID())
+                            return SpellCastResult::SPELL_FAILED_ALREADY_HAVE_CHARM;
+                        break;
+                    }
+                }
+
                 if (m_caster->GetPetGUID())                  //let warlock do a replacement summon
                 {
                     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK)

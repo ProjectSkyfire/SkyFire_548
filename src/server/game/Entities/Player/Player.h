@@ -1508,6 +1508,7 @@ public:
     Pet* GetPet() const;
     Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, uint32 despwtime);
     void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
+    int8 GetFreeActivePetSlot() const;
 
     /// Handles said message in regular chat based on declared language and in config pre-defined Range.
     void Say(std::string const& text, const Language language);

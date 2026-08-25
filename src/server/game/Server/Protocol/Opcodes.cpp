@@ -452,6 +452,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_SET_LFG_BONUS_FACTION_ID,                0x0247, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSetLfgBonusFactionID            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_LOOT_SPECIALIZATION,                 0x1260, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSetLootSpecialization           ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_PARTY_ASSIGNMENT,                    0x1802, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSetPartyAssignmentOpcode        ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SET_PET_SLOT,                            0x10A7, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSetPetSlot                     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_PET_TALENT_TREE,                     0x1463, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSetPetSpecialization            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_PLAYER_DECLINED_NAMES,               0x09E2, STATUS_AUTHED,                       PROCESS_THREADUNSAFE, &WorldSession::HandleSetPlayerDeclinedNames          ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SET_PRIMARY_TALENT_TREE,                 0x06C6, STATUS_LOGGEDIN,                     PROCESS_INPLACE,      &WorldSession::HandeSetTalentSpecialization          ); // 5.4.8 18414
@@ -911,7 +912,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_PET_NAME_QUERY_RESPONSE,                        0x0ABE, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PET_REMOVED_SPELL,                              0x1CAE, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PET_SPELLS_MESSAGE,                             0x095A, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_PET_STABLE_LIST,                                0x1613, STATUS_UNHANDLED); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_PET_STABLE_LIST,                                0x1613, STATUS_NEVER    ); // 5.4.8 18414 - Call Pet flyout icons / GetCallPetSpellInfo
     DEFINE_OPCODE_HANDLER(SMSG_PET_UPDATE_COMBO_POINTS,                        0x1206, STATUS_UNHANDLED); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PHASE_SHIFT_CHANGE,                             0x02A2, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_PLAYED_TIME,                                    0x11E2, STATUS_NEVER    ); // 5.4.8 18414
@@ -1058,7 +1059,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_SPLINE_MOVE_UNROOT,                             0x01E1, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SPLINE_MOVE_UNSET_FLYING,                       0x0DE2, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SPLINE_MOVE_UNSET_HOVER,                        0x0CE1, STATUS_NEVER    ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(SMSG_STABLE_RESULT,                                  0x14BE, STATUS_UNHANDLED); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_STABLE_RESULT,                                  0x14BE, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_STANDSTATE_UPDATE,                              0x1C12, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_START_MIRROR_TIMER,                             0x0E12, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_START_TIMER,                                    0x0E3F, STATUS_NEVER    ); // 5.4.8 18414

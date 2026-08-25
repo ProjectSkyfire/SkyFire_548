@@ -366,8 +366,11 @@ namespace
         pet->GetMap()->AddToMap(pet->ToCreature());
         player->SetMinion(pet, true);
         pet->InitTalentForLevel();
+        pet->SetSlot(PET_SAVE_FIRST_ACTIVE_SLOT);
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
         player->PetSpellInitialize();
+        if (WorldSession* session = player->GetSession())
+            session->SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_ACTIVE_SLOT);
 
         SF_LOG_INFO("entities.pet", "Created starter hunter pet entry %u for player %s (GUID: %u) from spell %u.",
             pet->GetEntry(), player->GetName().c_str(), player->GetGUIDLow(), starterPet.CreatedBySpell);
@@ -1692,6 +1695,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
     pCurrChar->LoadPet();
+
+    // Call Pet flyout icons / GetCallPetSpellInfo need active-slot list
+    if (pCurrChar->getClass() == CLASS_HUNTER)
+        SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_ACTIVE_SLOT);
 
     // Set FFA PvP for non GM in non-rest mode
     if (sWorld->IsFFAPvPRealm() && !pCurrChar->IsGameMaster() && !pCurrChar->HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING))

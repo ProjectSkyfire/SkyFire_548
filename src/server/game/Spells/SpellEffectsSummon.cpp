@@ -34,6 +34,7 @@
 #include "PathGenerator.h"
 #include "Pet.h"
 #include "Player.h"
+#include "WorldSession.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
@@ -416,8 +417,26 @@ void Spell::EffectTameCreature(SpellEffIndex /*effIndex*/)
 
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
     {
-        pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-        m_caster->ToPlayer()->PetSpellInitialize();
+        Player* player = m_caster->ToPlayer();
+        int8 freeSlot = player->GetFreeActivePetSlot();
+        if (freeSlot < 0)
+        {
+            // Five Call Pet slots are full — abandon the new tame (matches retail "too many pets").
+            pet->Remove(PET_SAVE_AS_DELETED, false);
+            return;
+        }
+
+        if (Pet* oldPet = player->GetPet())
+        {
+            if (oldPet != pet)
+                player->RemovePet(oldPet, PET_SAVE_NOT_IN_SLOT, false);
+        }
+
+        pet->SetSlot(uint8(freeSlot));
+        pet->SavePetToDB(PetSaveMode(freeSlot));
+        player->PetSpellInitialize();
+        if (WorldSession* session = player->GetSession())
+            session->SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_ACTIVE_SLOT);
     }
 }
 
@@ -446,10 +465,52 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
 
     Pet* OldSummon = owner->GetPet();
 
+    // Hunter Call Pet 1-5: MiscValue 0, BasePoints = active slot 0-4
+    if (!petentry)
+    {
+        int32 slot = m_spellInfo->Effects[effIndex].BasePoints;
+        if (!IsActivePetSlot(slot))
+            return;
+
+        if (OldSummon)
+        {
+            if (OldSummon->getPetType() == PetType::HUNTER_PET && int32(OldSummon->GetSlot()) == slot)
+            {
+                if (OldSummon->isDead())
+                    return;
+
+                ASSERT(OldSummon->GetMap() == owner->GetMap());
+
+                float px, py, pz;
+                owner->GetClosePoint(px, py, pz, OldSummon->GetObjectSize());
+                OldSummon->NearTeleportTo(px, py, pz, OldSummon->GetOrientation());
+
+                if (OldSummon->isControlled())
+                    owner->PetSpellInitialize();
+                return;
+            }
+
+            // Dismiss current pet into its Call Pet slot, then summon the requested slot.
+            owner->RemovePet(OldSummon, PET_SAVE_NOT_IN_SLOT, false);
+        }
+
+        Pet* pet = new Pet(owner, PetType::HUNTER_PET);
+        if (!pet->LoadPetFromDB(owner, 0, 0, false, int8(slot)))
+        {
+            delete pet;
+            // CheckCast should already report SPELL_FAILED_NO_PET.
+            return;
+        }
+
+        if (WorldSession* session = owner->GetSession())
+            session->SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_ACTIVE_SLOT);
+        return;
+    }
+
     // if pet requested type already exist
     if (OldSummon)
     {
-        if (petentry == 0 || OldSummon->GetEntry() == petentry)
+        if (OldSummon->GetEntry() == petentry)
         {
             // pet in corpse state can't be summoned
             if (OldSummon->isDead())
@@ -457,15 +518,10 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
 
             ASSERT(OldSummon->GetMap() == owner->GetMap());
 
-            //OldSummon->GetMap()->Remove(OldSummon->ToCreature(), false);
-
             float px, py, pz;
             owner->GetClosePoint(px, py, pz, OldSummon->GetObjectSize());
 
             OldSummon->NearTeleportTo(px, py, pz, OldSummon->GetOrientation());
-            //OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-            //OldSummon->SetMap(owner->GetMap());
-            //owner->GetMap()->Add(OldSummon->ToCreature());
 
             if (owner->GetTypeId() == TypeID::TYPEID_PLAYER && OldSummon->isControlled())
                 owner->ToPlayer()->PetSpellInitialize();
@@ -474,7 +530,12 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
         }
 
         if (owner->GetTypeId() == TypeID::TYPEID_PLAYER)
-            owner->ToPlayer()->RemovePet(OldSummon, (OldSummon->getPetType() == PetType::HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT), false);
+        {
+            PetSaveMode saveMode = OldSummon->getPetType() == PetType::HUNTER_PET
+                ? PET_SAVE_NOT_IN_SLOT
+                : PET_SAVE_NOT_IN_SLOT;
+            owner->ToPlayer()->RemovePet(OldSummon, saveMode, false);
+        }
         else
             return;
     }
@@ -974,6 +1035,14 @@ void Spell::EffectCreateTamedPet(SpellEffIndex effIndex)
     if (!pet)
         return;
 
+    Player* player = unitTarget->ToPlayer();
+    int8 freeSlot = player->GetFreeActivePetSlot();
+    if (freeSlot < 0)
+    {
+        delete pet;
+        return;
+    }
+
     // relocate
     float px, py, pz;
     unitTarget->GetClosePoint(px, py, pz, pet->GetObjectSize(), PET_FOLLOW_DIST, pet->GetFollowAngle());
@@ -986,12 +1055,11 @@ void Spell::EffectCreateTamedPet(SpellEffIndex effIndex)
     unitTarget->SetMinion(pet, true);
 
     pet->InitTalentForLevel();
-
-    if (unitTarget->GetTypeId() == TypeID::TYPEID_PLAYER)
-    {
-        pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-        unitTarget->ToPlayer()->PetSpellInitialize();
-    }
+    pet->SetSlot(uint8(freeSlot));
+    pet->SavePetToDB(PetSaveMode(freeSlot));
+    player->PetSpellInitialize();
+    if (WorldSession* session = player->GetSession())
+        session->SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_ACTIVE_SLOT);
 }
 
 void Spell::EffectGameObjectDamage(SpellEffIndex /*effIndex*/)

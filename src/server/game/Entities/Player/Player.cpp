@@ -15966,6 +15966,9 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
         if (GetGroup())
             SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
+
+    if (getClass() == CLASS_HUNTER && GetSession())
+        GetSession()->SendPetList(0, PET_SAVE_FIRST_ACTIVE_SLOT, PET_SAVE_LAST_ACTIVE_SLOT);
 }
 
 void Player::StopCastingCharm()
@@ -23211,7 +23214,7 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
         return NULL;
     }
 
-    // petentry == 0 for hunter "call pet" (current pet summoned if any)
+    // petentry == 0 for hunter "call pet" is handled in EffectSummonPet via slot load
     if (!entry)
     {
         delete pet;
@@ -23283,6 +23286,35 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
     //ObjectAccessor::UpdateObjectVisibility(pet);
 
     return pet;
+}
+
+int8 Player::GetFreeActivePetSlot() const
+{
+    bool occupied[MAX_ACTIVE_PETS] = { };
+
+    if (QueryResult result = CharacterDatabase.PQuery(
+        "SELECT slot FROM character_pet WHERE owner = %u AND slot >= %u AND slot <= %u",
+        GetGUIDLow(), uint32(PET_SAVE_FIRST_ACTIVE_SLOT), uint32(PET_SAVE_LAST_ACTIVE_SLOT)))
+    {
+        do
+        {
+            uint8 slot = result->Fetch()[0].GetUInt8();
+            if (IsActivePetSlot(slot))
+                occupied[slot - PET_SAVE_FIRST_ACTIVE_SLOT] = true;
+        } while (result->NextRow());
+    }
+
+    if (Pet const* pet = GetPet())
+    {
+        if (pet->getPetType() == PetType::HUNTER_PET && IsActivePetSlot(pet->GetSlot()))
+            occupied[pet->GetSlot() - PET_SAVE_FIRST_ACTIVE_SLOT] = true;
+    }
+
+    for (uint8 i = 0; i < MAX_ACTIVE_PETS; ++i)
+        if (!occupied[i])
+            return int8(PET_SAVE_FIRST_ACTIVE_SLOT + i);
+
+    return -1;
 }
 
 void Player::ReadyCheckComplete()

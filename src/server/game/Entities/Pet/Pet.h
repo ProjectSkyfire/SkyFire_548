@@ -46,11 +46,14 @@ public:
     bool CreateBaseAtCreature(Creature* creature);
     bool CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit* owner);
     bool CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map/*, uint32 phaseMask*/);
-    bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
+    bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, int8 slot = -1);
     bool isBeingLoaded() const { return m_loading; }
     void SavePetToDB(PetSaveMode mode);
     void Remove(PetSaveMode mode, bool returnreagent = false);
     static void DeleteFromDB(uint32 guidlow);
+
+    uint8 GetSlot() const { return m_slot; }
+    void SetSlot(uint8 slot) { m_slot = slot; }
 
     void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
     void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
@@ -152,6 +155,7 @@ protected:
     bool    m_loading;
     uint32  m_regenTimer;
     uint32  m_transportExitGraceTimer;
+    uint8   m_slot;                                     // character_pet.slot (Call Pet 0-4 / stable 5+)
 
     DeclinedName* m_declinedname;
 

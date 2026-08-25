@@ -13,17 +13,32 @@ enum class PetType
     MAX_PET_TYPE = 4
 };
 
-#define MAX_PET_STABLES         4
+// MoP: five Call Pet active slots, then stable slots.
+// Client m_petList is capped at 55 entries (slots 0-54): 5 active + 50 stable.
+#define MAX_ACTIVE_PETS         5
+#define MAX_PET_STABLES         50
 
 // stored in character_pet.slot
 enum PetSaveMode
 {
     PET_SAVE_AS_DELETED = -1,                        // not saved in fact
-    PET_SAVE_AS_CURRENT = 0,                        // in current slot (with player)
-    PET_SAVE_FIRST_STABLE_SLOT = 1,
-    PET_SAVE_LAST_STABLE_SLOT = MAX_PET_STABLES,          // last in DB stable slot index (including), all higher have same meaning as PET_SAVE_NOT_IN_SLOT
-    PET_SAVE_NOT_IN_SLOT = 100                       // for avoid conflict with stable size grow will use 100
+    PET_SAVE_FIRST_ACTIVE_SLOT = 0,                  // Call Pet 1
+    PET_SAVE_AS_CURRENT = PET_SAVE_FIRST_ACTIVE_SLOT,// warlock/mage current; hunter Call Pet 1
+    PET_SAVE_LAST_ACTIVE_SLOT = MAX_ACTIVE_PETS - 1, // Call Pet 5 (inclusive)
+    PET_SAVE_FIRST_STABLE_SLOT = MAX_ACTIVE_PETS,    // 5
+    PET_SAVE_LAST_STABLE_SLOT = PET_SAVE_FIRST_STABLE_SLOT + MAX_PET_STABLES - 1, // 54
+    PET_SAVE_NOT_IN_SLOT = 100                       // sentinel / temporary unslotted
 };
+
+inline bool IsActivePetSlot(int slot)
+{
+    return slot >= PET_SAVE_FIRST_ACTIVE_SLOT && slot <= PET_SAVE_LAST_ACTIVE_SLOT;
+}
+
+inline bool IsStabledPetSlot(int slot)
+{
+    return slot >= PET_SAVE_FIRST_STABLE_SLOT && slot <= PET_SAVE_LAST_STABLE_SLOT;
+}
 
 enum PetSpellState
 {

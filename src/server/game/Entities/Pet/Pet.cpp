@@ -27,7 +27,7 @@
 Pet::Pet(Player* owner, PetType type) :
     Guardian(NULL, owner, true), m_petSpec(0), m_usedTalentCount(0), m_removed(false),
     m_petType(type), m_duration(0), m_auraRaidUpdateMask(0), m_loading(false),
-    m_regenTimer(PET_FOCUS_REGEN_INTERVAL), m_transportExitGraceTimer(0), m_declinedname(NULL)
+    m_regenTimer(PET_FOCUS_REGEN_INTERVAL), m_transportExitGraceTimer(0), m_slot(PET_SAVE_FIRST_ACTIVE_SLOT), m_declinedname(NULL)
 {
     ASSERT(m_owner->GetTypeId() == TypeID::TYPEID_PLAYER);
 
@@ -88,7 +88,7 @@ void Pet::StartTransportExitGrace(uint32 duration)
     m_transportExitGraceTimer = duration;
 }
 
-bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool current)
+bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool current, int8 slot)
 {
     m_loading = true;
 
@@ -104,6 +104,13 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         stmt->setUInt32(0, ownerid);
         stmt->setUInt32(1, petnumber);
     }
+    else if (slot >= 0)
+    {
+        // Exact Call Pet / stable slot
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_PET_BY_ENTRY_AND_SLOT);
+        stmt->setUInt32(0, ownerid);
+        stmt->setUInt8(1, uint8(slot));
+    }
     else if (current)
     {
         // Current pet
@@ -112,18 +119,18 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     }
     else if (petEntry)
     {
-        // known petEntry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
+        // known petEntry entry (unique for summoned pet, but non unique for hunter pet)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_PET_BY_ENTRY_AND_SLOT_2);
         stmt->setUInt32(0, ownerid);
         stmt->setUInt32(1, petEntry);
-        stmt->setUInt8(2, uint8(PET_SAVE_LAST_STABLE_SLOT));
+        stmt->setUInt8(2, uint8(PET_SAVE_LAST_ACTIVE_SLOT));
     }
     else
     {
-        // Any current or other non-stabled pet (for hunter "call pet")
+        // Fallback: first active-slot pet
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_PET_BY_SLOT);
         stmt->setUInt32(0, ownerid);
-        stmt->setUInt8(1, uint8(PET_SAVE_LAST_STABLE_SLOT));
+        stmt->setUInt8(1, uint8(PET_SAVE_LAST_ACTIVE_SLOT));
     }
 
     result = CharacterDatabase.Query(stmt);
@@ -157,6 +164,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
     }
 
     uint32 petId = fields[0].GetUInt32();
+    m_slot = fields[7].GetUInt8();
 
     if (current && owner->IsPetNeedBeTemporaryUnsummoned())
     {
@@ -250,25 +258,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool c
         }
     }
 
-    bool const isActivePet = fields[17].GetBool();
-
-    // set loaded pet as current
-    if (!isActivePet || fields[7].GetUInt8())
+    // Mark this pet as the currently summoned one; keep its Call Pet / stable slot.
     {
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
-
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UDP_CHAR_PET_SLOT_BY_SLOT_EXCLUDE_ID);
-        stmt->setUInt8(0, uint8(PET_SAVE_NOT_IN_SLOT));
-        stmt->setUInt32(1, ownerid);
-        stmt->setUInt8(2, uint8(PET_SAVE_AS_CURRENT));
-        stmt->setUInt32(3, m_charmInfo->GetPetNumber());
-        trans->Append(stmt);
-
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_PET_SLOT_BY_ID);
-        stmt->setUInt8(0, uint8(PET_SAVE_AS_CURRENT));
-        stmt->setUInt32(1, ownerid);
-        stmt->setUInt32(2, m_charmInfo->GetPetNumber());
-        trans->Append(stmt);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHAR_PET_ACTIVE_BY_OWNER);
         stmt->setUInt32(0, ownerid);
@@ -391,9 +383,67 @@ void Pet::SavePetToDB(PetSaveMode mode)
         mode = PET_SAVE_NOT_IN_SLOT;
     }
 
-    bool const saveAsActive = mode == PET_SAVE_AS_CURRENT ||
-        (getPetType() == PetType::HUNTER_PET && mode > PET_SAVE_LAST_STABLE_SLOT && owner->GetPetGUID() == GetGUID());
-    PetSaveMode const dbMode = saveAsActive ? PET_SAVE_AS_CURRENT : mode;
+    // Resolve DB slot + whether this pet is the currently summoned one.
+    uint8 slotToSave = m_slot;
+    bool saveAsActive = false;
+
+    if (mode == PET_SAVE_AS_DELETED)
+    {
+        RemoveAllAuras();
+        DeleteFromDB(m_charmInfo->GetPetNumber());
+        return;
+    }
+
+    if (getPetType() == PetType::HUNTER_PET)
+    {
+        if (mode == PET_SAVE_NOT_IN_SLOT)
+        {
+            // Dismiss: keep Call Pet slot, clear active flag.
+            if (!IsActivePetSlot(m_slot))
+                slotToSave = PET_SAVE_FIRST_ACTIVE_SLOT;
+            else
+                slotToSave = m_slot;
+            saveAsActive = false;
+        }
+        else if (IsStabledPetSlot(int32(mode)))
+        {
+            slotToSave = uint8(mode);
+            m_slot = slotToSave;
+            saveAsActive = false;
+        }
+        else if (IsActivePetSlot(int32(mode)))
+        {
+            // PET_SAVE_AS_CURRENT (== slot 0) on logout must keep the pet's Call Pet slot.
+            if (mode == PET_SAVE_AS_CURRENT && IsActivePetSlot(m_slot))
+                slotToSave = m_slot;
+            else
+                slotToSave = uint8(mode);
+            m_slot = slotToSave;
+            saveAsActive = true;
+        }
+        else
+        {
+            if (!IsActivePetSlot(m_slot) && !IsStabledPetSlot(m_slot))
+                m_slot = PET_SAVE_FIRST_ACTIVE_SLOT;
+            slotToSave = m_slot;
+            saveAsActive = true;
+        }
+    }
+    else
+    {
+        // Warlock / mage summons: single current slot.
+        if (mode == PET_SAVE_NOT_IN_SLOT)
+        {
+            slotToSave = PET_SAVE_NOT_IN_SLOT;
+            saveAsActive = false;
+        }
+        else
+        {
+            slotToSave = PET_SAVE_AS_CURRENT;
+            m_slot = slotToSave;
+            saveAsActive = true;
+        }
+    }
 
     uint32 curhealth = GetHealth();
     uint32 curmana = GetPower(POWER_MANA);
@@ -402,34 +452,32 @@ void Pet::SavePetToDB(PetSaveMode mode)
     // save auras before possibly removing them
     _SaveAuras(trans);
 
-    // stable and not in slot saves
-    if (mode > PET_SAVE_AS_CURRENT)
+    // stable / dismiss saves strip combat auras
+    if (!saveAsActive)
         RemoveAllAuras();
 
     _SaveSpells(trans);
     _SaveSpellCooldowns(trans);
     CharacterDatabase.CommitTransaction(trans);
 
-    // current/stable/not_in_slot
-    if (mode >= PET_SAVE_AS_CURRENT)
     {
         uint32 ownerLowGUID = GUID_LOPART(GetOwnerGUID());
         std::string name = m_name;
         CharacterDatabase.EscapeString(name);
         trans = CharacterDatabase.BeginTransaction();
-        // remove current data
 
         PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_BY_ID);
         stmt->setUInt32(0, m_charmInfo->GetPetNumber());
         trans->Append(stmt);
 
-        // prevent duplicate using slot (except PET_SAVE_NOT_IN_SLOT)
-        if (mode <= PET_SAVE_LAST_STABLE_SLOT)
+        // Avoid two pets claiming the same slot (move the other to NOT_IN_SLOT).
+        if (slotToSave != PET_SAVE_NOT_IN_SLOT)
         {
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_UDP_CHAR_PET_SLOT_BY_SLOT);
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_UDP_CHAR_PET_SLOT_BY_SLOT_EXCLUDE_ID);
             stmt->setUInt8(0, uint8(PET_SAVE_NOT_IN_SLOT));
             stmt->setUInt32(1, ownerLowGUID);
-            stmt->setUInt8(2, uint8(mode));
+            stmt->setUInt8(2, slotToSave);
+            stmt->setUInt32(3, m_charmInfo->GetPetNumber());
             trans->Append(stmt);
         }
 
@@ -440,17 +488,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
             trans->Append(stmt);
         }
 
-        // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
-        if (getPetType() == PetType::HUNTER_PET && (mode == PET_SAVE_AS_CURRENT || mode > PET_SAVE_LAST_STABLE_SLOT))
-        {
-            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_BY_SLOT);
-            stmt->setUInt32(0, ownerLowGUID);
-            stmt->setUInt8(1, uint8(PET_SAVE_AS_CURRENT));
-            stmt->setUInt8(2, uint8(PET_SAVE_LAST_STABLE_SLOT));
-            trans->Append(stmt);
-        }
-
-        // save pet
+        // save pet (do NOT delete sibling hunter pets)
         std::ostringstream ss;
         ss << "INSERT INTO character_pet (id, entry,  owner, modelid, level, exp, Reactstate, slot, name, renamed, active, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, PetSpecId) "
             << "VALUES ("
@@ -461,7 +499,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
             << uint32(getLevel()) << ','
             << GetUInt32Value(UNIT_FIELD_PET_EXPERIENCE) << ','
             << uint32(GetReactState()) << ','
-            << uint32(dbMode) << ", '"
+            << uint32(slotToSave) << ", '"
             << name.c_str() << "', "
             << uint32(HasByteFlag(UNIT_FIELD_SHAPESHIFT_FORM, 2, UNIT_CAN_BE_RENAMED) ? 0 : 1) << ','
             << uint32(saveAsActive ? 1 : 0) << ','
@@ -482,12 +520,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
 
         trans->Append(ss.str().c_str());
         CharacterDatabase.CommitTransaction(trans);
-    }
-    // delete
-    else
-    {
-        RemoveAllAuras();
-        DeleteFromDB(m_charmInfo->GetPetNumber());
+
+        m_slot = slotToSave;
     }
 }
 
