@@ -510,8 +510,9 @@ Vehicle* Vehicle::RemovePassenger(Unit* unit)
     if (_me->IsInWorld())
         unit->m_movementInfo.ResetTransport();
 
-    // only for flyable vehicles
-    if (unit->IsFlying())
+    // Only grant a parachute when actually flying, not for passengers with gravity
+    // disabled for vehicle seat attachment (underwater/ground remote-control seats).
+    if (unit->HasUnitMovementFlag(MOVEMENTFLAG_FLYING))
         _me->CastSpell(unit, VEHICLE_SPELL_PARACHUTE, true);
 
     if (_me->GetTypeId() == TypeID::TYPEID_UNIT && _me->ToCreature()->IsAIEnabled)

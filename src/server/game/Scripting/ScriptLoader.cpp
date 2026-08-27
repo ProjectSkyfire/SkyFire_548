@@ -314,6 +314,7 @@ void AddSC_instance_firelands();               //Firelands
 void AddSC_boss_alysrazor();
 
 void AddSC_ashenvale();
+void AddSC_darkshore();
 void AddSC_azuremyst_isle();
 void AddSC_bloodmyst_isle();
 void AddSC_desolace();
@@ -994,6 +995,7 @@ void AddKalimdorScripts()
     //AddSC_instance_zulfarrak();
 
     AddSC_ashenvale();
+    AddSC_darkshore();
     AddSC_azuremyst_isle();
     AddSC_bloodmyst_isle();
     AddSC_desolace();

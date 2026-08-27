@@ -99,6 +99,7 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_dustwallow_marsh.cpp
   Kalimdor/zone_winterspring.cpp
   Kalimdor/zone_ashenvale.cpp
+  Kalimdor/zone_darkshore.cpp
   Kalimdor/zone_teldrassil.cpp
   Kalimdor/OnyxiasLair/boss_onyxia.cpp
   Kalimdor/OnyxiasLair/onyxias_lair.h
