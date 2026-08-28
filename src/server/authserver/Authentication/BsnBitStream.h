@@ -112,6 +112,17 @@ namespace Skyfire::Authnet
 
         bool ReadUInt32(uint32& out) { return ReadBits(32, out); }
 
+        bool ReadUInt64(uint64& out)
+        {
+            uint32 high = 0;
+            uint32 low = 0;
+            if (!ReadUInt32(high) || !ReadUInt32(low))
+                return false;
+
+            out = (uint64(high) << 32) | uint64(low);
+            return true;
+        }
+
         bool ReadFourCC(std::string& out)
         {
             uint32 value = 0;
@@ -125,6 +136,34 @@ namespace Skyfire::Authnet
                 if (c != '\0')
                     out.push_back(c);
             }
+            return true;
+        }
+
+        bool ReadBytes(void* out, size_t length)
+        {
+            AlignToByte();
+            if (length > RemainingBits() / 8)
+                return false;
+
+            std::memcpy(out, _data + (_bitPos >> 3), length);
+            _bitPos += length * 8;
+            return true;
+        }
+
+        bool ReadString(size_t length, std::string& out)
+        {
+            out.clear();
+            out.resize(length);
+
+            if (length == 0)
+                return true;
+
+            if (!ReadBytes(&out[0], length))
+            {
+                out.clear();
+                return false;
+            }
+
             return true;
         }
 
