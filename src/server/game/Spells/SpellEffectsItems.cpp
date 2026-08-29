@@ -209,7 +209,7 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
         if (player->OnArchaeologyFindUsed(gameObjTarget))
             return;
 
-        SendLoot(guid, LootType::LOOT_SKINNING);
+        SendLoot(guid, LootType::LOOT_CORPSE);
     }
     else if (itemTarget)
         itemTarget->SetFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_UNLOCKED);
