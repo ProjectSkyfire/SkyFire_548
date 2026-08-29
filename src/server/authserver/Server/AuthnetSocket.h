@@ -26,7 +26,7 @@ private:
     void TrySendProbeResponse(size_t readOffset, size_t readSize);
     bool DecodeInitialRequest(void);
     void ProcessEncryptedClientBytes(size_t encryptedFollowupOffset);
-    void SendEncryptedRequestResult(uint32 requestId);
+    void SendEncryptedRequestResult(uint32 requestId, std::vector<uint8> const* resourceKey = nullptr, uint32 resourceItemId = 0);
     void CryptClientPayload(std::vector<uint8>& payload);
     void CryptServerPayload(std::vector<uint8>& payload);
 
@@ -47,6 +47,12 @@ private:
     bool _clientModeSwitchSeen;
     bool _followupLogged;
     bool _postSuccessBurstSeen;
+    bool _mode1ConnectAnswered;
+    bool _mode2LoginAnswered;
+    bool _mode2Command2Answered;
+    bool _mode2Command8Answered;
+    bool _postLoginStatusSent;
+    bool _mode1Command6Answered;
 };
 
 #endif
