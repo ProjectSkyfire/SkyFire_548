@@ -9,6 +9,7 @@
 #include "Util.h"
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
@@ -208,6 +209,12 @@ namespace
         return value && value[0] ? value : fallback;
     }
 
+    bool HasEnvValue(char const* name)
+    {
+        char const* value = std::getenv(name);
+        return value && value[0];
+    }
+
     int HexValue(char c)
     {
         if (c >= '0' && c <= '9')
@@ -338,7 +345,7 @@ namespace
                     case 5:
                         return "PostLoginTransition";
                     case 6:
-                        return "RealmListRequestCandidate";
+                        return "RealmListCancelOrDisconnect";
                     case 9:
                         return "ServiceLookupRequest";
                     default:
@@ -620,7 +627,9 @@ namespace
         return StringEnabled(mode);
     }
 
-    std::vector<uint8> BuildStartupResponseProbe(std::string* startupAccountName = nullptr, std::vector<uint8>* startupAccountKey = nullptr)
+    std::vector<uint8> BuildStartupResponseProbe(std::string* startupAccountName = nullptr,
+        std::vector<uint8>* startupAccountKey = nullptr,
+        std::string* worldAccountIdentity = nullptr)
     {
         Skyfire::Authnet::BitWriter writer;
         char const* accountMode = GetEnvOrDefault("AUTHNET_STARTUP_ACCOUNT_RESPONSE", "none");
@@ -632,6 +641,13 @@ namespace
             *startupAccountName = accountName;
         if (startupAccountKey)
             *startupAccountKey = accountKey;
+
+        std::string authSessionIdentity = GetEnvOrDefault("AUTHNET_STARTUP_WORLD_ACCOUNT", "A");
+        if (authSessionIdentity.size() > MaxInitialIdentityBytes)
+            authSessionIdentity.resize(MaxInitialIdentityBytes);
+
+        if (worldAccountIdentity)
+            *worldAccountIdentity = authSessionIdentity;
 
         writer.WriteBits(0x00, 6);
         writer.WriteBits(1, 1);
@@ -658,8 +674,7 @@ namespace
         writer.WriteUInt32(0);
         writer.WriteBits(0, 8);
         writer.WriteBits(0, 5);
-        uint8 const tailString[] = { 'A' };
-        writer.WriteBytes(tailString, sizeof(tailString));
+        writer.WriteBytes(authSessionIdentity.data(), authSessionIdentity.size());
         writer.WriteUInt32(0);
         writer.WriteUInt32(0);
         writer.WriteUInt32(0);
@@ -887,6 +902,74 @@ namespace
         return std::min<uint32>(GetEnvUInt32(name, 0), 16);
     }
 
+    uint32 GetMode2Command8List6Count()
+    {
+        if (HasEnvValue("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"))
+            return GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT");
+
+        if (StringEquals(GetMode2Command8ResponseMode(), "empty-structured"))
+            return 0;
+
+        return 1;
+    }
+
+    bool TryParseIPv4AddressBytes(std::string const& address, std::array<uint8, 4>& bytes)
+    {
+        size_t offset = 0;
+        for (size_t index = 0; index < bytes.size(); ++index)
+        {
+            if (offset >= address.size())
+                return false;
+
+            char* end = nullptr;
+            unsigned long value = std::strtoul(address.c_str() + offset, &end, 10);
+            if (!end || end == address.c_str() + offset || value > 255)
+                return false;
+
+            bytes[index] = uint8(value);
+            offset = size_t(end - address.c_str());
+
+            if (index + 1 < bytes.size())
+            {
+                if (offset >= address.size() || address[offset] != '.')
+                    return false;
+
+                ++offset;
+            }
+        }
+
+        return offset == address.size();
+    }
+
+    std::vector<uint8> BuildMode2Command8DefaultRouteList(uint32 entryCount)
+    {
+        std::vector<uint8> bytes(6 * entryCount, 0);
+        if (!entryCount)
+            return bytes;
+
+        std::array<uint8, 4> address = { 127, 0, 0, 1 };
+        TryParseIPv4AddressBytes(
+            GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_ROUTE_ADDRESS",
+                GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", "127.0.0.1")),
+            address);
+
+        uint32 const port = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_ROUTE_PORT",
+            GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", 8085)) & 0xFFFF;
+
+        for (uint32 index = 0; index < entryCount; ++index)
+        {
+            size_t const offset = size_t(index) * 6;
+            bytes[offset] = address[0];
+            bytes[offset + 1] = address[1];
+            bytes[offset + 2] = address[2];
+            bytes[offset + 3] = address[3];
+            bytes[offset + 4] = uint8(port >> 8);
+            bytes[offset + 5] = uint8(port);
+        }
+
+        return bytes;
+    }
+
     std::vector<uint8> GetConfiguredListBytes(char const* name, size_t entrySize, uint32 entryCount)
     {
         std::vector<uint8> bytes(entrySize * entryCount, 0);
@@ -1029,9 +1112,13 @@ namespace
         Skyfire::Authnet::BitWriter writer;
 
         uint32 const fieldValue = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0);
-        uint32 const list6Count = GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT");
+        uint32 const list6Count = GetMode2Command8List6Count();
         uint32 const list18Count = GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT");
-        std::vector<uint8> list6 = GetConfiguredListBytes("AUTHNET_MODE2_COMMAND8_LIST6_HEX", 6, list6Count);
+        std::vector<uint8> list6 = BuildMode2Command8DefaultRouteList(list6Count);
+        std::vector<uint8> configuredList6;
+        if (!list6.empty() && TryParseHexBytes(std::getenv("AUTHNET_MODE2_COMMAND8_LIST6_HEX"), list6.size(), configuredList6))
+            list6 = configuredList6;
+
         std::vector<uint8> list18 = GetConfiguredListBytes("AUTHNET_MODE2_COMMAND8_LIST18_HEX", 18, list18Count);
 
         writer.WriteBits(0x08, 6);
@@ -2132,7 +2219,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
             AuthnetPacketName(2, 8, 1), command8Mode,
             GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
-            GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+            GetMode2Command8List6Count(),
             GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
             ByteArrayToHexStr(plainCommand8Response).c_str(), ByteArrayToHexStr(command8Response).c_str());
 
@@ -2170,7 +2257,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
                         remoteAddress.c_str(), remotePort, triggerText.c_str(),
                         AuthnetPacketName(2, 8, 1), command8ModeText.c_str(), repeatIndex + 1, repeatCount,
                         GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
-                        GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                        GetMode2Command8List6Count(),
                         GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                         ByteArrayToHexStr(plainRepeatCommand8Response).c_str(), ByteArrayToHexStr(repeatCommand8Response).c_str());
 
@@ -2198,7 +2285,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
                     socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
                     AuthnetPacketName(2, 8, 1), command8Mode, repeatIndex + 1, repeatCount,
                     GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
-                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                    GetMode2Command8List6Count(),
                     GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                     ByteArrayToHexStr(plainRepeatCommand8Response).c_str(), ByteArrayToHexStr(repeatCommand8Response).c_str());
 
@@ -2224,7 +2311,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
                 socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
                 AuthnetPacketName(2, 8, 1), command8Mode, repeatIndex + 1, postCommand6Count,
                 GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
-                GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                GetMode2Command8List6Count(),
                 GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                 ByteArrayToHexStr(plainResponse).c_str());
         }
@@ -2252,7 +2339,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
                     remoteAddress.c_str(), remotePort, AuthnetPacketName(2, 8, 1),
                     command8ModeText.c_str(), i + 1, postCommand6Count, delayMs, gapMs,
                     GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
-                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                    GetMode2Command8List6Count(),
                     GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                     ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
 
@@ -2750,14 +2837,16 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
     {
         std::string startupAccountName;
         std::vector<uint8> startupAccountKey;
-        std::vector<uint8> response = BuildStartupResponseProbe(&startupAccountName, &startupAccountKey);
+        std::string worldAccountIdentity;
+        std::vector<uint8> response = BuildStartupResponseProbe(&startupAccountName, &startupAccountKey,
+            &worldAccountIdentity);
         std::string startupAccountKeyHex = startupAccountKey.empty() ? std::string() : ByteArrayToHexStr(startupAccountKey);
         std::string responseHex = ByteArrayToHexStr(response);
 
-        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response account_count=%u account_name=%s account_key=%s plain=%s",
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response account_count=%u account_name=%s account_key=%s auth_session_identity=%s plain=%s",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), response.size(),
             startupAccountName.empty() ? 0u : 1u, startupAccountName.c_str(),
-            startupAccountKeyHex.c_str(), responseHex.c_str());
+            startupAccountKeyHex.c_str(), worldAccountIdentity.c_str(), responseHex.c_str());
 
         socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
         _responded = true;

@@ -850,7 +850,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     if (!result)
     {
         SendAuthResponseError(ResponseCodes::AUTH_UNKNOWN_ACCOUNT);
-        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Sent Auth Response (unknown account).");
+        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Sent Auth Response (unknown account: '%s', kind: %s, canonical: '%s', length: %u, build: %u, realm: %u, addonSize: %u).",
+            account.c_str(), Skyfire::Auth::GetLoginIdentityKindName(loginIdentity.Kind),
+            loginIdentity.Canonical.c_str(), accountNameLength, clientBuild, VirtualRealmID, addonSize);
         return -1;
     }
 
