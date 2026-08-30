@@ -6,6 +6,7 @@
 #include "AuthnetSocket.h"
 #include "Authentication/BsnBitStream.h"
 #include "Log.h"
+#include "RealmList.h"
 #include "Util.h"
 
 #include <algorithm>
@@ -209,6 +210,12 @@ namespace
         return value && value[0] ? value : fallback;
     }
 
+    std::string GetEnvStringOrDefault(char const* name, std::string const& fallback)
+    {
+        char const* value = std::getenv(name);
+        return value && value[0] ? value : fallback;
+    }
+
     bool HasEnvValue(char const* name)
     {
         char const* value = std::getenv(name);
@@ -280,6 +287,32 @@ namespace
     {
         writer.WriteUInt32(uint32(value >> 32));
         writer.WriteUInt32(uint32(value));
+    }
+
+    Realm const* FindAuthnetRealm(std::string const& preferredName)
+    {
+        sRealmList->UpdateIfNeed();
+
+        if (!preferredName.empty())
+        {
+            for (RealmList::RealmMap::const_iterator itr = sRealmList->begin(); itr != sRealmList->end(); ++itr)
+                if (itr->second.name == preferredName || itr->first == preferredName)
+                    return &itr->second;
+        }
+
+        if (sRealmList->begin() != sRealmList->end())
+            return &sRealmList->begin()->second;
+
+        return nullptr;
+    }
+
+    uint32 GetAuthnetRealmCategory(Realm const* realm)
+    {
+        if (HasEnvValue("AUTHNET_MODE2_COMMAND2_REALM_CATEGORY"))
+            return GetEnvUInt32("AUTHNET_MODE2_COMMAND2_REALM_CATEGORY", 1) & 0xFF;
+
+        uint32 const category = realm ? realm->timezone : 0;
+        return (category ? category : 1) & 0xFF;
     }
 
     std::string FourCCFromUInt32(uint32 value)
@@ -897,6 +930,21 @@ namespace
         return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_POST_COMMAND6_GAP_MS", 0);
     }
 
+    char const* GetMode2Command8RequestResponseMode()
+    {
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_REQUEST_RESPONSE", "structured");
+    }
+
+    uint32 GetMode2Command8RequestDelayMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REQUEST_DELAY_MS", 0);
+    }
+
+    uint32 GetMode2Command8RequestGapMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REQUEST_GAP_MS", 0);
+    }
+
     uint32 GetMode2Command8ListCount(char const* name)
     {
         return std::min<uint32>(GetEnvUInt32(name, 0), 16);
@@ -947,14 +995,16 @@ namespace
         if (!entryCount)
             return bytes;
 
+        Realm const* realm = FindAuthnetRealm(GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME", ""));
+        std::string defaultAddress = realm ? realm->ExternalAddress.GetHost() : "127.0.0.1";
+        uint32 const defaultPort = realm ? realm->ExternalAddress.GetPort() : 8085;
+
         std::array<uint8, 4> address = { 127, 0, 0, 1 };
-        TryParseIPv4AddressBytes(
-            GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_ROUTE_ADDRESS",
-                GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", "127.0.0.1")),
-            address);
+        TryParseIPv4AddressBytes(GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND8_ROUTE_ADDRESS",
+            GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", defaultAddress)), address);
 
         uint32 const port = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_ROUTE_PORT",
-            GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", 8085)) & 0xFFFF;
+            GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", defaultPort)) & 0xFFFF;
 
         for (uint32 index = 0; index < entryCount; ++index)
         {
@@ -990,23 +1040,30 @@ namespace
             GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE1", 0)) & 0xFF;
         uint32 const keyValue32 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_KEY_VALUE32",
             GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_VALUE32", 1));
-        uint32 const field418 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD418", 0);
-        uint32 const field41C = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD41C", 0);
         uint32 const field420 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD420", 0) & 0xFF;
         uint32 const field424 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD424", 0);
         uint32 const finalByte = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FINAL_BYTE", 0) & 0xFF;
         bool const hasEndpoint = StringEnabled(std::getenv("AUTHNET_MODE2_COMMAND2_HAS_ENDPOINT"));
         uint32 const endpointField450 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD450", 0);
         uint32 const endpointField454 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD454", 0);
-        uint32 const endpointPort = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", 8085) & 0xFFFF;
+
+        std::string configuredName = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME", "");
+        Realm const* realm = FindAuthnetRealm(configuredName);
+        uint32 const realmCategory = GetAuthnetRealmCategory(realm);
+        uint32 const field418 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD418", 0);
+        uint32 const field41C = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD41C", realmCategory);
+        uint32 const endpointPort = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT",
+            realm ? realm->ExternalAddress.GetPort() : 8085) & 0xFFFF;
         uint32 const endpointByte458 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD458", endpointPort >> 8) & 0xFF;
         uint32 const endpointByte459 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD459", endpointPort) & 0xFF;
 
-        std::string accountName = GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_NAME", "WoW1");
+        std::string accountName = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME",
+            realm ? realm->name : "WoW1");
         if (accountName.size() > 0x3FC)
             accountName.resize(0x3FC);
 
-        std::string endpointAddress = GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", "127.0.0.1");
+        std::string endpointAddress = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS",
+            realm ? realm->ExternalAddress.GetHost() : "127.0.0.1");
         if (endpointAddress.size() > 0x17)
             endpointAddress.resize(0x17);
 
@@ -2716,6 +2773,85 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
 
             if (ShouldSendMode1SequenceOnMode2Command0())
                 TrySendPostLoginMode1Sequence("mode2 command0");
+        }
+
+        if (plain.size() > ClientModeSwitchRequestLen &&
+            header.command == 8 && header.modeSwitch && header.mode == 2)
+        {
+            char const* responseMode = GetMode2Command8RequestResponseMode();
+            if (StringEquals(responseMode, "none") || StringEquals(responseMode, "skip") ||
+                StringEquals(responseMode, "off"))
+            {
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: selected realm %s (mode2 command8) request observed; response disabled by AUTHNET_MODE2_COMMAND8_REQUEST_RESPONSE=%s plain=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(header), responseMode, ByteArrayToHexStr(plain).c_str());
+                return;
+            }
+
+            std::vector<std::vector<uint8>> responses;
+            std::vector<std::string> responseLabels;
+            auto addResponse = [&responses, &responseLabels](char const* label, std::vector<uint8> response)
+            {
+                responses.push_back(std::move(response));
+                responseLabels.push_back(label);
+            };
+
+            if (StringEquals(responseMode, "status"))
+                addResponse("mode2-command8-status", BuildMode2Command8StatusProbe());
+            else if (StringEquals(responseMode, "empty"))
+                addResponse("mode2-command8-empty", BuildEmptyModeCommand(8, 2));
+            else if (StringEquals(responseMode, "state") || StringEquals(responseMode, "command6") ||
+                StringEquals(responseMode, "mode2-command6"))
+                addResponse("mode2-command6-state", BuildMode2Command6StateProbe());
+            else if (StringEquals(responseMode, "mode1-status"))
+                addResponse("mode1-status", BuildMode1Command1Status(GetMode1Command6Status()));
+            else if (StringEquals(responseMode, "mode1-sequence"))
+            {
+                TrySendPostLoginMode1Sequence("selected-realm command8");
+                return;
+            }
+            else if (StringEquals(responseMode, "structured-state"))
+            {
+                addResponse("mode2-command8-structured", BuildMode2Command8StructuredProbe());
+                addResponse("mode2-command6-state", BuildMode2Command6StateProbe());
+            }
+            else if (StringEquals(responseMode, "state-structured"))
+            {
+                addResponse("mode2-command6-state", BuildMode2Command6StateProbe());
+                addResponse("mode2-command8-structured", BuildMode2Command8StructuredProbe());
+            }
+            else
+                addResponse("mode2-command8-structured", BuildMode2Command8StructuredProbe());
+
+            uint32 const delayMs = GetMode2Command8RequestDelayMs();
+            uint32 const gapMs = GetMode2Command8RequestGapMs();
+            if (delayMs)
+            {
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying selected-realm %s (mode2 command8) %s response by %u ms",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(header), responseMode, delayMs);
+                std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+            }
+
+            for (size_t i = 0; i < responses.size(); ++i)
+            {
+                if (gapMs && i != 0)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(gapMs));
+
+                std::vector<uint8> response = responses[i];
+                std::vector<uint8> plainResponse = response;
+                CryptServerPayload(response);
+
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted selected-realm %s (mode2 command8) %s response %u/%u request=%s plain=%s encrypted=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(header), responseLabels[i].c_str(), uint32(i + 1),
+                    uint32(responses.size()), ByteArrayToHexStr(plain).c_str(),
+                    ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
+
+                socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+            }
+
+            return;
         }
 
         if (plain.size() == ClientModeSwitchRequestLen &&
