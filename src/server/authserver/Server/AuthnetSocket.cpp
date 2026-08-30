@@ -16,6 +16,7 @@
 #include <iterator>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace
@@ -257,6 +258,23 @@ namespace
         return end && *end == '\0' ? uint32(parsed) : fallback;
     }
 
+    uint64 GetEnvUInt64(char const* name, uint64 fallback)
+    {
+        char const* value = std::getenv(name);
+        if (!value || !value[0])
+            return fallback;
+
+        char* end = nullptr;
+        unsigned long long parsed = std::strtoull(value, &end, 0);
+        return end && *end == '\0' ? uint64(parsed) : fallback;
+    }
+
+    void WriteUInt64(Skyfire::Authnet::BitWriter& writer, uint64 value)
+    {
+        writer.WriteUInt32(uint32(value >> 32));
+        writer.WriteUInt32(uint32(value));
+    }
+
     std::string FourCCFromUInt32(uint32 value)
     {
         std::string text;
@@ -285,6 +303,91 @@ namespace
             default:
                 return "component-major";
         }
+    }
+
+    char const* AuthnetPacketName(uint32 mode, uint32 command, uint32 modeSwitch)
+    {
+        if (!modeSwitch)
+            return "InlineControl";
+
+        switch (mode)
+        {
+            case 0:
+                switch (command)
+                {
+                    case 0:
+                        return "InitialLoginResponseCandidate";
+                    case 9:
+                        return "InitialLoginRequest";
+                    default:
+                        return "Mode0Unknown";
+                }
+            case 1:
+                switch (command)
+                {
+                    case 0:
+                        return "SessionKeepalive";
+                    case 1:
+                        return "LoginStatus";
+                    case 2:
+                        return "ConnectRealmListResultCandidate";
+                    case 3:
+                        return "ConnectRealmListStatusCandidate";
+                    case 4:
+                        return "ConnectRealmListTicketCandidate";
+                    case 5:
+                        return "PostLoginTransition";
+                    case 6:
+                        return "RealmListRequestCandidate";
+                    case 9:
+                        return "ServiceLookupRequest";
+                    default:
+                        return "Mode1Unknown";
+                }
+            case 2:
+                switch (command)
+                {
+                    case 0:
+                        return "GameAccountList";
+                    case 2:
+                        return "GameAccountDetail";
+                    case 3:
+                        return "GameAccountServicesReadyCandidate";
+                    case 6:
+                        return "GameAccountStateUpdateCandidate";
+                    case 7:
+                        return "GameAccountReconnectCompleteCandidate";
+                    case 8:
+                        return "GameAccountLoginComplete";
+                    default:
+                        return "Mode2Unknown";
+                }
+            case 11:
+                switch (command)
+                {
+                    case 3:
+                        return "ServiceMethodResult";
+                    case 4:
+                        return "ServiceLookupResult";
+                    case 7:
+                        return "ServiceNotify";
+                    case 8:
+                        return "ServiceState";
+                    case 9:
+                        return "ServiceLookupRequest";
+                    case 10:
+                        return "ServiceComplete";
+                    default:
+                        return "Mode11Unknown";
+                }
+            default:
+                return "UnknownMode";
+        }
+    }
+
+    char const* AuthnetPacketName(ProbePacketHeader const& header)
+    {
+        return header.decoded ? AuthnetPacketName(header.mode, header.command, header.modeSwitch) : "Undecoded";
     }
 
     ServiceKeyMode GetServiceKeyMode()
@@ -444,6 +547,55 @@ namespace
         return payload;
     }
 
+    char const* GetServiceResponseMode()
+    {
+        return GetEnvOrDefault("AUTHNET_SERVICE_RESPONSE_MODE", "method-result");
+    }
+
+    bool IsServiceResponseModeDisabled(char const* mode)
+    {
+        return StringEquals(mode, "none") || StringEquals(mode, "skip") || StringEquals(mode, "off");
+    }
+
+    char const* GetResourceResultMode()
+    {
+        return GetEnvOrDefault("AUTHNET_RESOURCE_RESULT_MODE", "empty");
+    }
+
+    bool IsResourceResultModeDisabled(char const* mode)
+    {
+        return StringEquals(mode, "none") || StringEquals(mode, "skip") || StringEquals(mode, "off");
+    }
+
+    std::vector<uint8> BuildServiceLookupResultBody(ServiceRequestInfo const& request, std::vector<uint8> const& servicePayloadProbe)
+    {
+        std::vector<uint8> body(32, 0);
+
+        std::vector<uint8> configuredBody;
+        if (TryParseHexBytes(std::getenv("AUTHNET_SERVICE_LOOKUP_RESULT_HEX"), body.size(), configuredBody))
+            return configuredBody;
+
+        char const* bodyMode = GetEnvOrDefault("AUTHNET_SERVICE_LOOKUP_RESULT_BODY", "service-payload");
+        if (StringEquals(bodyMode, "zero"))
+            return body;
+
+        if (StringEquals(bodyMode, "request-id"))
+        {
+            StoreUInt32LE(body.data(), request.requestId);
+            return body;
+        }
+
+        if (StringEquals(bodyMode, "service-payload") || StringEquals(bodyMode, "record"))
+        {
+            size_t const copySize = std::min(body.size(), servicePayloadProbe.size());
+            if (copySize != 0)
+                std::copy(servicePayloadProbe.begin(), servicePayloadProbe.begin() + copySize, body.begin());
+            return body;
+        }
+
+        return body;
+    }
+
     std::string GetStartupAccountName()
     {
         std::string accountName = GetEnvOrDefault("AUTHNET_STARTUP_ACCOUNT_NAME", "WoW1");
@@ -594,6 +746,11 @@ namespace
         return GetEnvUInt32("AUTHNET_MODE2_COMMAND0_DELAY_MS", 0);
     }
 
+    bool ShouldSendMode2FollowupsBeforeCommand0()
+    {
+        return StringEnabled(std::getenv("AUTHNET_MODE2_FOLLOWUPS_BEFORE_COMMAND0"));
+    }
+
     uint32 GetMode2Command0Status()
     {
         return GetEnvUInt32("AUTHNET_MODE2_COMMAND0_STATUS", 0);
@@ -615,6 +772,53 @@ namespace
         return GetEnvUInt32("AUTHNET_MODE2_COMMAND2_DELAY_MS", 0);
     }
 
+    bool ShouldSendMode2EmptyCommandProbe(char const* mode)
+    {
+        return StringEquals(mode, "empty") || StringEquals(mode, "1") ||
+            StringEquals(mode, "true") || StringEquals(mode, "yes");
+    }
+
+    char const* GetMode2Command3ResponseMode()
+    {
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND3_RESPONSE", "none");
+    }
+
+    uint32 GetMode2Command3DelayMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND3_DELAY_MS", 0);
+    }
+
+    char const* GetMode2Command6ResponseMode()
+    {
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND6_RESPONSE", "none");
+    }
+
+    bool ShouldSendMode2Command6StateProbe(char const* mode)
+    {
+        return StringEquals(mode, "state") || StringEquals(mode, "structured") ||
+            StringEquals(mode, "1") || StringEquals(mode, "true") || StringEquals(mode, "yes");
+    }
+
+    uint32 GetMode2Command6DelayMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND6_DELAY_MS", 0);
+    }
+
+    char const* GetMode2Command6Position()
+    {
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND6_POSITION", "after-command8");
+    }
+
+    char const* GetMode2Command7ResponseMode()
+    {
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND7_RESPONSE", "none");
+    }
+
+    uint32 GetMode2Command7DelayMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND7_DELAY_MS", 0);
+    }
+
     char const* GetMode2Command8ResponseMode()
     {
         return GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_RESPONSE", "none");
@@ -626,9 +830,56 @@ namespace
             StringEquals(mode, "1") || StringEquals(mode, "true") || StringEquals(mode, "yes");
     }
 
+    char const* GetMode2Command8StatusResponseMode()
+    {
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_STATUS_RESPONSE", "none");
+    }
+
+    bool ShouldSendMode2Command8StatusBeforeStructured(char const* mode)
+    {
+        return StringEquals(mode, "before") || StringEquals(mode, "before-structured") || StringEquals(mode, "both");
+    }
+
+    bool ShouldSendMode2Command8StatusAfterStructured(char const* mode)
+    {
+        return StringEquals(mode, "after") || StringEquals(mode, "after-structured") ||
+            StringEquals(mode, "status") || StringEquals(mode, "both") ||
+            StringEquals(mode, "1") || StringEquals(mode, "true") || StringEquals(mode, "yes");
+    }
+
     uint32 GetMode2Command8DelayMs()
     {
         return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_DELAY_MS", 0);
+    }
+
+    uint32 GetMode2Command8RepeatCount()
+    {
+        return std::min<uint32>(GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REPEAT_COUNT", 0), 4);
+    }
+
+    uint32 GetMode2Command8RepeatDelayMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REPEAT_DELAY_MS", 0);
+    }
+
+    bool ShouldSendMode2Command8RepeatAsync()
+    {
+        return StringEnabled(std::getenv("AUTHNET_MODE2_COMMAND8_REPEAT_ASYNC"));
+    }
+
+    uint32 GetMode2Command8PostCommand6Count()
+    {
+        return std::min<uint32>(GetEnvUInt32("AUTHNET_MODE2_COMMAND8_POST_COMMAND6_COUNT", 0), 4);
+    }
+
+    uint32 GetMode2Command8PostCommand6DelayMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_POST_COMMAND6_DELAY_MS", 0);
+    }
+
+    uint32 GetMode2Command8PostCommand6GapMs()
+    {
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_POST_COMMAND6_GAP_MS", 0);
     }
 
     uint32 GetMode2Command8ListCount(char const* name)
@@ -661,10 +912,20 @@ namespace
         uint32 const field420 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD420", 0) & 0xFF;
         uint32 const field424 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD424", 0);
         uint32 const finalByte = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FINAL_BYTE", 0) & 0xFF;
+        bool const hasEndpoint = StringEnabled(std::getenv("AUTHNET_MODE2_COMMAND2_HAS_ENDPOINT"));
+        uint32 const endpointField450 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD450", 0);
+        uint32 const endpointField454 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD454", 0);
+        uint32 const endpointPort = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", 8085) & 0xFFFF;
+        uint32 const endpointByte458 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD458", endpointPort >> 8) & 0xFF;
+        uint32 const endpointByte459 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD459", endpointPort) & 0xFF;
 
         std::string accountName = GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_NAME", "WoW1");
         if (accountName.size() > 0x3FC)
             accountName.resize(0x3FC);
+
+        std::string endpointAddress = GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", "127.0.0.1");
+        if (endpointAddress.size() > 0x17)
+            endpointAddress.resize(0x17);
 
         writer.WriteBits(0x02, 6);
         writer.WriteBits(1, 1);
@@ -678,13 +939,86 @@ namespace
         writer.WriteUInt32(field418 + 0x80000000u);
         writer.WriteBits(uint32(accountName.size()), 10);
         writer.WriteBytes(accountName.data(), accountName.size());
-        writer.WriteBits(0, 1);
+        writer.WriteBits(hasEndpoint ? 1 : 0, 1);
+        if (hasEndpoint)
+        {
+            uint8 endpointFields[6] =
+            {
+                uint8(endpointField454 & 0xFF),
+                uint8((endpointField454 >> 8) & 0xFF),
+                uint8((endpointField454 >> 16) & 0xFF),
+                uint8((endpointField454 >> 24) & 0xFF),
+                uint8(endpointByte458),
+                uint8(endpointByte459)
+            };
+
+            writer.WriteBits(uint32(endpointAddress.size()), 5);
+            writer.WriteBytes(endpointAddress.data(), endpointAddress.size());
+            writer.WriteUInt32(endpointField450);
+            writer.WriteBytes(endpointFields, sizeof(endpointFields));
+        }
         writer.WriteBits(finalByte, 8);
 
         writer.WriteBits(keyByte0, 8);
         writer.WriteBits(0, 12);
         writer.WriteBits(keyByte1, 8);
         writer.WriteUInt32(keyValue32);
+        writer.AlignToByte();
+
+        return writer.Data();
+    }
+
+    std::vector<uint8> BuildMode2Command6StateProbe()
+    {
+        Skyfire::Authnet::BitWriter writer;
+
+        uint32 const accountByte0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND6_ACCOUNT_BYTE0", 0) & 0xFF;
+        uint32 const accountField4 = GetEnvUInt32("AUTHNET_MODE2_COMMAND6_ACCOUNT_FIELD4", 0);
+        uint32 const accountField8 = GetEnvUInt32("AUTHNET_MODE2_COMMAND6_ACCOUNT_FIELD8", 0);
+        uint32 const serviceStateField0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND6_SERVICE_FIELD0", 0);
+        uint64 const serviceStateField8 = GetEnvUInt64("AUTHNET_MODE2_COMMAND6_SERVICE_FIELD8", 0);
+        uint64 const stateToken64 = GetEnvUInt64("AUTHNET_MODE2_COMMAND6_STATE_TOKEN64", 0);
+        uint32 const stateField8 = GetEnvUInt32("AUTHNET_MODE2_COMMAND6_STATE_FIELD8", 0);
+        uint32 const stateByte0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND6_STATE_BYTE0", 0) & 0xFF;
+        uint32 const stateField4 = GetEnvUInt32("AUTHNET_MODE2_COMMAND6_STATE_FIELD4", 0);
+
+        std::string accountBlobText = GetEnvOrDefault("AUTHNET_MODE2_COMMAND6_ACCOUNT_BLOB_TEXT", "");
+        if (accountBlobText.size() > 0x17)
+            accountBlobText.resize(0x17);
+
+        std::vector<uint8> accountBlob(accountBlobText.begin(), accountBlobText.end());
+        std::vector<uint8> configuredBlob;
+        if (TryParseHexBytes(std::getenv("AUTHNET_MODE2_COMMAND6_ACCOUNT_BLOB_HEX"), accountBlob.size(), configuredBlob))
+            accountBlob = configuredBlob;
+
+        std::vector<uint8> accountBlobSuffix = { 0, 0 };
+        std::string accountBlobSuffixText = GetEnvOrDefault("AUTHNET_MODE2_COMMAND6_ACCOUNT_BLOB_SUFFIX_TEXT", "");
+        if (accountBlobSuffixText.size() >= accountBlobSuffix.size())
+            std::copy_n(accountBlobSuffixText.begin(), accountBlobSuffix.size(), accountBlobSuffix.begin());
+
+        std::vector<uint8> configuredBlobSuffix;
+        if (TryParseHexBytes(std::getenv("AUTHNET_MODE2_COMMAND6_ACCOUNT_BLOB_SUFFIX_HEX"), accountBlobSuffix.size(), configuredBlobSuffix))
+            accountBlobSuffix = configuredBlobSuffix;
+
+        writer.WriteBits(0x06, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x02, 4);
+
+        writer.WriteBits(accountByte0, 8);
+        writer.WriteUInt32(accountField4);
+        writer.WriteUInt32(accountField8);
+        writer.WriteBits(uint32(accountBlob.size()), 7);
+        accountBlob.insert(accountBlob.end(), accountBlobSuffix.begin(), accountBlobSuffix.end());
+        writer.WriteBytes(accountBlob.data(), accountBlob.size());
+
+        writer.WriteBits(0, 21);
+        WriteUInt64(writer, serviceStateField8);
+        writer.WriteUInt32(serviceStateField0);
+
+        WriteUInt64(writer, stateToken64);
+        writer.WriteUInt32(stateField8);
+        writer.WriteBits(stateByte0, 8);
+        writer.WriteUInt32(stateField4);
         writer.AlignToByte();
 
         return writer.Data();
@@ -720,6 +1054,23 @@ namespace
         return writer.Data();
     }
 
+    std::vector<uint8> BuildMode2Command8StatusProbe()
+    {
+        Skyfire::Authnet::BitWriter writer;
+
+        uint32 const status = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_STATUS", 0) & 0xFF;
+
+        writer.WriteBits(0x08, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x02, 4);
+
+        writer.WriteBits(1, 1);
+        writer.WriteBits(status, 8);
+        writer.AlignToByte();
+
+        return writer.Data();
+    }
+
     std::vector<uint8> BuildEmptyModeCommand(uint32 command, uint32 mode)
     {
         Skyfire::Authnet::BitWriter writer;
@@ -739,6 +1090,74 @@ namespace
         writer.WriteBits(1, 1);
         writer.WriteBits(0x01, 4);
         writer.WriteBits(status, 16);
+
+        return writer.Data();
+    }
+
+    std::vector<uint8> BuildMode1Command2Empty()
+    {
+        Skyfire::Authnet::BitWriter writer;
+
+        writer.WriteBits(0x02, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x01, 4);
+        writer.WriteBits(0, 1);
+        writer.AlignToByte();
+
+        return writer.Data();
+    }
+
+    std::vector<uint8> BuildMode1Command2Result(uint32 field0, uint32 field1)
+    {
+        Skyfire::Authnet::BitWriter writer;
+
+        writer.WriteBits(0x02, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x01, 4);
+        writer.WriteBits(1, 1);
+        writer.WriteUInt32(field0);
+        writer.WriteUInt32(field1);
+        writer.AlignToByte();
+
+        return writer.Data();
+    }
+
+    std::vector<uint8> BuildMode1Command3Value(uint32 value)
+    {
+        Skyfire::Authnet::BitWriter writer;
+
+        writer.WriteBits(0x03, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x01, 4);
+        writer.WriteUInt32(value);
+        writer.AlignToByte();
+
+        return writer.Data();
+    }
+
+    std::vector<uint8> GetConfiguredFixedBytes(char const* name, size_t length)
+    {
+        std::vector<uint8> bytes(length, 0);
+        std::vector<uint8> configuredBytes;
+        if (TryParseHexBytes(std::getenv(name), bytes.size(), configuredBytes))
+            return configuredBytes;
+
+        return bytes;
+    }
+
+    std::vector<uint8> BuildMode1Command4Pair()
+    {
+        Skyfire::Authnet::BitWriter writer;
+
+        std::vector<uint8> first = GetConfiguredFixedBytes("AUTHNET_MODE1_COMMAND6_KEY0", 6);
+        std::vector<uint8> second = GetConfiguredFixedBytes("AUTHNET_MODE1_COMMAND6_KEY1", 6);
+
+        writer.WriteBits(0x04, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x01, 4);
+        writer.WriteBytes(second.data(), second.size());
+        writer.WriteBytes(first.data(), first.size());
+        writer.AlignToByte();
 
         return writer.Data();
     }
@@ -766,6 +1185,125 @@ namespace
     uint16 GetMode1Command6Status()
     {
         return uint16(GetEnvUInt32("AUTHNET_MODE1_COMMAND6_STATUS", 6) & 0xFFFF);
+    }
+
+    char const* GetPostLoginMode1ResponseMode()
+    {
+        return GetEnvOrDefault("AUTHNET_POST_LOGIN_MODE1_SEQUENCE", "none");
+    }
+
+    bool ShouldSendMode1SequenceOnModeSwitch(char const* phase)
+    {
+        char const* mode = GetEnvOrDefault("AUTHNET_SEND_MODE1_SEQUENCE_ON_MODE_SWITCH", "none");
+        if (StringEquals(mode, phase))
+            return true;
+
+        return StringEnabled(mode) && StringEquals(phase, "after-mode2");
+    }
+
+    bool ShouldSendMode1SequenceOnMode2Command0()
+    {
+        return StringEnabled(GetEnvOrDefault("AUTHNET_SEND_MODE1_SEQUENCE_ON_MODE2_COMMAND0", "1"));
+    }
+
+    bool IsMode1ProbeDisabled(char const* responseMode)
+    {
+        return StringEquals(responseMode, "none") || StringEquals(responseMode, "skip") ||
+            StringEquals(responseMode, "off");
+    }
+
+    bool AddMode1ProbeResponse(char const* responseMode, uint16 status, uint32 field0, uint32 field1, uint32 value,
+        std::vector<std::vector<uint8>>& responses, std::vector<std::string>& responseLabels)
+    {
+        auto addResponse = [&responses, &responseLabels](char const* label, std::vector<uint8> response)
+        {
+            responses.push_back(std::move(response));
+            responseLabels.push_back(label);
+        };
+
+        if (StringEquals(responseMode, "empty"))
+        {
+            addResponse("empty", BuildEmptyModeCommand(6, 1));
+            return true;
+        }
+
+        if (StringEquals(responseMode, "command2-empty") || StringEquals(responseMode, "c2-empty"))
+        {
+            addResponse("command2-empty", BuildMode1Command2Empty());
+            return true;
+        }
+
+        if (StringEquals(responseMode, "command2-result") || StringEquals(responseMode, "c2-result"))
+        {
+            addResponse("command2-result", BuildMode1Command2Result(field0, field1));
+            return true;
+        }
+
+        if (StringEquals(responseMode, "command3-value") || StringEquals(responseMode, "command3-status") ||
+            StringEquals(responseMode, "c3-value") || StringEquals(responseMode, "c3-status"))
+        {
+            addResponse("command3-value", BuildMode1Command3Value(value));
+            return true;
+        }
+
+        if (StringEquals(responseMode, "command4-pair") || StringEquals(responseMode, "command4-ticket") ||
+            StringEquals(responseMode, "c4-pair") || StringEquals(responseMode, "c4-ticket"))
+        {
+            addResponse("command4-pair", BuildMode1Command4Pair());
+            return true;
+        }
+
+        if (StringEquals(responseMode, "status"))
+        {
+            addResponse("status", BuildMode1Command1Status(status));
+            return true;
+        }
+
+        return false;
+    }
+
+    void BuildMode1ProbeResponses(char const* responseMode, uint16 status, uint32 field0, uint32 field1, uint32 value,
+        std::vector<std::vector<uint8>>& responses, std::vector<std::string>& responseLabels)
+    {
+        if (AddMode1ProbeResponse(responseMode, status, field0, field1, value, responses, responseLabels))
+            return;
+
+        if (StringEquals(responseMode, "command4-command2") || StringEquals(responseMode, "c4-c2"))
+        {
+            AddMode1ProbeResponse("command4-pair", status, field0, field1, value, responses, responseLabels);
+            AddMode1ProbeResponse("command2-empty", status, field0, field1, value, responses, responseLabels);
+            return;
+        }
+
+        if (StringEquals(responseMode, "command4-command3") || StringEquals(responseMode, "c4-c3"))
+        {
+            AddMode1ProbeResponse("command4-pair", status, field0, field1, value, responses, responseLabels);
+            AddMode1ProbeResponse("command3-value", status, field0, field1, value, responses, responseLabels);
+            return;
+        }
+
+        if (StringEquals(responseMode, "command3-command4") || StringEquals(responseMode, "c3-c4"))
+        {
+            AddMode1ProbeResponse("command3-value", status, field0, field1, value, responses, responseLabels);
+            AddMode1ProbeResponse("command4-pair", status, field0, field1, value, responses, responseLabels);
+            return;
+        }
+
+        if (StringEquals(responseMode, "command2-command3") || StringEquals(responseMode, "c2-c3"))
+        {
+            AddMode1ProbeResponse("command2-result", status, field0, field1, value, responses, responseLabels);
+            AddMode1ProbeResponse("command3-value", status, field0, field1, value, responses, responseLabels);
+            return;
+        }
+
+        if (StringEquals(responseMode, "command3-command2") || StringEquals(responseMode, "c3-c2"))
+        {
+            AddMode1ProbeResponse("command3-value", status, field0, field1, value, responses, responseLabels);
+            AddMode1ProbeResponse("command2-result", status, field0, field1, value, responses, responseLabels);
+            return;
+        }
+
+        AddMode1ProbeResponse("status", status, field0, field1, value, responses, responseLabels);
     }
 
     std::vector<uint8> BuildEmptyRequestResult(uint32 requestId)
@@ -809,7 +1347,15 @@ namespace
         return writer.Data();
     }
 
+    std::vector<uint8> BuildServiceResultPayload(uint32 requestId, std::vector<uint8> const& servicePayloadProbe, uint32 field80);
+
     std::vector<uint8> BuildServiceResultPayload(ServiceRequestInfo const& request, ServiceResultProbeInfo* probeInfo)
+    {
+        std::vector<uint8> servicePayloadProbe = BuildServicePayloadProbe(request, probeInfo);
+        return BuildServiceResultPayload(request.requestId, servicePayloadProbe, probeInfo ? probeInfo->field80 : 0);
+    }
+
+    std::vector<uint8> BuildServiceResultPayload(uint32 requestId, std::vector<uint8> const& servicePayloadProbe, uint32 field80)
     {
         Skyfire::Authnet::BitWriter writer;
 
@@ -819,15 +1365,91 @@ namespace
         writer.WriteUInt32(0);
         writer.WriteBits(0, 1);
 
-        std::vector<uint8> servicePayloadProbe = BuildServicePayloadProbe(request, probeInfo);
         writer.WriteBytes(servicePayloadProbe.data(), servicePayloadProbe.size());
         writer.WriteBits(0, 9);
-        writer.WriteUInt32(probeInfo ? probeInfo->field80 : 0);
+        writer.WriteUInt32(field80);
         writer.WriteBits(0, 1);
-        writer.WriteUInt32(request.requestId);
+        writer.WriteUInt32(requestId);
 
         writer.AlignToByte();
         return writer.Data();
+    }
+
+    std::vector<uint8> BuildServiceLookupResultPayload(uint32 requestId, std::vector<uint8> const& lookupBody)
+    {
+        Skyfire::Authnet::BitWriter writer;
+
+        writer.WriteBits(0x04, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x0B, 4);
+        writer.WriteUInt32(requestId);
+        writer.WriteBytes(lookupBody.data(), lookupBody.size());
+        writer.AlignToByte();
+        return writer.Data();
+    }
+
+    std::vector<uint8> BuildServiceCompletePayload(uint32 requestId, std::vector<uint8> const& servicePayloadProbe)
+    {
+        Skyfire::Authnet::BitWriter writer;
+        char const* variantMode = GetEnvOrDefault("AUTHNET_SERVICE_COMPLETE_VARIANT", "zero40");
+
+        writer.WriteBits(0x0A, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x0B, 4);
+
+        if (StringEquals(variantMode, "short16") || StringEquals(variantMode, "word16") ||
+            StringEquals(variantMode, "variant1"))
+        {
+            writer.WriteBits(1, 1);
+            writer.WriteBits(GetEnvUInt32("AUTHNET_SERVICE_COMPLETE_WORD", 0) & 0xFFFF, 16);
+            writer.WriteUInt32(requestId);
+            writer.AlignToByte();
+            return writer.Data();
+        }
+
+        std::vector<uint8> body(40, 0);
+        std::vector<uint8> configuredBody;
+        if (TryParseHexBytes(std::getenv("AUTHNET_SERVICE_COMPLETE_BODY_HEX"), body.size(), configuredBody))
+            body = configuredBody;
+        else
+        {
+            char const* bodyMode = GetEnvOrDefault("AUTHNET_SERVICE_COMPLETE_BODY", "zero");
+            if (StringEquals(bodyMode, "service-payload") || StringEquals(bodyMode, "record"))
+            {
+                size_t const copySize = std::min(body.size(), servicePayloadProbe.size());
+                if (copySize != 0)
+                    std::copy(servicePayloadProbe.begin(), servicePayloadProbe.begin() + copySize, body.begin());
+            }
+        }
+
+        if (char const* tag = std::getenv("AUTHNET_SERVICE_COMPLETE_TAG"))
+            body[8] = uint8(GetEnvUInt32("AUTHNET_SERVICE_COMPLETE_TAG", uint32(uint8(tag[0]))) & 0xFF);
+
+        writer.WriteBits(0, 1);
+        writer.WriteBytes(body.data(), body.size());
+        writer.WriteUInt32(requestId);
+        writer.AlignToByte();
+        return writer.Data();
+    }
+
+    bool ShouldSendPostLoginServiceResult()
+    {
+        return StringEnabled(std::getenv("AUTHNET_POST_LOGIN_SERVICE_RESULT"));
+    }
+
+    std::vector<uint8> GetPostLoginServiceResultPayload()
+    {
+        std::vector<uint8> payload(22, 0);
+        payload[0] = 'N';
+        payload[1] = 'u';
+        payload[2] = 'l';
+        payload[4] = 1;
+
+        std::vector<uint8> configuredPayload;
+        if (TryParseHexBytes(std::getenv("AUTHNET_POST_LOGIN_SERVICE_RESULT_PAYLOAD"), payload.size(), configuredPayload))
+            return configuredPayload;
+
+        return payload;
     }
 
     void ApplyStreamCipher(uint8 state[256], uint8& i, uint8& j, std::vector<uint8>& payload)
@@ -1200,7 +1822,9 @@ AuthnetSocket::AuthnetSocket(RealmSocket& socket) :
     _clientCryptInitialized(false), _serverCryptI(0), _serverCryptJ(0), _serverCryptInitialized(false),
     _responded(false), _httpResponded(false), _clientModeSwitchSeen(false), _followupLogged(false),
     _postSuccessBurstSeen(false), _mode1ConnectAnswered(false), _mode2LoginAnswered(false),
-    _mode2Command2Answered(false), _mode2Command8Answered(false), _postLoginStatusSent(false),
+    _mode2Command2Answered(false), _mode2Command3Answered(false), _mode2Command6Answered(false),
+    _mode2Command7Answered(false), _mode2Command8Answered(false), _mode2Command8PostCommand6Scheduled(false),
+    _postLoginServiceResultSent(false), _postLoginStatusSent(false), _postLoginMode1SequenceSent(false),
     _mode1Command6Answered(false)
 {
 }
@@ -1262,8 +1886,9 @@ bool AuthnetSocket::DecodeInitialRequest(void)
     _initialRequestLen = request.packetLength;
 
     SF_LOG_INFO("server.authserver",
-        "'%s:%d' authnet decode: initial_header command=%u mode_switch=%u mode=%u header_bits=%zu program=%s platform=%s locale=%s components=%zu",
+        "'%s:%d' authnet decode: initial_header name=%s command=%u mode_switch=%u mode=%u header_bits=%zu program=%s platform=%s locale=%s components=%zu",
         socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+        AuthnetPacketName(request.header),
         request.header.command, request.header.modeSwitch, request.header.mode, request.header.bitPosition,
         request.program.c_str(), request.platform.c_str(), request.locale.c_str(), request.components.size());
 
@@ -1298,6 +1923,8 @@ void AuthnetSocket::CryptClientPayload(std::vector<uint8>& payload)
 
 void AuthnetSocket::CryptServerPayload(std::vector<uint8>& payload)
 {
+    std::lock_guard<std::mutex> lock(_serverCryptMutex);
+
     if (!_serverCryptInitialized)
     {
         std::memcpy(_serverCryptState, InitialServerToClientCryptState, sizeof(_serverCryptState));
@@ -1329,6 +1956,404 @@ void AuthnetSocket::SendEncryptedRequestResult(uint32 requestId, std::vector<uin
         ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
 
     socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+}
+
+bool AuthnetSocket::TrySendMode2Command0Probe(char const* trigger, bool sendFollowups)
+{
+    char const* responseMode = nullptr;
+    uint32 status = GetMode2Command0Status();
+    std::vector<uint8> response = BuildLoginAuthProbe(status, responseMode);
+
+    if (response.empty())
+    {
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: %s-triggered %s (mode2 command0) response disabled by AUTHNET_MODE2_COMMAND0_RESPONSE=%s",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+            AuthnetPacketName(2, 0, 1), responseMode);
+        return false;
+    }
+
+    if (uint32 delayMs = GetMode2Command0DelayMs())
+    {
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying %s-triggered %s (mode2 command0) %s response by %u ms",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+            AuthnetPacketName(2, 0, 1), responseMode, delayMs);
+        std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+    }
+
+    _mode2LoginAnswered = true;
+
+    bool const sendFollowupsBeforeCommand0 = sendFollowups && ShouldSendMode2FollowupsBeforeCommand0();
+    if (sendFollowupsBeforeCommand0)
+        SendMode2LoginFollowups(trigger);
+
+    std::vector<uint8> plainResponse = response;
+    CryptServerPayload(response);
+
+    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command0) %s response status=%u plain=%s encrypted=%s",
+        socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+        AuthnetPacketName(2, 0, 1), responseMode, status,
+        ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
+
+    socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+
+    if (sendFollowups && !sendFollowupsBeforeCommand0)
+        SendMode2LoginFollowups(trigger);
+
+    return true;
+}
+
+void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
+{
+    auto sendMode2EmptyCommand = [this, trigger](uint32 command, char const* responseMode, uint32 delayMs, bool& answered)
+    {
+        if (answered || !ShouldSendMode2EmptyCommandProbe(responseMode))
+            return;
+
+        answered = true;
+
+        if (delayMs)
+        {
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying %s-triggered %s (mode2 command%u) %s response by %u ms",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                AuthnetPacketName(2, command, 1), command, responseMode, delayMs);
+            std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+        }
+
+        std::vector<uint8> emptyResponse = BuildEmptyModeCommand(command, 2);
+        std::vector<uint8> plainEmptyResponse = emptyResponse;
+        CryptServerPayload(emptyResponse);
+
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command%u) %s response plain=%s encrypted=%s",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+            AuthnetPacketName(2, command, 1), command, responseMode,
+            ByteArrayToHexStr(plainEmptyResponse).c_str(), ByteArrayToHexStr(emptyResponse).c_str());
+
+        socket().QueueSend(reinterpret_cast<char const*>(emptyResponse.data()), emptyResponse.size());
+    };
+
+    auto sendMode2Command6 = [this, trigger]()
+    {
+        char const* responseMode = GetMode2Command6ResponseMode();
+        if (_mode2Command6Answered || !ShouldSendMode2Command6StateProbe(responseMode))
+            return;
+
+        _mode2Command6Answered = true;
+
+        if (uint32 delayMs = GetMode2Command6DelayMs())
+        {
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying %s-triggered %s (mode2 command6) %s response by %u ms",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                AuthnetPacketName(2, 6, 1), responseMode, delayMs);
+            std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+        }
+
+        std::vector<uint8> stateResponse = BuildMode2Command6StateProbe();
+        std::vector<uint8> plainStateResponse = stateResponse;
+        CryptServerPayload(stateResponse);
+
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command6) %s response position=%s plain=%s encrypted=%s",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+            AuthnetPacketName(2, 6, 1), responseMode, GetMode2Command6Position(),
+            ByteArrayToHexStr(plainStateResponse).c_str(), ByteArrayToHexStr(stateResponse).c_str());
+
+        socket().QueueSend(reinterpret_cast<char const*>(stateResponse.data()), stateResponse.size());
+    };
+
+    char const* command2Mode = GetMode2Command2ResponseMode();
+    if (!_mode2Command2Answered && ShouldSendMode2Command2DetailProbe(command2Mode))
+    {
+        _mode2Command2Answered = true;
+
+        if (uint32 detailDelayMs = GetMode2Command2DelayMs())
+        {
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying %s-triggered %s (mode2 command2) %s response by %u ms",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                AuthnetPacketName(2, 2, 1), command2Mode, detailDelayMs);
+            std::this_thread::sleep_for(std::chrono::milliseconds(detailDelayMs));
+        }
+
+        std::vector<uint8> detailResponse = BuildLoginGameAccountDetailProbe();
+        std::vector<uint8> plainDetailResponse = detailResponse;
+        CryptServerPayload(detailResponse);
+
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command2) %s response plain=%s encrypted=%s",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+            AuthnetPacketName(2, 2, 1), command2Mode,
+            ByteArrayToHexStr(plainDetailResponse).c_str(), ByteArrayToHexStr(detailResponse).c_str());
+
+        socket().QueueSend(reinterpret_cast<char const*>(detailResponse.data()), detailResponse.size());
+    }
+
+    if (StringEquals(GetMode2Command6Position(), "after-command2"))
+        sendMode2Command6();
+
+    sendMode2EmptyCommand(3, GetMode2Command3ResponseMode(), GetMode2Command3DelayMs(), _mode2Command3Answered);
+
+    if (StringEquals(GetMode2Command6Position(), "after-command3"))
+        sendMode2Command6();
+
+    char const* command8Mode = GetMode2Command8ResponseMode();
+    if (!_mode2Command8Answered && ShouldSendMode2Command8StructuredProbe(command8Mode))
+    {
+        _mode2Command8Answered = true;
+        char const* command8StatusMode = GetMode2Command8StatusResponseMode();
+
+        auto sendMode2Command8Status = [&](char const* position)
+        {
+            std::vector<uint8> statusResponse = BuildMode2Command8StatusProbe();
+            std::vector<uint8> plainStatusResponse = statusResponse;
+            CryptServerPayload(statusResponse);
+
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command8) status %s response status=%u plain=%s encrypted=%s",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                AuthnetPacketName(2, 8, 1), position,
+                GetEnvUInt32("AUTHNET_MODE2_COMMAND8_STATUS", 0) & 0xFF,
+                ByteArrayToHexStr(plainStatusResponse).c_str(), ByteArrayToHexStr(statusResponse).c_str());
+
+            socket().QueueSend(reinterpret_cast<char const*>(statusResponse.data()), statusResponse.size());
+        };
+
+        if (uint32 command8DelayMs = GetMode2Command8DelayMs())
+        {
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying %s-triggered %s (mode2 command8) %s response by %u ms",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                AuthnetPacketName(2, 8, 1), command8Mode, command8DelayMs);
+            std::this_thread::sleep_for(std::chrono::milliseconds(command8DelayMs));
+        }
+
+        if (ShouldSendMode2Command8StatusBeforeStructured(command8StatusMode))
+            sendMode2Command8Status("before-structured");
+
+        std::vector<uint8> command8Response = BuildMode2Command8StructuredProbe();
+        std::vector<uint8> plainCommand8Response = command8Response;
+        CryptServerPayload(command8Response);
+
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command8) %s response field=%u list6=%u list18=%u plain=%s encrypted=%s",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+            AuthnetPacketName(2, 8, 1), command8Mode,
+            GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+            GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+            GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
+            ByteArrayToHexStr(plainCommand8Response).c_str(), ByteArrayToHexStr(command8Response).c_str());
+
+        socket().QueueSend(reinterpret_cast<char const*>(command8Response.data()), command8Response.size());
+
+        if (ShouldSendMode2Command8StatusAfterStructured(command8StatusMode))
+            sendMode2Command8Status("after-structured");
+
+        uint32 const repeatCount = GetMode2Command8RepeatCount();
+        uint32 const repeatDelayMs = GetMode2Command8RepeatDelayMs();
+        if (repeatCount && ShouldSendMode2Command8RepeatAsync())
+        {
+            std::shared_ptr<RealmSocket> delayedSocket = socket().shared_from_this();
+            std::string remoteAddress = socket().getRemoteAddress();
+            uint16 remotePort = socket().getRemotePort();
+            std::string command8ModeText = command8Mode;
+            std::string triggerText = trigger ? trigger : "unknown";
+
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: scheduling asynchronous %s-triggered %s (mode2 command8) %s repeat count=%u delay_ms=%u",
+                remoteAddress.c_str(), remotePort, triggerText.c_str(), AuthnetPacketName(2, 8, 1),
+                command8ModeText.c_str(), repeatCount, repeatDelayMs);
+
+            std::thread([this, delayedSocket, remoteAddress, remotePort, command8ModeText, triggerText, repeatCount, repeatDelayMs]()
+            {
+                for (uint32 repeatIndex = 0; repeatIndex < repeatCount; ++repeatIndex)
+                {
+                    if (repeatDelayMs)
+                        std::this_thread::sleep_for(std::chrono::milliseconds(repeatDelayMs));
+
+                    std::vector<uint8> repeatCommand8Response = BuildMode2Command8StructuredProbe();
+                    std::vector<uint8> plainRepeatCommand8Response = repeatCommand8Response;
+                    CryptServerPayload(repeatCommand8Response);
+
+                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted asynchronous %s-triggered %s (mode2 command8) %s repeat %u/%u response field=%u list6=%u list18=%u plain=%s encrypted=%s",
+                        remoteAddress.c_str(), remotePort, triggerText.c_str(),
+                        AuthnetPacketName(2, 8, 1), command8ModeText.c_str(), repeatIndex + 1, repeatCount,
+                        GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                        GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                        GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
+                        ByteArrayToHexStr(plainRepeatCommand8Response).c_str(), ByteArrayToHexStr(repeatCommand8Response).c_str());
+
+                    delayedSocket->QueueSend(reinterpret_cast<char const*>(repeatCommand8Response.data()), repeatCommand8Response.size());
+                }
+            }).detach();
+        }
+        else
+        {
+            for (uint32 repeatIndex = 0; repeatIndex < repeatCount; ++repeatIndex)
+            {
+                if (repeatDelayMs)
+                {
+                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying %s-triggered %s (mode2 command8) repeat %u/%u by %u ms",
+                        socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                        AuthnetPacketName(2, 8, 1), repeatIndex + 1, repeatCount, repeatDelayMs);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(repeatDelayMs));
+                }
+
+                std::vector<uint8> repeatCommand8Response = BuildMode2Command8StructuredProbe();
+                std::vector<uint8> plainRepeatCommand8Response = repeatCommand8Response;
+                CryptServerPayload(repeatCommand8Response);
+
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command8) %s repeat %u/%u response field=%u list6=%u list18=%u plain=%s encrypted=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                    AuthnetPacketName(2, 8, 1), command8Mode, repeatIndex + 1, repeatCount,
+                    GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
+                    ByteArrayToHexStr(plainRepeatCommand8Response).c_str(), ByteArrayToHexStr(repeatCommand8Response).c_str());
+
+                socket().QueueSend(reinterpret_cast<char const*>(repeatCommand8Response.data()), repeatCommand8Response.size());
+            }
+        }
+    }
+
+    if (StringEquals(GetMode2Command6Position(), "after-command8"))
+        sendMode2Command6();
+
+    uint32 const postCommand6Count = GetMode2Command8PostCommand6Count();
+    if (!_mode2Command8PostCommand6Scheduled && postCommand6Count &&
+        ShouldSendMode2Command8StructuredProbe(command8Mode))
+    {
+        _mode2Command8PostCommand6Scheduled = true;
+
+        for (uint32 repeatIndex = 0; repeatIndex < postCommand6Count; ++repeatIndex)
+        {
+            std::vector<uint8> plainResponse = BuildMode2Command8StructuredProbe();
+
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: queued delayed %s-triggered %s (mode2 command8) %s post-command6 %u/%u response field=%u list6=%u list18=%u plain=%s",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                AuthnetPacketName(2, 8, 1), command8Mode, repeatIndex + 1, postCommand6Count,
+                GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
+                ByteArrayToHexStr(plainResponse).c_str());
+        }
+
+        uint32 const delayMs = GetMode2Command8PostCommand6DelayMs();
+        uint32 const gapMs = GetMode2Command8PostCommand6GapMs();
+        std::shared_ptr<RealmSocket> delayedSocket = socket().shared_from_this();
+        std::string remoteAddress = socket().getRemoteAddress();
+        uint16 remotePort = socket().getRemotePort();
+        std::string command8ModeText = command8Mode ? command8Mode : "";
+
+        std::thread([this, delayedSocket, postCommand6Count, delayMs, gapMs, remoteAddress,
+            remotePort, command8ModeText]() mutable
+        {
+            if (delayMs)
+                std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+
+            for (uint32 i = 0; i < postCommand6Count; ++i)
+            {
+                std::vector<uint8> response = BuildMode2Command8StructuredProbe();
+                std::vector<uint8> plainResponse = response;
+                CryptServerPayload(response);
+
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending delayed post-command6 %s (mode2 command8) %s response %u/%u delay_ms=%u gap_ms=%u field=%u list6=%u list18=%u plain=%s encrypted=%s",
+                    remoteAddress.c_str(), remotePort, AuthnetPacketName(2, 8, 1),
+                    command8ModeText.c_str(), i + 1, postCommand6Count, delayMs, gapMs,
+                    GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
+                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
+                    ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
+
+                delayedSocket->QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+
+                if (gapMs && i + 1 < postCommand6Count)
+                    std::this_thread::sleep_for(std::chrono::milliseconds(gapMs));
+            }
+        }).detach();
+    }
+
+    sendMode2EmptyCommand(7, GetMode2Command7ResponseMode(), GetMode2Command7DelayMs(), _mode2Command7Answered);
+}
+
+bool AuthnetSocket::TrySendPostLoginMode1Sequence(char const* trigger)
+{
+    char const* postLoginMode1Mode = GetPostLoginMode1ResponseMode();
+    if (_postLoginMode1SequenceSent || IsMode1ProbeDisabled(postLoginMode1Mode))
+        return false;
+
+    _postLoginMode1SequenceSent = true;
+
+    uint16 status = uint16(GetEnvUInt32("AUTHNET_POST_LOGIN_MODE1_STATUS", GetMode1Command6Status()) & 0xFFFF);
+    uint32 field0 = GetEnvUInt32("AUTHNET_POST_LOGIN_MODE1_FIELD0", GetEnvUInt32("AUTHNET_MODE1_COMMAND6_FIELD0", 0));
+    uint32 field1 = GetEnvUInt32("AUTHNET_POST_LOGIN_MODE1_FIELD1", GetEnvUInt32("AUTHNET_MODE1_COMMAND6_FIELD1", 0));
+    uint32 value = GetEnvUInt32("AUTHNET_POST_LOGIN_MODE1_VALUE", GetEnvUInt32("AUTHNET_MODE1_COMMAND6_VALUE", status));
+    uint32 delayMs = GetEnvUInt32("AUTHNET_POST_LOGIN_MODE1_DELAY_MS", 0);
+    uint32 gapMs = GetEnvUInt32("AUTHNET_POST_LOGIN_MODE1_GAP_MS", 0);
+    std::vector<std::vector<uint8>> responses;
+    std::vector<std::string> responseLabels;
+
+    BuildMode1ProbeResponses(postLoginMode1Mode, status, field0, field1, value, responses, responseLabels);
+
+    if (delayMs || gapMs)
+    {
+        std::shared_ptr<RealmSocket> delayedSocket = socket().shared_from_this();
+        std::string remoteAddress = socket().getRemoteAddress();
+        uint16 remotePort = socket().getRemotePort();
+        std::string postLoginMode1ModeText = postLoginMode1Mode ? postLoginMode1Mode : "";
+
+        for (size_t i = 0; i < responses.size(); ++i)
+        {
+            ProbePacketHeader responseHeader = DecodeProbePacketHeader(responses[i]);
+
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: queued encrypted %s-triggered post-login %s %s response %u/%u mode=%s delay_ms=%u gap_ms=%u status=%u field0=%u field1=%u value=%u plain=%s",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                responseHeader.decoded ? AuthnetPacketName(responseHeader) : "UndecodedMode1Probe",
+                responseLabels[i].c_str(), uint32(i + 1), uint32(responses.size()),
+                postLoginMode1Mode, delayMs, gapMs, status, field0, field1, value,
+                ByteArrayToHexStr(responses[i]).c_str());
+        }
+
+        std::thread([this, delayedSocket, responses = std::move(responses),
+            responseLabels = std::move(responseLabels), delayMs, gapMs, remoteAddress, remotePort,
+            trigger, postLoginMode1ModeText, status, field0, field1, value]() mutable
+        {
+            if (delayMs)
+                std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+
+            for (size_t i = 0; i < responses.size(); ++i)
+            {
+                std::vector<uint8> response = responses[i];
+                std::vector<uint8> plainResponse = response;
+                ProbePacketHeader responseHeader = DecodeProbePacketHeader(plainResponse);
+                CryptServerPayload(response);
+
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending delayed encrypted %s-triggered post-login %s %s response %u/%u mode=%s delay_ms=%u gap_ms=%u status=%u field0=%u field1=%u value=%u plain=%s encrypted=%s",
+                    remoteAddress.c_str(), remotePort, trigger,
+                    responseHeader.decoded ? AuthnetPacketName(responseHeader) : "UndecodedMode1Probe",
+                    responseLabels[i].c_str(), uint32(i + 1), uint32(responses.size()),
+                    postLoginMode1ModeText.c_str(), delayMs, gapMs, status, field0, field1, value,
+                    ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
+
+                delayedSocket->QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+
+                if (gapMs && i + 1 < responses.size())
+                    std::this_thread::sleep_for(std::chrono::milliseconds(gapMs));
+            }
+        }).detach();
+    }
+    else
+    {
+        for (size_t i = 0; i < responses.size(); ++i)
+        {
+            std::vector<uint8> response = responses[i];
+            std::vector<uint8> plainResponse = response;
+            ProbePacketHeader responseHeader = DecodeProbePacketHeader(plainResponse);
+            CryptServerPayload(response);
+
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered post-login %s %s response %u/%u mode=%s delay_ms=%u gap_ms=%u status=%u field0=%u field1=%u value=%u plain=%s encrypted=%s",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                responseHeader.decoded ? AuthnetPacketName(responseHeader) : "UndecodedMode1Probe",
+                responseLabels[i].c_str(), uint32(i + 1), uint32(responses.size()),
+                postLoginMode1Mode, delayMs, gapMs, status, field0, field1, value,
+                ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
+
+            socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+        }
+    }
+
+    return true;
 }
 
 void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
@@ -1364,6 +2389,15 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
                     lookup.payloadFirst, lookup.payloadSecond, lookup.payloadWord, lookup.remainingBits,
                     lookup.packetLength, lookup.bitLength);
 
+                char const* resourceResultMode = GetResourceResultMode();
+                if (IsResourceResultModeDisabled(resourceResultMode))
+                {
+                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: localized resource result id=%u disabled by AUTHNET_RESOURCE_RESULT_MODE=%s",
+                        socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                        lookup.requestId, resourceResultMode);
+                    continue;
+                }
+
                 std::vector<uint8> resourceKey;
                 uint32 resourceItemId = 0;
                 std::string resourceResultReason;
@@ -1385,6 +2419,15 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
             {
                 SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: decoded post-success request id=%u",
                     socket().getRemoteAddress().c_str(), socket().getRemotePort(), requestId);
+
+                char const* resourceResultMode = GetResourceResultMode();
+                if (IsResourceResultModeDisabled(resourceResultMode))
+                {
+                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success request id=%u result disabled by AUTHNET_RESOURCE_RESULT_MODE=%s",
+                        socket().getRemoteAddress().c_str(), socket().getRemotePort(), requestId, resourceResultMode);
+                    continue;
+                }
+
                 SendEncryptedRequestResult(requestId);
             }
         }
@@ -1395,15 +2438,17 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
     ProbePacketHeader header = DecodeProbePacketHeader(plain);
     if (header.decoded)
     {
-        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: decrypted post-success header command=%u mode_switch=%u mode=%u header_bits=%zu",
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: decrypted post-success header name=%s command=%u mode_switch=%u mode=%u header_bits=%zu",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+            AuthnetPacketName(header),
             header.command, header.modeSwitch, header.mode, header.bitPosition);
 
         ServiceRequestInfo serviceRequest;
         if (TryDecodeServiceRequest(plain, serviceRequest))
         {
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: service request id=%u records=%zu selector=%u label_len=%zu nested_header=%s packet_len=%zu bits=%zu",
-                socket().getRemoteAddress().c_str(), socket().getRemotePort(), serviceRequest.requestId,
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: service request name=%s id=%u records=%zu selector=%u label_len=%zu nested_header=%s packet_len=%zu bits=%zu",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                AuthnetPacketName(serviceRequest.header), serviceRequest.requestId,
                 serviceRequest.records.size(), serviceRequest.selector, serviceRequest.label.size(),
                 serviceRequest.hasNestedHeader ? "yes" : "no", serviceRequest.packetLength,
                 serviceRequest.bitLength);
@@ -1423,9 +2468,72 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
             _answeredRequestIds.push_back(serviceRequest.requestId);
 
             ServiceResultProbeInfo resultProbe;
-            std::vector<uint8> response = BuildServiceResultPayload(serviceRequest, &resultProbe);
-            std::vector<uint8> plainResponse = response;
-            CryptServerPayload(response);
+            std::vector<uint8> servicePayloadProbe = BuildServicePayloadProbe(serviceRequest, &resultProbe);
+            std::vector<uint8> lookupBody = BuildServiceLookupResultBody(serviceRequest, servicePayloadProbe);
+            std::vector<std::vector<uint8>> responses;
+            std::vector<std::string> responseLabels;
+            char const* serviceResponseMode = GetServiceResponseMode();
+
+            auto addResponse = [&responses, &responseLabels](char const* label, std::vector<uint8> response)
+            {
+                responses.push_back(std::move(response));
+                responseLabels.push_back(label);
+            };
+
+            if (StringEquals(serviceResponseMode, "lookup-result") || StringEquals(serviceResponseMode, "lookup") ||
+                StringEquals(serviceResponseMode, "command4") || StringEquals(serviceResponseMode, "c4"))
+            {
+                addResponse("lookup-result", BuildServiceLookupResultPayload(serviceRequest.requestId, lookupBody));
+            }
+            else if (StringEquals(serviceResponseMode, "complete") || StringEquals(serviceResponseMode, "complete-result") ||
+                StringEquals(serviceResponseMode, "command10") || StringEquals(serviceResponseMode, "c10"))
+            {
+                addResponse("complete-result", BuildServiceCompletePayload(serviceRequest.requestId, servicePayloadProbe));
+            }
+            else if (StringEquals(serviceResponseMode, "lookup-method") || StringEquals(serviceResponseMode, "command4-command3") ||
+                StringEquals(serviceResponseMode, "c4-c3"))
+            {
+                addResponse("lookup-result", BuildServiceLookupResultPayload(serviceRequest.requestId, lookupBody));
+                addResponse("method-result", BuildServiceResultPayload(serviceRequest.requestId, servicePayloadProbe, resultProbe.field80));
+            }
+            else if (StringEquals(serviceResponseMode, "lookup-complete") || StringEquals(serviceResponseMode, "command4-command10") ||
+                StringEquals(serviceResponseMode, "c4-c10"))
+            {
+                addResponse("lookup-result", BuildServiceLookupResultPayload(serviceRequest.requestId, lookupBody));
+                addResponse("complete-result", BuildServiceCompletePayload(serviceRequest.requestId, servicePayloadProbe));
+            }
+            else if (StringEquals(serviceResponseMode, "method-complete") || StringEquals(serviceResponseMode, "command3-command10") ||
+                StringEquals(serviceResponseMode, "c3-c10"))
+            {
+                addResponse("method-result", BuildServiceResultPayload(serviceRequest.requestId, servicePayloadProbe, resultProbe.field80));
+                addResponse("complete-result", BuildServiceCompletePayload(serviceRequest.requestId, servicePayloadProbe));
+            }
+            else if (StringEquals(serviceResponseMode, "lookup-method-complete") ||
+                StringEquals(serviceResponseMode, "command4-command3-command10") ||
+                StringEquals(serviceResponseMode, "c4-c3-c10"))
+            {
+                addResponse("lookup-result", BuildServiceLookupResultPayload(serviceRequest.requestId, lookupBody));
+                addResponse("method-result", BuildServiceResultPayload(serviceRequest.requestId, servicePayloadProbe, resultProbe.field80));
+                addResponse("complete-result", BuildServiceCompletePayload(serviceRequest.requestId, servicePayloadProbe));
+            }
+            else if (StringEquals(serviceResponseMode, "method-lookup-complete") ||
+                StringEquals(serviceResponseMode, "command3-command4-command10") ||
+                StringEquals(serviceResponseMode, "c3-c4-c10"))
+            {
+                addResponse("method-result", BuildServiceResultPayload(serviceRequest.requestId, servicePayloadProbe, resultProbe.field80));
+                addResponse("lookup-result", BuildServiceLookupResultPayload(serviceRequest.requestId, lookupBody));
+                addResponse("complete-result", BuildServiceCompletePayload(serviceRequest.requestId, servicePayloadProbe));
+            }
+            else if (StringEquals(serviceResponseMode, "method-lookup") || StringEquals(serviceResponseMode, "command3-command4") ||
+                StringEquals(serviceResponseMode, "c3-c4"))
+            {
+                addResponse("method-result", BuildServiceResultPayload(serviceRequest.requestId, servicePayloadProbe, resultProbe.field80));
+                addResponse("lookup-result", BuildServiceLookupResultPayload(serviceRequest.requestId, lookupBody));
+            }
+            else if (!IsServiceResponseModeDisabled(serviceResponseMode))
+            {
+                addResponse("method-result", BuildServiceResultPayload(serviceRequest.requestId, servicePayloadProbe, resultProbe.field80));
+            }
 
             SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: service result source id=%u found=%s record_index=%u/%zu record_mode=%s key_mode=%s key=%s blob_mode=%s blob=%s field80_mode=%s field80=%u source=%s/%s minor=%u major=%u build=%u",
                 socket().getRemoteAddress().c_str(), socket().getRemotePort(), serviceRequest.requestId,
@@ -1436,11 +2544,23 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
                 resultProbe.program.c_str(), resultProbe.component.c_str(), resultProbe.minor,
                 resultProbe.major, resultProbe.build);
 
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted service result payload id=%u plain=%s encrypted=%s",
-                socket().getRemoteAddress().c_str(), socket().getRemotePort(), serviceRequest.requestId,
-                ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: service response mode=%s lookup_body=%s response_count=%zu",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), serviceResponseMode,
+                ByteArrayToHexStr(lookupBody).c_str(), responses.size());
 
-            socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+            for (size_t i = 0; i < responses.size(); ++i)
+            {
+                std::vector<uint8> plainResponse = responses[i];
+                std::vector<uint8> response = responses[i];
+                CryptServerPayload(response);
+
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted service %s payload %zu/%zu id=%u plain=%s encrypted=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), responseLabels[i].c_str(), i + 1,
+                    responses.size(), serviceRequest.requestId, ByteArrayToHexStr(plainResponse).c_str(),
+                    ByteArrayToHexStr(response).c_str());
+
+                socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+            }
             return;
         }
 
@@ -1453,95 +2573,41 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
             std::vector<uint8> plainResponse = response;
             CryptServerPayload(response);
 
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted empty mode1 command0 response plain=%s encrypted=%s",
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s (mode1 command0) response plain=%s encrypted=%s",
                 socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                AuthnetPacketName(1, 0, 1),
                 ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
 
             socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+
+            if (StringEnabled(std::getenv("AUTHNET_SEND_MODE1_SEQUENCE_ON_COMMAND0")))
+                TrySendPostLoginMode1Sequence("mode1 command0");
         }
 
         if (plain.size() == ClientModeSwitchRequestLen &&
             header.command == 0 && header.modeSwitch && header.mode == 2)
         {
-            char const* responseMode = nullptr;
-            uint32 status = GetMode2Command0Status();
-            std::vector<uint8> response = BuildLoginAuthProbe(status, responseMode);
-
-            if (response.empty())
-            {
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: mode2 command0 response disabled by AUTHNET_MODE2_COMMAND0_RESPONSE=%s",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), responseMode);
+            if (!TrySendMode2Command0Probe("mode2 command0", true))
                 return;
-            }
 
-            if (uint32 delayMs = GetMode2Command0DelayMs())
+            if (!_postLoginServiceResultSent && ShouldSendPostLoginServiceResult())
             {
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying mode2 command0 %s response by %u ms",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), responseMode, delayMs);
-                std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
-            }
+                _postLoginServiceResultSent = true;
 
-            _mode2LoginAnswered = true;
+                uint32 requestId = GetEnvUInt32("AUTHNET_POST_LOGIN_SERVICE_RESULT_ID", 1);
+                uint32 field80 = GetEnvUInt32("AUTHNET_POST_LOGIN_SERVICE_RESULT_FIELD80", 0);
+                std::vector<uint8> servicePayload = GetPostLoginServiceResultPayload();
+                std::vector<uint8> serviceResultResponse = BuildServiceResultPayload(requestId, servicePayload, field80);
+                std::vector<uint8> plainServiceResultResponse = serviceResultResponse;
+                CryptServerPayload(serviceResultResponse);
 
-            std::vector<uint8> plainResponse = response;
-            CryptServerPayload(response);
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted post-login %s (mode11 command3) id=%u field80=%u service_payload=%s plain=%s encrypted=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(11, 3, 1), requestId, field80,
+                    ByteArrayToHexStr(servicePayload).c_str(),
+                    ByteArrayToHexStr(plainServiceResultResponse).c_str(), ByteArrayToHexStr(serviceResultResponse).c_str());
 
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted mode2 command0 %s response status=%u plain=%s encrypted=%s",
-                socket().getRemoteAddress().c_str(), socket().getRemotePort(),
-                responseMode, status,
-                ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
-
-            socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
-
-            char const* command2Mode = GetMode2Command2ResponseMode();
-            if (!_mode2Command2Answered && ShouldSendMode2Command2DetailProbe(command2Mode))
-            {
-                _mode2Command2Answered = true;
-
-                if (uint32 detailDelayMs = GetMode2Command2DelayMs())
-                {
-                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying mode2 command2 %s response by %u ms",
-                        socket().getRemoteAddress().c_str(), socket().getRemotePort(), command2Mode,
-                        detailDelayMs);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(detailDelayMs));
-                }
-
-                std::vector<uint8> detailResponse = BuildLoginGameAccountDetailProbe();
-                std::vector<uint8> plainDetailResponse = detailResponse;
-                CryptServerPayload(detailResponse);
-
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted mode2 command2 %s response plain=%s encrypted=%s",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), command2Mode,
-                    ByteArrayToHexStr(plainDetailResponse).c_str(), ByteArrayToHexStr(detailResponse).c_str());
-
-                socket().QueueSend(reinterpret_cast<char const*>(detailResponse.data()), detailResponse.size());
-            }
-
-            char const* command8Mode = GetMode2Command8ResponseMode();
-            if (!_mode2Command8Answered && ShouldSendMode2Command8StructuredProbe(command8Mode))
-            {
-                _mode2Command8Answered = true;
-
-                if (uint32 command8DelayMs = GetMode2Command8DelayMs())
-                {
-                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: delaying mode2 command8 %s response by %u ms",
-                        socket().getRemoteAddress().c_str(), socket().getRemotePort(), command8Mode,
-                        command8DelayMs);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(command8DelayMs));
-                }
-
-                std::vector<uint8> command8Response = BuildMode2Command8StructuredProbe();
-                std::vector<uint8> plainCommand8Response = command8Response;
-                CryptServerPayload(command8Response);
-
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted mode2 command8 %s response field=%u list6=%u list18=%u plain=%s encrypted=%s",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), command8Mode,
-                    GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
-                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"),
-                    GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
-                    ByteArrayToHexStr(plainCommand8Response).c_str(), ByteArrayToHexStr(command8Response).c_str());
-
-                socket().QueueSend(reinterpret_cast<char const*>(command8Response.data()), command8Response.size());
+                socket().QueueSend(reinterpret_cast<char const*>(serviceResultResponse.data()), serviceResultResponse.size());
             }
 
             uint16 postLoginStatus = 0;
@@ -1553,12 +2619,16 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
                 std::vector<uint8> plainStatusResponse = statusResponse;
                 CryptServerPayload(statusResponse);
 
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted post-login mode1 command1 status=%u plain=%s encrypted=%s",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), postLoginStatus,
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted post-login %s (mode1 command1) status=%u plain=%s encrypted=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(1, 1, 1), postLoginStatus,
                     ByteArrayToHexStr(plainStatusResponse).c_str(), ByteArrayToHexStr(statusResponse).c_str());
 
                 socket().QueueSend(reinterpret_cast<char const*>(statusResponse.data()), statusResponse.size());
             }
+
+            if (ShouldSendMode1SequenceOnMode2Command0())
+                TrySendPostLoginMode1Sequence("mode2 command0");
         }
 
         if (plain.size() == ClientModeSwitchRequestLen &&
@@ -1567,34 +2637,38 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
             _mode1Command6Answered = true;
 
             char const* responseMode = GetMode1Command6ResponseMode();
-            if (StringEquals(responseMode, "none") || StringEquals(responseMode, "skip") || StringEquals(responseMode, "off"))
+            if (IsMode1ProbeDisabled(responseMode))
             {
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: mode1 command6 realmlist request observed; response disabled by AUTHNET_MODE1_COMMAND6_RESPONSE=%s",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), responseMode);
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: %s (mode1 command6) observed; response disabled by AUTHNET_MODE1_COMMAND6_RESPONSE=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(1, 6, 1), responseMode);
                 return;
             }
 
             uint16 status = GetMode1Command6Status();
-            std::vector<uint8> response;
-            if (StringEquals(responseMode, "empty"))
+            uint32 field0 = GetEnvUInt32("AUTHNET_MODE1_COMMAND6_FIELD0", 0);
+            uint32 field1 = GetEnvUInt32("AUTHNET_MODE1_COMMAND6_FIELD1", 0);
+            uint32 value = GetEnvUInt32("AUTHNET_MODE1_COMMAND6_VALUE", status);
+            std::vector<std::vector<uint8>> responses;
+            std::vector<std::string> responseLabels;
+
+            BuildMode1ProbeResponses(responseMode, status, field0, field1, value, responses, responseLabels);
+
+            for (size_t i = 0; i < responses.size(); ++i)
             {
-                response = BuildEmptyModeCommand(6, 1);
+                std::vector<uint8> response = responses[i];
+                std::vector<uint8> plainResponse = response;
+                CryptServerPayload(response);
+
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s (mode1 command6) %s response %u/%u status=%u field0=%u field1=%u value=%u plain=%s encrypted=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(1, 6, 1), responseLabels[i].c_str(),
+                    uint32(i + 1), uint32(responses.size()),
+                    status, field0, field1, value,
+                    ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
+
+                socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
             }
-            else
-            {
-                responseMode = "status";
-                response = BuildMode1Command1Status(status);
-            }
-
-            std::vector<uint8> plainResponse = response;
-            CryptServerPayload(response);
-
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted mode1 command6 %s response status=%u plain=%s encrypted=%s",
-                socket().getRemoteAddress().c_str(), socket().getRemotePort(),
-                responseMode, status,
-                ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
-
-            socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
         }
     }
 }
@@ -1697,8 +2771,9 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
 
         if (header.decoded)
         {
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: client mode switch header command=%u mode_switch=%u mode=%u header_bits=%zu",
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: client mode switch header name=%s command=%u mode_switch=%u mode=%u header_bits=%zu",
                 socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                AuthnetPacketName(header),
                 header.command, header.modeSwitch, header.mode, header.bitPosition);
         }
 
@@ -1708,6 +2783,18 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
 
             SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: client mode switch detected, waiting for encrypted follow-up",
                 socket().getRemoteAddress().c_str(), socket().getRemotePort());
+
+            if (ShouldSendMode1SequenceOnModeSwitch("before-mode2"))
+                TrySendPostLoginMode1Sequence("mode-switch-before-mode2");
+
+            if (StringEnabled(std::getenv("AUTHNET_SEND_MODE2_ON_MODE_SWITCH")))
+            {
+                bool const sendFollowups = StringEnabled(GetEnvOrDefault("AUTHNET_SEND_MODE2_ON_MODE_SWITCH_FOLLOWUPS", "1"));
+                TrySendMode2Command0Probe("mode-switch", sendFollowups);
+            }
+
+            if (ShouldSendMode1SequenceOnModeSwitch("after-mode2"))
+                TrySendPostLoginMode1Sequence("mode-switch-after-mode2");
         }
     }
 
@@ -1738,46 +2825,13 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
 
             if (!ShouldSendBurstMode2Response())
             {
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success lookup burst reached %zu byte(s), burst mode2 response disabled",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), encryptedFollowupBytes);
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success lookup burst reached %zu byte(s), burst %s (mode2 command0) response disabled",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), encryptedFollowupBytes,
+                    AuthnetPacketName(2, 0, 1));
                 return;
             }
 
-            char const* responseMode = nullptr;
-            uint32 status = GetMode2Command0Status();
-            std::vector<uint8> response = BuildLoginAuthProbe(status, responseMode);
-
-            if (response.empty())
-            {
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success lookup burst reached %zu byte(s), mode2 command0 response disabled by AUTHNET_MODE2_COMMAND0_RESPONSE=%s",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), encryptedFollowupBytes,
-                    responseMode);
-                return;
-            }
-
-            if (uint32 delayMs = GetMode2Command0DelayMs())
-            {
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success lookup burst reached %zu byte(s), delaying mode2 command0 %s response by %u ms",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), encryptedFollowupBytes,
-                    responseMode, delayMs);
-                std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
-            }
-
-            ProbePacketHeader header = DecodeProbePacketHeader(response);
-
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success lookup burst reached %zu byte(s), sending %zu-byte mode2 command0 %s candidate: %s, header_ok=%s command=%u mode_switch=%u mode=%u",
-                socket().getRemoteAddress().c_str(), socket().getRemotePort(), encryptedFollowupBytes,
-                response.size(), responseMode, ByteArrayToHexStr(response).c_str(), header.decoded ? "yes" : "no",
-                header.command, header.modeSwitch, header.mode);
-
-            std::vector<uint8> plainResponse = response;
-            CryptServerPayload(response);
-
-            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted burst-complete mode2 command0 %s response status=%u plain=%s encrypted=%s",
-                socket().getRemoteAddress().c_str(), socket().getRemotePort(),
-                responseMode, status, ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());
-
-            socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
+            TrySendMode2Command0Probe("burst-complete", StringEnabled(std::getenv("AUTHNET_SEND_BURST_MODE2_FOLLOWUPS")));
         }
     }
 

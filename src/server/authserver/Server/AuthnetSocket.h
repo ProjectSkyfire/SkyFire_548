@@ -8,6 +8,7 @@
 
 #include "Common.h"
 #include "RealmSocket.h"
+#include <mutex>
 
 class AuthnetSocket : public RealmSocket::Session
 {
@@ -27,6 +28,9 @@ private:
     bool DecodeInitialRequest(void);
     void ProcessEncryptedClientBytes(size_t encryptedFollowupOffset);
     void SendEncryptedRequestResult(uint32 requestId, std::vector<uint8> const* resourceKey = nullptr, uint32 resourceItemId = 0);
+    bool TrySendMode2Command0Probe(char const* trigger, bool sendFollowups);
+    void SendMode2LoginFollowups(char const* trigger);
+    bool TrySendPostLoginMode1Sequence(char const* trigger);
     void CryptClientPayload(std::vector<uint8>& payload);
     void CryptServerPayload(std::vector<uint8>& payload);
 
@@ -41,6 +45,7 @@ private:
     uint8 _serverCryptI;
     uint8 _serverCryptJ;
     bool _serverCryptInitialized;
+    std::mutex _serverCryptMutex;
     std::vector<uint32> _answeredRequestIds;
     bool _responded;
     bool _httpResponded;
@@ -50,8 +55,14 @@ private:
     bool _mode1ConnectAnswered;
     bool _mode2LoginAnswered;
     bool _mode2Command2Answered;
+    bool _mode2Command3Answered;
+    bool _mode2Command6Answered;
+    bool _mode2Command7Answered;
     bool _mode2Command8Answered;
+    bool _mode2Command8PostCommand6Scheduled;
+    bool _postLoginServiceResultSent;
     bool _postLoginStatusSent;
+    bool _postLoginMode1SequenceSent;
     bool _mode1Command6Answered;
 };
 
