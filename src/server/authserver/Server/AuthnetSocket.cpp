@@ -38,6 +38,7 @@ namespace
     constexpr size_t ResourceLookupBurstCount = 19;
     constexpr size_t AuthnetSecretBytes = 64;
     constexpr uint32 AuthnetDefaultWorldSessionTtlSeconds = 300;
+    constexpr uint32 MaxAuthnetRealmRoutes = 16;
     char constexpr PatchHttpResponseBody[] =
         "<patch><record program=\"WoW\" component=\"enUS\">"
         "http://127.0.0.1:1119/manifest;unused;internal;18414"
@@ -851,13 +852,16 @@ namespace
         return writer.Data();
     }
 
+    uint32 GetAuthnetDefaultRealmField();
+    std::vector<uint8> BuildLoginAuthRealmListProbe();
+
     std::vector<uint8> BuildLoginAuthSingleListProbe()
     {
         Skyfire::Authnet::BitWriter writer;
 
         uint32 const byte0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE0", 0) & 0xFF;
         uint32 const byte1 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE1", 0) & 0xFF;
-        uint32 const value32 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_VALUE32", 1);
+        uint32 const value32 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_VALUE32", GetAuthnetDefaultRealmField());
         uint32 const word16 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_WORD16", 0) & 0xFFFF;
 
         writer.WriteBits(0x00, 6);
@@ -886,6 +890,9 @@ namespace
 
         if (StringEquals(responseMode, "single-list"))
             return BuildLoginAuthSingleListProbe();
+
+        if (StringEquals(responseMode, "realm-list") || StringEquals(responseMode, "realms") || StringEquals(responseMode, "multi-list"))
+            return BuildLoginAuthRealmListProbe();
 
         responseMode = "status";
         return BuildLoginAuthStatusProbe(status);
@@ -920,7 +927,15 @@ namespace
     bool ShouldSendMode2Command2DetailProbe(char const* mode)
     {
         return StringEquals(mode, "detail") || StringEquals(mode, "full") ||
+            StringEquals(mode, "realms") || StringEquals(mode, "realm-list") ||
+            StringEquals(mode, "realm-details") || StringEquals(mode, "multi-list") ||
             StringEquals(mode, "1") || StringEquals(mode, "true") || StringEquals(mode, "yes");
+    }
+
+    bool ShouldSendMode2Command2RealmDetails(char const* mode)
+    {
+        return StringEquals(mode, "realms") || StringEquals(mode, "realm-list") ||
+            StringEquals(mode, "realm-details") || StringEquals(mode, "multi-list");
     }
 
     uint32 GetMode2Command2DelayMs()
@@ -1055,18 +1070,7 @@ namespace
 
     uint32 GetMode2Command8ListCount(char const* name)
     {
-        return std::min<uint32>(GetEnvUInt32(name, 0), 16);
-    }
-
-    uint32 GetMode2Command8List6Count()
-    {
-        if (HasEnvValue("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"))
-            return GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT");
-
-        if (StringEquals(GetMode2Command8ResponseMode(), "empty-structured"))
-            return 0;
-
-        return 1;
+        return std::min<uint32>(GetEnvUInt32(name, 0), MaxAuthnetRealmRoutes);
     }
 
     bool TryParseIPv4AddressBytes(std::string const& address, std::array<uint8, 4>& bytes)
@@ -1097,25 +1101,116 @@ namespace
         return offset == address.size();
     }
 
-    std::vector<uint8> BuildMode2Command8DefaultRouteList(uint32 entryCount)
+    struct AuthnetRealmRoute
+    {
+        uint32 realmId = 0;
+        std::string name;
+        std::string host = "127.0.0.1";
+        std::array<uint8, 4> address = {{ 127, 0, 0, 1 }};
+        uint16 port = 8085;
+        uint32 category = 1;
+    };
+
+    std::vector<AuthnetRealmRoute> BuildAuthnetRealmRoutes()
+    {
+        std::vector<AuthnetRealmRoute> routes;
+        sRealmList->UpdateIfNeed();
+        routes.reserve(std::min<size_t>(sRealmList->size(), MaxAuthnetRealmRoutes));
+
+        for (RealmList::RealmMap::const_iterator itr = sRealmList->begin(); itr != sRealmList->end(); ++itr)
+        {
+            if (routes.size() >= MaxAuthnetRealmRoutes)
+                break;
+
+            Realm const& realm = itr->second;
+            AuthnetRealmRoute route;
+            route.realmId = realm.m_ID;
+            route.name = realm.name;
+            route.host = realm.ExternalAddress.GetHost();
+            route.port = uint16(realm.ExternalAddress.GetPort() & 0xFFFF);
+            route.category = GetAuthnetRealmCategory(&realm);
+            TryParseIPv4AddressBytes(route.host, route.address);
+            routes.push_back(route);
+        }
+
+        return routes;
+    }
+
+    uint32 GetAuthnetDefaultRealmField(std::vector<AuthnetRealmRoute> const& routes)
+    {
+        if (HasEnvValue("AUTHNET_MODE2_COMMAND8_FIELD"))
+            return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0);
+
+        std::string const preferredName = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME", "");
+        if (!preferredName.empty())
+        {
+            if (Realm const* realm = FindAuthnetRealm(preferredName))
+                return realm->m_ID;
+        }
+
+        if (!routes.empty())
+            return routes.front().realmId;
+
+        return 0;
+    }
+
+    uint32 GetAuthnetDefaultRealmField()
+    {
+        return GetAuthnetDefaultRealmField(BuildAuthnetRealmRoutes());
+    }
+
+    std::string FindAuthnetRealmNameById(uint32 realmId)
+    {
+        sRealmList->UpdateIfNeed();
+        for (RealmList::RealmMap::const_iterator itr = sRealmList->begin(); itr != sRealmList->end(); ++itr)
+            if (itr->second.m_ID == realmId)
+                return itr->second.name;
+
+        return {};
+    }
+
+    uint32 GetMode2Command8List6Count(std::vector<AuthnetRealmRoute> const& routes)
+    {
+        if (HasEnvValue("AUTHNET_MODE2_COMMAND8_LIST6_COUNT"))
+            return GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST6_COUNT");
+
+        if (StringEquals(GetMode2Command8ResponseMode(), "empty-structured"))
+            return 0;
+
+        if (!routes.empty())
+            return std::min<uint32>(uint32(routes.size()), MaxAuthnetRealmRoutes);
+
+        return 1;
+    }
+
+    uint32 GetMode2Command8List6Count()
+    {
+        return GetMode2Command8List6Count(BuildAuthnetRealmRoutes());
+    }
+
+    std::vector<uint8> BuildMode2Command8DefaultRouteList(uint32 entryCount, std::vector<AuthnetRealmRoute> const& routes)
     {
         std::vector<uint8> bytes(6 * entryCount, 0);
         if (!entryCount)
             return bytes;
 
-        Realm const* realm = FindAuthnetRealm(GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME", ""));
-        std::string defaultAddress = realm ? realm->ExternalAddress.GetHost() : "127.0.0.1";
-        uint32 const defaultPort = realm ? realm->ExternalAddress.GetPort() : 8085;
-
-        std::array<uint8, 4> address = { 127, 0, 0, 1 };
-        TryParseIPv4AddressBytes(GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND8_ROUTE_ADDRESS",
-            GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", defaultAddress)), address);
-
-        uint32 const port = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_ROUTE_PORT",
-            GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", defaultPort)) & 0xFFFF;
+        std::array<uint8, 4> overrideAddress = {{ 127, 0, 0, 1 }};
+        std::string const configuredAddress = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND8_ROUTE_ADDRESS",
+            GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", ""));
+        bool const useOverrideAddress = !configuredAddress.empty() && TryParseIPv4AddressBytes(configuredAddress, overrideAddress);
+        bool const useOverridePort = HasEnvValue("AUTHNET_MODE2_COMMAND8_ROUTE_PORT") || HasEnvValue("AUTHNET_MODE2_COMMAND2_PORT");
+        uint16 const overridePort = uint16(GetEnvUInt32("AUTHNET_MODE2_COMMAND8_ROUTE_PORT",
+            GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", 8085)) & 0xFFFF);
 
         for (uint32 index = 0; index < entryCount; ++index)
         {
+            AuthnetRealmRoute const* route = nullptr;
+            if (!routes.empty())
+                route = &routes[std::min<size_t>(index, routes.size() - 1)];
+
+            std::array<uint8, 4> const& address = useOverrideAddress ? overrideAddress : (route ? route->address : overrideAddress);
+            uint16 const port = useOverridePort ? overridePort : (route ? route->port : uint16(8085));
+
             size_t const offset = size_t(index) * 6;
             bytes[offset] = address[0];
             bytes[offset + 1] = address[1];
@@ -1128,6 +1223,36 @@ namespace
         return bytes;
     }
 
+    std::vector<uint8> BuildLoginAuthRealmListProbe()
+    {
+        Skyfire::Authnet::BitWriter writer;
+        std::vector<AuthnetRealmRoute> const routes = BuildAuthnetRealmRoutes();
+
+        uint32 const byte0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE0", 0) & 0xFF;
+        uint32 const byte1 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE1", 0) & 0xFF;
+        uint32 const word16 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_WORD16", 0) & 0xFFFF;
+        uint32 const entryCount = routes.empty() ? 1 : std::min<uint32>(uint32(routes.size()), MaxAuthnetRealmRoutes);
+
+        writer.WriteBits(0x00, 6);
+        writer.WriteBits(1, 1);
+        writer.WriteBits(0x02, 4);
+        writer.WriteBits(0, 1);
+        writer.WriteBits(entryCount, 7);
+
+        for (uint32 index = 0; index < entryCount; ++index)
+        {
+            uint32 const value32 = routes.empty() ? GetAuthnetDefaultRealmField(routes) : routes[index].realmId;
+            writer.WriteBits(byte0, 8);
+            writer.WriteBits(0, 12);
+            writer.WriteBits(byte1, 8);
+            writer.WriteUInt32(value32);
+            writer.WriteBits(word16, 16);
+        }
+
+        writer.AlignToByte();
+        return writer.Data();
+    }
+
     std::vector<uint8> GetConfiguredListBytes(char const* name, size_t entrySize, uint32 entryCount)
     {
         std::vector<uint8> bytes(entrySize * entryCount, 0);
@@ -1138,16 +1263,21 @@ namespace
         return bytes;
     }
 
-    std::vector<uint8> BuildLoginGameAccountDetailProbe()
+    std::vector<uint8> BuildLoginGameAccountDetailProbe(AuthnetRealmRoute const* route = nullptr)
     {
         Skyfire::Authnet::BitWriter writer;
 
+        std::vector<AuthnetRealmRoute> fallbackRoutes;
+        if (!route)
+            fallbackRoutes = BuildAuthnetRealmRoutes();
+
+        uint32 const defaultRealmField = route ? route->realmId : GetAuthnetDefaultRealmField(fallbackRoutes);
         uint32 const keyByte0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_KEY_BYTE0",
             GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE0", 0)) & 0xFF;
         uint32 const keyByte1 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_KEY_BYTE1",
             GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE1", 0)) & 0xFF;
         uint32 const keyValue32 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_KEY_VALUE32",
-            GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_VALUE32", 1));
+            GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_VALUE32", defaultRealmField));
         uint32 const field420 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD420", 0) & 0xFF;
         uint32 const field424 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD424", 0);
         uint32 const finalByte = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FINAL_BYTE", 0) & 0xFF;
@@ -1156,21 +1286,21 @@ namespace
         uint32 const endpointField454 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD454", 0);
 
         std::string configuredName = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME", "");
-        Realm const* realm = FindAuthnetRealm(configuredName);
-        uint32 const realmCategory = GetAuthnetRealmCategory(realm);
+        Realm const* realm = route ? nullptr : FindAuthnetRealm(configuredName);
+        uint32 const realmCategory = route ? route->category : GetAuthnetRealmCategory(realm);
         uint32 const field418 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD418", 0);
         uint32 const field41C = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD41C", realmCategory);
         uint32 const endpointPort = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT",
-            realm ? realm->ExternalAddress.GetPort() : 8085) & 0xFFFF;
+            route ? route->port : (realm ? realm->ExternalAddress.GetPort() : 8085)) & 0xFFFF;
         uint32 const endpointByte458 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD458", endpointPort >> 8) & 0xFF;
         uint32 const endpointByte459 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD459", endpointPort) & 0xFF;
 
-        std::string accountName = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME",
+        std::string accountName = route ? route->name : GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME",
             realm ? realm->name : "WoW1");
         if (accountName.size() > 0x3FC)
             accountName.resize(0x3FC);
 
-        std::string endpointAddress = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS",
+        std::string endpointAddress = route ? route->host : GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS",
             realm ? realm->ExternalAddress.GetHost() : "127.0.0.1");
         if (endpointAddress.size() > 0x17)
             endpointAddress.resize(0x17);
@@ -1275,11 +1405,12 @@ namespace
     std::vector<uint8> BuildMode2Command8StructuredProbe()
     {
         Skyfire::Authnet::BitWriter writer;
+        std::vector<AuthnetRealmRoute> const routes = BuildAuthnetRealmRoutes();
 
-        uint32 const fieldValue = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0);
-        uint32 const list6Count = GetMode2Command8List6Count();
+        uint32 const fieldValue = GetAuthnetDefaultRealmField(routes);
+        uint32 const list6Count = GetMode2Command8List6Count(routes);
         uint32 const list18Count = GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT");
-        std::vector<uint8> list6 = BuildMode2Command8DefaultRouteList(list6Count);
+        std::vector<uint8> list6 = BuildMode2Command8DefaultRouteList(list6Count, routes);
         std::vector<uint8> configuredList6;
         if (!list6.empty() && TryParseHexBytes(std::getenv("AUTHNET_MODE2_COMMAND8_LIST6_HEX"), list6.size(), configuredList6))
             list6 = configuredList6;
@@ -1755,7 +1886,29 @@ namespace
         return true;
     }
 
-    bool TryDecodeSelectedRealmSeed(std::vector<uint8> const& packet, uint32& connectionSeed)
+    struct SelectedRealmRequestInfo
+    {
+        uint32 connectionSeed = 0;
+        uint32 realmField = 0;
+        bool hasRealmField = false;
+    };
+
+    bool SkipBits(Skyfire::Authnet::BitReader& reader, size_t bitCount)
+    {
+        while (bitCount > 0)
+        {
+            uint32 ignored = 0;
+            uint32 const chunk = std::min<uint32>(uint32(bitCount), 32);
+            if (!reader.ReadBits(chunk, ignored))
+                return false;
+
+            bitCount -= chunk;
+        }
+
+        return true;
+    }
+
+    bool TryDecodeSelectedRealmRequest(std::vector<uint8> const& packet, SelectedRealmRequestInfo& info)
     {
         Skyfire::Authnet::BitReader reader(packet.data(), packet.size());
 
@@ -1769,7 +1922,20 @@ namespace
         if (header.command != 8 || header.mode != 2)
             return false;
 
-        return reader.ReadUInt32(connectionSeed);
+        if (!reader.ReadUInt32(info.connectionSeed))
+            return false;
+
+        size_t const remainingBits = reader.RemainingBits();
+        if (remainingBits >= 32)
+        {
+            if (!SkipBits(reader, remainingBits - 32))
+                return false;
+
+            if (reader.ReadUInt32(info.realmField))
+                info.hasRealmField = true;
+        }
+
+        return true;
     }
 
     bool TryDecodeResourceLookup(std::vector<uint8> const& packet, ResourceLookupInfo& info)
@@ -2204,7 +2370,7 @@ void AuthnetSocket::PrepareWorldSessionKey(std::string const& identity, std::str
     _authnetOS = GetAuthnetOSFromPlatform(platform);
     _authnetSecret.fill(0);
 
-    PersistAuthnetWorldSessionKey(0, GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0), "initial-login");
+    PersistAuthnetWorldSessionKey(0, GetAuthnetDefaultRealmField(), "initial-login");
 }
 
 void AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, char const* reason)
@@ -2258,16 +2424,22 @@ bool AuthnetSocket::TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8>
     if (!ShouldGenerateWorldSessionKey())
         return false;
 
-    uint32 connectionSeed = 0;
-    if (!TryDecodeSelectedRealmSeed(packet, connectionSeed))
+    SelectedRealmRequestInfo selectedRealm;
+    if (!TryDecodeSelectedRealmRequest(packet, selectedRealm))
     {
         SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: selected realm request did not contain a decodable connection seed, request=%s.",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), ByteArrayToHexStr(packet).c_str());
         return false;
     }
 
-    uint32 const realmField = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0);
-    PersistAuthnetWorldSessionKey(connectionSeed, realmField, "selected-realm");
+    uint32 const realmField = selectedRealm.hasRealmField ? selectedRealm.realmField : GetAuthnetDefaultRealmField();
+    std::string const realmName = FindAuthnetRealmNameById(realmField);
+    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: selected realm request seed=%u realm_field=%u realm=%s source=%s.",
+        socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+        selectedRealm.connectionSeed, realmField, realmName.empty() ? "<unknown>" : realmName.c_str(),
+        selectedRealm.hasRealmField ? "packet" : "default");
+
+    PersistAuthnetWorldSessionKey(selectedRealm.connectionSeed, realmField, "selected-realm");
     return true;
 }
 
@@ -2435,16 +2607,30 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
             std::this_thread::sleep_for(std::chrono::milliseconds(detailDelayMs));
         }
 
-        std::vector<uint8> detailResponse = BuildLoginGameAccountDetailProbe();
-        std::vector<uint8> plainDetailResponse = detailResponse;
-        CryptServerPayload(detailResponse);
+        std::vector<AuthnetRealmRoute> detailRoutes;
+        if (ShouldSendMode2Command2RealmDetails(command2Mode))
+            detailRoutes = BuildAuthnetRealmRoutes();
 
-        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command2) %s response plain=%s encrypted=%s",
-            socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
-            AuthnetPacketName(2, 2, 1), command2Mode,
-            ByteArrayToHexStr(plainDetailResponse).c_str(), ByteArrayToHexStr(detailResponse).c_str());
+        auto sendCommand2Detail = [this, trigger, command2Mode](AuthnetRealmRoute const* route)
+        {
+            std::vector<uint8> detailResponse = BuildLoginGameAccountDetailProbe(route);
+            std::vector<uint8> plainDetailResponse = detailResponse;
+            CryptServerPayload(detailResponse);
 
-        socket().QueueSend(reinterpret_cast<char const*>(detailResponse.data()), detailResponse.size());
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command2) %s response realm_id=%u realm=%s plain=%s encrypted=%s",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
+                AuthnetPacketName(2, 2, 1), command2Mode,
+                route ? route->realmId : 0, route ? route->name.c_str() : "<default>",
+                ByteArrayToHexStr(plainDetailResponse).c_str(), ByteArrayToHexStr(detailResponse).c_str());
+
+            socket().QueueSend(reinterpret_cast<char const*>(detailResponse.data()), detailResponse.size());
+        };
+
+        if (detailRoutes.empty())
+            sendCommand2Detail(nullptr);
+        else
+            for (AuthnetRealmRoute const& route : detailRoutes)
+                sendCommand2Detail(&route);
     }
 
     if (StringEquals(GetMode2Command6Position(), "after-command2"))
@@ -2494,7 +2680,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
         SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command8) %s response field=%u list6=%u list18=%u plain=%s encrypted=%s",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
             AuthnetPacketName(2, 8, 1), command8Mode,
-            GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+            GetAuthnetDefaultRealmField(),
             GetMode2Command8List6Count(),
             GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
             ByteArrayToHexStr(plainCommand8Response).c_str(), ByteArrayToHexStr(command8Response).c_str());
@@ -2532,7 +2718,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
                     SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted asynchronous %s-triggered %s (mode2 command8) %s repeat %u/%u response field=%u list6=%u list18=%u plain=%s encrypted=%s",
                         remoteAddress.c_str(), remotePort, triggerText.c_str(),
                         AuthnetPacketName(2, 8, 1), command8ModeText.c_str(), repeatIndex + 1, repeatCount,
-                        GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                        GetAuthnetDefaultRealmField(),
                         GetMode2Command8List6Count(),
                         GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                         ByteArrayToHexStr(plainRepeatCommand8Response).c_str(), ByteArrayToHexStr(repeatCommand8Response).c_str());
@@ -2560,7 +2746,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
                 SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending encrypted %s-triggered %s (mode2 command8) %s repeat %u/%u response field=%u list6=%u list18=%u plain=%s encrypted=%s",
                     socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
                     AuthnetPacketName(2, 8, 1), command8Mode, repeatIndex + 1, repeatCount,
-                    GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                    GetAuthnetDefaultRealmField(),
                     GetMode2Command8List6Count(),
                     GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                     ByteArrayToHexStr(plainRepeatCommand8Response).c_str(), ByteArrayToHexStr(repeatCommand8Response).c_str());
@@ -2586,7 +2772,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
             SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: queued delayed %s-triggered %s (mode2 command8) %s post-command6 %u/%u response field=%u list6=%u list18=%u plain=%s",
                 socket().getRemoteAddress().c_str(), socket().getRemotePort(), trigger,
                 AuthnetPacketName(2, 8, 1), command8Mode, repeatIndex + 1, postCommand6Count,
-                GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                GetAuthnetDefaultRealmField(),
                 GetMode2Command8List6Count(),
                 GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                 ByteArrayToHexStr(plainResponse).c_str());
@@ -2614,7 +2800,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger)
                 SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: sending delayed post-command6 %s (mode2 command8) %s response %u/%u delay_ms=%u gap_ms=%u field=%u list6=%u list18=%u plain=%s encrypted=%s",
                     remoteAddress.c_str(), remotePort, AuthnetPacketName(2, 8, 1),
                     command8ModeText.c_str(), i + 1, postCommand6Count, delayMs, gapMs,
-                    GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0),
+                    GetAuthnetDefaultRealmField(),
                     GetMode2Command8List6Count(),
                     GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT"),
                     ByteArrayToHexStr(plainResponse).c_str(), ByteArrayToHexStr(response).c_str());

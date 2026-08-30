@@ -189,7 +189,8 @@ bool TryReadAuthnetWorldSessionKeyOverride(SessionKey& key, std::string* source 
 
 bool IsAuthnetWorldTokenResolveEnabled(bool bridgeEnabled)
 {
-    return bridgeEnabled || AuthnetStringEnabled(std::getenv("AUTHNET_WORLD_TOKEN_RESOLVE"));
+    return bridgeEnabled || sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_AUTHNET_WORLD_TOKEN_RESOLVE) ||
+        AuthnetStringEnabled(std::getenv("AUTHNET_WORLD_TOKEN_RESOLVE"));
 }
 
 bool TryParseAuthnetAccountIdToken(std::string const& account, uint32& accountId)
