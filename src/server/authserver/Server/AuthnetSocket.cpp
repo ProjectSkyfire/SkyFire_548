@@ -7,8 +7,8 @@
 #include "Auth/LoginIdentity.h"
 #include "Authentication/BsnBitStream.h"
 #include "Common.h"
-#include "CryptoRandom.h"
 #include "Database/DatabaseEnv.h"
+#include "HMAC.h"
 #include "Log.h"
 #include "RealmList.h"
 #include "Util.h"
@@ -508,6 +508,25 @@ namespace
         target[1] = uint8((value >> 8) & 0xFF);
         target[2] = uint8((value >> 16) & 0xFF);
         target[3] = uint8((value >> 24) & 0xFF);
+    }
+
+    SessionKey BuildAuthnetWorldSessionKey(std::array<uint8, AuthnetSecretBytes> const& secret, uint32 connectionSeed, uint32 realmField)
+    {
+        auto buildDigestInput = [](uint32 first, uint32 second)
+        {
+            std::array<uint8, 12> input = { { 'W', 'o', 'W', 0, 0, 0, 0, 0, 0, 0, 0, 0 } };
+            StoreUInt32LE(input.data() + 4, first);
+            StoreUInt32LE(input.data() + 8, second);
+            return input;
+        };
+
+        auto firstDigest = SkyFire::Crypto::HMAC_SHA1::GetDigestOf(secret, buildDigestInput(connectionSeed, realmField));
+        auto secondDigest = SkyFire::Crypto::HMAC_SHA1::GetDigestOf(secret, buildDigestInput(realmField, connectionSeed));
+
+        SessionKey key = {};
+        std::copy(firstDigest.begin(), firstDigest.end(), key.begin());
+        std::copy(secondDigest.begin(), secondDigest.end(), key.begin() + firstDigest.size());
+        return key;
     }
 
     void CopyFourCC(uint8* target, std::string const& value)
@@ -1736,6 +1755,23 @@ namespace
         return true;
     }
 
+    bool TryDecodeSelectedRealmSeed(std::vector<uint8> const& packet, uint32& connectionSeed)
+    {
+        Skyfire::Authnet::BitReader reader(packet.data(), packet.size());
+
+        ProbePacketHeader header;
+        if (!reader.ReadBits(6, header.command) || !reader.ReadBits(1, header.modeSwitch))
+            return false;
+
+        if (!header.modeSwitch || !reader.ReadBits(4, header.mode))
+            return false;
+
+        if (header.command != 8 || header.mode != 2)
+            return false;
+
+        return reader.ReadUInt32(connectionSeed);
+    }
+
     bool TryDecodeResourceLookup(std::vector<uint8> const& packet, ResourceLookupInfo& info)
     {
         using namespace Skyfire::Authnet;
@@ -2051,8 +2087,10 @@ namespace
 }
 
 AuthnetSocket::AuthnetSocket(RealmSocket& socket) :
-    socket_(socket), _encryptedBytesProcessed(0), _initialRequestLen(0), _clientCryptI(0), _clientCryptJ(0),
-    _authnetWorldSessionKeyGenerated(false), _authnetWorldSessionKeyPersisted(false),
+    socket_(socket), _encryptedBytesProcessed(0), _initialRequestLen(0), _authnetAccountId(0),
+    _authnetLocaleId(0), _authnetWorldConnectionSeed(0), _authnetWorldRealmField(0),
+    _authnetWorldSessionKey(), _authnetSecret(), _authnetWorldSessionKeyGenerated(false),
+    _authnetWorldSessionKeyPersisted(false), _clientCryptI(0), _clientCryptJ(0),
     _clientCryptInitialized(false), _serverCryptI(0), _serverCryptJ(0), _serverCryptInitialized(false),
     _responded(false), _httpResponded(false), _clientModeSwitchSeen(false), _followupLogged(false),
     _postSuccessBurstSeen(false), _mode1ConnectAnswered(false), _mode2LoginAnswered(false),
@@ -2159,46 +2197,78 @@ void AuthnetSocket::PrepareWorldSessionKey(std::string const& identity, std::str
         return;
     }
 
+    _authnetAccountId = accountId;
+    _authnetAccountName = accountName;
     _authnetWorldAccountToken = BuildWorldAccountToken(accountId);
-    SkyFire::Crypto::GetRandomBytes(_authnetWorldSessionKey);
-    std::vector<uint8> authnetSecret(AuthnetSecretBytes);
-    SkyFire::Crypto::GetRandomBytes(authnetSecret);
+    _authnetLocaleId = GetLocaleByName(locale);
+    _authnetOS = GetAuthnetOSFromPlatform(platform);
+    _authnetSecret.fill(0);
+
+    PersistAuthnetWorldSessionKey(0, GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0), "initial-login");
+}
+
+void AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, char const* reason)
+{
+    if (!_authnetAccountId || _authnetWorldAccountToken.empty())
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: cannot persist world session key before account context is ready.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort());
+        return;
+    }
+
+    _authnetWorldConnectionSeed = connectionSeed;
+    _authnetWorldRealmField = realmField;
+    _authnetWorldSessionKey = BuildAuthnetWorldSessionKey(_authnetSecret, connectionSeed, realmField);
     _authnetWorldSessionKeyGenerated = true;
 
-    uint32 const localeId = GetLocaleByName(locale);
-    std::string const os = GetAuthnetOSFromPlatform(platform);
     std::string const remoteAddress = socket().getRemoteAddress();
 
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF_BY_ID);
     stmt->setBinary(0, _authnetWorldSessionKey);
     stmt->setString(1, remoteAddress);
-    stmt->setUInt32(2, localeId);
-    stmt->setString(3, os);
-    stmt->setUInt32(4, accountId);
+    stmt->setUInt32(2, _authnetLocaleId);
+    stmt->setString(3, _authnetOS);
+    stmt->setUInt32(4, _authnetAccountId);
     LoginDatabase.DirectExecute(stmt);
-
-    PreparedStatement* cleanupStmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_EXPIRED_AUTHNET_WORLD_SESSIONS);
-    LoginDatabase.Execute(cleanupStmt);
 
     uint32 const sessionTtl = GetAuthnetWorldSessionTtlSeconds();
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_AUTHNET_WORLD_SESSION);
-    stmt->setUInt32(0, accountId);
+    stmt->setUInt32(0, _authnetAccountId);
     stmt->setString(1, _authnetWorldAccountToken);
     stmt->setBinary(2, _authnetWorldSessionKey);
-    stmt->setBinary(3, authnetSecret);
-    stmt->setUInt32(4, 0);
-    stmt->setUInt32(5, GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0));
+    stmt->setBinary(3, _authnetSecret);
+    stmt->setUInt32(4, connectionSeed);
+    stmt->setUInt32(5, realmField);
     stmt->setString(6, remoteAddress);
-    stmt->setUInt32(7, localeId);
-    stmt->setString(8, os);
+    stmt->setUInt32(7, _authnetLocaleId);
+    stmt->setString(8, _authnetOS);
     stmt->setUInt32(9, sessionTtl);
     LoginDatabase.DirectExecute(stmt);
 
     _authnetWorldSessionKeyPersisted = true;
 
-    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: generated world session key for account %u (%s), token=%s, ttl=%u, key=%s.",
-        remoteAddress.c_str(), socket().getRemotePort(), accountId, accountName.c_str(),
-        _authnetWorldAccountToken.c_str(), sessionTtl, MaskSessionKey(_authnetWorldSessionKey).c_str());
+    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: persisted %s world session key for account %u (%s), token=%s, seed=%u, realm_field=%u, ttl=%u, key=%s.",
+        remoteAddress.c_str(), socket().getRemotePort(), reason ? reason : "authnet",
+        _authnetAccountId, _authnetAccountName.c_str(), _authnetWorldAccountToken.c_str(),
+        connectionSeed, realmField, sessionTtl, MaskSessionKey(_authnetWorldSessionKey).c_str());
+}
+
+bool AuthnetSocket::TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8> const& packet)
+{
+    if (!ShouldGenerateWorldSessionKey())
+        return false;
+
+    uint32 connectionSeed = 0;
+    if (!TryDecodeSelectedRealmSeed(packet, connectionSeed))
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: selected realm request did not contain a decodable connection seed, request=%s.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), ByteArrayToHexStr(packet).c_str());
+        return false;
+    }
+
+    uint32 const realmField = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0);
+    PersistAuthnetWorldSessionKey(connectionSeed, realmField, "selected-realm");
+    return true;
 }
 
 void AuthnetSocket::CryptClientPayload(std::vector<uint8>& payload)
@@ -2927,6 +2997,8 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
         if (plain.size() > ClientModeSwitchRequestLen &&
             header.command == 8 && header.modeSwitch && header.mode == 2)
         {
+            TryUpdateWorldSessionKeyFromSelectedRealm(plain);
+
             char const* responseMode = GetMode2Command8RequestResponseMode();
             if (StringEquals(responseMode, "none") || StringEquals(responseMode, "skip") ||
                 StringEquals(responseMode, "off"))
