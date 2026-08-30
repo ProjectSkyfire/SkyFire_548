@@ -4,7 +4,11 @@
 */
 
 #include "AuthnetSocket.h"
+#include "Auth/LoginIdentity.h"
 #include "Authentication/BsnBitStream.h"
+#include "Common.h"
+#include "CryptoRandom.h"
+#include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "RealmList.h"
 #include "Util.h"
@@ -12,6 +16,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -31,6 +36,8 @@ namespace
     constexpr size_t FirstEncryptedFollowupLen = 57;
     constexpr size_t EncryptedResourceLookupRequestLen = 27;
     constexpr size_t ResourceLookupBurstCount = 19;
+    constexpr size_t AuthnetSecretBytes = 64;
+    constexpr uint32 AuthnetDefaultWorldSessionTtlSeconds = 300;
     char constexpr PatchHttpResponseBody[] =
         "<patch><record program=\"WoW\" component=\"enUS\">"
         "http://127.0.0.1:1119/manifest;unused;internal;18414"
@@ -660,7 +667,91 @@ namespace
         return StringEnabled(mode);
     }
 
-    std::vector<uint8> BuildStartupResponseProbe(std::string* startupAccountName = nullptr,
+    bool ShouldGenerateWorldSessionKey()
+    {
+        return StringEnabled(std::getenv("AUTHNET_GENERATE_WORLD_SESSION_KEY"));
+    }
+
+    std::string GetConfiguredStartupWorldAccount()
+    {
+        std::string authSessionIdentity = GetEnvOrDefault("AUTHNET_STARTUP_WORLD_ACCOUNT", "A");
+        if (authSessionIdentity.size() > MaxInitialIdentityBytes)
+            authSessionIdentity.resize(MaxInitialIdentityBytes);
+
+        return authSessionIdentity;
+    }
+
+    std::string BuildWorldAccountToken(uint32 /*accountId*/)
+    {
+        return GetConfiguredStartupWorldAccount();
+    }
+
+    uint32 GetAuthnetWorldSessionTtlSeconds()
+    {
+        uint32 ttl = GetEnvUInt32("AUTHNET_WORLD_SESSION_TTL_SECONDS", AuthnetDefaultWorldSessionTtlSeconds);
+        return ttl ? ttl : AuthnetDefaultWorldSessionTtlSeconds;
+    }
+
+    std::string GetAuthnetOSFromPlatform(std::string const& platform)
+    {
+        std::string normalized(platform);
+        std::transform(normalized.begin(), normalized.end(), normalized.begin(), [](unsigned char c)
+        {
+            return char(std::tolower(c));
+        });
+
+        if (normalized.find("win") != std::string::npos || normalized.find("wn") != std::string::npos)
+            return "Win";
+
+        if (normalized.find("mac") != std::string::npos || normalized.find("osx") != std::string::npos)
+            return "OSX";
+
+        if (platform.size() >= 3)
+            return platform.substr(0, 3);
+
+        return platform.empty() ? "Win" : platform;
+    }
+
+    std::string MaskSessionKey(SessionKey const& key)
+    {
+        std::string hex = ByteArrayToHexStr(key);
+        if (hex.size() <= 16)
+            return hex;
+
+        return hex.substr(0, 8) + "..." + hex.substr(hex.size() - 8);
+    }
+
+    bool TryResolveAuthnetLoginIdentity(std::string const& identity, uint32& accountId, std::string& accountName)
+    {
+        Skyfire::Auth::LoginIdentity loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(identity);
+
+        PreparedStatement* stmt = nullptr;
+        if (loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_SESSIONKEY_BY_LOGIN_IDENTITY);
+            stmt->setString(0, loginIdentity.Canonical);
+            stmt->setString(1, loginIdentity.Canonical);
+            stmt->setString(2, loginIdentity.Canonical);
+        }
+        else
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_SESSIONKEY);
+            stmt->setString(0, identity);
+        }
+
+        PreparedQueryResult result = LoginDatabase.Query(stmt);
+        if (!result)
+            return false;
+
+        Field* fields = result->Fetch();
+        accountId = fields[1].GetUInt32();
+        accountName = loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email ? fields[3].GetString() : identity;
+
+        return accountId != 0;
+    }
+
+    std::vector<uint8> BuildStartupResponseProbe(std::string const& worldAccountToken = std::string(),
+        std::string* startupAccountName = nullptr,
         std::vector<uint8>* startupAccountKey = nullptr,
         std::string* worldAccountIdentity = nullptr)
     {
@@ -675,9 +766,7 @@ namespace
         if (startupAccountKey)
             *startupAccountKey = accountKey;
 
-        std::string authSessionIdentity = GetEnvOrDefault("AUTHNET_STARTUP_WORLD_ACCOUNT", "A");
-        if (authSessionIdentity.size() > MaxInitialIdentityBytes)
-            authSessionIdentity.resize(MaxInitialIdentityBytes);
+        std::string authSessionIdentity = worldAccountToken.empty() ? GetConfiguredStartupWorldAccount() : worldAccountToken;
 
         if (worldAccountIdentity)
             *worldAccountIdentity = authSessionIdentity;
@@ -1963,6 +2052,7 @@ namespace
 
 AuthnetSocket::AuthnetSocket(RealmSocket& socket) :
     socket_(socket), _encryptedBytesProcessed(0), _initialRequestLen(0), _clientCryptI(0), _clientCryptJ(0),
+    _authnetWorldSessionKeyGenerated(false), _authnetWorldSessionKeyPersisted(false),
     _clientCryptInitialized(false), _serverCryptI(0), _serverCryptJ(0), _serverCryptInitialized(false),
     _responded(false), _httpResponded(false), _clientModeSwitchSeen(false), _followupLogged(false),
     _postSuccessBurstSeen(false), _mode1ConnectAnswered(false), _mode2LoginAnswered(false),
@@ -2049,7 +2139,66 @@ bool AuthnetSocket::DecodeInitialRequest(void)
         request.hasIdentity ? "yes" : "no", request.identityLength, request.identity.c_str(),
         request.tailValue, _initialRequestLen, request.bitLength);
 
+    if (request.hasIdentity)
+        PrepareWorldSessionKey(request.identity, request.platform, request.locale);
+
     return true;
+}
+
+void AuthnetSocket::PrepareWorldSessionKey(std::string const& identity, std::string const& platform, std::string const& locale)
+{
+    if (!ShouldGenerateWorldSessionKey())
+        return;
+
+    uint32 accountId = 0;
+    std::string accountName;
+    if (!TryResolveAuthnetLoginIdentity(identity, accountId, accountName))
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: world session key generation requested but identity '%s' did not resolve to an account.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), identity.c_str());
+        return;
+    }
+
+    _authnetWorldAccountToken = BuildWorldAccountToken(accountId);
+    SkyFire::Crypto::GetRandomBytes(_authnetWorldSessionKey);
+    std::vector<uint8> authnetSecret(AuthnetSecretBytes);
+    SkyFire::Crypto::GetRandomBytes(authnetSecret);
+    _authnetWorldSessionKeyGenerated = true;
+
+    uint32 const localeId = GetLocaleByName(locale);
+    std::string const os = GetAuthnetOSFromPlatform(platform);
+    std::string const remoteAddress = socket().getRemoteAddress();
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF_BY_ID);
+    stmt->setBinary(0, _authnetWorldSessionKey);
+    stmt->setString(1, remoteAddress);
+    stmt->setUInt32(2, localeId);
+    stmt->setString(3, os);
+    stmt->setUInt32(4, accountId);
+    LoginDatabase.DirectExecute(stmt);
+
+    PreparedStatement* cleanupStmt = LoginDatabase.GetPreparedStatement(LOGIN_DEL_EXPIRED_AUTHNET_WORLD_SESSIONS);
+    LoginDatabase.Execute(cleanupStmt);
+
+    uint32 const sessionTtl = GetAuthnetWorldSessionTtlSeconds();
+    stmt = LoginDatabase.GetPreparedStatement(LOGIN_REP_AUTHNET_WORLD_SESSION);
+    stmt->setUInt32(0, accountId);
+    stmt->setString(1, _authnetWorldAccountToken);
+    stmt->setBinary(2, _authnetWorldSessionKey);
+    stmt->setBinary(3, authnetSecret);
+    stmt->setUInt32(4, 0);
+    stmt->setUInt32(5, GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0));
+    stmt->setString(6, remoteAddress);
+    stmt->setUInt32(7, localeId);
+    stmt->setString(8, os);
+    stmt->setUInt32(9, sessionTtl);
+    LoginDatabase.DirectExecute(stmt);
+
+    _authnetWorldSessionKeyPersisted = true;
+
+    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: generated world session key for account %u (%s), token=%s, ttl=%u, key=%s.",
+        remoteAddress.c_str(), socket().getRemotePort(), accountId, accountName.c_str(),
+        _authnetWorldAccountToken.c_str(), sessionTtl, MaskSessionKey(_authnetWorldSessionKey).c_str());
 }
 
 void AuthnetSocket::CryptClientPayload(std::vector<uint8>& payload)
@@ -2974,15 +3123,17 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
         std::string startupAccountName;
         std::vector<uint8> startupAccountKey;
         std::string worldAccountIdentity;
-        std::vector<uint8> response = BuildStartupResponseProbe(&startupAccountName, &startupAccountKey,
+        std::vector<uint8> response = BuildStartupResponseProbe(_authnetWorldAccountToken, &startupAccountName, &startupAccountKey,
             &worldAccountIdentity);
         std::string startupAccountKeyHex = startupAccountKey.empty() ? std::string() : ByteArrayToHexStr(startupAccountKey);
         std::string responseHex = ByteArrayToHexStr(response);
 
-        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response account_count=%u account_name=%s account_key=%s auth_session_identity=%s plain=%s",
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response account_count=%u account_name=%s account_key=%s auth_session_identity=%s generated_key=%u persisted_key=%u plain=%s",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), response.size(),
             startupAccountName.empty() ? 0u : 1u, startupAccountName.c_str(),
-            startupAccountKeyHex.c_str(), worldAccountIdentity.c_str(), responseHex.c_str());
+            startupAccountKeyHex.c_str(), worldAccountIdentity.c_str(),
+            _authnetWorldSessionKeyGenerated ? 1u : 0u, _authnetWorldSessionKeyPersisted ? 1u : 0u,
+            responseHex.c_str());
 
         socket().QueueSend(reinterpret_cast<char const*>(response.data()), response.size());
         _responded = true;

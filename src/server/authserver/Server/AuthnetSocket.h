@@ -6,9 +6,12 @@
 #ifndef SF_AUTHNETSOCKET_H
 #define SF_AUTHNETSOCKET_H
 
+#include "Authentication/AuthDefines.h"
 #include "Common.h"
 #include "RealmSocket.h"
 #include <mutex>
+#include <string>
+#include <vector>
 
 class AuthnetSocket : public RealmSocket::Session
 {
@@ -26,6 +29,7 @@ private:
 
     void TrySendProbeResponse(size_t readOffset, size_t readSize);
     bool DecodeInitialRequest(void);
+    void PrepareWorldSessionKey(std::string const& identity, std::string const& platform, std::string const& locale);
     void ProcessEncryptedClientBytes(size_t encryptedFollowupOffset);
     void SendEncryptedRequestResult(uint32 requestId, std::vector<uint8> const* resourceKey = nullptr, uint32 resourceItemId = 0);
     bool TrySendMode2Command0Probe(char const* trigger, bool sendFollowups);
@@ -37,6 +41,10 @@ private:
     std::vector<uint8> _captured;
     size_t _encryptedBytesProcessed;
     size_t _initialRequestLen;
+    std::string _authnetWorldAccountToken;
+    SessionKey _authnetWorldSessionKey;
+    bool _authnetWorldSessionKeyGenerated;
+    bool _authnetWorldSessionKeyPersisted;
     uint8 _clientCryptState[256];
     uint8 _clientCryptI;
     uint8 _clientCryptJ;

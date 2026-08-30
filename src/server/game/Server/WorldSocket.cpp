@@ -35,6 +35,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <limits>
 #include <new>
 #include <utility>
 
@@ -183,6 +184,30 @@ bool TryReadAuthnetWorldSessionKeyOverride(SessionKey& key, std::string* source 
     if (source)
         *source = "AUTHNET_WORLD_SESSION_KEY";
 
+    return true;
+}
+
+bool IsAuthnetWorldTokenResolveEnabled(bool bridgeEnabled)
+{
+    return bridgeEnabled || AuthnetStringEnabled(std::getenv("AUTHNET_WORLD_TOKEN_RESOLVE"));
+}
+
+bool TryParseAuthnetAccountIdToken(std::string const& account, uint32& accountId)
+{
+    char const* prefix = GetAuthnetEnvOrDefault("AUTHNET_WORLD_ACCOUNT_ID_PREFIX", "A");
+    std::string tokenPrefix(prefix);
+    if (tokenPrefix.empty() || account.compare(0, tokenPrefix.size(), tokenPrefix) != 0)
+        return false;
+
+    std::string idText = account.substr(tokenPrefix.size());
+    if (idText.empty() || !std::all_of(idText.begin(), idText.end(), [](unsigned char c) { return std::isdigit(c) != 0; }))
+        return false;
+
+    unsigned long parsed = std::strtoul(idText.c_str(), nullptr, 10);
+    if (parsed == 0 || parsed > std::numeric_limits<uint32>::max())
+        return false;
+
+    accountId = uint32(parsed);
     return true;
 }
 
@@ -927,33 +952,69 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     Skyfire::Auth::LoginIdentity const loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(account);
     bool const authnetWorldBridgeEnabled = AuthnetStringEnabled(std::getenv("AUTHNET_WORLD_SESSION_BRIDGE"));
+    bool const authnetWorldTokenResolveEnabled = IsAuthnetWorldTokenResolveEnabled(authnetWorldBridgeEnabled);
     std::string const authnetWorldAccountToken = GetAuthnetEnvOrDefault("AUTHNET_WORLD_ACCOUNT_TOKEN", "A");
     std::string const authnetWorldAccountIdentity = GetAuthnetEnvOrDefault("AUTHNET_WORLD_ACCOUNT_IDENTITY", "");
-    bool useAuthnetWorldBridge = false;
+    bool useAuthnetWorldToken = false;
+    bool useAuthnetTokenLookup = false;
+    bool useAuthnetAccountIdLookup = false;
+    bool useAuthnetIpLookup = false;
+    uint32 authnetAccountId = 0;
     SessionKey authnetWorldSessionKey = {};
     std::string authnetWorldSessionKeySource;
     std::string accountLookup = account;
     Skyfire::Auth::LoginIdentity effectiveLoginIdentity = loginIdentity;
 
-    if (authnetWorldBridgeEnabled && account == authnetWorldAccountToken)
+    if (authnetWorldBridgeEnabled && account == authnetWorldAccountToken && !authnetWorldAccountIdentity.empty())
     {
-        if (authnetWorldAccountIdentity.empty())
-            SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: authnet world bridge enabled for token account '%s' but AUTHNET_WORLD_ACCOUNT_IDENTITY is empty.", account.c_str());
-        else if (TryReadAuthnetWorldSessionKeyOverride(authnetWorldSessionKey, &authnetWorldSessionKeySource))
-        {
-            accountLookup = authnetWorldAccountIdentity;
-            effectiveLoginIdentity = Skyfire::Auth::NormalizeLoginIdentity(accountLookup);
-            useAuthnetWorldBridge = true;
+        accountLookup = authnetWorldAccountIdentity;
+        effectiveLoginIdentity = Skyfire::Auth::NormalizeLoginIdentity(accountLookup);
+        useAuthnetWorldToken = true;
 
-            SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: authnet world bridge resolving token account '%s' through configured identity '%s'.",
-                account.c_str(), accountLookup.c_str());
-        }
+        SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: authnet world bridge resolving token account '%s' through configured identity '%s'.",
+            account.c_str(), accountLookup.c_str());
+    }
+    else if (authnetWorldBridgeEnabled && account == authnetWorldAccountToken)
+        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: authnet world bridge enabled for token account '%s' but AUTHNET_WORLD_ACCOUNT_IDENTITY is empty.", account.c_str());
+    else if (authnetWorldTokenResolveEnabled && TryParseAuthnetAccountIdToken(account, authnetAccountId))
+    {
+        useAuthnetWorldToken = true;
+        useAuthnetAccountIdLookup = true;
+        authnetWorldSessionKeySource = "database";
+
+        SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: authnet world token '%s' resolving through account id %u.",
+            account.c_str(), authnetAccountId);
+    }
+    else if (authnetWorldTokenResolveEnabled && account == authnetWorldAccountToken)
+    {
+        useAuthnetWorldToken = true;
+        useAuthnetTokenLookup = true;
+        authnetWorldSessionKeySource = "authnet-session";
+
+        SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: authnet world token '%s' resolving through stored session from %s.",
+            account.c_str(), GetRemoteAddress().c_str());
     }
 
     // Get the account information from the realmd database.
     // 0 id, 1 sessionkey, 2 last_ip, 3 locked, 4 expansion, 5 mutetime, 6 locale, 7 recruiter, 8 os, 9 hasBoost
     PreparedStatement* stmt = nullptr;
-    if (effectiveLoginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+    if (useAuthnetTokenLookup)
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_TOKEN);
+        stmt->setString(0, account);
+        stmt->setString(1, GetRemoteAddress());
+    }
+    else if (useAuthnetAccountIdLookup)
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_ID);
+        stmt->setUInt32(0, authnetAccountId);
+    }
+    else if (useAuthnetIpLookup)
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_IP);
+        stmt->setString(0, GetRemoteAddress());
+    }
+    else if (effectiveLoginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
     {
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_LOGIN_IDENTITY);
         stmt->setString(0, effectiveLoginIdentity.Canonical);
@@ -967,6 +1028,17 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (!result && useAuthnetTokenLookup)
+    {
+        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: authnet world token '%s' had no stored session for %s; trying latest-login fallback.",
+            account.c_str(), GetRemoteAddress().c_str());
+
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_IP);
+        stmt->setString(0, GetRemoteAddress());
+        result = LoginDatabase.Query(stmt);
+        if (result)
+            authnetWorldSessionKeySource = "database";
+    }
 
     // Stop if the account is not found
     if (!result)
@@ -974,7 +1046,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         SendAuthResponseError(ResponseCodes::AUTH_UNKNOWN_ACCOUNT);
         SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Sent Auth Response (unknown account: '%s', lookup: '%s', kind: %s, canonical: '%s', bridge: %u, length: %u, build: %u, realm: %u, addonSize: %u).",
             account.c_str(), accountLookup.c_str(), Skyfire::Auth::GetLoginIdentityKindName(effectiveLoginIdentity.Kind),
-            effectiveLoginIdentity.Canonical.c_str(), useAuthnetWorldBridge ? 1 : 0, accountNameLength, clientBuild, VirtualRealmID, addonSize);
+            effectiveLoginIdentity.Canonical.c_str(), useAuthnetWorldToken ? 1 : 0, accountNameLength, clientBuild, VirtualRealmID, addonSize);
         return -1;
     }
 
@@ -999,8 +1071,15 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     id = fields[0].GetUInt32();
 
     SessionKey sessionKey = fields[1].GetBinary<SESSION_KEY_LENGTH>();
-    if (useAuthnetWorldBridge)
+    if (useAuthnetWorldToken && authnetWorldSessionKeySource.empty())
+        authnetWorldSessionKeySource = "database";
+
+    if (useAuthnetWorldToken && TryReadAuthnetWorldSessionKeyOverride(authnetWorldSessionKey, &authnetWorldSessionKeySource))
+    {
         sessionKey = authnetWorldSessionKey;
+        SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: authnet world token '%s' using session key override from %s.",
+            account.c_str(), authnetWorldSessionKeySource.c_str());
+    }
 
     int64 mutetime = fields[5].GetInt64();
     //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
@@ -1091,7 +1170,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     {
         SendAuthResponseError(ResponseCodes::AUTH_FAILED);
         SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s bridge=%u lookup='%s' keySource='%s' clientSeed=%s serverSeed=%s receivedDigest=%s expectedDigest=%s",
-            id, account.c_str(), address.c_str(), useAuthnetWorldBridge ? 1 : 0, accountLookup.c_str(),
+            id, account.c_str(), address.c_str(), useAuthnetWorldToken ? 1 : 0, accountLookup.c_str(),
             authnetWorldSessionKeySource.c_str(), ByteArrayToHexStr(clientSeed).c_str(), ByteArrayToHexStr(m_Seed).c_str(),
             ByteArrayToHexStr(digest).c_str(), ByteArrayToHexStr(expectedDigest).c_str());
         return -1;
