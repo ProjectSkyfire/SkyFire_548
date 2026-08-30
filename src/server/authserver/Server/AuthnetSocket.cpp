@@ -2432,14 +2432,15 @@ bool AuthnetSocket::TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8>
         return false;
     }
 
-    uint32 const realmField = selectedRealm.hasRealmField ? selectedRealm.realmField : GetAuthnetDefaultRealmField();
-    std::string const realmName = FindAuthnetRealmNameById(realmField);
-    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: selected realm request seed=%u realm_field=%u realm=%s source=%s.",
+    uint32 const selectedRealmField = selectedRealm.hasRealmField ? selectedRealm.realmField : GetAuthnetDefaultRealmField();
+    uint32 const keyRealmField = GetAuthnetDefaultRealmField();
+    std::string const selectedRealmName = FindAuthnetRealmNameById(selectedRealmField);
+    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: selected realm request seed=%u selected_realm_field=%u selected_realm=%s key_realm_field=%u source=%s.",
         socket().getRemoteAddress().c_str(), socket().getRemotePort(),
-        selectedRealm.connectionSeed, realmField, realmName.empty() ? "<unknown>" : realmName.c_str(),
+        selectedRealm.connectionSeed, selectedRealmField, selectedRealmName.empty() ? "<unknown>" : selectedRealmName.c_str(), keyRealmField,
         selectedRealm.hasRealmField ? "packet" : "default");
 
-    PersistAuthnetWorldSessionKey(selectedRealm.connectionSeed, realmField, "selected-realm");
+    PersistAuthnetWorldSessionKey(selectedRealm.connectionSeed, keyRealmField, "selected-realm");
     return true;
 }
 
