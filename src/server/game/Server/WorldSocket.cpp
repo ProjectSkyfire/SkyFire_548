@@ -223,6 +223,20 @@ bool TryParseAuthnetAccountIdToken(std::string const& account, uint32& accountId
     return true;
 }
 
+bool AuthnetAuthSessionDigestMatches(std::string const& account, std::array<uint8, 4> const& clientSeed,
+    std::array<uint8, 4> const& serverSeed, SessionKey const& sessionKey, SkyFire::Crypto::SHA1::Digest const& digest)
+{
+    uint8 t[4] = { 0x00, 0x00, 0x00, 0x00 };
+    SkyFire::Crypto::SHA1 sha;
+    sha.UpdateData(account);
+    sha.UpdateData(t);
+    sha.UpdateData(clientSeed);
+    sha.UpdateData(serverSeed);
+    sha.UpdateData(sessionKey);
+    sha.Finalize();
+    return sha.GetDigest() == digest;
+}
+
 bool IsHushedUnhandledClientOpcode(uint16 opcode)
 {
     switch (opcode)
@@ -969,6 +983,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     std::string const authnetWorldAccountIdentity = GetAuthnetEnvOrDefault("AUTHNET_WORLD_ACCOUNT_IDENTITY", "");
     bool useAuthnetWorldToken = false;
     bool useAuthnetTokenLookup = false;
+    bool useAuthnetLiveDigestLookup = false;
     bool useAuthnetAccountIdLookup = false;
     bool useAuthnetIpLookup = false;
     uint32 authnetAccountId = 0;
@@ -1000,17 +1015,22 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     else if (authnetWorldTokenResolveEnabled && account == authnetWorldAccountToken)
     {
         useAuthnetWorldToken = true;
-        useAuthnetTokenLookup = true;
-        authnetWorldSessionKeySource = "authnet-session";
+        useAuthnetLiveDigestLookup = true;
+        authnetWorldSessionKeySource = "authnet-session-digest";
 
-        SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: authnet world token '%s' resolving through stored session from %s.",
+        SF_LOG_INFO("network", "WorldSocket::HandleAuthSession: authnet world token '%s' resolving through live session-key digest from %s.",
             account.c_str(), GetRemoteAddress().c_str());
     }
 
     // Get the account information from the realmd database.
     // 0 id, 1 sessionkey, 2 last_ip, 3 locked, 4 expansion, 5 mutetime, 6 locale, 7 recruiter, 8 os, 9 hasBoost
     PreparedStatement* stmt = nullptr;
-    if (useAuthnetTokenLookup)
+    if (useAuthnetLiveDigestLookup)
+    {
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_LIVE);
+        stmt->setString(0, GetRemoteAddress());
+    }
+    else if (useAuthnetTokenLookup)
     {
         stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_TOKEN);
         stmt->setString(0, account);
@@ -1040,7 +1060,35 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     PreparedQueryResult result = LoginDatabase.Query(stmt);
-    if (!result && useAuthnetTokenLookup)
+    if (!result && useAuthnetLiveDigestLookup)
+    {
+        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: authnet world token '%s' had no live session for %s; trying token then latest-login fallback.",
+            account.c_str(), GetRemoteAddress().c_str());
+
+        stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_TOKEN);
+        stmt->setString(0, account);
+        stmt->setString(1, GetRemoteAddress());
+        result = LoginDatabase.Query(stmt);
+        if (result)
+            authnetWorldSessionKeySource = "authnet-session";
+        else
+        {
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_TOKEN_ANY);
+            stmt->setString(0, account);
+            result = LoginDatabase.Query(stmt);
+            if (result)
+                authnetWorldSessionKeySource = "authnet-session-any-ip";
+            else
+            {
+                stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_AUTHNET_IP);
+                stmt->setString(0, GetRemoteAddress());
+                result = LoginDatabase.Query(stmt);
+                if (result)
+                    authnetWorldSessionKeySource = "database";
+            }
+        }
+    }
+    else if (!result && useAuthnetTokenLookup)
     {
         SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: authnet world token '%s' had no stored session for %s; trying token-any then latest-login fallback.",
             account.c_str(), GetRemoteAddress().c_str());
@@ -1071,6 +1119,28 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     Field* fields = result->Fetch();
+    if (useAuthnetLiveDigestLookup)
+    {
+        bool matched = false;
+        do
+        {
+            fields = result->Fetch();
+            SessionKey const candidateKey = fields[1].GetBinary<SESSION_KEY_LENGTH>();
+            if (AuthnetAuthSessionDigestMatches(account, clientSeed, m_Seed, candidateKey, digest))
+            {
+                matched = true;
+                break;
+            }
+        } while (result->NextRow());
+
+        if (!matched)
+        {
+            SendAuthResponseError(ResponseCodes::AUTH_FAILED);
+            SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: authnet world token '%s' had no matching session key digest from %s.",
+                account.c_str(), GetRemoteAddress().c_str());
+            return -1;
+        }
+    }
 
     uint8 expansion = fields[4].GetUInt8();
     uint32 world_expansion = sWorld->getIntConfig(WorldIntConfigs::CONFIG_EXPANSION);

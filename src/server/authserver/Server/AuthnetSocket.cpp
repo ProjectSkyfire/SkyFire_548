@@ -306,12 +306,16 @@ namespace
         return authSessionIdentity;
     }
 
-    // Soft AuthSession currently sends this literal token (default "A"), not
-    // the account username. Every account therefore shares the same token
-    // until the client identity is A{id}. World already parses A{id}.
-    std::string BuildWorldAccountToken(uint32 /*accountId*/)
+    // Persist A{id} so each account has a unique world_account_token.
+    // Soft AuthSession still sends the literal "A"; world matches the digest
+    // against live session keys. AUTHNET_STARTUP_WORLD_ACCOUNT overrides.
+    std::string BuildWorldAccountToken(uint32 accountId)
     {
-        return GetConfiguredStartupWorldAccount();
+        if (HasEnvValue("AUTHNET_STARTUP_WORLD_ACCOUNT"))
+            return GetConfiguredStartupWorldAccount();
+        if (!accountId)
+            return "A";
+        return std::string("A") + std::to_string(accountId);
     }
 
     uint32 GetAuthnetWorldSessionTtlSeconds()
@@ -3459,7 +3463,7 @@ void AuthnetSocket::PublishPendingSoftFinishSession()
     pending.accountName = _authnetAccountName;
     pending.loginIdentity = _loginIdentity;
     pending.worldToken = _authnetWorldAccountToken.empty()
-        ? GetConfiguredStartupWorldAccount() : _authnetWorldAccountToken;
+        ? BuildWorldAccountToken(pending.accountId) : _authnetWorldAccountToken;
     pending.clientOs = _clientOs;
     pending.clientLocale = _clientLocale;
     pending.localeId = _authnetLocaleId;
@@ -4142,7 +4146,7 @@ void AuthnetSocket::PersistAuthnetWorldSessionKey(char const* reason, uint32 con
     }
 
     if (_authnetWorldAccountToken.empty())
-        _authnetWorldAccountToken = GetConfiguredStartupWorldAccount();
+        _authnetWorldAccountToken = BuildWorldAccountToken(_authnetAccountId ? _authnetAccountId : _accountId);
     if (!_authnetLocaleId)
         _authnetLocaleId = uint32(GetLocaleByName(_clientLocale.empty() ? "enUS" : _clientLocale));
     if (_authnetOS.empty())
