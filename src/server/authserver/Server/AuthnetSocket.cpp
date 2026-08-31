@@ -9,6 +9,7 @@
 #include "Authentication/BsnBitStream.h"
 #include "Common.h"
 #include "Configuration/Config.h"
+#include "CryptoRandom.h"
 #include "Database/DatabaseEnv.h"
 #include "HMAC.h"
 #include "Log.h"
@@ -681,18 +682,35 @@ namespace
         return moduleName;
     }
 
-    std::vector<uint8> BuildStartupModuleKey()
+    std::vector<uint8> BuildStartupModuleKey(std::vector<uint8> const& generatedKey, char const** keySource)
     {
         std::vector<uint8> key(40, 0);
         std::vector<uint8> configuredKey;
         if (TryParseHexBytes(std::getenv("AUTHNET_STARTUP_MODULE_KEY"), key.size(), configuredKey) ||
             TryParseHexBytes(std::getenv("AUTHNET_STARTUP_ACCOUNT_KEY"), key.size(), configuredKey))
+        {
+            if (keySource)
+                *keySource = "env";
             return configuredKey;
+        }
 
         std::string configuredKeyText = sConfigMgr->GetStringDefault("Authnet.StartupModuleKey", "");
         if (TryParseHexBytes(configuredKeyText.c_str(), key.size(), configuredKey))
+        {
+            if (keySource)
+                *keySource = "config";
             return configuredKey;
+        }
 
+        if (generatedKey.size() == key.size())
+        {
+            if (keySource)
+                *keySource = "generated";
+            return generatedKey;
+        }
+
+        if (keySource)
+            *keySource = "zero";
         return key;
     }
 
@@ -797,15 +815,19 @@ namespace
     }
 
     std::vector<uint8> BuildStartupResponseProbe(std::string const& worldAccountToken = std::string(),
+        std::vector<uint8> const& generatedStartupModuleKey = std::vector<uint8>(),
         bool* startupModuleIncluded = nullptr,
         std::string* startupModuleName = nullptr,
         std::vector<uint8>* startupModuleKey = nullptr,
+        char const** startupModuleKeySource = nullptr,
         std::string* worldAccountIdentity = nullptr)
     {
         Skyfire::Authnet::BitWriter writer;
         bool const includeStartupModule = ShouldSendStartupModuleProbe();
         std::string moduleName = includeStartupModule ? GetStartupModuleName() : std::string();
-        std::vector<uint8> moduleKey = includeStartupModule && !moduleName.empty() ? BuildStartupModuleKey() : std::vector<uint8>();
+        char const* moduleKeySource = "disabled";
+        std::vector<uint8> moduleKey = includeStartupModule && !moduleName.empty() ?
+            BuildStartupModuleKey(generatedStartupModuleKey, &moduleKeySource) : std::vector<uint8>();
         bool const sendStartupModule = includeStartupModule && !moduleName.empty();
 
         if (startupModuleIncluded)
@@ -814,6 +836,8 @@ namespace
             *startupModuleName = sendStartupModule ? moduleName : std::string();
         if (startupModuleKey)
             *startupModuleKey = moduleKey;
+        if (startupModuleKeySource)
+            *startupModuleKeySource = sendStartupModule ? moduleKeySource : "disabled";
 
         std::string authSessionIdentity = worldAccountToken.empty() ? GetConfiguredStartupWorldAccount() : worldAccountToken;
 
@@ -2358,8 +2382,8 @@ AuthnetSocket::AuthnetSocket(RealmSocket& socket) :
     socket_(socket), _encryptedBytesProcessed(0), _initialRequestLen(0), _authnetAccountId(0),
     _authnetLocaleId(0), _authnetWorldConnectionSeed(0), _authnetWorldRealmField(0),
     _authnetSelectedRealmField(0), _authnetLoginCompleteRealmField(0),
-    _authnetWorldSessionKey(), _authnetSecret(), _authnetWorldSessionKeyGenerated(false),
-    _authnetWorldSessionKeyPersisted(false), _clientCryptI(0), _clientCryptJ(0),
+    _authnetWorldSessionKey(), _authnetStartupModuleKey(), _authnetSecret(), _authnetWorldSessionKeyGenerated(false),
+    _authnetWorldSessionKeyPersisted(false), _authnetStartupModuleKeyGenerated(false), _clientCryptI(0), _clientCryptJ(0),
     _clientCryptInitialized(false), _serverCryptI(0), _serverCryptJ(0), _serverCryptInitialized(false),
     _responded(false), _httpResponded(false), _clientModeSwitchSeen(false), _followupLogged(false),
     _postSuccessBurstSeen(false), _mode1ConnectAnswered(false), _mode2LoginAnswered(false),
@@ -2508,11 +2532,22 @@ void AuthnetSocket::PrepareWorldSessionKey(std::string const& identity, std::str
     _authnetWorldAccountToken = BuildWorldAccountToken(accountId);
     _authnetLocaleId = GetLocaleByName(locale);
     _authnetOS = GetAuthnetOSFromPlatform(platform);
-    _authnetSecret.fill(0);
+    SkyFire::Crypto::GetRandomBytes(_authnetSecret);
     _authnetSelectedRealmField = ResolveAuthnetSelectedRealmField(accountId, BuildAuthnetRealmRoutes());
     _authnetLoginCompleteRealmField = _authnetSelectedRealmField;
 
     PersistAuthnetWorldSessionKey(0, _authnetSelectedRealmField, _authnetSelectedRealmField, "initial-login");
+}
+
+std::vector<uint8> AuthnetSocket::GetOrCreateStartupModuleKey(void)
+{
+    if (!_authnetStartupModuleKeyGenerated)
+    {
+        SkyFire::Crypto::GetRandomBytes(_authnetStartupModuleKey);
+        _authnetStartupModuleKeyGenerated = true;
+    }
+
+    return std::vector<uint8>(_authnetStartupModuleKey.begin(), _authnetStartupModuleKey.end());
 }
 
 void AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, uint32 selectedRealmField, char const* reason)
@@ -3088,68 +3123,89 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
         socket().getRemoteAddress().c_str(), socket().getRemotePort(), offset, plain.size(),
         ByteArrayToHexStr(plain).c_str());
 
-    if (plain.size() % EncryptedResourceLookupRequestLen == 0)
+    auto handleResourceLookupPacket = [this](std::vector<uint8> const& packet, size_t packetOffset) -> bool
     {
-        for (size_t pos = 0; pos < plain.size(); pos += EncryptedResourceLookupRequestLen)
+        ResourceLookupInfo lookup;
+        if (TryDecodeResourceLookup(packet, lookup))
         {
-            std::vector<uint8> packet(plain.begin() + pos, plain.begin() + pos + EncryptedResourceLookupRequestLen);
-            ResourceLookupInfo lookup;
-            if (TryDecodeResourceLookup(packet, lookup))
+            std::string payloadFirst = FourCCFromUInt32(lookup.payloadFirst);
+            std::string payloadSecond = FourCCFromUInt32(lookup.payloadSecond);
+
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: localized resource lookup packet_offset=%zu id=%u marker=0x%08X parent=0x%08X optional=%u type=%u locale=%s variant=%u payload0=%s payload1=%s payload0_raw=0x%08X payload1_raw=0x%08X word=0x%04X remaining_bits=%zu packet_len=%zu bits=%zu",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), packetOffset,
+                lookup.requestId, lookup.marker, lookup.parentRaw, lookup.optionalFlag, lookup.requestType,
+                lookup.locale.c_str(), lookup.variant, payloadFirst.c_str(), payloadSecond.c_str(),
+                lookup.payloadFirst, lookup.payloadSecond, lookup.payloadWord, lookup.remainingBits,
+                lookup.packetLength, lookup.bitLength);
+
+            char const* resourceResultMode = GetResourceResultMode();
+            if (IsResourceResultModeDisabled(resourceResultMode))
             {
-                std::string payloadFirst = FourCCFromUInt32(lookup.payloadFirst);
-                std::string payloadSecond = FourCCFromUInt32(lookup.payloadSecond);
-
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: localized resource lookup id=%u marker=0x%08X parent=0x%08X optional=%u type=%u locale=%s variant=%u payload0=%s payload1=%s payload0_raw=0x%08X payload1_raw=0x%08X word=0x%04X remaining_bits=%zu packet_len=%zu bits=%zu",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), lookup.requestId,
-                    lookup.marker, lookup.parentRaw, lookup.optionalFlag, lookup.requestType,
-                    lookup.locale.c_str(), lookup.variant, payloadFirst.c_str(), payloadSecond.c_str(),
-                    lookup.payloadFirst, lookup.payloadSecond, lookup.payloadWord, lookup.remainingBits,
-                    lookup.packetLength, lookup.bitLength);
-
-                char const* resourceResultMode = GetResourceResultMode();
-                if (IsResourceResultModeDisabled(resourceResultMode))
-                {
-                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: localized resource result id=%u disabled by AUTHNET_RESOURCE_RESULT_MODE=%s",
-                        socket().getRemoteAddress().c_str(), socket().getRemotePort(),
-                        lookup.requestId, resourceResultMode);
-                    continue;
-                }
-
-                std::vector<uint8> resourceKey;
-                uint32 resourceItemId = 0;
-                std::string resourceResultReason;
-                bool hasResourceItem = TryGetConfiguredResourceResult(lookup, resourceKey, resourceItemId, resourceResultReason);
-                if (!resourceResultReason.empty())
-                {
-                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: configured resource result id=%u decision=%s items=%u item_id=%u key=%s",
-                        socket().getRemoteAddress().c_str(), socket().getRemotePort(),
-                        lookup.requestId, resourceResultReason.c_str(), hasResourceItem ? 1u : 0u,
-                        resourceItemId, hasResourceItem ? ByteArrayToHexStr(resourceKey).c_str() : "");
-                }
-
-                SendEncryptedRequestResult(lookup.requestId, hasResourceItem ? &resourceKey : nullptr, resourceItemId);
-                continue;
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: localized resource result id=%u disabled by AUTHNET_RESOURCE_RESULT_MODE=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    lookup.requestId, resourceResultMode);
+                return true;
             }
 
-            uint32 requestId = 0;
-            if (TryDecodePostSuccessRequestId(packet, requestId))
+            std::vector<uint8> resourceKey;
+            uint32 resourceItemId = 0;
+            std::string resourceResultReason;
+            bool hasResourceItem = TryGetConfiguredResourceResult(lookup, resourceKey, resourceItemId, resourceResultReason);
+            if (!resourceResultReason.empty())
             {
-                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: decoded post-success request id=%u",
-                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), requestId);
-
-                char const* resourceResultMode = GetResourceResultMode();
-                if (IsResourceResultModeDisabled(resourceResultMode))
-                {
-                    SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success request id=%u result disabled by AUTHNET_RESOURCE_RESULT_MODE=%s",
-                        socket().getRemoteAddress().c_str(), socket().getRemotePort(), requestId, resourceResultMode);
-                    continue;
-                }
-
-                SendEncryptedRequestResult(requestId);
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: configured resource result id=%u decision=%s items=%u item_id=%u key=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    lookup.requestId, resourceResultReason.c_str(), hasResourceItem ? 1u : 0u,
+                    resourceItemId, hasResourceItem ? ByteArrayToHexStr(resourceKey).c_str() : "");
             }
+
+            SendEncryptedRequestResult(lookup.requestId, hasResourceItem ? &resourceKey : nullptr, resourceItemId);
+            return true;
         }
 
-        return;
+        uint32 requestId = 0;
+        if (TryDecodePostSuccessRequestId(packet, requestId))
+        {
+            SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: decoded post-success request packet_offset=%zu id=%u",
+                socket().getRemoteAddress().c_str(), socket().getRemotePort(), packetOffset, requestId);
+
+            char const* resourceResultMode = GetResourceResultMode();
+            if (IsResourceResultModeDisabled(resourceResultMode))
+            {
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: post-success request id=%u result disabled by AUTHNET_RESOURCE_RESULT_MODE=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(), requestId, resourceResultMode);
+                return true;
+            }
+
+            SendEncryptedRequestResult(requestId);
+            return true;
+        }
+
+        return false;
+    };
+
+    size_t resourceLookupBytes = 0;
+    while (plain.size() >= resourceLookupBytes + EncryptedResourceLookupRequestLen)
+    {
+        std::vector<uint8> packet(plain.begin() + resourceLookupBytes,
+            plain.begin() + resourceLookupBytes + EncryptedResourceLookupRequestLen);
+        if (!handleResourceLookupPacket(packet, resourceLookupBytes))
+            break;
+
+        resourceLookupBytes += EncryptedResourceLookupRequestLen;
+    }
+
+    if (resourceLookupBytes != 0)
+    {
+        if (resourceLookupBytes == plain.size())
+            return;
+
+        std::vector<uint8> remaining(plain.begin() + resourceLookupBytes, plain.end());
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: decrypted post-success resource prefix packets=%u trailing_len=%zu trailing=%s",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+            uint32(resourceLookupBytes / EncryptedResourceLookupRequestLen), remaining.size(),
+            ByteArrayToHexStr(remaining).c_str());
+        plain.swap(remaining);
     }
 
     ProbePacketHeader header = DecodeProbePacketHeader(plain);
@@ -3489,6 +3545,12 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
             }
         }
     }
+    else
+    {
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: decrypted post-success header undecoded len=%zu plain=%s",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), plain.size(),
+            ByteArrayToHexStr(plain).c_str());
+    }
 }
 
 void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
@@ -3569,16 +3631,18 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
         bool startupModuleIncluded = false;
         std::string startupModuleName;
         std::vector<uint8> startupModuleKey;
+        char const* startupModuleKeySource = "disabled";
         std::string worldAccountIdentity;
-        std::vector<uint8> response = BuildStartupResponseProbe(_authnetWorldAccountToken, &startupModuleIncluded,
-            &startupModuleName, &startupModuleKey, &worldAccountIdentity);
+        std::vector<uint8> response = BuildStartupResponseProbe(_authnetWorldAccountToken,
+            GetOrCreateStartupModuleKey(), &startupModuleIncluded, &startupModuleName, &startupModuleKey,
+            &startupModuleKeySource, &worldAccountIdentity);
         std::string startupModuleKeyHex = startupModuleKey.empty() ? std::string() : ByteArrayToHexStr(startupModuleKey);
         std::string responseHex = ByteArrayToHexStr(response);
 
-        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response module_seed=%u module_count=%u module_name=%s module_key=%s auth_session_identity=%s generated_key=%u persisted_key=%u plain=%s",
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response module_seed=%u module_count=%u module_name=%s module_key=%s module_key_source=%s auth_session_identity=%s generated_key=%u persisted_key=%u plain=%s",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), response.size(),
             startupModuleIncluded ? 1u : 0u, startupModuleIncluded ? 1u : 0u, startupModuleName.c_str(),
-            startupModuleKeyHex.c_str(), worldAccountIdentity.c_str(),
+            startupModuleKeyHex.c_str(), startupModuleKeySource, worldAccountIdentity.c_str(),
             _authnetWorldSessionKeyGenerated ? 1u : 0u, _authnetWorldSessionKeyPersisted ? 1u : 0u,
             responseHex.c_str());
 

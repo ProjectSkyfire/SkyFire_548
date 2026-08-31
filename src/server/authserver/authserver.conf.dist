@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026310608
+ConfVersion=2026310609
 
 ###################################################################################################
 # SECTION INDEX
@@ -117,8 +117,8 @@ Authnet.StartupModuleName = ""
 #
 #    Authnet.StartupModuleKey
 #        Description: 40-byte startup module-list key, encoded as 80 hex
-#                     characters. Leave empty to send a zero key while probing.
-#        Default:     "" - (Zero key)
+#                     characters. Leave empty to generate a per-session key.
+#        Default:     "" - (Generated per-session key)
 
 Authnet.StartupModuleKey = ""
 
