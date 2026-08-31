@@ -6,22 +6,17 @@
 #ifndef SF_ACCMGR_H
 #define SF_ACCMGR_H
 
+#include "Auth/AccountOpResult.h"
 #include "Common.h"
 #include "Platform/Singleton.h"
 #include "RBAC.h"
 
-enum class AccountOpResult
-{
-    AOR_OK,
-    AOR_NAME_TOO_LONG,
-    AOR_PASS_TOO_LONG,
-    AOR_EMAIL_TOO_LONG,
-    AOR_EMAIL_INVALID,
-    AOR_EMAIL_ALREADY_EXIST,
-    AOR_NAME_ALREADY_EXIST,
-    AOR_NAME_NOT_EXIST,
-    AOR_DB_INTERNAL_ERROR
-};
+// AccountOpResult, MAX_ACCOUNT_STR, and MAX_EMAIL_STR live in the shared,
+// dependency-free Auth/AccountOpResult module - deliberately not the full
+// Auth/AccountIdentity.h (which pulls in SRP6/OpenSSL), since AccountMgr.h
+// is included practically everywhere and doesn't need those declarations
+// itself; only AccountMgr.cpp's implementation does.
+using AccountOpResult = Skyfire::Auth::AccountOpResult;
 
 enum PasswordChangeSecurity
 {
@@ -37,9 +32,6 @@ struct AccountTwoFactorInfo
     std::string Secret;
     uint64 LastUsedStep = 0;
 };
-
-#define MAX_ACCOUNT_STR 16
-#define MAX_EMAIL_STR 64
 
 namespace rbac
 {
