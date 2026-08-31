@@ -31,12 +31,13 @@ private:
     void TrySendProbeResponse(size_t readOffset, size_t readSize);
     bool DecodeInitialRequest(void);
     void PrepareWorldSessionKey(std::string const& identity, std::string const& platform, std::string const& locale);
-    void PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, char const* reason);
+    void PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, uint32 selectedRealmField, char const* reason);
     bool TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8> const& packet);
     void ProcessEncryptedClientBytes(size_t encryptedFollowupOffset);
     void SendEncryptedRequestResult(uint32 requestId, std::vector<uint8> const* resourceKey = nullptr, uint32 resourceItemId = 0);
-    bool TrySendMode2Command0Probe(char const* trigger, bool sendFollowups);
-    void SendMode2LoginFollowups(char const* trigger);
+    uint32 GetAuthnetPreferredRealmField(void) const;
+    bool TrySendMode2Command0Probe(char const* trigger, bool sendFollowups, bool forceRealmList = false);
+    void SendMode2LoginFollowups(char const* trigger, bool forceRealmList = false);
     bool TrySendPostLoginMode1Sequence(char const* trigger);
     void CryptClientPayload(std::vector<uint8>& payload);
     void CryptServerPayload(std::vector<uint8>& payload);
@@ -48,6 +49,8 @@ private:
     uint32 _authnetLocaleId;
     uint32 _authnetWorldConnectionSeed;
     uint32 _authnetWorldRealmField;
+    uint32 _authnetSelectedRealmField;
+    uint32 _authnetLoginCompleteRealmField;
     std::string _authnetAccountName;
     std::string _authnetOS;
     std::string _authnetWorldAccountToken;
