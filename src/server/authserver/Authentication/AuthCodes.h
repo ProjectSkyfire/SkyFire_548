@@ -98,6 +98,20 @@ enum class AuthMigrateResult : uint8
     MIGRATE_FAILED = 0xFF
 };
 
+// Wire result for AUTH_AUTHNET_LOGIN_GRANT, a launcher-only pre-login
+// command that validates account credentials before the authnet game flow
+// is allowed to continue.
+enum class AuthnetLoginGrantResult : uint8
+{
+    GRANT_OK = 0x00,
+    GRANT_NAME_NOT_EXIST = 0x01,
+    GRANT_PASS_INCORRECT = 0x02,
+    GRANT_PASS_TOO_LONG = 0x03,
+    GRANT_IDENTITY_INVALID = 0x04,
+    GRANT_ACCOUNT_BANNED = 0x05,
+    GRANT_FAILED = 0xFF
+};
+
 enum ExpansionFlags
 {
     POST_BC_EXP_FLAG = 0x2,

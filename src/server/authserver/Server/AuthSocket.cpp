@@ -7,6 +7,7 @@
 
 #include "Auth/AccountIdentity.h"
 #include "AuthCodes.h"
+#include "AuthnetLoginGrant.h"
 #include "AuthPatchTransfer.h"
 #include "AuthSocket.h"
 #include "ByteBuffer.h"
@@ -34,7 +35,9 @@ enum eAuthCmd
     XFER_CANCEL = 0x34,
     // Launcher-facing pre-login account migration (authnet). Not part of the
     // classic GRUNT protocol - a real WoW client never sends this.
-    AUTH_MIGRATE_ACCOUNT = 0x40
+    AUTH_MIGRATE_ACCOUNT = 0x40,
+    // Launcher-facing authnet login grant. A real WoW client never sends this.
+    AUTH_AUTHNET_LOGIN_GRANT = 0x41
 };
 
 enum eStatus
@@ -131,10 +134,11 @@ const AuthHandler table[] =
     { XFER_ACCEPT,              STATUS_CONNECTED, &AuthSocket::_HandleXferAccept        },
     { XFER_RESUME,              STATUS_CONNECTED, &AuthSocket::_HandleXferResume        },
     { XFER_CANCEL,              STATUS_CONNECTED, &AuthSocket::_HandleXferCancel        },
-    { AUTH_MIGRATE_ACCOUNT,     STATUS_CONNECTED, &AuthSocket::_HandleMigrateAccount    }
+    { AUTH_MIGRATE_ACCOUNT,     STATUS_CONNECTED, &AuthSocket::_HandleMigrateAccount    },
+    { AUTH_AUTHNET_LOGIN_GRANT, STATUS_CONNECTED, &AuthSocket::_HandleAuthnetLoginGrant }
 };
 
-#define AUTH_TOTAL_COMMANDS 9
+#define AUTH_TOTAL_COMMANDS 10
 
 namespace
 {
@@ -233,6 +237,45 @@ namespace
                 socket.getRemoteAddress().c_str(), socket.getRemotePort(),
                 socket.getRemoteAddress().c_str(), wrongPassBanTime, login.c_str(), failedLogins);
         }
+    }
+
+    uint32 GetAuthnetLoginGrantTtlSeconds()
+    {
+        int32 ttl = sConfigMgr->GetIntDefault("Authnet.LoginGrantTTL", 60);
+        if (ttl <= 0)
+            return 60;
+
+        return uint32(std::min<int32>(ttl, 600));
+    }
+
+    bool TryResolveAuthnetGrantIdentity(std::string const& identity, uint32& accountId, std::string& accountName)
+    {
+        Skyfire::Auth::LoginIdentity const loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(identity);
+        if (!loginIdentity.Valid)
+            return false;
+
+        if (loginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email)
+        {
+            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_SESSIONKEY_BY_LOGIN_IDENTITY);
+            stmt->setString(0, loginIdentity.Canonical);
+            stmt->setString(1, loginIdentity.Canonical);
+            stmt->setString(2, loginIdentity.Canonical);
+
+            PreparedQueryResult result = LoginDatabase.Query(stmt);
+            if (!result)
+                return false;
+
+            Field* fields = result->Fetch();
+            accountId = fields[1].GetUInt32();
+            accountName = fields[3].GetString();
+        }
+        else
+        {
+            accountId = Skyfire::Auth::GetId(identity);
+            accountName = identity;
+        }
+
+        return accountId != 0;
     }
 }
 
@@ -1146,4 +1189,127 @@ bool AuthSocket::_HandleMigrateAccount()
     char response[2] = { char(uint8(AUTH_MIGRATE_ACCOUNT)), char(uint8(result)) };
     socket().QueueSend(response, sizeof(response));
     return true;
+}
+
+// Launcher-facing pre-login authnet grant. Validates the account password on
+// the classic auth port, then grants the next authnet game connection from
+// the same address permission to continue past startup.
+//
+// Wire format, request: cmd(1) + size(uint16 LE, bytes following) +
+//   [len(1) + identity] + [len(1) + password]
+// Wire format, response: cmd(1) + AuthnetLoginGrantResult(1) + ttl(uint32 LE)
+bool AuthSocket::_HandleAuthnetLoginGrant()
+{
+    SF_LOG_DEBUG("server.authserver", "Entering _HandleAuthnetLoginGrant");
+
+    auto queueResponse = [this](AuthnetLoginGrantResult result, uint32 ttlSeconds = 0) -> bool
+    {
+        char response[6] =
+        {
+            char(uint8(AUTH_AUTHNET_LOGIN_GRANT)),
+            char(uint8(result)),
+            char(uint8(ttlSeconds & 0xFF)),
+            char(uint8((ttlSeconds >> 8) & 0xFF)),
+            char(uint8((ttlSeconds >> 16) & 0xFF)),
+            char(uint8((ttlSeconds >> 24) & 0xFF))
+        };
+
+        socket().QueueSend(response, sizeof(response));
+        return true;
+    };
+
+    const size_t headerSize = 3; // cmd(1) + size(2)
+    if (socket().GetAvailableBytes() < headerSize)
+        return false;
+
+    std::vector<uint8> header(headerSize);
+    if (!socket().PeekBytes(&header[0], header.size()))
+        return false;
+
+    uint16 bodySize = uint16(header[1]) | (uint16(header[2]) << 8);
+    const uint16 maxBodySize = uint16((1 + MAX_EMAIL_STR) + (1 + MAX_ACCOUNT_STR));
+    if (bodySize > maxBodySize)
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' Authnet login grant request too large (%u bytes)",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), bodySize);
+        socket().Close();
+        return false;
+    }
+
+    if (socket().GetAvailableBytes() < headerSize + bodySize)
+        return false;
+
+    std::vector<uint8> packet(headerSize + bodySize);
+    if (!socket().ReadBytes(&packet[0], packet.size()))
+        return false;
+
+    size_t offset = headerSize;
+    bool identityTooLong = false;
+    bool passwordTooLong = false;
+    auto readField = [&packet, &offset](std::string& out, size_t maxLen, bool& tooLong) -> bool
+    {
+        if (offset >= packet.size())
+            return false;
+
+        uint8 len = packet[offset++];
+        if (offset + len > packet.size())
+            return false;
+
+        if (len > maxLen)
+        {
+            tooLong = true;
+            return false;
+        }
+
+        out.assign(reinterpret_cast<char const*>(&packet[offset]), len);
+        offset += len;
+        return true;
+    };
+
+    std::string identity, password;
+    if (!readField(identity, MAX_EMAIL_STR, identityTooLong) ||
+        !readField(password, MAX_ACCOUNT_STR, passwordTooLong))
+    {
+        if (passwordTooLong)
+            return queueResponse(AuthnetLoginGrantResult::GRANT_PASS_TOO_LONG);
+
+        if (identityTooLong)
+            return queueResponse(AuthnetLoginGrantResult::GRANT_IDENTITY_INVALID);
+
+        SF_LOG_ERROR("server.authserver", "'%s:%d' Malformed authnet login grant request",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort());
+        socket().Close();
+        return false;
+    }
+
+    Skyfire::Auth::LoginIdentity const loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(identity);
+    if (!loginIdentity.Valid)
+        return queueResponse(AuthnetLoginGrantResult::GRANT_IDENTITY_INVALID);
+
+    uint32 accountId = 0;
+    std::string accountName;
+    if (!TryResolveAuthnetGrantIdentity(identity, accountId, accountName))
+        return queueResponse(AuthnetLoginGrantResult::GRANT_NAME_NOT_EXIST);
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_ACCOUNT_BANNED);
+    stmt->setUInt32(0, accountId);
+    if (LoginDatabase.Query(stmt))
+        return queueResponse(AuthnetLoginGrantResult::GRANT_ACCOUNT_BANNED);
+
+    if (!Skyfire::Auth::CheckPassword(accountId, password))
+    {
+        RecordFailedLogon(accountId, identity, socket());
+        SF_LOG_DEBUG("server.authserver", "'%s:%d' Authnet login grant denied for account %u (%s): invalid password",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), accountId, accountName.c_str());
+        return queueResponse(AuthnetLoginGrantResult::GRANT_PASS_INCORRECT);
+    }
+
+    uint32 const ttlSeconds = GetAuthnetLoginGrantTtlSeconds();
+    if (!Skyfire::Authnet::IssueLoginGrant(accountId, socket().getRemoteAddress(), ttlSeconds))
+        return queueResponse(AuthnetLoginGrantResult::GRANT_FAILED);
+
+    SF_LOG_INFO("server.authserver", "'%s:%d' Authnet login grant issued for account %u (%s), ttl=%u",
+        socket().getRemoteAddress().c_str(), socket().getRemotePort(), accountId, accountName.c_str(), ttlSeconds);
+
+    return queueResponse(AuthnetLoginGrantResult::GRANT_OK, ttlSeconds);
 }

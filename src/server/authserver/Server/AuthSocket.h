@@ -35,6 +35,7 @@ public:
     bool _HandleReconnectProof();
     bool _HandleRealmList();
     bool _HandleMigrateAccount();
+    bool _HandleAuthnetLoginGrant();
 
     //data transfer handle for patch
     bool _HandleXferResume();

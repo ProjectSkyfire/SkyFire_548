@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026310606
+ConfVersion=2026310607
 
 ###################################################################################################
 # SECTION INDEX
@@ -65,14 +65,34 @@ BindIP = "0.0.0.0"
 #
 #    Authnet.Enabled
 #        Description: Enable the authnet listener (launcher-facing,
-#                      authnet-style login). Passive probe only for now -
-#                      logs the first frame's header from each connection
-#                      and closes; does not yet authenticate anything.
+#                      authnet-style login). Experimental and not production
+#                      ready; handles the current launcher authnet flow while
+#                      the protocol work is still being finalized.
 #                      The classic GRUNT listener (RealmServerPort/BindIP
 #                      above) is unaffected either way.
 #        Default:     0 - (Disabled)
 
 Authnet.Enabled = 0
+
+#
+#    Authnet.AllowUnverifiedLogin
+#        Description: Allows identity-only authnet sessions to receive a
+#                     success response and world handoff token without a
+#                     validated password proof.
+#                     This is unsafe and only useful for local protocol
+#                     research while the authnet proof flow is unfinished.
+#        Default:     0 - (Disabled)
+
+Authnet.AllowUnverifiedLogin = 0
+
+#
+#    Authnet.LoginGrantTTL
+#        Description: Lifetime in seconds for a launcher-issued authnet login
+#                     grant. The grant is one-use and must be consumed by the
+#                     game client's authnet connection from the same address.
+#        Default:     60
+
+Authnet.LoginGrantTTL = 60
 
 #
 #    Authnet.BindIP

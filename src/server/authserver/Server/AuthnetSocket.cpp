@@ -4,9 +4,11 @@
 */
 
 #include "AuthnetSocket.h"
+#include "AuthnetLoginGrant.h"
 #include "Auth/LoginIdentity.h"
 #include "Authentication/BsnBitStream.h"
 #include "Common.h"
+#include "Configuration/Config.h"
 #include "Database/DatabaseEnv.h"
 #include "HMAC.h"
 #include "Log.h"
@@ -689,7 +691,13 @@ namespace
 
     bool ShouldGenerateWorldSessionKey()
     {
-        return StringEnabled(std::getenv("AUTHNET_GENERATE_WORLD_SESSION_KEY"));
+        return StringEnabled(GetEnvOrDefault("AUTHNET_GENERATE_WORLD_SESSION_KEY", "1"));
+    }
+
+    bool ShouldAllowUnverifiedAuthnetLogin()
+    {
+        return sConfigMgr->GetBoolDefault("Authnet.AllowUnverifiedLogin", false) ||
+            StringEnabled(std::getenv("AUTHNET_ALLOW_UNVERIFIED_LOGIN"));
     }
 
     std::string GetConfiguredStartupWorldAccount()
@@ -888,7 +896,7 @@ namespace
             return BuildLoginAuthRealmListProbe(defaultRealmField);
         }
 
-        responseMode = GetEnvOrDefault("AUTHNET_MODE2_COMMAND0_RESPONSE", "status");
+        responseMode = GetEnvOrDefault("AUTHNET_MODE2_COMMAND0_RESPONSE", "realms");
         if (StringEquals(responseMode, "none") || StringEquals(responseMode, "skip") || StringEquals(responseMode, "off"))
             return {};
 
@@ -928,7 +936,7 @@ namespace
 
     char const* GetMode2Command2ResponseMode()
     {
-        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_RESPONSE", "none");
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND2_RESPONSE", "realms");
     }
 
     bool ShouldSendMode2Command2DetailProbe(char const* mode)
@@ -960,7 +968,7 @@ namespace
 
     char const* GetMode2Command3ResponseMode()
     {
-        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND3_RESPONSE", "none");
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND3_RESPONSE", "empty");
     }
 
     uint32 GetMode2Command3DelayMs()
@@ -1001,7 +1009,7 @@ namespace
 
     char const* GetMode2Command8ResponseMode()
     {
-        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_RESPONSE", "none");
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_RESPONSE", "structured");
     }
 
     bool ShouldSendMode2Command8StructuredProbe(char const* mode)
@@ -1034,12 +1042,12 @@ namespace
 
     uint32 GetMode2Command8RepeatCount()
     {
-        return std::min<uint32>(GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REPEAT_COUNT", 0), 4);
+        return std::min<uint32>(GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REPEAT_COUNT", 1), 4);
     }
 
     uint32 GetMode2Command8RepeatDelayMs()
     {
-        return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REPEAT_DELAY_MS", 0);
+        return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_REPEAT_DELAY_MS", 3500);
     }
 
     bool ShouldSendMode2Command8RepeatAsync()
@@ -1239,7 +1247,7 @@ namespace
         if (StringEquals(GetMode2Command8ResponseMode(), "empty-structured"))
             return 0;
 
-        if (StringEquals(GetEnvOrDefault("AUTHNET_MODE2_COMMAND0_RESPONSE", "status"), "single-list"))
+        if (StringEquals(GetEnvOrDefault("AUTHNET_MODE2_COMMAND0_RESPONSE", "realms"), "single-list"))
             return 1;
 
         if (!routes.empty())
@@ -1635,7 +1643,7 @@ namespace
 
     char const* GetMode1Command6ResponseMode()
     {
-        return GetEnvOrDefault("AUTHNET_MODE1_COMMAND6_RESPONSE", "none");
+        return GetEnvOrDefault("AUTHNET_MODE1_COMMAND6_RESPONSE", "realm-list");
     }
 
     uint16 GetMode1Command6Status()
@@ -2417,8 +2425,45 @@ bool AuthnetSocket::DecodeInitialRequest(void)
         request.hasIdentity ? "yes" : "no", request.identityLength, request.identity.c_str(),
         request.tailValue, _initialRequestLen, request.bitLength);
 
-    if (request.hasIdentity)
-        PrepareWorldSessionKey(request.identity, request.platform, request.locale);
+    if (!request.hasIdentity)
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: initial request has no identity; closing.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort());
+        socket().Close();
+        _responded = true;
+        return true;
+    }
+
+    uint32 accountId = 0;
+    std::string accountName;
+    bool const identityResolved = TryResolveAuthnetLoginIdentity(request.identity, accountId, accountName);
+    if (!identityResolved)
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: refusing authnet login for unknown identity '%s'.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), request.identity.c_str());
+
+        socket().Close();
+        _responded = true;
+        return true;
+    }
+
+    bool const loginGrantConsumed = Skyfire::Authnet::ConsumeLoginGrant(accountId, socket().getRemoteAddress());
+    if (!loginGrantConsumed && !ShouldAllowUnverifiedAuthnetLogin())
+    {
+        SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: refusing identity-only authnet login for account %u (%s); no validated login grant was available.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), accountId, accountName.c_str());
+        socket().Close();
+        _responded = true;
+        return true;
+    }
+
+    if (!loginGrantConsumed)
+    {
+        SF_LOG_WARN("server.authserver", "'%s:%d' authnet probe: allowing unverified identity-only login for '%s' because the local research override is enabled.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), request.identity.c_str());
+    }
+
+    PrepareWorldSessionKey(request.identity, request.platform, request.locale);
 
     return true;
 }

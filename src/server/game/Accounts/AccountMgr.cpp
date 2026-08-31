@@ -8,6 +8,7 @@
 
 #include "AccountMgr.h"
 #include "Auth/AccountIdentity.h"
+#include "Auth/LoginIdentity.h"
 #include "Auth/TOTP.h"
 #include "CryptoHash.h"
 #include "Config.h"
@@ -25,17 +26,29 @@ AccountMgr::~AccountMgr()
     ClearRBAC();
 }
 
-AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password, std::string email = "")
+AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password, std::string email)
 {
     if (utf8length(username) > MAX_ACCOUNT_STR)
         return AccountOpResult::AOR_NAME_TOO_LONG;                           // username's too long
 
+    if (utf8length(password) > MAX_ACCOUNT_STR)
+        return AccountOpResult::AOR_PASS_TOO_LONG;
+
+    if (utf8length(email) > MAX_EMAIL_STR)
+        return AccountOpResult::AOR_EMAIL_TOO_LONG;
+
+    Skyfire::Auth::LoginIdentity loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(email);
+    if (!loginIdentity.Valid || loginIdentity.Kind != Skyfire::Auth::LoginIdentityKind::Email)
+        return AccountOpResult::AOR_EMAIL_INVALID;
+
     normalizeString(username);
     normalizeString(password);
-    normalizeString(email);
 
     if (GetId(username))
         return AccountOpResult::AOR_NAME_ALREADY_EXIST;                       // username does already exist
+
+    if (Skyfire::Auth::IsEmailLoginAssignedToAnotherAccount(0, loginIdentity.Canonical))
+        return AccountOpResult::AOR_EMAIL_ALREADY_EXIST;
 
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_INS_ACCOUNT);
 
@@ -43,8 +56,8 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     auto [salt, verifier] = SkyFire::Crypto::SRP6::MakeRegistrationData(username, password);
     stmt->setBinary(1, salt);
     stmt->setBinary(2, verifier);
-    stmt->setString(3, email);
-    stmt->setString(4, email);
+    stmt->setString(3, loginIdentity.Original);
+    stmt->setString(4, loginIdentity.Original);
 
     LoginDatabase.DirectExecute(stmt); // Enforce saving, otherwise AddGroup can fail
     uint32 const accountId = GetId(username);
