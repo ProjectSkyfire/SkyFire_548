@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026310607
+ConfVersion=2026310608
 
 ###################################################################################################
 # SECTION INDEX
@@ -93,6 +93,34 @@ Authnet.AllowUnverifiedLogin = 0
 #        Default:     60
 
 Authnet.LoginGrantTTL = 60
+
+#
+#    Authnet.StartupModuleSeed
+#        Description: Include one startup module-list seed in the initial
+#                     authnet response. This is experimental and is used to
+#                     test the clean-client startup path without the temporary
+#                     socket helper.
+#        Default:     0 - (Disabled)
+
+Authnet.StartupModuleSeed = 0
+
+#
+#    Authnet.StartupModuleName
+#        Description: Name attached to the experimental startup module-list
+#                     seed when Authnet.StartupModuleSeed is enabled. This must
+#                     be a support module filename present in the client folder;
+#                     an empty value disables the seed even when the toggle is on.
+#        Default:     "" - (Disabled)
+
+Authnet.StartupModuleName = ""
+
+#
+#    Authnet.StartupModuleKey
+#        Description: 40-byte startup module-list key, encoded as 80 hex
+#                     characters. Leave empty to send a zero key while probing.
+#        Default:     "" - (Zero key)
+
+Authnet.StartupModuleKey = ""
 
 #
 #    Authnet.BindIP

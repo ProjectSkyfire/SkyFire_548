@@ -665,28 +665,46 @@ namespace
         return body;
     }
 
-    std::string GetStartupAccountName()
+    std::string GetStartupModuleName()
     {
-        std::string accountName = GetEnvOrDefault("AUTHNET_STARTUP_ACCOUNT_NAME", "WoW1");
-        if (accountName.size() > 0x3FC)
-            accountName.resize(0x3FC);
+        std::string moduleName;
+        if (HasEnvValue("AUTHNET_STARTUP_MODULE_NAME"))
+            moduleName = std::getenv("AUTHNET_STARTUP_MODULE_NAME");
+        else if (HasEnvValue("AUTHNET_STARTUP_ACCOUNT_NAME"))
+            moduleName = std::getenv("AUTHNET_STARTUP_ACCOUNT_NAME");
+        else
+            moduleName = sConfigMgr->GetStringDefault("Authnet.StartupModuleName", "");
 
-        return accountName;
+        if (moduleName.size() > 0x3FC)
+            moduleName.resize(0x3FC);
+
+        return moduleName;
     }
 
-    std::vector<uint8> BuildStartupAccountKey()
+    std::vector<uint8> BuildStartupModuleKey()
     {
         std::vector<uint8> key(40, 0);
         std::vector<uint8> configuredKey;
-        if (TryParseHexBytes(std::getenv("AUTHNET_STARTUP_ACCOUNT_KEY"), key.size(), configuredKey))
+        if (TryParseHexBytes(std::getenv("AUTHNET_STARTUP_MODULE_KEY"), key.size(), configuredKey) ||
+            TryParseHexBytes(std::getenv("AUTHNET_STARTUP_ACCOUNT_KEY"), key.size(), configuredKey))
+            return configuredKey;
+
+        std::string configuredKeyText = sConfigMgr->GetStringDefault("Authnet.StartupModuleKey", "");
+        if (TryParseHexBytes(configuredKeyText.c_str(), key.size(), configuredKey))
             return configuredKey;
 
         return key;
     }
 
-    bool ShouldSendStartupAccountProbe(char const* mode)
+    bool ShouldSendStartupModuleProbe()
     {
-        return StringEnabled(mode);
+        if (HasEnvValue("AUTHNET_STARTUP_MODULE_RESPONSE"))
+            return StringEnabled(std::getenv("AUTHNET_STARTUP_MODULE_RESPONSE"));
+
+        if (HasEnvValue("AUTHNET_STARTUP_ACCOUNT_RESPONSE"))
+            return StringEnabled(std::getenv("AUTHNET_STARTUP_ACCOUNT_RESPONSE"));
+
+        return sConfigMgr->GetBoolDefault("Authnet.StartupModuleSeed", false);
     }
 
     bool ShouldGenerateWorldSessionKey()
@@ -779,20 +797,23 @@ namespace
     }
 
     std::vector<uint8> BuildStartupResponseProbe(std::string const& worldAccountToken = std::string(),
-        std::string* startupAccountName = nullptr,
-        std::vector<uint8>* startupAccountKey = nullptr,
+        bool* startupModuleIncluded = nullptr,
+        std::string* startupModuleName = nullptr,
+        std::vector<uint8>* startupModuleKey = nullptr,
         std::string* worldAccountIdentity = nullptr)
     {
         Skyfire::Authnet::BitWriter writer;
-        char const* accountMode = GetEnvOrDefault("AUTHNET_STARTUP_ACCOUNT_RESPONSE", "none");
-        bool const includeAccount = ShouldSendStartupAccountProbe(accountMode);
-        std::string accountName = includeAccount ? GetStartupAccountName() : std::string();
-        std::vector<uint8> accountKey = includeAccount ? BuildStartupAccountKey() : std::vector<uint8>();
+        bool const includeStartupModule = ShouldSendStartupModuleProbe();
+        std::string moduleName = includeStartupModule ? GetStartupModuleName() : std::string();
+        std::vector<uint8> moduleKey = includeStartupModule && !moduleName.empty() ? BuildStartupModuleKey() : std::vector<uint8>();
+        bool const sendStartupModule = includeStartupModule && !moduleName.empty();
 
-        if (startupAccountName)
-            *startupAccountName = accountName;
-        if (startupAccountKey)
-            *startupAccountKey = accountKey;
+        if (startupModuleIncluded)
+            *startupModuleIncluded = sendStartupModule;
+        if (startupModuleName)
+            *startupModuleName = sendStartupModule ? moduleName : std::string();
+        if (startupModuleKey)
+            *startupModuleKey = moduleKey;
 
         std::string authSessionIdentity = worldAccountToken.empty() ? GetConfiguredStartupWorldAccount() : worldAccountToken;
 
@@ -804,12 +825,12 @@ namespace
         writer.WriteBits(0x00, 4);
 
         writer.WriteBits(0, 1);
-        writer.WriteBits(includeAccount ? 1 : 0, 3);
-        if (includeAccount)
+        writer.WriteBits(sendStartupModule ? 1 : 0, 3);
+        if (sendStartupModule)
         {
-            writer.WriteBytes(accountKey.data(), accountKey.size());
-            writer.WriteBits(uint32(accountName.size()), 10);
-            writer.WriteBytes(accountName.data(), accountName.size());
+            writer.WriteBytes(moduleKey.data(), moduleKey.size());
+            writer.WriteBits(uint32(moduleName.size()), 10);
+            writer.WriteBytes(moduleName.data(), moduleName.size());
         }
 
         writer.WriteUInt32(0x8000C350);
@@ -3545,18 +3566,19 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
 
     if (!_responded)
     {
-        std::string startupAccountName;
-        std::vector<uint8> startupAccountKey;
+        bool startupModuleIncluded = false;
+        std::string startupModuleName;
+        std::vector<uint8> startupModuleKey;
         std::string worldAccountIdentity;
-        std::vector<uint8> response = BuildStartupResponseProbe(_authnetWorldAccountToken, &startupAccountName, &startupAccountKey,
-            &worldAccountIdentity);
-        std::string startupAccountKeyHex = startupAccountKey.empty() ? std::string() : ByteArrayToHexStr(startupAccountKey);
+        std::vector<uint8> response = BuildStartupResponseProbe(_authnetWorldAccountToken, &startupModuleIncluded,
+            &startupModuleName, &startupModuleKey, &worldAccountIdentity);
+        std::string startupModuleKeyHex = startupModuleKey.empty() ? std::string() : ByteArrayToHexStr(startupModuleKey);
         std::string responseHex = ByteArrayToHexStr(response);
 
-        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response account_count=%u account_name=%s account_key=%s auth_session_identity=%s generated_key=%u persisted_key=%u plain=%s",
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: initial request detected, sending startup response candidate %zu-byte response module_seed=%u module_count=%u module_name=%s module_key=%s auth_session_identity=%s generated_key=%u persisted_key=%u plain=%s",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), response.size(),
-            startupAccountName.empty() ? 0u : 1u, startupAccountName.c_str(),
-            startupAccountKeyHex.c_str(), worldAccountIdentity.c_str(),
+            startupModuleIncluded ? 1u : 0u, startupModuleIncluded ? 1u : 0u, startupModuleName.c_str(),
+            startupModuleKeyHex.c_str(), worldAccountIdentity.c_str(),
             _authnetWorldSessionKeyGenerated ? 1u : 0u, _authnetWorldSessionKeyPersisted ? 1u : 0u,
             responseHex.c_str());
 
