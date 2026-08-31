@@ -386,7 +386,7 @@ namespace
                     case 5:
                         return "PostLoginTransition";
                     case 6:
-                        return "RealmListCancelOrDisconnect";
+                        return "RealmListRefreshOrDisconnect";
                     case 9:
                         return "ServiceLookupRequest";
                     default:
@@ -3273,6 +3273,25 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
                 SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: %s (mode1 command6) observed; response disabled by AUTHNET_MODE1_COMMAND6_RESPONSE=%s",
                     socket().getRemoteAddress().c_str(), socket().getRemotePort(),
                     AuthnetPacketName(1, 6, 1), responseMode);
+                return;
+            }
+
+            if (StringEquals(responseMode, "realm-list") || StringEquals(responseMode, "realms") ||
+                StringEquals(responseMode, "mode2-realms") || StringEquals(responseMode, "mode2-followups"))
+            {
+                _mode2LoginAnswered = false;
+                _mode2Command2Answered = false;
+                _mode2Command3Answered = false;
+                _mode2Command6Answered = false;
+                _mode2Command7Answered = false;
+                _mode2Command8Answered = false;
+                _mode2Command8PostCommand6Scheduled = false;
+
+                SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: %s (mode1 command6) replaying realm-list sequence by AUTHNET_MODE1_COMMAND6_RESPONSE=%s",
+                    socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+                    AuthnetPacketName(1, 6, 1), responseMode);
+
+                TrySendMode2Command0Probe("mode1 command6", true);
                 return;
             }
 
