@@ -54,6 +54,9 @@ public:
 
     void UpdateIfNeed();
 
+    // Probe-driven: set or clear REALM_FLAG_OFFLINE in memory and auth.realmlist.
+    void SetRealmOffline(uint32 realmId, bool offline);
+
     void AddRealm(const Realm& NewRealm) { m_realms[NewRealm.name] = NewRealm; }
 
     RealmMap::const_iterator begin() const { return m_realms.begin(); }

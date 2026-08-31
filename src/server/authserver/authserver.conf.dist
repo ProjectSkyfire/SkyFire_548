@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026310605
+ConfVersion=2026310606
 
 ###################################################################################################
 # SECTION INDEX
@@ -61,6 +61,39 @@ RealmServerPort = 3724
 #        Default:     "0.0.0.0" - (Bind to all IPs on the system)
 
 BindIP = "0.0.0.0"
+
+#
+#    Authnet.Enabled
+#        Description: Enable the authnet listener (launcher-facing,
+#                      Battle.net v2-style login on port 1119). Soft login
+#                      uses this port; classic GRUNT (RealmServerPort)
+#                      is unaffected. Soft2 identity is the email from the
+#                      client login packet (any account in
+#                      account_login_identity). Soft2 password is shared
+#                      from authnet_srp_password.txt next to authserver.exe
+#                      (AUTHNET_SRP_PASSWORD overrides). Soft0 is off:
+#                      after Soft2 the client opens .logon.battle.net;
+#                      SkyFire Launcher Soft mode must DNS-redirect that
+#                      host here (do not apply classic LoginFlowPatches)
+#                      and force kAuthnetFixedProp205 in Wow-64 so Soft2
+#                      629D0 matches. World AuthSession token is "A".
+#        Default:     0 - (Disabled)
+
+Authnet.Enabled = 0
+
+#
+#    Authnet.BindIP
+#        Description: Bind the authnet listener to IP/hostname.
+#        Default:     "0.0.0.0" - (Bind to all IPs on the system)
+
+Authnet.BindIP = "0.0.0.0"
+
+#
+#    Authnet.Port
+#        Description: TCP port for the authnet listener.
+#        Default:     1119
+
+Authnet.Port = 1119
 
 #
 #    PidFile

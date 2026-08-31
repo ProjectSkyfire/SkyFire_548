@@ -36,6 +36,14 @@ namespace SkyFire::Impl
             static constexpr size_t DIGEST_LENGTH = DigestLength;
             using Digest = std::array<uint8, DIGEST_LENGTH>;
 
+            static char const* DigestName()
+            {
+                if constexpr (DigestLength == 32)
+                    return "SHA256";
+                else
+                    return "SHA1";
+            }
+
             template <typename Container>
             static Digest GetDigestOf(Container const& seed, uint8 const* data, size_t len)
             {
@@ -56,6 +64,8 @@ namespace SkyFire::Impl
 
             GenericHMAC(uint8 const* seed, size_t len) : _mac(HMACImpl::MakeMAC()), _ctx(HMACImpl::MakeCTX(_mac))
             {
+                _params[0] = OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>(DigestName()), 0);
+                _params[1] = OSSL_PARAM_construct_end();
                 int result = EVP_MAC_init(_ctx, seed, len, _params);
                 ASSERT(result == 1);
             }
@@ -100,7 +110,7 @@ namespace SkyFire::Impl
             EVP_MAC* _mac;
             EVP_MAC_CTX* _ctx;
             Digest _digest = { };
-            OSSL_PARAM _params[2] = { OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>("SHA1"), 0), OSSL_PARAM_construct_end() };
+            OSSL_PARAM _params[2] = {};
     };
 }
 

@@ -44,7 +44,10 @@ public:
     bool ReadBytes(void* buf, size_t len);
     void DiscardBytes(size_t len);
 
-    bool QueueSend(void const* buf, size_t len);
+    bool QueueSend(void const* buf, size_t len, bool closeWhenSent = false);
+
+    boost::asio::any_io_executor GetExecutor() const;
+    void SetTcpNoDelay(bool enable);
 
     const std::string& getRemoteAddress(void) const;
     uint16 getRemotePort(void) const;
@@ -77,6 +80,7 @@ private:
     uint16 _remotePort;
     std::deque<std::vector<char>> _writeQueue;
     bool _writeInProgress;
+    bool _closeWhenWritesFlush;
     std::atomic<bool> _closed;
     std::atomic<bool> _closeNotified;
 };

@@ -7,8 +7,9 @@
 #include "Network/BoostAsioUtils.h"
 #include "RealmSocket.h"
 #include <boost/asio/buffer.hpp>
+#include <boost/asio/dispatch.hpp>
 #include <boost/asio/error.hpp>
-#include <boost/asio/post.hpp>
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/write.hpp>
 #include <algorithm>
 #include <cstring>
@@ -50,7 +51,7 @@ RealmSocket::Session::~Session(void) { }
 RealmSocket::RealmSocket(std::unique_ptr<RealmSocketHandle> socket, std::string remoteAddress, uint16 remotePort) :
     _socket(std::move(socket)), _readBuffer(), _inputBuffer(), _inputReadPos(0), _session(),
     _remoteAddress(std::move(remoteAddress)), _packetLogAccountName(), _remotePort(remotePort), _writeQueue(),
-    _writeInProgress(false), _closed(false), _closeNotified(false)
+    _writeInProgress(false), _closeWhenWritesFlush(false), _closed(false), _closeNotified(false)
 {
     _inputBuffer.reserve(4096);
 }
@@ -81,6 +82,23 @@ const std::string& RealmSocket::getRemoteAddress(void) const
 uint16 RealmSocket::getRemotePort(void) const
 {
     return _remotePort;
+}
+
+boost::asio::any_io_executor RealmSocket::GetExecutor() const
+{
+    return _socket->get_executor();
+}
+
+void RealmSocket::SetTcpNoDelay(bool enable)
+{
+    if (!_socket)
+        return;
+
+    boost::system::error_code error;
+    _socket->set_option(boost::asio::ip::tcp::no_delay(enable), error);
+    if (error)
+        SF_LOG_ERROR("server.authserver", "RealmSocket::SetTcpNoDelay failed for %s:%u error %d",
+            _remoteAddress.c_str(), _remotePort, error.value());
 }
 
 void RealmSocket::SetPacketLogAccountName(std::string accountName)
@@ -125,7 +143,7 @@ void RealmSocket::DiscardBytes(size_t len)
     _inputReadPos = std::min(_inputReadPos + len, _inputBuffer.size());
 }
 
-bool RealmSocket::QueueSend(void const* buf, size_t len)
+bool RealmSocket::QueueSend(void const* buf, size_t len, bool closeWhenSent)
 {
     if (buf == NULL || len == 0)
         return true;
@@ -137,10 +155,16 @@ bool RealmSocket::QueueSend(void const* buf, size_t len)
     std::vector<char> data(bytes, bytes + len);
     LogAuthPacket(data.data(), data.size(), Skyfire::PACKET_LOG_SERVER_TO_CLIENT);
 
+    // dispatch (not post): OnRead already runs on this executor. post() would
+    // queue the write after the next HandleRead, so a peer FIN that arrives
+    // with the request (authnet 4601 + close) CloseSocket'd before the reply
+    // left the socket. Auth.log still said "sending" because it logs here.
     std::shared_ptr<RealmSocket> self = shared_from_this();
-    boost::asio::post(_socket->get_executor(),
-        [self, data = std::move(data)]() mutable
+    boost::asio::dispatch(_socket->get_executor(),
+        [self, data = std::move(data), closeWhenSent]() mutable
         {
+            if (closeWhenSent)
+                self->_closeWhenWritesFlush = true;
             self->QueueWrite(std::move(data));
         });
 
@@ -172,9 +196,20 @@ void RealmSocket::AsyncRead()
 
 void RealmSocket::HandleRead(boost::system::error_code const& error, size_t bytesTransferred)
 {
-    if (error || bytesTransferred == 0)
+    bool const peerEof = (bytesTransferred == 0) || (error == boost::asio::error::eof);
+    if (error && !peerEof)
     {
         CloseSocket();
+        return;
+    }
+
+    if (peerEof)
+    {
+        // Half-close: flush queued replies (RequestRealmList is often followed
+        // by a client FIN on the same connection) instead of aborting them.
+        _closeWhenWritesFlush = true;
+        if (!_writeInProgress && _writeQueue.empty())
+            CloseSocket();
         return;
     }
 
@@ -238,7 +273,13 @@ void RealmSocket::HandleWrite(boost::system::error_code const& error)
     }
 
     if (!_writeQueue.empty())
+    {
         StartAsyncWrite();
+        return;
+    }
+
+    if (_closeWhenWritesFlush)
+        CloseSocket();
 }
 
 bool RealmSocket::IsOpen(void) const

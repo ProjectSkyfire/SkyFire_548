@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2026272801
+ConfVersion=2026272802
 
 ###################################################################################################
 # SECTION INDEX
@@ -285,6 +285,17 @@ MaxPingTime = 30
 #        Default:     8085
 
 WorldServerPort = 8085
+
+#
+#    Authnet.WorldTokenResolve
+#        Description: Allows worldserver to resolve temporary authnet world-account tokens from
+#                     the auth database during world authentication.
+#        Important:   Required while authnet world handoff presents a token account string instead
+#                     of the player's canonical login identity.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Authnet.WorldTokenResolve = 0
 
 #
 #    BindIP

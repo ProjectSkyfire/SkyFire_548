@@ -5,6 +5,7 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
+#include "Log.h"
 #include "RealmList.h"
 
 RealmList::RealmList() : m_UpdateInterval(0), m_NextUpdateTime(time(NULL)) { }
@@ -95,5 +96,31 @@ void RealmList::UpdateRealms(bool init)
                 SF_LOG_INFO("server.authserver", "Added realm \"%s\" at %s:%u.", name.c_str(),
                     m_realms[name].ExternalAddress.GetHost().c_str(), port);
         } while (result->NextRow());
+    }
+}
+
+void RealmList::SetRealmOffline(uint32 realmId, bool offline)
+{
+    if (!realmId)
+        return;
+
+    uint32 const bit = REALM_FLAG_OFFLINE;
+    for (RealmMap::iterator itr = m_realms.begin(); itr != m_realms.end(); ++itr)
+    {
+        if (itr->second.m_ID != realmId)
+            continue;
+
+        uint8 flags = uint8(itr->second.flag);
+        uint8 const next = uint8(offline ? (flags | bit) : (flags & ~bit));
+        if (next == flags)
+            return;
+
+        itr->second.flag = RealmFlags(next);
+        LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = (flag & ~%u) | %u WHERE id = %u",
+            bit, offline ? bit : 0, realmId);
+        if (!itr->first.empty())
+            SF_LOG_INFO("server.authserver", "Realm \"%s\" (id=%u) %s (realmlist.flag=0x%02X).",
+                itr->second.name.c_str(), realmId, offline ? "offline" : "online", next);
+        return;
     }
 }
