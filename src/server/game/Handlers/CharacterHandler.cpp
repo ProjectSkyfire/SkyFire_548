@@ -321,7 +321,7 @@ namespace
             << static_cast<uint32>(PetType::HUNTER_PET) << ','
             << uint32(player->getLevel()) << ','
             << "0,"
-            << uint32(REACT_DEFENSIVE) << ",'"
+            << uint32(REACT_ASSIST) << ",'"
             << petName << "',"
             << "0,"
             << "1,"

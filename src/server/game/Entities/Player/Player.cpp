@@ -16194,7 +16194,10 @@ void Player::PetSpellInitialize()
     data.WriteByteSeq(guid[6]);
     data << uint32(pet->GetDuration());
     data.WriteByteSeq(guid[5]);
-    data << uint32(0);                                  // flags ??
+    // Same layout as VehicleSpellInitialize / CharmSpellInitialize: react, command, flags
+    data << uint8(pet->GetReactState());
+    data << uint8(charmInfo->GetCommandState());
+    data << uint16(0);
 
     GetSession()->SendPacket(&data);
 }
