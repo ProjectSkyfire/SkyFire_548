@@ -32,6 +32,7 @@ private:
     bool DecodeInitialRequest(void);
     void PrepareWorldSessionKey(std::string const& identity, std::string const& platform, std::string const& locale);
     void PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, uint32 selectedRealmField, char const* reason);
+    void ConsumeAcceptedLoginGrant(char const* reason);
     std::vector<uint8> GetOrCreateStartupModuleKey(void);
     bool TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8> const& packet);
     void ProcessEncryptedClientBytes(size_t encryptedFollowupOffset);
@@ -61,6 +62,7 @@ private:
     bool _authnetWorldSessionKeyGenerated;
     bool _authnetWorldSessionKeyPersisted;
     bool _authnetStartupModuleKeyGenerated;
+    bool _authnetLoginGrantAccepted;
     uint8 _clientCryptState[256];
     uint8 _clientCryptI;
     uint8 _clientCryptJ;

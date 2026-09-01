@@ -2383,7 +2383,8 @@ AuthnetSocket::AuthnetSocket(RealmSocket& socket) :
     _authnetLocaleId(0), _authnetWorldConnectionSeed(0), _authnetWorldRealmField(0),
     _authnetSelectedRealmField(0), _authnetLoginCompleteRealmField(0),
     _authnetWorldSessionKey(), _authnetStartupModuleKey(), _authnetSecret(), _authnetWorldSessionKeyGenerated(false),
-    _authnetWorldSessionKeyPersisted(false), _authnetStartupModuleKeyGenerated(false), _clientCryptI(0), _clientCryptJ(0),
+    _authnetWorldSessionKeyPersisted(false), _authnetStartupModuleKeyGenerated(false), _authnetLoginGrantAccepted(false),
+    _clientCryptI(0), _clientCryptJ(0),
     _clientCryptInitialized(false), _serverCryptI(0), _serverCryptJ(0), _serverCryptInitialized(false),
     _responded(false), _httpResponded(false), _clientModeSwitchSeen(false), _followupLogged(false),
     _postSuccessBurstSeen(false), _mode1ConnectAnswered(false), _mode2LoginAnswered(false),
@@ -2492,8 +2493,8 @@ bool AuthnetSocket::DecodeInitialRequest(void)
         return true;
     }
 
-    bool const loginGrantConsumed = Skyfire::Authnet::ConsumeLoginGrant(accountId, socket().getRemoteAddress());
-    if (!loginGrantConsumed && !ShouldAllowUnverifiedAuthnetLogin())
+    _authnetLoginGrantAccepted = Skyfire::Authnet::HasLoginGrant(accountId, socket().getRemoteAddress());
+    if (!_authnetLoginGrantAccepted && !ShouldAllowUnverifiedAuthnetLogin())
     {
         SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: refusing identity-only authnet login for account %u (%s); no validated login grant was available.",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), accountId, accountName.c_str());
@@ -2502,10 +2503,15 @@ bool AuthnetSocket::DecodeInitialRequest(void)
         return true;
     }
 
-    if (!loginGrantConsumed)
+    if (!_authnetLoginGrantAccepted)
     {
         SF_LOG_WARN("server.authserver", "'%s:%d' authnet probe: allowing unverified identity-only login for '%s' because the local research override is enabled.",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(), request.identity.c_str());
+    }
+    else
+    {
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: accepted pending login grant for account %u (%s).",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(), accountId, accountName.c_str());
     }
 
     PrepareWorldSessionKey(request.identity, request.platform, request.locale);
@@ -2537,6 +2543,27 @@ void AuthnetSocket::PrepareWorldSessionKey(std::string const& identity, std::str
     _authnetLoginCompleteRealmField = _authnetSelectedRealmField;
 
     PersistAuthnetWorldSessionKey(0, _authnetSelectedRealmField, _authnetSelectedRealmField, "initial-login");
+}
+
+void AuthnetSocket::ConsumeAcceptedLoginGrant(char const* reason)
+{
+    if (!_authnetLoginGrantAccepted)
+        return;
+
+    if (Skyfire::Authnet::ConsumeLoginGrant(_authnetAccountId, socket().getRemoteAddress()))
+    {
+        SF_LOG_INFO("server.authserver", "'%s:%d' authnet probe: consumed login grant for account %u (%s), reason=%s.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+            _authnetAccountId, _authnetAccountName.c_str(), reason ? reason : "authnet");
+    }
+    else
+    {
+        SF_LOG_WARN("server.authserver", "'%s:%d' authnet probe: login grant for account %u (%s) was already gone, reason=%s.",
+            socket().getRemoteAddress().c_str(), socket().getRemotePort(),
+            _authnetAccountId, _authnetAccountName.c_str(), reason ? reason : "authnet");
+    }
+
+    _authnetLoginGrantAccepted = false;
 }
 
 std::vector<uint8> AuthnetSocket::GetOrCreateStartupModuleKey(void)
@@ -2622,6 +2649,7 @@ bool AuthnetSocket::TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8>
         previousRealmField, selectedRealm.hasRealmField ? "packet" : "default");
 
     PersistAuthnetWorldSessionKey(selectedRealm.connectionSeed, keyRealmField, selectedRealmField, "selected-realm");
+    ConsumeAcceptedLoginGrant("selected-realm");
     return true;
 }
 

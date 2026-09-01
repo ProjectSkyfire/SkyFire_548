@@ -52,7 +52,7 @@ bool IssueLoginGrant(uint32 accountId, std::string const& remoteAddress, uint32 
     return true;
 }
 
-bool ConsumeLoginGrant(uint32 accountId, std::string const& remoteAddress)
+bool HasLoginGrant(uint32 accountId, std::string const& remoteAddress)
 {
     if (!accountId || remoteAddress.empty())
         return false;
@@ -66,6 +66,19 @@ bool ConsumeLoginGrant(uint32 accountId, std::string const& remoteAddress)
         return false;
 
     if (itr->second.RemoteAddress != remoteAddress)
+        return false;
+
+    return true;
+}
+
+bool ConsumeLoginGrant(uint32 accountId, std::string const& remoteAddress)
+{
+    if (!HasLoginGrant(accountId, remoteAddress))
+        return false;
+
+    std::lock_guard<std::mutex> lock(LoginGrantMutex);
+    auto itr = LoginGrants.find(accountId);
+    if (itr == LoginGrants.end() || itr->second.RemoteAddress != remoteAddress)
         return false;
 
     LoginGrants.erase(itr);
