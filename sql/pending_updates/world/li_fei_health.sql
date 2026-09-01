@@ -1,0 +1,23 @@
+-- Quest 29421 "Only the Worthy Shall Pass" tidak bisa diselesaikan pemain
+-- level 4-5: Master Li Fei (54734) terlalu tebal.
+--
+-- Health_mod=36 x 200 (creature_classlevelstats level 5, unit_class 1) = 7200
+-- HP. smart_scripts memberi kill credit di 20% health, jadi pemain harus
+-- menembus 5760 damage sambil dipukul 9-17 tiap 2 detik plus Feet of Fury
+-- (108958) dan Flying Shadow Kick (108944) tiap ~10-12 detik.
+--
+-- Tidak ada apa pun di Wandering Isle yang di-tune sedekat itu:
+--   Jaomin Ro (54611)          level 3   493 HP  -- duel sejenis, credit di 10%
+--   Guardian of the Elders     level 7   868 HP
+--   Ruk-Ruk (55634)            level 7  1116 HP
+--   Zhao-Ren (55786)           level 10 4008 HP  -- boss penutup zona
+--   Mob biasa level 5                    200 HP  -- Health_mod=1
+--
+-- Health_mod=5 menaruhnya di 1000 HP, artinya 800 damage sampai ambang 20%:
+-- sekitar dua kali duel Jaomin Ro, masih di bawah named mob level 7, dan tetap
+-- 5x mob level 5 biasa. Naikkan angka ini kalau ternyata terlalu ringan.
+--
+-- mindmg/maxdmg/attackpower dibiarkan apa adanya: 9/17/17 adalah nilai standar
+-- level 5 dari 2026_08_17_world_06.sql, sama dengan mob level 5 lain.
+
+UPDATE `creature_template` SET `Health_mod`=5 WHERE `entry`=54734; -- Master Li Fei
