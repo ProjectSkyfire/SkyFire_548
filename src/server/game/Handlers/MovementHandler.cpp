@@ -425,6 +425,11 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // resummon pet
     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
 
+    // Near teleports often keep the pet in-world (no unsummon/resummon). The client still
+    // clears the pet action bar on teleport, so re-send spells when a pet is present.
+    if (GetPlayer()->GetPet())
+        GetPlayer()->PetSpellInitialize();
+
     // resummon battle pet
     GetPlayer()->GetBattlePetMgr()->ResummonLastBattlePet();
 
@@ -478,6 +483,11 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recvPacket)
 
     // resummon pet
     GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
+
+    // Near teleports often keep the pet in-world (no unsummon/resummon). The client still
+    // clears the pet action bar on teleport, so re-send spells when a pet is present.
+    if (GetPlayer()->GetPet())
+        GetPlayer()->PetSpellInitialize();
 
     // resummon battle pet
     GetPlayer()->GetBattlePetMgr()->ResummonLastBattlePet();
