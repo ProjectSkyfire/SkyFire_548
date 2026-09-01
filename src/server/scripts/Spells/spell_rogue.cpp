@@ -698,6 +698,9 @@ protected:
         if (!spellInfo)
             return !GetTarget()->HasAura(SPELL_ROGUE_SUBTERFUGE);
 
+        if (spellInfo->Id == SPELL_ROGUE_MASTER_OF_SUBTLETY_DAMAGE_PERCENT)
+            return false;
+
         Spell const* procSpell = eventInfo.GetSpell();
 
         // Food / drink from consumable items should drop Subterfuge stealth immediately
