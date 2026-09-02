@@ -3607,6 +3607,21 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Attributes |= SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY;
                 spellInfo->AttributesEx2 |= 0x04000000; // SPELL_ATTR2_NO_SCHOOL_IMMUNITY
                 break;
+            // Darkshore 13523 / 13565: script effect 54189 (spirit remains GO) is NYI.
+            case 62518:
+                spellInfo->Effects[EFFECT_0].Effect = 0;
+                // Summon is triggered during Elune's Presence channel; use channel target (corpse).
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    if (spellInfo->Effects[i].Effect == SPELL_EFFECT_SUMMON)
+                        spellInfo->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CHANNEL_TARGET);
+                break;
+            case 64306:
+            case 70719:
+                // Petrified Root triggers 70719 to summon the withered ent on the corpse.
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    if (spellInfo->Effects[i].Effect == SPELL_EFFECT_SUMMON)
+                        spellInfo->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
+                break;
             default:
                 break;
         }

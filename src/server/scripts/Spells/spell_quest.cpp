@@ -9,9 +9,12 @@
  * Scriptnames of files in this file should be prefixed with "spell_q#questID_".
  */
 
+#include "ObjectAccessor.h"
 #include "Player.h"
+#include <unordered_map>
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SmartAI.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "Vehicle.h"
@@ -1771,6 +1774,181 @@ class spell_q12847_summon_soul_moveto_bunny : public SpellScriptLoader
         }
 };
 
+// http://www.wowhead.com/quest=13523 Power Over the Tides
+// http://www.wowhead.com/quest=13565 Twice Removed
+enum DarkshoreCorpseSootheSpells
+{
+    SPELL_ELUNES_PRESENCE         = 62517,
+    SPELL_ELUNES_PRESENCE_DUMMY   = 62518,
+    SPELL_CALL_WITHERED_ENT       = 64306,
+    SPELL_WITHERED_ENT_DUMMY      = 70719,
+    NPC_TIDAL_SPIRIT_SOOTHE       = 32937,
+    NPC_WITHERED_ENT_KC           = 34010,
+};
+
+static std::unordered_map<uint64, uint64> sDarkshoreSootheCorpseByPlayer;
+
+static void DarkshoreSootheStoreCorpseTarget(Player* player, Creature* corpse)
+{
+    if (player && corpse)
+        sDarkshoreSootheCorpseByPlayer[player->GetGUID()] = corpse->GetGUID();
+}
+
+static Unit* DarkshoreSootheGetStoredCorpseTarget(Unit* caster)
+{
+    if (!caster || caster->GetTypeId() != TypeID::TYPEID_PLAYER)
+        return NULL;
+
+    std::unordered_map<uint64, uint64>::iterator itr = sDarkshoreSootheCorpseByPlayer.find(caster->GetGUID());
+    if (itr == sDarkshoreSootheCorpseByPlayer.end())
+        return NULL;
+
+    return ObjectAccessor::GetUnit(*caster, itr->second);
+}
+
+static bool DarkshoreSootheIsCorpseTarget(Unit* unit)
+{
+    if (!unit || unit->GetTypeId() != TypeID::TYPEID_UNIT)
+        return false;
+
+    Creature* creature = unit->ToCreature();
+    return creature && creature->isDead();
+}
+
+static bool DarkshoreCorpseAlreadySoothed(Creature* creature)
+{
+    if (!creature || creature->GetAIName() != "SmartAI" || !creature->AI())
+        return false;
+
+    SmartAI* ai = CAST_AI(SmartAI, creature->AI());
+    return ai && ai->GetScript()->IsEventPhase(1);
+}
+
+static void DarkshoreCorpseMarkSoothed(Creature* creature)
+{
+    if (!creature || creature->GetAIName() != "SmartAI" || !creature->AI())
+        return;
+
+    if (SmartAI* ai = CAST_AI(SmartAI, creature->AI()))
+        ai->GetScript()->SetEventPhase(1);
+}
+
+static Unit* GetDarkshoreSootheCorpseTarget(Unit* caster, Unit* spellTarget, uint32 spellId)
+{
+    if (DarkshoreSootheIsCorpseTarget(spellTarget))
+        return spellTarget;
+
+    // 62518 is periodic-triggered from 62517 while the player channels; the triggered
+    // spell's unit target is the aura holder (player), not the corpse being soothed.
+    if (spellId == SPELL_ELUNES_PRESENCE_DUMMY && caster)
+    {
+        if (uint64 channelGuid = caster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT))
+            if (Unit* channelTarget = ObjectAccessor::GetUnit(*caster, channelGuid))
+                return channelTarget;
+    }
+
+    // 70719 is periodic-triggered from 64306; keep the original corpse on the player.
+    if ((spellId == SPELL_CALL_WITHERED_ENT || spellId == SPELL_WITHERED_ENT_DUMMY) && caster)
+        if (Unit* storedTarget = DarkshoreSootheGetStoredCorpseTarget(caster))
+            return storedTarget;
+
+    return spellTarget;
+}
+
+class spell_darkshore_corpse_soothe : public SpellScriptLoader
+{
+    public:
+        spell_darkshore_corpse_soothe() : SpellScriptLoader("spell_darkshore_corpse_soothe") { }
+
+        class spell_darkshore_corpse_soothe_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_darkshore_corpse_soothe_SpellScript);
+
+            SpellCastResult CheckCorpseNotSoothed()
+            {
+                if (GetSpellInfo()->Id != SPELL_ELUNES_PRESENCE && GetSpellInfo()->Id != SPELL_CALL_WITHERED_ENT)
+                    return SpellCastResult::SPELL_CAST_OK;
+
+                if (Creature* target = GetExplTargetUnit() ? GetExplTargetUnit()->ToCreature() : NULL)
+                    if (DarkshoreCorpseAlreadySoothed(target))
+                        return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+
+                return SpellCastResult::SPELL_CAST_OK;
+            }
+
+            void MarkCorpseSoothed()
+            {
+                if (GetSpellInfo()->Id != SPELL_ELUNES_PRESENCE && GetSpellInfo()->Id != SPELL_CALL_WITHERED_ENT)
+                    return;
+
+                if (Creature* target = GetExplTargetUnit() ? GetExplTargetUnit()->ToCreature() : NULL)
+                {
+                    DarkshoreCorpseMarkSoothed(target);
+                    if (Player* player = GetCaster() ? GetCaster()->ToPlayer() : NULL)
+                        DarkshoreSootheStoreCorpseTarget(player, target);
+                }
+            }
+
+            void RelocateSummonDest(SpellEffIndex /*effIndex*/)
+            {
+                if (GetSpellInfo()->Id != SPELL_ELUNES_PRESENCE_DUMMY
+                    && GetSpellInfo()->Id != SPELL_CALL_WITHERED_ENT
+                    && GetSpellInfo()->Id != SPELL_WITHERED_ENT_DUMMY)
+                    return;
+
+                Unit* target = GetDarkshoreSootheCorpseTarget(GetCaster(), GetExplTargetUnit(), GetSpellInfo()->Id);
+                if (!target)
+                    return;
+
+                if (WorldLocation* dest = GetHitDest())
+                    dest->Relocate(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
+            }
+
+            void HandleQuestCredit(SpellEffIndex /*effIndex*/)
+            {
+                if (GetSpellInfo()->Id != SPELL_ELUNES_PRESENCE_DUMMY
+                    && GetSpellInfo()->Id != SPELL_CALL_WITHERED_ENT
+                    && GetSpellInfo()->Id != SPELL_WITHERED_ENT_DUMMY)
+                    return;
+
+                Player* player = GetOriginalCaster() ? GetOriginalCaster()->ToPlayer() : NULL;
+                if (!player)
+                    return;
+
+                uint32 credit = 0;
+                switch (GetSpellInfo()->Id)
+                {
+                    case SPELL_ELUNES_PRESENCE_DUMMY:
+                        credit = NPC_TIDAL_SPIRIT_SOOTHE;
+                        break;
+                    case SPELL_CALL_WITHERED_ENT:
+                    case SPELL_WITHERED_ENT_DUMMY:
+                        credit = NPC_WITHERED_ENT_KC;
+                        break;
+                    default:
+                        return;
+                }
+
+                player->KilledMonsterCredit(credit);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnCheckCast += SpellCheckCastFn(spell_darkshore_corpse_soothe_SpellScript::CheckCorpseNotSoothed);
+                OnCast += SpellCastFn(spell_darkshore_corpse_soothe_SpellScript::MarkCorpseSoothed);
+                OnEffectHit += SpellEffectFn(spell_darkshore_corpse_soothe_SpellScript::RelocateSummonDest, EFFECT_0, SPELL_EFFECT_SUMMON);
+                OnEffectHit += SpellEffectFn(spell_darkshore_corpse_soothe_SpellScript::RelocateSummonDest, EFFECT_1, SPELL_EFFECT_SUMMON);
+                OnEffectHit += SpellEffectFn(spell_darkshore_corpse_soothe_SpellScript::HandleQuestCredit, EFFECT_0, SPELL_EFFECT_SUMMON);
+                OnEffectHit += SpellEffectFn(spell_darkshore_corpse_soothe_SpellScript::HandleQuestCredit, EFFECT_1, SPELL_EFFECT_SUMMON);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_darkshore_corpse_soothe_SpellScript();
+        }
+};
+
 enum BearFlankMaster
 {
     SPELL_BEAR_FLANK_MASTER = 56565,
@@ -2406,6 +2584,7 @@ void AddSC_quest_spell_scripts()
     new spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy();
     new spell_q13291_q13292_q13239_q13261_armored_decoy_summon_skytalon();
     new spell_q12847_summon_soul_moveto_bunny();
+    new spell_darkshore_corpse_soothe();
     new spell_q13011_bear_flank_master();
     new spell_q13086_cannons_target();
     new spell_q12690_burst_at_the_seams();
