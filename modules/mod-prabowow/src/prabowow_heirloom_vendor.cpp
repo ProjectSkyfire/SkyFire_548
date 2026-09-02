@@ -52,30 +52,59 @@ public:
             return;
         }
 
+        // HANYA perlengkapan yang bisa dipakai. Item-sparse.db2 5.4.8 memberi
+        // kualitas heirloom (7) ke banyak hal yang bukan equipment: token honor,
+        // barang profesi, dan sejumlah item placeholder. Semuanya bukan senjata
+        // atau armor, atau tidak punya slot pakai, jadi dua syarat di bawah
+        // membuang mereka tanpa perlu daftar entry manual.
         std::vector<uint32> heirlooms;
+        uint32 rejected = 0;
         for (auto const& pair : *sObjectMgr->GetItemTemplateStore())
         {
             ItemTemplate const& proto = pair.second;
             if (proto.Quality != ITEM_QUALITY_HEIRLOOM || proto.Name1.empty())
                 continue;
+
+            if (proto.Class != ITEM_CLASS_WEAPON && proto.Class != ITEM_CLASS_ARMOR)
+            {
+                ++rejected;
+                continue;
+            }
+
+            if (proto.InventoryType == INVTYPE_NON_EQUIP)
+            {
+                ++rejected;
+                continue;
+            }
+
             heirlooms.push_back(pair.first);
         }
         std::sort(heirlooms.begin(), heirlooms.end());
 
+        // priceGold >= 0 memaksa harga itu (0 = gratis); negatif berarti biarkan
+        // harga bawaan DB2. Sebelumnya 0 berarti "biarkan DB2", dan itu justru
+        // membuat sebagian heirloom tetap berharga.
+        bool overridePrice = priceGold >= 0;
         uint32 price = 0;
-        if (priceGold > 0)
+        if (overridePrice && priceGold > 0)
             price = uint32(std::min<uint64>(uint64(priceGold) * GOLD, uint64(std::numeric_limits<int32>::max())));
 
         uint32 added = 0;
         uint32 skipped = 0;
         for (uint32 itemId : heirlooms)
         {
-            if (price)
+            if (overridePrice)
             {
                 // ItemTemplates live in ObjectMgr's own (non-const) container; the
                 // accessor is const-only, hence the cast. Done before players log in.
                 if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
+                {
                     const_cast<ItemTemplate*>(proto)->BuyPrice = int32(price);
+                    // Wajib saat harga 0: vendor membeli balik item seharga
+                    // SellPrice, jadi heirloom gratis dengan SellPrice > 0
+                    // adalah mesin gold tak terbatas (beli 0, jual berulang).
+                    const_cast<ItemTemplate*>(proto)->SellPrice = 0;
+                }
             }
 
             VendorItemData const* list = sObjectMgr->GetNpcVendorItemList(entry);
@@ -99,7 +128,10 @@ public:
         }
 
         SF_LOG_INFO(PraboWoW::LOG, "[mod-prabowow] Heirloom vendor %u: %u heirloom(s) found in Item-sparse.db2, %u registered, %u skipped, price %s each.",
-            entry, uint32(heirlooms.size()), added, skipped, price ? PraboWoW::FormatMoney(price).c_str() : "from DB2 (unchanged)");
+            entry, uint32(heirlooms.size()), added, skipped,
+            overridePrice ? (price ? PraboWoW::FormatMoney(price).c_str() : "free") : "from DB2 (unchanged)");
+        SF_LOG_INFO(PraboWoW::LOG, "[mod-prabowow] Heirloom vendor %u: %u item kualitas heirloom dilewati karena bukan equipment (token honor, barang profesi, placeholder).",
+            entry, rejected);
     }
 };
 
