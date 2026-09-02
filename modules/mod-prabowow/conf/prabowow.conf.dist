@@ -1,0 +1,106 @@
+[worldserver]
+
+########################################
+# mod-prabowow configuration
+########################################
+#
+# The core does NOT read module .conf files by itself. Copy the keys you want
+# to change into worldserver.conf (PraboWoW deployment: the
+# config/worldserver.overrides.conf file of the PraboWoW-Pandaria repo).
+# Every key below is optional; the defaults listed here are compiled in.
+#
+#    PraboWoW.XpRate.Max
+#        Description: Highest multiplier a player may pick with ".xp rate <n>".
+#                     Applied on top of Rate.XP.Kill / Rate.XP.Quest / Rate.XP.Explore.
+#        Default:     5
+
+PraboWoW.XpRate.Max = 5
+
+#
+#    PraboWoW.WorldChat.Enable
+#        Description: Enable the realm-wide ".chat <message>" command.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+#    PraboWoW.WorldChat.MinLevel
+#        Description: Minimum character level required to use ".chat".
+#        Default:     1
+#
+#    PraboWoW.WorldChat.Cooldown
+#        Description: Seconds a player must wait between two ".chat" messages.
+#                     GMs are exempt. 0 disables the cooldown.
+#        Default:     3
+
+PraboWoW.WorldChat.Enable = 1
+PraboWoW.WorldChat.MinLevel = 1
+PraboWoW.WorldChat.Cooldown = 3
+
+#
+#    PraboWoW.AutoSellGrey.Enable
+#        Description: Sell poor-quality (grey) loot to the void the moment it is
+#                     looted and credit the vendor price to the player.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+PraboWoW.AutoSellGrey.Enable = 1
+
+#
+#    PraboWoW.AllFlightPaths.Enable
+#        Description: Mark every flight path of the player's faction as known
+#                     on each login.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+PraboWoW.AllFlightPaths.Enable = 1
+
+#
+#    PraboWoW.HeirloomVendor.Enable
+#        Description: Fill the heirloom vendor with every heirloom-quality item
+#                     at startup.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+#    PraboWoW.HeirloomVendor.Entry
+#        Description: creature_template entry of the vendor NPC (spawned by
+#                     sql/updates/world/*prabowow_heirloom_vendor*.sql).
+#        Default:     900001
+#
+#    PraboWoW.HeirloomVendor.PriceGold
+#        Description: Gold price applied to every heirloom item (overrides the
+#                     BuyPrice from Item-sparse.db2, which is 0 for most of them
+#                     because they are Justice Point items on retail).
+#                     0 keeps the DB2 price, which makes most heirlooms free.
+#        Default:     500
+
+PraboWoW.HeirloomVendor.Enable = 1
+PraboWoW.HeirloomVendor.Entry = 900001
+PraboWoW.HeirloomVendor.PriceGold = 500
+
+#
+#    PraboWoW.StarterMail.Enable
+#        Description: Mail an item to every newly created character.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+#    PraboWoW.StarterMail.ItemId
+#        Description: Item sent. 23162 = Foror's Crate of Endless Resist Gear
+#                     Storage (36-slot bag).
+#        Default:     23162
+#
+#    PraboWoW.StarterMail.ItemCount
+#        Description: How many of that item.
+#        Default:     1
+#
+#    PraboWoW.StarterMail.SenderEntry
+#        Description: creature_template entry shown as the mail sender. Falls
+#                     back to a GM letter when the entry does not exist.
+#        Default:     900001 (the heirloom vendor)
+#
+#    PraboWoW.StarterMail.Subject
+#    PraboWoW.StarterMail.Body
+#        Description: Mail text. Leave unset for the built-in English text.
+
+PraboWoW.StarterMail.Enable = 1
+PraboWoW.StarterMail.ItemId = 23162
+PraboWoW.StarterMail.ItemCount = 1
+PraboWoW.StarterMail.SenderEntry = 900001

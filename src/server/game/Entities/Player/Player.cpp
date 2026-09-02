@@ -21218,6 +21218,10 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint64 lootGuid)
         // LootItem is being removed (looted) from the container, delete it from the DB.
         if (loot->containerID > 0)
             loot->DeleteLootItemFromContainerItemDB(item->itemid);
+
+        // Module hook: the item is already in the bags, scripts may sell or destroy it here.
+        if (newitem)
+            sScriptMgr->OnPlayerLootItem(this, newitem, uint32(item->count), lootGuid);
     }
     else
         SendEquipError(msg, NULL, NULL, item->itemid);

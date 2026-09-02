@@ -3412,6 +3412,16 @@ void WorldObject::ClearPhases(bool update)
 
 bool WorldObject::IsPhased(WorldObject const* obj) const
 {
+    // Creatures flagged CREATURE_FLAG_EXTRA_ALL_PHASES are visible in every phase (custom).
+    if (Creature const* creature = ToCreature())
+        if (CreatureTemplate const* info = creature->GetCreatureTemplate())
+            if (info->flags_extra & CREATURE_FLAG_EXTRA_ALL_PHASES)
+                return true;
+    if (Creature const* creature = obj->ToCreature())
+        if (CreatureTemplate const* info = creature->GetCreatureTemplate())
+            if (info->flags_extra & CREATURE_FLAG_EXTRA_ALL_PHASES)
+                return true;
+
     // PhaseId 169 is the default fallback phase
     if (_phases.empty() && obj->GetPhases().empty())
         return true;
