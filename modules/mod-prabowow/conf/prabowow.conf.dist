@@ -55,8 +55,10 @@ PraboWoW.AllFlightPaths.Enable = 1
 
 #
 #    PraboWoW.HeirloomVendor.Enable
-#        Description: Fill the heirloom vendor with every heirloom-quality item
-#                     at startup.
+#        Description: Fill the heirloom vendor with every heirloom-quality piece
+#                     of EQUIPMENT at startup. Only weapons and armour that have
+#                     a real equip slot are listed; heirloom-quality honour
+#                     tokens, profession items and placeholders are skipped.
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled)
 #
@@ -66,10 +68,13 @@ PraboWoW.AllFlightPaths.Enable = 1
 #        Default:     900001
 #
 #    PraboWoW.HeirloomVendor.PriceGold
-#        Description: Gold price applied to every heirloom item (overrides the
-#                     BuyPrice from Item-sparse.db2, which is 0 for most of them
-#                     because they are Justice Point items on retail).
-#                     0 keeps the DB2 price, which makes most heirlooms free.
+#        Description: Gold price forced on every listed heirloom, overriding the
+#                     BuyPrice from Item-sparse.db2 (most heirlooms are Justice
+#                     Point items on retail and carry no gold price at all).
+#                     0  = free.
+#                     <0 = leave the DB2 price untouched.
+#                     Any value >= 0 also zeroes SellPrice, otherwise a free
+#                     heirloom could be sold straight back for gold.
 #        Default:     500
 
 PraboWoW.HeirloomVendor.Enable = 1

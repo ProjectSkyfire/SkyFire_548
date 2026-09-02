@@ -9,7 +9,7 @@ Compiled into the worldserver through the module system in `modules/`.
 | Realm-wide chat | `.chat <message>` broadcasts a system message to everyone online, both factions. Respects mutes, a minimum level and a per-player cooldown; `\|` is escaped so nobody can forge links. | `PraboWoW.WorldChat.*` |
 | Auto-sell grey loot | Poor-quality items are sold the moment they are looted (only the looted count, greys already in the bags are kept). | `PraboWoW.AutoSellGrey.Enable` |
 | All flight paths | Every taxi node of the player's faction is marked known on each login. | `PraboWoW.AllFlightPaths.Enable` |
-| Heirloom vendor | NPC 900001 spawned at every distinct `playercreateinfo` start position, visible in every phase. Its list is built at startup from every heirloom-quality item in `Item-sparse.db2`; price is a flat gold amount. | `PraboWoW.HeirloomVendor.*` |
+| Heirloom vendor | NPC 900001 spawned at every distinct `playercreateinfo` start position, visible in every phase. Its list is built at startup from heirloom-quality **equipment** in `Item-sparse.db2` (weapons and armour with a real equip slot; honour tokens, profession items and placeholders are skipped). Price is forced to a flat gold amount, and SellPrice is zeroed so a free heirloom cannot be resold for gold. | `PraboWoW.HeirloomVendor.*` |
 | Starter mail | Every new character receives item 23162 (36-slot bag) by mail. | `PraboWoW.StarterMail.*` |
 
 See [conf/prabowow.conf.dist](conf/prabowow.conf.dist) for every key and its
