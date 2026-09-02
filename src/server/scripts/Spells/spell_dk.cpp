@@ -151,7 +151,7 @@ public:
                     {
                         std::set<uint8> runes;
                         for (uint8 i = 0; i < MAX_RUNES; i++)
-                            if (_player->GetRuneCooldown(i) == _player->GetRuneBaseCooldown(i))
+                            if (_player->GetRuneCooldown(i) > 0)
                                 runes.insert(i);
                         if (!runes.empty())
                         {

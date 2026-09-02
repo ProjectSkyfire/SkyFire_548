@@ -5806,7 +5806,17 @@ bool CharmInfo::AddSpellToActionBar(SpellInfo const* spellInfo, ActiveStates new
         uint8 j = (preferredSlot + i) % MAX_UNIT_ACTION_BAR_INDEX;
         if (!PetActionBar[j].GetAction() && PetActionBar[j].IsActionBarForSpell())
         {
-            SetActionBar(j, spell_id, newstate == ACT_DECIDE ? spellInfo->IsAutocastable() ? ACT_DISABLED : ACT_PASSIVE : newstate);
+            ActiveStates state = newstate;
+            if (state == ACT_DECIDE)
+            {
+                if (!spellInfo->IsAutocastable())
+                    state = ACT_PASSIVE;
+                else if (spellInfo->AttributesEx9 & SPELL_ATTR9_BY_DEFAULT_AUTOCAST_OFF)
+                    state = ACT_DISABLED;
+                else
+                    state = ACT_ENABLED;
+            }
+            SetActionBar(j, spell_id, state);
             return true;
         }
     }

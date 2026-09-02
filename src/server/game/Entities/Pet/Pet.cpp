@@ -1563,7 +1563,13 @@ bool Pet::addSpell(uint32 spellId, ActiveStates active /*= ACT_DECIDE*/, PetSpel
     if (active == ACT_DECIDE)                               // active was not used before, so we save it's autocast/passive state here
     {
         if (spellInfo->IsAutocastable())
-            newspell.active = ACT_DISABLED;
+        {
+            // MoP: autocastable pet abilities default on unless flagged otherwise
+            if (spellInfo->AttributesEx9 & SPELL_ATTR9_BY_DEFAULT_AUTOCAST_OFF)
+                newspell.active = ACT_DISABLED;
+            else
+                newspell.active = ACT_ENABLED;
+        }
         else
             newspell.active = ACT_PASSIVE;
     }
@@ -1607,7 +1613,7 @@ bool Pet::addSpell(uint32 spellId, ActiveStates active /*= ACT_DECIDE*/, PetSpel
     if (spellInfo->IsPassive() && (!spellInfo->CasterAuraState || HasAuraState(AuraStateType(spellInfo->CasterAuraState))))
         CastSpell(this, spellId, true);
     else
-        m_charmInfo->AddSpellToActionBar(spellInfo);
+        m_charmInfo->AddSpellToActionBar(spellInfo, newspell.active);
 
     if (newspell.active == ACT_ENABLED)
         ToggleAutocast(spellInfo, true);
@@ -1773,6 +1779,9 @@ void Pet::InitPetCreateSpells()
     InitLevelupSpellsForLevel();
 
     CastPetAuras(false);
+
+    // CharmInfo ctor forces Passive for charm safety; hunter/summon pet bars default to Assist.
+    SetReactState(REACT_ASSIST);
 }
 
 bool Pet::resetTalents()

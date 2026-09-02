@@ -124,6 +124,12 @@ void PetAI::UpdateAI(uint32 diff)
         typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
         TargetSpellList targetSpellStore;
 
+        // Melee pets were dumping Growl/Cower/AoE while still pathing in. Wait until engaged
+        // before firing combat self-buffs, melee-range spells, and caster-centered AoE.
+        // Ranged pet spells (Imp Firebolt, etc.) still use normal CanAutoCast range checks.
+        Unit* victim = me->GetVictim();
+        bool const engaged = victim && me->IsWithinMeleeRange(victim);
+
         for (uint8 i = 0; i < me->GetPetAutoSpellSize(); ++i)
         {
             uint32 spellID = me->GetPetAutoSpellOnPos(i);
@@ -134,21 +140,30 @@ void PetAI::UpdateAI(uint32 diff)
             if (!spellInfo)
                 continue;
 
+            // Bonus abilities like Rest are marked No AutoCast (AI) and must never fire from PetAI.
+            if (!spellInfo->IsAutocastable())
+                continue;
+
             if (me->GetCharmInfo() && me->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
                 continue;
 
             if (spellInfo->IsPositive())
             {
-                if (spellInfo->CanBeUsedInCombat())
-                {
-                    // check spell cooldown
-                    if (me->HasSpellCooldown(spellInfo->Id))
-                        continue;
+                // Out-of-combat vanity spells (Rest, etc.) are never valid autocasts.
+                if (!spellInfo->CanBeUsedInCombat())
+                    continue;
 
-                    // Check if we're in combat or commanded to attack
-                    if (!me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack())
-                        continue;
-                }
+                // check spell cooldown
+                if (me->HasSpellCooldown(spellInfo->Id))
+                    continue;
+
+                // Check if we're in combat or commanded to attack
+                if (!me->IsInCombat() && !me->GetCharmInfo()->IsCommandAttack())
+                    continue;
+
+                // Cower and similar: do not cast at pull start while still running in.
+                if (!engaged)
+                    continue;
 
                 Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
                 bool spellUsed = false;
@@ -169,7 +184,11 @@ void PetAI::UpdateAI(uint32 diff)
                 }
 
                 if (spellInfo->HasEffect(SPELL_EFFECT_JUMP_DEST))
+                {
+                    if (!spellUsed)
+                        delete spell;
                     continue; // Pets must only jump to target
+                }
 
                 // No enemy, check friendly
                 if (!spellUsed)
@@ -195,11 +214,16 @@ void PetAI::UpdateAI(uint32 diff)
                 if (!spellUsed)
                     delete spell;
             }
-            else if (me->GetVictim() && CanAttack(me->GetVictim()) && spellInfo->CanBeUsedInCombat())
+            else if (victim && CanAttack(victim) && spellInfo->CanBeUsedInCombat())
             {
+                bool const meleeRangeSpell = spellInfo->RangeEntry && spellInfo->RangeEntry->type == SPELL_RANGE_MELEE;
+                // Demoralizing Roar etc. are centered on the caster; wait until melee.
+                if ((!spellInfo->NeedsExplicitUnitTarget() || meleeRangeSpell) && !engaged)
+                    continue;
+
                 Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
-                if (spell->CanAutoCast(me->GetVictim()))
-                    targetSpellStore.push_back(std::make_pair(me->GetVictim(), spell));
+                if (spell->CanAutoCast(victim))
+                    targetSpellStore.push_back(std::make_pair(victim, spell));
                 else
                     delete spell;
             }

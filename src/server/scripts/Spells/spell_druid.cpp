@@ -195,10 +195,28 @@ public:
                 amount = 0;
         }
 
+        // CalculateAmount() above only runs once, when this AuraEffect is first
+        // constructed - which happens while Dash's own spell is still being
+        // handled, effect by effect. When Dash is used from outside Cat Form,
+        // the client auto-shifts as part of casting it, but that shift is a
+        // second effect of the SAME cast that resolves AFTER this aura object
+        // already exists: the amount gets cached at 0 (still the old form) and
+        // is then pushed to the target using that stale value once this effect
+        // is actually applied - the buff icon shows up, but with no speed bonus,
+        // and nothing ever revisits it afterward. By the time this effect is
+        // actually applied to the target (AURA_EFFECT_HANDLE_REAL), the form
+        // change has already resolved, so re-checking it here and recalculating
+        // picks up the correct value.
+        void RecheckFormAfterApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            GetEffect(EFFECT_0)->RecalculateAmount();
+        }
+
         void Register() override
         {
             // MoP Dash uses SPELL_AURA_MOD_SPEED_ALWAYS (129), not MOD_INCREASE_SPEED (31).
             DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_dru_dash_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_SPEED_ALWAYS);
+            AfterEffectApply += AuraEffectApplyFn(spell_dru_dash_AuraScript::RecheckFormAfterApply, EFFECT_0, SPELL_AURA_MOD_SPEED_ALWAYS, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
