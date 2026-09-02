@@ -685,6 +685,9 @@ public:
     // Called when a player is created.
     virtual void OnCreate(Player* /*player*/) { }
 
+    // Called after a looted item has been stored in the player's bags (the handler may sell or destroy it).
+    virtual void OnLootItem(Player* /*player*/, Item* /*item*/, uint32 /*count*/, uint64 /*lootGuid*/) { }
+
     // Called when a player is deleted.
     virtual void OnDelete(uint64 /*guid*/) { }
 
@@ -943,6 +946,7 @@ public: /* Initialization */
     void OnPlayerLogin(Player* player, bool firstLogin);
     void OnPlayerLogout(Player* player);
     void OnPlayerCreate(Player* player);
+    void OnPlayerLootItem(Player* player, Item* item, uint32 count, uint64 lootGuid);
     void OnPlayerDelete(uint64 guid);
     void OnPlayerSave(Player* player);
     void OnPlayerBindToInstance(Player* player, DifficultyID difficulty, uint32 mapid, bool permanent);

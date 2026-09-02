@@ -1248,6 +1248,11 @@ void ScriptMgr::OnPlayerCreate(Player* player)
     FOREACH_SCRIPT(PlayerScript)->OnCreate(player);
 }
 
+void ScriptMgr::OnPlayerLootItem(Player* player, Item* item, uint32 count, uint64 lootGuid)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnLootItem(player, item, count, lootGuid);
+}
+
 void ScriptMgr::OnPlayerDelete(uint64 guid)
 {
     FOREACH_SCRIPT(PlayerScript)->OnDelete(guid);
