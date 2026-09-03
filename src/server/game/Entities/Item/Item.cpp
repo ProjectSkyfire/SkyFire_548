@@ -340,7 +340,10 @@ void Item::SaveToDB(SQLTransaction& trans)
             stmt->setString(++index, ssEnchants.str());
 
             stmt->setInt16(++index, GetItemRandomPropertyId());
-            stmt->setUInt32(++index, GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0)); // reforge Id
+            // Only write a reforge the modifiers mask actually claims. reforgeID is a signed int,
+            // so a poisoned slot past 2^31 makes MySQL reject this statement under STRICT_TRANS_TABLES,
+            // and that rolls back the whole Player::SaveToDB transaction along with it.
+            stmt->setUInt32(++index, HasFlag(ITEM_FIELD_MODIFIERS_MASK, 1) ? GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 0) : 0); // reforge Id
             stmt->setUInt16(++index, GetUInt32Value(ITEM_FIELD_DURABILITY));
             stmt->setUInt32(++index, GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME));
             stmt->setString(++index, m_text);
@@ -404,6 +407,7 @@ void Item::SaveToDB(SQLTransaction& trans)
 
 bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entry)
 {
+    // Every caller must SELECT exactly these 13 columns in this order, reforgeId and transmogrifyId included:
     //                                                    0                1      2         3        4      5             6                 7  8          9               10          11          12
     //result = CharacterDatabase.PQuery("SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, reforgeId, transmogrifyId, durability, playedTime, text FROM item_instance WHERE guid = '%u'", guid);
 
