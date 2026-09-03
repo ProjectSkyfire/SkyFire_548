@@ -20,7 +20,7 @@ env:
   BUILD_TYPE: Release
   BOOST_VERSION: 1.91.0
   BOOST_ROOT: C:\local\boost_1_91_0
-  OPENSSL_VERSION: 4.0.1
+  OPENSSL_VERSION: 4.0.2
   OPENSSL_ROOT_DIR: C:\Program Files\OpenSSL
   OPENSSL_MODULES: C:\Program Files\OpenSSL\bin
   OPENSSL_LIB_LEGACY: C:\Program Files\OpenSSL\lib\VC\x64\MD\liblegacy.lib
@@ -49,6 +49,28 @@ jobs:
     - name: windows dependencies
       shell: pwsh
       run: |
+        function Invoke-ChocoInstall {
+          param(
+            [Parameter(Mandatory = $true)]
+            [string] $PackageName,
+            [string[]] $PackageArgs = @(),
+            [int] $Attempts = 3
+          )
+
+          for ($attempt = 1; $attempt -le $Attempts; ++$attempt) {
+            choco install -y $PackageName @PackageArgs --no-progress
+            if ($LASTEXITCODE -eq 0) {
+              return $true
+            }
+
+            if ($attempt -lt $Attempts) {
+              Start-Sleep -Seconds (30 * $attempt)
+            }
+          }
+
+          return $false
+        }
+
         function Install-ChocoPackage {
           param(
             [Parameter(Mandatory = $true)]
@@ -56,23 +78,50 @@ jobs:
             [string[]] $PackageArgs = @()
           )
 
-          for ($attempt = 1; $attempt -le 3; ++$attempt) {
-            choco install -y $PackageName @PackageArgs --no-progress
-            if ($LASTEXITCODE -eq 0) {
+          if (-not (Invoke-ChocoInstall -PackageName $PackageName -PackageArgs $PackageArgs)) {
+            throw "choco install $PackageName failed after 3 attempts."
+          }
+        }
+
+        function Install-OpenSsl {
+          param(
+            [Parameter(Mandatory = $true)]
+            [string] $PinnedVersion
+          )
+
+          # The chocolatey openssl package downloads its installer from slproweb, which
+          # keeps only the newest build per branch and deletes point releases as soon as a
+          # successor ships. Any version we pin therefore 404s without warning -- that is
+          # exactly how 4.0.1 broke this job. Try the pin first so builds stay reproducible,
+          # then walk the feed's 4.x releases newest-first so an upstream rotation does not
+          # take CI down with it. Stay on 4.x: the core needs the OpenSSL 4 legacy provider.
+          $candidates = @($PinnedVersion)
+
+          try {
+            $feed = 'https://community.chocolatey.org/api/v2/FindPackagesById()?id=''openssl''&$orderby=Version%20desc&$top=40'
+            $body = (Invoke-WebRequest -Uri $feed -UseBasicParsing).Content
+            $candidates += [regex]::Matches($body, '<d:Version>([^<]+)</d:Version>') |
+              ForEach-Object { $_.Groups[1].Value } |
+              Where-Object { $_ -like '4.*' }
+          } catch {
+            Write-Warning "Could not read the chocolatey feed; trying the pinned version only. $_"
+          }
+
+          foreach ($version in ($candidates | Select-Object -Unique)) {
+            if (Invoke-ChocoInstall -PackageName openssl -PackageArgs @("--version=$version") -Attempts 2) {
+              if ($version -ne $PinnedVersion) {
+                Write-Host "::warning::OPENSSL_VERSION $PinnedVersion is no longer downloadable; built against $version instead. Update OPENSSL_VERSION in .github/workflows/windows.yml."
+              }
               return
             }
-
-            if ($attempt -eq 3) {
-              exit $LASTEXITCODE
-            }
-
-            Start-Sleep -Seconds (30 * $attempt)
           }
+
+          throw "Could not install any OpenSSL 4.x package. Tried: $($candidates -join ', ')"
         }
 
         Install-ChocoPackage -PackageName make
         Install-ChocoPackage -PackageName cmake -PackageArgs @("--pre")
-        Install-ChocoPackage -PackageName openssl -PackageArgs @("--version=$env:OPENSSL_VERSION")
+        Install-OpenSsl -PinnedVersion $env:OPENSSL_VERSION
 
     - name: Cache Boost
       id: boost-cache
