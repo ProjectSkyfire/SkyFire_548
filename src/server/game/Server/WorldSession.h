@@ -947,10 +947,10 @@ public:                                                 // opcodes handlers
     void HandleChallengeModeRequestLeaders(WorldPacket& recvData);
     void HandleChallengeModeRequestMapStats(WorldPacket& recvData);
 
-    void SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, bool party, uint64 queueGuidOverride = 0, uint8 queueIdOverride = 0);
+    void SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, bool party, uint64 queueGuidOverride = 0, uint8 queueIdOverride = 0, uint32 joinTimeOverride = 0);
     void SendLfgRoleChosen(uint64 guid, uint8 roles);
     void SendLfgRoleCheckUpdate(lfg::LfgRoleCheck const& pRoleCheck);
-    void SendLfgClearStatus(uint64 lfgGroupGuid = 0, uint8 queueIdOverride = 0, bool groupLeave = false);
+    void SendLfgClearStatus(uint64 lfgGroupGuid = 0, uint8 queueIdOverride = 0, bool groupLeave = false, uint32 joinTimeOverride = 0);
     void SendLfgLfrList(bool update);
     void SendLfgJoinResult(lfg::LfgJoinResultData const& joinData);
     void SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData);
