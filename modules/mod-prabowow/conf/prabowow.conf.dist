@@ -47,7 +47,9 @@ PraboWoW.AutoSellGrey.Enable = 1
 #
 #    PraboWoW.AllFlightPaths.Enable
 #        Description: Mark every flight path of the player's faction as known
-#                     on each login.
+#                     on each login. Pandaren are skipped until they pick a
+#                     faction, then granted on their next zone change without
+#                     needing to relog.
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled)
 
