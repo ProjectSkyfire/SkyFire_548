@@ -1717,6 +1717,14 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
     {
+        // Safety net for the delivery objective of 29423. A player standing in front
+        // of Master Shang Xi has reached the temple by definition, so grant the credit
+        // even if areatrigger 7835 was never tripped -- it can be walked around, and a
+        // player whose Huo despawned has no other way to finish. Done before the quest
+        // menu is built so the hand-in is offered on this same click.
+        if (player->GetQuestStatus(29423) == QUEST_STATUS_INCOMPLETE)
+            player->KilledMonsterCredit(61128);
+
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
@@ -1889,31 +1897,41 @@ public:
 
     bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
     {
-        if (player->GetQuestStatus(29423) == QUEST_STATUS_INCOMPLETE)
+        if (player->GetQuestStatus(29423) != QUEST_STATUS_INCOMPLETE)
+            return false;
+
+        // The welcome scene only plays when the whole cast is actually here. Both
+        // lookups are phase filtered (IsWithinDistInMap -> InSamePhase), so they are
+        // allowed to fail without taking the quest down with them.
+        if (Creature* huo = player->FindNearestCreature(54958, 15.0f, true)) // Check if Huo is with us.
         {
-            if (Creature* huo = player->FindNearestCreature(54958, 15.0f, true)) // Check if Huo is with us.
+            if (Creature* master = player->FindNearestCreature(54786, 25.0f, true))
             {
-                if (Creature* master = player->FindNearestCreature(54786, 25.0f, true))
+                master->MonsterSay("Welcome, Huo. The people have missed your warmth.", Language::LANG_UNIVERSAL, player);
+                master->SendPlaySound(27788, true);
+                if (Creature* aysa = master->SummonCreature(61126, aysaTempleSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
                 {
-                    master->MonsterSay("Welcome, Huo. The people have missed your warmth.", Language::LANG_UNIVERSAL, player);
-                    master->SendPlaySound(27788, true);
-                    if (Creature* aysa = master->SummonCreature(61126, aysaTempleSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
-                    {
-                        aysa->GetMotionMaster()->MovePoint(0, aysaTempleMovePoint_1);
-                    }
-                    if (Creature* ji = master->SummonCreature(61127, jiTempleSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
-                    {
-                        ji->GetMotionMaster()->MovePoint(0, jiTempleMovePoint_1);
-                    }
-                    player->KilledMonsterCredit(61128);
-                    huo->GetMotionMaster()->MovePoint(0, huoPos);
-                    huo->DeleteCharmInfo();
-                    huo->DespawnOrUnsummon(60000);
-                    return true;
+                    aysa->GetMotionMaster()->MovePoint(0, aysaTempleMovePoint_1);
                 }
+                if (Creature* ji = master->SummonCreature(61127, jiTempleSpawnPos, TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 120000))
+                {
+                    ji->GetMotionMaster()->MovePoint(0, jiTempleMovePoint_1);
+                }
+                huo->GetMotionMaster()->MovePoint(0, huoPos);
+                huo->DeleteCharmInfo();
+                huo->DespawnOrUnsummon(60000);
             }
         }
-        return false;
+
+        // Credit is granted whether or not that scene could play. Reaching the temple
+        // with the quest active IS the objective, and requiring both creatures made
+        // the quest impossible in both directions: while escorting Huo the player is
+        // in a phase the temple spawns are not in, so Master Shang Xi is not found;
+        // relogging fixes the phase but Huo is a temporary summon and is gone for
+        // good, so Huo is not found. Either way the old code returned false, no
+        // credit 61128 was ever granted, and 29423 could never be handed in.
+        player->KilledMonsterCredit(61128);
+        return true;
     }
 };
 
