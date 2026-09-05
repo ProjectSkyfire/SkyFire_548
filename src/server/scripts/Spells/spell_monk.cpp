@@ -14,6 +14,7 @@
 #include "SpellAuraEffects.h"
 #include "Containers.h"
 #include "Group.h"
+#include "MonkSpellCalculations.h"
 
 enum MonkSpells
 {
@@ -3164,6 +3165,126 @@ enum Blackout
     SPELL_MONK_SHUFFLE = 115307
 };
 
+// A monk melee ability carries a placeholder in its DBC damage effect -- the real
+// number is the weapon formula times the coefficient the client keeps in its tooltip.
+// Returns false for a caster with no equipped weapons to read, which leaves creatures
+// casting a monk ability on whatever the spell data says.
+static bool CalculateMonkMeleeAbilityDamage(Unit* caster, float coefficient, int32& damage)
+{
+    Player* player = caster ? caster->ToPlayer() : NULL;
+    if (!player)
+        return false;
+
+    Skyfire::Spells::Monk::MeleeAbilityDamageData data;
+    data.MainHandDamage = frand(player->GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE),
+        player->GetWeaponDamageRange(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE));
+    data.MainHandSpeed = float(player->GetAttackTime(WeaponAttackType::BASE_ATTACK)) / IN_MILLISECONDS;
+    data.DualWield = player->haveOffhandWeapon();
+
+    if (data.DualWield)
+    {
+        data.OffHandDamage = frand(player->GetWeaponDamageRange(WeaponAttackType::OFF_ATTACK, WeaponDamageRange::MINDAMAGE),
+            player->GetWeaponDamageRange(WeaponAttackType::OFF_ATTACK, WeaponDamageRange::MAXDAMAGE));
+        data.OffHandSpeed = float(player->GetAttackTime(WeaponAttackType::OFF_ATTACK)) / IN_MILLISECONDS;
+    }
+
+    data.AttackPower = player->GetTotalAttackPowerValue(WeaponAttackType::BASE_ATTACK);
+    data.Brewmaster = player->GetTalentSpecialization(player->GetActiveSpec()) == SPEC_MONK_BREWMASTER;
+
+    damage = int32(Skyfire::Spells::Monk::CalculateMeleeAbilityDamage(data, coefficient));
+    return true;
+}
+
+// Jab - 100780, plus the copies the weapon override auras swap in for it
+class spell_monk_jab : public SpellScriptLoader
+{
+    public:
+    spell_monk_jab() : SpellScriptLoader("spell_monk_jab")
+    { }
+
+    class spell_monk_jab_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_jab_SpellScript);
+
+        void HandleCalcDamage(SpellEffIndex /*effIndex*/)
+        {
+            int32 damage = 0;
+            if (CalculateMonkMeleeAbilityDamage(GetCaster(), Skyfire::Spells::Monk::JAB_COEFFICIENT, damage))
+                SetEffectValue(damage);
+        }
+
+        void Register()
+        {
+            OnEffectLaunchTarget += SpellEffectFn(spell_monk_jab_SpellScript::HandleCalcDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monk_jab_SpellScript();
+    }
+};
+
+// Tiger Palm - 100787
+class spell_monk_tiger_palm : public SpellScriptLoader
+{
+    public:
+    spell_monk_tiger_palm() : SpellScriptLoader("spell_monk_tiger_palm")
+    { }
+
+    class spell_monk_tiger_palm_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_tiger_palm_SpellScript);
+
+        void HandleCalcDamage(SpellEffIndex /*effIndex*/)
+        {
+            int32 damage = 0;
+            if (CalculateMonkMeleeAbilityDamage(GetCaster(), Skyfire::Spells::Monk::TIGER_PALM_COEFFICIENT, damage))
+                SetEffectValue(damage);
+        }
+
+        void Register()
+        {
+            OnEffectLaunchTarget += SpellEffectFn(spell_monk_tiger_palm_SpellScript::HandleCalcDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monk_tiger_palm_SpellScript();
+    }
+};
+
+// Rising Sun Kick - 107428
+class spell_monk_rising_sun_kick : public SpellScriptLoader
+{
+    public:
+    spell_monk_rising_sun_kick() : SpellScriptLoader("spell_monk_rising_sun_kick")
+    { }
+
+    class spell_monk_rising_sun_kick_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_monk_rising_sun_kick_SpellScript);
+
+        void HandleCalcDamage(SpellEffIndex /*effIndex*/)
+        {
+            int32 damage = 0;
+            if (CalculateMonkMeleeAbilityDamage(GetCaster(), Skyfire::Spells::Monk::RISING_SUN_KICK_COEFFICIENT, damage))
+                SetEffectValue(damage);
+        }
+
+        void Register()
+        {
+            OnEffectLaunchTarget += SpellEffectFn(spell_monk_rising_sun_kick_SpellScript::HandleCalcDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_monk_rising_sun_kick_SpellScript();
+    }
+};
+
 // Blackout Kick - 100784
 class spell_monk_blackout_kick : public SpellScriptLoader
 {
@@ -3174,6 +3295,16 @@ class spell_monk_blackout_kick : public SpellScriptLoader
     class spell_monk_blackout_kick_SpellScript : public SpellScript
     {
         PrepareSpellScript(spell_monk_blackout_kick_SpellScript);
+
+        // Fill the damage in before the effect handler runs, so the damage done and
+        // taken modifiers, crit and armour all still apply on top of it -- and so the
+        // 20% follow-up below reads a real number out of GetHitDamage().
+        void HandleCalcDamage(SpellEffIndex /*effIndex*/)
+        {
+            int32 damage = 0;
+            if (CalculateMonkMeleeAbilityDamage(GetCaster(), Skyfire::Spells::Monk::BLACKOUT_KICK_COEFFICIENT, damage))
+                SetEffectValue(damage);
+        }
 
         void HandleOnHit()
         {
@@ -3216,6 +3347,7 @@ class spell_monk_blackout_kick : public SpellScriptLoader
 
         void Register()
         {
+            OnEffectLaunchTarget += SpellEffectFn(spell_monk_blackout_kick_SpellScript::HandleCalcDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
             OnHit += SpellHitFn(spell_monk_blackout_kick_SpellScript::HandleOnHit);
         }
     };
@@ -3320,6 +3452,9 @@ void AddSC_monk_spell_scripts()
     new spell_monk_zen_pilgrimage();
     new spell_monk_zen_pilgrimage_return();
     new spell_monk_blackout_kick();
+    new spell_monk_jab();
+    new spell_monk_rising_sun_kick();
+    new spell_monk_tiger_palm();
     new spell_monk_fortifying_brew();
     new spell_monk_touch_of_death();
     new spell_monk_tigereye_brew_stacks();

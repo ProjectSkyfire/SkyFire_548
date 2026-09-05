@@ -538,6 +538,18 @@ target_include_directories(paladin_spell_calculation_tests PRIVATE
 
 add_test(NAME paladin_spell_calculation_tests COMMAND paladin_spell_calculation_tests)
 
+add_executable(monk_spell_calculation_tests
+  MonkSpellCalculationTests.cpp
+)
+
+target_include_directories(monk_spell_calculation_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${CMAKE_SOURCE_DIR}/src/server/scripts/Spells
+)
+
+add_test(NAME monk_spell_calculation_tests COMMAND monk_spell_calculation_tests)
+
 add_executable(pvp_resilience_tests
   PvpResilienceTests.cpp
 )

@@ -382,6 +382,10 @@ public:
     // method avalible only in EffectHandler method
     int32 GetEffectValue();
 
+    // replaces the value the effect handler is about to use
+    // method avalible only in EffectHandler method
+    void SetEffectValue(int32 value);
+
     // returns: cast item if present.
     Item* GetCastItem();
 
