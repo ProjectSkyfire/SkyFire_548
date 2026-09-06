@@ -697,6 +697,7 @@ public:                                                 // opcodes handlers
     void HandlePetitionDeclineOpcode(WorldPacket& recvData);
     void HandleOfferPetitionOpcode(WorldPacket& recvData);
     void HandleTurnInPetitionOpcode(WorldPacket& recvData);
+    void SendPetitionShowSignatures(ObjectGuid petitionGuid, ObjectGuid ownerGuid);
     void SendPetitionSignResults(ObjectGuid petitionGuid, ObjectGuid playerGuid, uint8 result);
 
     void HandleGuildQueryOpcode(WorldPacket& recvPacket);
