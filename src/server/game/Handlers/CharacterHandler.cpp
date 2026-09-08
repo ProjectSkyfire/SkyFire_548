@@ -40,6 +40,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "WorldSocket.h"
 
 class LoginQueryHolder : public SQLQueryHolder
 {
@@ -1407,9 +1408,6 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
         return;
     }
 
-    m_playerLoading = true;
-    SF_LOG_DEBUG("network", "WORLD: Recvd Player Logon Message");
-
     PlayerLoginRequest request = ReadPlayerLoginRequest(recvData);
     ObjectGuid playerGuid = request.guid;
 
@@ -1424,16 +1422,46 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
         return;
     }
 
+    m_playerLoading = true;
+    m_pendingPlayerLoginGuid = playerGuid;
+
+    if (!m_InstanceSocket || m_InstanceSocket->IsClosed())
+    {
+        if (!SendConnectToInstance())
+        {
+            SendCharacterLoginFailed(ResponseCodes::CHAR_LOGIN_FAILED);
+            m_playerLoading = false;
+            m_pendingPlayerLoginGuid = 0;
+        }
+        return;
+    }
+
+    ContinuePlayerLogin();
+}
+
+void WorldSession::ContinuePlayerLogin()
+{
+    if (!m_playerLoading || GetPlayer() != NULL || !m_pendingPlayerLoginGuid)
+        return;
+
+    ObjectGuid playerGuid = m_pendingPlayerLoginGuid;
     LoginQueryHolder* holder = new LoginQueryHolder(GetAccountId(), playerGuid);
     if (!holder->Initialize())
     {
         delete holder;                                      // delete all unprocessed queries
         SendCharacterLoginFailed(ResponseCodes::CHAR_LOGIN_FAILED);
         m_playerLoading = false;
+        m_pendingPlayerLoginGuid = 0;
         return;
     }
 
+    m_pendingPlayerLoginGuid = 0;
     _charLoginCallback = CharacterDatabase.DelayQueryHolder((SQLQueryHolder*)holder);
+}
+
+void WorldSession::HandleQueuedMessagesEnd(WorldPacket& /*recvData*/)
+{
+    ContinuePlayerLogin();
 }
 
 void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)

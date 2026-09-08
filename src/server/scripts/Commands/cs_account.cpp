@@ -297,21 +297,26 @@ public:
     static bool HandleAccountCreateCommand(ChatHandler* handler, char const* args)
     {
         if (!*args)
+        {
+            handler->SendSysMessage("Syntax: .account create <email> <username> <password>");
+            handler->SetSentErrorMessage(true);
             return false;
-
-        std::string email;
+        }
 
         ///- %Parse the command line arguments
-        char* accountName = strtok((char*)args, " ");
+        char* email = strtok((char*)args, " ");
+        char* accountName = strtok(NULL, " ");
         char* password = strtok(NULL, " ");
-        char* possibleEmail = strtok(NULL, " ' ");
-        if (possibleEmail)
-            email = possibleEmail;
+        char* extraArg = strtok(NULL, " ");
 
-        if (!accountName || !password)
+        if (!email || !accountName || !password || extraArg)
+        {
+            handler->SendSysMessage("Syntax: .account create <email> <username> <password>");
+            handler->SetSentErrorMessage(true);
             return false;
+        }
 
-        AccountOpResult result = sAccountMgr->CreateAccount(std::string(accountName), std::string(password), email);
+        AccountOpResult result = sAccountMgr->CreateAccount(std::string(accountName), std::string(password), std::string(email));
         switch (result)
         {
             case AccountOpResult::AOR_OK:
@@ -321,7 +326,7 @@ public:
                     SF_LOG_INFO("entities.player.character", "Account: %d (IP: %s) Character:[%s] (GUID: %u) created Account %s (Email: '%s')",
                         handler->GetSession()->GetAccountId(), handler->GetSession()->GetRemoteAddress().c_str(),
                         handler->GetSession()->GetPlayer()->GetName().c_str(), handler->GetSession()->GetPlayer()->GetGUIDLow(),
-                        accountName, email.c_str());
+                        accountName, email);
                 }
                 break;
             case AccountOpResult::AOR_NAME_TOO_LONG:
@@ -330,6 +335,22 @@ public:
                 return false;
             case AccountOpResult::AOR_NAME_ALREADY_EXIST:
                 handler->SendSysMessage(LANG_ACCOUNT_ALREADY_EXIST);
+                handler->SetSentErrorMessage(true);
+                return false;
+            case AccountOpResult::AOR_PASS_TOO_LONG:
+                handler->SendSysMessage(LANG_PASSWORD_TOO_LONG);
+                handler->SetSentErrorMessage(true);
+                return false;
+            case AccountOpResult::AOR_EMAIL_TOO_LONG:
+                handler->SendSysMessage(LANG_EMAIL_TOO_LONG);
+                handler->SetSentErrorMessage(true);
+                return false;
+            case AccountOpResult::AOR_EMAIL_INVALID:
+                handler->SendSysMessage("That is not a valid email address.");
+                handler->SetSentErrorMessage(true);
+                return false;
+            case AccountOpResult::AOR_EMAIL_ALREADY_EXIST:
+                handler->SendSysMessage("That email address is already assigned to another account.");
                 handler->SetSentErrorMessage(true);
                 return false;
             case AccountOpResult::AOR_DB_INTERNAL_ERROR:

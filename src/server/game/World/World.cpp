@@ -79,6 +79,7 @@ void StartEluna(bool restart);
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "WorldSocket.h"
 
 std::atomic<bool> World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -221,6 +222,15 @@ bool World::RemoveSession(uint32 id)
 void World::AddSession(WorldSession* s)
 {
     addSessQueue.add(s);
+}
+
+void World::AddInstanceSocket(WorldSocket* socket, uint64 key, uint32 accountId)
+{
+    if (!socket)
+        return;
+
+    socket->AddReference();
+    instanceSocketQueue.add({ socket, key, accountId });
 }
 
 void World::AddSession_(WorldSession* s)
@@ -654,6 +664,7 @@ void World::LoadConfigSettings(bool reload)
 
     setIntConfig(WorldIntConfigs::CONFIG_SOCKET_TIMEOUTTIME, sConfigMgr->GetIntDefault("SocketTimeOutTime", 900000));
     setIntConfig(WorldIntConfigs::CONFIG_SESSION_ADD_DELAY, sConfigMgr->GetIntDefault("SessionAddDelay", 10000));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_AUTHNET_WORLD_TOKEN_RESOLVE, sConfigMgr->GetBoolDefault("Authnet.WorldTokenResolve", false));
 
     SetFloatConfig(WorldFloatConfigs::CONFIG_GROUP_XP_DISTANCE, sConfigMgr->GetFloatDefault("MaxGroupXPDistance", 74.0f));
     SetFloatConfig(WorldFloatConfigs::CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE, sConfigMgr->GetFloatDefault("MaxRecruitAFriendBonusDistance", 100.0f));
@@ -2811,6 +2822,33 @@ void World::UpdateSessions(uint32 diff)
     WorldSession* sess = NULL;
     while (addSessQueue.next(sess))
         AddSession_(sess);
+
+    InstanceSocketLink link = {};
+    while (instanceSocketQueue.next(link))
+    {
+        bool attached = false;
+        WorldSession* session = FindSession(link.AccountId);
+        if (session && !link.Socket->IsClosed() && link.Socket->AttachSession(session))
+        {
+            attached = session->AttachInstanceSocket(link.Socket, link.Key);
+            if (!attached)
+                link.Socket->DetachSession(session);
+        }
+
+        if (attached)
+        {
+            WorldPacket resume(SMSG_RESUME_COMMS, 0);
+            link.Socket->SendPacket(resume);
+            SF_LOG_INFO("network", "World::UpdateSessions: secondary world connection ready for account %u.", link.AccountId);
+        }
+        else
+        {
+            SF_LOG_ERROR("network", "World::UpdateSessions: rejected secondary world connection for account %u.", link.AccountId);
+            link.Socket->CloseSocket();
+        }
+
+        link.Socket->RemoveReference();
+    }
 
     ///- Then send an update signal to remaining ones
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)

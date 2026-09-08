@@ -16,6 +16,7 @@ class AuthCrypt
         AuthCrypt();
 
         void Init(SessionKey const& K);
+        void Init(SessionKey const& K, std::array<uint8, 32> const& encryptionSeeds);
         void DecryptRecv(uint8* data, size_t len);
         void EncryptSend(uint8* data, size_t len);
 

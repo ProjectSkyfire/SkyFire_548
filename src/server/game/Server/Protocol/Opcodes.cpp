@@ -395,6 +395,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_POI_QUERY,                         0x10C2, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPOIQuery                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_PUSH_RESULT,                       0x1370, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleQuestPushResult                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_QUEST_QUERY,                             0x02D5, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleQuestQueryOpcode                ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_QUEUED_MESSAGES_END,                     0x1093, STATUS_AUTHED,                       PROCESS_THREADUNSAFE, &WorldSession::HandleQueuedMessagesEnd               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RAID_READY_CHECK,                        0x0817, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRaidReadyCheckOpcode            ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RAID_READY_CHECK_CONFIRM,                0x158B, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRaidReadyCheckConfirmOpcode     ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_RAID_TARGET_UPDATE,                      0x0886, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRaidTargetUpdateOpcode          ); // 5.4.8 18414
@@ -658,6 +659,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_CLIENT_CONTROL_UPDATE,                          0x1043, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_COMPLAIN_RESULT,                                0x128F, STATUS_UNHANDLED); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_CONQUEST_FORMULA_CONSTANTS,                     0x0EAB, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_CONNECT_TO,                                     0x1149, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_CONTACT_LIST,                                   0x1F22, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_CONVERT_RUNE,                                   0x1A1B, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_COOLDOWN_EVENT,                                 0x1163, STATUS_NEVER    ); // 5.4.8 18414
@@ -981,6 +983,7 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_RESET_FAILED_NOTIFY,                            0x10AE, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESPEC_WIPE_CONFIRM,                            0x02AB, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESPOND_INSPECT_ACHIEVEMENTS,                   0x009E, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_RESUME_COMMS,                                   0x0969, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESURRECT_REQUEST,                              0x1062, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESYNC_RUNES,                                   0x15E3, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SELL_RESPONSE,                                  0x048E, STATUS_NEVER    ); // 5.4.8 18414

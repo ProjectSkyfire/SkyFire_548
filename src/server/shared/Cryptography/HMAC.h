@@ -56,9 +56,17 @@ namespace SkyFire::Impl
 
             GenericHMAC(uint8 const* seed, size_t len) : _mac(HMACImpl::MakeMAC()), _ctx(HMACImpl::MakeCTX(_mac))
             {
-                int result = EVP_MAC_init(_ctx, seed, len, _params);
+                char const* digestName = EVP_MD_get0_name(HashCreator());
+                OSSL_PARAM params[2] =
+                {
+                    OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>(digestName), 0),
+                    OSSL_PARAM_construct_end()
+                };
+                int result = EVP_MAC_init(_ctx, seed, len, params);
                 ASSERT(result == 1);
             }
+            GenericHMAC(std::string_view seed) : GenericHMAC(reinterpret_cast<uint8 const*>(seed.data()), seed.size()) {}
+            GenericHMAC(std::string const& seed) : GenericHMAC(std::string_view(seed)) {}
             template <typename Container>
             GenericHMAC(Container const& container) : GenericHMAC(std::data(container), std::size(container)) {}
 
@@ -100,7 +108,6 @@ namespace SkyFire::Impl
             EVP_MAC* _mac;
             EVP_MAC_CTX* _ctx;
             Digest _digest = { };
-            OSSL_PARAM _params[2] = { OSSL_PARAM_construct_utf8_string("digest", const_cast<char*>("SHA1"), 0), OSSL_PARAM_construct_end() };
     };
 }
 
@@ -108,5 +115,6 @@ namespace SkyFire::Crypto
 {
     using HMAC_SHA1 = SkyFire::Impl::GenericHMAC<EVP_sha1, Constants::SHA1_DIGEST_LENGTH_BYTES>;
     using HMAC_SHA256 = SkyFire::Impl::GenericHMAC<EVP_sha256, Constants::SHA256_DIGEST_LENGTH_BYTES>;
+    using HMAC_SHA512 = SkyFire::Impl::GenericHMAC<EVP_sha512, Constants::SHA512_DIGEST_LENGTH_BYTES>;
 }
 #endif

@@ -27,6 +27,25 @@ void AuthCrypt::Init(SessionKey const& K)
     _initialized = true;
 }
 
+void AuthCrypt::Init(SessionKey const& K, std::array<uint8, 32> const& encryptionSeeds)
+{
+    SkyFire::Crypto::HMAC_SHA1 serverEncryptionKey(encryptionSeeds.data(), 16);
+    serverEncryptionKey.UpdateData(K);
+    serverEncryptionKey.Finalize();
+    _serverEncrypt.Init(serverEncryptionKey.GetDigest());
+
+    SkyFire::Crypto::HMAC_SHA1 clientDecryptionKey(encryptionSeeds.data() + 16, 16);
+    clientDecryptionKey.UpdateData(K);
+    clientDecryptionKey.Finalize();
+    _clientDecrypt.Init(clientDecryptionKey.GetDigest());
+
+    std::array<uint8, 1024> syncBuf;
+    _serverEncrypt.UpdateData(syncBuf);
+    _clientDecrypt.UpdateData(syncBuf);
+
+    _initialized = true;
+}
+
 void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
 {
     ASSERT(_initialized);

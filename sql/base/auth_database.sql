@@ -90,6 +90,8 @@ CREATE TABLE `account_login_identity` (
   `identity_canonical` varchar(255) NOT NULL DEFAULT '',
   `salt` binary(32) NOT NULL,
   `verifier` binary(32) NOT NULL,
+  `authnet_salt` binary(32) DEFAULT NULL,
+  `authnet_verifier` binary(128) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -406,4 +408,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-

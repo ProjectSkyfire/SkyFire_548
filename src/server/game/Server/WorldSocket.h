@@ -95,6 +95,12 @@ public:
     /// Detaches the owning world session when the session is being removed.
     void DetachSession(WorldSession* session);
 
+    /// Attaches an authenticated secondary world connection.
+    bool AttachSession(WorldSession* session);
+
+    /// Returns the address and port accepted by this socket.
+    bool GetLocalEndpoint(std::array<uint8, 16>& address, uint32& addressType, uint16& port) const;
+
     /// Returns true when outgoing data is waiting to be flushed.
     bool HasPendingOutput(void) const;
 
@@ -110,6 +116,9 @@ private:
 
     /// Called by ProcessIncoming() on CMSG_AUTH_SESSION.
     int HandleAuthSession(WorldPacket& recvPacket);
+
+    /// Called by ProcessIncoming() on CMSG_AUTH_CONTINUED_SESSION.
+    int HandleAuthContinuedSession(WorldPacket& recvPacket);
 
     /// Called by ProcessIncoming() on CMSG_PING.
     int HandlePing(WorldPacket& recvPacket);
@@ -162,6 +171,7 @@ private:
     size_t m_OutBufferSize;
     bool m_Started;
 
+    std::array<uint8, 32> m_EncryptionSeeds;
     std::array<uint8, 4> m_Seed;
     std::array<char, 4096> m_ReadBuffer;
 

@@ -8,6 +8,7 @@
 */
 
 #include "AccountMgr.h"
+#include "AuthnetConnectTo.h"
 #include "BattlegroundMgr.h"
 #include "CharacterBoost.h"
 #include "Common.h"
@@ -85,12 +86,18 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 }
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool hasBoost, bool usedEmailLogin) :
+WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale,
+    uint32 recruiter, bool isARecruiter, bool hasBoost, bool usedEmailLogin, std::string worldAuthLogin,
+    SessionKey const& worldSessionKey) :
     m_muteTime(mute_time),
     m_timeOutTime(0),
     AntiDOS(this),
     _player(NULL),
     m_Socket(sock),
+    m_InstanceSocket(NULL),
+    m_WorldAuthLogin(std::move(worldAuthLogin)),
+    m_WorldSessionKey(worldSessionKey),
+    m_InstanceConnectKey(0),
     _security(sec),
     m_virtualRealmID(0),
     _accountId(id),
@@ -103,6 +110,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_playerLogout(false),
     m_playerRecentlyLogout(false),
     m_playerSave(false),
+    m_pendingPlayerLoginGuid(0),
     m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
     m_sessionDbLocaleIndex(locale),
     m_latency(0),
@@ -143,6 +151,17 @@ WorldSession::~WorldSession()
     ///- unload player if not unloaded
     if (_player)
         LogoutPlayer(true);
+
+    if (m_InstanceConnectKey)
+        AuthnetConnectTo::Remove(m_InstanceConnectKey);
+
+    if (m_InstanceSocket)
+    {
+        m_InstanceSocket->DetachSession(this);
+        m_InstanceSocket->CloseSocket();
+        m_InstanceSocket->RemoveReference();
+        m_InstanceSocket = NULL;
+    }
 
     /// - If have unclosed socket, close it
     if (m_Socket)
@@ -196,7 +215,8 @@ uint32 WorldSession::GetGuidLow() const
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/)
 {
-    if (!m_Socket)
+    WorldSocket* socket = m_InstanceSocket ? m_InstanceSocket : m_Socket;
+    if (!socket)
         return;
 
     if (packet->GetOpcode() == NULL_OPCODE)
@@ -261,14 +281,15 @@ void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/
     }
 #endif                                                      // !SKYFIRE_DEBUG
 
-    if (m_Socket->SendPacket(*packet) == -1)
-        m_Socket->CloseSocket();
+    if (socket->SendPacket(*packet) == -1)
+        socket->CloseSocket();
 }
 
 void WorldSession::LogPacketMarker(std::string const& marker)
 {
-    if (m_Socket)
-        m_Socket->LogPacketMarker(marker);
+    WorldSocket* socket = m_InstanceSocket ? m_InstanceSocket : m_Socket;
+    if (socket)
+        socket->LogPacketMarker(marker);
 }
 
 /// Add an incoming packet to the queue
@@ -460,10 +481,72 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
             m_Socket = NULL;
         }
 
+        if (m_InstanceSocket && m_InstanceSocket->IsClosed())
+        {
+            m_InstanceSocket->DetachSession(this);
+            m_InstanceSocket->RemoveReference();
+            m_InstanceSocket = NULL;
+        }
+
         if (!m_Socket)
             return false;                                       //Will remove this session from the world session map
     }
 
+    return true;
+}
+
+bool WorldSession::SendConnectToInstance()
+{
+    if (!m_Socket || m_Socket->IsClosed())
+        return false;
+
+    std::array<uint8, 16> address = {};
+    uint32 addressType = 0;
+    uint16 port = 0;
+    if (!m_Socket->GetLocalEndpoint(address, addressType, port))
+    {
+        SF_LOG_ERROR("network", "WorldSession::SendConnectToInstance: unable to resolve the local world endpoint for account %u.", GetAccountId());
+        return false;
+    }
+
+    if (m_InstanceConnectKey)
+        AuthnetConnectTo::Remove(m_InstanceConnectKey);
+
+    m_InstanceConnectKey = AuthnetConnectTo::GenerateKey(GetAccountId());
+    AuthnetConnectTo::PendingConnection pending;
+    pending.AccountId = GetAccountId();
+    pending.Login = m_WorldAuthLogin;
+    pending.WorldSessionKey = m_WorldSessionKey;
+    AuthnetConnectTo::Register(m_InstanceConnectKey, std::move(pending));
+
+    WorldPacket packet = AuthnetConnectTo::BuildPacket(m_InstanceConnectKey, address, addressType, port);
+    if (m_Socket->SendPacket(packet) == -1)
+    {
+        AuthnetConnectTo::Remove(m_InstanceConnectKey);
+        m_InstanceConnectKey = 0;
+        return false;
+    }
+
+    SF_LOG_INFO("network", "WorldSession::SendConnectToInstance: requested secondary world connection for account %u on port %u.",
+        GetAccountId(), uint32(port));
+    return true;
+}
+
+bool WorldSession::AttachInstanceSocket(WorldSocket* socket, uint64 key)
+{
+    if (!socket || key != m_InstanceConnectKey)
+        return false;
+
+    socket->AddReference();
+    if (m_InstanceSocket)
+    {
+        m_InstanceSocket->DetachSession(this);
+        m_InstanceSocket->CloseSocket();
+        m_InstanceSocket->RemoveReference();
+    }
+
+    m_InstanceSocket = socket;
+    m_InstanceConnectKey = 0;
     return true;
 }
 

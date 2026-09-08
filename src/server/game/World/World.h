@@ -26,8 +26,8 @@
 class Object;
 class WorldPacket;
 class WorldSession;
-class Player;
 class WorldSocket;
+class Player;
 class SystemMgr;
 
 // ServerMessages.dbc
@@ -167,6 +167,7 @@ enum class WorldBoolConfigs
     CONFIG_TICKETS_GM_ENABLED,
     CONFIG_TICKETS_FEEDBACK_SYSTEM_ENABLED,
     CONFIG_BOOST_NEW_ACCOUNT,
+    CONFIG_AUTHNET_WORLD_TOKEN_RESOLVE,
 #ifdef ELUNA
     CONFIG_ELUNA_ENABLED,
 #endif
@@ -563,6 +564,7 @@ public:
 
     WorldSession* FindSession(uint32 id) const;
     void AddSession(WorldSession* s);
+    void AddInstanceSocket(WorldSocket* socket, uint64 key, uint32 accountId);
     void SendAutoBroadcast();
     bool RemoveSession(uint32 id);
     /// Get the number of current active sessions
@@ -885,6 +887,13 @@ private:
     // sessions that are added async
     void AddSession_(WorldSession* s);
     Skyfire::LockedQueue<WorldSession*, Skyfire::Mutex> addSessQueue;
+    struct InstanceSocketLink
+    {
+        WorldSocket* Socket;
+        uint64 Key;
+        uint32 AccountId;
+    };
+    Skyfire::LockedQueue<InstanceSocketLink, Skyfire::Mutex> instanceSocketQueue;
 
     // used versions
     std::string m_DBVersion;
