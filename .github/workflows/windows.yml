@@ -20,7 +20,7 @@ env:
   BUILD_TYPE: Release
   BOOST_VERSION: 1.91.0
   BOOST_ROOT: C:\local\boost_1_91_0
-  OPENSSL_VERSION: 4.0.1
+  OPENSSL_VERSION: 4.0.2
   OPENSSL_ROOT_DIR: C:\Program Files\OpenSSL
   OPENSSL_MODULES: C:\Program Files\OpenSSL\bin
   OPENSSL_LIB_LEGACY: C:\Program Files\OpenSSL\lib\VC\x64\MD\liblegacy.lib
