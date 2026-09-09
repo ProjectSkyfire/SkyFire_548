@@ -1248,7 +1248,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // NOTE ATM the socket is single-threaded, have this in mind ...
     bool const usedEmailLogin = effectiveLoginIdentity.Kind == Skyfire::Auth::LoginIdentityKind::Email;
     WorldSession* session = new (std::nothrow) WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale,
-        recruiter, isRecruiter, hasBoost, usedEmailLogin, account, sessionKey);
+        recruiter, isRecruiter, hasBoost, usedEmailLogin, useAuthnetWorldToken, account, sessionKey);
     if (!session)
         return -1;
 

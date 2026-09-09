@@ -42,6 +42,8 @@ int main()
 {
     std::string const worldSocket =
         ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/game/Server/WorldSocket.cpp");
+    std::string const characterHandler =
+        ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/game/Handlers/CharacterHandler.cpp");
     std::string const miscHandler =
         ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/game/Handlers/MiscHandler.cpp");
     std::string const loginDatabase =
@@ -56,6 +58,10 @@ int main()
         "World auth should resolve email-shaped account names through login identities.");
     passed &= Expect(Contains(loginDatabase, "LOGIN_SEL_ACCOUNT_INFO_BY_LOGIN_IDENTITY"),
         "Login database should prepare account-info lookup by login identity.");
+    passed &= Expect(Contains(worldSocket, "usedEmailLogin, useAuthnetWorldToken, account, sessionKey"),
+        "World auth should mark authnet token sessions so CONNECT_TO is limited to launcher clients.");
+    passed &= Expect(Contains(characterHandler, "if (m_usesAuthnetWorldHandoff && (!m_InstanceSocket || m_InstanceSocket->IsClosed()))"),
+        "Patched classic clients must enter the world on the existing socket instead of SMSG_CONNECT_TO.");
     passed &= Expect(Contains(miscHandler, "ObjectGuid guid = GetPlayer() ? GetPlayer()->GetGUID() : 0;"),
         "Requested account data should be sent with the logged-in player GUID when available.");
 

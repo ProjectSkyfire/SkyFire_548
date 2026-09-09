@@ -1425,7 +1425,10 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
     m_playerLoading = true;
     m_pendingPlayerLoginGuid = playerGuid;
 
-    if (!m_InstanceSocket || m_InstanceSocket->IsClosed())
+    // Authnet/launcher clients expect a Battle.net-style secondary world socket.
+    // Patched classic clients stay on the existing world connection; sending
+    // SMSG_CONNECT_TO to them drops the session during the loading screen.
+    if (m_usesAuthnetWorldHandoff && (!m_InstanceSocket || m_InstanceSocket->IsClosed()))
     {
         if (!SendConnectToInstance())
         {

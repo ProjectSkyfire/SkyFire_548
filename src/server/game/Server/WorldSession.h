@@ -254,8 +254,8 @@ class WorldSession
 {
 public:
     WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale,
-        uint32 recruiter, bool isARecruiter, bool hasBoost, bool usedEmailLogin, std::string worldAuthLogin,
-        SessionKey const& worldSessionKey);
+        uint32 recruiter, bool isARecruiter, bool hasBoost, bool usedEmailLogin, bool usesAuthnetWorldHandoff,
+        std::string worldAuthLogin, SessionKey const& worldSessionKey);
     ~WorldSession();
 
     bool PlayerLoading() const { return m_playerLoading; }
@@ -299,6 +299,7 @@ public:
     AccountTypes GetSecurity() const { return _security; }
     uint32 GetAccountId() const { return _accountId; }
     bool UsedEmailLogin() const { return m_usedEmailLogin; }
+    bool UsesAuthnetWorldHandoff() const { return m_usesAuthnetWorldHandoff; }
     Player* GetPlayer() const { return _player; }
     std::string const& GetPlayerName() const;
     std::string GetPlayerInfo() const;
@@ -1236,6 +1237,7 @@ private:
     bool isRecruiter;
     bool m_hasBoost;
     bool m_usedEmailLogin;
+    bool m_usesAuthnetWorldHandoff;
     Skyfire::LockedQueue<WorldPacket*, Skyfire::Mutex> _recvQueue;
     time_t timeLastWhoCommand;
     z_stream_s* _compressionStream;

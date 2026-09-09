@@ -87,8 +87,8 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale,
-    uint32 recruiter, bool isARecruiter, bool hasBoost, bool usedEmailLogin, std::string worldAuthLogin,
-    SessionKey const& worldSessionKey) :
+    uint32 recruiter, bool isARecruiter, bool hasBoost, bool usedEmailLogin, bool usesAuthnetWorldHandoff,
+    std::string worldAuthLogin, SessionKey const& worldSessionKey) :
     m_muteTime(mute_time),
     m_timeOutTime(0),
     AntiDOS(this),
@@ -121,6 +121,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     isRecruiter(isARecruiter),
     m_hasBoost(hasBoost),
     m_usedEmailLogin(usedEmailLogin),
+    m_usesAuthnetWorldHandoff(usesAuthnetWorldHandoff),
     timeLastWhoCommand(0),
     _RBACData(NULL)
 {
