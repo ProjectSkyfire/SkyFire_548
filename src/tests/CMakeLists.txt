@@ -776,6 +776,19 @@ target_include_directories(darkmoon_faire_tests PRIVATE
 
 add_test(NAME darkmoon_faire_tests COMMAND darkmoon_faire_tests)
 
+add_executable(game_event_schedule_tests
+  ${CMAKE_SOURCE_DIR}/src/server/game/Events/GameEventSchedule.cpp
+  GameEventScheduleTests.cpp
+)
+
+target_include_directories(game_event_schedule_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Platform
+  ${CMAKE_SOURCE_DIR}/src/server/game/Events
+)
+
+add_test(NAME game_event_schedule_tests COMMAND game_event_schedule_tests)
+
 add_executable(game_domain_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Player/PlayerRestState.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/Spells/Auras/SpellAuraMetadata.cpp

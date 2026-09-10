@@ -5,6 +5,7 @@
 
 #include "BattlegroundMgr.h"
 #include "GameEventMgr.h"
+#include "GameEventSchedule.h"
 #include "GameObjectAI.h"
 #include "GossipDef.h"
 #include "Language.h"
@@ -113,10 +114,17 @@ bool GameEventMgr::CheckOneGameEvent(uint16 entry) const
         case GAMEEVENT_NORMAL:
         {
             time_t currenttime = time(NULL);
+            GameEventData const& event = mGameEvent[entry];
+
+            if (event.holiday_id == HolidayIds::HOLIDAY_DARKMOON_FAIRE_TEROKKAR)
+                return event.start <= currenttime
+                    && currenttime < event.end
+                    && GameEventSchedule::IsMonthlyFirstWeekdayActive(currenttime, 0, event.length);
+
             // Get the event information
-            return mGameEvent[entry].start < currenttime
-                && currenttime < mGameEvent[entry].end
-                && (currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE) < mGameEvent[entry].length * MINUTE;
+            return event.start < currenttime
+                && currenttime < event.end
+                && (currenttime - event.start) % (event.occurence * MINUTE) < event.length * MINUTE;
         }
         // if the state is conditions or nextphase, then the event should be active
         case GAMEEVENT_WORLD_CONDITIONS:
@@ -167,6 +175,18 @@ uint32 GameEventMgr::NextCheck(uint16 entry) const
     // never started event, we return delay before start
     if (mGameEvent[entry].start > currenttime)
         return uint32(mGameEvent[entry].start - currenttime);
+
+    if (mGameEvent[entry].holiday_id == HolidayIds::HOLIDAY_DARKMOON_FAIRE_TEROKKAR)
+    {
+        uint32 delay = GameEventSchedule::GetSecondsUntilMonthlyFirstWeekdayTransition(currenttime, 0, mGameEvent[entry].length);
+        if (!delay)
+            return max_ge_check_delay;
+
+        if (mGameEvent[entry].end < time_t(currenttime + delay))
+            return uint32(mGameEvent[entry].end - currenttime);
+
+        return delay;
+    }
 
     uint32 delay;
     // in event, we return the end of it
