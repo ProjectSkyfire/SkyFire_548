@@ -1083,12 +1083,8 @@ void WorldSession::SendAddonsInfo()
     {
         if (shouldSendPublicKey(*itr))
         {
-            size_t pos = data.wpos();
             for (int i = 0; i < 256; i++)
-                data << uint8(0);
-
-            for (int i = 0; i < 256; i++)
-                data.put(pos + pubKeyOrder[i], addonPublicKey[i]);
+                data << addonPublicKey[pubKeyOrder[i]];
         }
 
         if (itr->Enabled)
