@@ -1060,6 +1060,11 @@ void WorldSession::SendAddonsInfo()
     };
 
     WorldPacket data(SMSG_ADDON_INFO, 1000);
+    auto shouldSendPublicKey = [](AddonInfo const& addon)
+    {
+        // Refresh built-in addon keys so stale client-side .pub files self-heal.
+        return !addon.UsePublicKeyOrCRC || addon.Name.compare(0, 9, "Blizzard_") == 0;
+    };
 
     AddonMgr::BannedAddonList const* bannedAddons = AddonMgr::GetBannedAddons();
     data.WriteBits((uint32)bannedAddons->size(), 18);
@@ -1069,14 +1074,14 @@ void WorldSession::SendAddonsInfo()
     {
         data.WriteBit(0); // Has URL
         data.WriteBit(itr->Enabled);
-        data.WriteBit(!itr->UsePublicKeyOrCRC); // If client doesnt have it, send it
+        data.WriteBit(shouldSendPublicKey(*itr));
     }
 
     data.FlushBits();
 
     for (AddonsList::iterator itr = m_addonsList.begin(); itr != m_addonsList.end(); ++itr)
     {
-        if (!itr->UsePublicKeyOrCRC)
+        if (shouldSendPublicKey(*itr))
         {
             size_t pos = data.wpos();
             for (int i = 0; i < 256; i++)
