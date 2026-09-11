@@ -665,6 +665,7 @@ void World::LoadConfigSettings(bool reload)
     setIntConfig(WorldIntConfigs::CONFIG_SOCKET_TIMEOUTTIME, sConfigMgr->GetIntDefault("SocketTimeOutTime", 900000));
     setIntConfig(WorldIntConfigs::CONFIG_SESSION_ADD_DELAY, sConfigMgr->GetIntDefault("SessionAddDelay", 10000));
     SetBoolConfig(WorldBoolConfigs::CONFIG_AUTHNET_WORLD_TOKEN_RESOLVE, sConfigMgr->GetBoolDefault("Authnet.WorldTokenResolve", false));
+    SetBoolConfig(WorldBoolConfigs::CONFIG_AUTHNET_VERBOSE_LOGGING, sConfigMgr->GetBoolDefault("Authnet.VerboseLogging", false));
 
     SetFloatConfig(WorldFloatConfigs::CONFIG_GROUP_XP_DISTANCE, sConfigMgr->GetFloatDefault("MaxGroupXPDistance", 74.0f));
     SetFloatConfig(WorldFloatConfigs::CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE, sConfigMgr->GetFloatDefault("MaxRecruitAFriendBonusDistance", 100.0f));
@@ -2839,7 +2840,8 @@ void World::UpdateSessions(uint32 diff)
         {
             WorldPacket resume(SMSG_RESUME_COMMS, 0);
             link.Socket->SendPacket(resume);
-            SF_LOG_INFO("network", "World::UpdateSessions: secondary world connection ready for account %u.", link.AccountId);
+            if (GetBoolConfig(WorldBoolConfigs::CONFIG_AUTHNET_VERBOSE_LOGGING))
+                SF_LOG_INFO("network", "World::UpdateSessions: secondary world connection ready for account %u.", link.AccountId);
         }
         else
         {

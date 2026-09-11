@@ -6856,7 +6856,8 @@ void Player::SendActionButtons(uint32 state) const
 
     data << uint8(state);
     GetSession()->SendPacket(&data);
-    SF_LOG_INFO("network", "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_AUTHNET_VERBOSE_LOGGING))
+        SF_LOG_INFO("network", "Action Buttons for '%u' spec '%u' Sent", GetGUIDLow(), GetActiveSpec());
 }
 
 bool Player::IsActionButtonDataValid(uint8 button, uint32 action, ActionButtonType type)

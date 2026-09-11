@@ -528,8 +528,9 @@ bool WorldSession::SendConnectToInstance()
         return false;
     }
 
-    SF_LOG_INFO("network", "WorldSession::SendConnectToInstance: requested secondary world connection for account %u on port %u.",
-        GetAccountId(), uint32(port));
+    if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_AUTHNET_VERBOSE_LOGGING))
+        SF_LOG_INFO("network", "WorldSession::SendConnectToInstance: requested secondary world connection for account %u on port %u.",
+            GetAccountId(), uint32(port));
     return true;
 }
 

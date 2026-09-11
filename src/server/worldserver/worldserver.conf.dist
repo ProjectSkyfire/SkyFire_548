@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion=2026272802
+ConfVersion=2026272803
 
 ###################################################################################################
 # SECTION INDEX
@@ -296,6 +296,16 @@ WorldServerPort = 8085
 #                     1 - (Enabled)
 
 Authnet.WorldTokenResolve = 0
+
+#
+#    Authnet.VerboseLogging
+#        Description: Enable verbose authnet world-session diagnostics, including token resolution,
+#                     character enumeration, secondary connection handoff, and action-button data.
+#        Important:   This output may contain account, character, and connection details. Enable only
+#                     while diagnosing authnet behavior. Warnings and errors are always logged.
+#        Default:     0 - (Disabled)
+
+Authnet.VerboseLogging = 0
 
 #
 #    BindIP
