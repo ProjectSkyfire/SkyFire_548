@@ -180,7 +180,7 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
         SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE Player: %lu left solo queue ticket type %u id %u time %u slot %u.",
             guid, ticketType, ticketId, ticketTime, slotOrQueueId);
         sLFGMgr->LeaveSoloLfg(guid, activeQueueId);
-        SendLfgClearStatus(0, queueID, clientTicketLeave);
+        SendLfgClearStatus(0, queueID, clientTicketLeave, ticketTime);
         return;
     }
 
@@ -201,7 +201,18 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 
     if (disbandDungeonGroup)
     {
+        uint8 const groupQueueId = sLFGMgr->GetQueueId(groupGuid);
+
         group->Disband();
+
+        // The cleanup sent while disbanding walks the player list the dungeon
+        // finder keeps for the group, and that list is already being torn down,
+        // so whoever asked to leave may get nothing. Answering here costs one
+        // packet and closes the gap. The ticket echoed back is the one the
+        // request carried: inside the dungeon the queue entry no longer exists
+        // on this side, so anything looked up here would go out as zero and be
+        // discarded by the client.
+        SendLfgClearStatus(0, groupQueueId ? groupQueueId : queueID, clientTicketLeave, ticketTime);
         return;
     }
 
@@ -215,7 +226,7 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 
     SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE GroupLeader: %lu left group queue.", guid);
     sLFGMgr->LeaveLfg(groupGuid);
-    SendLfgClearStatus(0, queueID, clientTicketLeave);
+    SendLfgClearStatus(0, queueID, clientTicketLeave, ticketTime);
 }
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
@@ -590,7 +601,7 @@ void WorldSession::HandleLfgGetStatus(WorldPacket& /*recvData*/)
         sLFGMgr->SendActiveProposal(guid);
 }
 
-void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, bool party, uint64 queueGuidOverride, uint8 queueIdOverride)
+void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, bool party, uint64 queueGuidOverride, uint8 queueIdOverride, uint32 joinTimeOverride)
 {
     bool join = false;
     bool queued = false;
@@ -615,6 +626,14 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
         queueId = sLFGMgr->GetQueueId(queueGuid);
     if (queueIdOverride)
         queueId = queueIdOverride;
+    // The client matches an update against its queue by a three field ticket,
+    // and the join time is one of those fields. Once the dungeon starts the
+    // queue entry is already gone, so GetQueueJoinTime returns zero and every
+    // update leaves with a ticket the client cannot recognize as its own. The
+    // caller passes back the time the client itself sent, which is the only
+    // copy still around.
+    if (joinTimeOverride)
+        joinTime = time_t(joinTimeOverride);
     uint8 dungeonCategory = 0;
     std::vector<uint32> dungeonEntries;
     dungeonEntries.reserve(updateData.dungeons.size());
@@ -1045,14 +1064,14 @@ void WorldSession::SendLfgLfrList(bool update)
     SendPacket(&data);
 }
 
-void WorldSession::SendLfgClearStatus(uint64 lfgGroupGuid, uint8 queueIdOverride, bool groupLeave)
+void WorldSession::SendLfgClearStatus(uint64 lfgGroupGuid, uint8 queueIdOverride, bool groupLeave, uint32 joinTimeOverride)
 {
     if (groupLeave)
-        SendLfgUpdateStatus(lfg::LfgUpdateData(lfg::LFG_UPDATETYPE_LEADER_UNK1), true, lfgGroupGuid, queueIdOverride);
+        SendLfgUpdateStatus(lfg::LfgUpdateData(lfg::LFG_UPDATETYPE_LEADER_UNK1), true, lfgGroupGuid, queueIdOverride, joinTimeOverride);
 
     lfg::LfgUpdateData removed(lfg::LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
-    SendLfgUpdateStatus(removed, false, 0, queueIdOverride);
-    SendLfgUpdateStatus(removed, true, lfgGroupGuid, queueIdOverride);
+    SendLfgUpdateStatus(removed, false, 0, queueIdOverride, joinTimeOverride);
+    SendLfgUpdateStatus(removed, true, lfgGroupGuid, queueIdOverride, joinTimeOverride);
     SendLfgLfrList(false);
 }
 
