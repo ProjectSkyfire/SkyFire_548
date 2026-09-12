@@ -40,7 +40,8 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
     {
         uint32 count, mapId, decompressedSize;
         G3D::Vector3 Position;
-        uint8 textCount, messageLen;
+        uint8 textCount;
+        uint32 messageLen;
         std::list<uint32> times;
         std::string chatLog, message;
         bool haveTicket, needResponse;
@@ -114,13 +115,13 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
 void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket& recvData)
 {
     std::string message;
-    uint8 messageLen = 0;
-
-    if (!ChatHandler(this).isValidChatMessage(message.c_str()))
-        return;
+    uint32 messageLen = 0;
 
     messageLen = recvData.ReadBits(11);
     message = recvData.ReadString(messageLen);
+
+    if (!ChatHandler(this).isValidChatMessage(message.c_str()))
+        return;
 
     GMTicketResponse response = GMTicketResponse::GMTICKET_RESPONSE_UPDATE_ERROR;
     if (GmTicket* ticket = sTicketMgr->GetGmTicketByPlayerGuid(GetPlayer()->GetGUID()))
