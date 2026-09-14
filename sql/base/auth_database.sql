@@ -152,7 +152,6 @@ CREATE TABLE `db_update` (
 
 LOCK TABLES `db_update` WRITE;
 /*!40000 ALTER TABLE `db_update` DISABLE KEYS */;
-INSERT INTO `db_update` VALUES ('2026-08-15','08:31:54','2026-01-23_auth_00.sql'),('2026-08-15','08:31:54','2026-06-22_auth_00.sql'),('2026-08-15','08:31:54','2026-06-28_auth_00.sql'),('2026-08-15','08:31:55','2026-07-08_auth_00.sql'),('2026-08-15','08:31:55','2026_07_19_auth_00.sql'),('2026-08-15','08:31:55','2026_07_22_auth_00.sql'),('2026-08-15','08:31:55','2026_07_25_auth_00.sql'),('2026-08-15','08:31:55','2026_07_25_auth_01.sql'),('2026-08-15','08:31:55','2026_07_30_auth_00.sql'),('2026-08-15','08:31:55','2026_08_04_auth_00.sql'),('2026-08-15','08:31:55','2026_08_04_auth_01.sql'),('2026-08-15','08:31:55','2026_08_04_auth_02.sql'),('2026-08-15','08:31:55','2026_08_06_auth_00.sql');
 /*!40000 ALTER TABLE `db_update` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `gm_notes`;
@@ -378,7 +377,6 @@ CREATE TABLE `skyfire_db_updates` (
 
 LOCK TABLES `skyfire_db_updates` WRITE;
 /*!40000 ALTER TABLE `skyfire_db_updates` DISABLE KEYS */;
-INSERT INTO `skyfire_db_updates` VALUES ('auth','2026-01-23_auth_00.sql','a3f9a9c8a615b8ce','2026-08-15 13:31:54'),('auth','2026-06-22_auth_00.sql','46a6a79443cbf930','2026-08-15 13:31:54'),('auth','2026-06-28_auth_00.sql','88075dc1b19be8cc','2026-08-15 13:31:54'),('auth','2026-07-08_auth_00.sql','05496f158f1a6e42','2026-08-15 13:31:55'),('auth','2026_07_19_auth_00.sql','00f419a9435d44b6','2026-08-15 13:31:55'),('auth','2026_07_22_auth_00.sql','94ecc7b1a58120b3','2026-08-15 13:31:55'),('auth','2026_07_25_auth_00.sql','e15bc6dd74b11f28','2026-08-15 13:31:55'),('auth','2026_07_25_auth_01.sql','74853e95ff112f11','2026-08-15 13:31:55'),('auth','2026_07_30_auth_00.sql','a041b89e569aa4c9','2026-08-15 13:31:55'),('auth','2026_08_04_auth_00.sql','e9dc2d0cf2d0cb4b','2026-08-15 13:31:55'),('auth','2026_08_04_auth_01.sql','00f5e630d0ef0f2c','2026-08-15 13:31:55'),('auth','2026_08_04_auth_02.sql','a6b0e756cbff5bcc','2026-08-15 13:31:55'),('auth','2026_08_06_auth_00.sql','9cebecd9b7007b01','2026-08-15 13:31:55');
 /*!40000 ALTER TABLE `skyfire_db_updates` ENABLE KEYS */;
 UNLOCK TABLES;
 DROP TABLE IF EXISTS `uptime`;
