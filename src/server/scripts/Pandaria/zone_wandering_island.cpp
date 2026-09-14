@@ -1917,12 +1917,21 @@ public:
     }
 };
 
+enum HuoSpiritOfFire // NOSONAR - plain enum matches the codebase convention for script ID constants
+{
+    QUEST_HUO_THE_SPIRIT_OF_FIRE  = 29422,
+    ITEM_HUOS_OFFERINGS           = 72583,
+    NPC_HUO_LIT_FOLLOWER          = 54958,
+    NPC_HUO_UNLIT                 = 54787,
+    SPELL_REIGNITE_HUO            = 106282,
+};
+
 class npc_huo : public CreatureScript
 {
 public:
     npc_huo() : CreatureScript("npc_huo") { }
 
-    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* /*quest*/ ) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* /*quest*/) OVERRIDE
     {
         player->CastSpell(player, 102630); // blessing of huo
         player->CastSpell(player, 128700);
@@ -1939,42 +1948,47 @@ public:
     };
 };
 
-// 102522 - Huo's Offerings
-class spell_item_huo_offering : public SpellScriptLoader
+class item_huos_offerings : public ItemScript
 {
 public:
-    spell_item_huo_offering() : SpellScriptLoader("spell_item_huo_offering") { }
+    item_huos_offerings() : ItemScript("item_huos_offerings") { }
 
-    class spell_item_huo_offering_SpellScript : public SpellScript
+    bool OnUse(Player* player, Item* /*item*/, SpellCastTargets const& /*targets*/) OVERRIDE
     {
-        PrepareSpellScript(spell_item_huo_offering_SpellScript);
+        if (!player)
+            return false;
 
-        enum HuoOffering
+        // Only act while the quest objective is still incomplete
+        if (player->GetQuestStatus(QUEST_HUO_THE_SPIRIT_OF_FIRE) != QUEST_STATUS_INCOMPLETE)
+            return false;
+
+        // The player must be near the unlit Huo to reignite him (mirrors retail)
+        Creature* huo = player->FindNearestCreature(NPC_HUO_UNLIT, 50.0f, true);
+        if (!huo)
+            return false; // not near Huo; leave the offering intact
+
+        // Reignite visual on the unlit Huo
+        huo->CastSpell(huo, SPELL_REIGNITE_HUO, true);
+
+        // Grant quest credit for the creature objective (NPC 54787)
+        player->KilledMonsterCredit(NPC_HUO_UNLIT);
+
+        // Summon the lit / following version of Huo next to the player
+        if (Creature* huoLit = player->SummonCreature(NPC_HUO_LIT_FOLLOWER, *player, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 1800000))
         {
-            NPC_HUO = 54787
-        };
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            Unit* caster = GetCaster();
-            Unit* target = GetHitUnit();
-
-            if (!caster || !target || target->GetEntry() != NPC_HUO)
-                return;
-
-            if (Player* player = caster->ToPlayer())
-                player->KilledMonsterCredit(NPC_HUO, target->GetGUID());
+            huoLit->SetOwnerGUID(player->GetGUID());
+            huoLit->GetMotionMaster()->MoveFollow(player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            huoLit->SetWalk(false);
         }
 
-        void Register() OVERRIDE
-        {
-            OnEffectHitTarget += SpellEffectFn(spell_item_huo_offering_SpellScript::HandleDummy, EFFECT_1, SPELL_EFFECT_DUMMY);
-        }
-    };
+        // Remove the now-redundant unlit Huo so only the lit follower remains
+        huo->DespawnOrUnsummon(1000);
 
-    SpellScript* GetSpellScript() const OVERRIDE
-    {
-        return new spell_item_huo_offering_SpellScript();
+        // Consume the provided offering (mirrors retail "use the offerings")
+        player->DestroyItemCount(ITEM_HUOS_OFFERINGS, 1, true);
+
+        // We handled the use: suppress the (no-op / broken) default spell 102522
+        return true;
     }
 };
 
@@ -2532,7 +2546,7 @@ void AddSC_wandering_island()
     new npc_master_shang_xi_temple();
     new AreaTrigger_at_temple_of_five_dawns();
     new npc_huo();
-    new spell_item_huo_offering();
+    new item_huos_offerings(); // NOSONAR - script self-registers with ScriptMgr; pointer intentionally owned by the script system for the process lifetime
     new npc_li_fei();
     new npc_aysa_meditation();
     new npc_aysa_cloudsinger();
