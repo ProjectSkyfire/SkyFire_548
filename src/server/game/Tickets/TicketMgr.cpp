@@ -462,16 +462,23 @@ void TicketMgr::SendGmResponsee(WorldSession* session, GmTicket* ticket) const
 {
     if (ticket)
     {
-        WorldPacket data(SMSG_GM_TICKET_RESPONSE, 1 + ticket->GetMessage().size() + ticket->GetResponse().size() + 4 + 4);
-        data.WriteBit(0);                                       // Has message ???
-        data.WriteBit(0);                                       // Has response ???
+        std::string const& message = ticket->GetMessage();
+        std::string const& response = ticket->GetResponse();
+        WorldPacket data(SMSG_GM_TICKET_RESPONSE, 9 + message.size() + response.size());
 
-        data.WriteBits(ticket->GetMessage().size(), 11);
-        data.WriteBits(ticket->GetResponse().size(), 14);
+        data.WriteBit(message.empty());
+        data.WriteBit(response.empty());
+
+        if (!message.empty())
+            data.WriteBits(message.size(), 11);
+        if (!response.empty())
+            data.WriteBits(response.size(), 14);
         data.FlushBits();
 
-        data.WriteString(ticket->GetMessage());
-        data.WriteString(ticket->GetResponse());
+        if (!response.empty())
+            data.WriteString(response);
+        if (!message.empty())
+            data.WriteString(message);
 
         data << uint32(ticket->GetTicketId());
         data << uint32(1);                                      // Response ID

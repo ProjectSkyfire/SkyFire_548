@@ -647,15 +647,17 @@ public:
             return true;
         }
 
-        if (Player* player = ticket->GetPlayer())
-            if (player->IsInWorld())
-                sTicketMgr->SendGmResponsee(player->GetSession(), ticket);
-
         SQLTransaction trans = SQLTransaction(NULL);
         ticket->SetCompleted();
         ticket->SaveToDB(trans);
 
         sTicketMgr->UpdateLastChange();
+
+        if (Player* player = ticket->GetPlayer())
+            if (player->IsInWorld())
+                sTicketMgr->SendGmResponsee(player->GetSession(), ticket);
+
+        handler->PSendSysMessage(LANG_COMMAND_TICKETCOMPLETED, ticket->GetTicketId());
         return true;
     }
 

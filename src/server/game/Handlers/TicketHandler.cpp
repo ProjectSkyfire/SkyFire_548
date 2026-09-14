@@ -40,7 +40,8 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
     {
         uint32 count, mapId, decompressedSize;
         G3D::Vector3 Position;
-        uint8 textCount, messageLen;
+        uint8 textCount;
+        uint32 messageLen;
         std::list<uint32> times;
         std::string chatLog, message;
         bool haveTicket, needResponse;
@@ -114,13 +115,13 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recvData)
 void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket& recvData)
 {
     std::string message;
-    uint8 messageLen = 0;
-
-    if (!ChatHandler(this).isValidChatMessage(message.c_str()))
-        return;
+    uint32 messageLen = 0;
 
     messageLen = recvData.ReadBits(11);
     message = recvData.ReadString(messageLen);
+
+    if (!ChatHandler(this).isValidChatMessage(message.c_str()))
+        return;
 
     GMTicketResponse response = GMTicketResponse::GMTICKET_RESPONSE_UPDATE_ERROR;
     if (GmTicket* ticket = sTicketMgr->GetGmTicketByPlayerGuid(GetPlayer()->GetGUID()))
@@ -187,56 +188,66 @@ void WorldSession::HandleGMTicketCaseStatusOpcode(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleGMSurveySubmit(WorldPacket& recvData)
 {
-    uint32 nextSurveyID = sTicketMgr->GetNextSurveyID();
-    // just put the survey into the database
-    uint32 mainSurvey; // GMSurveyCurrentSurvey.dbc, column 1 (all 9) ref to GMSurveySurveys.dbc
+    struct SurveyAnswer
+    {
+        uint32 QuestionId;
+        uint8 Rank;
+        std::string Comment;
+    };
+
+    uint32 mainSurvey;
     recvData >> mainSurvey;
 
+    uint8 answerCount = recvData.ReadBits(4);
+    std::vector<uint32> commentLengths(answerCount);
+    for (uint8 i = 0; i < answerCount; ++i)
+        commentLengths[i] = recvData.ReadBits(9);
+
+    uint32 overallCommentLength = recvData.ReadBits(11);
+    std::string overallComment = recvData.ReadString(overallCommentLength);
+    if (!ChatHandler(this).isValidChatMessage(overallComment.c_str()))
+        return;
+
     std::unordered_set<uint32> surveyIds;
-    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    std::vector<SurveyAnswer> answers;
+    answers.reserve(answerCount);
 
-    // sub_survey1, r1, comment1, sub_survey2, r2, comment2, sub_survey3, r3, comment3, sub_survey4, r4, comment4, sub_survey5, r5, comment5, sub_survey6, r6, comment6, sub_survey7, r7, comment7, sub_survey8, r8, comment8, sub_survey9, r9, comment9, sub_survey10, r10, comment10,
-    for (uint8 i = 0; i < 15; i++)
+    for (uint8 i = 0; i < answerCount; ++i)
     {
-        uint32 subSurveyId; // ref to i'th GMSurveySurveys.dbc field (all fields in that dbc point to fields in GMSurveyQuestions.dbc)
-        recvData >> subSurveyId;
-        if (!subSurveyId)
-            break;
+        SurveyAnswer answer;
+        recvData >> answer.QuestionId;
+        recvData >> answer.Rank;
+        answer.Comment = recvData.ReadString(commentLengths[i]);
 
-        uint8 rank; // probably some sort of ref to GMSurveyAnswers.dbc
-        recvData >> rank;
-        std::string comment; // comment ("Usage: GMSurveyAnswerSubmit(question, rank, comment)")
-        recvData >> comment;
-
-        // make sure the same sub survey is not added to DB twice
-        if (!surveyIds.insert(subSurveyId).second)
-            continue;
-
-        if (!ChatHandler(this).isValidChatMessage(comment.c_str()))
+        if (!answer.QuestionId || !surveyIds.insert(answer.QuestionId).second)
             return;
 
-        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GM_SUBSURVEY);
-        stmt->setUInt32(0, nextSurveyID);
-        stmt->setUInt32(1, subSurveyId);
-        stmt->setUInt32(2, rank);
-        stmt->setString(3, comment);
-        trans->Append(stmt);
+        if (!ChatHandler(this).isValidChatMessage(answer.Comment.c_str()))
+            return;
+
+        answers.push_back(std::move(answer));
     }
 
-    std::string comment; // just a guess
-    recvData >> comment;
+    SQLTransaction trans = CharacterDatabase.BeginTransaction();
+    uint32 nextSurveyID = sTicketMgr->GetNextSurveyID();
 
-    if (!ChatHandler(this).isValidChatMessage(comment.c_str()))
-        return;
+    for (SurveyAnswer const& answer : answers)
+    {
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GM_SUBSURVEY);
+        stmt->setUInt32(0, nextSurveyID);
+        stmt->setUInt32(1, answer.QuestionId);
+        stmt->setUInt32(2, answer.Rank);
+        stmt->setString(3, answer.Comment);
+        trans->Append(stmt);
+    }
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_GM_SURVEY);
     stmt->setUInt32(0, GUID_LOPART(GetPlayer()->GetGUID()));
     stmt->setUInt32(1, nextSurveyID);
     stmt->setUInt32(2, mainSurvey);
-    stmt->setString(3, comment);
+    stmt->setString(3, overallComment);
 
     trans->Append(stmt);
-
     CharacterDatabase.CommitTransaction(trans);
 }
 
