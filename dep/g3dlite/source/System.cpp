@@ -79,9 +79,9 @@
 #endif
 
 // SIMM include
-#if defined(WIN32) || defined(__x86_64__)
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
 #include <xmmintrin.h>
-#else
+#elif defined(_M_ARM) || defined(_M_ARM64) || defined(__arm__) || defined(__aarch64__)
 #include "sse2neon.h"
 #endif
 
@@ -549,16 +549,16 @@ static G3DEndian checkEndian() {
 
 
 static bool checkForCPUID() {
-    // all known supported architectures have cpuid
-    // add cases for incompatible architectures if they are added
-    // e.g., if we ever support __powerpc__ being defined again
-
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
     return true;
+#else
+    return false;
+#endif
 }
 
 
 void System::getStandardProcessorExtensions() {
-#if ! defined(G3D_OSX) || defined(G3D_OSX_INTEL)
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
     if (! m_hasCPUID) {
         return;
     }
@@ -1689,7 +1689,7 @@ std::string System::currentTimeString() {
     return format("%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
 }
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 
 // Windows 64-bit
 void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32& edx) {
@@ -1701,7 +1701,7 @@ void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32
 	edx = regs[3];
 }
 
-#else
+#elif defined(__i386__) || defined(__x86_64__)
 
 // See http://sam.zoy.org/blog/2007-04-13-shlib-with-non-pic-code-have-inline-assembly-and-pic-mix-well
 // for a discussion of why the second version saves ebx; it allows 32-bit code to compile with the -fPIC option.
@@ -1725,6 +1725,15 @@ void System::cpuid(CPUIDFunction func, int32& eax, int32& ebx, int32& ecx, int32
                  : "=a"(eax), "=r"(ebx), "=c"(ecx), "=d"(edx)
                  : "a"(func));
 #endif
+}
+
+#else
+
+void System::cpuid(CPUIDFunction, int32& eax, int32& ebx, int32& ecx, int32& edx) {
+    eax = 0;
+    ebx = 0;
+    ecx = 0;
+    edx = 0;
 }
 
 #endif

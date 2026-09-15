@@ -49,23 +49,18 @@ set(g3dlib_STAT_SRCS
   source/Vector4.cpp
 )
 
-if(WIN32)
-  include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/dep/zlib
-  )
-else()
-  include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
-      ${CMAKE_SOURCE_DIR}/dep/sse2neon
-    endif()
-  )
-  
-  
-endif()
-
 add_library(g3dlib STATIC ${g3dlib_STAT_SRCS})
+
+target_include_directories(g3dlib PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+if(WIN32)
+  target_include_directories(g3dlib PRIVATE ${CMAKE_SOURCE_DIR}/dep/zlib)
+else()
+  string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" G3DLITE_SYSTEM_PROCESSOR)
+  if(G3DLITE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|arm)")
+    target_include_directories(g3dlib PRIVATE ${SSE2NEON_INCLUDE_DIRS})
+  endif()
+endif()
 
 target_link_libraries(g3dlib
   ${ZLIB_LIBRARIES}
