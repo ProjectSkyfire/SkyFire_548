@@ -225,6 +225,23 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         else
             std::printf("%s start requested; waiting for the child process to report ready.\n", service.c_str());
     }
+    else if (command == "world" || command == ".server" || command == "server")
+    {
+        if (origin != HubCommandOrigin::LocalConsole)
+        {
+            std::printf("World commands require the local hub console.\n");
+            return true;
+        }
+        std::string text;
+        std::getline(input >> std::ws, text);
+        if (command != "world")
+            text = "server " + text;
+        std::string error;
+        if (!_processSupervisor.SendWorldCommand(text, error))
+            std::printf("World command rejected: %s.\n", error.c_str());
+        else
+            std::printf("World command sent; waiting for its result.\n");
+    }
     else if (command == "admin")
     {
         std::string subcommand;
@@ -332,6 +349,10 @@ void HubCommandHandler::PrintHelp() const
     std::printf("             Start and supervise a database-configured service.\n");
     std::printf("  stop <service>\n");
     std::printf("             Gracefully stop a managed service.\n");
+    std::printf("  world <command>  Execute a worldserver console command (optional leading dot).\n");
+    std::printf("  .server restart 300 | .server shutdown 300  Graceful countdown in seconds.\n");
+    std::printf("  .server shutdown time 23:00 | .server restart time 23:00  Server local time.\n");
+    std::printf("  .server shutdown cancel | .server restart cancel  Cancel the countdown.\n");
     std::printf("  admins     List hub administrator identities and access flags.\n");
     std::printf("  admin create <username> <password> [access_flags]\n");
     std::printf("             Create a local-only administrator (default access flags: 0xF).\n");

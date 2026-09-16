@@ -262,12 +262,16 @@ int main(int argc, char** argv)
         while (webEnabled && webServer.PollServiceCommand(webCommand))
         {
             std::string error;
-            bool const accepted = webCommand.Start
+            bool const accepted = !webCommand.WorldCommand.empty()
+                ? processSupervisor.SendWorldCommand(webCommand.WorldCommand, error)
+                : webCommand.Start
                 ? processSupervisor.Start(webCommand.ServiceKey, error)
                 : processSupervisor.Stop(webCommand.ServiceKey, error);
+            if (webCommand.DispatchResult)
+                webCommand.DispatchResult->set_value(accepted ? "" : error);
             if (!accepted)
                 SF_LOG_WARN("server.hub", "Web console could not %s managed service '%s': %s.",
-                    webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
+                    !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
         }
 
         if (webEnabled)
@@ -284,6 +288,9 @@ int main(int argc, char** argv)
                 webService.ProcessId = service.ProcessId;
                 webService.LastExitCode = service.LastExitCode;
                 webService.Enabled = service.Enabled;
+                webService.CanSendCommands = service.CanSendCommands;
+                webService.CommandPending = service.CommandPending;
+                webService.CommandResult = service.CommandResult;
                 status.Services.push_back(std::move(webService));
             }
             webServer.UpdateStatus(status);

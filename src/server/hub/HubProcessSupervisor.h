@@ -31,6 +31,9 @@ struct HubManagedServiceStatus
     uint64 ProcessId = 0;
     int64 LastExitCode = 0;
     bool Enabled = false;
+    bool CommandPending = false;
+    bool CanSendCommands = false;
+    std::string CommandResult;
 };
 
 class HubProcessSupervisor
@@ -44,6 +47,7 @@ public:
 
     bool Start(std::string const& serviceKey, std::string& error);
     bool Stop(std::string const& serviceKey, std::string& error);
+    bool SendWorldCommand(std::string command, std::string& error);
     bool ReloadDatabaseRecords(std::string& error);
     void Update();
     void StopAll();
@@ -72,6 +76,11 @@ private:
         uint64 StatusReadHandle = 0;
         int64 LastExitCode = 0;
         bool Ready = false;
+        bool CanSendCommands = false;
+        bool CommandPending = false;
+        bool RestartPending = false;
+        bool SuppressRestart = false;
+        std::string CommandResult;
         std::string StatusBuffer;
         std::chrono::steady_clock::time_point StartedAt;
         std::chrono::steady_clock::time_point LastHeartbeat;
@@ -92,6 +101,7 @@ private:
     void ForceStop(std::string const& serviceKey, ManagedServiceRuntime& runtime);
 
     std::unordered_map<std::string, ManagedServiceRuntime> _services;
+    bool _shuttingDown = false;
 };
 
 #endif

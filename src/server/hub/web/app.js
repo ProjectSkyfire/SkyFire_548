@@ -13,12 +13,24 @@ const lastUpdated = document.querySelector("#last-updated");
 const statusSummary = document.querySelector("#status-summary");
 const componentGrid = document.querySelector("#component-grid");
 
+const worldConsole = document.querySelector("#world-console");
+const worldCommandForm = document.querySelector("#world-command-form");
+const worldCommandInput = document.querySelector("#world-command");
+const worldCommandSend = document.querySelector("#world-command-send");
+const worldCommandState = document.querySelector("#world-command-state");
+const worldCommandResult = document.querySelector("#world-command-result");
+let worldCommandSending = false;
+let worldCommandAllowed = false;
 let refreshTimer = null;
 let csrfToken = "";
 let canOperateServices = false;
 
 function showLogin(message = "") {
     stopRefresh();
+    worldCommandAllowed = false;
+    worldConsole.hidden = true;
+    worldCommandInput.value = "";
+    worldCommandResult.textContent = "No command response yet.";
     csrfToken = "";
     canOperateServices = false;
     loginView.hidden = false;
@@ -66,6 +78,15 @@ function formatUptime(totalSeconds) {
 function renderStatus(data) {
     csrfToken = data.csrfToken || "";
     canOperateServices = data.canOperateServices === true;
+    const world = data.components.find((component) => component.key === "world");
+    worldConsole.hidden = data.canSendWorldCommands !== true;
+    worldCommandAllowed = data.canSendWorldCommands === true && !!world && world.enabled &&
+        world.state === "running" && world.canSendCommands && !world.commandPending;
+    worldCommandSend.disabled = !worldCommandAllowed || worldCommandSending;
+    worldCommandState.textContent = world?.commandPending ? "Waiting for worldserver response..." :
+        worldCommandAllowed ? "Ready. Commands run with full console access." : "Worldserver must be running under the hub with command support.";
+    if (world?.commandResult && !worldCommandSending)
+        worldCommandResult.textContent = world.commandResult;
     signedInUser.textContent = data.username;
     lastUpdated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
 
@@ -120,6 +141,39 @@ function renderStatus(data) {
         return article;
     }));
 }
+
+worldCommandForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!worldCommandAllowed || worldCommandSending)
+        return;
+    const command = worldCommandInput.value.trim();
+    if (!command || new TextEncoder().encode(command).length > 1024 || /[\x00-\x1f\x7f]/.test(command)) {
+        worldCommandResult.textContent = "Enter one command up to 1024 bytes without control characters.";
+        return;
+    }
+    worldCommandSending = true;
+    worldCommandSend.disabled = true;
+    worldCommandResult.textContent = "Sending command...";
+    try {
+        const response = await fetch("/api/v1/services/world/command", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "X-Hub-CSRF": csrfToken, "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ command })
+        });
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data.error || "World command was rejected");
+        worldCommandAllowed = false;
+        worldCommandResult.textContent = "Command queued. Waiting for worldserver response...";
+        window.setTimeout(loadStatus, 500);
+    } catch (error) {
+        worldCommandResult.textContent = error.message;
+    } finally {
+        worldCommandSending = false;
+        worldCommandSend.disabled = !worldCommandAllowed;
+    }
+});
 
 async function operateService(serviceKey, action, button) {
     button.disabled = true;

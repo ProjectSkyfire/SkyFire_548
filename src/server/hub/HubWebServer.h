@@ -13,6 +13,8 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <chrono>
 #include <deque>
+#include <future>
+#include <memory>
 #include <map>
 #include <mutex>
 #include <string>
@@ -28,6 +30,9 @@ struct HubWebManagedServiceStatus
     uint64 ProcessId = 0;
     int64 LastExitCode = 0;
     bool Enabled = false;
+    bool CommandPending = false;
+    bool CanSendCommands = false;
+    std::string CommandResult;
 };
 
 struct HubWebStatusSnapshot
@@ -40,6 +45,8 @@ struct HubWebServiceCommand
 {
     std::string ServiceKey;
     bool Start = false;
+    std::string WorldCommand;
+    std::shared_ptr<std::promise<std::string>> DispatchResult;
 };
 
 class HubWebServer
@@ -83,7 +90,7 @@ private:
     std::string HandleLogout(std::map<std::string, std::string> const& headers);
     std::string HandleStatus(std::map<std::string, std::string> const& headers);
     std::string HandleServiceCommand(std::string const& path,
-        std::map<std::string, std::string> const& headers);
+        std::map<std::string, std::string> const& headers, std::string const& body);
     std::string ServeAsset(std::string const& target) const;
     bool FindSession(std::map<std::string, std::string> const& headers,
         AuthenticatedSession& session);

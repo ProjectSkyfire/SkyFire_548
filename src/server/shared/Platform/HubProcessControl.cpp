@@ -116,6 +116,7 @@ bool Skyfire::HubControl::ChildChannel::Initialize(uint64 controlReadHandle, uin
 
 bool Skyfire::HubControl::ChildChannel::SendStatus(char const* status) const
 {
+    std::lock_guard<std::mutex> lock(_statusMutex);
     if (!_statusWriteHandle)
         return false;
 
@@ -124,7 +125,7 @@ bool Skyfire::HubControl::ChildChannel::SendStatus(char const* status) const
     return WriteAll(_statusWriteHandle, message.data(), message.size());
 }
 
-bool Skyfire::HubControl::ChildChannel::StopRequested()
+bool Skyfire::HubControl::ChildChannel::StopRequested(std::vector<std::string>* commands)
 {
     if (!_controlReadHandle)
         return true;
@@ -173,9 +174,33 @@ bool Skyfire::HubControl::ChildChannel::StopRequested()
         _controlBuffer.erase(0, lineEnd + 1);
         if (command == "STOP")
             return true;
+        if (commands && command.compare(0, 8, "COMMAND ") == 0 &&
+            command.size() > 8 && command.size() <= MaxCommandLength + 8)
+            commands->push_back(command.substr(8));
     }
 
-    return false;
+    // A partial frame must never grow without bound.
+    return _controlBuffer.size() > MaxCommandLength + 8;
+}
+
+void Skyfire::HubControl::ChildChannel::AppendCommandOutput(char const* text)
+{
+    std::string part(text);
+    for (char& character : part)
+        if (static_cast<unsigned char>(character) < 32 || character == 127)
+            character = ' ';
+    if (_commandOutput.size() + part.size() <= 2048)
+        _commandOutput += part;
+    else if (_commandOutput.size() <= 2048)
+        _commandOutput += " [output truncated]";
+}
+
+void Skyfire::HubControl::ChildChannel::FinishCommand(bool success)
+{
+    std::string const message = std::string("RESULT ") + (success ? "OK " : "ERROR ") +
+        (_commandOutput.empty() ? (success ? "Command completed." : "Command failed.") : _commandOutput);
+    (void)SendStatus(message.c_str());
+    _commandOutput.clear();
 }
 
 void Skyfire::HubControl::ChildChannel::Close()

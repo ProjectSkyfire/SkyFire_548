@@ -57,6 +57,20 @@
 
             <div id="status-summary" class="summary" aria-live="polite"></div>
             <div id="component-grid" class="component-grid"></div>
+            <section id="world-console" class="world-console" aria-labelledby="world-console-title" hidden>
+                <h2 id="world-console-title">World server console</h2>
+                <p>Send world commands with or without the leading dot. Shutdown and restart use the normal player-save sequence.</p>
+                <form id="world-command-form">
+                    <label for="world-command">Command</label>
+                    <div class="world-command-row">
+                        <input id="world-command" name="command" required maxlength="1024" autocomplete="off" spellcheck="false" placeholder=".server restart 300" aria-describedby="world-command-help">
+                        <button id="world-command-send" class="primary-button" type="submit">Send command</button>
+                    </div>
+                </form>
+                <p id="world-command-help">Countdown: <code>server shutdown 300</code> or <code>server restart 300</code> (seconds). At a clock time: <code>server shutdown time 23:00</code> or <code>server restart time 23:00</code> (server local time; next occurrence). Cancel: <code>server shutdown cancel</code> or <code>server restart cancel</code>.</p>
+                <p id="world-command-state"></p>
+                <pre id="world-command-result" role="status" aria-live="polite">No command response yet.</pre>
+            </section>
         </section>
     </main>
 

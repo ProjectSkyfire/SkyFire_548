@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <cstdio>
 #include <filesystem>
 #include <sstream>
 #include <utility>
@@ -140,6 +141,10 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
 
     runtime.State = HubManagedProcessState::Starting;
     runtime.Ready = false;
+    runtime.CanSendCommands = false;
+    runtime.CommandPending = false;
+    runtime.SuppressRestart = false;
+    runtime.RestartPending = false;
     runtime.LastExitCode = 0;
     runtime.StatusBuffer.clear();
     runtime.StartedAt = std::chrono::steady_clock::now();
@@ -174,9 +179,47 @@ bool HubProcessSupervisor::Stop(std::string const& serviceKey, std::string& erro
         error = "unable to send the stop command to managed service '" + serviceKey + "'";
         return false;
     }
+    runtime.SuppressRestart = true;
     runtime.State = HubManagedProcessState::Stopping;
     runtime.StopRequestedAt = std::chrono::steady_clock::now();
     SF_LOG_INFO("server.hub", "Stop requested for managed service '%s'.", serviceKey.c_str());
+    return true;
+}
+
+bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& error)
+{
+    size_t const first = command.find_first_not_of(" ");
+    if (first != std::string::npos)
+        command.erase(0, first);
+    if (!command.empty() && command.front() == '.')
+        command.erase(0, 1);
+    if (command.empty() || command.find_first_not_of(" ") == std::string::npos ||
+        command.size() > Skyfire::HubControl::MaxCommandLength ||
+        std::any_of(command.begin(), command.end(), [](unsigned char c) { return c < 32 || c == 127; }))
+    {
+        error = "enter one command, up to 1024 bytes, without control characters";
+        return false;
+    }
+    auto service = _services.find("world");
+    if (service == _services.end() || !service->second.Definition.Enabled ||
+        service->second.State != HubManagedProcessState::Running || !service->second.CanSendCommands)
+    {
+        error = "worldserver must be running under the hub with command support";
+        return false;
+    }
+    ManagedServiceRuntime& runtime = service->second;
+    if (runtime.CommandPending)
+    {
+        error = "a world command is still awaiting a response";
+        return false;
+    }
+    if (!WriteControl(runtime, ("COMMAND " + command + '\n').c_str()))
+    {
+        error = "unable to send the world command";
+        return false;
+    }
+    runtime.CommandPending = true;
+    runtime.CommandResult = "Waiting for worldserver response...";
     return true;
 }
 
@@ -317,6 +360,14 @@ void HubProcessSupervisor::Update()
 {
     for (auto& service : _services)
         Update(service.first, service.second);
+    for (auto& service : _services)
+        if (service.second.RestartPending)
+        {
+            service.second.RestartPending = false;
+            std::string error;
+            if (!_shuttingDown && !Start(service.first, error))
+                SF_LOG_ERROR("server.hub", "Unable to restart '%s': %s.", service.first.c_str(), error.c_str());
+        }
 }
 
 void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime& runtime)
@@ -341,7 +392,7 @@ void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime&
 #endif
     ReadStatusMessages(key, runtime);
     auto const now = std::chrono::steady_clock::now();
-    if (runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
+    if (key != "world" && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
         ForceStop(key, runtime);
     else if (runtime.State == HubManagedProcessState::Starting && now - runtime.StartedAt > StartupTimeout)
         runtime.State = HubManagedProcessState::Unresponsive;
@@ -396,8 +447,9 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
         runtime.State = HubManagedProcessState::Starting;
         runtime.LastHeartbeat = now;
     }
-    else if (message == Skyfire::HubControl::ReadyMessage)
+    else if (message == Skyfire::HubControl::ReadyMessage || message == Skyfire::HubControl::WorldReadyMessage)
     {
+        runtime.CanSendCommands = key == "world" && message == Skyfire::HubControl::WorldReadyMessage;
         runtime.Ready = true;
         runtime.State = HubManagedProcessState::Running;
         runtime.LastHeartbeat = now;
@@ -409,6 +461,13 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
         if (runtime.Ready && runtime.State != HubManagedProcessState::Stopping)
             runtime.State = HubManagedProcessState::Running;
     }
+    else if (message.compare(0, 7, "RESULT ") == 0 && runtime.CommandPending)
+    {
+        runtime.CommandPending = false;
+        runtime.CommandResult = message.substr(7);
+        std::printf("World: %s\n", runtime.CommandResult.c_str());
+        std::fflush(stdout);
+    }
     else if (message == Skyfire::HubControl::StoppingMessage)
     {
         if (runtime.State != HubManagedProcessState::Stopping)
@@ -419,6 +478,7 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
 
 void HubProcessSupervisor::StopAll()
 {
+    _shuttingDown = true;
     for (auto& service : _services)
     {
         std::string ignored;
@@ -426,19 +486,22 @@ void HubProcessSupervisor::StopAll()
             (void)Stop(service.first, ignored);
     }
     auto const deadline = std::chrono::steady_clock::now() + ShutdownTimeout;
-    while (std::chrono::steady_clock::now() < deadline)
+    while (true)
     {
         Update();
         bool active = false;
-        for (auto const& service : _services)
+        for (auto& service : _services)
+        {
+            // World saves and database draining must finish, even during hub exit.
+            if (service.first != "world" && IsActive(service.second) &&
+                std::chrono::steady_clock::now() >= deadline)
+                ForceStop(service.first, service.second);
             active = active || IsActive(service.second);
+        }
         if (!active)
             return;
         Skyfire::SleepForMilliseconds(100);
     }
-    for (auto& service : _services)
-        if (IsActive(service.second))
-            ForceStop(service.first, service.second);
 }
 
 HubManagedServiceStatus HubProcessSupervisor::GetStatus(std::string const& key) const
@@ -454,6 +517,9 @@ HubManagedServiceStatus HubProcessSupervisor::GetStatus(std::string const& key) 
     status.ProcessId = found->second.ProcessId;
     status.LastExitCode = found->second.LastExitCode;
     status.Enabled = found->second.Definition.Enabled;
+    status.CanSendCommands = found->second.CanSendCommands;
+    status.CommandPending = found->second.CommandPending;
+    status.CommandResult = found->second.CommandResult;
     return status;
 }
 
@@ -497,6 +563,13 @@ void HubProcessSupervisor::MarkExited(std::string const& key, ManagedServiceRunt
 {
     SF_LOG_INFO("server.hub", "Managed service '%s' process %llu exited with code %lld.", key.c_str(),
         static_cast<unsigned long long>(runtime.ProcessId), static_cast<long long>(exitCode));
+    ReadStatusMessages(key, runtime);
+    runtime.RestartPending = key == "world" && exitCode == Skyfire::HubControl::WorldRestartExitCode &&
+        !_shuttingDown && !runtime.SuppressRestart;
+    if (runtime.CommandPending)
+        runtime.CommandResult = "Worldserver exited before returning a command result.";
+    runtime.CommandPending = false;
+    runtime.CanSendCommands = false;
     runtime.LastExitCode = exitCode;
     runtime.State = HubManagedProcessState::Exited;
     runtime.Ready = false;

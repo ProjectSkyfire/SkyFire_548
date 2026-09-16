@@ -51,6 +51,7 @@ public:
         static std::vector<ChatCommand> serverShutdownCommandTable =
         {
             { "cancel", rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN_CANCEL, true, &HandleServerShutDownCancelCommand, "", },
+            { "time",   rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN,        true, &HandleServerShutdownTimeCommand, "", },
             { ""   ,    rbac::RBAC_PERM_COMMAND_SERVER_SHUTDOWN,        true, &HandleServerShutDownCommand,       "", },
         };
 
@@ -309,6 +310,20 @@ public:
         else
             sWorld->ShutdownServ(time, SHUTDOWN_MASK_RESTART, RESTART_EXIT_CODE);
 
+        return true;
+    }
+
+    static bool HandleServerShutdownTimeCommand(ChatHandler* handler, char const* args)
+    {
+        uint32 delaySeconds = 0;
+        if (!Skyfire::ServerRestartSchedule::CalculateRestartDelay(args, delaySeconds))
+        {
+            handler->SendSysMessage("Usage: server shutdown time HH:MM[:SS] (server local time).");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+        sWorld->ShutdownServ(delaySeconds, 0, SHUTDOWN_EXIT_CODE);
+        handler->PSendSysMessage("Shutdown scheduled in %u seconds (server local time).", delaySeconds);
         return true;
     }
 

@@ -200,6 +200,7 @@ namespace
             case 403: return "Forbidden";
             case 404: return "Not Found";
             case 405: return "Method Not Allowed";
+            case 409: return "Conflict";
             case 413: return "Payload Too Large";
             case 429: return "Too Many Requests";
             default: return "Internal Server Error";
@@ -492,7 +493,7 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
     if (path == "/api/v1/status" && method == "GET")
         return HandleStatus(headers);
     if (path.compare(0, 17, "/api/v1/services/") == 0 && method == "POST")
-        return HandleServiceCommand(path, headers);
+        return HandleServiceCommand(path, headers, body);
     if (path.compare(0, 8, "/api/v1/") == 0)
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     if (method != "GET")
@@ -596,6 +597,8 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
          << "\",\"csrfToken\":\"" << session.CsrfToken
          << "\",\"canOperateServices\":"
          << ((session.AccessFlags & HUB_ADMIN_ACCESS_OPERATE_NODES) ? "true" : "false")
+         << ",\"canSendWorldCommands\":"
+         << (((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) == HUB_ADMIN_ACCESS_ALL_LOCAL) ? "true" : "false")
          << ",\"uptimeSeconds\":" << status.UptimeSeconds << ",\"components\":["
          << "{\"key\":\"hub\",\"name\":\"Hub Runtime\",\"status\":\"online\",\"detail\":\"Control process is running\"},"
          << "{\"key\":\"database\",\"name\":\"Hub Database\",\"status\":\"online\",\"detail\":\"Connection pool is active\"},"
@@ -618,14 +621,18 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
         if (service.State == "exited")
             json << " | Exit " << service.LastExitCode;
         json << "\",\"managed\":true,\"enabled\":" << (service.Enabled ? "true" : "false")
-             << ",\"state\":\"" << JsonEscape(service.State) << "\"}";
+             << ",\"state\":\"" << JsonEscape(service.State) << "\""
+             << ",\"canSendCommands\":" << (service.CanSendCommands ? "true" : "false")
+             << ",\"commandPending\":" << (service.CommandPending ? "true" : "false")
+             << ",\"commandResult\":\"" << JsonEscape(
+                 (session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) == HUB_ADMIN_ACCESS_ALL_LOCAL ? service.CommandResult : "") << "\"}";
     }
     json << "]}";
     return MakeResponse(200, "application/json", json.str());
 }
 
 std::string HubWebServer::HandleServiceCommand(std::string const& path,
-    std::map<std::string, std::string> const& headers)
+    std::map<std::string, std::string> const& headers, std::string const& body)
 {
     AuthenticatedSession session;
     if (!FindSession(headers, session))
@@ -643,7 +650,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     std::string const serviceKey = route.substr(0, slash);
     std::string const action = route.substr(slash + 1);
-    if (action != "start" && action != "stop")
+    if (action != "start" && action != "stop" && !(serviceKey == "world" && action == "command"))
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     if (!std::all_of(serviceKey.begin(), serviceKey.end(), [](unsigned char character)
         { return std::isalnum(character) || character == '_' || character == '-'; }))
@@ -651,6 +658,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
 
     bool found = false;
     bool enabled = false;
+    bool commandReady = false;
     {
         std::lock_guard<std::mutex> lock(_statusMutex);
         for (HubWebManagedServiceStatus const& service : _status.Services)
@@ -659,6 +667,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
             {
                 found = true;
                 enabled = service.Enabled;
+                commandReady = service.State == "running" && service.CanSendCommands && !service.CommandPending;
                 break;
             }
         }
@@ -671,9 +680,37 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
     HubWebServiceCommand command;
     command.ServiceKey = serviceKey;
     command.Start = action == "start";
+    std::future<std::string> dispatchResult;
+    if (action == "command")
+    {
+        // Arbitrary CLI commands have full console authority, including account management.
+        if ((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) != HUB_ADMIN_ACCESS_ALL_LOCAL)
+            return MakeResponse(403, "application/json", "{\"error\":\"full local administrator access is required for world commands\"}");
+        if (!commandReady)
+            return MakeResponse(409, "application/json", "{\"error\":\"worldserver is not ready or a command is pending\"}");
+        auto const form = ParseForm(body);
+        auto const value = form.find("command");
+        if (value == form.end() || value->second.empty() || value->second.size() > 1024 ||
+            value->second.find_first_not_of(" .") == std::string::npos ||
+            std::any_of(value->second.begin(), value->second.end(), [](unsigned char c) { return c < 32 || c == 127; }))
+            return MakeResponse(400, "application/json", "{\"error\":\"enter one command up to 1024 bytes without control characters\"}");
+        command.WorldCommand = value->second;
+        command.DispatchResult = std::make_shared<std::promise<std::string>>();
+        dispatchResult = command.DispatchResult->get_future();
+    }
     {
         std::lock_guard<std::mutex> lock(_commandMutex);
+        if (_commands.size() >= 64 || (action == "command" &&
+            std::any_of(_commands.begin(), _commands.end(), [](HubWebServiceCommand const& queued)
+                { return !queued.WorldCommand.empty(); })))
+            return MakeResponse(409, "application/json", "{\"error\":\"command queue is busy; try again after the response\"}");
         _commands.push_back(std::move(command));
+    }
+    if (dispatchResult.valid() && dispatchResult.wait_for(std::chrono::seconds(2)) == std::future_status::ready)
+    {
+        std::string const error = dispatchResult.get();
+        if (!error.empty())
+            return MakeResponse(409, "application/json", "{\"error\":\"" + JsonEscape(error) + "\"}");
     }
     return MakeResponse(202, "application/json", "{\"accepted\":true}");
 }

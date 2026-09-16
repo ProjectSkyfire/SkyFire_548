@@ -350,6 +350,36 @@ input:focus {
     opacity: 0.42;
 }
 
+.world-console {
+    margin-top: 24px;
+    padding: 24px;
+    border: 1px solid #38404b;
+    border-radius: 12px;
+}
+
+.world-command-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+
+.world-command-row input {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.world-command-row button {
+    width: auto;
+}
+
+#world-command-result {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    max-height: 240px;
+    overflow: auto;
+}
+
 [hidden] {
     display: none !important;
 }

@@ -554,7 +554,7 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
     std::thread hubControlThread;
     if (hubControl && !World::IsStopped())
     {
-        if (!hubControl->SendStatus(Skyfire::HubControl::ReadyMessage))
+        if (!hubControl->SendStatus(Skyfire::HubControl::WorldReadyMessage))
         {
             SF_LOG_ERROR("server.worldserver", "Hubserver control channel was lost during startup.");
             World::StopNow(ERROR_EXIT_CODE);
@@ -566,12 +566,20 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
                 auto nextHeartbeat = std::chrono::steady_clock::now() + std::chrono::seconds(5);
                 while (!World::IsStopped())
                 {
-                    if (hubControl->StopRequested())
+                    std::vector<std::string> commands;
+                    if (hubControl->StopRequested(&commands))
                     {
                         SF_LOG_INFO("server.worldserver", "Hubserver requested worldserver shutdown.");
                         World::StopNow(SHUTDOWN_EXIT_CODE);
                         break;
                     }
+
+                    for (std::string const& command : commands)
+                        sWorld->QueueCliCommand(new CliCommandHolder(hubControl, command.c_str(),
+                            [](void* context, char const* text)
+                            { static_cast<Skyfire::HubControl::ChildChannel*>(context)->AppendCommandOutput(text); },
+                            [](void* context, bool success)
+                            { static_cast<Skyfire::HubControl::ChildChannel*>(context)->FinishCommand(success); }));
 
                     auto const now = std::chrono::steady_clock::now();
                     if (now >= nextHeartbeat)
@@ -586,6 +594,7 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
                     }
                     Skyfire::SleepForMilliseconds(100);
                 }
+                (void)hubControl->SendStatus(Skyfire::HubControl::StoppingMessage);
             });
         }
     }
