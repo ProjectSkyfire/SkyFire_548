@@ -20,6 +20,12 @@ if(WIN32)
     ${hubserver_SRCS}
     ${sources_windows_Debugging}
   )
+  if(MSVC)
+    set(hubserver_SRCS
+      ${hubserver_SRCS}
+      hubserver.rc
+    )
+  endif()
 endif()
 
 include_directories(
