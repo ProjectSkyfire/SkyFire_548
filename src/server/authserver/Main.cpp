@@ -17,8 +17,12 @@
 #include <winsock2.h>
 #endif
 #include <mysql.h>
+#include <cerrno>
+#include <chrono>
 #include <csignal>
+#include <cstdlib>
 #include <filesystem>
+#include <limits>
 #include <memory>
 
 #include "AuthnetAcceptor.h"
@@ -31,6 +35,7 @@
 #include "Log.h"
 #include "OpenSSLProviders.h"
 #include "PacketLogServer.h"
+#include "Platform/HubProcessControl.h"
 #include "Platform/TimeUtils.h"
 #include "RealmAcceptor.h"
 #include "RealmList.h"
@@ -77,6 +82,19 @@ LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the a
 
 namespace
 {
+    bool ParseHubHandle(char const* value, uint64& handle)
+    {
+        errno = 0;
+        char* end = nullptr;
+        unsigned long long const parsed = std::strtoull(value, &end, 10);
+        if (errno != 0 || end == value || *end != '\0' || parsed == 0 ||
+            parsed > std::numeric_limits<uintptr_t>::max())
+            return false;
+
+        handle = uint64(parsed);
+        return true;
+    }
+
     Skyfire::Database::SetupOptions LoadAuthDatabaseSetupOptions()
     {
         Skyfire::Database::SetupOptions options = Skyfire::Database::MakeAuthDatabaseSetupOptions(
@@ -216,6 +234,8 @@ extern int main(int argc, char** argv)
     const char* db_User = _SKYFIRE_AUTH_DATABASE_USER;
     const char* db_Password = _SKYFIRE_AUTH_DATABASE_PASS;
     const char* authDB = _SKYFIRE_AUTH_DATABASE;
+    uint64 hubControlReadHandle = 0;
+    uint64 hubStatusWriteHandle = 0;
 
     // Command line parsing to get the configuration file name
     char const* configFile = _SKYFIRE_REALM_CONFIG;
@@ -230,6 +250,24 @@ extern int main(int argc, char** argv)
         if (strcmp(argv[count], "--no_use_config_database_info") == 0)
         {
             noUseConfigDatabaseInfo = argv[count];
+        }
+
+        if (strcmp(argv[count], "--hub-control-read") == 0)
+        {
+            if (++count >= argc || !ParseHubHandle(argv[count], hubControlReadHandle))
+            {
+                printf("Runtime-Error: --hub-control-read requires a valid inherited handle\n");
+                return 1;
+            }
+        }
+
+        if (strcmp(argv[count], "--hub-status-write") == 0)
+        {
+            if (++count >= argc || !ParseHubHandle(argv[count], hubStatusWriteHandle))
+            {
+                printf("Runtime-Error: --hub-status-write requires a valid inherited handle\n");
+                return 1;
+            }
         }
 
         if (noUseConfigDatabaseInfo == 1)
@@ -310,6 +348,21 @@ extern int main(int argc, char** argv)
                 configFile = argv[count];
         }
         ++count;
+    }
+
+    Skyfire::HubControl::ChildChannel hubControl;
+    std::string hubControlError;
+    if (!hubControl.Initialize(hubControlReadHandle, hubStatusWriteHandle, hubControlError))
+    {
+        printf("Authserver startup denied: %s. Start authnet from the hubserver console.\n",
+            hubControlError.c_str());
+        return 1;
+    }
+
+    if (!hubControl.SendStatus(Skyfire::HubControl::StartingMessage))
+    {
+        printf("Authserver startup denied: the hubserver control channel was lost.\n");
+        return 1;
     }
 
     if (!sConfigMgr->LoadInitial(configFile))
@@ -419,6 +472,12 @@ extern int main(int argc, char** argv)
         SF_LOG_INFO("server.authserver", "Authnet passive probe listening on %s:%d", authnetBindIp.c_str(), authnetPort);
     }
 
+    if (!hubControl.SendStatus(Skyfire::HubControl::ReadyMessage))
+    {
+        SF_LOG_ERROR("server.authserver", "Hubserver control channel was lost during startup.");
+        return 1;
+    }
+
     // Register authservers's signal handlers
     std::signal(SIGINT, AuthServerSignalHandler);
     std::signal(SIGTERM, AuthServerSignalHandler);
@@ -496,13 +555,33 @@ extern int main(int argc, char** argv)
     // maximum counter for next ping
     uint32 numLoops = (sConfigMgr->GetIntDefault("MaxPingTime", 30) * (MINUTE * 1000000 / 100000));
     uint32 loopCounter = 0;
+    auto nextHubHeartbeat = std::chrono::steady_clock::now() + std::chrono::seconds(5);
 
     // Wait for termination signal
     while (!stopEvent)
     {
+        if (hubControl.StopRequested())
+        {
+            SF_LOG_INFO("server.authserver", "Hubserver requested authserver shutdown.");
+            stopEvent = true;
+            continue;
+        }
+
         acceptor.Update();
         authnetAcceptor.Update();
         Skyfire::SleepForMilliseconds(100);
+
+        auto const now = std::chrono::steady_clock::now();
+        if (now >= nextHubHeartbeat)
+        {
+            if (!hubControl.SendStatus(Skyfire::HubControl::HeartbeatMessage))
+            {
+                SF_LOG_ERROR("server.authserver", "Hubserver control channel was lost; stopping authserver.");
+                stopEvent = true;
+                continue;
+            }
+            nextHubHeartbeat = now + std::chrono::seconds(5);
+        }
 
         if ((++loopCounter) == numLoops)
         {
@@ -514,6 +593,7 @@ extern int main(int argc, char** argv)
 
     acceptor.Close();
     authnetAcceptor.Close();
+    (void)hubControl.SendStatus(Skyfire::HubControl::StoppingMessage);
 
     // Close the Database Pool and library
     StopDB();

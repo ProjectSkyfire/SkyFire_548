@@ -6,6 +6,8 @@
 ########### hubserver ###############
 
 file(GLOB sources_Localdir *.cpp *.h)
+list(APPEND sources_Localdir HubProcessSupervisor.cpp HubProcessSupervisor.h)
+list(REMOVE_DUPLICATES sources_Localdir)
 
 source_group(CMake FILES CMakeLists.txt)
 source_group(localdir FILES ${sources_Localdir})

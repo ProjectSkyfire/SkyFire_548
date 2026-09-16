@@ -20,6 +20,9 @@ void HubDatabaseConnection::DoPrepareStatements()
     PrepareStatement(HUB_SEL_ADMINS,
         "SELECT id, username, access_flags, enabled, last_login_at FROM hub_admins ORDER BY username",
         CONNECTION_SYNCH);
+    PrepareStatement(HUB_SEL_MANAGED_SERVICES,
+        "SELECT service_key, name, executable_path, config_path, working_directory, enabled "
+        "FROM hub_managed_services ORDER BY service_key", CONNECTION_SYNCH);
     PrepareStatement(HUB_INS_ADMIN,
         "INSERT INTO hub_admins (username, password_hash, access_flags) VALUES (?, ?, ?)",
         CONNECTION_SYNCH);

@@ -14,6 +14,7 @@
 #include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
 #include "HubConsole.h"
+#include "HubProcessSupervisor.h"
 #include "Log.h"
 #include "Platform/TimeUtils.h"
 #include "SystemConfig.h"
@@ -154,6 +155,16 @@ int main(int argc, char** argv)
     if (!StartDatabase())
         return 1;
 
+    HubProcessSupervisor processSupervisor;
+    std::string databaseRecordError;
+    if (!processSupervisor.ReloadDatabaseRecords(databaseRecordError))
+    {
+        SF_LOG_ERROR("server.hub", "Unable to cache managed service database records: %s.",
+            databaseRecordError.c_str());
+        StopDatabase();
+        return 1;
+    }
+
     int32 maxPingTime = sConfigMgr->GetIntDefault("MaxPingTime", 30);
     if (maxPingTime < 1 || maxPingTime > 1440)
     {
@@ -168,6 +179,8 @@ int main(int argc, char** argv)
     std::signal(SIGTERM, HubServerSignalHandler);
 #ifdef _WIN32
     std::signal(SIGBREAK, HubServerSignalHandler);
+#else
+    std::signal(SIGPIPE, SIG_IGN);
 #endif
 
     SF_LOG_INFO("server.hub", "Configured hub endpoint: %s:%d.", bindIp.c_str(), port);
@@ -176,12 +189,14 @@ int main(int argc, char** argv)
 
     bool const consoleEnabled = sConfigMgr->GetBoolDefault("Console.Enable", true);
     HubConsoleInput console;
-    HubCommandHandler commandHandler(bindIp, uint16(port));
+    HubCommandHandler commandHandler(bindIp, uint16(port), processSupervisor);
     if (consoleEnabled)
         console.PrintPrompt();
 
     while (!StopEvent)
     {
+        processSupervisor.Update();
+
         if (consoleEnabled)
         {
             std::string command;
@@ -207,6 +222,7 @@ int main(int argc, char** argv)
         Skyfire::SleepForMilliseconds(50);
     }
 
+    processSupervisor.Stop();
     StopDatabase();
     SF_LOG_INFO("server.hub", "Hub server stopped.");
     return 0;

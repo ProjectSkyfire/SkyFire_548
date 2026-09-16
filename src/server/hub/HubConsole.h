@@ -11,6 +11,8 @@
 
 #include "Define.h"
 
+class HubProcessSupervisor;
+
 enum class HubConsolePollResult
 {
     None,
@@ -39,7 +41,7 @@ private:
 class HubCommandHandler
 {
 public:
-    HubCommandHandler(std::string bindIp, uint16 port);
+    HubCommandHandler(std::string bindIp, uint16 port, HubProcessSupervisor& processSupervisor);
 
     // Returns false when the command requests server shutdown.
     bool Execute(std::string const& commandLine, HubCommandOrigin origin) const;
@@ -55,6 +57,7 @@ private:
     std::string _bindIp;
     uint16 _port;
     std::chrono::steady_clock::time_point _startedAt;
+    HubProcessSupervisor& _processSupervisor;
 };
 
 #endif
