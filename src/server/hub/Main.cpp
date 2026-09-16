@@ -7,7 +7,12 @@
 #include <chrono>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <string>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #include "Common.h"
 #include "Configuration/Config.h"
@@ -15,6 +20,7 @@
 #include "Database/DatabaseEnv.h"
 #include "HubConsole.h"
 #include "HubProcessSupervisor.h"
+#include "HubWebServer.h"
 #include "Log.h"
 #include "Platform/TimeUtils.h"
 #include "SystemConfig.h"
@@ -30,6 +36,28 @@ HubDatabaseWorkerPool HubDatabase;
 namespace
 {
     volatile std::sig_atomic_t StopEvent = 0;
+
+    std::filesystem::path GetExecutableDirectory(char const* program)
+    {
+#ifdef _WIN32
+        char path[SKYFIRE_PATH_MAX];
+        DWORD const length = GetModuleFileNameA(nullptr, path, SKYFIRE_PATH_MAX);
+        if (length > 0 && length < SKYFIRE_PATH_MAX)
+            return std::filesystem::path(std::string(path, length)).parent_path();
+#endif
+
+        std::error_code error;
+#if defined(__linux__)
+        std::filesystem::path const executable = std::filesystem::read_symlink("/proc/self/exe", error);
+        if (!error)
+            return executable.parent_path();
+#endif
+
+        std::filesystem::path const absoluteProgram = std::filesystem::absolute(program, error);
+        if (!error)
+            return absoluteProgram.parent_path();
+        return std::filesystem::current_path();
+    }
 
     void HubServerSignalHandler(int signal)
     {
@@ -165,6 +193,36 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    bool const webEnabled = sConfigMgr->GetBoolDefault("Web.Enable", true);
+    std::string const webBindIp = sConfigMgr->GetStringDefault("Web.BindIP", "127.0.0.1");
+    int const webPort = sConfigMgr->GetIntDefault("Web.Port", 54880);
+    std::filesystem::path webRoot = sConfigMgr->GetStringDefault("Web.Root", "web");
+    if (webRoot.is_relative())
+        webRoot = GetExecutableDirectory(argv[0]) / webRoot;
+    webRoot = webRoot.lexically_normal();
+    bool const webAllowRemote = sConfigMgr->GetBoolDefault("Web.AllowRemote", false);
+    int webSessionTimeout = sConfigMgr->GetIntDefault("Web.SessionTimeout", 1800);
+    if (webPort <= 0 || webPort > 65535)
+    {
+        SF_LOG_ERROR("server.hub", "Web.Port must be between 1 and 65535; found %d.", webPort);
+        StopDatabase();
+        return 1;
+    }
+    if (webSessionTimeout < 300 || webSessionTimeout > 86400)
+    {
+        SF_LOG_WARN("server.hub", "Web.SessionTimeout must be between 300 and 86400 seconds; using 1800.");
+        webSessionTimeout = 1800;
+    }
+
+    HubWebServer webServer;
+    if (webEnabled && !webServer.Open(webBindIp, uint16(webPort), webRoot.string(), webAllowRemote,
+        uint32(webSessionTimeout)))
+    {
+        SF_LOG_ERROR("server.hub", "Unable to start the hub web console.");
+        StopDatabase();
+        return 1;
+    }
+
     int32 maxPingTime = sConfigMgr->GetIntDefault("MaxPingTime", 30);
     if (maxPingTime < 1 || maxPingTime > 1440)
     {
@@ -188,6 +246,7 @@ int main(int argc, char** argv)
     SF_LOG_INFO("server.hub", "Press Ctrl-C to stop.");
 
     bool const consoleEnabled = sConfigMgr->GetBoolDefault("Console.Enable", true);
+    auto const hubStartedAt = std::chrono::steady_clock::now();
     HubConsoleInput console;
     HubCommandHandler commandHandler(bindIp, uint16(port), processSupervisor);
     if (consoleEnabled)
@@ -196,6 +255,17 @@ int main(int argc, char** argv)
     while (!StopEvent)
     {
         processSupervisor.Update();
+
+        if (webEnabled)
+        {
+            HubWebStatusSnapshot status;
+            status.UptimeSeconds = uint64(std::chrono::duration_cast<std::chrono::seconds>(
+                std::chrono::steady_clock::now() - hubStartedAt).count());
+            status.AuthnetState = processSupervisor.GetStateName();
+            status.AuthnetProcessId = processSupervisor.GetProcessId();
+            status.AuthnetLastExitCode = processSupervisor.GetLastExitCode();
+            webServer.UpdateStatus(status);
+        }
 
         if (consoleEnabled)
         {
@@ -222,6 +292,7 @@ int main(int argc, char** argv)
         Skyfire::SleepForMilliseconds(50);
     }
 
+    webServer.Close();
     processSupervisor.Stop();
     StopDatabase();
     SF_LOG_INFO("server.hub", "Hub server stopped.");

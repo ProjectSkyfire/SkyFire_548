@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091502
+ConfVersion=2026091503
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -59,6 +59,55 @@ Hub.Port = 9100
 #                     0 - (Disabled)
 
 Console.Enable = 1
+
+###################################################################################################
+# WEB CONSOLE SETTINGS
+#
+#    Web.Enable
+#        Description: Enable the self-contained hub web console.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Web.Enable = 1
+
+#
+#    Web.BindIP
+#        Description: Address the web console will bind to.
+#        Important:   Keep this on loopback unless remote access is intentionally configured.
+#        Default:     "127.0.0.1"
+
+Web.BindIP = "127.0.0.1"
+
+#
+#    Web.Port
+#        Description: HTTP port for the web console.
+#        Important:   TCP ports must be between 1 and 65535.
+#        Default:     54880
+
+Web.Port = 54880
+
+#
+#    Web.Root
+#        Description: Directory containing the hub web interface files.
+#                     Relative paths are resolved from the hubserver executable directory.
+#        Default:     "web"
+
+Web.Root = "web"
+
+#
+#    Web.AllowRemote
+#        Description: Permit non-loopback clients to reach the web console.
+#        Important:   Remote administrators must also have the remote-login access flag.
+#        Default:     0 - (Disabled)
+
+Web.AllowRemote = 0
+
+#
+#    Web.SessionTimeout
+#        Description: Authenticated web session lifetime in seconds, refreshed by activity.
+#        Default:     1800 - (30 minutes)
+
+Web.SessionTimeout = 1800
 
 ###################################################################################################
 # LOGGING SYSTEM SETTINGS

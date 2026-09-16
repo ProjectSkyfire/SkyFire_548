@@ -6,15 +6,19 @@
 ########### hubserver ###############
 
 file(GLOB sources_Localdir *.cpp *.h)
-list(APPEND sources_Localdir HubProcessSupervisor.cpp HubProcessSupervisor.h)
+file(GLOB_RECURSE web_assets web/*)
+list(APPEND sources_Localdir HubProcessSupervisor.cpp HubProcessSupervisor.h HubWebServer.cpp HubWebServer.h)
 list(REMOVE_DUPLICATES sources_Localdir)
 
 source_group(CMake FILES CMakeLists.txt)
 source_group(localdir FILES ${sources_Localdir})
+source_group("Web Files" FILES ${web_assets})
+set_source_files_properties(${web_assets} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 set(hubserver_SRCS
   ${hubserver_SRCS}
   ${sources_Localdir}
+  ${web_assets}
 )
 
 if(WIN32)
@@ -71,6 +75,13 @@ elseif(TARGET Boost::boost)
   target_link_libraries(hubserver Boost::boost)
 endif()
 
+add_custom_command(TARGET hubserver
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/web
+    $<TARGET_FILE_DIR:hubserver>/web
+)
+
 if(WIN32)
   if(MSVC)
     skyfire_copy_windows_runtime_dependencies(hubserver)
@@ -97,7 +108,9 @@ endif()
 if(UNIX)
   install(TARGETS hubserver DESTINATION bin)
   install(FILES hubserver.conf.dist DESTINATION ${CONF_DIR})
+  install(DIRECTORY web DESTINATION bin)
 elseif(WIN32)
   install(TARGETS hubserver RUNTIME DESTINATION ".")
   install(FILES hubserver.conf.dist DESTINATION ".")
+  install(DIRECTORY web DESTINATION ".")
 endif()

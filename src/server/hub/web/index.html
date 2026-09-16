@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Project SkyFire Hub</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/" aria-label="Project SkyFire Hub home">
+            <img src="/assets/skyfire-logo.png" alt="Project SkyFire">
+            <span>
+                <strong>Project SkyFire</strong>
+                <small>Hub Server</small>
+            </span>
+        </a>
+        <nav id="main-nav" class="nav" aria-label="Hub navigation" hidden>
+            <button class="nav-item active" type="button" aria-current="page">Status</button>
+            <button id="logout-button" class="nav-item command" type="button">Sign out</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="login-view" class="login-view" aria-labelledby="login-title">
+            <form id="login-form" class="login-panel" autocomplete="on">
+                <div class="panel-heading">
+                    <p class="eyebrow">Hub administration</p>
+                    <h1 id="login-title">Sign in</h1>
+                    <p>Use a hub administrator account.</p>
+                </div>
+
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" autocomplete="username" required maxlength="64">
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+                <p id="login-error" class="form-error" role="alert" hidden></p>
+                <button id="login-button" class="primary-button" type="submit">Sign in</button>
+            </form>
+        </section>
+
+        <section id="status-view" class="status-view" aria-labelledby="status-title" hidden>
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">System overview</p>
+                    <h1 id="status-title">Component Status</h1>
+                </div>
+                <div class="refresh-meta">
+                    <span id="signed-in-user"></span>
+                    <span id="last-updated">Waiting for status</span>
+                </div>
+            </div>
+
+            <div id="status-summary" class="summary" aria-live="polite"></div>
+            <div id="component-grid" class="component-grid"></div>
+        </section>
+    </main>
+
+    <script src="/app.js" defer></script>
+</body>
+</html>

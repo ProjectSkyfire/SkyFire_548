@@ -1,0 +1,360 @@
+:root {
+    color-scheme: dark;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 16px;
+    --page: #101214;
+    --surface: #191c20;
+    --surface-raised: #22262b;
+    --border: #363c43;
+    --text: #f2f4f7;
+    --muted: #a8b0ba;
+    --accent: #f07d28;
+    --accent-hover: #ff9141;
+    --online: #3dcc72;
+    --offline: #ee5656;
+    --issue: #e2b83f;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--page);
+    color: var(--text);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button {
+    letter-spacing: 0;
+}
+
+.topbar {
+    min-height: 76px;
+    padding: 10px clamp(18px, 4vw, 54px);
+    border-bottom: 1px solid var(--border);
+    background: #15181b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.brand {
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.brand img {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+}
+
+.brand span {
+    display: grid;
+    gap: 2px;
+}
+
+.brand strong {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.brand small {
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+}
+
+.nav {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nav-item {
+    min-height: 42px;
+    padding: 0 15px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.nav-item:hover,
+.nav-item:focus-visible,
+.nav-item.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+    outline: none;
+}
+
+.nav-item.command {
+    margin-left: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+main {
+    width: min(1180px, calc(100% - 36px));
+    margin: 0 auto;
+}
+
+.login-view {
+    min-height: calc(100vh - 77px);
+    display: grid;
+    place-items: center;
+    padding: 42px 0 80px;
+}
+
+.login-panel {
+    width: min(410px, 100%);
+    padding: 32px;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 6px;
+    background: var(--surface);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+}
+
+.panel-heading {
+    margin-bottom: 26px;
+}
+
+.eyebrow {
+    margin: 0 0 7px;
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.2;
+}
+
+.panel-heading p:last-child {
+    margin: 8px 0 0;
+    color: var(--muted);
+}
+
+label {
+    display: block;
+    margin: 17px 0 7px;
+    color: #dfe3e8;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 11px;
+    border: 1px solid #4a5159;
+    border-radius: 4px;
+    background: #0e1012;
+    color: var(--text);
+    outline: none;
+}
+
+input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(240, 125, 40, 0.16);
+}
+
+.primary-button {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 22px;
+    border: 1px solid #ff9749;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #15100c;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+    background: var(--accent-hover);
+    outline: none;
+}
+
+.primary-button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.form-error {
+    margin: 14px 0 0;
+    color: #ff8585;
+    font-size: 0.88rem;
+}
+
+.status-view {
+    padding: 46px 0 70px;
+}
+
+.page-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.refresh-meta {
+    color: var(--muted);
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    font-size: 0.82rem;
+}
+
+#signed-in-user {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.summary {
+    margin-bottom: 18px;
+    padding: 15px 17px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--muted);
+}
+
+.summary strong {
+    color: var(--text);
+}
+
+.component-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.component {
+    min-height: 142px;
+    padding: 21px 22px;
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--status-color);
+    border-radius: 6px;
+    background: var(--surface-raised);
+    display: grid;
+    align-content: space-between;
+    gap: 24px;
+}
+
+.component.online {
+    --status-color: var(--online);
+}
+
+.component.offline {
+    --status-color: var(--offline);
+}
+
+.component.issue {
+    --status-color: var(--issue);
+}
+
+.component-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.component h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.status-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--status-color);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-label::before {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--status-color);
+    content: "";
+}
+
+.component p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 700px) {
+    .topbar {
+        min-height: 68px;
+        padding: 8px 16px;
+    }
+
+    .brand img {
+        width: 46px;
+        height: 46px;
+    }
+
+    .brand strong {
+        font-size: 0.9rem;
+    }
+
+    .nav-item {
+        padding: 0 9px;
+    }
+
+    main {
+        width: min(100% - 24px, 1180px);
+    }
+
+    .login-panel {
+        padding: 25px 21px;
+    }
+
+    .page-heading {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    .refresh-meta {
+        justify-items: start;
+    }
+
+    .component-grid {
+        grid-template-columns: 1fr;
+    }
+}
