@@ -80,7 +80,7 @@ namespace
             size_t parsedLength = 0;
             accessFlags = std::stoull(value, &parsedLength, 0);
             return parsedLength == value.size() && accessFlags != 0 &&
-                (accessFlags & ~uint64(HUB_ADMIN_ACCESS_ALL)) == 0;
+                (accessFlags & ~uint64(HUB_ADMIN_ACCESS_ALL_LOCAL)) == 0;
         }
         catch (std::invalid_argument const&)
         {
@@ -180,7 +180,7 @@ HubCommandHandler::HubCommandHandler(std::string bindIp, uint16 port)
 {
 }
 
-bool HubCommandHandler::Execute(std::string const& commandLine) const
+bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin origin) const
 {
     std::istringstream input(commandLine);
     std::string command;
@@ -210,6 +210,12 @@ bool HubCommandHandler::Execute(std::string const& commandLine) const
             return true;
         }
 
+        if (origin != HubCommandOrigin::LocalConsole)
+        {
+            std::printf("Administrator accounts can only be created from the local hub console.\n");
+            return true;
+        }
+
         std::string username;
         std::string password;
         std::string accessText;
@@ -221,7 +227,7 @@ bool HubCommandHandler::Execute(std::string const& commandLine) const
             return true;
         }
 
-        uint64 accessFlags = HUB_ADMIN_ACCESS_ALL;
+        uint64 accessFlags = HUB_ADMIN_ACCESS_ALL_LOCAL;
         if (!accessText.empty() && !ParseAdminAccessFlags(accessText, accessFlags))
         {
             std::printf("Invalid access flags. Use a decimal or 0x value containing only bits 0x1 through 0x8.\n");
@@ -251,7 +257,7 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  nodes      List enabled routing nodes.\n");
     std::printf("  admins     List hub administrator identities and access flags.\n");
     std::printf("  admin create <username> <password> [access_flags]\n");
-    std::printf("             Create an administrator (default access flags: 0xF).\n");
+    std::printf("             Create a local-only administrator (default access flags: 0xF).\n");
     std::printf("  reload     Reload configuration and logging settings.\n");
     std::printf("  stop       Stop the hub server.\n");
 }
@@ -313,7 +319,8 @@ void HubCommandHandler::PrintAdmins() const
         return;
     }
 
-    std::printf("%-5s %-24s %-18s %-9s %-20s\n", "ID", "Username", "Access flags", "Enabled", "Last login");
+    std::printf("%-5s %-24s %-18s %-11s %-9s %-20s\n",
+        "ID", "Username", "Access flags", "Scope", "Enabled", "Last login");
     do
     {
         Field* fields = result->Fetch();
@@ -321,9 +328,10 @@ void HubCommandHandler::PrintAdmins() const
         flags << "0x" << std::hex << std::uppercase << fields[2].GetUInt64();
         std::string const lastLogin = fields[4].IsNull() ? "never" : fields[4].GetString();
 
-        std::printf("%-5u %-24.24s %-18s %-9s %-20.20s\n", fields[0].GetUInt32(),
-            fields[1].GetString().c_str(), flags.str().c_str(), fields[3].GetBool() ? "yes" : "no",
-            lastLogin.c_str());
+        std::printf("%-5u %-24.24s %-18s %-11s %-9s %-20.20s\n", fields[0].GetUInt32(),
+            fields[1].GetString().c_str(), flags.str().c_str(),
+            HubAdminCanLoginRemotely(fields[2].GetUInt64()) ? "remote" : "local-only",
+            fields[3].GetBool() ? "yes" : "no", lastLogin.c_str());
     } while (result->NextRow());
 }
 
@@ -363,8 +371,8 @@ void HubCommandHandler::CreateAdmin(std::string const& username, std::string con
     insertAdmin->setUInt64(2, accessFlags);
     HubDatabase.DirectExecute(insertAdmin);
 
-    std::printf("Created administrator '%s' with access flags 0x%llX.\n", username.c_str(),
-        static_cast<unsigned long long>(accessFlags));
+    std::printf("Created local-only administrator '%s' with access flags 0x%llX and no remote privileges.\n",
+        username.c_str(), static_cast<unsigned long long>(accessFlags));
 }
 
 void HubCommandHandler::ReloadConfiguration() const

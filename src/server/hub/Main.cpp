@@ -190,7 +190,7 @@ int main(int argc, char** argv)
                 StopEvent = 1;
             else if (pollResult == HubConsolePollResult::Command)
             {
-                if (!commandHandler.Execute(command))
+                if (!commandHandler.Execute(command, HubCommandOrigin::LocalConsole))
                     StopEvent = 1;
                 else
                     console.PrintPrompt();

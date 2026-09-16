@@ -41,7 +41,7 @@ CREATE TABLE `hub_admins` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(64) NOT NULL,
   `password_hash` varchar(255) NOT NULL DEFAULT '' COMMENT 'Encoded password hash; format defined by the admin protocol',
-  `access_flags` bigint unsigned NOT NULL DEFAULT '1' COMMENT '1 view, 2 manage nodes, 4 operate nodes, 8 manage admins',
+  `access_flags` bigint unsigned NOT NULL DEFAULT '1' COMMENT '1 view, 2 manage nodes, 4 operate nodes, 8 manage admins, 16 remote login',
   `enabled` tinyint unsigned NOT NULL DEFAULT '1',
   `last_login_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

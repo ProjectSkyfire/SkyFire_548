@@ -18,6 +18,12 @@ enum class HubConsolePollResult
     Closed
 };
 
+enum class HubCommandOrigin
+{
+    LocalConsole,
+    Remote
+};
+
 class HubConsoleInput
 {
 public:
@@ -36,7 +42,7 @@ public:
     HubCommandHandler(std::string bindIp, uint16 port);
 
     // Returns false when the command requests server shutdown.
-    bool Execute(std::string const& commandLine) const;
+    bool Execute(std::string const& commandLine, HubCommandOrigin origin) const;
 
 private:
     void PrintHelp() const;
