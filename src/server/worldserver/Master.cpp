@@ -21,6 +21,7 @@
 #include "Database/DatabaseSetup/DatabaseSetup.h"
 #include "Database/DatabaseSetup/DatabaseSetupRuntime.h"
 #include "Database/DatabaseWorkerPool.h"
+#include "Configuration/ConfigVersion.h"
 #include "SystemConfig.h"
 #include "World.h"
 #include "WorldRunnable.h"
@@ -366,7 +367,7 @@ int Master::Run()
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
-    if (confVersion < SKYFIREWORLD_CONFIG_VERSION)
+    if (confVersion < Skyfire::ConfigVersion::World)
     {
         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
         SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");

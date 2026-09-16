@@ -26,6 +26,7 @@
 #include "Database/DatabaseSetup/DatabaseSetup.h"
 #include "Database/DatabaseSetup/DatabaseSetupRuntime.h"
 #include "Configuration/Config.h"
+#include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "OpenSSLProviders.h"
@@ -333,7 +334,7 @@ extern int main(int argc, char** argv)
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
-    if (confVersion < SKYFIREAUTH_CONFIG_VERSION)
+    if (confVersion < Skyfire::ConfigVersion::Auth)
     {
         SF_LOG_INFO("server.authserver",
             "*****************************************************************************");

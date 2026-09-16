@@ -16,6 +16,7 @@ if( SERVERS )
   add_subdirectory(game)
   add_subdirectory(collision)
   add_subdirectory(authserver)
+  add_subdirectory(hub)
   add_subdirectory(scripts)
   add_subdirectory(worldserver)
 

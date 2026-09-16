@@ -1,0 +1,95 @@
+#
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See COPYRIGHT file for Copyright information
+#
+
+########### hubserver ###############
+
+file(GLOB sources_Localdir *.cpp *.h)
+
+source_group(CMake FILES CMakeLists.txt)
+source_group(localdir FILES ${sources_Localdir})
+
+set(hubserver_SRCS
+  ${hubserver_SRCS}
+  ${sources_Localdir}
+)
+
+if(WIN32)
+  set(hubserver_SRCS
+    ${hubserver_SRCS}
+    ${sources_windows_Debugging}
+  )
+endif()
+
+include_directories(
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Database
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Platform
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  ${MYSQL_INCLUDE_DIR}
+  ${OPENSSL_INCLUDE_DIR}
+)
+
+add_executable(hubserver
+  ${hubserver_SRCS}
+)
+
+add_dependencies(hubserver revision.h)
+
+if(NOT WIN32)
+  set_target_properties(hubserver PROPERTIES
+    COMPILE_DEFINITIONS _SKYFIRE_HUB_CONFIG="${CONF_DIR}/hubserver.conf"
+  )
+endif()
+
+target_link_libraries(hubserver
+  shared
+  ${MYSQL_LIBRARY}
+  ${OPENSSL_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT}
+)
+
+if(TARGET Boost::headers)
+  target_link_libraries(hubserver Boost::headers)
+elseif(TARGET Boost::boost)
+  target_link_libraries(hubserver Boost::boost)
+endif()
+
+if(WIN32)
+  if(MSVC)
+    skyfire_copy_windows_runtime_dependencies(hubserver)
+
+    add_custom_command(TARGET hubserver
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/hubserver.conf.dist ${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/
+    )
+  elseif(MINGW)
+    add_custom_command(TARGET hubserver
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/hubserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
+    )
+  elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    skyfire_copy_windows_runtime_dependencies(hubserver)
+
+    add_custom_command(TARGET hubserver
+      POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/hubserver.conf.dist ${CMAKE_BINARY_DIR}/bin/
+    )
+  endif()
+endif()
+
+if(UNIX)
+  install(TARGETS hubserver DESTINATION bin)
+  install(FILES hubserver.conf.dist DESTINATION ${CONF_DIR})
+elseif(WIN32)
+  install(TARGETS hubserver RUNTIME DESTINATION ".")
+  install(FILES hubserver.conf.dist DESTINATION ".")
+endif()

@@ -1,0 +1,40 @@
+###############################################
+#    SkyFire Hub Server configuration file    #
+###############################################
+[hubserver]
+ConfVersion=2026091501
+
+###################################################################################################
+# HUB SERVER SETTINGS
+#
+#    Hub.BindIP
+#        Description: Address the connection distribution hub will bind to.
+#        Default:     "0.0.0.0" - (Bind to all available interfaces)
+
+Hub.BindIP = "0.0.0.0"
+
+#
+#    Hub.Port
+#        Description: TCP port reserved for the connection distribution hub.
+#        Default:     9100
+
+Hub.Port = 9100
+
+###################################################################################################
+# LOGGING SYSTEM SETTINGS
+#
+#    LogsDir
+#        Description: Directory for log files. The directory must already exist.
+#        Default:     "" - (Use the current directory)
+
+LogsDir = ""
+
+#
+#    Log.Async.Enable
+#        Description: Enable asynchronous log writing.
+#        Default:     0 - (Disabled)
+
+Log.Async.Enable = 0
+
+Appender.Console=1,2,0, 13 11 9 5 3 1
+Logger.root=3,Console
