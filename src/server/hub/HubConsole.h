@@ -43,6 +43,7 @@ private:
     void PrintStatus() const;
     void PrintNodes() const;
     void PrintAdmins() const;
+    void CreateAdmin(std::string const& username, std::string const& password, uint64 accessFlags) const;
     void ReloadConfiguration() const;
 
     std::string _bindIp;

@@ -6,12 +6,16 @@
 #include "HubConsole.h"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
+
+#include <openssl/evp.h>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -21,11 +25,15 @@
 #endif
 
 #include "Configuration/Config.h"
+#include "Cryptography/CryptoRandom.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
+#include "Utilities/Util.h"
 
 namespace
 {
+    constexpr int HubAdminPasswordIterations = 210000;
+
     std::string ToLower(std::string value)
     {
         std::transform(value.begin(), value.end(), value.begin(),
@@ -53,6 +61,48 @@ namespace
             case 3: return "degraded";
             default: return "unknown";
         }
+    }
+
+    bool IsValidAdminUsername(std::string const& username)
+    {
+        return username.size() >= 3 && username.size() <= 64 &&
+            std::all_of(username.begin(), username.end(), [](unsigned char character)
+            {
+                return std::isalnum(character) || character == '.' || character == '_' ||
+                    character == '-' || character == '@';
+            });
+    }
+
+    bool ParseAdminAccessFlags(std::string const& value, uint64& accessFlags)
+    {
+        try
+        {
+            size_t parsedLength = 0;
+            accessFlags = std::stoull(value, &parsedLength, 0);
+            return parsedLength == value.size() && accessFlags != 0 &&
+                (accessFlags & ~uint64(HUB_ADMIN_ACCESS_ALL)) == 0;
+        }
+        catch (std::invalid_argument const&)
+        {
+            return false;
+        }
+        catch (std::out_of_range const&)
+        {
+            return false;
+        }
+    }
+
+    bool CreateAdminPasswordHash(std::string const& password, std::string& passwordHash)
+    {
+        std::array<uint8, 16> salt = SkyFire::Crypto::GetRandomBytes<16>();
+        std::array<uint8, 32> digest = { };
+        if (PKCS5_PBKDF2_HMAC(password.data(), int(password.size()), salt.data(), int(salt.size()),
+            HubAdminPasswordIterations, EVP_sha256(), int(digest.size()), digest.data()) != 1)
+            return false;
+
+        passwordHash = "$pbkdf2-sha256$" + std::to_string(HubAdminPasswordIterations) + '$' +
+            ByteArrayToHexStr(salt) + '$' + ByteArrayToHexStr(digest);
+        return true;
     }
 }
 
@@ -148,6 +198,38 @@ bool HubCommandHandler::Execute(std::string const& commandLine) const
         PrintNodes();
     else if (command == "admins")
         PrintAdmins();
+    else if (command == "admin")
+    {
+        std::string subcommand;
+        input >> subcommand;
+        subcommand = ToLower(subcommand);
+
+        if (subcommand != "create")
+        {
+            std::printf("Usage: admin create <username> <password> [access_flags]\n");
+            return true;
+        }
+
+        std::string username;
+        std::string password;
+        std::string accessText;
+        std::string extra;
+        input >> username >> password >> accessText;
+        if (username.empty() || password.empty() || input >> extra)
+        {
+            std::printf("Usage: admin create <username> <password> [access_flags]\n");
+            return true;
+        }
+
+        uint64 accessFlags = HUB_ADMIN_ACCESS_ALL;
+        if (!accessText.empty() && !ParseAdminAccessFlags(accessText, accessFlags))
+        {
+            std::printf("Invalid access flags. Use a decimal or 0x value containing only bits 0x1 through 0x8.\n");
+            return true;
+        }
+
+        CreateAdmin(username, password, accessFlags);
+    }
     else if (command == "reload")
         ReloadConfiguration();
     else if (command == "stop" || command == "quit" || command == "exit")
@@ -168,6 +250,8 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  status     Show hub uptime, endpoint, and database record counts.\n");
     std::printf("  nodes      List enabled routing nodes.\n");
     std::printf("  admins     List hub administrator identities and access flags.\n");
+    std::printf("  admin create <username> <password> [access_flags]\n");
+    std::printf("             Create an administrator (default access flags: 0xF).\n");
     std::printf("  reload     Reload configuration and logging settings.\n");
     std::printf("  stop       Stop the hub server.\n");
 }
@@ -241,6 +325,46 @@ void HubCommandHandler::PrintAdmins() const
             fields[1].GetString().c_str(), flags.str().c_str(), fields[3].GetBool() ? "yes" : "no",
             lastLogin.c_str());
     } while (result->NextRow());
+}
+
+void HubCommandHandler::CreateAdmin(std::string const& username, std::string const& password,
+    uint64 accessFlags) const
+{
+    if (!IsValidAdminUsername(username))
+    {
+        std::printf("Invalid username. Use 3-64 letters, numbers, periods, underscores, hyphens, or @ characters.\n");
+        return;
+    }
+
+    if (password.size() < 8 || password.size() > 128)
+    {
+        std::printf("Invalid password. Passwords must contain 8-128 characters and cannot contain spaces.\n");
+        return;
+    }
+
+    PreparedStatement* selectAdmin = HubDatabase.GetPreparedStatement(HUB_SEL_ADMIN_BY_USERNAME);
+    selectAdmin->setString(0, username);
+    if (HubDatabase.Query(selectAdmin))
+    {
+        std::printf("Administrator '%s' already exists.\n", username.c_str());
+        return;
+    }
+
+    std::string passwordHash;
+    if (!CreateAdminPasswordHash(password, passwordHash))
+    {
+        std::printf("Unable to create the administrator password verifier.\n");
+        return;
+    }
+
+    PreparedStatement* insertAdmin = HubDatabase.GetPreparedStatement(HUB_INS_ADMIN);
+    insertAdmin->setString(0, username);
+    insertAdmin->setString(1, passwordHash);
+    insertAdmin->setUInt64(2, accessFlags);
+    HubDatabase.DirectExecute(insertAdmin);
+
+    std::printf("Created administrator '%s' with access flags 0x%llX.\n", username.c_str(),
+        static_cast<unsigned long long>(accessFlags));
 }
 
 void HubCommandHandler::ReloadConfiguration() const

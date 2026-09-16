@@ -20,6 +20,9 @@ void HubDatabaseConnection::DoPrepareStatements()
     PrepareStatement(HUB_SEL_ADMINS,
         "SELECT id, username, access_flags, enabled, last_login_at FROM hub_admins ORDER BY username",
         CONNECTION_SYNCH);
+    PrepareStatement(HUB_INS_ADMIN,
+        "INSERT INTO hub_admins (username, password_hash, access_flags) VALUES (?, ?, ?)",
+        CONNECTION_SYNCH);
     PrepareStatement(HUB_UPD_NODE_HEARTBEAT,
         "UPDATE hub_nodes SET status = ?, current_load = ?, last_heartbeat_at = CURRENT_TIMESTAMP "
         "WHERE node_key = ?", CONNECTION_ASYNC);
