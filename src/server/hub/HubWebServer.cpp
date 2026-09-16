@@ -541,7 +541,7 @@ std::string HubWebServer::HandleLogin(std::string const& body, std::string const
 
     PreparedStatement* updateLogin = HubDatabase.GetPreparedStatement(HUB_UPD_ADMIN_LAST_LOGIN);
     updateLogin->setString(0, usernameValue->second);
-    HubDatabase.DirectExecute(updateLogin);
+    HubDatabase.Execute(updateLogin);
 
     std::ostringstream cookie;
     cookie << "Set-Cookie: hub_session=" << token << "; Path=/; HttpOnly; SameSite=Strict; Max-Age="
