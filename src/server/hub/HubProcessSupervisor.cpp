@@ -12,11 +12,9 @@
 
 #include <algorithm>
 #include <cerrno>
-#include <cstdio>
 #include <filesystem>
 #include <sstream>
 #include <utility>
-#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -32,6 +30,7 @@ namespace
 {
     constexpr std::chrono::seconds StartupTimeout(30);
     constexpr std::chrono::seconds HeartbeatTimeout(15);
+    constexpr std::chrono::seconds ShutdownTimeout(10);
 
     bool WritePipe(uint64 handleValue, char const* message)
     {
@@ -42,7 +41,7 @@ namespace
 #ifdef _WIN32
             DWORD bytesWritten = 0;
             if (!WriteFile(reinterpret_cast<HANDLE>(uintptr_t(handleValue)), message + consumed,
-                DWORD(length - consumed), &bytesWritten, nullptr) || bytesWritten == 0)
+                DWORD(length - consumed), &bytesWritten, nullptr) || !bytesWritten)
                 return false;
 #else
             ssize_t const bytesWritten = write(int(handleValue), message + consumed, length - consumed);
@@ -55,7 +54,6 @@ namespace
 #endif
             consumed += size_t(bytesWritten);
         }
-
         return true;
     }
 
@@ -69,41 +67,33 @@ namespace
     }
 }
 
-HubProcessSupervisor::HubProcessSupervisor()
-    : _state(HubManagedProcessState::Stopped), _processId(0), _processHandle(0),
-      _controlWriteHandle(0), _statusReadHandle(0), _lastExitCode(0), _ready(false)
-{
-}
-
 HubProcessSupervisor::~HubProcessSupervisor()
 {
-    Stop();
+    StopAll();
 }
 
 bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& error)
 {
     Update();
-    if (IsActive())
-    {
-        error = "managed service '" + _serviceKey + "' is already " + GetStateName();
-        return false;
-    }
-
-    auto const service = _services.find(serviceKey);
+    auto service = _services.find(serviceKey);
     if (service == _services.end())
     {
         error = "managed service '" + serviceKey + "' is not present in the database record cache";
         return false;
     }
 
-    ManagedServiceDefinition const& definition = service->second;
-    if (!definition.Enabled)
+    ManagedServiceRuntime& runtime = service->second;
+    if (IsActive(runtime))
+    {
+        error = "managed service '" + serviceKey + "' is already " + GetStateName(runtime.State);
+        return false;
+    }
+    if (!runtime.Definition.Enabled)
     {
         error = "managed service '" + serviceKey + "' is disabled";
         return false;
     }
-
-    if (definition.ExecutablePath.empty())
+    if (runtime.Definition.ExecutablePath.empty())
     {
         error = "managed service '" + serviceKey + "' has no executable path";
         return false;
@@ -111,14 +101,13 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
 
     try
     {
-        std::filesystem::path workingDirectory = definition.WorkingDirectory.empty()
-            ? std::filesystem::current_path()
-            : std::filesystem::path(definition.WorkingDirectory);
+        std::filesystem::path workingDirectory = runtime.Definition.WorkingDirectory.empty()
+            ? std::filesystem::current_path() : std::filesystem::path(runtime.Definition.WorkingDirectory);
         if (workingDirectory.is_relative())
             workingDirectory = std::filesystem::absolute(workingDirectory);
         workingDirectory = workingDirectory.lexically_normal();
 
-        std::filesystem::path executablePath = ResolvePath(workingDirectory, definition.ExecutablePath);
+        std::filesystem::path executablePath = ResolvePath(workingDirectory, runtime.Definition.ExecutablePath);
 #ifdef _WIN32
         if (!std::filesystem::exists(executablePath) && executablePath.extension().empty())
             executablePath += ".exe";
@@ -128,26 +117,20 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
             error = "managed service executable does not exist: " + executablePath.string();
             return false;
         }
-
-        std::filesystem::path configPath = ResolvePath(workingDirectory, definition.ConfigPath);
+        std::filesystem::path configPath = ResolvePath(workingDirectory, runtime.Definition.ConfigPath);
         if (!std::filesystem::is_regular_file(configPath))
         {
             error = "managed service configuration does not exist: " + configPath.string();
             return false;
         }
-
         if (!std::filesystem::is_directory(workingDirectory))
         {
             error = "managed service working directory does not exist: " + workingDirectory.string();
             return false;
         }
-
-        _serviceKey = serviceKey;
-        if (!Launch(executablePath.string(), configPath.string(), workingDirectory.string(), error))
-        {
-            _serviceKey.clear();
+        if (!Launch(serviceKey, runtime, executablePath.string(), configPath.string(),
+            workingDirectory.string(), error))
             return false;
-        }
     }
     catch (std::filesystem::filesystem_error const& exception)
     {
@@ -155,86 +138,111 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
         return false;
     }
 
-    _state = HubManagedProcessState::Starting;
-    _ready = false;
-    _lastExitCode = 0;
-    _statusBuffer.clear();
-    _startedAt = std::chrono::steady_clock::now();
-    _lastHeartbeat = _startedAt;
-    SF_LOG_INFO("server.hub", "Started managed service '%s' as process %llu.", _serviceKey.c_str(),
-        static_cast<unsigned long long>(_processId));
+    runtime.State = HubManagedProcessState::Starting;
+    runtime.Ready = false;
+    runtime.LastExitCode = 0;
+    runtime.StatusBuffer.clear();
+    runtime.StartedAt = std::chrono::steady_clock::now();
+    runtime.LastHeartbeat = runtime.StartedAt;
+    SF_LOG_INFO("server.hub", "Started managed service '%s' as process %llu.", serviceKey.c_str(),
+        static_cast<unsigned long long>(runtime.ProcessId));
+    return true;
+}
+
+bool HubProcessSupervisor::Stop(std::string const& serviceKey, std::string& error)
+{
+    Update();
+    auto service = _services.find(serviceKey);
+    if (service == _services.end())
+    {
+        error = "managed service '" + serviceKey + "' is not present in the database record cache";
+        return false;
+    }
+    ManagedServiceRuntime& runtime = service->second;
+    if (!IsActive(runtime))
+    {
+        error = "managed service '" + serviceKey + "' is not running";
+        return false;
+    }
+    if (runtime.State == HubManagedProcessState::Stopping)
+    {
+        error = "managed service '" + serviceKey + "' is already stopping";
+        return false;
+    }
+    if (!WriteControl(runtime, Skyfire::HubControl::StopCommand))
+    {
+        error = "unable to send the stop command to managed service '" + serviceKey + "'";
+        return false;
+    }
+    runtime.State = HubManagedProcessState::Stopping;
+    runtime.StopRequestedAt = std::chrono::steady_clock::now();
+    SF_LOG_INFO("server.hub", "Stop requested for managed service '%s'.", serviceKey.c_str());
     return true;
 }
 
 bool HubProcessSupervisor::ReloadDatabaseRecords(std::string& error)
 {
-    PreparedQueryResult result = HubDatabase.Query(
-        HubDatabase.GetPreparedStatement(HUB_SEL_MANAGED_SERVICES));
-
-    std::unordered_map<std::string, ManagedServiceDefinition> services;
+    PreparedQueryResult result = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_MANAGED_SERVICES));
+    std::unordered_map<std::string, ManagedServiceDefinition> definitions;
     if (result)
     {
         do
         {
             Field* fields = result->Fetch();
-            std::string const serviceKey = fields[0].GetString();
-            if (serviceKey.empty())
+            std::string const key = fields[0].GetString();
+            if (key.empty())
             {
                 error = "hub_managed_services contains an empty service key";
                 return false;
             }
-
             ManagedServiceDefinition definition;
             definition.Name = fields[1].GetString();
             definition.ExecutablePath = fields[2].GetString();
             definition.ConfigPath = fields[3].GetString();
             definition.WorkingDirectory = fields[4].GetString();
             definition.Enabled = fields[5].GetBool();
-            services.emplace(serviceKey, std::move(definition));
+            definitions.emplace(key, std::move(definition));
         } while (result->NextRow());
     }
 
-    _services.swap(services);
-    SF_LOG_INFO("server.hub", "Cached %u managed service database record(s).", uint32(_services.size()));
+    for (auto& definition : definitions)
+        _services[definition.first].Definition = std::move(definition.second);
+    for (auto service = _services.begin(); service != _services.end();)
+    {
+        if (definitions.find(service->first) == definitions.end() && !IsActive(service->second))
+            service = _services.erase(service);
+        else
+            ++service;
+    }
+    SF_LOG_INFO("server.hub", "Cached %u managed service database record(s).", uint32(definitions.size()));
     return true;
 }
 
-bool HubProcessSupervisor::Launch(std::string const& executablePath, std::string const& configPath,
+bool HubProcessSupervisor::Launch(std::string const& serviceKey, ManagedServiceRuntime& runtime,
+    std::string const& executablePath, std::string const& configPath,
     std::string const& workingDirectory, std::string& error)
 {
 #ifdef _WIN32
     SECURITY_ATTRIBUTES security = { sizeof(SECURITY_ATTRIBUTES), nullptr, TRUE };
-    HANDLE childControlRead = nullptr;
-    HANDLE parentControlWrite = nullptr;
-    HANDLE parentStatusRead = nullptr;
-    HANDLE childStatusWrite = nullptr;
-
-    auto closePipeHandles = [&]()
+    HANDLE childControlRead = nullptr, parentControlWrite = nullptr;
+    HANDLE parentStatusRead = nullptr, childStatusWrite = nullptr;
+    auto closePipes = [&]()
     {
-        if (childControlRead)
-            CloseHandle(childControlRead);
-        if (parentControlWrite)
-            CloseHandle(parentControlWrite);
-        if (parentStatusRead)
-            CloseHandle(parentStatusRead);
-        if (childStatusWrite)
-            CloseHandle(childStatusWrite);
+        if (childControlRead) CloseHandle(childControlRead);
+        if (parentControlWrite) CloseHandle(parentControlWrite);
+        if (parentStatusRead) CloseHandle(parentStatusRead);
+        if (childStatusWrite) CloseHandle(childStatusWrite);
     };
-
     if (!CreatePipe(&childControlRead, &parentControlWrite, &security, 0) ||
         !CreatePipe(&parentStatusRead, &childStatusWrite, &security, 0) ||
         !SetHandleInformation(parentControlWrite, HANDLE_FLAG_INHERIT, 0) ||
         !SetHandleInformation(parentStatusRead, HANDLE_FLAG_INHERIT, 0))
     {
-        error = "unable to create authnet supervision pipes (Windows error " +
-            std::to_string(GetLastError()) + ')';
-        closePipeHandles();
+        error = "unable to create supervision pipes (Windows error " + std::to_string(GetLastError()) + ')';
+        closePipes();
         return false;
     }
-
-    std::filesystem::path const executable(executablePath);
-    std::filesystem::path const config(configPath);
-    std::filesystem::path const working(workingDirectory);
+    std::filesystem::path const executable(executablePath), config(configPath), working(workingDirectory);
     std::wostringstream command;
     command << L'\"' << executable.wstring() << L"\" -c \"" << config.wstring()
         << L"\" --hub-control-read " << reinterpret_cast<uintptr_t>(childControlRead)
@@ -242,65 +250,46 @@ bool HubProcessSupervisor::Launch(std::string const& executablePath, std::string
     std::wstring commandText = command.str();
     std::vector<wchar_t> commandBuffer(commandText.begin(), commandText.end());
     commandBuffer.push_back(L'\0');
-
     STARTUPINFOW startupInfo = { };
     startupInfo.cb = sizeof(startupInfo);
     PROCESS_INFORMATION processInfo = { };
     if (!CreateProcessW(executable.wstring().c_str(), commandBuffer.data(), nullptr, nullptr, TRUE,
         CREATE_NEW_CONSOLE, nullptr, working.wstring().c_str(), &startupInfo, &processInfo))
     {
-        error = "unable to start authnet process (Windows error " + std::to_string(GetLastError()) + ')';
-        closePipeHandles();
+        error = "unable to start managed service '" + serviceKey + "' (Windows error " +
+            std::to_string(GetLastError()) + ')';
+        closePipes();
         return false;
     }
-
     CloseHandle(processInfo.hThread);
     CloseHandle(childControlRead);
-    childControlRead = nullptr;
     CloseHandle(childStatusWrite);
-    childStatusWrite = nullptr;
-
-    _processId = processInfo.dwProcessId;
-    _processHandle = uint64(reinterpret_cast<uintptr_t>(processInfo.hProcess));
-    _controlWriteHandle = uint64(reinterpret_cast<uintptr_t>(parentControlWrite));
-    _statusReadHandle = uint64(reinterpret_cast<uintptr_t>(parentStatusRead));
-    parentControlWrite = nullptr;
-    parentStatusRead = nullptr;
+    runtime.ProcessId = processInfo.dwProcessId;
+    runtime.ProcessHandle = uint64(reinterpret_cast<uintptr_t>(processInfo.hProcess));
+    runtime.ControlWriteHandle = uint64(reinterpret_cast<uintptr_t>(parentControlWrite));
+    runtime.StatusReadHandle = uint64(reinterpret_cast<uintptr_t>(parentStatusRead));
 #else
-    int controlPipe[2] = { -1, -1 };
-    int statusPipe[2] = { -1, -1 };
+    int controlPipe[2] = { -1, -1 }, statusPipe[2] = { -1, -1 };
     if (pipe(controlPipe) != 0 || pipe(statusPipe) != 0)
     {
-        error = "unable to create authnet supervision pipes";
-        if (controlPipe[0] >= 0)
-            close(controlPipe[0]);
-        if (controlPipe[1] >= 0)
-            close(controlPipe[1]);
-        if (statusPipe[0] >= 0)
-            close(statusPipe[0]);
-        if (statusPipe[1] >= 0)
-            close(statusPipe[1]);
+        error = "unable to create supervision pipes";
+        if (controlPipe[0] >= 0) close(controlPipe[0]);
+        if (controlPipe[1] >= 0) close(controlPipe[1]);
+        if (statusPipe[0] >= 0) close(statusPipe[0]);
+        if (statusPipe[1] >= 0) close(statusPipe[1]);
         return false;
     }
-
     pid_t const child = fork();
     if (child < 0)
     {
-        error = "unable to fork authnet process";
-        close(controlPipe[0]);
-        close(controlPipe[1]);
-        close(statusPipe[0]);
-        close(statusPipe[1]);
+        error = "unable to fork managed service '" + serviceKey + "'";
+        close(controlPipe[0]); close(controlPipe[1]); close(statusPipe[0]); close(statusPipe[1]);
         return false;
     }
-
     if (child == 0)
     {
-        close(controlPipe[1]);
-        close(statusPipe[0]);
-        if (chdir(workingDirectory.c_str()) != 0)
-            _exit(126);
-
+        close(controlPipe[1]); close(statusPipe[0]);
+        if (chdir(workingDirectory.c_str()) != 0) _exit(126);
         std::string const controlHandle = std::to_string(controlPipe[0]);
         std::string const statusHandle = std::to_string(statusPipe[1]);
         execl(executablePath.c_str(), executablePath.c_str(), "-c", configPath.c_str(),
@@ -308,197 +297,191 @@ bool HubProcessSupervisor::Launch(std::string const& executablePath, std::string
             static_cast<char*>(nullptr));
         _exit(127);
     }
-
-    close(controlPipe[0]);
-    close(statusPipe[1]);
+    close(controlPipe[0]); close(statusPipe[1]);
     int const flags = fcntl(statusPipe[0], F_GETFL, 0);
-    if (flags >= 0)
-        (void)fcntl(statusPipe[0], F_SETFL, flags | O_NONBLOCK);
-
-    _processId = uint64(child);
-    _processHandle = 0;
-    _controlWriteHandle = uint64(controlPipe[1]);
-    _statusReadHandle = uint64(statusPipe[0]);
+    if (flags >= 0) (void)fcntl(statusPipe[0], F_SETFL, flags | O_NONBLOCK);
+    runtime.ProcessId = uint64(child);
+    runtime.ControlWriteHandle = uint64(controlPipe[1]);
+    runtime.StatusReadHandle = uint64(statusPipe[0]);
 #endif
-
-    if (!WritePipe(_controlWriteHandle, Skyfire::HubControl::LaunchToken))
+    if (!WritePipe(runtime.ControlWriteHandle, Skyfire::HubControl::LaunchToken))
     {
-        error = "unable to authorize the authnet child process";
-#ifdef _WIN32
-        TerminateProcess(reinterpret_cast<HANDLE>(uintptr_t(_processHandle)), 1);
-#else
-        kill(pid_t(_processId), SIGKILL);
-        (void)waitpid(pid_t(_processId), nullptr, 0);
-#endif
-        CloseHandles();
-        _processId = 0;
+        error = "unable to authorize managed service '" + serviceKey + "'";
+        ForceStop(serviceKey, runtime);
         return false;
     }
-
     return true;
 }
 
 void HubProcessSupervisor::Update()
 {
-    if (!IsActive())
-        return;
+    for (auto& service : _services)
+        Update(service.first, service.second);
+}
 
+void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime& runtime)
+{
+    if (!IsActive(runtime))
+        return;
 #ifdef _WIN32
     DWORD exitCode = STILL_ACTIVE;
-    if (!GetExitCodeProcess(reinterpret_cast<HANDLE>(uintptr_t(_processHandle)), &exitCode) ||
-        exitCode != STILL_ACTIVE)
+    if (!GetExitCodeProcess(reinterpret_cast<HANDLE>(uintptr_t(runtime.ProcessHandle)), &exitCode) || exitCode != STILL_ACTIVE)
     {
-        MarkExited(exitCode == STILL_ACTIVE ? -1 : int64(exitCode));
+        MarkExited(key, runtime, exitCode == STILL_ACTIVE ? -1 : int64(exitCode));
         return;
     }
 #else
     int status = 0;
-    pid_t const result = waitpid(pid_t(_processId), &status, WNOHANG);
-    if (result == pid_t(_processId))
+    pid_t const result = waitpid(pid_t(runtime.ProcessId), &status, WNOHANG);
+    if (result == pid_t(runtime.ProcessId))
     {
-        int64 exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : 128 + WTERMSIG(status);
-        MarkExited(exitCode);
+        MarkExited(key, runtime, WIFEXITED(status) ? WEXITSTATUS(status) : 128 + WTERMSIG(status));
         return;
     }
 #endif
-
-    ReadStatusMessages();
-
+    ReadStatusMessages(key, runtime);
     auto const now = std::chrono::steady_clock::now();
-    if (_state == HubManagedProcessState::Starting && now - _startedAt > StartupTimeout)
-        _state = HubManagedProcessState::Unresponsive;
-    else if (_ready && now - _lastHeartbeat > HeartbeatTimeout &&
-        _state != HubManagedProcessState::Stopping)
-        _state = HubManagedProcessState::Unresponsive;
+    if (runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
+        ForceStop(key, runtime);
+    else if (runtime.State == HubManagedProcessState::Starting && now - runtime.StartedAt > StartupTimeout)
+        runtime.State = HubManagedProcessState::Unresponsive;
+    else if (runtime.Ready && now - runtime.LastHeartbeat > HeartbeatTimeout &&
+        runtime.State != HubManagedProcessState::Stopping)
+        runtime.State = HubManagedProcessState::Unresponsive;
 }
 
-void HubProcessSupervisor::ReadStatusMessages()
+void HubProcessSupervisor::ReadStatusMessages(std::string const& key, ManagedServiceRuntime& runtime)
 {
-    if (!_statusReadHandle)
+    if (!runtime.StatusReadHandle)
         return;
-
     char buffer[512];
 #ifdef _WIN32
     while (true)
     {
         DWORD available = 0;
-        if (!PeekNamedPipe(reinterpret_cast<HANDLE>(uintptr_t(_statusReadHandle)), nullptr, 0,
+        if (!PeekNamedPipe(reinterpret_cast<HANDLE>(uintptr_t(runtime.StatusReadHandle)), nullptr, 0,
             nullptr, &available, nullptr) || !available)
             break;
-
         DWORD bytesRead = 0;
         DWORD const requested = std::min<DWORD>(available, DWORD(sizeof(buffer)));
-        if (!ReadFile(reinterpret_cast<HANDLE>(uintptr_t(_statusReadHandle)), buffer, requested,
-            &bytesRead, nullptr) || bytesRead == 0)
+        if (!ReadFile(reinterpret_cast<HANDLE>(uintptr_t(runtime.StatusReadHandle)), buffer, requested,
+            &bytesRead, nullptr) || !bytesRead)
             break;
-        _statusBuffer.append(buffer, bytesRead);
+        runtime.StatusBuffer.append(buffer, bytesRead);
     }
 #else
     while (true)
     {
-        ssize_t const bytesRead = read(int(_statusReadHandle), buffer, sizeof(buffer));
-        if (bytesRead > 0)
-        {
-            _statusBuffer.append(buffer, size_t(bytesRead));
-            continue;
-        }
-        if (bytesRead < 0 && errno == EINTR)
-            continue;
+        ssize_t const bytesRead = read(int(runtime.StatusReadHandle), buffer, sizeof(buffer));
+        if (bytesRead > 0) { runtime.StatusBuffer.append(buffer, size_t(bytesRead)); continue; }
+        if (bytesRead < 0 && errno == EINTR) continue;
         break;
     }
 #endif
-
     size_t lineEnd = 0;
-    while ((lineEnd = _statusBuffer.find('\n')) != std::string::npos)
+    while ((lineEnd = runtime.StatusBuffer.find('\n')) != std::string::npos)
     {
-        std::string const message = _statusBuffer.substr(0, lineEnd);
-        _statusBuffer.erase(0, lineEnd + 1);
-        ProcessStatusMessage(message);
+        std::string const message = runtime.StatusBuffer.substr(0, lineEnd);
+        runtime.StatusBuffer.erase(0, lineEnd + 1);
+        ProcessStatusMessage(key, runtime, message);
     }
 }
 
-void HubProcessSupervisor::ProcessStatusMessage(std::string const& message)
+void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedServiceRuntime& runtime,
+    std::string const& message)
 {
     auto const now = std::chrono::steady_clock::now();
     if (message == Skyfire::HubControl::StartingMessage)
     {
-        _state = HubManagedProcessState::Starting;
-        _lastHeartbeat = now;
+        runtime.State = HubManagedProcessState::Starting;
+        runtime.LastHeartbeat = now;
     }
     else if (message == Skyfire::HubControl::ReadyMessage)
     {
-        _ready = true;
-        _state = HubManagedProcessState::Running;
-        _lastHeartbeat = now;
-        SF_LOG_INFO("server.hub", "Managed service '%s' reported ready.", _serviceKey.c_str());
+        runtime.Ready = true;
+        runtime.State = HubManagedProcessState::Running;
+        runtime.LastHeartbeat = now;
+        SF_LOG_INFO("server.hub", "Managed service '%s' reported ready.", key.c_str());
     }
     else if (message == Skyfire::HubControl::HeartbeatMessage)
     {
-        _lastHeartbeat = now;
-        if (_ready && _state != HubManagedProcessState::Stopping)
-            _state = HubManagedProcessState::Running;
+        runtime.LastHeartbeat = now;
+        if (runtime.Ready && runtime.State != HubManagedProcessState::Stopping)
+            runtime.State = HubManagedProcessState::Running;
     }
     else if (message == Skyfire::HubControl::StoppingMessage)
-        _state = HubManagedProcessState::Stopping;
+    {
+        if (runtime.State != HubManagedProcessState::Stopping)
+            runtime.StopRequestedAt = now;
+        runtime.State = HubManagedProcessState::Stopping;
+    }
 }
 
-void HubProcessSupervisor::Stop()
+void HubProcessSupervisor::StopAll()
 {
-    Update();
-    if (!IsActive())
-        return;
-
-    _state = HubManagedProcessState::Stopping;
-    (void)WriteControl(Skyfire::HubControl::StopCommand);
-
-#ifdef _WIN32
-    HANDLE const process = reinterpret_cast<HANDLE>(uintptr_t(_processHandle));
-    DWORD waitResult = WaitForSingleObject(process, 10000);
-    if (waitResult == WAIT_TIMEOUT)
+    for (auto& service : _services)
     {
-        SF_LOG_ERROR("server.hub", "Managed service '%s' did not stop; terminating it.", _serviceKey.c_str());
-        TerminateProcess(process, 1);
-        (void)WaitForSingleObject(process, 5000);
+        std::string ignored;
+        if (IsActive(service.second) && service.second.State != HubManagedProcessState::Stopping)
+            (void)Stop(service.first, ignored);
     }
-
-    DWORD exitCode = 1;
-    (void)GetExitCodeProcess(process, &exitCode);
-    MarkExited(exitCode == STILL_ACTIVE ? -1 : int64(exitCode));
-#else
-    for (uint32 attempt = 0; attempt < 100; ++attempt)
+    auto const deadline = std::chrono::steady_clock::now() + ShutdownTimeout;
+    while (std::chrono::steady_clock::now() < deadline)
     {
-        int status = 0;
-        pid_t const result = waitpid(pid_t(_processId), &status, WNOHANG);
-        if (result == pid_t(_processId))
-        {
-            MarkExited(WIFEXITED(status) ? WEXITSTATUS(status) : 128 + WTERMSIG(status));
+        Update();
+        bool active = false;
+        for (auto const& service : _services)
+            active = active || IsActive(service.second);
+        if (!active)
             return;
-        }
         Skyfire::SleepForMilliseconds(100);
     }
-
-    SF_LOG_ERROR("server.hub", "Managed service '%s' did not stop; terminating it.", _serviceKey.c_str());
-    kill(pid_t(_processId), SIGKILL);
-    int status = 0;
-    (void)waitpid(pid_t(_processId), &status, 0);
-    MarkExited(WIFEXITED(status) ? WEXITSTATUS(status) : 128 + WTERMSIG(status));
-#endif
+    for (auto& service : _services)
+        if (IsActive(service.second))
+            ForceStop(service.first, service.second);
 }
 
-bool HubProcessSupervisor::WriteControl(char const* message)
+HubManagedServiceStatus HubProcessSupervisor::GetStatus(std::string const& key) const
 {
-    return _controlWriteHandle && WritePipe(_controlWriteHandle, message);
+    HubManagedServiceStatus status;
+    status.Key = key;
+    status.Name = key;
+    auto const found = _services.find(key);
+    if (found == _services.end())
+        return status;
+    status.Name = found->second.Definition.Name;
+    status.State = found->second.State;
+    status.ProcessId = found->second.ProcessId;
+    status.LastExitCode = found->second.LastExitCode;
+    status.Enabled = found->second.Definition.Enabled;
+    return status;
 }
 
-bool HubProcessSupervisor::IsActive() const
+std::vector<HubManagedServiceStatus> HubProcessSupervisor::GetStatuses() const
 {
-    return _state == HubManagedProcessState::Starting || _state == HubManagedProcessState::Running ||
-        _state == HubManagedProcessState::Unresponsive || _state == HubManagedProcessState::Stopping;
+    std::vector<HubManagedServiceStatus> statuses;
+    statuses.reserve(_services.size());
+    for (auto const& service : _services)
+        statuses.push_back(GetStatus(service.first));
+    std::sort(statuses.begin(), statuses.end(), [](HubManagedServiceStatus const& left,
+        HubManagedServiceStatus const& right) { return left.Key < right.Key; });
+    return statuses;
 }
 
-char const* HubProcessSupervisor::GetStateName() const
+bool HubProcessSupervisor::WriteControl(ManagedServiceRuntime const& runtime, char const* message)
 {
-    switch (_state)
+    return runtime.ControlWriteHandle && WritePipe(runtime.ControlWriteHandle, message);
+}
+
+bool HubProcessSupervisor::IsActive(ManagedServiceRuntime const& runtime)
+{
+    return runtime.State == HubManagedProcessState::Starting || runtime.State == HubManagedProcessState::Running ||
+        runtime.State == HubManagedProcessState::Unresponsive || runtime.State == HubManagedProcessState::Stopping;
+}
+
+char const* HubProcessSupervisor::GetStateName(HubManagedProcessState state)
+{
+    switch (state)
     {
         case HubManagedProcessState::Stopped: return "stopped";
         case HubManagedProcessState::Starting: return "starting";
@@ -510,33 +493,54 @@ char const* HubProcessSupervisor::GetStateName() const
     }
 }
 
-void HubProcessSupervisor::MarkExited(int64 exitCode)
+void HubProcessSupervisor::MarkExited(std::string const& key, ManagedServiceRuntime& runtime, int64 exitCode)
 {
-    SF_LOG_INFO("server.hub", "Managed service '%s' process %llu exited with code %lld.",
-        _serviceKey.c_str(), static_cast<unsigned long long>(_processId), static_cast<long long>(exitCode));
-    _lastExitCode = exitCode;
-    _state = HubManagedProcessState::Exited;
-    _ready = false;
-    CloseHandles();
+    SF_LOG_INFO("server.hub", "Managed service '%s' process %llu exited with code %lld.", key.c_str(),
+        static_cast<unsigned long long>(runtime.ProcessId), static_cast<long long>(exitCode));
+    runtime.LastExitCode = exitCode;
+    runtime.State = HubManagedProcessState::Exited;
+    runtime.Ready = false;
+    CloseHandles(runtime);
 }
 
-void HubProcessSupervisor::CloseHandles()
+void HubProcessSupervisor::ForceStop(std::string const& key, ManagedServiceRuntime& runtime)
+{
+    SF_LOG_ERROR("server.hub", "Managed service '%s' did not stop cleanly; terminating it.", key.c_str());
+#ifdef _WIN32
+    HANDLE const process = reinterpret_cast<HANDLE>(uintptr_t(runtime.ProcessHandle));
+    if (process)
+    {
+        TerminateProcess(process, 1);
+        (void)WaitForSingleObject(process, 5000);
+    }
+    DWORD exitCode = 1;
+    if (process)
+        (void)GetExitCodeProcess(process, &exitCode);
+    MarkExited(key, runtime, exitCode == STILL_ACTIVE ? -1 : int64(exitCode));
+#else
+    if (runtime.ProcessId)
+    {
+        kill(pid_t(runtime.ProcessId), SIGKILL);
+        int status = 0;
+        (void)waitpid(pid_t(runtime.ProcessId), &status, 0);
+        MarkExited(key, runtime, WIFEXITED(status) ? WEXITSTATUS(status) : 128 + WTERMSIG(status));
+    }
+#endif
+}
+
+void HubProcessSupervisor::CloseHandles(ManagedServiceRuntime& runtime)
 {
 #ifdef _WIN32
-    if (_processHandle)
-        CloseHandle(reinterpret_cast<HANDLE>(uintptr_t(_processHandle)));
-    if (_controlWriteHandle)
-        CloseHandle(reinterpret_cast<HANDLE>(uintptr_t(_controlWriteHandle)));
-    if (_statusReadHandle)
-        CloseHandle(reinterpret_cast<HANDLE>(uintptr_t(_statusReadHandle)));
+    if (runtime.ProcessHandle) CloseHandle(reinterpret_cast<HANDLE>(uintptr_t(runtime.ProcessHandle)));
+    if (runtime.ControlWriteHandle) CloseHandle(reinterpret_cast<HANDLE>(uintptr_t(runtime.ControlWriteHandle)));
+    if (runtime.StatusReadHandle) CloseHandle(reinterpret_cast<HANDLE>(uintptr_t(runtime.StatusReadHandle)));
 #else
-    if (_controlWriteHandle)
-        close(int(_controlWriteHandle));
-    if (_statusReadHandle)
-        close(int(_statusReadHandle));
+    if (runtime.ControlWriteHandle) close(int(runtime.ControlWriteHandle));
+    if (runtime.StatusReadHandle) close(int(runtime.StatusReadHandle));
 #endif
-    _processHandle = 0;
-    _controlWriteHandle = 0;
-    _statusReadHandle = 0;
-    _statusBuffer.clear();
+    runtime.ProcessId = 0;
+    runtime.ProcessHandle = 0;
+    runtime.ControlWriteHandle = 0;
+    runtime.StatusReadHandle = 0;
+    runtime.StatusBuffer.clear();
 }

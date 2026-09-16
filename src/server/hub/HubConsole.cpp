@@ -207,9 +207,9 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         std::string extra;
         input >> service;
         service = ToLower(service);
-        if (service != "authnet" || input >> extra)
+        if (service.empty() || input >> extra)
         {
-            std::printf("Usage: start authnet\n");
+            std::printf("Usage: start <service>\n");
             return true;
         }
 
@@ -221,9 +221,9 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
 
         std::string error;
         if (!_processSupervisor.Start(service, error))
-            std::printf("Unable to start authnet: %s.\n", error.c_str());
+            std::printf("Unable to start %s: %s.\n", service.c_str(), error.c_str());
         else
-            std::printf("Authnet start requested; waiting for the child process to report ready.\n");
+            std::printf("%s start requested; waiting for the child process to report ready.\n", service.c_str());
     }
     else if (command == "admin")
     {
@@ -284,7 +284,34 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         else
             std::printf("Usage: reload [db_records]\n");
     }
-    else if (command == "stop" || command == "quit" || command == "exit")
+    else if (command == "stop")
+    {
+        std::string service;
+        std::string extra;
+        input >> service;
+        service = ToLower(service);
+        if (service.empty())
+        {
+            std::printf("Stopping hub server...\n");
+            return false;
+        }
+        if (input >> extra)
+        {
+            std::printf("Usage: stop [service]\n");
+            return true;
+        }
+        if (origin != HubCommandOrigin::LocalConsole)
+        {
+            std::printf("Managed services can only be stopped from the local hub console.\n");
+            return true;
+        }
+        std::string error;
+        if (!_processSupervisor.Stop(service, error))
+            std::printf("Unable to stop %s: %s.\n", service.c_str(), error.c_str());
+        else
+            std::printf("%s stop requested.\n", service.c_str());
+    }
+    else if (command == "quit" || command == "exit")
     {
         std::printf("Stopping hub server...\n");
         return false;
@@ -301,15 +328,17 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  help       Show this command list.\n");
     std::printf("  status     Show hub uptime, endpoint, and database record counts.\n");
     std::printf("  nodes      List enabled routing nodes.\n");
-    std::printf("  start authnet\n");
-    std::printf("             Start and supervise the database-configured authnet service.\n");
+    std::printf("  start <service>\n");
+    std::printf("             Start and supervise a database-configured service.\n");
+    std::printf("  stop <service>\n");
+    std::printf("             Gracefully stop a managed service.\n");
     std::printf("  admins     List hub administrator identities and access flags.\n");
     std::printf("  admin create <username> <password> [access_flags]\n");
     std::printf("             Create a local-only administrator (default access flags: 0xF).\n");
     std::printf("  reload     Reload configuration and logging settings.\n");
     std::printf("  .reload db_records\n");
     std::printf("             Refresh cached managed service records from the hub database.\n");
-    std::printf("  stop       Stop the hub server.\n");
+    std::printf("  stop       Stop the hub server when no service is supplied.\n");
 }
 
 void HubCommandHandler::PrintStatus() const
@@ -329,13 +358,17 @@ void HubCommandHandler::PrintStatus() const
         static_cast<unsigned long long>(nodes ? nodes->GetRowCount() : 0));
     std::printf("  Administrators: %llu\n",
         static_cast<unsigned long long>(admins ? admins->GetRowCount() : 0));
-    std::printf("  Authnet:       %s", _processSupervisor.GetStateName());
-    if (_processSupervisor.GetProcessId())
-        std::printf(" (process %llu)",
-            static_cast<unsigned long long>(_processSupervisor.GetProcessId()));
-    if (_processSupervisor.GetState() == HubManagedProcessState::Exited)
-        std::printf(" (exit code %lld)", static_cast<long long>(_processSupervisor.GetLastExitCode()));
-    std::printf("\n");
+    for (HubManagedServiceStatus const& service : _processSupervisor.GetStatuses())
+    {
+        std::printf("  %-14s %s", service.Name.c_str(), HubProcessSupervisor::GetStateName(service.State));
+        if (service.ProcessId)
+            std::printf(" (process %llu)", static_cast<unsigned long long>(service.ProcessId));
+        if (service.State == HubManagedProcessState::Exited)
+            std::printf(" (exit code %lld)", static_cast<long long>(service.LastExitCode));
+        if (!service.Enabled)
+            std::printf(" (disabled)");
+        std::printf("\n");
+    }
 }
 
 void HubCommandHandler::PrintNodes() const

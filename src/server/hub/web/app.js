@@ -14,9 +14,13 @@ const statusSummary = document.querySelector("#status-summary");
 const componentGrid = document.querySelector("#component-grid");
 
 let refreshTimer = null;
+let csrfToken = "";
+let canOperateServices = false;
 
 function showLogin(message = "") {
     stopRefresh();
+    csrfToken = "";
+    canOperateServices = false;
     loginView.hidden = false;
     statusView.hidden = true;
     mainNav.hidden = true;
@@ -60,6 +64,8 @@ function formatUptime(totalSeconds) {
 }
 
 function renderStatus(data) {
+    csrfToken = data.csrfToken || "";
+    canOperateServices = data.canOperateServices === true;
     signedInUser.textContent = data.username;
     lastUpdated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
 
@@ -88,8 +94,54 @@ function renderStatus(data) {
 
         heading.append(title, state);
         article.append(heading, detail);
+
+        if (component.managed) {
+            const controls = document.createElement("div");
+            controls.className = "service-controls";
+
+            const active = ["starting", "running", "unresponsive", "stopping"].includes(component.state);
+            const startButton = document.createElement("button");
+            startButton.className = "service-button start";
+            startButton.type = "button";
+            startButton.textContent = "Start";
+            startButton.disabled = !canOperateServices || !component.enabled || active;
+            startButton.addEventListener("click", () => operateService(component.key, "start", startButton));
+
+            const stopButton = document.createElement("button");
+            stopButton.className = "service-button stop";
+            stopButton.type = "button";
+            stopButton.textContent = "Stop";
+            stopButton.disabled = !canOperateServices || !active || component.state === "stopping";
+            stopButton.addEventListener("click", () => operateService(component.key, "stop", stopButton));
+
+            controls.append(startButton, stopButton);
+            article.append(controls);
+        }
         return article;
     }));
+}
+
+async function operateService(serviceKey, action, button) {
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = action === "start" ? "Starting..." : "Stopping...";
+    try {
+        const response = await fetch(`/api/v1/services/${encodeURIComponent(serviceKey)}/${action}`, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "X-Hub-CSRF": csrfToken }
+        });
+        const data = await response.json();
+        if (!response.ok)
+            throw new Error(data.error || `Unable to ${action} service`);
+        lastUpdated.textContent = `${action === "start" ? "Start" : "Stop"} requested`;
+        window.setTimeout(loadStatus, 300);
+    } catch (error) {
+        lastUpdated.textContent = error.message;
+        button.disabled = false;
+    } finally {
+        button.textContent = originalText;
+    }
 }
 
 async function loadStatus() {

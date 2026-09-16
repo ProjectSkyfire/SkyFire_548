@@ -12,18 +12,34 @@
 #include <atomic>
 #include <boost/asio/ip/tcp.hpp>
 #include <chrono>
+#include <deque>
 #include <map>
 #include <mutex>
 #include <string>
+#include <vector>
 
 class HubWebSession;
+
+struct HubWebManagedServiceStatus
+{
+    std::string Key;
+    std::string Name;
+    std::string State = "stopped";
+    uint64 ProcessId = 0;
+    int64 LastExitCode = 0;
+    bool Enabled = false;
+};
 
 struct HubWebStatusSnapshot
 {
     uint64 UptimeSeconds = 0;
-    std::string AuthnetState = "stopped";
-    uint64 AuthnetProcessId = 0;
-    int64 AuthnetLastExitCode = 0;
+    std::vector<HubWebManagedServiceStatus> Services;
+};
+
+struct HubWebServiceCommand
+{
+    std::string ServiceKey;
+    bool Start = false;
 };
 
 class HubWebServer
@@ -39,6 +55,7 @@ public:
         bool allowRemote, uint32 sessionTimeoutSeconds);
     void Close();
     void UpdateStatus(HubWebStatusSnapshot const& status);
+    bool PollServiceCommand(HubWebServiceCommand& command);
 
 private:
     friend class HubWebSession;
@@ -46,6 +63,7 @@ private:
     struct AuthenticatedSession
     {
         std::string Username;
+        std::string CsrfToken;
         uint64 AccessFlags = 0;
         std::chrono::steady_clock::time_point ExpiresAt;
     };
@@ -64,6 +82,8 @@ private:
         bool remoteIsLoopback);
     std::string HandleLogout(std::map<std::string, std::string> const& headers);
     std::string HandleStatus(std::map<std::string, std::string> const& headers);
+    std::string HandleServiceCommand(std::string const& path,
+        std::map<std::string, std::string> const& headers);
     std::string ServeAsset(std::string const& target) const;
     bool FindSession(std::map<std::string, std::string> const& headers,
         AuthenticatedSession& session);
@@ -82,6 +102,9 @@ private:
     std::mutex _authMutex;
     std::map<std::string, AuthenticatedSession> _sessions;
     std::map<std::string, LoginAttempt> _loginAttempts;
+
+    std::mutex _commandMutex;
+    std::deque<HubWebServiceCommand> _commands;
 };
 
 #endif

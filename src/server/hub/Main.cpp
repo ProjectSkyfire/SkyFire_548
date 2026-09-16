@@ -9,6 +9,7 @@
 #include <cstring>
 #include <filesystem>
 #include <string>
+#include <utility>
 
 #include "Common.h"
 
@@ -257,14 +258,34 @@ int main(int argc, char** argv)
     {
         processSupervisor.Update();
 
+        HubWebServiceCommand webCommand;
+        while (webEnabled && webServer.PollServiceCommand(webCommand))
+        {
+            std::string error;
+            bool const accepted = webCommand.Start
+                ? processSupervisor.Start(webCommand.ServiceKey, error)
+                : processSupervisor.Stop(webCommand.ServiceKey, error);
+            if (!accepted)
+                SF_LOG_WARN("server.hub", "Web console could not %s managed service '%s': %s.",
+                    webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
+        }
+
         if (webEnabled)
         {
             HubWebStatusSnapshot status;
             status.UptimeSeconds = uint64(std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::steady_clock::now() - hubStartedAt).count());
-            status.AuthnetState = processSupervisor.GetStateName();
-            status.AuthnetProcessId = processSupervisor.GetProcessId();
-            status.AuthnetLastExitCode = processSupervisor.GetLastExitCode();
+            for (HubManagedServiceStatus const& service : processSupervisor.GetStatuses())
+            {
+                HubWebManagedServiceStatus webService;
+                webService.Key = service.Key;
+                webService.Name = service.Name;
+                webService.State = HubProcessSupervisor::GetStateName(service.State);
+                webService.ProcessId = service.ProcessId;
+                webService.LastExitCode = service.LastExitCode;
+                webService.Enabled = service.Enabled;
+                status.Services.push_back(std::move(webService));
+            }
             webServer.UpdateStatus(status);
         }
 
@@ -294,7 +315,7 @@ int main(int argc, char** argv)
     }
 
     webServer.Close();
-    processSupervisor.Stop();
+    processSupervisor.StopAll();
     StopDatabase();
     SF_LOG_INFO("server.hub", "Hub server stopped.");
     return 0;

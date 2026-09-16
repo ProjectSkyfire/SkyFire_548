@@ -12,8 +12,10 @@
 #endif
 #include <mysql.h>
 #include <csignal>
+#include <chrono>
 #include <filesystem>
 #include <memory>
+#include <thread>
 
 #include "Common.h"
 #include "Configuration/Config.h"
@@ -33,6 +35,7 @@
 #include "Log.h"
 #include "Master.h"
 #include "Platform/TimeUtils.h"
+#include "Platform/HubProcessControl.h"
 #include "RARunnable.h"
 #include "RealmList.h"
 #include "SFSoap.h"
@@ -350,7 +353,7 @@ public:
 };
 
 /// Main function
-int Master::Run()
+int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
 {
     BigNumber seed1;
     seed1.SetRand(16 * 8);
@@ -548,9 +551,51 @@ int Master::Run()
 
     SF_LOG_INFO("server.worldserver",  " % s (worldserver-daemon) ready...", SKYFIRE_VER_PRODUCTVERSION_STR);
 
+    std::thread hubControlThread;
+    if (hubControl && !World::IsStopped())
+    {
+        if (!hubControl->SendStatus(Skyfire::HubControl::ReadyMessage))
+        {
+            SF_LOG_ERROR("server.worldserver", "Hubserver control channel was lost during startup.");
+            World::StopNow(ERROR_EXIT_CODE);
+        }
+        else
+        {
+            hubControlThread = std::thread([hubControl]
+            {
+                auto nextHeartbeat = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+                while (!World::IsStopped())
+                {
+                    if (hubControl->StopRequested())
+                    {
+                        SF_LOG_INFO("server.worldserver", "Hubserver requested worldserver shutdown.");
+                        World::StopNow(SHUTDOWN_EXIT_CODE);
+                        break;
+                    }
+
+                    auto const now = std::chrono::steady_clock::now();
+                    if (now >= nextHeartbeat)
+                    {
+                        if (!hubControl->SendStatus(Skyfire::HubControl::HeartbeatMessage))
+                        {
+                            SF_LOG_ERROR("server.worldserver", "Hubserver control channel was lost; stopping worldserver.");
+                            World::StopNow(SHUTDOWN_EXIT_CODE);
+                            break;
+                        }
+                        nextHeartbeat = now + std::chrono::seconds(5);
+                    }
+                    Skyfire::SleepForMilliseconds(100);
+                }
+            });
+        }
+    }
+
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
     worldRunner.Join();
+
+    if (hubControlThread.joinable())
+        hubControlThread.join();
 
     raRunner.Join();
 

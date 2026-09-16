@@ -314,6 +314,42 @@ input:focus {
     font-size: 0.88rem;
 }
 
+.service-controls {
+    display: flex;
+    gap: 9px;
+}
+
+.service-button {
+    min-width: 88px;
+    min-height: 38px;
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #171a1d;
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.service-button.start {
+    border-color: #338b55;
+}
+
+.service-button.stop {
+    border-color: #9a4444;
+}
+
+.service-button:hover:not(:disabled),
+.service-button:focus-visible:not(:disabled) {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.service-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+}
+
 [hidden] {
     display: none !important;
 }

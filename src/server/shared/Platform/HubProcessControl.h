@@ -12,7 +12,7 @@
 
 namespace Skyfire::HubControl
 {
-    char constexpr LaunchToken[] = "SKYFIRE-HUB-AUTHNET-1\n";
+    char constexpr LaunchToken[] = "SKYFIRE-HUB-SERVICE-1\n";
     char constexpr StartingMessage[] = "STARTING";
     char constexpr ReadyMessage[] = "READY";
     char constexpr HeartbeatMessage[] = "HEARTBEAT";

@@ -193,6 +193,7 @@ namespace
         switch (status)
         {
             case 200: return "OK";
+            case 202: return "Accepted";
             case 204: return "No Content";
             case 400: return "Bad Request";
             case 401: return "Unauthorized";
@@ -429,12 +430,25 @@ void HubWebServer::Close()
     std::lock_guard<std::mutex> lock(_authMutex);
     _sessions.clear();
     _loginAttempts.clear();
+
+    std::lock_guard<std::mutex> commandLock(_commandMutex);
+    _commands.clear();
 }
 
 void HubWebServer::UpdateStatus(HubWebStatusSnapshot const& status)
 {
     std::lock_guard<std::mutex> lock(_statusMutex);
     _status = status;
+}
+
+bool HubWebServer::PollServiceCommand(HubWebServiceCommand& command)
+{
+    std::lock_guard<std::mutex> lock(_commandMutex);
+    if (_commands.empty())
+        return false;
+    command = std::move(_commands.front());
+    _commands.pop_front();
+    return true;
 }
 
 void HubWebServer::AsyncAccept()
@@ -477,6 +491,8 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
         return HandleLogout(headers);
     if (path == "/api/v1/status" && method == "GET")
         return HandleStatus(headers);
+    if (path.compare(0, 17, "/api/v1/services/") == 0 && method == "POST")
+        return HandleServiceCommand(path, headers);
     if (path.compare(0, 8, "/api/v1/") == 0)
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     if (method != "GET")
@@ -534,6 +550,7 @@ std::string HubWebServer::HandleLogin(std::string const& body, std::string const
         _loginAttempts.erase(remoteAddress);
         AuthenticatedSession session;
         session.Username = usernameValue->second;
+        session.CsrfToken = ByteArrayToHexStr(SkyFire::Crypto::GetRandomBytes<32>());
         session.AccessFlags = accessFlags;
         session.ExpiresAt = now + std::chrono::seconds(_sessionTimeoutSeconds);
         _sessions[token] = session;
@@ -574,27 +591,91 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
         status = _status;
     }
 
-    std::string authnetHealth = "offline";
-    if (status.AuthnetState == "running")
-        authnetHealth = "online";
-    else if (status.AuthnetState == "starting" || status.AuthnetState == "stopping" ||
-        status.AuthnetState == "unresponsive")
-        authnetHealth = "issue";
-
     std::ostringstream json;
     json << "{\"authenticated\":true,\"username\":\"" << JsonEscape(session.Username)
-         << "\",\"uptimeSeconds\":" << status.UptimeSeconds << ",\"components\":["
+         << "\",\"csrfToken\":\"" << session.CsrfToken
+         << "\",\"canOperateServices\":"
+         << ((session.AccessFlags & HUB_ADMIN_ACCESS_OPERATE_NODES) ? "true" : "false")
+         << ",\"uptimeSeconds\":" << status.UptimeSeconds << ",\"components\":["
          << "{\"key\":\"hub\",\"name\":\"Hub Runtime\",\"status\":\"online\",\"detail\":\"Control process is running\"},"
          << "{\"key\":\"database\",\"name\":\"Hub Database\",\"status\":\"online\",\"detail\":\"Connection pool is active\"},"
-         << "{\"key\":\"web\",\"name\":\"Web Console\",\"status\":\"online\",\"detail\":\"Secure session is active\"},"
-         << "{\"key\":\"authnet\",\"name\":\"Authnet Server\",\"status\":\"" << authnetHealth
-         << "\",\"detail\":\"" << JsonEscape(status.AuthnetState);
-    if (status.AuthnetProcessId)
-        json << " | PID " << status.AuthnetProcessId;
-    if (status.AuthnetState == "exited")
-        json << " | Exit " << status.AuthnetLastExitCode;
-    json << "\"}]}";
+         << "{\"key\":\"web\",\"name\":\"Web Console\",\"status\":\"online\",\"detail\":\"Secure session is active\"}";
+
+    for (HubWebManagedServiceStatus const& service : status.Services)
+    {
+        std::string health = "offline";
+        if (service.State == "running")
+            health = "online";
+        else if (service.State == "starting" || service.State == "stopping" ||
+            service.State == "unresponsive")
+            health = "issue";
+
+        json << ",{\"key\":\"" << JsonEscape(service.Key) << "\",\"name\":\""
+             << JsonEscape(service.Name) << "\",\"status\":\"" << health
+             << "\",\"detail\":\"" << JsonEscape(service.Enabled ? service.State : "disabled");
+        if (service.ProcessId)
+            json << " | PID " << service.ProcessId;
+        if (service.State == "exited")
+            json << " | Exit " << service.LastExitCode;
+        json << "\",\"managed\":true,\"enabled\":" << (service.Enabled ? "true" : "false")
+             << ",\"state\":\"" << JsonEscape(service.State) << "\"}";
+    }
+    json << "]}";
     return MakeResponse(200, "application/json", json.str());
+}
+
+std::string HubWebServer::HandleServiceCommand(std::string const& path,
+    std::map<std::string, std::string> const& headers)
+{
+    AuthenticatedSession session;
+    if (!FindSession(headers, session))
+        return MakeResponse(401, "application/json", "{\"error\":\"authentication required\"}");
+    if (!(session.AccessFlags & HUB_ADMIN_ACCESS_OPERATE_NODES))
+        return MakeResponse(403, "application/json", "{\"error\":\"service operation access is required\"}");
+
+    auto const csrf = headers.find("x-hub-csrf");
+    if (csrf == headers.end() || csrf->second != session.CsrfToken)
+        return MakeResponse(403, "application/json", "{\"error\":\"invalid request token\"}");
+
+    std::string const route = path.substr(17);
+    size_t const slash = route.find('/');
+    if (slash == std::string::npos || slash == 0 || route.find('/', slash + 1) != std::string::npos)
+        return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
+    std::string const serviceKey = route.substr(0, slash);
+    std::string const action = route.substr(slash + 1);
+    if (action != "start" && action != "stop")
+        return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
+    if (!std::all_of(serviceKey.begin(), serviceKey.end(), [](unsigned char character)
+        { return std::isalnum(character) || character == '_' || character == '-'; }))
+        return MakeResponse(400, "application/json", "{\"error\":\"invalid service key\"}");
+
+    bool found = false;
+    bool enabled = false;
+    {
+        std::lock_guard<std::mutex> lock(_statusMutex);
+        for (HubWebManagedServiceStatus const& service : _status.Services)
+        {
+            if (service.Key == serviceKey)
+            {
+                found = true;
+                enabled = service.Enabled;
+                break;
+            }
+        }
+    }
+    if (!found)
+        return MakeResponse(404, "application/json", "{\"error\":\"managed service not found\"}");
+    if (!enabled)
+        return MakeResponse(403, "application/json", "{\"error\":\"managed service is disabled\"}");
+
+    HubWebServiceCommand command;
+    command.ServiceKey = serviceKey;
+    command.Start = action == "start";
+    {
+        std::lock_guard<std::mutex> lock(_commandMutex);
+        _commands.push_back(std::move(command));
+    }
+    return MakeResponse(202, "application/json", "{\"accepted\":true}");
 }
 
 std::string HubWebServer::ServeAsset(std::string const& target) const

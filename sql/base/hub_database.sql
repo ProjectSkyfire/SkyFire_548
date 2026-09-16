@@ -55,7 +55,8 @@ CREATE TABLE `hub_managed_services` (
 INSERT INTO `hub_managed_services`
   (`service_key`, `name`, `executable_path`, `config_path`, `working_directory`, `enabled`)
 VALUES
-  ('authnet', 'Authnet Server', 'authserver', 'authserver.conf', '.', 1);
+  ('authnet', 'Authnet Server', 'authserver', 'authserver.conf', '.', 1),
+  ('world', 'World Server', 'worldserver', 'worldserver.conf', '.', 1);
 
 DROP TABLE IF EXISTS `hub_admins`;
 CREATE TABLE `hub_admins` (

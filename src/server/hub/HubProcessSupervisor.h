@@ -11,6 +11,7 @@
 #include <chrono>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 enum class HubManagedProcessState
 {
@@ -22,25 +23,34 @@ enum class HubManagedProcessState
     Exited
 };
 
+struct HubManagedServiceStatus
+{
+    std::string Key;
+    std::string Name;
+    HubManagedProcessState State = HubManagedProcessState::Stopped;
+    uint64 ProcessId = 0;
+    int64 LastExitCode = 0;
+    bool Enabled = false;
+};
+
 class HubProcessSupervisor
 {
 public:
-    HubProcessSupervisor();
+    HubProcessSupervisor() = default;
     ~HubProcessSupervisor();
 
     HubProcessSupervisor(HubProcessSupervisor const&) = delete;
     HubProcessSupervisor& operator=(HubProcessSupervisor const&) = delete;
 
     bool Start(std::string const& serviceKey, std::string& error);
+    bool Stop(std::string const& serviceKey, std::string& error);
     bool ReloadDatabaseRecords(std::string& error);
     void Update();
-    void Stop();
+    void StopAll();
 
-    HubManagedProcessState GetState() const { return _state; }
-    char const* GetStateName() const;
-    std::string const& GetServiceKey() const { return _serviceKey; }
-    uint64 GetProcessId() const { return _processId; }
-    int64 GetLastExitCode() const { return _lastExitCode; }
+    HubManagedServiceStatus GetStatus(std::string const& serviceKey) const;
+    std::vector<HubManagedServiceStatus> GetStatuses() const;
+    static char const* GetStateName(HubManagedProcessState state);
 
 private:
     struct ManagedServiceDefinition
@@ -52,27 +62,36 @@ private:
         bool Enabled = false;
     };
 
-    bool IsActive() const;
-    bool Launch(std::string const& executablePath, std::string const& configPath,
-        std::string const& workingDirectory, std::string& error);
-    bool WriteControl(char const* message);
-    void ReadStatusMessages();
-    void ProcessStatusMessage(std::string const& message);
-    void MarkExited(int64 exitCode);
-    void CloseHandles();
+    struct ManagedServiceRuntime
+    {
+        ManagedServiceDefinition Definition;
+        HubManagedProcessState State = HubManagedProcessState::Stopped;
+        uint64 ProcessId = 0;
+        uint64 ProcessHandle = 0;
+        uint64 ControlWriteHandle = 0;
+        uint64 StatusReadHandle = 0;
+        int64 LastExitCode = 0;
+        bool Ready = false;
+        std::string StatusBuffer;
+        std::chrono::steady_clock::time_point StartedAt;
+        std::chrono::steady_clock::time_point LastHeartbeat;
+        std::chrono::steady_clock::time_point StopRequestedAt;
+    };
 
-    HubManagedProcessState _state;
-    std::string _serviceKey;
-    uint64 _processId;
-    uint64 _processHandle;
-    uint64 _controlWriteHandle;
-    uint64 _statusReadHandle;
-    int64 _lastExitCode;
-    bool _ready;
-    std::string _statusBuffer;
-    std::chrono::steady_clock::time_point _startedAt;
-    std::chrono::steady_clock::time_point _lastHeartbeat;
-    std::unordered_map<std::string, ManagedServiceDefinition> _services;
+    static bool IsActive(ManagedServiceRuntime const& runtime);
+    bool Launch(std::string const& serviceKey, ManagedServiceRuntime& runtime,
+        std::string const& executablePath, std::string const& configPath,
+        std::string const& workingDirectory, std::string& error);
+    static bool WriteControl(ManagedServiceRuntime const& runtime, char const* message);
+    void Update(std::string const& serviceKey, ManagedServiceRuntime& runtime);
+    void ReadStatusMessages(std::string const& serviceKey, ManagedServiceRuntime& runtime);
+    void ProcessStatusMessage(std::string const& serviceKey, ManagedServiceRuntime& runtime,
+        std::string const& message);
+    void MarkExited(std::string const& serviceKey, ManagedServiceRuntime& runtime, int64 exitCode);
+    static void CloseHandles(ManagedServiceRuntime& runtime);
+    void ForceStop(std::string const& serviceKey, ManagedServiceRuntime& runtime);
+
+    std::unordered_map<std::string, ManagedServiceRuntime> _services;
 };
 
 #endif

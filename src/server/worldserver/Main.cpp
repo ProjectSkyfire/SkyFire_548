@@ -10,6 +10,10 @@
 #include <openssl/crypto.h>
 #include <openssl/opensslv.h>
 
+#include <cerrno>
+#include <cstdlib>
+#include <limits>
+
 #include "Common.h"
 #include "Configuration/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -17,6 +21,7 @@
 #include "Log.h"
 #include "Master.h"
 #include "OpenSSLProviders.h"
+#include "Platform/HubProcessControl.h"
 #include "World.h"
 
 #ifndef _SKYFIRE_CORE_CONFIG
@@ -72,6 +77,22 @@ LoginDatabaseWorkerPool LoginDatabase;                      ///< Accessor to the
 RealmNameMap realmNameStore;
 uint32 realmID = -1;                                        ///< Id of the realm
 
+namespace
+{
+    bool ParseHubHandle(char const* value, uint64& handle)
+    {
+        errno = 0;
+        char* end = nullptr;
+        unsigned long long const parsed = std::strtoull(value, &end, 10);
+        if (errno != 0 || end == value || *end != '\0' || parsed == 0 ||
+            parsed > std::numeric_limits<uintptr_t>::max())
+            return false;
+
+        handle = uint64(parsed);
+        return true;
+    }
+}
+
 /// Print out the usage string for this program on the console.
 void usage(const char* prog)
 {
@@ -106,6 +127,8 @@ extern int main(int argc, char** argv)
     const char* authDB = _SKYFIRE_DATABASE_AUTH;
     const char* charactersDB = _SKYFIRE_DATABASE_CHARACTERS;
     const char* worldDB = _SKYFIRE_DATABASE_WORLD;
+    uint64 hubControlReadHandle = 0;
+    uint64 hubStatusWriteHandle = 0;
 
     ///- Command line parsing to get the configuration file name
     char const* cfg_file = _SKYFIRE_CORE_CONFIG;
@@ -121,6 +144,24 @@ extern int main(int argc, char** argv)
         if (strcmp(argv[c], "--no_use_config_database_info") == 0)
         {
             noUseConfigDatabaseInfo = argv[c];
+        }
+
+        if (strcmp(argv[c], "--hub-control-read") == 0)
+        {
+            if (++c >= argc || !ParseHubHandle(argv[c], hubControlReadHandle))
+            {
+                printf("Runtime-Error: --hub-control-read requires a valid inherited handle\n");
+                return 1;
+            }
+        }
+
+        if (strcmp(argv[c], "--hub-status-write") == 0)
+        {
+            if (++c >= argc || !ParseHubHandle(argv[c], hubStatusWriteHandle))
+            {
+                printf("Runtime-Error: --hub-status-write requires a valid inherited handle\n");
+                return 1;
+            }
         }
 
         if (noUseConfigDatabaseInfo == 1)
@@ -261,6 +302,24 @@ extern int main(int argc, char** argv)
         ++c;
     }
 
+    Skyfire::HubControl::ChildChannel hubControl;
+    Skyfire::HubControl::ChildChannel* hubControlChannel = nullptr;
+    if (hubControlReadHandle || hubStatusWriteHandle)
+    {
+        std::string hubControlError;
+        if (!hubControl.Initialize(hubControlReadHandle, hubStatusWriteHandle, hubControlError))
+        {
+            printf("Worldserver hub-managed startup denied: %s.\n", hubControlError.c_str());
+            return 1;
+        }
+        if (!hubControl.SendStatus(Skyfire::HubControl::StartingMessage))
+        {
+            printf("Worldserver hub-managed startup denied: the hubserver control channel was lost.\n");
+            return 1;
+        }
+        hubControlChannel = &hubControl;
+    }
+
     if (!sConfigMgr->LoadInitial(cfg_file))
     {
         printf("Invalid or missing configuration file : %s\n", cfg_file);
@@ -289,7 +348,9 @@ extern int main(int argc, char** argv)
 
     ///- and run the 'Master'
     /// @todo Why do we need this 'Master'? Can't all of this be in the Main as for Realmd?
-    int ret = sMaster->Run();
+    int ret = sMaster->Run(hubControlChannel);
+    if (hubControlChannel)
+        (void)hubControl.SendStatus(Skyfire::HubControl::StoppingMessage);
 
     // at sMaster return function exist with codes
     // 0 - normal shutdown
