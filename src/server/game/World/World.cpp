@@ -1381,6 +1381,8 @@ extern void LoadGameObjectModelList(std::string const& dataPath);
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
+    if (auto latest = LoginDatabase.Query(LoginDatabase.GetPreparedStatement(LOGIN_HUB_EVENT_LATEST)))
+        _hubAccountEventId = (*latest)[0].GetUInt64();
     ///- Server startup begin
     uint32 startupBegin = getMSTime();
 
@@ -2102,6 +2104,7 @@ void World::LoadAutobroadcasts()
 /// Update the World !
 void World::Update(uint32 diff)
 {
+    UpdateHubAccountEvents(diff);
     m_updateTime = diff;
     Skyfire::Diagnostics::GetRuntimeMetrics().RecordWorldUpdate(diff);
 
@@ -2873,7 +2876,49 @@ void World::UpdateSessions(uint32 diff)
     }
 }
 
-// This handles the issued and queued CLI commands
+// Apply durable account changes made through the hub on each realm's world thread.
+void World::UpdateHubAccountEvents(uint32 diff)
+{
+    if (diff < _hubAccountPollTimer) { _hubAccountPollTimer -= diff; return; }
+    _hubAccountPollTimer = 2000;
+    auto* stmt = LoginDatabase.GetPreparedStatement(LOGIN_HUB_EVENTS);
+    stmt->setUInt64(0, _hubAccountEventId);
+    auto events = LoginDatabase.Query(stmt);
+    if (!events) return;
+    do
+    {
+        auto* row = events->Fetch();
+        _hubAccountEventId = row[0].GetUInt64();
+        std::string const action = row[1].GetString();
+        uint32 const accountId = row[2].GetUInt32();
+        if (action == "ip-ban")
+        {
+            std::string const ip = row[3].GetString();
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_HUB_IP_ACTIVE); stmt->setString(0, ip);
+            if (LoginDatabase.Query(stmt))
+                for (auto const& session : GetAllSessions())
+                    if (session.second->GetRemoteAddress() == ip) session.second->KickPlayer();
+        }
+        else if (WorldSession* session = FindSession(accountId))
+        {
+            if (action == "credentials" || action == "update" || action == "gm" || action == "rbac")
+            {
+                // Reconnect removes old GM flags, permissions and authenticated credentials.
+                session->KickPlayer();
+                continue;
+            }
+            stmt = LoginDatabase.GetPreparedStatement(LOGIN_HUB_CURRENT_MODERATION); stmt->setUInt32(0, accountId);
+            if (auto state = LoginDatabase.Query(stmt))
+            {
+                if (action == "mute" || action == "unmute")
+                    session->m_muteTime = time_t((*state)[0].GetInt64());
+                if ((*state)[1].GetBool()) session->KickPlayer();
+            }
+        }
+    } while (events->NextRow());
+}
+
+// This handles the issued and queued CLI commands.
 void World::ProcessCliCommands()
 {
     CliCommandHolder::Print* zprint = NULL;

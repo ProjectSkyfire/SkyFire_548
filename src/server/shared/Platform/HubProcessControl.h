@@ -18,6 +18,7 @@ namespace Skyfire::HubControl
     char constexpr StartingMessage[] = "STARTING";
     char constexpr ReadyMessage[] = "READY";
     char constexpr WorldReadyMessage[] = "READY_WORLD_COMMANDS_1";
+    char constexpr AccountReadyMessage[] = "READY_WORLD_ACCOUNTS_1";
     constexpr size_t MaxCommandLength = 1024;
     constexpr int WorldRestartExitCode = 2;
     char constexpr HeartbeatMessage[] = "HEARTBEAT";
@@ -35,7 +36,7 @@ namespace Skyfire::HubControl
 
         bool Initialize(uint64 controlReadHandle, uint64 statusWriteHandle, std::string& error);
         bool SendStatus(char const* status) const;
-        bool StopRequested(std::vector<std::string>* commands = nullptr);
+        bool StopRequested(std::vector<std::string>* commands = nullptr, std::vector<std::string>* accounts = nullptr);
         void AppendCommandOutput(char const* text);
         void FinishCommand(bool success);
         void Close();

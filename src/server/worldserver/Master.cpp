@@ -554,7 +554,7 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
     std::thread hubControlThread;
     if (hubControl && !World::IsStopped())
     {
-        if (!hubControl->SendStatus(Skyfire::HubControl::WorldReadyMessage))
+        if (!hubControl->SendStatus(Skyfire::HubControl::AccountReadyMessage))
         {
             SF_LOG_ERROR("server.worldserver", "Hubserver control channel was lost during startup.");
             World::StopNow(ERROR_EXIT_CODE);
@@ -567,13 +567,16 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
                 while (!World::IsStopped())
                 {
                     std::vector<std::string> commands;
-                    if (hubControl->StopRequested(&commands))
+                    std::vector<std::string> accounts;
+                    if (hubControl->StopRequested(&commands, &accounts))
                     {
                         SF_LOG_INFO("server.worldserver", "Hubserver requested worldserver shutdown.");
                         World::StopNow(SHUTDOWN_EXIT_CODE);
                         break;
                     }
 
+                    for (std::string const& request : accounts)
+                        commands.push_back("account hub " + request);
                     for (std::string const& command : commands)
                         sWorld->QueueCliCommand(new CliCommandHolder(hubControl, command.c_str(),
                             [](void* context, char const* text)

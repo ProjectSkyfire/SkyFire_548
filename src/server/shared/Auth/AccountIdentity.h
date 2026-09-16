@@ -14,6 +14,7 @@
 
 namespace Skyfire::Auth
 {
+    bool NormalizeCredential(std::string& value, size_t maxLength);
     uint32 GetId(std::string const& username);
     bool GetName(uint32 accountId, std::string& name);
     bool CheckPassword(uint32 accountId, std::string password);

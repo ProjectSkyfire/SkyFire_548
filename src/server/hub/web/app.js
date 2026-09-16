@@ -27,6 +27,7 @@ let canOperateServices = false;
 
 function showLogin(message = "") {
     stopRefresh();
+    window.HubAccounts?.reset();
     worldCommandAllowed = false;
     worldConsole.hidden = true;
     worldCommandInput.value = "";
@@ -76,6 +77,7 @@ function formatUptime(totalSeconds) {
 }
 
 function renderStatus(data) {
+    window.HubAccounts?.update(data);
     csrfToken = data.csrfToken || "";
     canOperateServices = data.canOperateServices === true;
     const world = data.components.find((component) => component.key === "world");

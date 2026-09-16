@@ -203,6 +203,7 @@ namespace
             case 409: return "Conflict";
             case 413: return "Payload Too Large";
             case 429: return "Too Many Requests";
+            case 503: return "Service Unavailable";
             default: return "Internal Server Error";
         }
     }
@@ -492,6 +493,8 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
         return HandleLogout(headers);
     if (path == "/api/v1/status" && method == "GET")
         return HandleStatus(headers);
+    if (path.compare(0, 17, "/api/v1/accounts/") == 0 && method == "POST")
+        return HandleAccounts(path.substr(17), headers, body);
     if (path.compare(0, 17, "/api/v1/services/") == 0 && method == "POST")
         return HandleServiceCommand(path, headers, body);
     if (path.compare(0, 8, "/api/v1/") == 0)
@@ -599,6 +602,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
          << ((session.AccessFlags & HUB_ADMIN_ACCESS_OPERATE_NODES) ? "true" : "false")
          << ",\"canSendWorldCommands\":"
          << (((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) == HUB_ADMIN_ACCESS_ALL_LOCAL) ? "true" : "false")
+         << ",\"accountsEnabled\":" << (Skyfire::Auth::AccountAdministration::IsEnabled() ? "true" : "false")
          << ",\"uptimeSeconds\":" << status.UptimeSeconds << ",\"components\":["
          << "{\"key\":\"hub\",\"name\":\"Hub Runtime\",\"status\":\"online\",\"detail\":\"Control process is running\"},"
          << "{\"key\":\"database\",\"name\":\"Hub Database\",\"status\":\"online\",\"detail\":\"Connection pool is active\"},"
@@ -715,6 +719,68 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
     return MakeResponse(202, "application/json", "{\"accepted\":true}");
 }
 
+std::string HubWebServer::HandleAccounts(std::string const& action,
+    std::map<std::string, std::string> const& headers, std::string const& body)
+{
+    using Skyfire::Auth::AccountAdministration;
+    AuthenticatedSession session;
+    if (!FindSession(headers, session))
+        return MakeResponse(401, "application/json", "{\"error\":\"Authentication required.\"}");
+    if ((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) != HUB_ADMIN_ACCESS_ALL_LOCAL)
+        return MakeResponse(403, "application/json", "{\"error\":\"Full hub administrator access is required.\"}");
+    auto csrf = headers.find("x-hub-csrf");
+    if (csrf == headers.end() || csrf->second != session.CsrfToken)
+        return MakeResponse(403, "application/json", "{\"error\":\"Invalid request token.\"}");
+    if (!AccountAdministration::IsEnabled())
+        return MakeResponse(503, "application/json", "{\"error\":\"Account administration is disabled. Configure the hub LoginDatabaseInfo and apply auth database updates.\"}");
+    auto const form = ParseForm(body);
+    if (action == "result")
+    {
+        auto id = form.find("job");
+        std::lock_guard<std::mutex> lock(_accountJobsMutex);
+        auto job = id == form.end() ? _accountJobs.end() : _accountJobs.find(id->second);
+        if (job == _accountJobs.end() || job->second.OwnerToken != session.CsrfToken)
+            return MakeResponse(404, "application/json", "{\"error\":\"Account request not found. Check the account state before retrying.\"}");
+        if (job->second.Result.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+            return MakeResponse(202, "application/json", "{\"pending\":true}");
+        auto const reply = job->second.Result.get();
+        return MakeResponse(reply.Status, "application/json", reply.Body);
+    }
+    if (AccountAdministration::IsReadAction(action))
+    {
+        auto const reply = AccountAdministration::Handle(action, form, session.Username);
+        return MakeResponse(reply.Status, "application/json", reply.Body);
+    }
+    if (action != "create" && action != "update" && action != "ban" && action != "unban" &&
+        action != "mute" && action != "unmute" && action != "gm" && action != "rbac" && action != "ip-ban" && action != "ip-unban")
+        return MakeResponse(404, "application/json", "{\"error\":\"Unknown account action.\"}");
+    HubWebServiceCommand command;
+    command.ServiceKey = "world";
+    command.AccountRequest = AccountAdministration::EncodeRequest(action, form, session.Username);
+    if (command.AccountRequest.empty())
+        return MakeResponse(400, "application/json", "{\"error\":\"Account request is too large.\"}");
+    command.AccountResult = std::make_shared<std::promise<Skyfire::Auth::AccountAdminReply>>();
+    AccountJob job;
+    job.OwnerToken = session.CsrfToken;
+    job.Result = command.AccountResult->get_future().share();
+    auto const now = std::chrono::steady_clock::now();
+    job.ExpiresAt = now + std::chrono::minutes(10);
+    std::string const id = ByteArrayToHexStr(SkyFire::Crypto::GetRandomBytes<16>());
+    {
+        std::lock_guard<std::mutex> jobsLock(_accountJobsMutex);
+        for (auto it = _accountJobs.begin(); it != _accountJobs.end();)
+            if (it->second.ExpiresAt <= now) it = _accountJobs.erase(it); else ++it;
+        if (_accountJobs.size() >= 64)
+            return MakeResponse(429, "application/json", "{\"error\":\"Account request limit reached. Wait before sending more changes.\"}");
+        std::lock_guard<std::mutex> commandLock(_commandMutex);
+        if (_commands.size() >= 64)
+            return MakeResponse(409, "application/json", "{\"error\":\"Hub command queue is busy.\"}");
+        _accountJobs.emplace(id, std::move(job));
+        _commands.push_back(std::move(command));
+    }
+    return MakeResponse(202, "application/json", "{\"job\":\"" + id + "\"}");
+}
+
 std::string HubWebServer::ServeAsset(std::string const& target) const
 {
     std::string relativePath;
@@ -724,6 +790,8 @@ std::string HubWebServer::ServeAsset(std::string const& target) const
         relativePath = "app.css";
     else if (target == "/app.js")
         relativePath = "app.js";
+    else if (target == "/accounts.js")
+        relativePath = "accounts.js";
     else if (target == "/assets/skyfire-logo.png")
         relativePath = "assets/skyfire-logo.png";
     else if (target == "/favicon.ico")

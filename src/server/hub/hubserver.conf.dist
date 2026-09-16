@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091503
+ConfVersion=2026091601
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -27,6 +27,13 @@ HubDatabase.WorkerThreads = 1
 #        Default:     1
 
 HubDatabase.SynchThreads = 1
+
+# Login database used by hub player-account administration (not the hub database).
+# Leave empty to disable Accounts in the web console. Apply auth SQL updates first.
+# Example: "127.0.0.1;3306;skyfire;skyfire;auth"
+# The hub routes changes through its managed worldserver while online.
+# Direct hub writes are allowed only while the managed world service is stopped.
+LoginDatabaseInfo = ""
 
 #
 #    MaxPingTime

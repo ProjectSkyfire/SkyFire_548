@@ -9,6 +9,7 @@
 #include "Define.h"
 
 #include <chrono>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -48,6 +49,7 @@ public:
     bool Start(std::string const& serviceKey, std::string& error);
     bool Stop(std::string const& serviceKey, std::string& error);
     bool SendWorldCommand(std::string command, std::string& error);
+    bool SendAccountRequest(std::string const& request, std::function<void(std::string const&)> callback, std::string& error);
     bool ReloadDatabaseRecords(std::string& error);
     void Update();
     void StopAll();
@@ -77,6 +79,8 @@ private:
         int64 LastExitCode = 0;
         bool Ready = false;
         bool CanSendCommands = false;
+        bool CanManageAccounts = false;
+        std::function<void(std::string const&)> AccountCallback;
         bool CommandPending = false;
         bool RestartPending = false;
         bool SuppressRestart = false;

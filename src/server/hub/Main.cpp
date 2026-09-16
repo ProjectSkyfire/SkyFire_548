@@ -21,6 +21,7 @@
 #include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
 #include "HubConsole.h"
+#include "Auth/AccountAdministration.h"
 #include "HubProcessSupervisor.h"
 #include "HubWebServer.h"
 #include "Log.h"
@@ -31,7 +32,7 @@
 #define _SKYFIRE_HUB_CONFIG "hubserver.conf"
 #endif
 
-// The shared database logger resolves this symbol even when no database appender is configured.
+// LoginDatabase also backs optional hub player-account administration.
 LoginDatabaseWorkerPool LoginDatabase;
 HubDatabaseWorkerPool HubDatabase;
 
@@ -116,12 +117,27 @@ namespace
             return false;
         }
 
+        std::string const loginInfo = sConfigMgr->GetStringDefault("LoginDatabaseInfo", "");
+        if (!loginInfo.empty())
+        {
+            if (!LoginDatabase.Open(loginInfo, 1, 2))
+            {
+                SF_LOG_ERROR("server.hub", "Cannot open the account database. Apply auth updates and check LoginDatabaseInfo.");
+                LoginDatabase.Close();
+                HubDatabase.Close();
+                MySQL::Library_End();
+                return false;
+            }
+            Skyfire::Auth::AccountAdministration::SetEnabled(true);
+        }
         SF_LOG_INFO("server.hub", "Started hub database connection pool.");
         return true;
     }
 
     void StopDatabase()
     {
+        if (Skyfire::Auth::AccountAdministration::IsEnabled())
+            LoginDatabase.Close();
         HubDatabase.Close();
         MySQL::Library_End();
     }
@@ -262,6 +278,33 @@ int main(int argc, char** argv)
         while (webEnabled && webServer.PollServiceCommand(webCommand))
         {
             std::string error;
+            if (webCommand.AccountResult)
+            {
+                using Skyfire::Auth::AccountAdministration;
+                using Skyfire::Auth::AccountAdminReply;
+                auto const promise = webCommand.AccountResult;
+                auto const world = processSupervisor.GetStatus("world");
+                if (world.State == HubManagedProcessState::Stopped || world.State == HubManagedProcessState::Exited)
+                {
+                    // Dispatch runs on the same main thread as Start/Stop: no online fallback race.
+                    promise->set_value(AccountAdministration::HandleEncodedRequest(webCommand.AccountRequest));
+                }
+                else if (!processSupervisor.SendAccountRequest(webCommand.AccountRequest,
+                    [promise](std::string const& result)
+                    {
+                        size_t const start = result.find("ACCOUNT ");
+                        if (start == std::string::npos || result.size() < start + 12)
+                            promise->set_value({503, "{\"error\":\"Invalid worldserver reply. Check account state before retrying.\"}"});
+                        else
+                        {
+                            std::string const code = result.substr(start + 8, 3);
+                            int status = code == "200" ? 200 : code == "400" ? 400 : code == "404" ? 404 : code == "409" ? 409 : 503;
+                            promise->set_value({status, result.substr(start + 12)});
+                        }
+                    }, error))
+                    promise->set_value({409, "{\"error\":\"Worldserver is busy, transitioning, or needs an update. No direct database fallback was attempted.\"}"});
+                continue;
+            }
             bool const accepted = !webCommand.WorldCommand.empty()
                 ? processSupervisor.SendWorldCommand(webCommand.WorldCommand, error)
                 : webCommand.Start
@@ -315,6 +358,8 @@ int main(int argc, char** argv)
         if (now >= nextDatabasePing)
         {
             HubDatabase.KeepAlive();
+            if (Skyfire::Auth::AccountAdministration::IsEnabled())
+                LoginDatabase.KeepAlive();
             nextDatabasePing = now + databasePingInterval;
         }
 

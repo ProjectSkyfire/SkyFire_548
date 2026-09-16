@@ -18,7 +18,8 @@
             </span>
         </a>
         <nav id="main-nav" class="nav" aria-label="Hub navigation" hidden>
-            <button class="nav-item active" type="button" aria-current="page">Status</button>
+            <button id="status-tab" class="nav-item active" type="button" aria-current="page">Status</button>
+            <button id="accounts-tab" class="nav-item" type="button" hidden>Accounts</button>
             <button id="logout-button" class="nav-item command" type="button">Sign out</button>
         </nav>
     </header>
@@ -72,8 +73,46 @@
                 <pre id="world-command-result" role="status" aria-live="polite">No command response yet.</pre>
             </section>
         </section>
+
+        <section id="accounts-view" class="status-view" aria-labelledby="accounts-title" hidden>
+            <div class="page-heading"><div><p class="eyebrow">Player administration</p><h1 id="accounts-title">Accounts</h1></div></div>
+            <p id="accounts-routing"></p>
+            <p id="accounts-message" role="status" aria-live="polite"></p>
+            <p id="accounts-disabled" hidden>Account administration is disabled. Configure LoginDatabaseInfo in hubserver.conf after applying the auth database update, then restart the hub.</p>
+            <div id="accounts-workspace">
+                <section class="account-panel"><h2>Find an account</h2>
+<form id="account-search" class="account-form"><label>Username, email or account ID<input name="query" type="text" maxlength="64"></label><button type="submit" class="primary-button" >Search</button></form><div id="account-results" class="account-table"></div><button id="account-next" type="button" class="service-button" disabled>Next page</button>
+                </section>
+                <details class="account-panel"><summary>Create player account</summary>
+<form id="account-create" class="account-form"><label>Username<input name="username" type="text" required maxlength="16" pattern="[A-Za-z0-9_.-]{1,16}" autocomplete="off"></label><label>Login email<input name="email" type="email" required maxlength="64" autocomplete="off"></label><label>New password (maximum 16 bytes)<input name="password" type="password" maxlength="16" autocomplete="new-password" required></label><label>Expansion<select name="expansion"><option value="4">Mists of Pandaria</option><option value="3">Cataclysm</option><option value="2">Wrath of the Lich King</option><option value="1">The Burning Crusade</option><option value="0">Classic</option></select></label><button type="submit" class="primary-button" data-mutation>Create account</button></form>
+                </details>
+                <section id="account-editor" class="account-panel" hidden>
+                    <div class="component-heading"><h2 id="account-selected">Selected account</h2><button id="account-refresh" type="button" class="service-button">Refresh</button></div>
+                    <p id="account-current-state"></p>
+                    <h3>Account details</h3><p>Leave the password blank to keep it. Changing the username or login email requires a new password and replaces the registration email. Credential and permission changes disconnect active sessions so the player reconnects with the new settings.</p>
+<form id="account-profile" class="account-form"><label>Username<input name="username" type="text" required maxlength="16" pattern="[A-Za-z0-9_.-]{1,16}" autocomplete="off"></label><label>Login email<input name="email" type="email" required maxlength="64" autocomplete="off"></label><label>New password (maximum 16 bytes)<input name="password" type="password" maxlength="16" autocomplete="new-password"></label><label>Expansion<select name="expansion"><option value="4">Mists of Pandaria</option><option value="3">Cataclysm</option><option value="2">Wrath of the Lich King</option><option value="1">The Burning Crusade</option><option value="0">Classic</option></select></label><button type="submit" class="primary-button" data-mutation>Save account</button></form>
+                    <div class="account-columns"><section><h3>Account ban</h3>
+<form id="account-ban" class="account-form"><label>Duration in minutes (0 = permanent)<input name="minutes" type="number" required min="0" max="525600" value="60"></label><label>Reason<input name="reason" type="text" required maxlength="255"></label><button type="submit" class="primary-button" data-mutation>Ban account</button></form><button id="account-unban" class="service-button" type="button" data-mutation>Unban account</button></section>
+                    <section><h3>Chat mute</h3>
+<form id="account-mute" class="account-form"><label>Duration in minutes (starts now, even offline)<input name="minutes" type="number" required min="1" max="525600" value="60"></label><label>Reason<input name="reason" type="text" required maxlength="255"></label><button type="submit" class="primary-button" data-mutation>Mute account</button></form><button id="account-unmute" class="service-button" type="button" data-mutation>Unmute account</button></section></div>
+                    <h3>GM access</h3><p>All realms replaces existing realm-specific GM levels. Selecting one realm replaces any global GM level. Level 0 removes GM access for the selected scope.</p>
+<div id="account-gm-current" class="account-table"></div><form id="account-gm" class="account-form"><label>Realm<select name="realm"><option value="-1">All realms</option></select></label><label>GM level<select name="level"><option value="0">0 — Player</option><option value="1">1 — Moderator</option><option value="2">2 — Game master</option><option value="3">3 — Administrator</option></select></label><button type="submit" class="primary-button" data-mutation>Set GM access</button></form>
+                    <h3>RBAC permissions</h3><p>These are explicit account overrides; GM roles may also supply inherited permissions. Revoke removes the override for the selected realm, allowing inherited permissions to apply.</p>
+<div id="account-rbac-current" class="account-table"></div><form id="account-rbac" class="account-form"><label>Realm<select name="realm"><option value="-1">All realms</option></select></label><label>Permission ID<input name="permission" type="number" required min="1" max="4294967295"></label><label>Action<select name="mode"><option value="grant">Grant</option><option value="deny">Deny</option><option value="revoke">Revoke override</option></select></label><button type="submit" class="primary-button" data-mutation>Apply permission</button></form>
+                    <details><summary>Find an RBAC permission</summary>
+<form id="permission-search" class="account-form"><label>Permission name or ID<input name="query" type="text" maxlength="64"></label><button type="submit" class="primary-button" >Search permissions</button></form><div id="permission-results" class="account-table"></div><button id="permission-next" type="button" class="service-button" disabled>Next page</button></details>
+                    <details><summary>Recent account ban history</summary>
+<div id="account-ban-history" class="account-table"></div></details>
+                </section>
+                <section class="account-panel"><h2>IP bans</h2><p>Ban a single IPv4 address. This applies to all accounts connecting from that address.</p>
+<form id="ip-ban-form" class="account-form"><label>IPv4 address<input name="ip" type="text" required maxlength="15" placeholder="192.0.2.10"></label><label>Duration in minutes (0 = permanent)<input name="minutes" type="number" required min="0" max="525600" value="60"></label><label>Reason<input name="reason" type="text" required maxlength="255"></label><button type="submit" class="primary-button" data-mutation>Ban IP</button></form><button id="ip-unban" class="service-button" type="button" data-mutation>Unban entered IP</button>
+<form id="ip-search" class="account-form"><label>Find active IP bans<input name="query" type="text" maxlength="15"></label><button type="submit" class="primary-button" >Search IP bans</button></form><div id="ip-results" class="account-table"></div><button id="ip-next" type="button" class="service-button" disabled>Next page</button>
+                </section>
+            </div>
+        </section>
     </main>
 
+    <script src="/accounts.js" defer></script>
     <script src="/app.js" defer></script>
 </body>
 </html>

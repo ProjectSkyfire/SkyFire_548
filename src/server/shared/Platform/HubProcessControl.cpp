@@ -125,7 +125,7 @@ bool Skyfire::HubControl::ChildChannel::SendStatus(char const* status) const
     return WriteAll(_statusWriteHandle, message.data(), message.size());
 }
 
-bool Skyfire::HubControl::ChildChannel::StopRequested(std::vector<std::string>* commands)
+bool Skyfire::HubControl::ChildChannel::StopRequested(std::vector<std::string>* commands, std::vector<std::string>* accounts)
 {
     if (!_controlReadHandle)
         return true;
@@ -177,10 +177,12 @@ bool Skyfire::HubControl::ChildChannel::StopRequested(std::vector<std::string>* 
         if (commands && command.compare(0, 8, "COMMAND ") == 0 &&
             command.size() > 8 && command.size() <= MaxCommandLength + 8)
             commands->push_back(command.substr(8));
+        if (accounts && command.compare(0, 8, "ACCOUNT ") == 0 && command.size() > 8 && command.size() <= 8200)
+            accounts->push_back(command.substr(8));
     }
 
     // A partial frame must never grow without bound.
-    return _controlBuffer.size() > MaxCommandLength + 8;
+    return _controlBuffer.size() > 8200;
 }
 
 void Skyfire::HubControl::ChildChannel::AppendCommandOutput(char const* text)

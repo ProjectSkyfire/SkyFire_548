@@ -801,6 +801,7 @@ public:
     void   ResetEventSeasonalQuests(uint16 event_id);
 
     void ReloadRBAC();
+    void UpdateHubAccountEvents(uint32 diff);
 
 protected:
     void _UpdateGameTime();
@@ -823,6 +824,8 @@ private:
     static std::atomic<bool> m_stopEvent;
     static uint8 m_ExitCode;
     uint32 m_ShutdownTimer;
+    uint64 _hubAccountEventId = 0;
+    uint32 _hubAccountPollTimer = 0;
     uint32 m_ShutdownMask;
 
     uint32 m_CleaningFlags;

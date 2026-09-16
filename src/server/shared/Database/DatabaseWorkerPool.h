@@ -414,29 +414,20 @@ public:
     //! were appended to the transaction will be respected during execution.
     void DirectCommitTransaction(SQLTransaction& transaction)
     {
-        T* con = GetFreeConnection();
-        if (con->ExecuteTransaction(transaction))
-        {
-            con->Unlock();      // OK, operation succesful
-            return;
-        }
+        (void)DirectCommitTransactionWithResult(transaction);
+    }
 
-        //! Handle MySQL Errno 1213 without extending deadlock to the core itself
-        /// @todo More elegant way
-        if (con->GetLastError() == 1213)
-        {
-            uint8 loopBreaker = 5;
-            for (uint8 i = 0; i < loopBreaker; ++i)
-            {
-                if (con->ExecuteTransaction(transaction))
-                    break;
-            }
-        }
-
-        //! Clean up now.
-        transaction->Cleanup();
-
-        con->Unlock();
+    //! Synchronous callers that acknowledge mutations must inspect the commit result.
+    bool DirectCommitTransactionWithResult(SQLTransaction& transaction)
+    {
+        T* connection = GetFreeConnection();
+        bool success = connection->ExecuteTransaction(transaction);
+        for (uint8 attempt = 0; !success && connection->GetLastError() == 1213 && attempt < 5; ++attempt)
+            success = connection->ExecuteTransaction(transaction);
+        connection->Unlock();
+        if (!success)
+            transaction->Cleanup();
+        return success;
     }
 
     //! Method used to execute prepared statements in a diverse context.

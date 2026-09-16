@@ -380,6 +380,43 @@ input:focus {
     overflow: auto;
 }
 
+.account-panel {
+    margin: 20px 0;
+    padding: 22px;
+    border: 1px solid #38404b;
+    border-radius: 12px;
+}
+.account-form, .account-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: 16px;
+    align-items: end;
+    margin: 18px 0;
+}
+.account-form label { display: grid; gap: 7px; }
+.account-form input, .account-form select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 11px;
+    color: inherit;
+    background: #171c24;
+    border: 1px solid #485366;
+    border-radius: 6px;
+}
+.account-table { overflow-x: auto; margin: 12px 0; }
+.account-table table { width: 100%; min-width: 420px; border-collapse: collapse; }
+#account-results table { min-width: 680px; }
+.account-table th, .account-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #38404b;
+    overflow-wrap: anywhere;
+}
+.account-panel summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+.account-panel h3 { margin-top: 28px; }
+#accounts-message { white-space: pre-wrap; overflow-wrap: anywhere; }
+
 [hidden] {
     display: none !important;
 }

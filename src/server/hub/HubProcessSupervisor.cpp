@@ -142,6 +142,7 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
     runtime.State = HubManagedProcessState::Starting;
     runtime.Ready = false;
     runtime.CanSendCommands = false;
+    runtime.CanManageAccounts = false;
     runtime.CommandPending = false;
     runtime.SuppressRestart = false;
     runtime.RestartPending = false;
@@ -220,6 +221,31 @@ bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& er
     }
     runtime.CommandPending = true;
     runtime.CommandResult = "Waiting for worldserver response...";
+    return true;
+}
+
+bool HubProcessSupervisor::SendAccountRequest(std::string const& request,
+    std::function<void(std::string const&)> callback, std::string& error)
+{
+    auto world = _services.find("world");
+    if (world == _services.end() || world->second.State != HubManagedProcessState::Running ||
+        !world->second.CanManageAccounts || world->second.CommandPending)
+    {
+        error = "Worldserver is busy or lacks account administration support. No direct database fallback was attempted.";
+        return false;
+    }
+    if (request.empty() || request.size() > 8192 || request.find_first_not_of("0123456789abcdef") != std::string::npos)
+    {
+        error = "Invalid account request.";
+        return false;
+    }
+    if (!WriteControl(world->second, ("ACCOUNT " + request + '\n').c_str()))
+    {
+        error = "Worldserver control channel failed. Check the account state before retrying.";
+        return false;
+    }
+    world->second.CommandPending = true;
+    world->second.AccountCallback = std::move(callback);
     return true;
 }
 
@@ -447,9 +473,10 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
         runtime.State = HubManagedProcessState::Starting;
         runtime.LastHeartbeat = now;
     }
-    else if (message == Skyfire::HubControl::ReadyMessage || message == Skyfire::HubControl::WorldReadyMessage)
+    else if (message == Skyfire::HubControl::ReadyMessage || message == Skyfire::HubControl::WorldReadyMessage || message == Skyfire::HubControl::AccountReadyMessage)
     {
-        runtime.CanSendCommands = key == "world" && message == Skyfire::HubControl::WorldReadyMessage;
+        runtime.CanSendCommands = key == "world" && message != Skyfire::HubControl::ReadyMessage;
+        runtime.CanManageAccounts = key == "world" && message == Skyfire::HubControl::AccountReadyMessage;
         runtime.Ready = true;
         runtime.State = HubManagedProcessState::Running;
         runtime.LastHeartbeat = now;
@@ -464,6 +491,12 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
     else if (message.compare(0, 7, "RESULT ") == 0 && runtime.CommandPending)
     {
         runtime.CommandPending = false;
+        if (runtime.AccountCallback)
+        {
+            auto callback = std::move(runtime.AccountCallback);
+            callback(message.substr(7));
+            return;
+        }
         runtime.CommandResult = message.substr(7);
         std::printf("World: %s\n", runtime.CommandResult.c_str());
         std::fflush(stdout);
@@ -568,6 +601,11 @@ void HubProcessSupervisor::MarkExited(std::string const& key, ManagedServiceRunt
         !_shuttingDown && !runtime.SuppressRestart;
     if (runtime.CommandPending)
         runtime.CommandResult = "Worldserver exited before returning a command result.";
+    if (runtime.AccountCallback)
+    {
+        auto callback = std::move(runtime.AccountCallback);
+        callback("ERROR ACCOUNT 503 {\"error\":\"Worldserver exited before acknowledging the change. Check account state before retrying.\"}");
+    }
     runtime.CommandPending = false;
     runtime.CanSendCommands = false;
     runtime.LastExitCode = exitCode;

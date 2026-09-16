@@ -7,6 +7,7 @@
 #define SKYFIRE_HUB_WEB_SERVER_H
 
 #include "Define.h"
+#include "Auth/AccountAdministration.h"
 #include "Threading/BoostAsioThreadGroup.h"
 
 #include <atomic>
@@ -46,6 +47,8 @@ struct HubWebServiceCommand
     std::string ServiceKey;
     bool Start = false;
     std::string WorldCommand;
+    std::string AccountRequest;
+    std::shared_ptr<std::promise<Skyfire::Auth::AccountAdminReply>> AccountResult;
     std::shared_ptr<std::promise<std::string>> DispatchResult;
 };
 
@@ -91,6 +94,8 @@ private:
     std::string HandleStatus(std::map<std::string, std::string> const& headers);
     std::string HandleServiceCommand(std::string const& path,
         std::map<std::string, std::string> const& headers, std::string const& body);
+    std::string HandleAccounts(std::string const& action,
+        std::map<std::string, std::string> const& headers, std::string const& body);
     std::string ServeAsset(std::string const& target) const;
     bool FindSession(std::map<std::string, std::string> const& headers,
         AuthenticatedSession& session);
@@ -109,6 +114,15 @@ private:
     std::mutex _authMutex;
     std::map<std::string, AuthenticatedSession> _sessions;
     std::map<std::string, LoginAttempt> _loginAttempts;
+
+    struct AccountJob
+    {
+        std::string OwnerToken;
+        std::shared_future<Skyfire::Auth::AccountAdminReply> Result;
+        std::chrono::steady_clock::time_point ExpiresAt;
+    };
+    std::mutex _accountJobsMutex;
+    std::map<std::string, AccountJob> _accountJobs;
 
     std::mutex _commandMutex;
     std::deque<HubWebServiceCommand> _commands;
