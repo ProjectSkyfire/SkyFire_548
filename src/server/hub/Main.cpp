@@ -10,11 +10,12 @@
 #include <filesystem>
 #include <string>
 
+#include "Common.h"
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
-#include "Common.h"
 #include "Configuration/Config.h"
 #include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
