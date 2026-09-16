@@ -23,11 +23,12 @@
 
 #include "Implementation/LoginDatabase.h"
 #include "Implementation/CharacterDatabase.h"
+#include "Implementation/HubDatabase.h"
 #include "Implementation/WorldDatabase.h"
 
 extern WorldDatabaseWorkerPool WorldDatabase;
 extern CharacterDatabaseWorkerPool CharacterDatabase;
+extern HubDatabaseWorkerPool HubDatabase;
 extern LoginDatabaseWorkerPool LoginDatabase;
 
 #endif
-

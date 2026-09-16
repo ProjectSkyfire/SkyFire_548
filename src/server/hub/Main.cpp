@@ -4,6 +4,7 @@
 */
 
 #include <csignal>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -12,6 +13,7 @@
 #include "Configuration/Config.h"
 #include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
+#include "HubConsole.h"
 #include "Log.h"
 #include "Platform/TimeUtils.h"
 #include "SystemConfig.h"
@@ -22,6 +24,7 @@
 
 // The shared database logger resolves this symbol even when no database appender is configured.
 LoginDatabaseWorkerPool LoginDatabase;
+HubDatabaseWorkerPool HubDatabase;
 
 namespace
 {
@@ -47,6 +50,49 @@ namespace
         std::printf(" %s [<options>]\n", program);
         std::printf("    -c config_file    use config_file as configuration file\n");
         std::printf("    --help            display this help and exit\n");
+    }
+
+    bool StartDatabase()
+    {
+        MySQL::Library_Init();
+
+        std::string const connectionInfo = sConfigMgr->GetStringDefault("HubDatabaseInfo", "");
+        if (connectionInfo.empty())
+        {
+            SF_LOG_ERROR("server.hub", "HubDatabaseInfo is not configured.");
+            MySQL::Library_End();
+            return false;
+        }
+
+        int32 workerThreads = sConfigMgr->GetIntDefault("HubDatabase.WorkerThreads", 1);
+        if (workerThreads < 1 || workerThreads > 32)
+        {
+            SF_LOG_WARN("server.hub", "HubDatabase.WorkerThreads must be between 1 and 32; using 1.");
+            workerThreads = 1;
+        }
+
+        int32 synchronousThreads = sConfigMgr->GetIntDefault("HubDatabase.SynchThreads", 1);
+        if (synchronousThreads < 1 || synchronousThreads > 32)
+        {
+            SF_LOG_WARN("server.hub", "HubDatabase.SynchThreads must be between 1 and 32; using 1.");
+            synchronousThreads = 1;
+        }
+
+        if (!HubDatabase.Open(connectionInfo, uint8(workerThreads), uint8(synchronousThreads)))
+        {
+            SF_LOG_ERROR("server.hub", "Cannot connect to the hub database.");
+            MySQL::Library_End();
+            return false;
+        }
+
+        SF_LOG_INFO("server.hub", "Started hub database connection pool.");
+        return true;
+    }
+
+    void StopDatabase()
+    {
+        HubDatabase.Close();
+        MySQL::Library_End();
     }
 }
 
@@ -105,6 +151,19 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    if (!StartDatabase())
+        return 1;
+
+    int32 maxPingTime = sConfigMgr->GetIntDefault("MaxPingTime", 30);
+    if (maxPingTime < 1 || maxPingTime > 1440)
+    {
+        SF_LOG_WARN("server.hub", "MaxPingTime must be between 1 and 1440 minutes; using 30.");
+        maxPingTime = 30;
+    }
+
+    auto const databasePingInterval = std::chrono::minutes(maxPingTime);
+    auto nextDatabasePing = std::chrono::steady_clock::now() + databasePingInterval;
+
     std::signal(SIGINT, HubServerSignalHandler);
     std::signal(SIGTERM, HubServerSignalHandler);
 #ifdef _WIN32
@@ -115,9 +174,40 @@ int main(int argc, char** argv)
     SF_LOG_INFO("server.hub", "Hub runtime shell initialized; connection distribution is not enabled yet.");
     SF_LOG_INFO("server.hub", "Press Ctrl-C to stop.");
 
-    while (!StopEvent)
-        Skyfire::SleepForSeconds(1);
+    bool const consoleEnabled = sConfigMgr->GetBoolDefault("Console.Enable", true);
+    HubConsoleInput console;
+    HubCommandHandler commandHandler(bindIp, uint16(port));
+    if (consoleEnabled)
+        console.PrintPrompt();
 
+    while (!StopEvent)
+    {
+        if (consoleEnabled)
+        {
+            std::string command;
+            HubConsolePollResult const pollResult = console.Poll(command);
+            if (pollResult == HubConsolePollResult::Closed)
+                StopEvent = 1;
+            else if (pollResult == HubConsolePollResult::Command)
+            {
+                if (!commandHandler.Execute(command))
+                    StopEvent = 1;
+                else
+                    console.PrintPrompt();
+            }
+        }
+
+        auto const now = std::chrono::steady_clock::now();
+        if (now >= nextDatabasePing)
+        {
+            HubDatabase.KeepAlive();
+            nextDatabasePing = now + databasePingInterval;
+        }
+
+        Skyfire::SleepForMilliseconds(50);
+    }
+
+    StopDatabase();
     SF_LOG_INFO("server.hub", "Hub server stopped.");
     return 0;
 }

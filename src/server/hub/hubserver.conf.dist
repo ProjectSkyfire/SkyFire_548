@@ -2,7 +2,39 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091501
+ConfVersion=2026091502
+
+###################################################################################################
+# DATABASE SETTINGS
+#
+#    HubDatabaseInfo
+#        Description: Connection settings for the hub database.
+#        Example:     "hostname;port;username;password;database"
+#        Default:     "127.0.0.1;3306;skyfire;skyfire;hub"
+
+HubDatabaseInfo = "127.0.0.1;3306;skyfire;skyfire;hub"
+
+#
+#    HubDatabase.WorkerThreads
+#        Description: Number of asynchronous hub database worker threads.
+#        Default:     1
+
+HubDatabase.WorkerThreads = 1
+
+#
+#    HubDatabase.SynchThreads
+#        Description: Number of synchronous hub database connections.
+#        Default:     1
+
+HubDatabase.SynchThreads = 1
+
+#
+#    MaxPingTime
+#        Description: Time in minutes between database keep-alive pings.
+#        Important:   Must be between 1 and 1440.
+#        Default:     30
+
+MaxPingTime = 30
 
 ###################################################################################################
 # HUB SERVER SETTINGS
@@ -19,6 +51,14 @@ Hub.BindIP = "0.0.0.0"
 #        Default:     9100
 
 Hub.Port = 9100
+
+#
+#    Console.Enable
+#        Description: Enable the interactive hub command console.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Console.Enable = 1
 
 ###################################################################################################
 # LOGGING SYSTEM SETTINGS
