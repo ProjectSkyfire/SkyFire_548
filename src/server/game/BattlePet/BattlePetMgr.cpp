@@ -379,16 +379,43 @@ std::vector<BattlePet*> BattlePetMgr::FindBattlePetNameMatches(std::string const
     return matches;
 }
 
+TempSummon* BattlePetMgr::GetCurrentSummon() const
+{
+    if (!m_summonGuid || !m_owner || !m_owner->IsInWorld() || !m_owner->FindMap())
+        return NULL;
+
+    // GetCreature() is map-scoped, so a companion left behind on a map the owner has since
+    // left resolves to NULL here -- which is what we want, since it is not ours to unsummon.
+    Creature* creature = ObjectAccessor::GetCreature(*m_owner, m_summonGuid);
+    return creature ? creature->ToTempSummon() : NULL;
+}
+
+void BattlePetMgr::SetCurrentSummon(TempSummon* summon)
+{
+    m_summonGuid = summon ? summon->GetGUID() : 0;
+}
+
 void BattlePetMgr::UnSummonCurrentBattlePet(bool temporary)
 {
-    if (!m_summon || !m_summonId)
+    // Guard on the guid rather than on a live summon: the bookkeeping below has to run
+    // whenever we believe a companion is out, even if the creature has already gone, or a
+    // teleport would stop resummoning it.
+    if (!m_summonGuid || !m_summonId)
         return;
 
     m_summonLastId = temporary ? m_summonId : 0;
     m_summonId = 0;
 
-    m_summon->UnSummon();
-    m_summon = NULL;
+    // This used to call UnSummon() on a cached TempSummon*, which nothing ever invalidated.
+    // The companion can be destroyed without passing through here at all -- it dies, its
+    // despawn timer runs out, its grid unloads, or its map is torn down (an LFG dungeon being
+    // left, for instance). The pointer then dangled, and the next unsummon -- on logout, on
+    // teleport, or on entering a battleground -- made a virtual call into freed memory.
+    // Resolving the guid instead simply yields NULL once the creature is gone.
+    if (TempSummon* summon = GetCurrentSummon())
+        summon->UnSummon();
+
+    m_summonGuid = 0;
 }
 
 void BattlePetMgr::ResummonLastBattlePet()

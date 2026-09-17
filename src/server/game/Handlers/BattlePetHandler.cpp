@@ -1125,8 +1125,10 @@ void WorldSession::HandleBattlePetModifyName(WorldPacket& recvData)
     battlePet->SetNickname(nickname);
     battlePet->SetTimestamp((uint32)time(NULL));
 
-    if (battlePetMgr->GetCurrentSummonId())
-        battlePetMgr->GetCurrentSummon()->SetUInt32Value(UNIT_FIELD_BATTLE_PET_COMPANION_NAME_TIMESTAMP, battlePet->GetTimestamp());
+    // Ask for the summon itself, not just the id: the renamed pet is only out in the world if
+    // its creature is still alive, and the two have never been guaranteed to agree.
+    if (TempSummon* summon = battlePetMgr->GetCurrentSummon())
+        summon->SetUInt32Value(UNIT_FIELD_BATTLE_PET_COMPANION_NAME_TIMESTAMP, battlePet->GetTimestamp());
 
     battlePetMgr->SaveToDb();
 }
