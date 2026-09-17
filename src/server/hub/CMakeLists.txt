@@ -75,12 +75,15 @@ elseif(TARGET Boost::boost)
   target_link_libraries(hubserver Boost::boost)
 endif()
 
-add_custom_command(TARGET hubserver
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/web
-    $<TARGET_FILE_DIR:hubserver>/web
+# Refresh assets even when only web files changed and hubserver needs no relink.
+add_custom_target(hubserver_web
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/web"
+    "$<TARGET_FILE_DIR:hubserver>/web"
+  COMMENT "Updating hubserver web assets"
+  VERBATIM
 )
+add_dependencies(hubserver hubserver_web)
 
 if(WIN32)
   if(MSVC)

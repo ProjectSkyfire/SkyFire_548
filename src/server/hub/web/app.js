@@ -3,6 +3,7 @@
 const refreshIntervalMs = 10000;
 const loginView = document.querySelector("#login-view");
 const statusView = document.querySelector("#status-view");
+const appShell = document.querySelector("#app-shell");
 const mainNav = document.querySelector("#main-nav");
 const loginForm = document.querySelector("#login-form");
 const loginButton = document.querySelector("#login-button");
@@ -34,6 +35,7 @@ function showLogin(message = "") {
     worldCommandResult.textContent = "No command response yet.";
     csrfToken = "";
     canOperateServices = false;
+    appShell.hidden = true;
     loginView.hidden = false;
     statusView.hidden = true;
     mainNav.hidden = true;
@@ -43,6 +45,7 @@ function showLogin(message = "") {
 }
 
 function showStatus() {
+    appShell.hidden = false;
     loginView.hidden = true;
     statusView.hidden = false;
     mainNav.hidden = false;
@@ -95,8 +98,10 @@ function renderStatus(data) {
     const onlineCount = data.components.filter((component) => component.status === "online").length;
     statusSummary.replaceChildren();
     const summaryStrong = document.createElement("strong");
-    summaryStrong.textContent = `${onlineCount} of ${data.components.length} components online`;
-    statusSummary.append(summaryStrong, ` | Hub uptime ${formatUptime(data.uptimeSeconds)}`);
+    summaryStrong.textContent = `${onlineCount} / ${data.components.length} online`;
+    const uptime = document.createElement("span");
+    uptime.textContent = `Hub uptime ${formatUptime(data.uptimeSeconds)}`;
+    statusSummary.append(summaryStrong, uptime);
 
     componentGrid.replaceChildren(...data.components.map((component) => {
         const article = document.createElement("article");
@@ -105,7 +110,7 @@ function renderStatus(data) {
         const heading = document.createElement("div");
         heading.className = "component-heading";
 
-        const title = document.createElement("h2");
+        const title = document.createElement("h3");
         title.textContent = component.name;
 
         const state = document.createElement("span");
@@ -266,7 +271,7 @@ logoutButton.addEventListener("click", async () => {
 });
 
 document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && statusView.hidden === false)
+    if (!document.hidden && appShell.hidden === false)
         loadStatus();
 });
 

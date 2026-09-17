@@ -18,7 +18,7 @@
             </span>
         </a>
         <nav id="main-nav" class="nav" aria-label="Hub navigation" hidden>
-            <button id="status-tab" class="nav-item active" type="button" aria-current="page">Status</button>
+            <button id="status-tab" class="nav-item active" type="button" aria-current="page">Console</button>
             <button id="accounts-tab" class="nav-item" type="button" hidden>Accounts</button>
             <button id="logout-button" class="nav-item command" type="button">Sign out</button>
         </nav>
@@ -44,20 +44,24 @@
             </form>
         </section>
 
+        <div id="app-shell" class="app-shell" hidden>
+            <aside id="server-sidebar" class="server-sidebar" aria-labelledby="server-status-title">
+                <h2 id="server-status-title">Server status</h2>
+                <div id="status-summary" class="summary" aria-live="polite"></div>
+                <div id="component-grid" class="component-grid"></div>
+                <div class="refresh-meta">
+                    <span id="signed-in-user"></span>
+                    <span id="last-updated" role="status">Waiting for status</span>
+                </div>
+            </aside>
+            <div class="app-content">
         <section id="status-view" class="status-view" aria-labelledby="status-title" hidden>
             <div class="page-heading">
                 <div>
-                    <p class="eyebrow">System overview</p>
-                    <h1 id="status-title">Component Status</h1>
-                </div>
-                <div class="refresh-meta">
-                    <span id="signed-in-user"></span>
-                    <span id="last-updated">Waiting for status</span>
+                    <p class="eyebrow">World administration</p>
+                    <h1 id="status-title">Console</h1>
                 </div>
             </div>
-
-            <div id="status-summary" class="summary" aria-live="polite"></div>
-            <div id="component-grid" class="component-grid"></div>
             <section id="world-console" class="world-console" aria-labelledby="world-console-title" hidden>
                 <h2 id="world-console-title">World server console</h2>
                 <p>Send world commands with or without the leading dot. Shutdown and restart use the normal player-save sequence.</p>
@@ -110,6 +114,8 @@
                 </section>
             </div>
         </section>
+            </div>
+        </div>
     </main>
 
     <script src="/accounts.js" defer></script>
