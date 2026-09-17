@@ -3026,7 +3026,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         if (spellPower->spellId != m_spellInfo->Id)
             continue;
 
-        if (spellPower->ShapeShiftSpellID && !m_caster->ToPlayer()->HasAura(spellPower->ShapeShiftSpellID))
+        if (spellPower->ShapeShiftSpellID && !m_caster->HasAura(spellPower->ShapeShiftSpellID))
             continue;
 
         foundSpellPower = true;
