@@ -1221,7 +1221,17 @@ namespace lfg
                 }
             }
 
-            grp->SetLfgRoles(pguid, proposal.players.find(pguid)->second.role);
+            // players is built from proposal.players, so this can only miss if the proposal was
+            // mutated underneath us - dereferencing end() made that an access violation.
+            LfgProposalPlayerContainer::const_iterator itRole = proposal.players.find(pguid);
+            if (itRole == proposal.players.end())
+            {
+                SF_LOG_ERROR("lfg.proposal.group.make", "Proposal %u lost player %u while building the group.",
+                    proposal.id, GUID_LOPART(pguid));
+                return false;
+            }
+
+            grp->SetLfgRoles(pguid, itRole->second.role);
 
             // Add the cooldown spell if queued for a random dungeon
             if (dungeon->type == LFG_TYPE_RANDOM)
@@ -2427,6 +2437,15 @@ namespace lfg
         for (LfgProposalContainer::iterator itProposal = ProposalsStore.begin(); itProposal != ProposalsStore.end();)
         {
             LfgProposalContainer::iterator itProposalRemove = itProposal++;
+
+            // Never tear down a proposal that has already succeeded. UpdateProposal() calls
+            // MakeNewGroup() while holding a reference and an iterator into ProposalsStore, and
+            // MakeNewGroup() disbands the party the players queued from - which lands here. A
+            // successful proposal owns its own cleanup: UpdateProposal() removes it if
+            // MakeNewGroup() fails.
+            if (itProposalRemove->second.state == LFG_PROPOSAL_SUCCESS)
+                continue;
+
             bool removeProposal = false;
 
             for (LfgProposalPlayerContainer::iterator itPlayer = itProposalRemove->second.players.begin();
