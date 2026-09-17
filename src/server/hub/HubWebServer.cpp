@@ -4,6 +4,7 @@
 */
 
 #include "HubWebServer.h"
+#include "HubProcessSupervisor.h"
 
 #include "Cryptography/CryptoRandom.h"
 #include "Database/DatabaseEnv.h"
@@ -624,7 +625,16 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
             json << " | PID " << service.ProcessId;
         if (service.State == "exited")
             json << " | Exit " << service.LastExitCode;
-        json << "\",\"managed\":true,\"enabled\":" << (service.Enabled ? "true" : "false")
+        json << "\",\"isWorld\":" << (service.IsWorld ? "true" : "false")
+             << ",\"uptimeSeconds\":" << service.UptimeSeconds
+             << ",\"metricsAvailable\":" << (service.MetricsAvailable ? "true" : "false")
+             << ",\"players\":" << service.Players << ",\"updateTimeMs\":" << service.UpdateTimeMs
+             << ",\"cpuPercent\":" << (service.CpuBasisPoints < 0 ? "null" : std::to_string(service.CpuBasisPoints / 100.0));
+        if ((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) == HUB_ADMIN_ACCESS_ALL_LOCAL)
+            json << ",\"executablePath\":\"" << JsonEscape(service.ExecutablePath)
+                 << "\",\"configPath\":\"" << JsonEscape(service.ConfigPath)
+                 << "\",\"workingDirectory\":\"" << JsonEscape(service.WorkingDirectory) << "\"";
+        json << ",\"managed\":true,\"enabled\":" << (service.Enabled ? "true" : "false")
              << ",\"state\":\"" << JsonEscape(service.State) << "\""
              << ",\"canSendCommands\":" << (service.CanSendCommands ? "true" : "false")
              << ",\"commandPending\":" << (service.CommandPending ? "true" : "false")
@@ -654,7 +664,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     std::string const serviceKey = route.substr(0, slash);
     std::string const action = route.substr(slash + 1);
-    if (action != "start" && action != "stop" && !(serviceKey == "world" && action == "command"))
+    if (action != "start" && action != "stop" && action != "configure" && action != "command")
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     if (!std::all_of(serviceKey.begin(), serviceKey.end(), [](unsigned char character)
         { return std::isalnum(character) || character == '_' || character == '-'; }))
@@ -676,21 +686,35 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
             }
         }
     }
-    if (!found)
+    if (!found && action != "configure")
         return MakeResponse(404, "application/json", "{\"error\":\"managed service not found\"}");
-    if (!enabled)
+    if (!enabled && action != "configure")
         return MakeResponse(403, "application/json", "{\"error\":\"managed service is disabled\"}");
 
     HubWebServiceCommand command;
     command.ServiceKey = serviceKey;
     command.Start = action == "start";
     std::future<std::string> dispatchResult;
+    if (action == "configure")
+    {
+        if ((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) != HUB_ADMIN_ACCESS_ALL_LOCAL)
+            return MakeResponse(403, "application/json", "{\"error\":\"Full local administrator access is required.\"}");
+        if (!HubProcessSupervisor::IsWorldKey(serviceKey))
+            return MakeResponse(400, "application/json", "{\"error\":\"World keys must be world or world-<id>.\"}");
+        auto const form = ParseForm(body);
+        auto value = [&](char const* key) { auto it = form.find(key); return it == form.end() ? std::string() : it->second; };
+        command.Configure = true;
+        command.Name = value("name"); command.ExecutablePath = value("executablePath");
+        command.ConfigPath = value("configPath"); command.WorkingDirectory = value("workingDirectory");
+        command.DispatchResult = std::make_shared<std::promise<std::string>>();
+        dispatchResult = command.DispatchResult->get_future();
+    }
     if (action == "command")
     {
         // Arbitrary CLI commands have full console authority, including account management.
         if ((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) != HUB_ADMIN_ACCESS_ALL_LOCAL)
             return MakeResponse(403, "application/json", "{\"error\":\"full local administrator access is required for world commands\"}");
-        if (!commandReady)
+        if (!HubProcessSupervisor::IsWorldKey(serviceKey) || !commandReady)
             return MakeResponse(409, "application/json", "{\"error\":\"worldserver is not ready or a command is pending\"}");
         auto const form = ParseForm(body);
         auto const value = form.find("command");
@@ -715,6 +739,8 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
         std::string const error = dispatchResult.get();
         if (!error.empty())
             return MakeResponse(409, "application/json", "{\"error\":\"" + JsonEscape(error) + "\"}");
+        if (action == "configure")
+            return MakeResponse(200, "application/json", "{\"saved\":true}");
     }
     return MakeResponse(202, "application/json", "{\"accepted\":true}");
 }

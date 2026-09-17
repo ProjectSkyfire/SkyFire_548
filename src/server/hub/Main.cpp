@@ -283,8 +283,7 @@ int main(int argc, char** argv)
                 using Skyfire::Auth::AccountAdministration;
                 using Skyfire::Auth::AccountAdminReply;
                 auto const promise = webCommand.AccountResult;
-                auto const world = processSupervisor.GetStatus("world");
-                if (world.State == HubManagedProcessState::Stopped || world.State == HubManagedProcessState::Exited)
+                if (!processSupervisor.HasActiveWorld())
                 {
                     // Dispatch runs on the same main thread as Start/Stop: no online fallback race.
                     promise->set_value(AccountAdministration::HandleEncodedRequest(webCommand.AccountRequest));
@@ -305,8 +304,11 @@ int main(int argc, char** argv)
                     promise->set_value({409, "{\"error\":\"Worldserver is busy, transitioning, or needs an update. No direct database fallback was attempted.\"}"});
                 continue;
             }
-            bool const accepted = !webCommand.WorldCommand.empty()
-                ? processSupervisor.SendWorldCommand(webCommand.WorldCommand, error)
+            bool const accepted = webCommand.Configure
+                ? processSupervisor.SaveWorldNode(webCommand.ServiceKey, webCommand.Name, webCommand.ExecutablePath,
+                    webCommand.ConfigPath, webCommand.WorkingDirectory, error)
+                : !webCommand.WorldCommand.empty()
+                ? processSupervisor.SendWorldCommand(webCommand.WorldCommand, error, webCommand.ServiceKey)
                 : webCommand.Start
                 ? processSupervisor.Start(webCommand.ServiceKey, error)
                 : processSupervisor.Stop(webCommand.ServiceKey, error);
@@ -314,7 +316,7 @@ int main(int argc, char** argv)
                 webCommand.DispatchResult->set_value(accepted ? "" : error);
             if (!accepted)
                 SF_LOG_WARN("server.hub", "Web console could not %s managed service '%s': %s.",
-                    !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
+                    webCommand.Configure ? "configure" : !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
         }
 
         if (webEnabled)
@@ -327,6 +329,15 @@ int main(int argc, char** argv)
                 HubWebManagedServiceStatus webService;
                 webService.Key = service.Key;
                 webService.Name = service.Name;
+                webService.IsWorld = service.IsWorld;
+                webService.ExecutablePath = service.ExecutablePath;
+                webService.ConfigPath = service.ConfigPath;
+                webService.WorkingDirectory = service.WorkingDirectory;
+                webService.CpuBasisPoints = service.CpuBasisPoints;
+                webService.UptimeSeconds = service.UptimeSeconds;
+                webService.MetricsAvailable = service.MetricsAvailable;
+                webService.Players = service.Players;
+                webService.UpdateTimeMs = service.UpdateTimeMs;
                 webService.State = HubProcessSupervisor::GetStateName(service.State);
                 webService.ProcessId = service.ProcessId;
                 webService.LastExitCode = service.LastExitCode;

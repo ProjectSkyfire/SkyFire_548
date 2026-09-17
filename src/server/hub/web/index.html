@@ -65,6 +65,8 @@
             <section id="world-console" class="world-console" aria-labelledby="world-console-title" hidden>
                 <h2 id="world-console-title">World server console</h2>
                 <p>Send world commands with or without the leading dot. Shutdown and restart use the normal player-save sequence.</p>
+                <label for="world-node">World node</label>
+                <select id="world-node" aria-describedby="world-command-state"></select>
                 <form id="world-command-form">
                     <label for="world-command">Command</label>
                     <div class="world-command-row">
@@ -76,6 +78,19 @@
                 <p id="world-command-state"></p>
                 <pre id="world-command-result" role="status" aria-live="polite">No command response yet.</pre>
             </section>
+            <details id="world-node-settings" class="account-panel" hidden>
+                <summary>Add or edit a world node</summary>
+                <p>Each world needs its own configuration, realm ID and listening port. Nodes share the hub's auth database. Save a name at any time; stop the node before changing launch paths. Saving does not start the server.</p>
+                <form id="world-node-form" class="account-form">
+                    <label>Node key<input name="key" required maxlength="64" pattern="world|world-[a-z0-9_-]+" value="world" title="world or world- followed by lowercase letters, numbers, underscores or hyphens"></label>
+                    <label>Display name<input name="name" required maxlength="100" placeholder="SkyFire PvE"></label>
+                    <label>Executable<input name="executablePath" required maxlength="1024" value="worldserver"></label>
+                    <label>Configuration file<input name="configPath" required maxlength="1024" value="worldserver.conf"></label>
+                    <label>Working directory<input name="workingDirectory" required maxlength="1024" value="."></label>
+                    <button class="primary-button" type="submit">Save world node</button>
+                </form>
+                <p id="world-node-message" role="status" aria-live="polite"></p>
+            </details>
         </section>
 
         <section id="accounts-view" class="status-view" aria-labelledby="accounts-title" hidden>

@@ -68,6 +68,55 @@ namespace
     }
 }
 
+bool HubProcessSupervisor::IsWorldKey(std::string const& key)
+{
+    return key == "world" || (key.size() > 6 && key.compare(0, 6, "world-") == 0);
+}
+
+bool HubProcessSupervisor::HasActiveWorld() const
+{
+    return std::any_of(_services.begin(), _services.end(), [](auto const& service)
+        { return IsWorldKey(service.first) && IsActive(service.second); });
+}
+
+bool HubProcessSupervisor::SaveWorldNode(std::string const& key, std::string const& name,
+    std::string const& executable, std::string const& config, std::string const& directory, std::string& error)
+{
+    auto valid = [](std::string const& value, size_t max)
+    {
+        return !value.empty() && value.size() <= max && value.find_first_not_of(" ") != std::string::npos &&
+            std::none_of(value.begin(), value.end(), [](unsigned char c) { return c < 32 || c == 127; });
+    };
+    if (!IsWorldKey(key) || key.size() > 64 || key.find_first_not_of("abcdefghijklmnopqrstuvwxyz0123456789-_") != std::string::npos ||
+        !valid(name, 100) || !valid(executable, 1024) || !valid(config, 1024) || !valid(directory, 1024))
+    {
+        error = "Use world or world-<id> as the key and provide a name and valid paths.";
+        return false;
+    }
+    auto found = _services.find(key);
+    if (found != _services.end() && IsActive(found->second) &&
+        (executable != found->second.Definition.ExecutablePath || config != found->second.Definition.ConfigPath ||
+            directory != found->second.Definition.WorkingDirectory))
+    {
+        error = "Stop this world gracefully before changing its launch paths.";
+        return false;
+    }
+    PreparedStatement* statement = HubDatabase.GetPreparedStatement(HUB_UPSERT_WORLD_SERVICE);
+    statement->setString(0, key); statement->setString(1, name); statement->setString(2, executable);
+    statement->setString(3, config); statement->setString(4, directory);
+    HubDatabase.DirectExecute(statement);
+    if (!ReloadDatabaseRecords(error)) return false;
+    found = _services.find(key);
+    if (found == _services.end() || found->second.Definition.Name != name ||
+        found->second.Definition.ExecutablePath != executable || found->second.Definition.ConfigPath != config ||
+        found->second.Definition.WorkingDirectory != directory)
+    {
+        error = "The world node could not be saved to the hub database.";
+        return false;
+    }
+    return true;
+}
+
 HubProcessSupervisor::~HubProcessSupervisor()
 {
     StopAll();
@@ -129,6 +178,19 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
             error = "managed service working directory does not exist: " + workingDirectory.string();
             return false;
         }
+        if (IsWorldKey(serviceKey))
+            for (auto const& other : _services)
+                if (other.first != serviceKey && IsWorldKey(other.first) && IsActive(other.second))
+                {
+                    auto const& definition = other.second.Definition;
+                    auto const otherDirectory = definition.WorkingDirectory.empty()
+                        ? std::filesystem::current_path() : std::filesystem::path(definition.WorkingDirectory);
+                    if (std::filesystem::equivalent(configPath, ResolvePath(otherDirectory, definition.ConfigPath)))
+                    {
+                        error = "This configuration is already used by active world node '" + other.first + "'.";
+                        return false;
+                    }
+                }
         if (!Launch(serviceKey, runtime, executablePath.string(), configPath.string(),
             workingDirectory.string(), error))
             return false;
@@ -147,6 +209,8 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
     runtime.SuppressRestart = false;
     runtime.RestartPending = false;
     runtime.LastExitCode = 0;
+    runtime.MetricsAvailable = false;
+    runtime.LastTick = 0;
     runtime.StatusBuffer.clear();
     runtime.StartedAt = std::chrono::steady_clock::now();
     runtime.LastHeartbeat = runtime.StartedAt;
@@ -187,7 +251,7 @@ bool HubProcessSupervisor::Stop(std::string const& serviceKey, std::string& erro
     return true;
 }
 
-bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& error)
+bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& error, std::string const& key)
 {
     size_t const first = command.find_first_not_of(" ");
     if (first != std::string::npos)
@@ -201,8 +265,8 @@ bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& er
         error = "enter one command, up to 1024 bytes, without control characters";
         return false;
     }
-    auto service = _services.find("world");
-    if (service == _services.end() || !service->second.Definition.Enabled ||
+    auto service = _services.find(key);
+    if (!IsWorldKey(key) || service == _services.end() || !service->second.Definition.Enabled ||
         service->second.State != HubManagedProcessState::Running || !service->second.CanSendCommands)
     {
         error = "worldserver must be running under the hub with command support";
@@ -227,7 +291,17 @@ bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& er
 bool HubProcessSupervisor::SendAccountRequest(std::string const& request,
     std::function<void(std::string const&)> callback, std::string& error)
 {
-    auto world = _services.find("world");
+    if (std::any_of(_services.begin(), _services.end(), [](auto const& service)
+        { return bool(service.second.AccountCallback); }))
+    {
+        error = "An account change is already pending. Wait for its result before retrying.";
+        return false;
+    }
+    auto world = std::find_if(_services.begin(), _services.end(), [](auto const& service)
+    {
+        return IsWorldKey(service.first) && service.second.State == HubManagedProcessState::Running &&
+            service.second.CanManageAccounts && !service.second.CommandPending;
+    });
     if (world == _services.end() || world->second.State != HubManagedProcessState::Running ||
         !world->second.CanManageAccounts || world->second.CommandPending)
     {
@@ -418,7 +492,7 @@ void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime&
 #endif
     ReadStatusMessages(key, runtime);
     auto const now = std::chrono::steady_clock::now();
-    if (key != "world" && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
+    if (!IsWorldKey(key) && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
         ForceStop(key, runtime);
     else if (runtime.State == HubManagedProcessState::Starting && now - runtime.StartedAt > StartupTimeout)
         runtime.State = HubManagedProcessState::Unresponsive;
@@ -475,8 +549,8 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
     }
     else if (message == Skyfire::HubControl::ReadyMessage || message == Skyfire::HubControl::WorldReadyMessage || message == Skyfire::HubControl::AccountReadyMessage)
     {
-        runtime.CanSendCommands = key == "world" && message != Skyfire::HubControl::ReadyMessage;
-        runtime.CanManageAccounts = key == "world" && message == Skyfire::HubControl::AccountReadyMessage;
+        runtime.CanSendCommands = IsWorldKey(key) && message != Skyfire::HubControl::ReadyMessage;
+        runtime.CanManageAccounts = IsWorldKey(key) && message == Skyfire::HubControl::AccountReadyMessage;
         runtime.Ready = true;
         runtime.State = HubManagedProcessState::Running;
         runtime.LastHeartbeat = now;
@@ -488,6 +562,23 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
         if (runtime.Ready && runtime.State != HubManagedProcessState::Stopping)
             runtime.State = HubManagedProcessState::Running;
     }
+    else if (IsWorldKey(key) && message.compare(0, 8, "METRICS ") == 0)
+    {
+        std::istringstream input(message.substr(8));
+        uint32 players, updateTime;
+        uint64 tick;
+        int32 cpu;
+        std::string extra;
+        if (input >> players >> updateTime >> tick >> cpu && !(input >> extra) && cpu >= -1 && cpu <= 10000 && tick != runtime.LastTick)
+        {
+            runtime.Players = players;
+            runtime.UpdateTimeMs = updateTime;
+            runtime.CpuBasisPoints = cpu;
+            runtime.LastTick = tick;
+            runtime.LastMetrics = now;
+            runtime.MetricsAvailable = true;
+        }
+    }
     else if (message.compare(0, 7, "RESULT ") == 0 && runtime.CommandPending)
     {
         runtime.CommandPending = false;
@@ -498,7 +589,7 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
             return;
         }
         runtime.CommandResult = message.substr(7);
-        std::printf("World: %s\n", runtime.CommandResult.c_str());
+        std::printf("%s: %s\n", key.c_str(), runtime.CommandResult.c_str());
         std::fflush(stdout);
     }
     else if (message == Skyfire::HubControl::StoppingMessage)
@@ -526,7 +617,7 @@ void HubProcessSupervisor::StopAll()
         for (auto& service : _services)
         {
             // World saves and database draining must finish, even during hub exit.
-            if (service.first != "world" && IsActive(service.second) &&
+            if (!IsWorldKey(service.first) && IsActive(service.second) &&
                 std::chrono::steady_clock::now() >= deadline)
                 ForceStop(service.first, service.second);
             active = active || IsActive(service.second);
@@ -553,6 +644,18 @@ HubManagedServiceStatus HubProcessSupervisor::GetStatus(std::string const& key) 
     status.CanSendCommands = found->second.CanSendCommands;
     status.CommandPending = found->second.CommandPending;
     status.CommandResult = found->second.CommandResult;
+    status.IsWorld = IsWorldKey(key);
+    status.ExecutablePath = found->second.Definition.ExecutablePath;
+    status.ConfigPath = found->second.Definition.ConfigPath;
+    status.WorkingDirectory = found->second.Definition.WorkingDirectory;
+    status.CpuBasisPoints = found->second.CpuBasisPoints;
+    if (IsActive(found->second))
+        status.UptimeSeconds = uint64(std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::steady_clock::now() - found->second.StartedAt).count());
+    status.MetricsAvailable = found->second.State == HubManagedProcessState::Running &&
+        found->second.MetricsAvailable && std::chrono::steady_clock::now() - found->second.LastMetrics <= HeartbeatTimeout;
+    status.Players = found->second.Players;
+    status.UpdateTimeMs = found->second.UpdateTimeMs;
     return status;
 }
 
@@ -597,7 +700,7 @@ void HubProcessSupervisor::MarkExited(std::string const& key, ManagedServiceRunt
     SF_LOG_INFO("server.hub", "Managed service '%s' process %llu exited with code %lld.", key.c_str(),
         static_cast<unsigned long long>(runtime.ProcessId), static_cast<long long>(exitCode));
     ReadStatusMessages(key, runtime);
-    runtime.RestartPending = key == "world" && exitCode == Skyfire::HubControl::WorldRestartExitCode &&
+    runtime.RestartPending = IsWorldKey(key) && exitCode == Skyfire::HubControl::WorldRestartExitCode &&
         !_shuttingDown && !runtime.SuppressRestart;
     if (runtime.CommandPending)
         runtime.CommandResult = "Worldserver exited before returning a command result.";

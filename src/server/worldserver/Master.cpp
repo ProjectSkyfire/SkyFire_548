@@ -593,6 +593,11 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
                             World::StopNow(SHUTDOWN_EXIT_CODE);
                             break;
                         }
+                        uint64 const metrics = HubWorldMetrics.load(std::memory_order_relaxed);
+                        std::string const message = "METRICS " + std::to_string(metrics >> 32) + " " +
+                            std::to_string(uint32(metrics)) + " " + std::to_string(HubWorldTick.load(std::memory_order_relaxed)) + " " +
+                            std::to_string(hubControl->SampleCpuUsage());
+                        (void)hubControl->SendStatus(message.c_str());
                         nextHeartbeat = now + std::chrono::seconds(5);
                     }
                     Skyfire::SleepForMilliseconds(100);

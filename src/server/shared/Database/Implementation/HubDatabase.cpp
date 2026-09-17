@@ -23,6 +23,10 @@ void HubDatabaseConnection::DoPrepareStatements()
     PrepareStatement(HUB_SEL_MANAGED_SERVICES,
         "SELECT service_key, name, executable_path, config_path, working_directory, enabled "
         "FROM hub_managed_services ORDER BY service_key", CONNECTION_SYNCH);
+    PrepareStatement(HUB_UPSERT_WORLD_SERVICE,
+        "INSERT INTO hub_managed_services (service_key,name,executable_path,config_path,working_directory,enabled) "
+        "VALUES (?,?,?,?,?,1) ON DUPLICATE KEY UPDATE name=VALUES(name),executable_path=VALUES(executable_path),"
+        "config_path=VALUES(config_path),working_directory=VALUES(working_directory)", CONNECTION_SYNCH);
     PrepareStatement(HUB_INS_ADMIN,
         "INSERT INTO hub_admins (username, password_hash, access_flags) VALUES (?, ?, ?)",
         CONNECTION_SYNCH);

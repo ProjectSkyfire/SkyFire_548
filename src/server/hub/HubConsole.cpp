@@ -225,7 +225,7 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         else
             std::printf("%s start requested; waiting for the child process to report ready.\n", service.c_str());
     }
-    else if (command == "world" || command == ".server" || command == "server")
+    else if (command == "world" || command == ".server" || command == "server" || HubProcessSupervisor::IsWorldKey(command))
     {
         if (origin != HubCommandOrigin::LocalConsole)
         {
@@ -234,10 +234,10 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         }
         std::string text;
         std::getline(input >> std::ws, text);
-        if (command != "world")
+        if (!HubProcessSupervisor::IsWorldKey(command))
             text = "server " + text;
         std::string error;
-        if (!_processSupervisor.SendWorldCommand(text, error))
+        if (!_processSupervisor.SendWorldCommand(text, error, HubProcessSupervisor::IsWorldKey(command) ? command : "world"))
             std::printf("World command rejected: %s.\n", error.c_str());
         else
             std::printf("World command sent; waiting for its result.\n");
@@ -349,7 +349,8 @@ void HubCommandHandler::PrintHelp() const
     std::printf("             Start and supervise a database-configured service.\n");
     std::printf("  stop <service>\n");
     std::printf("             Gracefully stop a managed service.\n");
-    std::printf("  world <command>  Execute a worldserver console command (optional leading dot).\n");
+    std::printf("  world <command>  Execute a command on the default world node (optional leading dot).\n");
+    std::printf("  world-<id> <command>  Execute a command on a named world node.\n");
     std::printf("  .server restart 300 | .server shutdown 300  Graceful countdown in seconds.\n");
     std::printf("  .server shutdown time 23:00 | .server restart time 23:00  Server local time.\n");
     std::printf("  .server shutdown cancel | .server restart cancel  Cancel the countdown.\n");
@@ -386,6 +387,17 @@ void HubCommandHandler::PrintStatus() const
             std::printf(" (process %llu)", static_cast<unsigned long long>(service.ProcessId));
         if (service.State == HubManagedProcessState::Exited)
             std::printf(" (exit code %lld)", static_cast<long long>(service.LastExitCode));
+        std::printf(" [%s] uptime %llu seconds", service.Key.c_str(), static_cast<unsigned long long>(service.UptimeSeconds));
+        if (service.IsWorld && service.MetricsAvailable)
+        {
+            std::printf(" | players %u | update %u ms", service.Players, service.UpdateTimeMs);
+            if (service.CpuBasisPoints >= 0)
+                std::printf(" | CPU %.2f%%", service.CpuBasisPoints / 100.0);
+            else
+                std::printf(" | CPU unavailable");
+        }
+        else if (service.IsWorld)
+            std::printf(" | players/load unavailable");
         if (!service.Enabled)
             std::printf(" (disabled)");
         std::printf("\n");

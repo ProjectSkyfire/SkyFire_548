@@ -9,6 +9,7 @@
 #include "Define.h"
 
 #include <string>
+#include <chrono>
 #include <mutex>
 #include <vector>
 
@@ -36,12 +37,16 @@ namespace Skyfire::HubControl
 
         bool Initialize(uint64 controlReadHandle, uint64 statusWriteHandle, std::string& error);
         bool SendStatus(char const* status) const;
+        // Percentage of total logical CPU capacity, in hundredths; -1 until sampled.
+        int32 SampleCpuUsage();
         bool StopRequested(std::vector<std::string>* commands = nullptr, std::vector<std::string>* accounts = nullptr);
         void AppendCommandOutput(char const* text);
         void FinishCommand(bool success);
         void Close();
 
     private:
+        std::chrono::steady_clock::time_point _cpuSampleTime;
+        uint64 _cpuSampleNs = 0;
         uint64 _controlReadHandle;
         uint64 _statusWriteHandle;
         std::string _controlBuffer;

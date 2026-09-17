@@ -169,7 +169,9 @@
             csrf = data.csrfToken || ""; permitted = data.canSendWorldCommands === true; enabled = data.accountsEnabled === true;
             accountsTab.hidden = !permitted; workspace.hidden = !enabled;
             byId("accounts-disabled").hidden = enabled;
-            const world = data.components.find((item) => item.key === "world");
+            const worlds = data.components.filter((item) => item.isWorld === true || item.key === "world");
+            const world = worlds.find((item) => item.state === "running") ||
+                worlds.find((item) => ["starting", "stopping", "unresponsive"].includes(item.state));
             byId("accounts-routing").textContent = world?.state === "running" ? "Changes are executed by worldserver through the hub." :
                 ["starting", "stopping", "unresponsive"].includes(world?.state) ? "Worldserver is transitioning. Account changes are temporarily unavailable." :
                 "Worldserver is stopped. The hub handles account changes directly.";

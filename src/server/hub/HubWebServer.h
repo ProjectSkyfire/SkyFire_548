@@ -34,6 +34,13 @@ struct HubWebManagedServiceStatus
     bool CommandPending = false;
     bool CanSendCommands = false;
     std::string CommandResult;
+    std::string ExecutablePath, ConfigPath, WorkingDirectory;
+    bool IsWorld = false;
+    uint64 UptimeSeconds = 0;
+    bool MetricsAvailable = false;
+    uint32 Players = 0;
+    uint32 UpdateTimeMs = 0;
+    int32 CpuBasisPoints = -1;
 };
 
 struct HubWebStatusSnapshot
@@ -46,6 +53,8 @@ struct HubWebServiceCommand
 {
     std::string ServiceKey;
     bool Start = false;
+    bool Configure = false;
+    std::string Name, ExecutablePath, ConfigPath, WorkingDirectory;
     std::string WorldCommand;
     std::string AccountRequest;
     std::shared_ptr<std::promise<Skyfire::Auth::AccountAdminReply>> AccountResult;

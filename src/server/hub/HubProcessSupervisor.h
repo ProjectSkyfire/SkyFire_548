@@ -35,6 +35,13 @@ struct HubManagedServiceStatus
     bool CommandPending = false;
     bool CanSendCommands = false;
     std::string CommandResult;
+    std::string ExecutablePath, ConfigPath, WorkingDirectory;
+    bool IsWorld = false;
+    uint64 UptimeSeconds = 0;
+    bool MetricsAvailable = false;
+    uint32 Players = 0;
+    uint32 UpdateTimeMs = 0;
+    int32 CpuBasisPoints = -1;
 };
 
 class HubProcessSupervisor
@@ -48,7 +55,11 @@ public:
 
     bool Start(std::string const& serviceKey, std::string& error);
     bool Stop(std::string const& serviceKey, std::string& error);
-    bool SendWorldCommand(std::string command, std::string& error);
+    static bool IsWorldKey(std::string const& key);
+    bool HasActiveWorld() const;
+    bool SaveWorldNode(std::string const& key, std::string const& name, std::string const& executable,
+        std::string const& config, std::string const& directory, std::string& error);
+    bool SendWorldCommand(std::string command, std::string& error, std::string const& key = "world");
     bool SendAccountRequest(std::string const& request, std::function<void(std::string const&)> callback, std::string& error);
     bool ReloadDatabaseRecords(std::string& error);
     void Update();
@@ -85,9 +96,16 @@ private:
         bool RestartPending = false;
         bool SuppressRestart = false;
         std::string CommandResult;
+        bool MetricsAvailable = false;
+        uint32 Players = 0;
+        uint32 UpdateTimeMs = 0;
+        int32 CpuBasisPoints = -1;
+
         std::string StatusBuffer;
         std::chrono::steady_clock::time_point StartedAt;
         std::chrono::steady_clock::time_point LastHeartbeat;
+        std::chrono::steady_clock::time_point LastMetrics;
+        uint64 LastTick = 0;
         std::chrono::steady_clock::time_point StopRequestedAt;
     };
 

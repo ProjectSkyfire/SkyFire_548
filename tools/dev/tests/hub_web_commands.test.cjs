@@ -9,6 +9,7 @@ const vm = require("node:vm");
 
 class Element {
     constructor() { this.listeners = {}; this.value = ""; this.textContent = ""; }
+    reset() { this.value = ""; }
     addEventListener(name, callback) { this.listeners[name] = callback; }
     replaceChildren(...children) { this.children = children; }
     append(...children) { this.children = [...(this.children || []), ...children]; }

@@ -31,7 +31,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
     font: inherit;
 }
 
@@ -187,7 +188,8 @@ label {
     font-weight: 600;
 }
 
-input {
+input,
+#world-node {
     width: 100%;
     min-height: 44px;
     padding: 9px 11px;
@@ -337,6 +339,8 @@ input:focus {
     font-size: 0.75rem;
     overflow-wrap: anywhere;
 }
+
+.service-metrics { white-space: pre-line; line-height: 1.6; }
 
 .service-controls {
     display: flex;

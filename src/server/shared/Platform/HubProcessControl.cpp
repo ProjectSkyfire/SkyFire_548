@@ -9,6 +9,8 @@
 #include <cerrno>
 #include <cstring>
 #include <iterator>
+#include <thread>
+#include <time.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -16,6 +18,33 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+
+int32 Skyfire::HubControl::ChildChannel::SampleCpuUsage()
+{
+    uint64 cpuNs;
+#ifdef _WIN32
+    FILETIME created, exited, kernel, user;
+    if (!GetProcessTimes(GetCurrentProcess(), &created, &exited, &kernel, &user)) return -1;
+    auto ticks = [](FILETIME const& time) { return (uint64(time.dwHighDateTime) << 32) | time.dwLowDateTime; };
+    cpuNs = (ticks(kernel) + ticks(user)) * 100;
+#else
+    timespec usage;
+    if (clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &usage) != 0) return -1;
+    cpuNs = uint64(usage.tv_sec) * 1000000000ULL + uint64(usage.tv_nsec);
+#endif
+    auto const now = std::chrono::steady_clock::now();
+    int32 result = -1;
+    if (_cpuSampleTime != std::chrono::steady_clock::time_point{} && cpuNs >= _cpuSampleNs)
+    {
+        auto const elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(now - _cpuSampleTime).count();
+        if (elapsed > 0)
+            result = int32((std::min)(10000.0, 10000.0 * double(cpuNs - _cpuSampleNs) /
+                double(elapsed) / (std::max)(1u, std::thread::hardware_concurrency())));
+    }
+    _cpuSampleTime = now;
+    _cpuSampleNs = cpuNs;
+    return result;
+}
 
 namespace
 {
