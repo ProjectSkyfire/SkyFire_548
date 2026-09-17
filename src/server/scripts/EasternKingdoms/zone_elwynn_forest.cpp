@@ -20,6 +20,7 @@ EndContentData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Vehicle.h"
+#include "Player.h"
 
 enum Northshire
 {
@@ -391,6 +392,7 @@ public:
             NPC_ANDROMATH = 46941,
             NPC_JONATHAN = 46942,
             NPC_RAGAMUFFIN = 46943,
+            NPC_HOGGER_KILL_CREDIT = 448,   // quest 176 "Wanted: Hogger"
         };
         enum HoggerSpells
         {
@@ -654,13 +656,8 @@ public:
                     std::list<Player*> playerList;
                     GetPlayerListInGrid(playerList, me, 15.0f);
 
-                    // TODO: FIX member access into incomplete type Player
-                    // reference to incomplete type player is not allowed.
-                    /*
-                    for (auto&& player : playerList)
-                    {
-                        player->KilledMonsterCredit(448);
-                    }*/
+                    for (std::list<Player*>::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                        (*itr)->KilledMonsterCredit(NPC_HOGGER_KILL_CREDIT);
 
                     me->CastSpell(me, SPELL_TELEPORT_VISUAL_ONLY);
                     me->DespawnOrUnsummon();
