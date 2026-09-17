@@ -340,6 +340,9 @@ input:focus {
     overflow-wrap: anywhere;
 }
 
+#service-action-message { font-size: 0.75rem; overflow-wrap: anywhere; }
+#service-action-message:empty { display: none; }
+
 .service-metrics { white-space: pre-line; line-height: 1.6; }
 
 .service-controls {

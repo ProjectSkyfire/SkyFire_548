@@ -563,7 +563,7 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
         {
             hubControlThread = std::thread([hubControl]
             {
-                auto nextHeartbeat = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+                auto nextHeartbeat = std::chrono::steady_clock::now() + std::chrono::seconds(1);
                 while (!World::IsStopped())
                 {
                     std::vector<std::string> commands;
@@ -598,7 +598,7 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
                             std::to_string(uint32(metrics)) + " " + std::to_string(HubWorldTick.load(std::memory_order_relaxed)) + " " +
                             std::to_string(hubControl->SampleCpuUsage());
                         (void)hubControl->SendStatus(message.c_str());
-                        nextHeartbeat = now + std::chrono::seconds(5);
+                        nextHeartbeat = now + std::chrono::seconds(1);
                     }
                     Skyfire::SleepForMilliseconds(100);
                 }

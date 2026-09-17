@@ -24,7 +24,7 @@ const requests = [];
 let reply = { ok: true, json: async () => ({ accepted: true }) };
 const context = vm.createContext({
     document: { querySelector: element, createElement: () => new Element(), addEventListener() {} },
-    window: { setTimeout() {}, setInterval() { return 1; }, clearInterval() {} },
+    window: { HubStatus: { configure() {}, start() {}, stop() {}, refresh() {} }, setTimeout() {}, setInterval() { return 1; }, clearInterval() {} },
     TextEncoder, URLSearchParams, Date, console,
     fetch: async (url, options) => { requests.push({ url, options }); return reply; }
 });

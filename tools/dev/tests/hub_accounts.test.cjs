@@ -37,7 +37,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
                 return json({ job: "test-job" }, 202);
             }
             const name = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
-            if (["index.html", "app.js", "accounts.js", "app.css"].includes(name))
+            if (["status.js", "index.html", "app.js", "accounts.js", "app.css"].includes(name))
                 return route.fulfill({ contentType: name.endsWith("js") ? "text/javascript" : name.endsWith("css") ? "text/css" : "text/html", body: fs.readFileSync(path.join(web, name)) });
             return route.fulfill({ status: 404, body: "" });
         });

@@ -47,11 +47,12 @@
         <div id="app-shell" class="app-shell" hidden>
             <aside id="server-sidebar" class="server-sidebar" aria-labelledby="server-status-title">
                 <h2 id="server-status-title">Server status</h2>
-                <div id="status-summary" class="summary" aria-live="polite"></div>
+                <div id="status-summary" class="summary"></div>
+                <p id="service-action-message" role="status" aria-live="polite"></p>
                 <div id="component-grid" class="component-grid"></div>
                 <div class="refresh-meta">
                     <span id="signed-in-user"></span>
-                    <span id="last-updated" role="status">Waiting for status</span>
+                    <span id="last-updated">Waiting for status</span>
                 </div>
             </aside>
             <div class="app-content">
@@ -133,6 +134,7 @@
         </div>
     </main>
 
+    <script src="/status.js" defer></script>
     <script src="/accounts.js" defer></script>
     <script src="/app.js" defer></script>
 </body>

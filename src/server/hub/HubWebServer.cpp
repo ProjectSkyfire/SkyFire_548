@@ -816,6 +816,8 @@ std::string HubWebServer::ServeAsset(std::string const& target) const
         relativePath = "app.css";
     else if (target == "/app.js")
         relativePath = "app.js";
+    else if (target == "/status.js")
+        relativePath = "status.js";
     else if (target == "/accounts.js")
         relativePath = "accounts.js";
     else if (target == "/assets/skyfire-logo.png")
