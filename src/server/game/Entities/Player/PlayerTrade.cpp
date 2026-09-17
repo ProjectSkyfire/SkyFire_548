@@ -32,16 +32,14 @@ void Player::UpdateSoulboundTradeItems()
     if (m_itemSoulboundTradeable.empty())
         return;
 
-    // also checks for garbage data
-    for (ItemDurationList::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
+    // The list is keyed on GUID rather than Item*, because an item can leave the player's
+    // possession through a path that never calls RemoveTradeableItem -- and the resulting stale
+    // pointer used to crash here, in Player::Update, reading ITEM_FIELD_OWNER off freed memory.
+    // Resolving the GUID against the current inventory turns that into a miss we can drop.
+    for (ItemGuidSet::iterator itr = m_itemSoulboundTradeable.begin(); itr != m_itemSoulboundTradeable.end();)
     {
-        ASSERT(*itr);
-        if ((*itr)->GetOwnerGUID() != GetGUID())
-        {
-            m_itemSoulboundTradeable.erase(itr++);
-            continue;
-        }
-        if ((*itr)->CheckSoulboundTradeExpire())
+        Item* item = GetItemByGuid(*itr);
+        if (!item || item->GetOwnerGUID() != GetGUID() || item->CheckSoulboundTradeExpire())
         {
             m_itemSoulboundTradeable.erase(itr++);
             continue;
@@ -52,11 +50,12 @@ void Player::UpdateSoulboundTradeItems()
 
 void Player::AddTradeableItem(Item* item)
 {
-    m_itemSoulboundTradeable.push_back(item);
+    if (item)
+        m_itemSoulboundTradeable.insert(item->GetGUID());
 }
 
-/// @todo should never allow an item to be added to m_itemSoulboundTradeable twice
 void Player::RemoveTradeableItem(Item* item)
 {
-    m_itemSoulboundTradeable.remove(item);
+    if (item)
+        m_itemSoulboundTradeable.erase(item->GetGUID());
 }
