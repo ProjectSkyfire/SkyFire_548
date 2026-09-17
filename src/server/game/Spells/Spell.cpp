@@ -7751,6 +7751,12 @@ SpellCastResult Spell::CanOpenLock(uint32 effIndex, uint32 lockId, SkillType& sk
                     return SpellCastResult::SPELL_CAST_OK;
                 reqKey = true;
                 break;
+                // check key spell: only the lock's own spell opens it
+            case LOCK_KEY_SPELL:
+                if (m_spellInfo->Id == lockInfo->Index[j])
+                    return SpellCastResult::SPELL_CAST_OK;
+                reqKey = true;
+                break;
                 // check key skill (only single first fit case can be)
             case LOCK_KEY_SKILL:
             {

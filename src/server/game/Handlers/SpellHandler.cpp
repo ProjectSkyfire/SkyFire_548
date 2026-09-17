@@ -1136,7 +1136,30 @@ SpellInfo const* ValidateCastSpellInfo(WorldPacket& recvPacket, uint32 spellId)
     return spellInfo;
 }
 
-bool ValidateCastSource(WorldPacket& recvPacket, Player* player, Unit*& caster, SpellInfo const* spellInfo, uint32 spellId)
+// True when target is a gameobject whose lock names spellId as its key (LOCK_KEY_SPELL). The
+// client casts the lock's own spell to open such an object - Horde Plans (203225) is opened with
+// 77364 "Examining" - and the player never learns it, so the spellbook check below must allow it.
+static bool IsSpellKeyForTargetLock(Player* player, uint64 targetGuid, uint32 spellId)
+{
+    if (!IS_GAMEOBJECT_GUID(targetGuid))
+        return false;
+
+    GameObject* go = player->GetMap()->GetGameObject(targetGuid);
+    if (!go)
+        return false;
+
+    LockEntry const* lock = sLockStore.LookupEntry(go->GetGOInfo()->GetLockId());
+    if (!lock)
+        return false;
+
+    for (uint8 i = 0; i < MAX_LOCK_CASE; ++i)
+        if (lock->Type[i] == LOCK_KEY_SPELL && lock->Index[i] == spellId)
+            return true;
+
+    return false;
+}
+
+bool ValidateCastSource(WorldPacket& recvPacket, Player* player, Unit*& caster, SpellInfo const* spellInfo, uint32 spellId, uint64 targetGuid)
 {
     if (caster->GetTypeId() == TypeID::TYPEID_UNIT && !caster->ToCreature()->HasSpell(spellId))
     {
@@ -1153,9 +1176,11 @@ bool ValidateCastSource(WorldPacket& recvPacket, Player* player, Unit*& caster, 
 
     if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && !caster->ToPlayer()->HasActiveSpell(spellId))
     {
-        // Archaeology solves are cast from the journal UI, not the spellbook.
+        // Archaeology solves are cast from the journal UI, not the spellbook, and a spell-key lock
+        // is opened with the lock's own spell.
         Player* casterPlayer = caster->ToPlayer();
-        if (!spellInfo->ResearchProject || !casterPlayer->HasResearchingProject(spellInfo->ResearchProject))
+        bool const researchSolve = spellInfo->ResearchProject && casterPlayer->HasResearchingProject(spellInfo->ResearchProject);
+        if (!researchSolve && !IsSpellKeyForTargetLock(casterPlayer, targetGuid, spellId))
         {
             recvPacket.rfinish(); // prevent spam at ignore packet
             return false;
@@ -1496,7 +1521,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (!spellInfo)
         return;
 
-    if (!ValidateCastSource(recvPacket, _player, caster, spellInfo, spellId))
+    if (!ValidateCastSource(recvPacket, _player, caster, spellInfo, spellId, request.targetGuid))
         return;
 
     // Aura Overriden Spells
