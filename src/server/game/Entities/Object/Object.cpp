@@ -1018,7 +1018,10 @@ void Object::_LoadIntoDataField(std::string const& data, uint32 startOffset, uin
 
     for (uint32 index = 0; index < count; ++index)
     {
-        m_uint32Values[startOffset + index] = atol(tokens[index]);
+        // strtoul, not atol: these fields are bitmasks, and a word with bit 31 set exceeds
+        // LONG_MAX where long is 32-bit, which atol clamps to 0x7FFFFFFF - one real bit read
+        // back as 31.
+        m_uint32Values[startOffset + index] = uint32(strtoul(tokens[index], NULL, 10));
         _changesMask.SetBit(startOffset + index);
     }
 }
