@@ -546,6 +546,23 @@ void Player::UpdateMastery()
     value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
     value += GetRatingBonusValue(CombatRating::CR_MASTERY);
     SetFloatValue(PLAYER_FIELD_MASTERY, value);
+
+    // The specialisation's mastery passive reads PLAYER_FIELD_MASTERY when its effect amounts are
+    // calculated, and nothing else recalculates them, so the bonus would stay at the value it had
+    // when the passive was applied until the player relogs or respecs.
+    ChrSpecializationEntry const* specialization = sChrSpecializationStore.LookupEntry(GetTalentSpecialization(GetActiveSpec()));
+    if (!specialization || !specialization->MasterySpellId)
+        return;
+
+    Aura* mastery = GetAura(specialization->MasterySpellId, GetGUID());
+    if (!mastery)
+        return;
+
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (AuraEffect* effect = mastery->GetEffect(i))
+            // SPELL_AURA_MASTERY is an input to the value written above, not an output of it
+            if (effect->GetAuraType() != SPELL_AURA_MASTERY)
+                effect->RecalculateAmount();
 }
 
 
