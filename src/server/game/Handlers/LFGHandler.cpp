@@ -1029,7 +1029,10 @@ void WorldSession::SendLfgUpdateProposal(lfg::LfgProposal const& proposal)
     data.WriteGuidBytes(queueGuidObject, 6);
     data.append(roleData);
     data << uint32(proposal.encounters); // CompletedMask
-    data.WriteGuidBytes(queueGuidObject, 7, 1);
+    // slotGuid byte 7, not a second copy of queueGuidObject byte 7: both guids declare all eight
+    // mask bits above, so the client expects eight bytes of each.
+    data.WriteGuidBytes(slotGuid, 7);
+    data.WriteGuidBytes(queueGuidObject, 1);
     data.WriteGuidBytes(slotGuid, 0, 2);
     data << uint32(3);                   // Type
     data.WriteGuidBytes(slotGuid, 3);
