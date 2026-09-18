@@ -100,10 +100,10 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(31)) ||
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(63)) ||
                 (node.Type == Service::Auth && (node.Capabilities & 8)) ||
-                (node.Type == Service::World && (node.Capabilities & 16)))
-            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..31)."); return; }
+                (node.Type == Service::World && (node.Capabilities & 48)))
+            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..63)."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
             { Reject(Error::Conflict, "Node key is already leased or registry capacity is exhausted."); return; }
             _key = node.Key;

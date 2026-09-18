@@ -13,6 +13,7 @@
 
 class HubProcessSupervisor;
 class HubClusterServer;
+class HubAuthProxy;
 
 enum class HubConsolePollResult
 {
@@ -42,7 +43,8 @@ private:
 class HubCommandHandler
 {
 public:
-    HubCommandHandler(std::string bindIp, uint16 port, HubProcessSupervisor& processSupervisor, HubClusterServer& clusterServer);
+    HubCommandHandler(std::string bindIp, uint16 port, HubProcessSupervisor& processSupervisor,
+        HubClusterServer& clusterServer, HubAuthProxy& authnetProxy, HubAuthProxy& legacyProxy);
 
     // Returns false when the command requests server shutdown.
     bool Execute(std::string const& commandLine, HubCommandOrigin origin) const;
@@ -52,6 +54,7 @@ private:
     void PrintStatus() const;
     void PrintNodes() const;
     void PrintRegistry() const;
+    void PrintRouting() const;
     void PrintAdmins() const;
     void CreateAdmin(std::string const& username, std::string const& password, uint64 accessFlags) const;
     void ReloadConfiguration() const;
@@ -61,6 +64,8 @@ private:
     std::chrono::steady_clock::time_point _startedAt;
     HubProcessSupervisor& _processSupervisor;
     HubClusterServer& _clusterServer;
+    HubAuthProxy& _authnetProxy;
+    HubAuthProxy& _legacyProxy;
 };
 
 #endif

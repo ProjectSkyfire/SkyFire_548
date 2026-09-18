@@ -85,6 +85,18 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         registryNodes = [];
         await page.evaluate(() => loadStatus());
         assert.equal(await page.locator("#component-grid article").count(), 1);
+        registryNodes = [{ key: "ingress:Authnet ingress", name: "Authnet ingress", status: "online",
+            detail: "127.0.0.1:1118 | active 1 | routed 3 | rejected 0", managed: false }];
+        await page.evaluate(() => loadStatus());
+        const ingress = page.locator("#component-grid article").nth(1);
+        assert.equal(await ingress.getByRole("button", { name: "Start", exact: true }).isVisible(), false);
+        await ingress.evaluate(el => { window.originalIngress = el; });
+        registryNodes[0].detail = "127.0.0.1:1118 | active 2 | routed 4 | rejected 1";
+        await page.evaluate(() => loadStatus());
+        assert.ok((await ingress.textContent()).includes("routed 4"));
+        assert.equal(await ingress.evaluate(el => window.originalIngress === el), true, "routing updates must retain the card DOM");
+        registryNodes = [];
+        await page.evaluate(() => loadStatus());
         assert.equal(await page.evaluate(() => window.originalStop === document.querySelector("#component-grid .stop")), true);
         slow = true;
         const refresh = page.evaluate(() => Promise.all([loadStatus(), loadStatus(), loadStatus()]));

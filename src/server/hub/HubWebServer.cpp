@@ -641,6 +641,20 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
              << ",\"commandResult\":\"" << JsonEscape(
                  (session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) == HUB_ADMIN_ACCESS_ALL_LOCAL ? service.CommandResult : "") << "\"}";
     }
+    for (auto const& ingress : status.AuthIngress)
+    {
+        if (!ingress.Enabled) continue;
+        json << ",{\"key\":\"ingress:" << JsonEscape(ingress.Name) << "\",\"name\":\"" << JsonEscape(ingress.Name)
+             << "\",\"status\":\"online\",\"detail\":\"" << JsonEscape(ingress.Address) << ':' << ingress.Port
+             << " | active " << ingress.Active << " | routed " << ingress.Routed << " | rejected " << ingress.Rejected
+             << " | connect failures " << ingress.ConnectFailures << " | retries " << ingress.Retries
+             << " | stream failures " << ingress.StreamFailures << "\",\"managed\":false"
+             << ",\"routing\":{\"active\":" << ingress.Active << ",\"accepted\":" << ingress.Accepted
+             << ",\"routed\":" << ingress.Routed << ",\"rejected\":" << ingress.Rejected << ",\"attempts\":" << ingress.Attempts
+             << ",\"connectFailures\":" << ingress.ConnectFailures << ",\"retries\":" << ingress.Retries
+             << ",\"streamFailures\":" << ingress.StreamFailures << ",\"clientBytes\":" << ingress.ClientBytes
+             << ",\"backendBytes\":" << ingress.BackendBytes << "}}";
+    }
     for (auto const& node : status.ClusterNodes)
     {
         json << ",{\"key\":\"cluster:" << JsonEscape(node.Key) << "\",\"name\":\"" << JsonEscape(node.Name)

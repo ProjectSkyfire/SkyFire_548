@@ -5,6 +5,7 @@
 
 #include "HubConsole.h"
 #include "HubClusterServer.h"
+#include "HubAuthProxy.h"
 
 #include <algorithm>
 #include <array>
@@ -178,9 +179,9 @@ HubConsolePollResult HubConsoleInput::Poll(std::string& command)
 }
 
 HubCommandHandler::HubCommandHandler(std::string bindIp, uint16 port,
-    HubProcessSupervisor& processSupervisor, HubClusterServer& clusterServer)
+    HubProcessSupervisor& processSupervisor, HubClusterServer& clusterServer, HubAuthProxy& authnetProxy, HubAuthProxy& legacyProxy)
     : _bindIp(std::move(bindIp)), _port(port), _startedAt(std::chrono::steady_clock::now()),
-      _processSupervisor(processSupervisor), _clusterServer(clusterServer)
+      _processSupervisor(processSupervisor), _clusterServer(clusterServer), _authnetProxy(authnetProxy), _legacyProxy(legacyProxy)
 {
 }
 
@@ -200,6 +201,8 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         PrintStatus();
     else if (command == "registry")
         PrintRegistry();
+    else if (command == "routing")
+        PrintRouting();
     else if (command == "nodes")
         PrintNodes();
     else if (command == "admins")
@@ -348,7 +351,8 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  help       Show this command list.\n");
     std::printf("  status     Show hub uptime, endpoint, and database record counts.\n");
     std::printf("  nodes      List enabled routing nodes.\n");
-    std::printf("  registry   List authenticated live cluster registrations (not routing).\n");
+    std::printf("  registry   List authenticated live cluster registrations.\n");
+    std::printf("  routing    Show authentication ingress connections, routes and failures.\n");
     std::printf("  start <service>\n");
     std::printf("             Start and supervise a database-configured service.\n");
     std::printf("  stop <service>\n");
@@ -380,8 +384,9 @@ void HubCommandHandler::PrintStatus() const
     std::printf("Hub status:\n");
     std::printf("  Endpoint:      %s:%u\n", _bindIp.c_str(), unsigned(_port));
     std::printf("  Uptime:        %lld seconds\n", static_cast<long long>(uptime));
-    std::printf("  Active nodes:  %llu\n",
+    std::printf("  Configured active routes: %llu\n",
         static_cast<unsigned long long>(nodes ? nodes->GetRowCount() : 0));
+    std::printf("  Live cluster services: %llu\n", static_cast<unsigned long long>(_clusterServer.Snapshot().size()));
     std::printf("  Administrators: %llu\n",
         static_cast<unsigned long long>(admins ? admins->GetRowCount() : 0));
     for (HubManagedServiceStatus const& service : _processSupervisor.GetStatuses())
@@ -428,6 +433,21 @@ void HubCommandHandler::PrintRegistry() const
             for (auto realm : node.Realms) std::printf(" %u", realm);
             std::printf("\n");
         }
+    }
+}
+
+void HubCommandHandler::PrintRouting() const
+{
+    for (auto proxy : {&_authnetProxy, &_legacyProxy})
+    {
+        auto const s = proxy->Status();
+        if (!s.Enabled) { std::printf("  Authentication ingress listener disabled.\n"); continue; }
+        std::printf("  %s %s:%u active %llu accepted %llu routed %llu rejected %llu\n"
+            "    attempts %llu connect failures %llu retries %llu stream failures %llu bytes up/down %llu/%llu\n",
+            s.Name.c_str(), s.Address.c_str(), unsigned(s.Port), (unsigned long long)s.Active,
+            (unsigned long long)s.Accepted, (unsigned long long)s.Routed, (unsigned long long)s.Rejected,
+            (unsigned long long)s.Attempts, (unsigned long long)s.ConnectFailures, (unsigned long long)s.Retries,
+            (unsigned long long)s.StreamFailures, (unsigned long long)s.ClientBytes, (unsigned long long)s.BackendBytes);
     }
 }
 

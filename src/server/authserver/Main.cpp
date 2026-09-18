@@ -485,6 +485,7 @@ extern int main(int argc, char** argv)
     if (endpoint == "auto") endpoint = authnetEnabled ? "authnet" : "legacy";
     bool const advertiseAuthnet = endpoint == "authnet";
     advertisement.Capabilities = advertiseAuthnet ? 16 : 0;
+    if (advertiseAuthnet ? authnetAcceptor.UsesProxyProtocol() : acceptor.UsesProxyProtocol()) advertisement.Capabilities |= 32;
     advertisement.Port = uint16(advertiseAuthnet ? authnetPort : rmport);
     std::string clusterError;
     if (sConfigMgr->GetBoolDefault("Cluster.Enable", false) &&

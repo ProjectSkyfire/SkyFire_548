@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091701
+ConfVersion=2026091801
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -70,14 +70,60 @@ Hub.Port = 9100
 # again and explicitly report ready. Changing these settings requires hub restart.
 # In cluster mode, account changes require an available managed world. Direct
 # offline hub account writes are disabled until remote dispatch is implemented.
-# Local supervised processes continue using their existing pipes; network agents
-# are a separate follow-up milestone. Never share the cluster CA with web clients.
+# Local supervised processes continue using their existing control pipes alongside network agents.
+# Never share the cluster CA with web clients.
 Hub.Cluster.Enable = 0
 Hub.Cluster.Certificate = ""
 Hub.Cluster.PrivateKey = ""
 Hub.Cluster.CA = ""
 Hub.Cluster.LeaseSeconds = 15
 Hub.Cluster.MaxConnections = 128
+
+# Optional public authentication ingress. Each connection stays on one ready, leased auth node.
+# Authnet and legacy protocols have separate listeners and are never mixed. Gameplay stays direct.
+# Ports below avoid the existing backend ports (1119/3724). Point clients at the enabled ingress;
+# Each authserver agent advertises one selected Cluster.AuthEndpoint; a legacy ingress needs
+# a separately registered legacy endpoint, not the same node's unadvertised legacy listener.
+# choose BindIP and firewall rules for your public entry point. Do not use a backend listener port
+# on the same address as its ingress. Requires Hub.Cluster.Enable and registered auth agents.
+#
+# PreserveClientIP = 1 requires the backend's corresponding *.ProxyProtocol.Enable = 1 and
+# TrustedPeers allowlist. The node advertises this capability; mismatched nodes are not selected.
+# A trusted PROXY v1 header precedes the unchanged client stream on the backend connection only.
+# PreserveClientIP = 0 selects only raw backends: their IP bans, audit and IP-based checks see the
+# hub address, not the client. Use raw mode only for isolated compatibility tests.
+# Backend authentication traffic is plaintext unless the client protocol encrypts it; keep backend
+# links on a trusted private network. Registry mutual TLS does not encrypt forwarded traffic.
+#
+# Weights: space-separated node-key=weight pairs, 1..1000. Unlisted nodes have weight 1.
+# Only authenticated live registry entries are eligible; hub_nodes rows do not activate routes.
+# Capacity uses the greater of heartbeat load and locally reserved connections (including pending
+# connects). Heartbeat load is sampled; this is not a global hard limit across multiple hubs.
+# MaxConnections bounds each listener including connecting clients (1..65536).
+# ConnectTimeout 1..30 seconds; IdleTimeout 5..86400 seconds; MaxAttempts 1..16 distinct nodes.
+# Retry occurs only when TCP connect fails, before sending any header or client bytes.
+# A connected backend failure closes that connection without replay. No session migration.
+# Restart the hub for changes. Console 'routing' and web status expose route/failure counters.
+
+Hub.AuthnetIngress.Enable = 0
+Hub.AuthnetIngress.BindIP = "127.0.0.1"
+Hub.AuthnetIngress.Port = 1118
+Hub.AuthnetIngress.PreserveClientIP = 1
+Hub.AuthnetIngress.Weights = ""
+Hub.AuthnetIngress.MaxConnections = 4096
+Hub.AuthnetIngress.ConnectTimeout = 3
+Hub.AuthnetIngress.IdleTimeout = 300
+Hub.AuthnetIngress.MaxAttempts = 3
+
+Hub.LegacyIngress.Enable = 0
+Hub.LegacyIngress.BindIP = "127.0.0.1"
+Hub.LegacyIngress.Port = 3723
+Hub.LegacyIngress.PreserveClientIP = 1
+Hub.LegacyIngress.Weights = ""
+Hub.LegacyIngress.MaxConnections = 4096
+Hub.LegacyIngress.ConnectTimeout = 3
+Hub.LegacyIngress.IdleTimeout = 300
+Hub.LegacyIngress.MaxAttempts = 3
 
 #
 #    Console.Enable

@@ -19,6 +19,7 @@ namespace Skyfire::Cluster
     // Register: key, name, type(u8), numeric address, port(u16), realm/build/capacity(u32), capabilities(u32).
     // Capability bits: 1 world commands, 2 account administration, 4 world metrics, 8 realm list.
     // Bit 16 identifies an Authnet endpoint; auth nodes without it advertise legacy authentication.
+    // Bit 32 identifies an auth endpoint requiring trusted PROXY v1 client-address metadata.
     // Realms: count(u16, 1..64), unique nonzero realm IDs(u32), including the primary realm.
     // Nodes advertising bit 8 must send Realms before readiness; older peers use the primary realm.
     // Ready: ready(u8), load(u32). Heartbeat: load(u32). Deregister: empty.

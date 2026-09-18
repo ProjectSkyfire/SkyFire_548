@@ -9,6 +9,7 @@
 #include <cstring>
 #include <filesystem>
 #include <string>
+#include <sstream>
 #include <utility>
 
 #include "Common.h"
@@ -22,6 +23,7 @@
 #include "Database/DatabaseEnv.h"
 #include "HubConsole.h"
 #include "HubClusterServer.h"
+#include "HubAuthProxy.h"
 #include "Auth/AccountAdministration.h"
 #include "HubProcessSupervisor.h"
 #include "HubWebServer.h"
@@ -40,6 +42,41 @@ HubDatabaseWorkerPool HubDatabase;
 namespace
 {
     volatile std::sig_atomic_t StopEvent = 0;
+
+    bool OpenAuthIngress(HubAuthProxy& proxy, bool authnet, bool clusterEnabled, std::string& error)
+    {
+        std::string const prefix = authnet ? "Hub.AuthnetIngress." : "Hub.LegacyIngress.";
+        if (!sConfigMgr->GetBoolDefault((prefix + "Enable").c_str(), false)) return true;
+        if (!clusterEnabled) { error = prefix + "Enable requires Hub.Cluster.Enable."; return false; }
+        HubAuthProxyOptions options;
+        options.Authnet = authnet;
+        options.Address = sConfigMgr->GetStringDefault((prefix + "BindIP").c_str(), "127.0.0.1");
+        int const port = sConfigMgr->GetIntDefault((prefix + "Port").c_str(), authnet ? 1118 : 3723);
+        if (port < 1 || port > 65535) { error = prefix + "Port must be 1..65535."; return false; }
+        options.Port = uint16(port);
+        options.PreserveClientIP = sConfigMgr->GetBoolDefault((prefix + "PreserveClientIP").c_str(), true);
+        options.MaxConnections = sConfigMgr->GetIntDefault((prefix + "MaxConnections").c_str(), 4096);
+        options.ConnectTimeoutSeconds = sConfigMgr->GetIntDefault((prefix + "ConnectTimeout").c_str(), 3);
+        options.IdleTimeoutSeconds = sConfigMgr->GetIntDefault((prefix + "IdleTimeout").c_str(), 300);
+        options.MaxAttempts = sConfigMgr->GetIntDefault((prefix + "MaxAttempts").c_str(), 3);
+        std::istringstream weights(sConfigMgr->GetStringDefault((prefix + "Weights").c_str(), ""));
+        std::string entry;
+        while (weights >> entry)
+        {
+            auto const split = entry.find('=');
+            std::string const key = entry.substr(0, split);
+            std::string const value = split == std::string::npos ? "" : entry.substr(split + 1);
+            if (!Skyfire::Cluster::ValidKey(key) || value.empty() || value.size() > 4 ||
+                value.find_first_not_of("0123456789") != std::string::npos || options.Weights.count(key) || options.Weights.size() >= 128)
+            { error = prefix + "Weights requires unique node-key=weight entries separated by spaces."; return false; }
+            options.Weights.emplace(key, unsigned(std::stoul(value)));
+        }
+        if (!proxy.Open(std::move(options), error)) { error = prefix + error; return false; }
+        auto const status = proxy.Status();
+        SF_LOG_INFO("server.hub", "%s listening on %s:%u; client IP preservation %s.", status.Name.c_str(),
+            status.Address.c_str(), unsigned(status.Port), sConfigMgr->GetBoolDefault((prefix + "PreserveClientIP").c_str(), true) ? "enabled" : "disabled");
+        return true;
+    }
 
     std::filesystem::path GetExecutableDirectory(char const* program)
     {
@@ -266,6 +303,16 @@ int main(int argc, char** argv)
         }
     }
 
+    HubAuthProxy authnetProxy, legacyProxy;
+    std::string ingressError;
+    if (!OpenAuthIngress(authnetProxy, true, clusterEnabled, ingressError) ||
+        !OpenAuthIngress(legacyProxy, false, clusterEnabled, ingressError))
+    {
+        SF_LOG_ERROR("server.hub", "Authentication ingress startup failed: %s", ingressError.c_str());
+        authnetProxy.Close(); legacyProxy.Close(); clusterServer.Close(); webServer.Close(); StopDatabase();
+        return 1;
+    }
+
     int32 maxPingTime = sConfigMgr->GetIntDefault("MaxPingTime", 30);
     if (maxPingTime < 1 || maxPingTime > 1440)
     {
@@ -285,19 +332,22 @@ int main(int argc, char** argv)
 #endif
 
     SF_LOG_INFO("server.hub", "Configured hub endpoint: %s:%d.", bindIp.c_str(), port);
-    SF_LOG_INFO("server.hub", "Hub runtime shell initialized; connection distribution is not enabled yet.");
+    SF_LOG_INFO("server.hub", "Hub runtime initialized. Use 'routing' for authentication ingress status.");
     SF_LOG_INFO("server.hub", "Press Ctrl-C to stop.");
 
     bool const consoleEnabled = sConfigMgr->GetBoolDefault("Console.Enable", true);
     auto const hubStartedAt = std::chrono::steady_clock::now();
     HubConsoleInput console;
-    HubCommandHandler commandHandler(bindIp, uint16(port), processSupervisor, clusterServer);
+    HubCommandHandler commandHandler(bindIp, uint16(port), processSupervisor, clusterServer, authnetProxy, legacyProxy);
     if (consoleEnabled)
         console.PrintPrompt();
 
     while (!StopEvent)
     {
         clusterServer.Update();
+        auto const liveNodes = clusterServer.Snapshot();
+        authnetProxy.Update(liveNodes);
+        legacyProxy.Update(liveNodes);
         processSupervisor.Update();
 
         HubWebServiceCommand webCommand;
@@ -381,6 +431,7 @@ int main(int argc, char** argv)
                 status.Services.push_back(std::move(webService));
             }
             status.ClusterNodes = clusterServer.Snapshot();
+            status.AuthIngress = {authnetProxy.Status(), legacyProxy.Status()};
             webServer.UpdateStatus(status);
         }
 
@@ -411,6 +462,7 @@ int main(int argc, char** argv)
         Skyfire::SleepForMilliseconds(50);
     }
 
+    authnetProxy.Close(); legacyProxy.Close();
     clusterServer.Close();
     webServer.Close();
     processSupervisor.StopAll();

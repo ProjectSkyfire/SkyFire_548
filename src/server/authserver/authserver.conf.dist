@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026090802
+ConfVersion=2026091801
 
 ###################################################################################################
 # SECTION INDEX
@@ -62,6 +62,21 @@ Cluster.Capacity = 0
 Cluster.Certificate = ""
 Cluster.PrivateKey = ""
 Cluster.CA = ""
+
+# Enable only when this backend listener is reached through a trusted hub ingress.
+# When enabled, ALL connections require a PROXY v1 header from an exact TrustedPeers IP;
+# ordinary direct client connections on that listener are rejected, including localhost clients.
+# TrustedPeers is a space-separated list of 1..16 numeric hub source IPs (no CIDR/wildcards).
+# The original client address is restored before login, IP bans and packet logging run.
+# Headers are bounded to 108 bytes with a 5-second deadline and 128 pending headers per listener.
+# Keep backend listeners firewalled to the trusted hubs. Do not trust public client addresses.
+# Leave disabled to preserve standalone/direct login. Changes require authserver restart.
+# Cluster.AuthEndpoint advertises the selected listener's proxy requirement to the hub.
+
+Authnet.ProxyProtocol.Enable = 0
+Authnet.ProxyProtocol.TrustedPeers = "127.0.0.1"
+Realm.ProxyProtocol.Enable = 0
+Realm.ProxyProtocol.TrustedPeers = "127.0.0.1"
 
 ###################################################################################################
 # AUTH SERVER SETTINGS

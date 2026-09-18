@@ -8,6 +8,7 @@
 
 #include "Define.h"
 #include "Cluster/ClusterProtocol.h"
+#include "HubAuthProxy.h"
 #include "Auth/AccountAdministration.h"
 #include "Threading/BoostAsioThreadGroup.h"
 
@@ -49,6 +50,7 @@ struct HubWebStatusSnapshot
     uint64 UptimeSeconds = 0;
     std::vector<HubWebManagedServiceStatus> Services;
     std::vector<Skyfire::Cluster::Node> ClusterNodes;
+    std::vector<HubAuthProxyStatus> AuthIngress;
 };
 
 struct HubWebServiceCommand
