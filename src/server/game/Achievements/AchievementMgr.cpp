@@ -2856,6 +2856,33 @@ bool AchievementMgr<T>::RequirementsSatisfied(CriteriaEntry const* achievementCr
     return true;
 }
 
+// Criteria store a map difficulty as the pre-Cataclysm 0-based index into the map's own difficulty
+// list (dungeons 0 normal / 1 heroic, raids 0 10N / 1 25N / 2 10H / 3 25H), not as a DifficultyID.
+// Difficulties introduced after that scheme have no index, so they get one no criterion can match.
+static uint32 GetCriteriaDifficultyIndex(DifficultyID difficulty)
+{
+    switch (difficulty)
+    {
+        case DIFFICULTY_NONE:
+        case DIFFICULTY_NORMAL:
+        case DIFFICULTY_10MAN_NORMAL:
+        case DIFFICULTY_40MAN:
+        case DIFFICULTY_SCE_NORMAL:
+            return 0;
+        case DIFFICULTY_HEROIC:
+        case DIFFICULTY_25MAN_NORMAL:
+        case DIFFICULTY_SCE_HEROIC:
+            return 1;
+        case DIFFICULTY_10MAN_HEROIC:
+        case DIFFICULTY_CHALLENGE:
+            return 2;
+        case DIFFICULTY_25MAN_HEROIC:
+            return 3;
+        default:
+            return 0xFF;
+    }
+}
+
 template<class T>
 bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* criteria, uint64 miscValue1, uint64 miscValue2, uint64 miscValue3, Unit const* unit, Player* referencePlayer) const
 {
@@ -2941,7 +2968,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
                 break;
             }
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_MAP_DIFFICULTY: // 20
-                if (uint32(referencePlayer->GetMap()->GetDifficulty()) != reqValue)
+                if (GetCriteriaDifficultyIndex(referencePlayer->GetMap()->GetDifficulty()) != reqValue)
                     return false;
                 break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_SOURCE_RACE: // 25
