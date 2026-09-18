@@ -470,6 +470,10 @@ namespace lfg
         void SetState(uint64 guid, LfgState state);
         void SetVoteKick(uint64 guid, bool active);
         void RemovePlayerData(uint64 guid);
+        /// Drops a queue entry left behind without a matching player state.
+        /// Without it the queue keeps sending status updates to someone who
+        /// already left.
+        void RemoveStaleQueueEntry(uint64 guid, uint32 queueId);
         void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap, bool isContinue);
         void _SaveToDB(uint64 guid, uint32 db_guid);
         LFGDungeonData const* GetLFGDungeon(uint32 id);
@@ -480,6 +484,13 @@ namespace lfg
 
         // Generic
         LFGQueue& GetQueue(uint64 guid);
+        /// Looks a queue up by its own id.
+        ///
+        /// GetQueue above takes the guid of whoever sits in the queue and
+        /// resolves the id from it. Passing a queue id to that overload still
+        /// compiles, since both are integers, and quietly returns a different
+        /// queue.
+        LFGQueue& GetQueueById(uint8 queueId) { return QueuesStore[queueId]; }
 
         LfgDungeonSet const& GetDungeonsByRandom(uint32 randomdungeon);
         LfgType GetDungeonType(uint32 dungeon);

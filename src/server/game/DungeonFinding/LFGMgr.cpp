@@ -835,6 +835,19 @@ namespace lfg
         }
     }
 
+    void LFGMgr::RemoveStaleQueueEntry(uint64 guid, uint32 queueId)
+    {
+        LFGQueue& queue = GetQueueById(uint8(queueId));
+        if (!queue.HasQueueData(guid))
+            return;
+
+        SF_LOG_DEBUG("lfg", "Player: %u had a queue entry with no matching state, removed from queue %u.",
+            GUID_LOPART(guid), queueId);
+
+        queue.RemoveFromQueue(guid);
+        SendLfgUpdateStatus(guid, LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE), false);
+    }
+
     void LFGMgr::LeaveSoloLfg(uint64 guid, uint32 queueId, bool disconnected)
     {
         SF_LOG_DEBUG("lfg.leave", "Player: %u left queue.", GUID_LOPART(guid));
@@ -844,7 +857,11 @@ namespace lfg
         {
             case LFG_STATE_QUEUED:
             {
-                LFGQueue& queue = GetQueue(queueId);
+                // GetQueueById, not GetQueue: the id is already at hand here.
+                // GetQueue takes the guid of whoever is queued and resolves the
+                // id itself, so handing it an id compiles and removes from an
+                // unrelated queue, leaving the player's own entry untouched.
+                LFGQueue& queue = GetQueueById(uint8(queueId));
                 queue.RemoveFromQueue(guid);
                 SendLfgUpdateStatus(guid, LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE), false);
                 ClearQueueState(guid, "Leave queued solo player");
@@ -873,12 +890,22 @@ namespace lfg
             }
             case LFG_STATE_NONE:
             case LFG_STATE_RAIDBROWSER:
+            {
+                // State saying nothing is going on does not mean the queue is
+                // clean. The queue entry and the player state are stored apart,
+                // and after leaving a dungeon the state is cleared while the
+                // entry survives. When it does, the queue keeps sending status
+                // updates with the timer running and the client stays on a
+                // paused queue no matter how often the player asks to leave.
+                RemoveStaleQueueEntry(guid, queueId);
                 break;
+            }
             case LFG_STATE_DUNGEON:
             case LFG_STATE_FINISHED_DUNGEON:
             case LFG_STATE_BOOT:
             {
                 ClearQueueState(guid, "Leave solo dungeon player");
+                RemoveStaleQueueEntry(guid, queueId);
                 break;
             }
         }
