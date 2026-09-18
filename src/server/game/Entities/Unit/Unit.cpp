@@ -53,6 +53,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+#include <array>
 #include <math.h>
 
 float baseMoveSpeed[MAX_MOVE_TYPE] =
@@ -5682,13 +5683,14 @@ void CharmInfo::InitPetActionBar()
         SetActionBar(ACTION_BAR_INDEX_PET_SPELL_START + i, 0, ACT_PASSIVE);
 
     // last 3 SpellOrActions are reactions
+    //
+    // Mists has three pet stances - Assist, Defensive, Passive - Aggressive having been removed in
+    // 5.0.4. These slots were filled with COMMAND_ATTACK - i, arithmetic on the command enum
+    // rather than the reaction one, which yields Aggressive, Assist, Passive: a stance the client
+    // no longer has, and no Defensive button at all.
+    static std::array<ReactStates, 3> const petStances = { REACT_ASSIST, REACT_DEFENSIVE, REACT_PASSIVE };
     for (uint32 i = 0; i < ACTION_BAR_INDEX_END - ACTION_BAR_INDEX_PET_SPELL_END; ++i)
-    {
-        if (i != 1)
-            SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + i, COMMAND_ATTACK - i, ACT_REACTION);
-        else
-            SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + i, REACT_ASSIST, ACT_REACTION);
-    }
+        SetActionBar(ACTION_BAR_INDEX_PET_SPELL_END + i, petStances[i], ACT_REACTION);
 }
 
 void CharmInfo::InitEmptyActionBar(bool withAttack)
@@ -5878,6 +5880,13 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
         ActiveStates type = ActiveStates(atol(*iter));
         ++iter;
         uint32 action = uint32(atol(*iter));
+
+        // The stance slots are fixed by the client build rather than arranged by the player, so
+        // the ones InitPetActionBar just wrote stand. Restoring them would let a bar saved before
+        // Aggressive was removed in 5.0.4 outlive the fix for good; dropping them heals such a row
+        // on the next summon, and the next save writes the corrected bar back out.
+        if (index >= ACTION_BAR_INDEX_PET_SPELL_END)
+            continue;
 
         PetActionBar[index].SetActionAndType(action, type);
 
