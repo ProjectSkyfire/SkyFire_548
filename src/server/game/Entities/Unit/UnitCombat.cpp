@@ -1661,7 +1661,10 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool add
     if (min_damage > max_damage)
         std::swap(min_damage, max_damage);
 
-    if (max_damage == 0.0f)
+    // Guard the value the modulo below uses, which is the integer: anything in (0.0, 1.0)
+    // truncates to 0, and rand() % 0 is an integer divide by zero. A negative max is caught
+    // here too, since casting that to uint32 gives a huge modulus.
+    if (max_damage < 1.0f)
         max_damage = 5.0f;
 
     return std::rand() % (uint32)max_damage + (uint32)min_damage;
