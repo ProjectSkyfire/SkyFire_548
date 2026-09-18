@@ -539,6 +539,7 @@ struct EnchantDuration
 
 typedef std::list<EnchantDuration> EnchantDurationList;
 typedef std::list<Item*> ItemDurationList;
+typedef std::set<uint64> ItemGuidSet;
 
 
 enum PlayerFlags
@@ -3459,7 +3460,10 @@ protected:
 
     EnchantDurationList m_enchantDuration;
     ItemDurationList m_itemDuration;
-    ItemDurationList m_itemSoulboundTradeable;
+    // Soulbound-tradeable items are held by GUID, not by pointer: the item can be destroyed
+    // by a path that does not call RemoveTradeableItem, and a stale Item* here crashed
+    // UpdateSoulboundTradeItems inside Player::Update.
+    ItemGuidSet m_itemSoulboundTradeable;
 
     void ResetTimeSync();
     void SendTimeSync();
