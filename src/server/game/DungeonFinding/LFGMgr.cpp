@@ -2553,45 +2553,47 @@ namespace lfg
         return plr1 && plr2 && (plr1->GetSocial()->HasIgnore(low2) || plr2->GetSocial()->HasIgnore(low1));
     }
 
+    // These use FindPlayerInOrOutOfWorld: a far teleport takes the player out of world for its
+    // duration, and sending a packet needs a session, not a player standing on a map.
     void LFGMgr::SendLfgRoleChosen(uint64 guid, uint64 pguid, uint8 roles)
     {
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
             player->GetSession()->SendLfgRoleChosen(pguid, roles);
     }
 
     void LFGMgr::SendLfgRoleCheckUpdate(uint64 guid, LfgRoleCheck const& roleCheck)
     {
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
             player->GetSession()->SendLfgRoleCheckUpdate(roleCheck);
     }
 
     void LFGMgr::SendLfgUpdateStatus(uint64 guid, LfgUpdateData const& data, bool party)
     {
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
             player->GetSession()->SendLfgUpdateStatus(data, party);
     }
 
     void LFGMgr::SendLfgJoinResult(uint64 guid, LfgJoinResultData const& data)
     {
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
             player->GetSession()->SendLfgJoinResult(data);
     }
 
     void LFGMgr::SendLfgBootProposalUpdate(uint64 guid, LfgPlayerBoot const& boot)
     {
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
             player->GetSession()->SendLfgBootProposalUpdate(boot);
     }
 
     void LFGMgr::SendLfgUpdateProposal(uint64 guid, LfgProposal const& proposal)
     {
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
             player->GetSession()->SendLfgUpdateProposal(proposal);
     }
 
     void LFGMgr::SendLfgQueueStatus(uint64 guid, LfgQueueStatusData const& data)
     {
-        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
             player->GetSession()->SendLfgQueueStatus(data);
     }
 
