@@ -1640,6 +1640,10 @@ static float tangent(float x)
     return 0.0f;
 }
 
+// Lateral tolerance of a trajectory shot, in yards. HasInLine() adds the target's own bounding
+// radius on top of it.
+static constexpr float TRAJECTORY_MISSILE_SIZE = 3.0f;
+
 #define DEBUG_TRAJ(a) //a
 
 void Spell::SelectImplicitTrajTargets()
@@ -1679,7 +1683,11 @@ void Spell::SelectImplicitTrajTargets()
 
         const float size = std::max((*itr)->GetObjectSize() * 0.7f, 1.0f); // 1/sqrt(3)
         /// @todo all calculation should be based on src instead of m_caster
-        const float objDist2d = m_targets.GetSrcPos()->GetExactDist2d(*itr) * std::cos(m_targets.GetSrcPos()->GetRelativeAngle(*itr));
+        // Project onto the same axis the impact point below is computed on. GetRelativeAngle()
+        // subtracts the source Position's own orientation, which is never assigned for a spell's
+        // src and stays 0, so candidates were measured against due east, not the firing direction.
+        const float objDist2d = m_targets.GetSrcPos()->GetExactDist2d(*itr) *
+            std::cos(m_targets.GetSrcPos()->GetAngle((*itr)->GetPositionX(), (*itr)->GetPositionY()) - m_caster->GetOrientation());
         const float dz = (*itr)->GetPositionZ() - m_targets.GetSrcPos()->m_positionZ;
 
         DEBUG_TRAJ(SF_LOG_ERROR("spells", "Spell::SelectTrajTargets: check %u, dist between %f %f, height between %f %f.", (*itr)->GetEntry(), objDist2d - size, objDist2d + size, dz - size, dz + size);)
@@ -8293,8 +8301,8 @@ namespace Skyfire
 
     bool WorldObjectSpellTrajTargetCheck::operator()(WorldObject* target)
     {
-        // return all targets on missile trajectory (0 - size of a missile)
-        if (!_caster->HasInLine(target, 0))
+        // return all targets on missile trajectory
+        if (!_caster->HasInLine(target, TRAJECTORY_MISSILE_SIZE))
             return false;
         return WorldObjectSpellAreaTargetCheck::operator ()(target);
     }
