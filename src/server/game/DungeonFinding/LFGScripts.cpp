@@ -212,8 +212,14 @@ namespace lfg
             return;
         }
 
-        // If group is being formed after proposal success do nothing more
-        if (state == LFG_STATE_PROPOSAL && method == GROUP_REMOVEMETHOD_DEFAULT)
+        // If group is being formed after proposal success do nothing more.
+        //
+        // state belongs to the group being left. When a player queued as part of an ordinary
+        // party, MakeNewGroup() pulls them out of that party, and it carries no LFG state - so
+        // this guard missed and LeaveLfg() below removed the proposal being converted. Check the
+        // player's own state as well.
+        LfgState const playerState = sLFGMgr->GetState(guid);
+        if ((state == LFG_STATE_PROPOSAL || playerState == LFG_STATE_PROPOSAL) && method == GROUP_REMOVEMETHOD_DEFAULT)
         {
             // LfgData: Remove player from group
             sLFGMgr->SetGroup(guid, 0);
