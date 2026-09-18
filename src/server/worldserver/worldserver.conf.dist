@@ -85,7 +85,7 @@ Cluster.Enable = 0
 # Hub failure/restart fails pending handoffs closed; clients must log in again. No replay/retry
 # of uncertain consumption and no active-world-session migration. The hub stores no session keys.
 # Tokens bind account, purpose, client IP, realm and the current destination world registration.
-# One ready world registration per realm is required until live realm routing chooses destinations.
+# Each realm has one world owner; independent gameplay processes are not interchangeable replicas.
 # All auth nodes continue sharing LoginDatabaseInfo for account and Authnet session-key records.
 Cluster.Handoff.Enable = 0
 

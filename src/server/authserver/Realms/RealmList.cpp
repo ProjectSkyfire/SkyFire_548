@@ -6,6 +6,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "RealmList.h"
+#include "Configuration/Config.h"
 
 RealmList::RealmList() : m_UpdateInterval(0), m_NextUpdateTime(time(NULL)) { }
 
@@ -56,11 +57,40 @@ void RealmList::UpdateIfNeed()
     UpdateRealms();
 }
 
+RealmList::RealmMap RealmList::Snapshot()
+{
+    UpdateIfNeed();
+    auto realms = m_realms;
+    using namespace Skyfire::Cluster;
+    if (!Realms::Client.Enabled()) return realms;
+    auto now = Realms::Now();
+    for (auto& entry : realms)
+    {
+        auto& realm = entry.second;
+        auto route = Realms::Client.Read({realm.m_ID,realm.gamebuild},now);
+        realm.clusterState = route.State;
+        // Identity, client flags and access restrictions remain database-owned.
+        // Invalid marks startup/shutdown and must never be advertised as a route.
+        if (route.State != Realms::Status::Ready || (realm.flag & (REALM_FLAG_INVALID | REALM_FLAG_OFFLINE)))
+        {
+            realm.flag = RealmFlags(realm.flag | REALM_FLAG_OFFLINE);
+            realm.ExternalAddress = Skyfire::Net::Address("0.0.0.0",0);
+            realm.LocalAddress = realm.ExternalAddress;
+        }
+        else
+        {
+            realm.ExternalAddress = Skyfire::Net::Address(route.Address,route.Port);
+            realm.LocalAddress = realm.ExternalAddress;
+        }
+    }
+    return realms;
+}
+
 void RealmList::UpdateRealms(bool init)
 {
     SF_LOG_INFO("server.authserver", "Updating Realm List...");
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_AUTH_REALMLIST);
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(sConfigMgr->GetBoolDefault("Cluster.RealmDirectory.Enable",false) ? LOGIN_SEL_CLUSTER_REALMLIST : LOGIN_SEL_AUTH_REALMLIST);
     PreparedQueryResult result = LoginDatabase.Query(stmt);
 
     // Circle through results and add them to the realm map
@@ -96,4 +126,8 @@ void RealmList::UpdateRealms(bool init)
                     m_realms[name].ExternalAddress.GetHost().c_str(), port);
         } while (result->NextRow());
     }
+    std::vector<Skyfire::Cluster::Realms::Query> queries;
+    for (auto const& entry : m_realms) queries.push_back({entry.second.m_ID,entry.second.gamebuild});
+    Skyfire::Cluster::Realms::Client.SetQueries(std::move(queries));
+
 }

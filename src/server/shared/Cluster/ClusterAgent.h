@@ -1,4 +1,7 @@
-/* Part of Project SkyFire. See LICENSE.md for copyright information. */
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
 #ifndef SKYFIRE_CLUSTER_AGENT_H
 #define SKYFIRE_CLUSTER_AGENT_H
 #include "ClusterProtocol.h"
@@ -12,6 +15,7 @@ namespace Skyfire::Cluster
     {
         bool Enabled = false;
         bool HandoffEnabled = false;
+        bool RealmDirectoryEnabled = false;
         std::string Host, Certificate, PrivateKey, CA;
         std::uint16_t Port = 9100;
         Node Advertisement;

@@ -5,6 +5,7 @@
 
 #include "HubConsole.h"
 #include "HubClusterServer.h"
+#include "Cluster/RealmDirectory.h"
 #include "HubAuthProxy.h"
 
 #include <algorithm>
@@ -203,6 +204,22 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         PrintRegistry();
     else if (command == "routing")
         PrintRouting();
+    else if (command == "realms")
+    {
+        auto const nodes = _clusterServer.Snapshot();
+        auto result = LoginDatabase.Query(LoginDatabase.GetPreparedStatement(LOGIN_SEL_CLUSTER_REALMLIST));
+        if (result) do
+        {
+            auto fields = result->Fetch();
+            auto route = Skyfire::Cluster::Realms::Resolve({fields[0].GetUInt32(),fields[11].GetUInt32()},nodes,Skyfire::Cluster::Realms::Now(),true);
+            auto flags = fields[7].GetUInt8();
+            bool const unavailable = (flags & 3) || route.State != Skyfire::Cluster::Realms::Status::Ready;
+            std::printf("Realm %u (%s): %s%s, endpoint %s:%u\n",fields[0].GetUInt32(),fields[1].GetString().c_str(),
+                (flags & 3) ? "offline" : Skyfire::Cluster::Realms::Name(route.State),
+                fields[9].GetUInt8() ? " | access restricted" : "",unavailable ? "-" : route.Address.c_str(),unavailable ? 0 : unsigned(route.Port));
+        } while (result->NextRow());
+        else std::printf("No configured realms available.\n");
+    }
     else if (command == "handoffs")
     {
         auto const status = _clusterServer.HandoffStatus();
@@ -374,8 +391,9 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  nodes      List enabled routing nodes.\n");
     std::printf("  registry   List authenticated live cluster registrations.\n");
     std::printf("  routing    Show authentication ingress connections, routes and failures.\n");
+    std::printf("  realms     Show configured realm identities and live world routes.\n");
     std::printf("  handoffs   Show shared handoff counters (no token material).\n");
-    std::printf("  cluster <drain|disable|enable> <node-key>  Persist authentication routing policy.\n");
+    std::printf("  cluster <drain|disable|enable> <node-key>  Persist auth/world routing policy (does not stop gameplay).\n");
     std::printf("  start <service>\n");
     std::printf("             Start and supervise a database-configured service.\n");
     std::printf("  stop <service>\n");

@@ -4,6 +4,7 @@ The copied config uses temporary TLS identities and ports; no managed service is
 import argparse
 import concurrent.futures
 import os
+import queue
 from pathlib import Path
 import re
 import socket
@@ -45,6 +46,7 @@ def main():
     parser.add_argument('--hub-config', required=True)
     parser.add_argument('--client-probe', required=True)
     parser.add_argument('--openssl', default='openssl')
+    parser.add_argument('--agent-probe')
     args = parser.parse_args()
     hidden = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
     with tempfile.TemporaryDirectory(prefix='skyfire-handoff-') as temp:
@@ -59,7 +61,7 @@ def main():
         openssl('req','-x509','-newkey','rsa:2048','-nodes','-keyout','ca.key','-out','ca.pem',
                 '-days','1','-subj','/CN=Handoff test CA','-addext','basicConstraints=critical,CA:TRUE',
                 '-addext','keyUsage=critical,keyCertSign,cRLSign','-addext','subjectKeyIdentifier=hash')
-        for name in ('hub','auth-a','auth-b','world','unknown'):
+        for name in ('hub','auth-a','auth-b','world','unknown','auth-dir','world-b','auth-agent'):
             openssl('req','-newkey','rsa:2048','-nodes','-keyout',name+'.key','-out',name+'.csr','-subj','/CN='+name)
             (root/'extensions.txt').write_text('basicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\nsubjectAltName=DNS:localhost\nextendedKeyUsage='+
                                              ('serverAuth' if name == 'hub' else 'clientAuth')+'\n')
@@ -73,7 +75,7 @@ def main():
                   'Hub.Cluster.Certificate':'"'+str(root/'hub.pem')+'"',
                   'Hub.Cluster.PrivateKey':'"'+str(root/'hub.key')+'"',
                   'Hub.Cluster.CA':'"'+str(root/'ca.pem')+'"',
-                  'Hub.AuthnetIngress.Enable':'0','Hub.LegacyIngress.Enable':'0',
+                  'Hub.AuthnetIngress.Enable':'0','Hub.LegacyIngress.Enable':'0','Hub.Cluster.LeaseSeconds':'5',
                   'Hub.PacketLog.Enable':'0','PacketLogServerControlFile':'""','Web.Enable':'0',
                   'Console.Enable':'1','LogsDir':'"'+str(root)+'"'}
         for key, value in values.items():
@@ -94,15 +96,16 @@ def main():
             context = ssl.create_default_context(cafile=str(root/'ca.pem'))
             context.load_cert_chain(str(root/(name+'.pem')),str(root/(name+'.key')))
             return context.wrap_socket(socket.create_connection(('127.0.0.1',port),timeout=3),server_hostname='localhost')
-        def register(name, service):
+        def register(name, service, realm=1, capabilities=None):
             sock = connect(name)
             body = string(name)+string(name)+bytes([service])+string('127.0.0.1')
-            body += struct.pack('!HIIII',1120 if service == 1 else 8085,1 if service == 2 else 0,18414,100,80 if service == 1 else 72)
+            body += struct.pack('!HIIII',1120 if service == 1 else 8085,realm if service == 2 else 0,18414,100,capabilities if capabilities is not None else (80 if service == 1 else 72))
             assert exchange(sock,1,body)[0] == 0x8000
             if service == 2:
-                assert exchange(sock,5,struct.pack('!HI',1,1))[0] == 0x8000
+                assert exchange(sock,5,struct.pack('!HI',1,realm))[0] == 0x8000
             assert exchange(sock,2,struct.pack('!BI',1,0))[0] == 0x8000
             registrations.append(sock)
+            return sock
         def request(name, action, purpose=1, account=123456789, realm=0, token='-', ttl=0, evidence='-', address='127.0.0.1'):
             body = struct.pack('!BBBIII',1,action,purpose,account,realm,ttl)+string(address)+string(evidence)+string(token)
             with connect(name) as sock:
@@ -120,6 +123,92 @@ def main():
                     time.sleep(.1)
             else:
                 raise RuntimeError('Isolated hub startup timed out')
+            # Directory protocol: distinct realms, incompatible build, readiness, overlapping
+            # ownership, deregistration, lease expiry and stale selected-owner rejection.
+            directory = register('auth-dir',1,capabilities=208)
+            world_a = register('world',2)
+            world_b = register('world-b',2,realm=2)
+            def query(pairs):
+                kind, body = exchange(directory,7,struct.pack('!BH',1,len(pairs))+b''.join(struct.pack('!II',*p) for p in pairs))
+                assert kind == 0x8002 and body[0] == 1
+                count = struct.unpack_from('!H',body,1)[0]; pos = 3; routes = []
+                def text():
+                    nonlocal pos
+                    size = struct.unpack_from('!H',body,pos)[0]; pos += 2
+                    value = body[pos:pos+size].decode(); pos += size; return value
+                for _ in range(count):
+                    realm, build, state = struct.unpack_from('!IIB',body,pos); pos += 9
+                    address = text(); port_, ttl = struct.unpack_from('!HI',body,pos); pos += 6
+                    destination = text(); routes.append((realm,build,state,address,port_,ttl,destination))
+                assert pos == len(body) and count == len(pairs)
+                return routes
+            routes = query([(1,18414),(2,18414),(3,18414)])
+            assert [v[2] for v in routes] == [1,1,0]
+            assert routes[0][6] != routes[1][6] and all(0 < v[5] <= 3000 for v in routes[:2])
+            assert query([(1,12345)])[0][2] == 4
+            selected_owner = routes[0][6]
+            def issue_selected(owner):
+                body = struct.pack('!BBBIII',2,1,2,123456790,1,60)+string('127.0.0.1')+string('a'*64)+string('-')+string(owner)
+                with connect('auth-dir') as sock:
+                    kind, reply = exchange(sock,6,body); assert kind == 0x8001; return reply[0]
+            assert issue_selected(selected_owner) == 0
+            assert exchange(world_a,2,struct.pack('!BI',0,0))[0] == 0x8000
+            assert query([(1,18414)])[0][2] == 0
+            assert exchange(world_a,2,struct.pack('!BI',1,0))[0] == 0x8000
+            assert exchange(world_b,5,struct.pack('!HII',2,2,1))[0] == 0x8000
+            assert query([(1,18414)])[0][2] == 5
+            assert exchange(world_b,5,struct.pack('!HI',1,2))[0] == 0x8000
+            assert exchange(world_a,4,b'')[0] == 0x8000
+            assert query([(1,18414)])[0][2] == 0
+            world_a.close(); registrations.remove(world_a)
+            world_a = register('world',2)
+            assert query([(1,18414)])[0][6] != selected_owner
+            assert issue_selected(selected_owner) == 2
+            # Keep the query caller alive but let world leases expire without heartbeats.
+            for _ in range(6):
+                time.sleep(1)
+                assert exchange(directory,3,struct.pack('!I',0))[0] == 0x8000
+            assert [v[2] for v in query([(1,18414),(2,18414)])] == [0,0]
+            for sock in registrations: sock.close()
+            registrations.clear()
+            time.sleep(.2)
+            print('Live realm TLS checks passed: separate realms, readiness, build, conflict, restart, selection binding, lease expiry.')
+            if args.agent_probe:
+                world_a = register('world',2); world_b = register('world-b',2,realm=2)
+                agent = subprocess.Popen([str(Path(args.agent_probe).resolve()),str(port),str(root/'ca.pem'),
+                        str(root/'auth-agent.pem'),str(root/'auth-agent.key')],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+                        text=True,creationflags=hidden)
+                events = queue.Queue()
+                def read_agent():
+                    for line in agent.stdout: events.put(line.strip())
+                reader_thread = threading.Thread(target=read_agent,daemon=True); reader_thread.start()
+                def expect_agent(expected, live_worlds):
+                    deadline = time.monotonic()+20
+                    while time.monotonic() < deadline:
+                        try:
+                            event = events.get(timeout=.25)
+                            if event != expected: raise RuntimeError('Agent probe: '+event)
+                            return
+                        except queue.Empty:
+                            if agent.poll() is not None: raise RuntimeError('Agent probe exited unexpectedly')
+                            for peer in live_worlds: assert exchange(peer,3,struct.pack('!I',0))[0] == 0x8000
+                    raise RuntimeError('Agent probe timed out waiting for '+expected)
+                try:
+                    expect_agent('READY',[world_a,world_b])
+                    assert exchange(world_a,2,struct.pack('!BI',0,0))[0] == 0x8000
+                    assert exchange(world_b,4,b'')[0] == 0x8000
+                    world_b.close(); registrations.remove(world_b)
+                    expect_agent('OFFLINE',[world_a])
+                    assert exchange(world_a,2,struct.pack('!BI',1,0))[0] == 0x8000
+                    world_b = register('world-b',2,realm=2)
+                    expect_agent('RECOVERED',[world_a,world_b])
+                    assert agent.wait(timeout=5) == 0
+                finally:
+                    if agent.poll() is None: agent.terminate(); agent.wait(timeout=5)
+                    reader_thread.join(timeout=2)
+                for peer in registrations: peer.close()
+                registrations.clear(); time.sleep(.2)
+                print('Actual C++ agent passed: background multi-batch refresh, offline withdrawal, world restart recovery and cache clearing on stop.')
             register('auth-a',1); register('auth-b',1); register('world',2)
             def heartbeat():
                 while not stopping.wait(1):

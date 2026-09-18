@@ -21,6 +21,7 @@ namespace Skyfire::Cluster
     // Bit 16 identifies an Authnet endpoint; auth nodes without it advertise legacy authentication.
     // Bit 32 identifies an auth endpoint requiring trusted PROXY v1 client-address metadata.
     // Bit 64 opts into hub-owned shared handoff enforcement (subprotocol v1, message 6).
+    // Bit 128 opts auth nodes into live realm queries (subprotocol v1, message 7).
     // Realms: count(u16, 1..64), unique nonzero realm IDs(u32), including the primary realm.
     // Nodes advertising bit 8 must send Realms before readiness; older peers use the primary realm.
     // Ready: ready(u8), load(u32). Heartbeat: load(u32). Deregister: empty.

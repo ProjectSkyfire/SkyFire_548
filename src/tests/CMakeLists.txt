@@ -937,3 +937,29 @@ if(WIN32)
 endif()
 add_test(NAME hub_auth_proxy_tests COMMAND hub_auth_proxy_tests)
 set_tests_properties(hub_auth_proxy_tests PROPERTIES TIMEOUT 60)
+
+add_executable(realm_directory_tests RealmDirectoryTests.cpp)
+target_include_directories(realm_directory_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+target_link_libraries(realm_directory_tests Threads::Threads)
+add_test(NAME realm_directory_tests COMMAND realm_directory_tests)
+
+add_executable(realm_directory_agent_probe
+  RealmDirectoryAgentProbe.cpp RealmSocketLogStub.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cluster/ClusterAgent.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cluster/HandoffClient.cpp)
+target_include_directories(realm_directory_agent_probe PRIVATE
+  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+target_link_libraries(realm_directory_agent_probe Threads::Threads ${OPENSSL_LIBRARIES})
+if(TARGET Boost::headers)
+  target_link_libraries(realm_directory_agent_probe Boost::headers)
+elseif(TARGET Boost::boost)
+  target_link_libraries(realm_directory_agent_probe Boost::boost)
+endif()
+if(WIN32)
+  target_link_libraries(realm_directory_agent_probe ws2_32.lib mswsock.lib)
+endif()

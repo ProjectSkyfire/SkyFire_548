@@ -1,4 +1,7 @@
-/* Part of Project SkyFire. See LICENSE.md for copyright information. */
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
 #include "HandoffClient.h"
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>

@@ -927,7 +927,8 @@ bool AuthSocket::_HandleRealmList()
     ByteBuffer pkt;
 
     size_t RealmListSize = 0;
-    for (RealmList::RealmMap::const_iterator i = sRealmList->begin(); i != sRealmList->end(); ++i)
+    auto const realms = sRealmList->Snapshot();
+    for (auto i = realms.begin(); i != realms.end(); ++i)
     {
         const Realm& realm = i->second;
         // don't work with realms which not compatible with the client

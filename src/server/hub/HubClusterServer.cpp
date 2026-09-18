@@ -5,6 +5,7 @@
 #include "HubClusterServer.h"
 #include "Cluster/HandoffService.h"
 #include "Cluster/HandoffClient.h"
+#include "Cluster/RealmDirectory.h"
 #include "Log.h"
 #include "Database/DatabaseEnv.h"
 #include "Network/BoostAsioUtils.h"
@@ -83,7 +84,7 @@ private:
             if (self->_header.Version != ProtocolVersion) { self->Reject(Error::Version, "Incompatible cluster protocol; hub requires version 1."); return; }
             if (self->_header.Type != Message::Register && self->_header.Type != Message::Ready &&
                 self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms &&
-                self->_header.Type != Handoff::RequestType)
+                self->_header.Type != Handoff::RequestType && self->_header.Type != Realms::RequestType)
             { self->Reject(Error::Malformed, "Unsupported request type."); return; }
             self->_body.resize(self->_header.Length);
             if (self->_body.empty()) { self->Handle(); return; }
@@ -96,6 +97,19 @@ private:
     }
     void Handle()
     {
+        if (_header.Type == Realms::RequestType)
+        {
+            std::vector<Realms::Query> queries;
+            if (_key.empty() || !Realms::DecodeQuery(_body,queries))
+            { Reject(Error::Malformed,"Realm queries require a registered auth connection and 1..16 realm/build pairs."); return; }
+            auto const now = HubClusterServer::Now(); auto nodes = _server._registry.Snapshot();
+            auto caller = std::find_if(nodes.begin(),nodes.end(),[&](Node const& node) { return node.Key == _key && node.Owner == _owner; });
+            if (caller == nodes.end() || caller->Type != Service::Auth || !caller->Ready || now >= caller->ExpiresAt || !(caller->Capabilities & 128))
+            { Reject(Error::NotRegistered,"Realm queries require a ready, leased auth node with directory capability."); return; }
+            std::vector<Realms::Route> routes;
+            for (auto query : queries) routes.push_back(Realms::Resolve(query,nodes,now,(caller->Capabilities & 64) != 0));
+            Write(Frame(Realms::ReplyType,Realms::EncodeReply(routes)),false); return;
+        }
         if (_header.Type == Handoff::RequestType)
         {
             Handoff::Request request;
@@ -125,10 +139,10 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(127)) ||
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(255)) ||
                 (node.Type == Service::Auth && (node.Capabilities & 8)) ||
-                (node.Type == Service::World && (node.Capabilities & 48)))
-            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..127)."); return; }
+                (node.Type == Service::World && (node.Capabilities & 176)))
+            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..255)."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
             { Reject(Error::Conflict, "Node key is already leased or registry capacity is exhausted."); return; }
             _key = node.Key;
@@ -212,7 +226,7 @@ bool HubClusterServer::LoadAdministration(std::string& error)
 {
     auto count = HubDatabase.Query("SELECT COUNT(*) FROM hub_cluster_policy");
     if (!count || count->Fetch()[0].GetUInt64() > 4096)
-    { error = "Cannot load cluster policy (maximum 4096 records). Apply sql/updates/hub/2026_09_18_hub_00.sql."; return false; }
+    { error = "Cannot load cluster policy (maximum 4096 records). Apply sql/updates/hub/2026_09_18_hub_00.sql and 2026_09_18_hub_01.sql."; return false; }
     auto result = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_CLUSTER_POLICY));
     if (!result && count->Fetch()[0].GetUInt64()) { error = "Cannot read persisted cluster policy."; return false; }
     _policies.clear();
@@ -221,8 +235,9 @@ bool HubClusterServer::LoadAdministration(std::string& error)
         auto fields = result->Fetch();
         Node node; node.Key = fields[0].GetString(); node.Name = fields[1].GetString();
         node.Capabilities = fields[2].GetUInt32(); node.Admin = Administration(fields[3].GetUInt8());
+        node.Type = Service(fields[4].GetUInt8());
         node.Live = false; node.Ready = false;
-        if (!ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
+        if ((node.Type != Service::Auth && node.Type != Service::World) || !ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
         { error = "Invalid persisted cluster policy; correct the hub_cluster_policy row before startup."; return false; }
         _policies[node.Key] = node;
         _registry.SetAdministration(node.Key,node.Admin);
@@ -242,13 +257,11 @@ bool HubClusterServer::SetAdministration(std::string const& key, std::string con
         if (policy == _policies.end()) { error = "Node is not registered and has no saved policy."; return false; }
         node = policy->second;
     }
-    if (node.Type != Service::Auth)
-    { error = "Routing maintenance controls apply to authentication nodes. Use worldserver's graceful shutdown commands for gameplay maintenance."; return false; }
     if (!_policies.count(key) && _policies.size() >= 4096) { error = "Cluster policy limit reached."; return false; }
     auto const state = action == "drain" ? Administration::Draining : action == "disable" ? Administration::Disabled : Administration::Enabled;
     auto stmt = HubDatabase.GetPreparedStatement(HUB_UPSERT_CLUSTER_POLICY);
     stmt->setString(0,key); stmt->setString(1,node.Name); stmt->setUInt32(2,node.Capabilities);
-    stmt->setUInt8(3,uint8(state)); stmt->setString(4,actor);
+    stmt->setUInt8(3,uint8(state)); stmt->setString(4,actor); stmt->setUInt8(5,uint8(node.Type));
     HubDatabase.DirectExecute(stmt);
     auto check = HubDatabase.GetPreparedStatement(HUB_SEL_CLUSTER_POLICY_BY_KEY); check->setString(0,key);
     auto saved = HubDatabase.Query(check);

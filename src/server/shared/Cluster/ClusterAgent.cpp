@@ -1,6 +1,10 @@
-/* Part of Project SkyFire. See LICENSE.md for copyright information. */
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
 #include "ClusterAgent.h"
 #include "HandoffClient.h"
+#include "RealmDirectory.h"
 #include "Configuration/Config.h"
 #include "Log.h"
 #include <boost/asio/connect.hpp>
@@ -21,12 +25,18 @@ namespace Skyfire::Cluster
     bool LoadAgentOptions(Node advertisement, AgentOptions& options, std::string& error)
     {
         options.Enabled = sConfigMgr->GetBoolDefault("Cluster.Enable", false);
+        options.RealmDirectoryEnabled = sConfigMgr->GetBoolDefault("Cluster.RealmDirectory.Enable", false);
+        Realms::Client.Configure(options.RealmDirectoryEnabled);
         options.HandoffEnabled = sConfigMgr->GetBoolDefault("Cluster.Handoff.Enable", false);
         if (!options.Enabled)
         {
-            if (options.HandoffEnabled) { error = "Cluster.Handoff.Enable requires Cluster.Enable."; return false; }
+            if (options.HandoffEnabled || options.RealmDirectoryEnabled) { error = "Cluster handoff and realm directory require Cluster.Enable."; return false; }
             Handoff::ConfigureClient(options); return true;
         }
+        if (options.RealmDirectoryEnabled && !options.HandoffEnabled)
+        { error = "Cluster.RealmDirectory.Enable requires Cluster.Handoff.Enable to bind selected world routes."; return false; }
+        if (options.RealmDirectoryEnabled && advertisement.Type != Service::Auth)
+        { error = "Cluster.RealmDirectory.Enable is an authserver option."; return false; }
         options.Host = sConfigMgr->GetStringDefault("Cluster.HubHost", "localhost");
         int const port = sConfigMgr->GetIntDefault("Cluster.HubPort", 9100);
         int const capacity = sConfigMgr->GetIntDefault("Cluster.Capacity", 0);
@@ -61,6 +71,7 @@ namespace Skyfire::Cluster
         { error = "Cluster mode requires a client certificate, private key and trusted hub CA."; return false; }
         advertisement.Capacity = std::uint32_t(capacity);
         if (options.HandoffEnabled) advertisement.Capabilities |= 64;
+        if (options.RealmDirectoryEnabled) advertisement.Capabilities |= 128;
         options.Port = std::uint16_t(port);
         options.Advertisement = std::move(advertisement);
         Handoff::ConfigureClient(options);
@@ -96,9 +107,13 @@ namespace Skyfire::Cluster
         Message Pending = Message::Register;
         bool Closed = false, Registered = false, Busy = true, Ready = false;
         std::uint32_t Lease = 15;
+        std::vector<Realms::Query> DirectoryQueries, DirectoryBatch;
+        std::size_t DirectoryOffset = 0;
+        std::uint64_t DirectoryStarted = 0;
         explicit Session(State& owner) : Owner(owner), Stream(owner.Io, owner.Tls), Resolver(owner.Io), Deadline(owner.Io), Pulse(owner.Io) { }
         void Close()
         {
+            if (Owner.Options.RealmDirectoryEnabled) Realms::Client.Clear();
             Closed = true; Resolver.cancel(); Deadline.cancel(); Pulse.cancel();
             boost::system::error_code ec;
             Stream.next_layer().cancel(ec); Stream.next_layer().close(ec);
@@ -158,7 +173,8 @@ namespace Skyfire::Cluster
                     if (self->Closed) return;
                     if (readError) { self->Fail("hub disconnected"); return; }
                     if (!DecodeHeader(self->HeaderBytes, self->Reply) || self->Reply.Version != ProtocolVersion ||
-                        (self->Reply.Type != Message::Ack && self->Reply.Type != Message::Error))
+                        (self->Reply.Type != Message::Ack && self->Reply.Type != Message::Error &&
+                         !(self->Pending == Realms::RequestType && self->Reply.Type == Realms::ReplyType)))
                     { self->Fail("incompatible or malformed hub protocol response", true); return; }
                     self->In.resize(self->Reply.Length);
                     boost::asio::async_read(self->Stream, boost::asio::buffer(self->In), [self](boost::system::error_code bodyError, std::size_t)
@@ -172,6 +188,21 @@ namespace Skyfire::Cluster
         void Complete()
         {
             Deadline.cancel(); Busy = false;
+            if (Reply.Type == Realms::ReplyType)
+            {
+                std::vector<Realms::Route> routes;
+                if (!Realms::DecodeReply(In,DirectoryBatch,routes)) { Fail("invalid realm directory response",true); return; }
+                for (auto const& route : routes) if (route.State == Realms::Status::Ready)
+                {
+                    boost::system::error_code ec;
+                    auto address = boost::asio::ip::make_address(route.Address,ec);
+                    if (ec || address.is_unspecified() || address.is_multicast()) { Fail("invalid realm endpoint",true); return; }
+                }
+                Realms::Client.Store(routes,DirectoryStarted);
+                if (Owner.Stopping) { RequestStop(); return; }
+                if (!QueryDirectory()) SchedulePulse();
+                return;
+            }
             Reader reader(In);
             std::uint16_t code;
             if (Reply.Type == Message::Error)
@@ -197,7 +228,24 @@ namespace Skyfire::Cluster
             }
             if (Pending == Message::Register || Pending == Message::Realms) { Publish(true); return; }
             Owner.Backoff = 1;
-            Pulse.expires_after(std::chrono::seconds((std::max)(1u, (std::min)(5u, Lease / 3))));
+            if (Owner.Options.RealmDirectoryEnabled && Ready)
+            {
+                DirectoryQueries = Realms::Client.Queries(); DirectoryOffset = 0;
+                if (QueryDirectory()) return;
+            }
+            SchedulePulse();
+        }
+        bool QueryDirectory()
+        {
+            if (DirectoryOffset >= DirectoryQueries.size()) return false;
+            auto end = (std::min)(DirectoryOffset + Realms::BatchSize,DirectoryQueries.size());
+            DirectoryBatch.assign(DirectoryQueries.begin() + DirectoryOffset,DirectoryQueries.begin() + end);
+            DirectoryOffset = end; DirectoryStarted = Realms::Now();
+            Send(Realms::RequestType,Realms::EncodeQuery(DirectoryBatch)); return true;
+        }
+        void SchedulePulse()
+        {
+            Pulse.expires_after(std::chrono::seconds(Owner.Options.RealmDirectoryEnabled ? 1u : (std::max)(1u, (std::min)(5u, Lease / 3))));
             auto self = shared_from_this();
             Pulse.async_wait([self](boost::system::error_code ec) { if (!ec && !self->Closed) self->Publish(false); });
         }
@@ -258,6 +306,7 @@ namespace Skyfire::Cluster
     bool Agent::Start(AgentOptions options, std::function<AgentSample()> sample, std::string& error)
     {
         Handoff::ConfigureClient(options);
+        Realms::Client.Configure(options.RealmDirectoryEnabled);
         if (!options.Enabled) return true;
         if (_state) { error = "Cluster agent is already started."; return false; }
         try

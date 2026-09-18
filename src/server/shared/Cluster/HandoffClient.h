@@ -1,4 +1,7 @@
-/* Part of Project SkyFire. See LICENSE.md for copyright information. */
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
 #ifndef SKYFIRE_HANDOFF_CLIENT_H
 #define SKYFIRE_HANDOFF_CLIENT_H
 #include "ClusterAgent.h"

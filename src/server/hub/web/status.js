@@ -78,8 +78,8 @@ window.HubStatus = (() => {
             card[action].hidden = !cluster;
             const state = { drain: "draining", disable: "disabled", enable: "enabled" }[action];
             card[action].disabled = pending.has(component.key) || !data.canOperateServices || component.adminState === state;
-            card[action].title = action === "enable" ? "Allow new hub-routed connections when the node is ready." :
-                "Stop new hub-routed authentication connections. Existing connections finish normally; the process remains running.";
+            card[action].title = action === "enable" ? "Allow new authentication connections or world handoffs when the node is ready." :
+                "Stop new authentication connections or world handoffs. Existing sessions continue; the process remains running.";
         }
     }
     function render(data) {

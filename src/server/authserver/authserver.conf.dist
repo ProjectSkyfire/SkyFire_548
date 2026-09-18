@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026091802
+ConfVersion=2026091803
 
 ###################################################################################################
 # SECTION INDEX
@@ -61,9 +61,26 @@ Cluster.Enable = 0
 # Hub failure/restart fails pending handoffs closed; clients must log in again. No replay/retry
 # of uncertain consumption and no active-world-session migration. The hub stores no session keys.
 # Tokens bind account, purpose, client IP, realm and the current destination world registration.
-# One ready world registration per realm is required until live realm routing chooses destinations.
+# Each realm has one world owner; independent gameplay processes are not interchangeable replicas.
 # All auth nodes continue sharing LoginDatabaseInfo for account and Authnet session-key records.
 Cluster.Handoff.Enable = 0
+
+# Live realm directory (upgrade hub first, including 2026_09_18_hub_01.sql).
+# Requires Cluster.Enable and Cluster.Handoff.Enable. Disabled preserves standalone routing.
+# The agent refreshes configured realm IDs/builds over its mTLS connection every second.
+# Packet builders read memory only. Routes expire within 3 seconds or their remaining lease;
+# disconnects clear the cache immediately. No database/loopback endpoint fallback is allowed.
+# Realm identity, flags and security remain in realmlist. World endpoints come exclusively
+# from Cluster.AdvertiseAddress and the world listener port; configure a client-reachable IPv4
+# address for Authnet (its route packet is IPv4). Local subnet overrides are not used.
+# Each realm must have exactly one live world owner. Multiple distinct realms are supported;
+# overlapping ownership fails closed, including when one of the claimants is not ready.
+# Authnet omits unavailable realms, sends empty route lists when none qualify, and checks
+# restricted-realm access before issuing a handoff. Legacy realm lists show offline/lock flags.
+# Saved realm selection survives if still available; otherwise a ready default is selected.
+# Debug endpoint/list overrides are ignored. A changed owner requires a fresh realm refresh.
+# Supports up to 1024 configured identities, queried in bounded batches of 16.
+Cluster.RealmDirectory.Enable = 0
 
 Cluster.HubHost = "localhost"
 Cluster.HubPort = 9100

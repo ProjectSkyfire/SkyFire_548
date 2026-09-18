@@ -59,6 +59,7 @@ VALUES
   ('world', 'World Server', 'worldserver', 'worldserver.conf', '.', 1);
 
 CREATE TABLE IF NOT EXISTS `hub_cluster_policy` (
+  `service_type` tinyint unsigned NOT NULL DEFAULT '1' COMMENT '1 auth, 2 world',
   `node_key` varchar(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `name` varchar(100) NOT NULL,
   `capabilities` int unsigned NOT NULL DEFAULT '0',

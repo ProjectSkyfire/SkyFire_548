@@ -685,7 +685,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
             for (auto realm : node.Realms) json << ' ' << realm;
         }
         json << "\",\"managed\":false,\"clusterKey\":\"" << JsonEscape(node.Key)
-             << "\",\"clusterCanAdmin\":" << (node.Type == Skyfire::Cluster::Service::Auth ? "true" : "false")
+             << "\",\"clusterCanAdmin\":" << "true"
              << ",\"live\":" << (node.Live ? "true" : "false") << ",\"hubConnections\":" << connections
              << ",\"adminState\":\"" << Skyfire::Cluster::AdministrationName(node.Admin) << "\"}";
     }

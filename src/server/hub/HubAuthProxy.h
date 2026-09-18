@@ -1,4 +1,7 @@
-/* Part of Project SkyFire. See LICENSE.md for copyright information. */
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
 #ifndef SKYFIRE_HUB_AUTH_PROXY_H
 #define SKYFIRE_HUB_AUTH_PROXY_H
 #include "Cluster/AuthRouting.h"

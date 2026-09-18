@@ -1,7 +1,11 @@
-/* Part of Project SkyFire. See LICENSE.md for copyright information. */
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
 #ifndef SKYFIRE_HANDOFF_SERVICE_H
 #define SKYFIRE_HANDOFF_SERVICE_H
 #include "HandoffProtocol.h"
+#include "RealmDirectory.h"
 #include <algorithm>
 namespace Skyfire::Cluster::Handoff
 {
@@ -32,16 +36,20 @@ namespace Skyfire::Cluster::Handoff
         else
         {
             if (caller->Type != Service::Auth) return Result::Denied;
+            if ((caller->Capabilities & 128) && Realms::Resolve({request.Bind.Realm,caller->Build},nodes,now,true).State != Realms::Status::Ready)
+                return Result::Unavailable;
             for (auto const& node : nodes)
             {
                 if (!serves(node)) continue;
-                // Until the realm-directory phase chooses endpoints, ambiguity fails closed.
+                // Duplicate live realm owners cannot safely share independent gameplay state.
                 if (destination) return Result::Unavailable;
                 destination = &node;
             }
         }
         if (!destination) return Result::Unavailable;
         request.Bind.Destination = destination->Key + ":" + std::to_string(destination->Owner);
+        if (request.Action == Operation::Issue && ((caller->Capabilities & 128) || request.ExpectedDestination != "-") &&
+            request.ExpectedDestination != request.Bind.Destination) return Result::Unavailable;
         return Result::Ok;
     }
     inline Result Execute(Store& store, Request const& request, std::uint64_t now, std::string& token)

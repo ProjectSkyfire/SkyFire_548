@@ -10,6 +10,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_LOGINDATABASE_STATEMENTS);
 
+    PrepareStatement(LOGIN_SEL_CLUSTER_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild FROM realmlist ORDER BY name", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_AUTH_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild FROM realmlist WHERE flag <> 3 ORDER BY name", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild FROM realmlist WHERE port = ? AND flag <> 3 ORDER BY name", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_REALMNAME_BY_ID, "SELECT name FROM realmlist WHERE id = ?", CONNECTION_SYNCH);

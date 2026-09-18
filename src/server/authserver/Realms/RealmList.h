@@ -7,6 +7,7 @@
 #define SF_REALMLIST_H
 
 #include "Common.h"
+#include "Cluster/RealmDirectory.h"
 #include "NetworkAddress.h"
 #include "Platform/Singleton.h"
 
@@ -39,6 +40,7 @@ struct Realm
     AccountTypes allowedSecurityLevel;
     float populationLevel;
     uint32 gamebuild;
+    Skyfire::Cluster::Realms::Status clusterState = Skyfire::Cluster::Realms::Status::Offline;
 };
 
 /// Storage object for the list of realms on the server
@@ -53,6 +55,7 @@ public:
     void Initialize(uint32 updateInterval);
 
     void UpdateIfNeed();
+    RealmMap Snapshot();
 
     void AddRealm(const Realm& NewRealm) { m_realms[NewRealm.name] = NewRealm; }
 

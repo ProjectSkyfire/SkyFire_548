@@ -1271,21 +1271,24 @@ namespace
     {
         std::vector<AuthnetRealmRoute> routes;
         sRealmList->UpdateIfNeed();
-        routes.reserve(std::min<size_t>(sRealmList->size(), MaxAuthnetRealmRoutes));
+        auto const realms = sRealmList->Snapshot();
+        routes.reserve(std::min<size_t>(realms.size(), MaxAuthnetRealmRoutes));
 
-        for (RealmList::RealmMap::const_iterator itr = sRealmList->begin(); itr != sRealmList->end(); ++itr)
+        for (auto itr = realms.begin(); itr != realms.end(); ++itr)
         {
             if (routes.size() >= MaxAuthnetRealmRoutes)
                 break;
 
             Realm const& realm = itr->second;
+            if (Skyfire::Cluster::Realms::Client.Enabled() &&
+                ((realm.flag & (REALM_FLAG_OFFLINE | REALM_FLAG_INVALID)) || realm.gamebuild != 18414)) continue;
             AuthnetRealmRoute route;
             route.realmId = realm.m_ID;
             route.name = realm.name;
             route.host = realm.ExternalAddress.GetHost();
             route.port = uint16(realm.ExternalAddress.GetPort() & 0xFFFF);
             route.category = GetAuthnetRealmCategory(&realm);
-            TryParseIPv4AddressBytes(route.host, route.address);
+            if (!TryParseIPv4AddressBytes(route.host, route.address) && Skyfire::Cluster::Realms::Client.Enabled()) continue;
             routes.push_back(route);
         }
 
@@ -1321,13 +1324,17 @@ namespace
     uint32 GetConfiguredAuthnetDefaultRealmField(std::vector<AuthnetRealmRoute> const& routes)
     {
         if (HasEnvValue("AUTHNET_MODE2_COMMAND8_FIELD"))
-            return GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD", 0);
+        {
+            uint32 const configured = GetEnvUInt32("AUTHNET_MODE2_COMMAND8_FIELD",0);
+            if (!Skyfire::Cluster::Realms::Client.Enabled() || FindAuthnetRealmRouteById(routes,configured)) return configured;
+        }
 
         std::string const preferredName = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME", "");
         if (!preferredName.empty())
         {
-            if (Realm const* realm = FindAuthnetRealm(preferredName))
-                return realm->m_ID;
+            for (auto const& route : routes) if (route.name == preferredName) return route.realmId;
+            if (!Skyfire::Cluster::Realms::Client.Enabled())
+                if (Realm const* realm = FindAuthnetRealm(preferredName)) return realm->m_ID;
         }
 
         if (!routes.empty())
@@ -1377,6 +1384,7 @@ namespace
 
     uint32 GetMode2Command8List6Count(std::vector<AuthnetRealmRoute> const& routes, bool forceRealmList)
     {
+        if (Skyfire::Cluster::Realms::Client.Enabled()) return std::min<uint32>(uint32(routes.size()),MaxAuthnetRealmRoutes);
         if (forceRealmList)
             return routes.empty() ? 1 : std::min<uint32>(uint32(routes.size()), MaxAuthnetRealmRoutes);
 
@@ -1411,8 +1419,8 @@ namespace
         std::array<uint8, 4> overrideAddress = {{ 127, 0, 0, 1 }};
         std::string const configuredAddress = GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND8_ROUTE_ADDRESS",
             GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_ENDPOINT_ADDRESS", ""));
-        bool const useOverrideAddress = !configuredAddress.empty() && TryParseIPv4AddressBytes(configuredAddress, overrideAddress);
-        bool const useOverridePort = HasEnvValue("AUTHNET_MODE2_COMMAND8_ROUTE_PORT") || HasEnvValue("AUTHNET_MODE2_COMMAND2_PORT");
+        bool const useOverrideAddress = !Skyfire::Cluster::Realms::Client.Enabled() && !configuredAddress.empty() && TryParseIPv4AddressBytes(configuredAddress, overrideAddress);
+        bool const useOverridePort = !Skyfire::Cluster::Realms::Client.Enabled() && (HasEnvValue("AUTHNET_MODE2_COMMAND8_ROUTE_PORT") || HasEnvValue("AUTHNET_MODE2_COMMAND2_PORT"));
         uint16 const overridePort = uint16(GetEnvUInt32("AUTHNET_MODE2_COMMAND8_ROUTE_PORT",
             GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT", 8085)) & 0xFFFF);
 
@@ -1445,7 +1453,7 @@ namespace
         uint32 const byte0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE0", 0) & 0xFF;
         uint32 const byte1 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_BYTE1", 0) & 0xFF;
         uint32 const word16 = GetEnvUInt32("AUTHNET_MODE2_COMMAND0_ENTRY_WORD16", 0) & 0xFFFF;
-        uint32 const entryCount = routes.empty() ? 1 : std::min<uint32>(uint32(routes.size()), MaxAuthnetRealmRoutes);
+        uint32 const entryCount = routes.empty() && !Skyfire::Cluster::Realms::Client.Enabled() ? 1 : std::min<uint32>(uint32(routes.size()), MaxAuthnetRealmRoutes);
 
         writer.WriteBits(0x00, 6);
         writer.WriteBits(1, 1);
@@ -1490,6 +1498,7 @@ namespace
                 effectiveRoute = FindAuthnetRealmRouteById(fallbackRoutes, defaultRealmField);
         }
 
+        if (Skyfire::Cluster::Realms::Client.Enabled() && !effectiveRoute) return {};
         uint32 const effectiveRealmField = effectiveRoute ? effectiveRoute->realmId :
             (defaultRealmField ? defaultRealmField : GetConfiguredAuthnetDefaultRealmField(fallbackRoutes));
         uint32 const keyByte0 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_KEY_BYTE0",
@@ -1510,10 +1519,10 @@ namespace
         uint32 const realmCategory = effectiveRoute ? effectiveRoute->category : GetAuthnetRealmCategory(realm);
         uint32 const field418 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD418", 0);
         uint32 const field41C = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD41C", realmCategory);
-        uint32 const endpointPort = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT",
+        uint32 const endpointPort = Skyfire::Cluster::Realms::Client.Enabled() ? effectiveRoute->port : GetEnvUInt32("AUTHNET_MODE2_COMMAND2_PORT",
             effectiveRoute ? effectiveRoute->port : (realm ? realm->ExternalAddress.GetPort() : 8085)) & 0xFFFF;
-        uint32 const endpointByte458 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD458", endpointPort >> 8) & 0xFF;
-        uint32 const endpointByte459 = GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD459", endpointPort) & 0xFF;
+        uint32 const endpointByte458 = Skyfire::Cluster::Realms::Client.Enabled() ? endpointPort >> 8 : GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD458", endpointPort >> 8) & 0xFF;
+        uint32 const endpointByte459 = Skyfire::Cluster::Realms::Client.Enabled() ? endpointPort & 0xFF : GetEnvUInt32("AUTHNET_MODE2_COMMAND2_FIELD459", endpointPort) & 0xFF;
 
         std::string accountName = effectiveRoute ? effectiveRoute->name : GetEnvStringOrDefault("AUTHNET_MODE2_COMMAND2_NAME",
             realm ? realm->name : "WoW1");
@@ -1625,14 +1634,22 @@ namespace
     std::vector<uint8> BuildMode2Command8StructuredProbe(uint32 defaultRealmField, bool forceRealmList)
     {
         Skyfire::Authnet::BitWriter writer;
-        std::vector<AuthnetRealmRoute> const routes = BuildAuthnetRealmRoutes();
-
+        std::vector<AuthnetRealmRoute> routes = BuildAuthnetRealmRoutes();
+        if (Skyfire::Cluster::Realms::Client.Enabled())
+        {
+            if (!defaultRealmField) defaultRealmField = GetConfiguredAuthnetDefaultRealmField(routes);
+            // This packet contains one realm ID and a list of endpoint candidates for THAT realm.
+            // Realm navigation is carried by command 0/2; never offer another realm as a fallback.
+            auto selected = FindAuthnetRealmRouteById(routes,defaultRealmField);
+            if (selected) { auto route = *selected; routes.assign(1,std::move(route)); }
+            else routes.clear();
+        }
         uint32 const fieldValue = defaultRealmField ? defaultRealmField : GetConfiguredAuthnetDefaultRealmField(routes);
         uint32 const list6Count = GetMode2Command8List6Count(routes, forceRealmList);
         uint32 const list18Count = GetMode2Command8ListCount("AUTHNET_MODE2_COMMAND8_LIST18_COUNT");
         std::vector<uint8> list6 = BuildMode2Command8DefaultRouteList(list6Count, routes, fieldValue);
         std::vector<uint8> configuredList6;
-        if (!list6.empty() && TryParseHexBytes(std::getenv("AUTHNET_MODE2_COMMAND8_LIST6_HEX"), list6.size(), configuredList6))
+        if (!Skyfire::Cluster::Realms::Client.Enabled() && !list6.empty() && TryParseHexBytes(std::getenv("AUTHNET_MODE2_COMMAND8_LIST6_HEX"), list6.size(), configuredList6))
             list6 = configuredList6;
 
         std::vector<uint8> list18 = GetConfiguredListBytes("AUTHNET_MODE2_COMMAND8_LIST18_HEX", 18, list18Count);
@@ -2761,6 +2778,26 @@ bool AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 
         return false;
     }
 
+    if (Skyfire::Cluster::Realms::Client.Enabled())
+    {
+        auto routes = BuildAuthnetRealmRoutes();
+        uint32 const selected = selectedRealmField ? selectedRealmField : _authnetSelectedRealmField;
+        bool allowed = FindAuthnetRealmRouteById(routes,selected) != nullptr;
+        auto realms = sRealmList->Snapshot();
+        for (auto const& entry : realms) if (entry.second.m_ID == selected && entry.second.allowedSecurityLevel > AccountTypes::SEC_PLAYER)
+        {
+            uint8 security = 0;
+            auto access = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
+            access->setUInt32(0,_authnetAccountId); access->setInt32(1,int32(selected));
+            if (auto result = LoginDatabase.Query(access)) do { security = std::max(security,result->Fetch()[0].GetUInt8()); } while (result->NextRow());
+            allowed = allowed && security >= uint8(entry.second.allowedSecurityLevel);
+        }
+        if (!allowed)
+        {
+            SF_LOG_WARN("server.authserver","Live realm %u unavailable or restricted for account %u.",selected,_authnetAccountId);
+            socket().Close(); return false;
+        }
+    }
     _authnetWorldConnectionSeed = connectionSeed;
     _authnetWorldRealmField = realmField;
     if (selectedRealmField)
@@ -2775,6 +2812,8 @@ bool AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 
         using namespace Skyfire::Cluster::Handoff;
         Request request; request.Action = Operation::Issue; request.Bind.Use = Purpose::World;
         request.Bind.Account = _authnetAccountId; request.Bind.Realm = _authnetSelectedRealmField;
+        if (Skyfire::Cluster::Realms::Client.Enabled())
+            request.ExpectedDestination = Skyfire::Cluster::Realms::Client.Read({_authnetSelectedRealmField,18414},Skyfire::Cluster::Realms::Now()).Destination;
         request.Bind.Address = remoteAddress;
         request.Bind.Evidence = Evidence(_authnetWorldSessionKey.data(),_authnetWorldSessionKey.size());
         request.Ttl = (std::min)(GetAuthnetWorldSessionTtlSeconds(),900u);
@@ -3031,6 +3070,7 @@ void AuthnetSocket::SendMode2LoginFollowups(char const* trigger, bool forceRealm
         auto sendCommand2Detail = [this, trigger, command2Mode, preferredRealmField](AuthnetRealmRoute const* route)
         {
             std::vector<uint8> detailResponse = BuildLoginGameAccountDetailProbe(route, preferredRealmField);
+            if (detailResponse.empty()) return;
             std::vector<uint8> plainDetailResponse = detailResponse;
             CryptServerPayload(detailResponse);
 
@@ -3633,7 +3673,7 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
         if (plain.size() > ClientModeSwitchRequestLen &&
             header.command == 8 && header.modeSwitch && header.mode == 2)
         {
-            if (!TryUpdateWorldSessionKeyFromSelectedRealm(plain) && Skyfire::Cluster::Handoff::Enabled())
+            if (!TryUpdateWorldSessionKeyFromSelectedRealm(plain) && (Skyfire::Cluster::Handoff::Enabled() || Skyfire::Cluster::Realms::Client.Enabled()))
             { socket().Close(); return; }
 
             char const* responseMode = GetMode2Command8RequestResponseMode();

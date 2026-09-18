@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091804
+ConfVersion=2026091805
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -86,8 +86,8 @@ Hub.Cluster.MaxConnections = 128
 # Consumed/revoked records remain until expiry to reject replay. Hub restart clears all records;
 # pending logins must retry. Existing world sessions are unaffected by handoff-store restart.
 # World destinations bind the registration owner, so a restarted world cannot inherit an old grant.
-# At this phase exactly one ready world node must advertise a requested realm. Multiple worlds
-# for different realms are supported; ambiguous destinations are rejected until realm routing lands.
+# Exactly one ready world node must own a requested realm. Multiple worlds
+# for different realms are supported; overlapping realm ownership fails closed.
 # Apply sql/updates/auth/2026_09_18_auth_00.sql before upgrading. Authnet session keys remain
 # in the auth database; the account row also records whether its key requires hub handoff.
 
@@ -118,11 +118,11 @@ Hub.Cluster.MaxConnections = 128
 # A connected backend failure closes that connection without replay. No session migration.
 # Restart the hub for changes. Console 'routing' and web status expose route/failure counters.
 #
-# Maintenance (apply sql/updates/hub/2026_09_18_hub_00.sql before upgrading an existing hub DB):
-#   cluster drain <node-key>   Stop new hub-routed authentication connections; existing streams finish.
+# Maintenance (apply hub migrations 2026_09_18_hub_00.sql and 2026_09_18_hub_01.sql):
+#   cluster drain <node-key>   Stop new auth connections/world handoffs; existing sessions finish.
 #   cluster disable <node-key> Keep the node out of new routing until explicitly enabled again.
 #   cluster enable <node-key>  Allow routing once the node also reports ready and has capacity.
-# Equivalent buttons appear on authentication cluster cards for operators with node-operation access.
+# Equivalent buttons appear on auth and world cluster cards for operators with node-operation access.
 # These commands do not kill services. Policy persists in hub_cluster_policy across reconnects and
 # hub restarts; registration/heartbeats cannot change it. Saved offline nodes remain administrable.
 # Registry and status show hub connections, including connecting clients. A zero count means this
@@ -132,8 +132,12 @@ Hub.Cluster.MaxConnections = 128
 # When no eligible node remains, new TCP connections close; 'routing' and web status report why.
 # Existing connections never migrate or replay data. A lost backend ends its sessions: clients must
 # reconnect/login again. Worldserver disappearance removes its live registration; recovery must
-# register and report ready anew. Gameplay remains direct, so world maintenance still uses graceful
-# world commands; live client realm-directory routing is a later phase. Changes made to policy by
+# register and report ready anew. Gameplay remains direct. World drain/disable withdraws new realm
+# routes and handoffs; it does not stop existing gameplay. Use graceful world commands to stop.
+# Console 'realms' combines configured realm identity/access with live endpoint availability.
+# Authserver Cluster.RealmDirectory.Enable uses authenticated message 7 queries (capability 128).
+# A realm with multiple live world owners is unavailable; this does not replicate gameplay state.
+# Changes made to policy by
 # this hub are immediate; another hub sharing the DB must reload policy by restarting before use.
 
 Hub.AuthnetIngress.Enable = 0

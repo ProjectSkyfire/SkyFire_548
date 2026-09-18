@@ -37,10 +37,10 @@ void HubDatabaseConnection::DoPrepareStatements()
         "UPDATE hub_nodes SET status = ?, current_load = ?, last_heartbeat_at = CURRENT_TIMESTAMP "
         "WHERE node_key = ?", CONNECTION_ASYNC);
     PrepareStatement(HUB_SEL_CLUSTER_POLICY,
-        "SELECT node_key,name,capabilities,admin_state FROM hub_cluster_policy ORDER BY node_key", CONNECTION_SYNCH);
+        "SELECT node_key,name,capabilities,admin_state,service_type FROM hub_cluster_policy ORDER BY node_key", CONNECTION_SYNCH);
     PrepareStatement(HUB_SEL_CLUSTER_POLICY_BY_KEY,
         "SELECT admin_state FROM hub_cluster_policy WHERE node_key = ?", CONNECTION_SYNCH);
     PrepareStatement(HUB_UPSERT_CLUSTER_POLICY,
-        "INSERT INTO hub_cluster_policy (node_key,name,capabilities,admin_state,updated_by) VALUES (?,?,?,?,?) "
-        "ON DUPLICATE KEY UPDATE name=VALUES(name),capabilities=VALUES(capabilities),admin_state=VALUES(admin_state),updated_by=VALUES(updated_by)", CONNECTION_SYNCH);
+        "INSERT INTO hub_cluster_policy (node_key,name,capabilities,admin_state,updated_by,service_type) VALUES (?,?,?,?,?,?) "
+        "ON DUPLICATE KEY UPDATE name=VALUES(name),capabilities=VALUES(capabilities),admin_state=VALUES(admin_state),updated_by=VALUES(updated_by),service_type=VALUES(service_type)", CONNECTION_SYNCH);
 }
