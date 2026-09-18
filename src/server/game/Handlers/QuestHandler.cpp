@@ -266,12 +266,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
                     // destroy not required for quest finish quest starting item
                     bool destroyItem = true;
 
-                    if (!quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
-                        break;
-
                     for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
                     {
-                        if ((*citr)->ObjectId == item->GetEntry() && item->GetTemplate()->MaxCount > 0)
+                        if ((*citr)->Type == QUEST_OBJECTIVE_TYPE_ITEM && (*citr)->ObjectId == item->GetEntry() && item->GetTemplate()->MaxCount > 0)
                         {
                             destroyItem = false;
                             break;
