@@ -17,6 +17,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include <utility>
 #include <vector>
 
 BlackMarketMgr::~BlackMarketMgr()
@@ -329,7 +330,8 @@ BlackMarketAuction* BlackMarketMgr::GetAuction(uint32 auctionId) const
 std::string BlackMarketAuction::BuildAuctionMailSubject(BMMailAuctionAnswers response)
 {
     std::ostringstream strm;
-    strm << GetTemplate()->ItemEntry << ":0:" << uint8(response) << ':' << GetAuctionId() << ':' << GetTemplate()->Quantity;
+    // uint32, not uint8 - see AuctionEntry::BuildAuctionMailSubject.
+    strm << GetTemplate()->ItemEntry << ":0:" << std::to_underlying(response) << ':' << GetAuctionId() << ':' << GetTemplate()->Quantity;
     return strm.str();
 }
 

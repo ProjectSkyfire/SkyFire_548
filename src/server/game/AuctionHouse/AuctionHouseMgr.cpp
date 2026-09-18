@@ -17,6 +17,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include <utility>
 #include <vector>
 
 enum eAuctionHouse
@@ -822,7 +823,9 @@ bool AuctionEntry::LoadFromFieldList(Field* fields)
 std::string AuctionEntry::BuildAuctionMailSubject(MailAuctionAnswer response) const
 {
     std::ostringstream strm;
-    strm << itemEntry << ":0:" << uint8(response) << ':' << Id << ':' << itemCount;
+    // uint32, not uint8: uint8 is unsigned char, and streaming one writes it as a character
+    // rather than a number, so the client cannot parse the field.
+    strm << itemEntry << ":0:" << std::to_underlying(response) << ':' << Id << ':' << itemCount;
     return strm.str();
 }
 
