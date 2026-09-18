@@ -32,12 +32,12 @@ public:
             if (error) { self->Stop(); return; }
             X509* certificate = SSL_get_peer_certificate(self->_stream.native_handle());
             if (!certificate) { self->Stop(); return; }
-            X509_NAME* subject = X509_get_subject_name(certificate);
+            auto* const subject = X509_get_subject_name(certificate);
             int const index = X509_NAME_get_index_by_NID(subject, NID_commonName, -1);
             bool const single = index >= 0 && X509_NAME_get_index_by_NID(subject, NID_commonName, index) < 0;
             if (single)
             {
-                ASN1_STRING* name = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(subject, index));
+                auto* const name = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(subject, index));
                 auto bytes = ASN1_STRING_get0_data(name);
                 self->_identity.assign(reinterpret_cast<char const*>(bytes), ASN1_STRING_length(name));
             }
