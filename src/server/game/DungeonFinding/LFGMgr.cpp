@@ -1915,8 +1915,19 @@ namespace lfg
         uint32 gDungeonId = GetDungeon(gguid);
         if (gDungeonId != dungeonId)
         {
-            SF_LOG_DEBUG("lfg.dungeon.finish", "Group %u finished dungeon %u but queued for %u", GUID_LOPART(gguid), dungeonId, gDungeonId);
-            return;
+            // From Cataclysm on, a dungeon has one difficulty-0 DungeonEncounter list shared by
+            // its normal and heroic versions, which are separate LFG dungeon ids, and an
+            // `instance_encounters` row can name only one of them. Accept the group's own dungeon
+            // when it is the same instance at another difficulty. Same map alone would be too
+            // loose: Blackrock Depths is two same-difficulty LFG entries that must not credit
+            // each other.
+            LFGDungeonData const* credited = GetLFGDungeon(dungeonId);
+            LFGDungeonData const* queued = GetLFGDungeon(gDungeonId);
+            if (!credited || !queued || credited->map != queued->map || credited->difficulty == queued->difficulty)
+            {
+                SF_LOG_DEBUG("lfg.dungeon.finish", "Group %u finished dungeon %u but queued for %u", GUID_LOPART(gguid), dungeonId, gDungeonId);
+                return;
+            }
         }
 
         if (GetState(gguid) == LFG_STATE_FINISHED_DUNGEON) // Shouldn't happen. Do not reward multiple times
