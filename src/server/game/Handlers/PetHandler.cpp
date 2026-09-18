@@ -949,9 +949,12 @@ void WorldSession::HandlePetActionHelper(Unit* pet, uint64 guid1, uint32 spellid
         case ACT_REACTION:                                  // 0x6
             switch (spellid)
             {
-                case REACT_ASSIST:                          //assist
                 case REACT_PASSIVE:                         //passive
+                    // Only passive calls off the attack. REACT_ASSIST shared this label and fell
+                    // into AttackStop() with it, so choosing Assist stopped the pet fighting.
                     pet->AttackStop();
+                    // fall through
+                case REACT_ASSIST:                          //assist
                 case REACT_DEFENSIVE:                       //recovery
                 case REACT_AGGRESSIVE:                      //activete
                     if (pet->GetTypeId() == TypeID::TYPEID_UNIT)
