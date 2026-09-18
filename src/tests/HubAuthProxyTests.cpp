@@ -1,11 +1,16 @@
 /* Part of Project SkyFire. See LICENSE.md for copyright information. */
 #include "HubAuthProxy.h"
 #include "Network/ProxyProtocol.h"
+#include "Packets/PacketLogServer.h"
 #include <boost/asio/write.hpp>
 #include <chrono>
 #include <iostream>
 #include <stdexcept>
 #include <thread>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <sstream>
 
 using boost::asio::ip::tcp;
 using Skyfire::Cluster::Node;
@@ -261,6 +266,58 @@ namespace
         boost::system::error_code ec; held->close(ec);
         h.Pump([&] { return h.Proxy.Status().ConnectionsByNode.count("a") == 0; });
     }
+    void PacketCapture()
+    {
+        namespace fs = std::filesystem;
+        auto const root = fs::temp_directory_path() / ("skyfire-hub-capture-" +
+            std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+        fs::create_directories(root);
+        struct Cleanup
+        {
+            fs::path Root;
+            ~Cleanup() { sPacketLogServer->Configure("", "PacketLogs"); std::error_code ec; fs::remove_all(Root,ec); }
+        } cleanup{root};
+        auto const control = root / "capture.active";
+        auto const logs = root / "logs";
+        sPacketLogServer->Configure(control.string(),logs.string());
+        Harness h; EchoServer backend(h.Io,true); h.Open(true);
+        h.Nodes = {Auth("capture-node",backend.Port())}; h.Nodes[0].Capabilities |= 32;
+        Require(h.Exchange("disabled") == "disabled" && !fs::exists(logs),"Disabled capture created logs or changed traffic");
+        h.Pump([&] { return h.Proxy.Status().Active == 0; });
+        std::ofstream(control).put('1');
+        std::string payload(50000,'x'); payload[0] = '\0'; payload[1] = char(0xff);
+        Require(h.Exchange(payload) == payload,"Capture changed binary forwarding");
+        h.Pump([&] { return h.Proxy.Status().Active == 0; });
+        std::string up, down; unsigned files = 0; bool route = false, closed = false;
+        for (auto const& entry : fs::directory_iterator(logs))
+        {
+            ++files; Require(entry.path().filename().string().find("hubauthnet_") == 0,"Wrong capture prefix");
+            std::ifstream input(entry.path()); std::string line;
+            while (std::getline(input,line))
+            {
+                if (line.find("Route node=capture-node backend=127.0.0.1:") != std::string::npos) route = true;
+                if (line.find("Hub connection closed") != std::string::npos) closed = true;
+                if (line.empty() || line[0] == '#') continue;
+                std::istringstream row(line); std::string seq,time,direction,opcode,name,hex; std::size_t bytes;
+                Require(bool(row >> seq >> time >> direction >> opcode >> name >> bytes >> hex),"Malformed capture record");
+                Require(name == "HUB_TCP_READ" && opcode == "0x0000" && hex.size() == bytes*2,"Incorrect chunk metadata");
+                Require(direction == "CMSG" || direction == "SMSG","Unknown capture direction");
+                auto& output = direction == "CMSG" ? up : down;
+                for (std::size_t i = 0; i < hex.size(); i += 2) output.push_back(char(std::stoul(hex.substr(i,2),nullptr,16)));
+            }
+        }
+        Require(files == 1 && route && closed,"Missing session lifecycle/routing capture");
+        Require(up == payload && down == payload,"Capture lost/duplicated bytes or included the generated PROXY header");
+        fs::remove(control);
+        Require(h.Exchange("disabled-again") == "disabled-again","Disabling capture interrupted forwarding");
+        h.Pump([&] { return h.Proxy.Status().Active == 0; });
+        Require(std::distance(fs::directory_iterator(logs),fs::directory_iterator{}) == 1,"Removed control file still enabled capture");
+        sPacketLogServer->EnableGlobalLogging();
+        Require(h.Exchange("continuous") == "continuous","Continuous capture interrupted forwarding");
+        h.Pump([&] { return h.Proxy.Status().Active == 0; });
+        Require(std::distance(fs::directory_iterator(logs),fs::directory_iterator{}) == 2,"Continuous capture did not create session log");
+        h.Proxy.Close();
+    }
     void HeaderFailurePaths()
     {
         for (auto const& payload : {std::string("not-a-proxy-header\n"), std::string(108,'x'), std::string("PROXY TCP4 ")})
@@ -282,7 +339,7 @@ int main()
 {
     try
     {
-        Selection(); HeaderValidation(); Transport(); RetryAndNoReplay(); ClientIdentityAndLimits(); BackoffAndMaintenance(); HeaderFailurePaths();
+        Selection(); HeaderValidation(); Transport(); RetryAndNoReplay(); ClientIdentityAndLimits(); BackoffAndMaintenance(); HeaderFailurePaths(); PacketCapture();
         std::cout << "Auth ingress tests passed: weights, readiness/leases/capacity, protocol isolation, binary forwarding, half-close, pinning, safe retry, no replay, client identity and listener limits.\n";
         return 0;
     }

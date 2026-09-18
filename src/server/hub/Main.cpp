@@ -28,6 +28,7 @@
 #include "HubProcessSupervisor.h"
 #include "HubWebServer.h"
 #include "Log.h"
+#include "Packets/PacketLogServer.h"
 #include "Platform/TimeUtils.h"
 #include "SystemConfig.h"
 
@@ -235,6 +236,12 @@ int main(int argc, char** argv)
         SF_LOG_ERROR("server.hub", "Hub.Port must be between 1 and 65535; found %d.", port);
         return 1;
     }
+
+    sPacketLogServer->Configure(sConfigMgr->GetStringDefault("PacketLogServerControlFile", ""),
+        sConfigMgr->GetStringDefault("PacketLogServerOutputDir", "PacketLogs"),
+        sConfigMgr->GetStringDefault("LogsDir", ""));
+    if (sConfigMgr->GetBoolDefault("Hub.PacketLog.Enable", false))
+        sPacketLogServer->EnableGlobalLogging();
 
     if (!StartDatabase())
         return 1;

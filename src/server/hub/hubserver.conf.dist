@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091802
+ConfVersion=2026091803
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -142,6 +142,21 @@ Hub.LegacyIngress.MaxConnections = 4096
 Hub.LegacyIngress.ConnectTimeout = 3
 Hub.LegacyIngress.IdleTimeout = 300
 Hub.LegacyIngress.MaxAttempts = 3
+
+# Authentication ingress packet capture uses the auth/world per-session text format.
+# Enable continuously with Hub.PacketLog.Enable, or set PacketLogServerControlFile to
+# "packetlogserver.active" to follow the existing packetlogserver on-demand switch.
+# Files use hubauthnet/hubauth prefixes; headers identify the client and markers the node/backend.
+# HUB_TCP_READ entries contain bytes received in each direction, before forwarding. TCP chunks
+# are not decoded protocol packets: opcode 0 is a placeholder, and chunks may split/combine packets.
+# Generated PROXY headers are excluded. Gameplay stays direct and is logged by worldserver.
+# Account/character filters are unavailable because the hub does not decode authentication.
+# Capture includes raw authentication data; use it only while diagnosing traffic.
+# Output directory is relative to the hub working directory. Config changes require restart;
+# control-file presence is checked during traffic. No capture occurs while ingress is disabled.
+Hub.PacketLog.Enable = 0
+PacketLogServerControlFile = ""
+PacketLogServerOutputDir = "PacketLogs"
 
 #
 #    Console.Enable

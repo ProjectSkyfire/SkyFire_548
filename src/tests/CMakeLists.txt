@@ -891,9 +891,21 @@ add_test(NAME cluster_foundation_tests COMMAND cluster_foundation_tests)
 add_executable(hub_auth_proxy_tests
   HubAuthProxyTests.cpp
   ${CMAKE_SOURCE_DIR}/src/server/hub/HubAuthProxy.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets/PacketLogServer.cpp
+  PacketLogServerConfigStub.cpp
+  RealmSocketLogStub.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets/ByteBuffer.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging/Errors.cpp
 )
 target_include_directories(hub_auth_proxy_tests PRIVATE
+  ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Threading
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
   ${CMAKE_SOURCE_DIR}/src/server/hub
   ${Boost_INCLUDE_DIRS}
 )

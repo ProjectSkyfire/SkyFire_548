@@ -12,7 +12,7 @@
 namespace Skyfire::ConfigVersion
 {
     constexpr uint32 Auth = 2026091801;
-    constexpr uint32 Hub = 2026091802;
+    constexpr uint32 Hub = 2026091803;
     constexpr uint32 World = 2026272803;
 }
 

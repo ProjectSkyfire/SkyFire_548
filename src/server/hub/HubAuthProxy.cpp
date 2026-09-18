@@ -1,5 +1,6 @@
 /* Part of Project SkyFire. See LICENSE.md for copyright information. */
 #include "HubAuthProxy.h"
+#include "Packets/PacketLogServer.h"
 #include <boost/asio/write.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <array>
@@ -19,7 +20,15 @@ class HubAuthProxySession : public std::enable_shared_from_this<HubAuthProxySess
 public:
     HubAuthProxySession(HubAuthProxy& owner, tcp::socket client, std::uint64_t id)
         : _owner(owner), _client(std::move(client)), _backend(owner._io), _timer(owner._io), _id(id) { }
-    void Start() { TryBackend(); }
+    void Start()
+    {
+        boost::system::error_code ec;
+        auto const remote = _client.remote_endpoint(ec);
+        if (!ec) _logInfo.RemoteAddress = remote.address().to_string() + ":" + std::to_string(remote.port());
+        _logInfo.FilePrefix = _owner._options.Authnet ? "hubauthnet" : "hubauth";
+        _logInfo.SessionName = std::string(_owner._options.Authnet ? "hub-authnet-" : "hub-legacy-") + std::to_string(_id);
+        TryBackend();
+    }
     std::string NodeKey() const { return _reserved ? _node.Key : ""; }
     bool StillEligible() const
     {
@@ -37,6 +46,9 @@ public:
     {
         if (_closed) return;
         _closed = true; _timer.cancel();
+        if (sPacketLogServer->CanLogPacket())
+            sPacketLogServer->LogMarker(this, _logInfo, "Hub connection closed");
+        sPacketLogServer->CloseSession(this);
         boost::system::error_code ec; _client.close(ec); _backend.close(ec);
         Release(); _owner._sessions.erase(_id);
     }
@@ -106,6 +118,8 @@ private:
                 self->ConnectFailed(); return;
             }
             ++self->_owner._status.Routed;
+            if (sPacketLogServer->CanLogPacket())
+                self->LogRoute();
             self->_owner._backoff.Succeeded(self->_node);
             self->Touch();
             // After TCP connect, never select another backend, even if the first write fails.
@@ -137,6 +151,11 @@ private:
         _timer.async_wait([self](boost::system::error_code ec) { if (!ec && !self->_closed) self->StreamFailed(); });
     }
     void StreamFailed() { ++_owner._status.StreamFailures; Stop(); }
+    void LogRoute()
+    {
+        sPacketLogServer->LogMarker(this, _logInfo, "Route node=" + _node.Key + " backend=" + _node.Address + ":" +
+            std::to_string(_node.Port) + "; TCP read chunks, opcode 0 is a placeholder");
+    }
     void Read(bool fromClient)
     {
         auto self = shared_from_this();
@@ -151,6 +170,14 @@ private:
                 self->Touch();
                 auto& output = fromClient ? self->_backend : self->_client;
                 auto& data = fromClient ? self->_up : self->_down;
+                if (sPacketLogServer->CanLogPacket())
+                {
+                    // Include routing metadata even when capture starts mid-session.
+                    self->LogRoute();
+                    sPacketLogServer->LogPacket(self.get(), self->_logInfo,
+                        fromClient ? Skyfire::PACKET_LOG_CLIENT_TO_SERVER : Skyfire::PACKET_LOG_SERVER_TO_CLIENT,
+                        0, "HUB_TCP_READ", data.data(), bytes);
+                }
                 boost::asio::async_write(output, boost::asio::buffer(data.data(), bytes),
                     [self, fromClient, ec](boost::system::error_code writeError, std::size_t written)
                 {
@@ -181,6 +208,7 @@ private:
     std::set<std::string> _tried;
     std::array<char, 16384> _up{}, _down{};
     std::string _identity;
+    Skyfire::PacketLogServerSessionInfo _logInfo;
     bool _closed = false, _reserved = false, _clientEnded = false, _backendEnded = false;
     bool _connecting = false, _withdrawn = false;
 };
