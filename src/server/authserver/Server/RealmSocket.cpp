@@ -17,6 +17,7 @@
 
 namespace
 {
+std::atomic<uint32> ActiveConnections[2]{};
 std::string GetAuthOpcodeNameForLogging(uint8 opcode)
 {
     switch (opcode)
@@ -47,12 +48,18 @@ RealmSocket::Session::Session(void) { }
 
 RealmSocket::Session::~Session(void) { }
 
-RealmSocket::RealmSocket(std::unique_ptr<RealmSocketHandle> socket, std::string remoteAddress, uint16 remotePort) :
+RealmSocket::RealmSocket(std::unique_ptr<RealmSocketHandle> socket, std::string remoteAddress, uint16 remotePort, bool authnet) :
     _socket(std::move(socket)), _readBuffer(), _inputBuffer(), _inputReadPos(0), _session(),
     _remoteAddress(std::move(remoteAddress)), _packetLogAccountName(), _remotePort(remotePort), _writeQueue(),
-    _writeInProgress(false), _closeWhenWritesFlush(false), _closed(false), _closeNotified(false)
+    _writeInProgress(false), _closeWhenWritesFlush(false), _closed(false), _closeNotified(false), _authnet(authnet)
 {
     _inputBuffer.reserve(4096);
+    ActiveConnections[_authnet ? 1 : 0].fetch_add(1, std::memory_order_relaxed);
+}
+
+uint32 RealmSocket::GetActiveConnections(bool authnet)
+{
+    return ActiveConnections[authnet ? 1 : 0].load(std::memory_order_relaxed);
 }
 
 RealmSocket::~RealmSocket(void)
@@ -259,6 +266,8 @@ void RealmSocket::CloseSocket()
     bool expected = false;
     if (!_closed.compare_exchange_strong(expected, true))
         return;
+
+    ActiveConnections[_authnet ? 1 : 0].fetch_sub(1, std::memory_order_relaxed);
 
     if (IsOpen())
         Skyfire::Net::CloseTcpSocket(*_socket);

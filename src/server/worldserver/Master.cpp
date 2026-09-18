@@ -27,6 +27,7 @@
 #include "SystemConfig.h"
 #include "World.h"
 #include "WorldRunnable.h"
+#include "Cluster/ClusterAgent.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
 
@@ -405,6 +406,23 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
     ///- Initialize the World
     sWorld->SetInitialWorldSettings();
 
+    Skyfire::Cluster::Agent clusterAgent;
+    Skyfire::Cluster::AgentOptions clusterOptions;
+    Skyfire::Cluster::Node advertisement;
+    advertisement.Type = Skyfire::Cluster::Service::World;
+    advertisement.Port = uint16(sWorld->getIntConfig(WorldIntConfigs::CONFIG_PORT_WORLD));
+    advertisement.Build = 18414;
+    advertisement.Capabilities = 8; // Realm list; remote commands are not implemented on this transport yet.
+    for (auto const& realm : realmNameStore) advertisement.Realms.push_back(realm.first);
+    if (!advertisement.Realms.empty()) advertisement.Realm = advertisement.Realms.front();
+    std::string clusterError;
+    if (!Skyfire::Cluster::LoadAgentOptions(std::move(advertisement), clusterOptions, clusterError))
+    {
+        SF_LOG_ERROR("server.worldserver", "%s", clusterError.c_str());
+        _StopDB();
+        return 1;
+    }
+
     ///- Register worldserver's signal handlers
     std::signal(SIGINT, WorldServerSignalHandler);
     std::signal(SIGTERM, WorldServerSignalHandler);
@@ -552,6 +570,20 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
     SF_LOG_INFO("server.worldserver",  " % s (worldserver-daemon) ready...", SKYFIRE_VER_PRODUCTVERSION_STR);
 
     std::thread hubControlThread;
+    if (!World::IsStopped() && !clusterAgent.Start(std::move(clusterOptions),
+        [lastTick = uint64(0), lastProgress = std::chrono::steady_clock::now()]() mutable
+        {
+            auto const now = std::chrono::steady_clock::now();
+            uint64 const tick = HubWorldTick.load(std::memory_order_relaxed);
+            if (tick != lastTick) { lastTick = tick; lastProgress = now; }
+            bool const ready = tick && HubWorldReady.load(std::memory_order_relaxed) &&
+                now - lastProgress < std::chrono::seconds(15);
+            return Skyfire::Cluster::AgentSample{ready, uint32(HubWorldMetrics.load(std::memory_order_relaxed) >> 32)};
+        }, clusterError))
+    {
+        SF_LOG_ERROR("server.worldserver", "%s", clusterError.c_str());
+        World::StopNow(ERROR_EXIT_CODE);
+    }
     if (hubControl && !World::IsStopped())
     {
         if (!hubControl->SendStatus(Skyfire::HubControl::AccountReadyMessage))
@@ -610,6 +642,8 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
     worldRunner.Join();
+
+    clusterAgent.Stop();
 
     if (hubControlThread.joinable())
         hubControlThread.join();

@@ -84,7 +84,7 @@ void AuthnetAcceptor::HandleAccept(std::shared_ptr<RealmSocketHandle> clientSock
         uint16 remotePort = endpointError ? 0 : remoteEndpoint.port();
 
         std::unique_ptr<RealmSocketHandle> socketHandle(new RealmSocketHandle(std::move(*clientSocket)));
-        std::shared_ptr<RealmSocket> socket(new RealmSocket(std::move(socketHandle), remoteAddress, remotePort));
+        std::shared_ptr<RealmSocket> socket(new RealmSocket(std::move(socketHandle), remoteAddress, remotePort, true));
         socket->set_session(std::unique_ptr<RealmSocket::Session>(new AuthnetSocket(*socket)));
         socket->Start();
     }

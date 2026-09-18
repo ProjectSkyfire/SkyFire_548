@@ -24,6 +24,7 @@
 
 std::atomic<uint64> HubWorldMetrics{0};
 std::atomic<uint64> HubWorldTick{0};
+std::atomic<bool> HubWorldReady{false};
 
 #define WORLD_SLEEP_CONST 50
 
@@ -64,6 +65,7 @@ void WorldRunnable::Run()
         uint32 const workTime = getMSTimeDiff(realCurrTime, getMSTime());
         HubWorldMetrics.store((uint64(sWorld->GetPlayerCount()) << 32) | workTime, std::memory_order_relaxed);
         HubWorldTick.fetch_add(1, std::memory_order_relaxed);
+        HubWorldReady.store(!sWorld->IsClosed() && !World::IsStopped(), std::memory_order_relaxed);
         realPrevTime = realCurrTime;
 
         // diff (D0) include time of previous sleep (d0) + tick time (t0)
@@ -87,6 +89,7 @@ void WorldRunnable::Run()
 #endif
     }
 
+    HubWorldReady.store(false, std::memory_order_relaxed);
     Skyfire::WorldShutdown::WorldShutdownStep shutdownStep = Skyfire::WorldShutdown::WORLD_SHUTDOWN_START;
 
     AdvanceShutdownStep(shutdownStep, Skyfire::WorldShutdown::WORLD_SHUTDOWN_SCRIPT_SHUTDOWN);

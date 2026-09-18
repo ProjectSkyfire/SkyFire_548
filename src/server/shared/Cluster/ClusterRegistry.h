@@ -41,6 +41,22 @@ namespace Skyfire::Cluster
             if (it == _nodes.end() || it->second.Owner != owner) return false;
             _nodes.erase(it); return true;
         }
+        bool SetRealms(std::string const& key, std::uint64_t owner, std::uint64_t now,
+            std::uint64_t lease, std::vector<std::uint32_t> const& realms)
+        {
+            auto it = _nodes.find(key);
+            if (it == _nodes.end() || it->second.Owner != owner || now >= it->second.ExpiresAt || !lease ||
+                it->second.Type != Service::World || !(it->second.Capabilities & 8)) return false;
+            Writer payload; payload.U16(std::uint16_t(realms.size()));
+            if (realms.empty() || realms.size() > 64) return false;
+            bool primary = false;
+            for (auto id : realms) { payload.U32(id); if (id == it->second.Realm) primary = true; }
+            std::vector<std::uint32_t> validated;
+            if (!primary || !DecodeRealms(payload.Bytes, validated)) return false;
+            it->second.Realms = std::move(validated);
+            it->second.ExpiresAt = now + lease;
+            return true;
+        }
         void Expire(std::uint64_t now)
         {
             for (auto it = _nodes.begin(); it != _nodes.end();)

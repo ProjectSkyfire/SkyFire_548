@@ -9,6 +9,7 @@ ConfVersion=2026272803
 #
 #    EXAMPLE CONFIG
 #    CONNECTIONS AND DIRECTORIES
+#    CLUSTER REGISTRATION
 #    PERFORMANCE SETTINGS
 #    SERVER LOGGING
 #    SERVER SETTINGS
@@ -52,6 +53,38 @@ ConfVersion=2026272803
 # - Copy this example to keep the formatting.
 # - Line breaks should be at column 100.
 ###################################################################################################
+
+###################################################################################################
+# CLUSTER REGISTRATION
+#
+# Optional registration with hubserver (also enable Hub.Cluster.Enable there).
+# Clustering disabled preserves standalone startup. Network failures retry in the background
+# (1..30 seconds) without disconnecting players or stopping the world. Locally managed processes
+# still honor the inherited hub control pipe and graceful shutdown. Launch directly without hub
+# handles to run independently across hub process restarts.
+#
+# NodeKey is a unique stable identity matching the client certificate's sole CN (1..64 ASCII
+# letters, digits, '-', '_' or '.'). Empty NodeName uses NodeKey.
+# HubHost must match the hub TLS certificate hostname/IP SAN. AdvertiseAddress must be a
+# concrete numeric IP reachable by clients, never 0.0.0.0 or ::. The actual world listener port,
+# all served realm IDs (maximum 64), and client build 18414 are advertised automatically.
+# Readiness follows the world open/closed state and tick progress; load is active players.
+# Capacity is advertised maximum players, 0 = unspecified; PlayerLimit remains authoritative.
+# Certificate, PrivateKey and CA are mandatory when enabled; relative paths use this config's
+# directory. Use a dedicated cluster CA and protect private keys. Settings require restart.
+# Invalid local configuration fails startup. An incompatible hub disables registration until
+# restart while gameplay stays running. Registration does not enable remote commands or routing.
+
+Cluster.Enable = 0
+Cluster.HubHost = "localhost"
+Cluster.HubPort = 9100
+Cluster.NodeKey = ""
+Cluster.NodeName = ""
+Cluster.AdvertiseAddress = ""
+Cluster.Capacity = 0
+Cluster.Certificate = ""
+Cluster.PrivateKey = ""
+Cluster.CA = ""
 
 ###################################################################################################
 # CONNECTIONS AND DIRECTORIES

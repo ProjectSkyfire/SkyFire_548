@@ -645,10 +645,15 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
     {
         json << ",{\"key\":\"cluster:" << JsonEscape(node.Key) << "\",\"name\":\"" << JsonEscape(node.Name)
              << "\",\"status\":\"" << (node.Ready ? "online" : "issue")
-             << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? "auth" : "world")
+             << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : "world")
              << " | " << (node.Ready ? "ready" : "not ready") << " | " << JsonEscape(node.Address) << ':' << node.Port
-             << " | realm " << node.Realm << " | load " << node.Load << '/' << node.Capacity
-             << "\",\"managed\":false}";
+             << " | load " << node.Load << '/' << node.Capacity;
+        if (!node.Realms.empty())
+        {
+            json << " | realms";
+            for (auto realm : node.Realms) json << ' ' << realm;
+        }
+        json << "\",\"managed\":false}";
     }
     json << "]}";
     return MakeResponse(200, "application/json", json.str());

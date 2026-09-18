@@ -16,6 +16,7 @@
 // Published by the world thread; the hub control thread never reads session containers.
 extern std::atomic<uint64> HubWorldMetrics;
 extern std::atomic<uint64> HubWorldTick;
+extern std::atomic<bool> HubWorldReady;
 
 /// Heartbeat thread for the World
 class WorldRunnable

@@ -14,14 +14,14 @@ import struct
 import time
 
 MAGIC = b'SFHC'
-REGISTER, READY, HEARTBEAT, DEREGISTER, ACK, ERROR = 1, 2, 3, 4, 0x8000, 0xffff
+REGISTER, READY, HEARTBEAT, DEREGISTER, REALMS, ACK, ERROR = 1, 2, 3, 4, 5, 0x8000, 0xffff
 
 def string(value):
     data = value.encode('utf-8')
     return struct.pack('!H', len(data)) + data
 
-def registration(node):
-    return string(node) + string('Synthetic foundation test') + b'\x02' + string('127.0.0.1') + struct.pack('!HIIII', 8085, 1, 18414, 100, 7)
+def registration(node, capabilities=7):
+    return string(node) + string('Synthetic foundation test') + b'\x02' + string('127.0.0.1') + struct.pack('!HIIII', 8085, 1, 18414, 100, capabilities)
 
 def frame(kind, body=b'', version=1):
     return struct.pack('!4sHHI', MAGIC, version, kind, len(body)) + body
@@ -126,6 +126,26 @@ def main():
             ack(replacement, REGISTER)
             replacement.sendall(frame(DEREGISTER))
             ack(replacement, DEREGISTER)
+    for invalid in [struct.pack('!HII', 2, 1, 1), struct.pack('!HI', 1, 2), struct.pack('!HI', 1, 0), b'\x00\x00']:
+        with connect() as peer:
+            peer.sendall(frame(REGISTER, registration(args.node, 8)))
+            ack(peer, REGISTER)
+            peer.sendall(frame(REALMS, invalid))
+            rejected(peer, 1)
+    with connect() as peer:
+        peer.sendall(frame(REGISTER, registration(args.node, 8)))
+        ack(peer, REGISTER)
+        peer.sendall(frame(READY, struct.pack('!BI', 1, 0)))
+        rejected(peer, 1)
+    with connect() as peer:
+        peer.sendall(frame(REGISTER, registration(args.node, 8)))
+        ack(peer, REGISTER)
+        peer.sendall(frame(REALMS, struct.pack('!HII', 2, 1, 2)))
+        ack(peer, REALMS)
+        peer.sendall(frame(READY, struct.pack('!BI', 1, 2)))
+        ack(peer, READY)
+        peer.sendall(frame(DEREGISTER))
+        ack(peer, DEREGISTER)
     with connect() as slow:
         slow.sendall(frame(REGISTER, registration(args.node))[:6])
         try:

@@ -27,6 +27,7 @@
 
 #include "AuthnetAcceptor.h"
 #include "Common.h"
+#include "Cluster/ClusterAgent.h"
 #include "Database/DatabaseSetup/DatabaseSetup.h"
 #include "Database/DatabaseSetup/DatabaseSetupRuntime.h"
 #include "Configuration/Config.h"
@@ -38,6 +39,7 @@
 #include "Platform/HubProcessControl.h"
 #include "Platform/TimeUtils.h"
 #include "RealmAcceptor.h"
+#include "RealmSocket.h"
 #include "RealmList.h"
 #include "SystemConfig.h"
 #include "Util.h"
@@ -351,15 +353,16 @@ extern int main(int argc, char** argv)
     }
 
     Skyfire::HubControl::ChildChannel hubControl;
+    bool const hubManaged = hubControlReadHandle || hubStatusWriteHandle;
     std::string hubControlError;
-    if (!hubControl.Initialize(hubControlReadHandle, hubStatusWriteHandle, hubControlError))
+    if (hubManaged && !hubControl.Initialize(hubControlReadHandle, hubStatusWriteHandle, hubControlError))
     {
         printf("Authserver startup denied: %s. Start authnet from the hubserver console.\n",
             hubControlError.c_str());
         return 1;
     }
 
-    if (!hubControl.SendStatus(Skyfire::HubControl::StartingMessage))
+    if (hubManaged && !hubControl.SendStatus(Skyfire::HubControl::StartingMessage))
     {
         printf("Authserver startup denied: the hubserver control channel was lost.\n");
         return 1;
@@ -436,7 +439,7 @@ extern int main(int argc, char** argv)
     RealmAcceptor acceptor;
 
     int32 rmport = sConfigMgr->GetIntDefault("RealmServerPort", 3724);
-    if (rmport < 0 || rmport > 0xFFFF)
+    if (rmport < 1 || rmport > 0xFFFF)
     {
         SF_LOG_ERROR("server.authserver", "Specified port out of allowed range (1-65535)");
         return 1;
@@ -453,10 +456,11 @@ extern int main(int argc, char** argv)
     // Authnet: separate, disabled-by-default listener for the launcher's
     // Authnet-style login path. Never affects the classic listener above.
     AuthnetAcceptor authnetAcceptor;
-    if (sConfigMgr->GetBoolDefault("Authnet.Enabled", false))
+    bool const authnetEnabled = sConfigMgr->GetBoolDefault("Authnet.Enabled", false);
+    int32 const authnetPort = sConfigMgr->GetIntDefault("Authnet.Port", 1119);
+    if (authnetEnabled)
     {
-        int32 authnetPort = sConfigMgr->GetIntDefault("Authnet.Port", 1119);
-        if (authnetPort < 0 || authnetPort > 0xFFFF)
+        if (authnetPort < 1 || authnetPort > 0xFFFF)
         {
             SF_LOG_ERROR("server.authserver", "Authnet.Port out of allowed range (1-65535)");
             return 1;
@@ -472,7 +476,32 @@ extern int main(int argc, char** argv)
         SF_LOG_INFO("server.authserver", "Authnet passive probe listening on %s:%d", authnetBindIp.c_str(), authnetPort);
     }
 
-    if (!hubControl.SendStatus(Skyfire::HubControl::ReadyMessage))
+    Skyfire::Cluster::Agent clusterAgent;
+    Skyfire::Cluster::AgentOptions clusterOptions;
+    Skyfire::Cluster::Node advertisement;
+    advertisement.Type = Skyfire::Cluster::Service::Auth;
+    advertisement.Build = 18414;
+    std::string endpoint = sConfigMgr->GetStringDefault("Cluster.AuthEndpoint", "auto");
+    if (endpoint == "auto") endpoint = authnetEnabled ? "authnet" : "legacy";
+    bool const advertiseAuthnet = endpoint == "authnet";
+    advertisement.Capabilities = advertiseAuthnet ? 16 : 0;
+    advertisement.Port = uint16(advertiseAuthnet ? authnetPort : rmport);
+    std::string clusterError;
+    if (sConfigMgr->GetBoolDefault("Cluster.Enable", false) &&
+        ((endpoint != "authnet" && endpoint != "legacy") || (advertiseAuthnet && !authnetEnabled)))
+    {
+        SF_LOG_ERROR("server.authserver", "Cluster.AuthEndpoint must select an enabled listener: authnet or legacy.");
+        return 1;
+    }
+    if (!Skyfire::Cluster::LoadAgentOptions(std::move(advertisement), clusterOptions, clusterError) ||
+        !clusterAgent.Start(std::move(clusterOptions), [advertiseAuthnet]
+        { return Skyfire::Cluster::AgentSample{true, RealmSocket::GetActiveConnections(advertiseAuthnet)}; }, clusterError))
+    {
+        SF_LOG_ERROR("server.authserver", "%s", clusterError.c_str());
+        return 1;
+    }
+
+    if (hubManaged && !hubControl.SendStatus(Skyfire::HubControl::ReadyMessage))
     {
         SF_LOG_ERROR("server.authserver", "Hubserver control channel was lost during startup.");
         return 1;
@@ -560,7 +589,7 @@ extern int main(int argc, char** argv)
     // Wait for termination signal
     while (!stopEvent)
     {
-        if (hubControl.StopRequested())
+        if (hubManaged && hubControl.StopRequested())
         {
             SF_LOG_INFO("server.authserver", "Hubserver requested authserver shutdown.");
             stopEvent = true;
@@ -572,7 +601,7 @@ extern int main(int argc, char** argv)
         Skyfire::SleepForMilliseconds(100);
 
         auto const now = std::chrono::steady_clock::now();
-        if (now >= nextHubHeartbeat)
+        if (hubManaged && now >= nextHubHeartbeat)
         {
             if (!hubControl.SendStatus(Skyfire::HubControl::HeartbeatMessage))
             {
@@ -591,9 +620,10 @@ extern int main(int argc, char** argv)
         }
     }
 
+    clusterAgent.Stop();
     acceptor.Close();
     authnetAcceptor.Close();
-    (void)hubControl.SendStatus(Skyfire::HubControl::StoppingMessage);
+    if (hubManaged) (void)hubControl.SendStatus(Skyfire::HubControl::StoppingMessage);
 
     // Close the Database Pool and library
     StopDB();

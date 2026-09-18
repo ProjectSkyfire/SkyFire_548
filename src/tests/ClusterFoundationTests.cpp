@@ -89,5 +89,27 @@ int main()
     registry.Register(valid, 4, 16000, 15000);
     registry.Clear();
     ok &= Check(registry.Snapshot().empty(), "Shutdown failed to clear registry");
+    valid.Capabilities = 8;
+    registry.Register(valid, 5, 0, 100);
+    ok &= Check(!registry.SetRealms(valid.Key, 6, 1, 100, {1, 2}), "Another owner changed realms");
+    ok &= Check(!registry.SetRealms(valid.Key, 5, 1, 100, {2}), "Missing primary realm accepted");
+    ok &= Check(!registry.SetRealms(valid.Key, 5, 1, 100, {1, 1}), "Duplicate realms accepted");
+    ok &= Check(!registry.SetRealms(valid.Key, 5, 1, 100, {1, 0}), "Zero realm accepted");
+    ok &= Check(!registry.SetRealms(valid.Key, 5, 1, 100, {}), "Empty realm list accepted");
+    ok &= Check(registry.SetRealms(valid.Key, 5, 1, 100, {1, 2}) && registry.Snapshot()[0].Realms.size() == 2 &&
+        !registry.Snapshot()[0].Ready, "Realm list failed or implied readiness");
+    ok &= Check(!registry.SetRealms(valid.Key, 5, 101, 100, {1, 2}), "Expired lease renewed by realm list");
+    Writer realms; realms.U16(2); realms.U32(1); realms.U32(2);
+    std::vector<std::uint32_t> decoded;
+    ok &= Check(DecodeRealms(realms.Bytes, decoded) && decoded == std::vector<std::uint32_t>({1, 2}), "Realm byte order incorrect");
+    for (std::size_t size = 0; size < realms.Bytes.size(); ++size)
+    {
+        auto truncated = realms.Bytes; truncated.resize(size);
+        ok &= Check(!DecodeRealms(truncated, decoded), "Partial realm list accepted");
+    }
+    realms.Bytes.push_back(0);
+    ok &= Check(!DecodeRealms(realms.Bytes, decoded), "Trailing realm bytes accepted");
+    realms.Bytes[1] = 65;
+    ok &= Check(!DecodeRealms(realms.Bytes, decoded), "Excessive realm count accepted");
     return ok ? 0 : 1;
 }

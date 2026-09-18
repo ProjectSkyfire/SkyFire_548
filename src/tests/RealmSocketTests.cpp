@@ -46,7 +46,7 @@ namespace
     };
 #endif
 
-    std::shared_ptr<RealmSocket> CreateConnectedRealmSocket(boost::asio::io_context& ioContext, tcp::socket& peer)
+    std::shared_ptr<RealmSocket> CreateConnectedRealmSocket(boost::asio::io_context& ioContext, tcp::socket& peer, bool authnet = false)
     {
         tcp::acceptor acceptor(ioContext, tcp::endpoint(tcp::v4(), 0));
 
@@ -57,7 +57,7 @@ namespace
         std::unique_ptr<RealmSocketHandle> serverSocket(new RealmSocketHandle(ioContext));
         acceptor.accept(*serverSocket);
 
-        return std::make_shared<RealmSocket>(std::move(serverSocket), "127.0.0.1", peer.local_endpoint().port());
+        return std::make_shared<RealmSocket>(std::move(serverSocket), "127.0.0.1", peer.local_endpoint().port(), authnet);
     }
 
     bool IsWouldBlock(boost::system::error_code const& error)
@@ -178,6 +178,22 @@ int main()
     boost::asio::io_context ioContext;
     tcp::socket peer(ioContext);
     std::shared_ptr<RealmSocket> socket = CreateConnectedRealmSocket(ioContext, peer);
+
+    tcp::socket authnetPeer(ioContext);
+    auto authnetSocket = CreateConnectedRealmSocket(ioContext, authnetPeer, true);
+    if (RealmSocket::GetActiveConnections(false) != 1 || RealmSocket::GetActiveConnections(true) != 1)
+    {
+        std::cerr << "Authnet and legacy connection counts are not independent\n";
+        return 1;
+    }
+    authnetSocket->Close();
+    authnetSocket->Close();
+    authnetSocket.reset();
+    if (RealmSocket::GetActiveConnections(false) != 1 || RealmSocket::GetActiveConnections(true) != 0)
+    {
+        std::cerr << "Repeated close/destruction corrupted active connection counts\n";
+        return 1;
+    }
 
     char const payload[] = "queued-auth-write";
     if (!socket->QueueSend(payload, std::strlen(payload)))

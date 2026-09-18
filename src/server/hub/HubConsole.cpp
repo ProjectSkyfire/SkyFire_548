@@ -418,9 +418,17 @@ void HubCommandHandler::PrintRegistry() const
     auto const nodes = _clusterServer.Snapshot();
     std::printf("Live cluster registry: %u node(s), protocol v1.\n", unsigned(nodes.size()));
     for (auto const& node : nodes)
+    {
         std::printf("  %s (%s) %s %s:%u realm %u build %u load %u/%u %s\n", node.Key.c_str(), node.Name.c_str(),
-            node.Type == Skyfire::Cluster::Service::Auth ? "auth" : "world", node.Address.c_str(), unsigned(node.Port),
+            node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : "world", node.Address.c_str(), unsigned(node.Port),
             node.Realm, node.Build, node.Load, node.Capacity, node.Ready ? "ready" : "not ready");
+        if (!node.Realms.empty())
+        {
+            std::printf("    Realms:");
+            for (auto realm : node.Realms) std::printf(" %u", realm);
+            std::printf("\n");
+        }
+    }
 }
 
 void HubCommandHandler::PrintNodes() const

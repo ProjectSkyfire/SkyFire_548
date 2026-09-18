@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Skyfire::Cluster
@@ -16,19 +17,23 @@ namespace Skyfire::Cluster
     // TLS transport. Integers are big endian; strings are uint16 byte length + UTF-8.
     // Header: SFHC (4), protocol version (2), message type (2), payload bytes (4).
     // Register: key, name, type(u8), numeric address, port(u16), realm/build/capacity(u32), capabilities(u32).
-    // Capability bits: 1 world commands, 2 account administration, 4 world metrics.
+    // Capability bits: 1 world commands, 2 account administration, 4 world metrics, 8 realm list.
+    // Bit 16 identifies an Authnet endpoint; auth nodes without it advertise legacy authentication.
+    // Realms: count(u16, 1..64), unique nonzero realm IDs(u32), including the primary realm.
+    // Nodes advertising bit 8 must send Realms before readiness; older peers use the primary realm.
     // Ready: ready(u8), load(u32). Heartbeat: load(u32). Deregister: empty.
     // Ack: request type(u16), lease seconds(u32). Error: code(u16), description(string).
     constexpr std::uint16_t ProtocolVersion = 1;
     constexpr std::size_t HeaderSize = 12;
     constexpr std::uint32_t MaximumPayload = 4096;
-    enum class Message : std::uint16_t { Register = 1, Ready = 2, Heartbeat = 3, Deregister = 4, Ack = 0x8000, Error = 0xffff };
+    enum class Message : std::uint16_t { Register = 1, Ready = 2, Heartbeat = 3, Deregister = 4, Realms = 5, Ack = 0x8000, Error = 0xffff };
     enum class Service : std::uint8_t { Auth = 1, World = 2 };
     enum class Error : std::uint16_t { Malformed = 1, Version = 2, Identity = 3, Conflict = 4, NotRegistered = 5, Capacity = 6 };
     struct Header { std::uint16_t Version = 0; Message Type = Message::Error; std::uint32_t Length = 0; };
     struct Node
     {
         std::string Key, Name, Address;
+        std::vector<std::uint32_t> Realms;
         Service Type = Service::Auth;
         std::uint16_t Port = 0;
         std::uint32_t Realm = 0, Build = 0, Capacity = 0, Capabilities = 0, Load = 0;
@@ -118,7 +123,26 @@ namespace Skyfire::Cluster
             !reader.U16(node.Port) || !node.Port || !reader.U32(node.Realm) || !reader.U32(node.Build) || !node.Build ||
             !reader.U32(node.Capacity) || !reader.U32(node.Capabilities) || !reader.End()) return false;
         node.Type = Service(type);
+        node.Realms.clear();
+        if (node.Type == Service::World) node.Realms.push_back(node.Realm);
         return (node.Type == Service::Auth && node.Realm == 0) || (node.Type == Service::World && node.Realm != 0);
+    }
+    inline bool DecodeRealms(std::vector<std::uint8_t> const& bytes, std::vector<std::uint32_t>& realms)
+    {
+        Reader reader(bytes);
+        std::uint16_t count;
+        if (!reader.U16(count) || count == 0 || count > 64) return false;
+        std::vector<std::uint32_t> decoded;
+        for (unsigned i = 0; i < count; ++i)
+        {
+            std::uint32_t id;
+            if (!reader.U32(id) || !id) return false;
+            for (auto existing : decoded) if (existing == id) return false;
+            decoded.push_back(id);
+        }
+        if (!reader.End()) return false;
+        realms = std::move(decoded);
+        return true;
     }
 }
 #endif

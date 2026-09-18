@@ -78,7 +78,7 @@ private:
             if (!DecodeHeader(self->_headerBytes, self->_header)) { self->Reject(Error::Malformed, "Invalid frame or payload exceeds 4096 bytes."); return; }
             if (self->_header.Version != ProtocolVersion) { self->Reject(Error::Version, "Incompatible cluster protocol; hub requires version 1."); return; }
             if (self->_header.Type != Message::Register && self->_header.Type != Message::Ready &&
-                self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister)
+                self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms)
             { self->Reject(Error::Malformed, "Unsupported request type."); return; }
             self->_body.resize(self->_header.Length);
             if (self->_body.empty()) { self->Handle(); return; }
@@ -100,11 +100,15 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(7)))
-            { Reject(Error::Version, "Requires client build 18414 and capabilities mask 0..7."); return; }
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(31)) ||
+                (node.Type == Service::Auth && (node.Capabilities & 8)) ||
+                (node.Type == Service::World && (node.Capabilities & 16)))
+            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..31)."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
             { Reject(Error::Conflict, "Node key is already leased or registry capacity is exhausted."); return; }
             _key = node.Key;
+            _needsRealms = (node.Capabilities & 8) != 0;
+            _primaryRealm = node.Realm;
             SF_LOG_INFO("server.hub", "Cluster node '%s' registered; awaiting readiness.", _key.c_str());
         }
         else
@@ -116,6 +120,21 @@ private:
                 if (!_server._registry.Remove(_key, _owner)) { Reject(Error::NotRegistered, "Node lease expired; reconnect and register."); return; }
                 Acknowledge(true); return;
             }
+            if (_header.Type == Message::Realms)
+            {
+                std::vector<std::uint32_t> realms;
+                if (!_needsRealms || !DecodeRealms(_body, realms))
+                { Reject(Error::Malformed, "Invalid or unsupported realm list."); return; }
+                bool primary = false;
+                for (auto id : realms) if (id == _primaryRealm) primary = true;
+                if (!primary) { Reject(Error::Malformed, "Realm list must include the primary realm."); return; }
+                if (!_server._registry.SetRealms(_key, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL, realms))
+                { Reject(Error::NotRegistered, "Node lease expired; reconnect and register."); return; }
+                _realmsReceived = true;
+                Acknowledge(false); return;
+            }
+            if (_needsRealms && !_realmsReceived)
+            { Reject(Error::Malformed, "Publish realms before readiness or heartbeats."); return; }
             Reader reader(_body);
             std::uint8_t ready = 0;
             std::uint32_t load = 0;
@@ -154,6 +173,8 @@ private:
     boost::asio::steady_timer _timer;
     std::uint64_t _owner;
     bool _closed = false;
+    bool _needsRealms = false, _realmsReceived = false;
+    std::uint32_t _primaryRealm = 0;
     std::string _identity, _key;
     std::array<std::uint8_t, HeaderSize> _headerBytes{};
     Header _header;
