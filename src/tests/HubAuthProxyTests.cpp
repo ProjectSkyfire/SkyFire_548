@@ -196,6 +196,8 @@ namespace
         h.Nodes = {Auth("a-dead",deadPort),Auth("b-good",good.Port())};
         Require(h.Exchange("retry-on-connect") == "retry-on-connect","Safe connect fallback failed");
         Require(h.Proxy.Status().Retries == 1 && h.Proxy.Status().ConnectFailures == 1,"Connect retry counters wrong");
+        Require(h.Exchange("during-backoff") == "during-backoff" && h.Proxy.Status().ConnectFailures == 1,
+            "Repeated client retried a backend still in failure backoff");
         h.Proxy.Close();
 
         Harness pinned; EchoServer drop(pinned.Io,false,true), spare(pinned.Io); pinned.Open();
@@ -222,6 +224,43 @@ namespace
         Require(h.Exchange("over-limit").empty() && backend.Peers.size() == 2,"Listener connection limit ignored");
         boost::system::error_code ec; held->close(ec);
     }
+    void BackoffAndMaintenance()
+    {
+        auto node = Auth("node",1000);
+        Skyfire::Cluster::AuthBackoff backoff;
+        backoff.Failed(node,100);
+        Require(backoff.Cooling(node,1099) && !backoff.Cooling(node,1100),"First backoff deadline wrong");
+        backoff.Failed(node,1100);
+        Require(backoff.Cooling(node,3099) && !backoff.Cooling(node,3100),"Exponential backoff wrong");
+        for (unsigned i = 0; i < 10; ++i) backoff.Failed(node,10000);
+        Require(backoff.Cooling(node,39999) && !backoff.Cooling(node,40000),"Backoff did not cap at 30 seconds");
+        auto replacement = node; replacement.Owner = 2;
+        Require(!backoff.Cooling(replacement,10001),"New process inherited old failure backoff");
+        backoff.Succeeded(node); Require(!backoff.Cooling(node,10001),"Successful connection did not reset backoff");
+        backoff.Failed(node,10000); backoff.Prune({});
+        Require(!backoff.Cooling(node,10001),"Expired registration retained backoff");
+
+        Harness h; EchoServer a(h.Io), b(h.Io); h.Open();
+        h.Nodes = {Auth("a",a.Port()),Auth("b",b.Port())};
+        auto held = h.Connect(); h.Pump([&] { return a.Peers.size() == 1; });
+        h.Nodes[0].Admin = Skyfire::Cluster::Administration::Draining;
+        Require(h.Exchange("other-node") == "other-node" && a.Peers.size() == 1 && b.Peers.size() == 1,
+            "Drain failed to divert new clients to remaining node");
+        Require(h.Proxy.Status().ConnectionsByNode.at("a") == 1,"Drain lost existing connection count");
+        h.Nodes[1].Admin = Skyfire::Cluster::Administration::Disabled;
+        Require(h.Exchange("no-route").empty() && h.Proxy.Status().NoBackend == 1 && h.Proxy.Status().AvailableNodes == 0,
+            "All nodes unavailable did not close/report rejection");
+        boost::asio::write(*held,boost::asio::buffer("existing",8));
+        std::array<char,8> bytes{}; bool done = false;
+        boost::asio::async_read(*held,boost::asio::buffer(bytes),[&](boost::system::error_code ec,std::size_t size)
+        { Require(!ec && size == 8,"Maintenance terminated an established connection"); done = true; });
+        h.Pump([&] { return done; });
+        Require(std::string(bytes.data(),bytes.size()) == "existing","Draining stream corrupted");
+        h.Nodes[0].Admin = Skyfire::Cluster::Administration::Enabled;
+        Require(h.Exchange("enabled") == "enabled" && a.Peers.size() == 2,"Re-enabled node did not accept new clients");
+        boost::system::error_code ec; held->close(ec);
+        h.Pump([&] { return h.Proxy.Status().ConnectionsByNode.count("a") == 0; });
+    }
     void HeaderFailurePaths()
     {
         for (auto const& payload : {std::string("not-a-proxy-header\n"), std::string(108,'x'), std::string("PROXY TCP4 ")})
@@ -243,7 +282,7 @@ int main()
 {
     try
     {
-        Selection(); HeaderValidation(); Transport(); RetryAndNoReplay(); ClientIdentityAndLimits(); HeaderFailurePaths();
+        Selection(); HeaderValidation(); Transport(); RetryAndNoReplay(); ClientIdentityAndLimits(); BackoffAndMaintenance(); HeaderFailurePaths();
         std::cout << "Auth ingress tests passed: weights, readiness/leases/capacity, protocol isolation, binary forwarding, half-close, pinning, safe retry, no replay, client identity and listener limits.\n";
         return 0;
     }

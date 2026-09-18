@@ -23,6 +23,9 @@ public:
     void Close();
     bool IsOpen() const { return !_closed; }
     std::vector<Skyfire::Cluster::Node> Snapshot() const { return _registry.Snapshot(); }
+    std::vector<Skyfire::Cluster::Node> Directory() const;
+    bool LoadAdministration(std::string& error);
+    bool SetAdministration(std::string const& key, std::string const& action, std::string const& actor, std::string& error);
 private:
     friend class HubClusterSession;
     void Accept();
@@ -31,6 +34,7 @@ private:
     boost::asio::ssl::context _tls;
     boost::asio::ip::tcp::acceptor _acceptor;
     Skyfire::Cluster::Registry _registry;
+    std::map<std::string,Skyfire::Cluster::Node> _policies;
     std::map<std::uint64_t, std::shared_ptr<HubClusterSession>> _sessions;
     std::uint64_t _nextOwner = 0;
     std::uint32_t _leaseSeconds = 15;

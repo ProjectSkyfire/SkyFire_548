@@ -150,7 +150,7 @@ namespace
 
         if (!HubDatabase.Open(connectionInfo, uint8(workerThreads), uint8(synchronousThreads)))
         {
-            SF_LOG_ERROR("server.hub", "Cannot connect to the hub database.");
+            SF_LOG_ERROR("server.hub", "Cannot open the hub database. Check HubDatabaseInfo and apply hub SQL updates, including 2026_09_18_hub_00.sql.");
             MySQL::Library_End();
             return false;
         }
@@ -305,6 +305,11 @@ int main(int argc, char** argv)
 
     HubAuthProxy authnetProxy, legacyProxy;
     std::string ingressError;
+    if (clusterEnabled && !clusterServer.LoadAdministration(ingressError))
+    {
+        SF_LOG_ERROR("server.hub", "%s", ingressError.c_str());
+        clusterServer.Close(); webServer.Close(); StopDatabase(); return 1;
+    }
     if (!OpenAuthIngress(authnetProxy, true, clusterEnabled, ingressError) ||
         !OpenAuthIngress(legacyProxy, false, clusterEnabled, ingressError))
     {
@@ -345,15 +350,18 @@ int main(int argc, char** argv)
     while (!StopEvent)
     {
         clusterServer.Update();
-        auto const liveNodes = clusterServer.Snapshot();
-        authnetProxy.Update(liveNodes);
-        legacyProxy.Update(liveNodes);
         processSupervisor.Update();
 
         HubWebServiceCommand webCommand;
         while (webEnabled && webServer.PollServiceCommand(webCommand))
         {
             std::string error;
+            if (!webCommand.ClusterAction.empty())
+            {
+                bool const applied = clusterServer.SetAdministration(webCommand.ServiceKey, webCommand.ClusterAction, webCommand.Actor, error);
+                webCommand.DispatchResult->set_value(applied ? "" : error);
+                continue;
+            }
             if (webCommand.AccountResult)
             {
                 using Skyfire::Auth::AccountAdministration;
@@ -402,6 +410,10 @@ int main(int argc, char** argv)
                     webCommand.Configure ? "configure" : !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
         }
 
+        auto const liveNodes = clusterServer.Snapshot();
+        authnetProxy.Update(liveNodes);
+        legacyProxy.Update(liveNodes);
+
         if (webEnabled)
         {
             HubWebStatusSnapshot status;
@@ -430,7 +442,7 @@ int main(int argc, char** argv)
                 webService.CommandResult = service.CommandResult;
                 status.Services.push_back(std::move(webService));
             }
-            status.ClusterNodes = clusterServer.Snapshot();
+            status.ClusterNodes = clusterServer.Directory();
             status.AuthIngress = {authnetProxy.Status(), legacyProxy.Status()};
             webServer.UpdateStatus(status);
         }

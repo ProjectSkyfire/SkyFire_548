@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091801
+ConfVersion=2026091802
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -104,6 +104,24 @@ Hub.Cluster.MaxConnections = 128
 # Retry occurs only when TCP connect fails, before sending any header or client bytes.
 # A connected backend failure closes that connection without replay. No session migration.
 # Restart the hub for changes. Console 'routing' and web status expose route/failure counters.
+#
+# Maintenance (apply sql/updates/hub/2026_09_18_hub_00.sql before upgrading an existing hub DB):
+#   cluster drain <node-key>   Stop new hub-routed authentication connections; existing streams finish.
+#   cluster disable <node-key> Keep the node out of new routing until explicitly enabled again.
+#   cluster enable <node-key>  Allow routing once the node also reports ready and has capacity.
+# Equivalent buttons appear on authentication cluster cards for operators with node-operation access.
+# These commands do not kill services. Policy persists in hub_cluster_policy across reconnects and
+# hub restarts; registration/heartbeats cannot change it. Saved offline nodes remain administrable.
+# Registry and status show hub connections, including connecting clients. A zero count means this
+# hub has drained its connections only; direct connections and other hubs are not counted. Backend
+# connection failures back off per process for 1,2,4,...30 seconds; successful connects reset backoff.
+# Expired/unready/maintenance nodes are excluded and pending connects withdrawn before forwarding.
+# When no eligible node remains, new TCP connections close; 'routing' and web status report why.
+# Existing connections never migrate or replay data. A lost backend ends its sessions: clients must
+# reconnect/login again. Worldserver disappearance removes its live registration; recovery must
+# register and report ready anew. Gameplay remains direct, so world maintenance still uses graceful
+# world commands; live client realm-directory routing is a later phase. Changes made to policy by
+# this hub are immediate; another hub sharing the DB must reload policy by restarting before use.
 
 Hub.AuthnetIngress.Enable = 0
 Hub.AuthnetIngress.BindIP = "127.0.0.1"

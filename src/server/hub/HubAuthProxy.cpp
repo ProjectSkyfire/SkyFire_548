@@ -20,6 +20,19 @@ public:
     HubAuthProxySession(HubAuthProxy& owner, tcp::socket client, std::uint64_t id)
         : _owner(owner), _client(std::move(client)), _backend(owner._io), _timer(owner._io), _id(id) { }
     void Start() { TryBackend(); }
+    std::string NodeKey() const { return _reserved ? _node.Key : ""; }
+    bool StillEligible() const
+    {
+        for (auto const& node : _owner._nodes)
+            if (node.Key == _node.Key && node.Owner == _node.Owner)
+                return node.Live && node.Ready && node.Admin == Skyfire::Cluster::Administration::Enabled && Now() < node.ExpiresAt;
+        return false;
+    }
+    void WithdrawPending()
+    {
+        if (!_closed && _connecting && !StillEligible())
+        { _withdrawn = true; boost::system::error_code ec; _backend.close(ec); }
+    }
     void Stop()
     {
         if (_closed) return;
@@ -29,12 +42,25 @@ public:
     }
 private:
     void Release() { if (_reserved) { _owner._routing.Release(_node); _reserved = false; } }
+    void ConnectFailed()
+    {
+        ++_owner._status.ConnectFailures;
+        _owner._backoff.Failed(_node,Now());
+        TryBackend();
+    }
     void TryBackend()
     {
         Release();
         if (_closed) return;
-        if (_tried.size() >= _owner._options.MaxAttempts || !_owner._routing.Select(_owner._nodes, Now(), _tried, _node))
-        { ++_owner._status.Rejected; Stop(); return; }
+        _connecting = false; _withdrawn = false;
+        auto excluded = _tried;
+        for (auto const& node : _owner._nodes) if (_owner._backoff.Cooling(node,Now())) excluded.insert(node.Key);
+        if (_tried.size() >= _owner._options.MaxAttempts || !_owner._routing.Select(_owner._nodes, Now(), excluded, _node))
+        {
+            ++_owner._status.Rejected; ++_owner._status.NoBackend;
+            _owner._status.LastRejection = "No eligible backend: readiness, lease, maintenance, capacity, retry limit or connection backoff. Client connection closed without replay.";
+            Stop(); return;
+        }
         _reserved = true;
         if (!_tried.empty()) ++_owner._status.Retries;
         _tried.insert(_node.Key); ++_owner._status.Attempts;
@@ -43,11 +69,12 @@ private:
         auto const listen = _owner._acceptor.local_endpoint();
         if (ec || !_node.Port || _owner._loopEndpoints.count({_node.Address, _node.Port}) ||
             (_node.Port == listen.port() && (address == listen.address() || (listen.address().is_unspecified() && address.is_loopback()))))
-        { ++_owner._status.ConnectFailures; TryBackend(); return; }
+        { ConnectFailed(); return; }
         _backend.close(ec);
         _backend = tcp::socket(_owner._io);
         auto self = shared_from_this();
         auto const attempt = ++_attempt;
+        _connecting = true;
         _timer.expires_after(std::chrono::seconds(_owner._options.ConnectTimeoutSeconds));
         _timer.async_wait([self, attempt](boost::system::error_code error)
         {
@@ -62,20 +89,24 @@ private:
             if (self->_closed || attempt != self->_attempt) return;
             self->_timer.cancel();
             ++self->_attempt; // Invalidate a connect deadline already queued before cancellation.
-            if (error) { ++self->_owner._status.ConnectFailures; self->TryBackend(); return; }
+            self->_connecting = false;
+            if (self->_withdrawn || !self->StillEligible())
+            { ++self->_owner._status.Withdrawn; self->TryBackend(); return; }
+            if (error) { self->ConnectFailed(); return; }
             boost::system::error_code endpointError;
             auto local = self->_backend.local_endpoint(endpointError);
-            if (endpointError) { ++self->_owner._status.ConnectFailures; self->TryBackend(); return; }
+            if (endpointError) { self->ConnectFailed(); return; }
             auto remote = self->_backend.remote_endpoint(endpointError);
-            if (endpointError) { ++self->_owner._status.ConnectFailures; self->TryBackend(); return; }
+            if (endpointError) { self->ConnectFailed(); return; }
             if (remote.port() == self->_owner._options.Port && remote.address() == local.address() &&
                 self->_owner._acceptor.local_endpoint().address().is_unspecified())
             {
                 // Cache local-interface loops before queued accepts can perpetuate the same route.
                 self->_owner._loopEndpoints.insert({self->_node.Address, self->_node.Port});
-                ++self->_owner._status.ConnectFailures; self->TryBackend(); return;
+                self->ConnectFailed(); return;
             }
             ++self->_owner._status.Routed;
+            self->_owner._backoff.Succeeded(self->_node);
             self->Touch();
             // After TCP connect, never select another backend, even if the first write fails.
             if (self->_owner._options.PreserveClientIP) self->SendIdentity();
@@ -151,6 +182,7 @@ private:
     std::array<char, 16384> _up{}, _down{};
     std::string _identity;
     bool _closed = false, _reserved = false, _clientEnded = false, _backendEnded = false;
+    bool _connecting = false, _withdrawn = false;
 };
 HubAuthProxy::HubAuthProxy() : _acceptor(_io), _acceptRetry(_io) { }
 HubAuthProxy::~HubAuthProxy() { Close(); }
@@ -188,7 +220,12 @@ void HubAuthProxy::Accept()
         if (!ec)
         {
             ++_status.Accepted;
-            if (_sessions.size() >= _options.MaxConnections) { ++_status.Rejected; socket.close(ec); }
+            if (_sessions.size() >= _options.MaxConnections)
+            {
+                ++_status.Rejected; ++_status.LimitRejected;
+                _status.LastRejection = "Ingress connection limit reached. Client connection closed.";
+                socket.close(ec);
+            }
             else
             {
                 auto session = std::make_shared<HubAuthProxySession>(*this, std::move(socket), ++_nextId);
@@ -208,7 +245,23 @@ void HubAuthProxy::Update(std::vector<Skyfire::Cluster::Node> nodes)
 {
     if (!_status.Enabled) return;
     _nodes = std::move(nodes);
+    _backoff.Prune(_nodes);
+    for (auto const& session : _sessions) session.second->WithdrawPending();
     for (unsigned i = 0; i < 512 && _io.poll_one(); ++i) { }
+}
+HubAuthProxyStatus HubAuthProxy::Status() const
+{
+    auto status = _status; status.Active = _sessions.size();
+    for (auto const& session : _sessions)
+    {
+        auto const key = session.second->NodeKey();
+        if (!key.empty()) ++status.ConnectionsByNode[key];
+    }
+    auto const now = Now();
+    for (auto const& node : _nodes)
+        if (_backoff.Cooling(node,now)) ++status.BackoffNodes;
+        else if (_routing.Eligible(node,now)) ++status.AvailableNodes;
+    return status;
 }
 void HubAuthProxy::Close()
 {
@@ -218,7 +271,7 @@ void HubAuthProxy::Close()
     boost::system::error_code ec; _acceptor.close(ec);
     auto sessions = _sessions;
     for (auto const& entry : sessions) entry.second->Stop();
-    _nodes.clear(); _loopEndpoints.clear(); _routing.Clear();
+    _nodes.clear(); _loopEndpoints.clear(); _routing.Clear(); _backoff.Clear();
     _io.restart(); while (_io.poll_one()) { }
     _io.stop();
 }

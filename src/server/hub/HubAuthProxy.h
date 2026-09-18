@@ -22,6 +22,9 @@ struct HubAuthProxyStatus
     bool Enabled = false;
     std::uint64_t Active = 0, Accepted = 0, Routed = 0, Rejected = 0, Attempts = 0,
         ConnectFailures = 0, Retries = 0, StreamFailures = 0, ClientBytes = 0, BackendBytes = 0;
+    std::uint64_t NoBackend = 0, LimitRejected = 0, Withdrawn = 0, BackoffNodes = 0, AvailableNodes = 0;
+    std::string LastRejection;
+    std::map<std::string,std::uint64_t> ConnectionsByNode;
 };
 class HubAuthProxySession;
 class HubAuthProxy
@@ -32,7 +35,7 @@ public:
     bool Open(HubAuthProxyOptions options, std::string& error);
     void Update(std::vector<Skyfire::Cluster::Node> nodes);
     void Close();
-    HubAuthProxyStatus Status() const { auto status = _status; status.Active = _sessions.size(); return status; }
+    HubAuthProxyStatus Status() const;
 private:
     friend class HubAuthProxySession;
     void Accept();
@@ -42,6 +45,7 @@ private:
     HubAuthProxyOptions _options;
     HubAuthProxyStatus _status;
     Skyfire::Cluster::AuthRouting _routing;
+    Skyfire::Cluster::AuthBackoff _backoff;
     std::vector<Skyfire::Cluster::Node> _nodes;
     std::set<std::pair<std::string, std::uint16_t>> _loopEndpoints;
     std::map<std::uint64_t, std::shared_ptr<HubAuthProxySession>> _sessions;

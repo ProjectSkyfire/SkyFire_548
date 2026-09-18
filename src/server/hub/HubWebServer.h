@@ -61,6 +61,7 @@ struct HubWebServiceCommand
     std::string Name, ExecutablePath, ConfigPath, WorkingDirectory;
     std::string WorldCommand;
     std::string AccountRequest;
+    std::string ClusterAction, Actor;
     std::shared_ptr<std::promise<Skyfire::Auth::AccountAdminReply>> AccountResult;
     std::shared_ptr<std::promise<std::string>> DispatchResult;
 };
@@ -109,6 +110,7 @@ private:
         std::map<std::string, std::string> const& headers, std::string const& body);
     std::string HandleAccounts(std::string const& action,
         std::map<std::string, std::string> const& headers, std::string const& body);
+    std::string HandleClusterCommand(std::string const& path, std::map<std::string,std::string> const& headers);
     std::string ServeAsset(std::string const& target) const;
     bool FindSession(std::map<std::string, std::string> const& headers,
         AuthenticatedSession& session);

@@ -111,5 +111,39 @@ int main()
     ok &= Check(!DecodeRealms(realms.Bytes, decoded), "Trailing realm bytes accepted");
     realms.Bytes[1] = 65;
     ok &= Check(!DecodeRealms(realms.Bytes, decoded), "Excessive realm count accepted");
+    Registry maintenance;
+    auto auth = valid; auth.Type = Service::Auth; auth.Realm = 0; auth.Realms.clear(); auth.Capabilities = 16;
+    maintenance.Register(auth,10,0,100);
+    ok &= Check(maintenance.SetAdministration(auth.Key,Administration::Draining),"Drain policy rejected");
+    maintenance.Renew(auth.Key,10,1,100,7,1);
+    ok &= Check(maintenance.Snapshot()[0].Ready && maintenance.Snapshot()[0].Admin == Administration::Draining,
+        "Heartbeat overwrote maintenance policy or readiness was conflated with policy");
+    maintenance.Remove(auth.Key,10);
+    auth.Admin = Administration::Enabled;
+    maintenance.Register(auth,11,2,100);
+    ok &= Check(maintenance.Snapshot()[0].Admin == Administration::Draining && !maintenance.Snapshot()[0].Ready,
+        "Reconnect bypassed drain or inherited readiness");
+    maintenance.Clear();
+    maintenance.Register(auth,12,3,100);
+    ok &= Check(maintenance.Snapshot()[0].Admin == Administration::Draining,"Clearing live leases discarded policy");
+    maintenance.SetAdministration(auth.Key,Administration::Disabled);
+    Registry restarted;
+    restarted.SetAdministration(auth.Key,maintenance.Snapshot()[0].Admin); // Persisted-policy replay on hub startup.
+    restarted.Register(auth,1,4,100);
+    ok &= Check(restarted.Snapshot()[0].Admin == Administration::Disabled,"Policy replay failed after hub restart");
+    restarted.SetAdministration(auth.Key,Administration::Enabled);
+    ok &= Check(restarted.Snapshot()[0].Admin == Administration::Enabled,"Re-enable did not clear maintenance");
+    ok &= Check(!restarted.SetAdministration("../bad",Administration::Draining) &&
+        !restarted.SetAdministration(auth.Key,Administration(3)),"Invalid policy accepted");
+    Registry worlds;
+    worlds.Register(valid,1,0,100); worlds.Renew(valid.Key,1,1,100,12,1);
+    worlds.Expire(101);
+    ok &= Check(worlds.Snapshot().empty(),"Expired world stayed in live directory");
+    worlds.Register(valid,2,102,100);
+    ok &= Check(worlds.Snapshot().size() == 1 && !worlds.Snapshot()[0].Ready && worlds.Snapshot()[0].Load == 0,
+        "Recovered world inherited stale readiness/load");
+    worlds.SetRealms(valid.Key,2,103,100,{1,3}); worlds.Renew(valid.Key,2,104,100,1,1);
+    ok &= Check(worlds.Snapshot()[0].Ready && worlds.Snapshot()[0].Realms == std::vector<std::uint32_t>({1,3}),
+        "Recovered world failed to republish its live realm list");
     return ok ? 0 : 1;
 }

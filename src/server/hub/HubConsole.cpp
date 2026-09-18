@@ -203,6 +203,19 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         PrintRegistry();
     else if (command == "routing")
         PrintRouting();
+    else if (command == "cluster")
+    {
+        std::string action, key, extra, error;
+        input >> action >> key;
+        if (origin != HubCommandOrigin::LocalConsole)
+            std::printf("Cluster maintenance requires the local hub console.\n");
+        else if (key.empty() || input >> extra)
+            std::printf("Usage: cluster <drain|disable|enable> <node-key>\n");
+        else if (!_clusterServer.SetAdministration(key,action,"local-console",error))
+            std::printf("Cluster maintenance rejected: %s\n",error.c_str());
+        else
+            std::printf("Cluster policy saved for %s. Existing connections remain pinned; use registry for hub connection counts.\n",key.c_str());
+    }
     else if (command == "nodes")
         PrintNodes();
     else if (command == "admins")
@@ -353,6 +366,7 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  nodes      List enabled routing nodes.\n");
     std::printf("  registry   List authenticated live cluster registrations.\n");
     std::printf("  routing    Show authentication ingress connections, routes and failures.\n");
+    std::printf("  cluster <drain|disable|enable> <node-key>  Persist authentication routing policy.\n");
     std::printf("  start <service>\n");
     std::printf("             Start and supervise a database-configured service.\n");
     std::printf("  stop <service>\n");
@@ -420,13 +434,17 @@ void HubCommandHandler::PrintRegistry() const
         std::printf("Cluster listener is disabled. Configure Hub.Cluster.Enable and TLS certificates.\n");
         return;
     }
-    auto const nodes = _clusterServer.Snapshot();
-    std::printf("Live cluster registry: %u node(s), protocol v1.\n", unsigned(nodes.size()));
+    auto const nodes = _clusterServer.Directory();
+    auto counts = _authnetProxy.Status().ConnectionsByNode;
+    for (auto const& entry : _legacyProxy.Status().ConnectionsByNode) counts[entry.first] += entry.second;
+    std::printf("Cluster directory: %u node(s), including saved offline policies, protocol v1.\n", unsigned(nodes.size()));
     for (auto const& node : nodes)
     {
         std::printf("  %s (%s) %s %s:%u realm %u build %u load %u/%u %s\n", node.Key.c_str(), node.Name.c_str(),
             node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : "world", node.Address.c_str(), unsigned(node.Port),
             node.Realm, node.Build, node.Load, node.Capacity, node.Ready ? "ready" : "not ready");
+        std::printf("    %s | policy %s | hub connections %llu\n",node.Live ? "registered" : "offline",
+            Skyfire::Cluster::AdministrationName(node.Admin),static_cast<unsigned long long>(counts[node.Key]));
         if (!node.Realms.empty())
         {
             std::printf("    Realms:");
@@ -448,6 +466,10 @@ void HubCommandHandler::PrintRouting() const
             (unsigned long long)s.Accepted, (unsigned long long)s.Routed, (unsigned long long)s.Rejected,
             (unsigned long long)s.Attempts, (unsigned long long)s.ConnectFailures, (unsigned long long)s.Retries,
             (unsigned long long)s.StreamFailures, (unsigned long long)s.ClientBytes, (unsigned long long)s.BackendBytes);
+        std::printf("    unavailable %llu limit rejected %llu withdrawn connects %llu backoff nodes %llu\n",
+            (unsigned long long)s.NoBackend,(unsigned long long)s.LimitRejected,(unsigned long long)s.Withdrawn,(unsigned long long)s.BackoffNodes);
+        if (!s.LastRejection.empty()) std::printf("    Last rejection: %s\n",s.LastRejection.c_str());
+        std::printf("    Eligible nodes now: %llu\n",(unsigned long long)s.AvailableNodes);
     }
 }
 

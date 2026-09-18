@@ -40,7 +40,7 @@ window.HubStatus = (() => {
         card.metrics.className = "service-metrics";
         card.controls = document.createElement("div");
         card.controls.className = "service-controls";
-        for (const action of ["start", "stop", "edit"]) {
+        for (const action of ["start", "stop", "edit", "drain", "disable", "enable"]) {
             const button = document.createElement("button");
             button.type = "button";
             button.className = `service-button ${action}`;
@@ -57,10 +57,12 @@ window.HubStatus = (() => {
         const active = ["starting", "running", "unresponsive", "stopping"].includes(component.state);
         card.article.className = `component ${component.status}`;
         text(card.title, component.name);
-        text(card.state, component.status);
+        text(card.state, component.clusterKey && component.live && component.adminState !== "enabled" ? component.adminState : component.status);
         text(card.detail, component.detail || "");
         card.metrics.hidden = !component.managed;
-        card.controls.hidden = !component.managed;
+        const cluster = component.clusterCanAdmin === true;
+        card.controls.hidden = !component.managed && !cluster;
+        card.start.hidden = card.stop.hidden = !component.managed;
         let metrics = `Uptime ${active ? formatUptime(component.uptimeSeconds) : "—"}`;
         if (isWorld(component)) {
             metrics += component.state === "running" && component.metricsAvailable
@@ -72,6 +74,13 @@ window.HubStatus = (() => {
         card.start.disabled = pending.has(component.key) || !data.canOperateServices || !component.enabled || active;
         card.stop.disabled = pending.has(component.key) || !data.canOperateServices || !active || component.state === "stopping";
         card.edit.hidden = !isWorld(component) || data.canSendWorldCommands !== true;
+        for (const action of ["drain", "disable", "enable"]) {
+            card[action].hidden = !cluster;
+            const state = { drain: "draining", disable: "disabled", enable: "enabled" }[action];
+            card[action].disabled = pending.has(component.key) || !data.canOperateServices || component.adminState === state;
+            card[action].title = action === "enable" ? "Allow new hub-routed connections when the node is ready." :
+                "Stop new hub-routed authentication connections. Existing connections finish normally; the process remains running.";
+        }
     }
     function render(data) {
         snapshot = data;
@@ -97,16 +106,22 @@ window.HubStatus = (() => {
         const operationGeneration = generation;
         pending.add(key);
         updateCard(cards.get(key), cards.get(key).data, snapshot);
-        text(actionMessage, `${action === "start" ? "Starting" : "Stopping"} ${cards.get(key).data.name}...`);
+        const component = cards.get(key).data;
+        const cluster = ["drain", "disable", "enable"].includes(action);
+        const label = action[0].toUpperCase() + action.slice(1);
+        const progress = { start: "Starting", stop: "Stopping", drain: "Draining", disable: "Disabling", enable: "Enabling" }[action];
+        text(actionMessage, `${progress} ${component.name}...`);
         try {
-            const response = await fetch(`/api/v1/services/${encodeURIComponent(key)}/${action}`, {
+            const path = cluster ? `/api/v1/cluster/${encodeURIComponent(component.clusterKey)}/${action}` :
+                `/api/v1/services/${encodeURIComponent(key)}/${action}`;
+            const response = await fetch(path, {
                 method: "POST", credentials: "same-origin", headers: { "X-Hub-CSRF": snapshot.csrfToken }
             });
             const data = await response.json();
             if (operationGeneration !== generation) return;
             if (response.status === 401) { stop(); callbacks.onUnauthorized?.(); return; }
             if (!response.ok) throw new Error(data.error || `Unable to ${action} service`);
-            text(actionMessage, `${action === "start" ? "Start" : "Stop"} requested for ${cards.get(key)?.data.name || key}`);
+            text(actionMessage, `${label} ${data.saved ? "saved" : "requested"} for ${cards.get(key)?.data.name || key}`);
             await refresh();
         } catch (error) {
             if (operationGeneration === generation) text(actionMessage, error.message);

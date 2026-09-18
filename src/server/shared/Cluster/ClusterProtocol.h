@@ -29,6 +29,12 @@ namespace Skyfire::Cluster
     constexpr std::uint32_t MaximumPayload = 4096;
     enum class Message : std::uint16_t { Register = 1, Ready = 2, Heartbeat = 3, Deregister = 4, Realms = 5, Ack = 0x8000, Error = 0xffff };
     enum class Service : std::uint8_t { Auth = 1, World = 2 };
+    // Hub-owned policy, never accepted from a node registration or heartbeat.
+    enum class Administration : std::uint8_t { Enabled = 0, Draining = 1, Disabled = 2 };
+    inline char const* AdministrationName(Administration state)
+    {
+        return state == Administration::Draining ? "draining" : state == Administration::Disabled ? "disabled" : "enabled";
+    }
     enum class Error : std::uint16_t { Malformed = 1, Version = 2, Identity = 3, Conflict = 4, NotRegistered = 5, Capacity = 6 };
     struct Header { std::uint16_t Version = 0; Message Type = Message::Error; std::uint32_t Length = 0; };
     struct Node
@@ -39,6 +45,8 @@ namespace Skyfire::Cluster
         std::uint16_t Port = 0;
         std::uint32_t Realm = 0, Build = 0, Capacity = 0, Capabilities = 0, Load = 0;
         bool Ready = false;
+        bool Live = true;
+        Administration Admin = Administration::Enabled;
         std::uint64_t Owner = 0, ExpiresAt = 0;
     };
     inline bool ValidKey(std::string const& key)

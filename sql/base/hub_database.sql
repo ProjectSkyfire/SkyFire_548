@@ -58,6 +58,16 @@ VALUES
   ('authnet', 'Authnet Server', 'authserver', 'authserver.conf', '.', 1),
   ('world', 'World Server', 'worldserver', 'worldserver.conf', '.', 1);
 
+CREATE TABLE IF NOT EXISTS `hub_cluster_policy` (
+  `node_key` varchar(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `capabilities` int unsigned NOT NULL DEFAULT '0',
+  `admin_state` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '0 enabled, 1 draining, 2 disabled',
+  `updated_by` varchar(64) NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`node_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `hub_admins`;
 CREATE TABLE `hub_admins` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,

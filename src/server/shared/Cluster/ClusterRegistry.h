@@ -22,6 +22,7 @@ namespace Skyfire::Cluster
             if (!owner || !lease || !ValidKey(node.Key) || _nodes.count(node.Key) || _nodes.size() >= _capacity) return false;
             for (auto const& entry : _nodes) if (entry.second.Owner == owner) return false;
             node.Owner = owner; node.Ready = false; node.Load = 0; node.ExpiresAt = now + lease;
+            node.Live = true;
             std::string const key = node.Key;
             _nodes.emplace(key, std::move(node));
             return true;
@@ -65,13 +66,24 @@ namespace Skyfire::Cluster
         std::vector<Node> Snapshot() const
         {
             std::vector<Node> nodes;
-            for (auto const& entry : _nodes) nodes.push_back(entry.second);
+            for (auto const& entry : _nodes)
+            {
+                nodes.push_back(entry.second);
+                auto policy = _administration.find(entry.first);
+                nodes.back().Admin = policy == _administration.end() ? Administration::Enabled : policy->second;
+            }
             return nodes;
+        }
+        bool SetAdministration(std::string const& key, Administration state)
+        {
+            if (!ValidKey(key) || unsigned(state) > unsigned(Administration::Disabled)) return false;
+            _administration[key] = state; return true;
         }
         void Clear() { _nodes.clear(); }
     private:
         std::size_t _capacity;
         std::map<std::string, Node> _nodes;
+        std::map<std::string, Administration> _administration;
     };
 }
 #endif

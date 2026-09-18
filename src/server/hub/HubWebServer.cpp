@@ -494,6 +494,8 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
         return HandleLogout(headers);
     if (path == "/api/v1/status" && method == "GET")
         return HandleStatus(headers);
+    if (path.compare(0,16,"/api/v1/cluster/") == 0 && method == "POST")
+        return HandleClusterCommand(path,headers);
     if (path.compare(0, 17, "/api/v1/accounts/") == 0 && method == "POST")
         return HandleAccounts(path.substr(17), headers, body);
     if (path.compare(0, 17, "/api/v1/services/") == 0 && method == "POST")
@@ -645,32 +647,82 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
     {
         if (!ingress.Enabled) continue;
         json << ",{\"key\":\"ingress:" << JsonEscape(ingress.Name) << "\",\"name\":\"" << JsonEscape(ingress.Name)
-             << "\",\"status\":\"online\",\"detail\":\"" << JsonEscape(ingress.Address) << ':' << ingress.Port
+             << "\",\"status\":\"" << (ingress.AvailableNodes ? "online" : "issue") << "\",\"detail\":\"" << JsonEscape(ingress.Address) << ':' << ingress.Port
+             << " | eligible nodes " << ingress.AvailableNodes << " | backoff " << ingress.BackoffNodes
              << " | active " << ingress.Active << " | routed " << ingress.Routed << " | rejected " << ingress.Rejected
              << " | connect failures " << ingress.ConnectFailures << " | retries " << ingress.Retries
-             << " | stream failures " << ingress.StreamFailures << "\",\"managed\":false"
+             << " | stream failures " << ingress.StreamFailures << " | unavailable " << ingress.NoBackend
+             << (ingress.LastRejection.empty() ? "" : " | last rejection: "+JsonEscape(ingress.LastRejection)) << "\",\"managed\":false"
              << ",\"routing\":{\"active\":" << ingress.Active << ",\"accepted\":" << ingress.Accepted
              << ",\"routed\":" << ingress.Routed << ",\"rejected\":" << ingress.Rejected << ",\"attempts\":" << ingress.Attempts
              << ",\"connectFailures\":" << ingress.ConnectFailures << ",\"retries\":" << ingress.Retries
              << ",\"streamFailures\":" << ingress.StreamFailures << ",\"clientBytes\":" << ingress.ClientBytes
-             << ",\"backendBytes\":" << ingress.BackendBytes << "}}";
+             << ",\"backendBytes\":" << ingress.BackendBytes << ",\"noBackend\":" << ingress.NoBackend
+             << ",\"limitRejected\":" << ingress.LimitRejected << ",\"withdrawn\":" << ingress.Withdrawn
+             << ",\"backoffNodes\":" << ingress.BackoffNodes << ",\"availableNodes\":" << ingress.AvailableNodes
+             << ",\"lastRejection\":\"" << JsonEscape(ingress.LastRejection) << "\"}}";
     }
     for (auto const& node : status.ClusterNodes)
     {
+        uint64 connections = 0;
+        for (auto const& ingress : status.AuthIngress)
+        {
+            auto count = ingress.ConnectionsByNode.find(node.Key);
+            if (count != ingress.ConnectionsByNode.end()) connections += count->second;
+        }
         json << ",{\"key\":\"cluster:" << JsonEscape(node.Key) << "\",\"name\":\"" << JsonEscape(node.Name)
-             << "\",\"status\":\"" << (node.Ready ? "online" : "issue")
+             << "\",\"status\":\"" << (!node.Live ? "offline" : node.Ready && node.Admin == Skyfire::Cluster::Administration::Enabled ? "online" : "issue")
              << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : "world")
-             << " | " << (node.Ready ? "ready" : "not ready") << " | " << JsonEscape(node.Address) << ':' << node.Port
-             << " | load " << node.Load << '/' << node.Capacity;
+             << " | " << (!node.Live ? "offline" : node.Ready ? "ready" : "not ready")
+             << " | policy " << Skyfire::Cluster::AdministrationName(node.Admin);
+        if (!node.Address.empty()) json << " | " << JsonEscape(node.Address) << ':' << node.Port;
+        if (node.Live) json << " | load " << node.Load << '/' << node.Capacity;
+        if (node.Type == Skyfire::Cluster::Service::Auth) json << " | hub connections " << connections;
         if (!node.Realms.empty())
         {
             json << " | realms";
             for (auto realm : node.Realms) json << ' ' << realm;
         }
-        json << "\",\"managed\":false}";
+        json << "\",\"managed\":false,\"clusterKey\":\"" << JsonEscape(node.Key)
+             << "\",\"clusterCanAdmin\":" << (node.Type == Skyfire::Cluster::Service::Auth ? "true" : "false")
+             << ",\"live\":" << (node.Live ? "true" : "false") << ",\"hubConnections\":" << connections
+             << ",\"adminState\":\"" << Skyfire::Cluster::AdministrationName(node.Admin) << "\"}";
     }
     json << "]}";
     return MakeResponse(200, "application/json", json.str());
+}
+
+std::string HubWebServer::HandleClusterCommand(std::string const& path, std::map<std::string,std::string> const& headers)
+{
+    AuthenticatedSession session;
+    if (!FindSession(headers,session)) return MakeResponse(401,"application/json","{\"error\":\"Authentication required.\"}");
+    if (!(session.AccessFlags & HUB_ADMIN_ACCESS_OPERATE_NODES))
+        return MakeResponse(403,"application/json","{\"error\":\"Node operation access is required.\"}");
+    auto csrf = headers.find("x-hub-csrf");
+    if (csrf == headers.end() || csrf->second != session.CsrfToken)
+        return MakeResponse(403,"application/json","{\"error\":\"Invalid request token.\"}");
+    auto const route = path.substr(16);
+    auto const slash = route.find('/');
+    std::string const key = route.substr(0,slash);
+    std::string const action = slash == std::string::npos ? "" : route.substr(slash+1);
+    if (!Skyfire::Cluster::ValidKey(key) || (action != "enable" && action != "disable" && action != "drain"))
+        return MakeResponse(400,"application/json","{\"error\":\"Invalid node key or cluster action.\"}");
+    HubWebServiceCommand command;
+    command.ServiceKey = key; command.ClusterAction = action; command.Actor = session.Username;
+    command.DispatchResult = std::make_shared<std::promise<std::string>>();
+    auto result = command.DispatchResult->get_future();
+    {
+        std::lock_guard<std::mutex> lock(_commandMutex);
+        if (_commands.size() >= 64) return MakeResponse(409,"application/json","{\"error\":\"Command queue is busy.\"}");
+        _commands.push_back(std::move(command));
+    }
+    if (result.wait_for(std::chrono::seconds(2)) == std::future_status::ready)
+    {
+        auto const error = result.get();
+        if (!error.empty()) return MakeResponse(409,"application/json","{\"error\":\""+JsonEscape(error)+"\"}");
+        return MakeResponse(200,"application/json","{\"saved\":true}");
+    }
+    return MakeResponse(202,"application/json","{\"accepted\":true}");
 }
 
 std::string HubWebServer::HandleServiceCommand(std::string const& path,

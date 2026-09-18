@@ -4,6 +4,7 @@
  */
 #include "HubClusterServer.h"
 #include "Log.h"
+#include "Database/DatabaseEnv.h"
 #include "Network/BoostAsioUtils.h"
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
@@ -14,6 +15,7 @@
 #include <chrono>
 #include <exception>
 #include <utility>
+#include <set>
 
 using namespace Skyfire::Cluster;
 
@@ -183,6 +185,69 @@ private:
 
 HubClusterServer::HubClusterServer() : _tls(boost::asio::ssl::context::tls_server), _acceptor(_io) { }
 HubClusterServer::~HubClusterServer() { Close(); }
+bool HubClusterServer::LoadAdministration(std::string& error)
+{
+    auto count = HubDatabase.Query("SELECT COUNT(*) FROM hub_cluster_policy");
+    if (!count || count->Fetch()[0].GetUInt64() > 4096)
+    { error = "Cannot load cluster policy (maximum 4096 records). Apply sql/updates/hub/2026_09_18_hub_00.sql."; return false; }
+    auto result = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_CLUSTER_POLICY));
+    if (!result && count->Fetch()[0].GetUInt64()) { error = "Cannot read persisted cluster policy."; return false; }
+    _policies.clear();
+    if (result) do
+    {
+        auto fields = result->Fetch();
+        Node node; node.Key = fields[0].GetString(); node.Name = fields[1].GetString();
+        node.Capabilities = fields[2].GetUInt32(); node.Admin = Administration(fields[3].GetUInt8());
+        node.Live = false; node.Ready = false;
+        if (!ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
+        { error = "Invalid persisted cluster policy; correct the hub_cluster_policy row before startup."; return false; }
+        _policies[node.Key] = node;
+        _registry.SetAdministration(node.Key,node.Admin);
+    } while (result->NextRow());
+    return true;
+}
+bool HubClusterServer::SetAdministration(std::string const& key, std::string const& action, std::string const& actor, std::string& error)
+{
+    if (_closed) { error = "Cluster listener is disabled."; return false; }
+    if (!ValidKey(key) || (action != "enable" && action != "disable" && action != "drain"))
+    { error = "Use a valid node key and enable, disable or drain."; return false; }
+    Node node; bool found = false;
+    for (auto const& current : _registry.Snapshot()) if (current.Key == key) { node = current; found = true; break; }
+    if (!found)
+    {
+        auto policy = _policies.find(key);
+        if (policy == _policies.end()) { error = "Node is not registered and has no saved policy."; return false; }
+        node = policy->second;
+    }
+    if (node.Type != Service::Auth)
+    { error = "Routing maintenance controls apply to authentication nodes. Use worldserver's graceful shutdown commands for gameplay maintenance."; return false; }
+    if (!_policies.count(key) && _policies.size() >= 4096) { error = "Cluster policy limit reached."; return false; }
+    auto const state = action == "drain" ? Administration::Draining : action == "disable" ? Administration::Disabled : Administration::Enabled;
+    auto stmt = HubDatabase.GetPreparedStatement(HUB_UPSERT_CLUSTER_POLICY);
+    stmt->setString(0,key); stmt->setString(1,node.Name); stmt->setUInt32(2,node.Capabilities);
+    stmt->setUInt8(3,uint8(state)); stmt->setString(4,actor);
+    HubDatabase.DirectExecute(stmt);
+    auto check = HubDatabase.GetPreparedStatement(HUB_SEL_CLUSTER_POLICY_BY_KEY); check->setString(0,key);
+    auto saved = HubDatabase.Query(check);
+    if (!saved || saved->Fetch()[0].GetUInt8() != uint8(state))
+    { error = "Policy persistence could not be verified; no in-memory change made. Check database availability and state before retrying."; return false; }
+    node.Admin = state; node.Ready = false; node.Live = false;
+    _policies[key] = node; _registry.SetAdministration(key,state);
+    SF_LOG_INFO("server.hub", "Cluster routing policy: actor '%s', node '%s', state '%s'. Existing streams remain pinned.",
+        actor.c_str(),key.c_str(),AdministrationName(state));
+    return true;
+}
+std::vector<Node> HubClusterServer::Directory() const
+{
+    auto nodes = _registry.Snapshot();
+    std::set<std::string> live;
+    for (auto const& node : nodes) live.insert(node.Key);
+    for (auto const& policy : _policies)
+    {
+        if (!live.count(policy.first)) nodes.push_back(policy.second);
+    }
+    return nodes;
+}
 std::uint64_t HubClusterServer::Now()
 {
     return std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
