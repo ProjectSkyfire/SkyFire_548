@@ -7,6 +7,7 @@
 #define SKYFIRE_HUB_WEB_SERVER_H
 
 #include "Define.h"
+#include "Cluster/ClusterProtocol.h"
 #include "Auth/AccountAdministration.h"
 #include "Threading/BoostAsioThreadGroup.h"
 
@@ -47,6 +48,7 @@ struct HubWebStatusSnapshot
 {
     uint64 UptimeSeconds = 0;
     std::vector<HubWebManagedServiceStatus> Services;
+    std::vector<Skyfire::Cluster::Node> ClusterNodes;
 };
 
 struct HubWebServiceCommand

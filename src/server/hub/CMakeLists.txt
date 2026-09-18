@@ -7,7 +7,7 @@
 
 file(GLOB sources_Localdir *.cpp *.h)
 file(GLOB_RECURSE web_assets web/*)
-list(APPEND sources_Localdir HubProcessSupervisor.cpp HubProcessSupervisor.h HubWebServer.cpp HubWebServer.h)
+list(APPEND sources_Localdir HubClusterServer.cpp HubClusterServer.h HubProcessSupervisor.cpp HubProcessSupervisor.h HubWebServer.cpp HubWebServer.h)
 list(REMOVE_DUPLICATES sources_Localdir)
 
 source_group(CMake FILES CMakeLists.txt)

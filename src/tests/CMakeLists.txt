@@ -883,3 +883,7 @@ target_include_directories(game_domain_tests PRIVATE
 )
 
 add_test(NAME game_domain_tests COMMAND game_domain_tests)
+
+add_executable(cluster_foundation_tests ClusterFoundationTests.cpp)
+target_include_directories(cluster_foundation_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+add_test(NAME cluster_foundation_tests COMMAND cluster_foundation_tests)

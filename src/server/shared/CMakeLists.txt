@@ -8,6 +8,7 @@ if( USE_COREPCH )
 endif()
 
 file(GLOB_RECURSE sources_Configuration Configuration/*.cpp Configuration/*.h)
+set(sources_Cluster Cluster/ClusterProtocol.h Cluster/ClusterRegistry.h)
 file(GLOB_RECURSE sources_Auth Auth/*.cpp Auth/*.h)
 list(APPEND sources_Auth Auth/AccountAdministration.cpp Auth/AccountAdministration.h)
 list(REMOVE_DUPLICATES sources_Auth)
@@ -27,6 +28,7 @@ file(GLOB sources_localdir *.cpp *.h)
 
 source_group(CMake FILES CMakeLists.txt)
 source_group(Configuration FILES ${sources_Configuration})
+source_group(Cluster FILES ${sources_Cluster})
 source_group(Auth FILES ${sources_Auth})
 source_group(Cryptography FILES ${sources_Cryptography})
 source_group(Database FILES ${sources_Database})
@@ -57,6 +59,7 @@ endif()
 set(shared_STAT_SRCS
   ${shared_STAT_SRCS}
   ${sources_Configuration}
+  ${sources_Cluster}
   ${sources_Auth}
   ${sources_Cryptography}
   ${sources_Database}

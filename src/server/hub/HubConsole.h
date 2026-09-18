@@ -12,6 +12,7 @@
 #include "Define.h"
 
 class HubProcessSupervisor;
+class HubClusterServer;
 
 enum class HubConsolePollResult
 {
@@ -41,7 +42,7 @@ private:
 class HubCommandHandler
 {
 public:
-    HubCommandHandler(std::string bindIp, uint16 port, HubProcessSupervisor& processSupervisor);
+    HubCommandHandler(std::string bindIp, uint16 port, HubProcessSupervisor& processSupervisor, HubClusterServer& clusterServer);
 
     // Returns false when the command requests server shutdown.
     bool Execute(std::string const& commandLine, HubCommandOrigin origin) const;
@@ -50,6 +51,7 @@ private:
     void PrintHelp() const;
     void PrintStatus() const;
     void PrintNodes() const;
+    void PrintRegistry() const;
     void PrintAdmins() const;
     void CreateAdmin(std::string const& username, std::string const& password, uint64 accessFlags) const;
     void ReloadConfiguration() const;
@@ -58,6 +60,7 @@ private:
     uint16 _port;
     std::chrono::steady_clock::time_point _startedAt;
     HubProcessSupervisor& _processSupervisor;
+    HubClusterServer& _clusterServer;
 };
 
 #endif

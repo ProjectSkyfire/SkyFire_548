@@ -13,6 +13,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         page.on("pageerror", error => errors.push(error.message));
         let count = 0, inFlight = 0, maxInFlight = 0, slow = false, fail = false, authenticated = true;
         let releaseStatus = null, releaseOperation = null;
+        let registryNodes = [];
         const component = { key: "world", name: "SkyFire", managed: true, isWorld: true, enabled: true,
             status: "online", state: "running", canSendCommands: true, metricsAvailable: true, players: 4,
             cpuPercent: 1.5, updateTimeMs: 2, executablePath: "worldserver", configPath: "worldserver.conf", workingDirectory: "." };
@@ -24,7 +25,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
                 const requestCount = count;
                 const data = { username: "admin", csrfToken: "token", canSendWorldCommands: true, canOperateServices: true,
                     accountsEnabled: true, uptimeSeconds: 60 + requestCount,
-                    components: [{ ...component, uptimeSeconds: 60 + requestCount, players: requestCount }] };
+                    components: [{ ...component, uptimeSeconds: 60 + requestCount, players: requestCount }, ...registryNodes] };
                 try {
                     if (slow) await new Promise(resolve => { releaseStatus = resolve; });
                     if (fail) return await json({ error: "temporarily unavailable" }, 503);
@@ -74,6 +75,17 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         assert.equal(await page.locator("#component-grid .stop").isEnabled(), false, "polling must not unlock a pending action");
         releaseOperation();
         await page.waitForFunction(() => document.querySelector("#service-action-message").textContent.includes("requested"));
+        registryNodes = [{ key: "cluster:synthetic-world", name: "Remote world", status: "issue", detail: "Cluster world | not ready", managed: false }];
+        await page.evaluate(() => loadStatus());
+        assert.equal(await page.locator("#component-grid article").count(), 2);
+        assert.equal(await page.locator("#component-grid article").nth(1).getByRole("button", { name: "Start", exact: true }).isVisible(), false);
+        registryNodes[0].status = "online";
+        await page.evaluate(() => loadStatus());
+        assert.equal(await page.locator("#component-grid article").nth(1).getAttribute("class"), "component online");
+        registryNodes = [];
+        await page.evaluate(() => loadStatus());
+        assert.equal(await page.locator("#component-grid article").count(), 1);
+        assert.equal(await page.evaluate(() => window.originalStop === document.querySelector("#component-grid .stop")), true);
         slow = true;
         const refresh = page.evaluate(() => Promise.all([loadStatus(), loadStatus(), loadStatus()]));
         while (!releaseStatus) await new Promise(resolve => setTimeout(resolve, 20));

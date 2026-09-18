@@ -4,6 +4,7 @@
 */
 
 #include "HubConsole.h"
+#include "HubClusterServer.h"
 
 #include <algorithm>
 #include <array>
@@ -177,9 +178,9 @@ HubConsolePollResult HubConsoleInput::Poll(std::string& command)
 }
 
 HubCommandHandler::HubCommandHandler(std::string bindIp, uint16 port,
-    HubProcessSupervisor& processSupervisor)
+    HubProcessSupervisor& processSupervisor, HubClusterServer& clusterServer)
     : _bindIp(std::move(bindIp)), _port(port), _startedAt(std::chrono::steady_clock::now()),
-      _processSupervisor(processSupervisor)
+      _processSupervisor(processSupervisor), _clusterServer(clusterServer)
 {
 }
 
@@ -197,6 +198,8 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         PrintHelp();
     else if (command == "status")
         PrintStatus();
+    else if (command == "registry")
+        PrintRegistry();
     else if (command == "nodes")
         PrintNodes();
     else if (command == "admins")
@@ -345,6 +348,7 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  help       Show this command list.\n");
     std::printf("  status     Show hub uptime, endpoint, and database record counts.\n");
     std::printf("  nodes      List enabled routing nodes.\n");
+    std::printf("  registry   List authenticated live cluster registrations (not routing).\n");
     std::printf("  start <service>\n");
     std::printf("             Start and supervise a database-configured service.\n");
     std::printf("  stop <service>\n");
@@ -402,6 +406,21 @@ void HubCommandHandler::PrintStatus() const
             std::printf(" (disabled)");
         std::printf("\n");
     }
+}
+
+void HubCommandHandler::PrintRegistry() const
+{
+    if (!_clusterServer.IsOpen())
+    {
+        std::printf("Cluster listener is disabled. Configure Hub.Cluster.Enable and TLS certificates.\n");
+        return;
+    }
+    auto const nodes = _clusterServer.Snapshot();
+    std::printf("Live cluster registry: %u node(s), protocol v1.\n", unsigned(nodes.size()));
+    for (auto const& node : nodes)
+        std::printf("  %s (%s) %s %s:%u realm %u build %u load %u/%u %s\n", node.Key.c_str(), node.Name.c_str(),
+            node.Type == Skyfire::Cluster::Service::Auth ? "auth" : "world", node.Address.c_str(), unsigned(node.Port),
+            node.Realm, node.Build, node.Load, node.Capacity, node.Ready ? "ready" : "not ready");
 }
 
 void HubCommandHandler::PrintNodes() const

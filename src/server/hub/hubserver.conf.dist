@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091601
+ConfVersion=2026091701
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -54,10 +54,30 @@ Hub.BindIP = "0.0.0.0"
 
 #
 #    Hub.Port
-#        Description: TCP port reserved for the connection distribution hub.
+#        Description: TCP port for authenticated cluster registration when Hub.Cluster.Enable = 1.
 #        Default:     9100
 
 Hub.Port = 9100
+
+# Cluster registration listener uses Hub.BindIP/Hub.Port only when enabled.
+# This is a control-plane listener, not the public game/authentication entry point.
+# Mutual TLS (minimum TLS 1.2) is mandatory. Paths are relative to the hub executable.
+# Use a dedicated cluster CA; issue each node a client certificate whose single
+# Common Name is its unique node key (ASCII letters, digits, '-', '_', '.', max 64).
+# The server certificate must match the hostname used by clients.
+# Registration is connection-owned and ephemeral. Send heartbeats more frequently
+# than LeaseSeconds. Disconnected/expired nodes disappear; reconnect must register
+# again and explicitly report ready. Changing these settings requires hub restart.
+# In cluster mode, account changes require an available managed world. Direct
+# offline hub account writes are disabled until remote dispatch is implemented.
+# Local supervised processes continue using their existing pipes; network agents
+# are a separate follow-up milestone. Never share the cluster CA with web clients.
+Hub.Cluster.Enable = 0
+Hub.Cluster.Certificate = ""
+Hub.Cluster.PrivateKey = ""
+Hub.Cluster.CA = ""
+Hub.Cluster.LeaseSeconds = 15
+Hub.Cluster.MaxConnections = 128
 
 #
 #    Console.Enable

@@ -21,6 +21,7 @@
 #include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
 #include "HubConsole.h"
+#include "HubClusterServer.h"
 #include "Auth/AccountAdministration.h"
 #include "HubProcessSupervisor.h"
 #include "HubWebServer.h"
@@ -241,6 +242,30 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    HubClusterServer clusterServer;
+    bool const clusterEnabled = sConfigMgr->GetBoolDefault("Hub.Cluster.Enable", false);
+    if (clusterEnabled)
+    {
+        auto clusterPath = [&](char const* key)
+        {
+            std::filesystem::path path = sConfigMgr->GetStringDefault(key, "");
+            if (path.empty()) return std::string();
+            if (path.is_relative()) path = GetExecutableDirectory(argv[0]) / path;
+            return path.lexically_normal().string();
+        };
+        int const lease = sConfigMgr->GetIntDefault("Hub.Cluster.LeaseSeconds", 15);
+        int const limit = sConfigMgr->GetIntDefault("Hub.Cluster.MaxConnections", 128);
+        if (lease < 5 || lease > 300 || limit < 1 || limit > 1024 ||
+            !clusterServer.Open(bindIp, uint16(port), clusterPath("Hub.Cluster.Certificate"),
+                clusterPath("Hub.Cluster.PrivateKey"), clusterPath("Hub.Cluster.CA"), uint32(lease), size_t(limit)))
+        {
+            SF_LOG_ERROR("server.hub", "Cluster listener startup failed. Check TLS files, Hub.Port, lease (5..300) and connection limit (1..1024).");
+            webServer.Close();
+            StopDatabase();
+            return 1;
+        }
+    }
+
     int32 maxPingTime = sConfigMgr->GetIntDefault("MaxPingTime", 30);
     if (maxPingTime < 1 || maxPingTime > 1440)
     {
@@ -266,12 +291,13 @@ int main(int argc, char** argv)
     bool const consoleEnabled = sConfigMgr->GetBoolDefault("Console.Enable", true);
     auto const hubStartedAt = std::chrono::steady_clock::now();
     HubConsoleInput console;
-    HubCommandHandler commandHandler(bindIp, uint16(port), processSupervisor);
+    HubCommandHandler commandHandler(bindIp, uint16(port), processSupervisor, clusterServer);
     if (consoleEnabled)
         console.PrintPrompt();
 
     while (!StopEvent)
     {
+        clusterServer.Update();
         processSupervisor.Update();
 
         HubWebServiceCommand webCommand;
@@ -285,8 +311,15 @@ int main(int argc, char** argv)
                 auto const promise = webCommand.AccountResult;
                 if (!processSupervisor.HasActiveWorld())
                 {
-                    // Dispatch runs on the same main thread as Start/Stop: no online fallback race.
-                    promise->set_value(AccountAdministration::HandleEncodedRequest(webCommand.AccountRequest));
+                    // An absent lease cannot prove a remote world is offline. Until remote
+                    // account dispatch exists, cluster mode must never fall back to direct writes.
+                    if (clusterEnabled)
+                        promise->set_value({409, "{\"error\":\"Cluster mode requires an available managed world for account changes; remote dispatch is not implemented. No direct database fallback was attempted.\"}"});
+                    else
+                    {
+                        // Dispatch runs on the same main thread as Start/Stop: no online fallback race.
+                        promise->set_value(AccountAdministration::HandleEncodedRequest(webCommand.AccountRequest));
+                    }
                 }
                 else if (!processSupervisor.SendAccountRequest(webCommand.AccountRequest,
                     [promise](std::string const& result)
@@ -347,6 +380,7 @@ int main(int argc, char** argv)
                 webService.CommandResult = service.CommandResult;
                 status.Services.push_back(std::move(webService));
             }
+            status.ClusterNodes = clusterServer.Snapshot();
             webServer.UpdateStatus(status);
         }
 
@@ -377,6 +411,7 @@ int main(int argc, char** argv)
         Skyfire::SleepForMilliseconds(50);
     }
 
+    clusterServer.Close();
     webServer.Close();
     processSupervisor.StopAll();
     StopDatabase();

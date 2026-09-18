@@ -641,6 +641,15 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
              << ",\"commandResult\":\"" << JsonEscape(
                  (session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) == HUB_ADMIN_ACCESS_ALL_LOCAL ? service.CommandResult : "") << "\"}";
     }
+    for (auto const& node : status.ClusterNodes)
+    {
+        json << ",{\"key\":\"cluster:" << JsonEscape(node.Key) << "\",\"name\":\"" << JsonEscape(node.Name)
+             << "\",\"status\":\"" << (node.Ready ? "online" : "issue")
+             << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? "auth" : "world")
+             << " | " << (node.Ready ? "ready" : "not ready") << " | " << JsonEscape(node.Address) << ':' << node.Port
+             << " | realm " << node.Realm << " | load " << node.Load << '/' << node.Capacity
+             << "\",\"managed\":false}";
+    }
     json << "]}";
     return MakeResponse(200, "application/json", json.str());
 }

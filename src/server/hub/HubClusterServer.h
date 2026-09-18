@@ -1,0 +1,40 @@
+/*
+ * This file is part of Project SkyFire https://www.projectskyfire.org.
+ * See LICENSE.md file for Copyright information.
+ */
+#ifndef SKYFIRE_HUB_CLUSTER_SERVER_H
+#define SKYFIRE_HUB_CLUSTER_SERVER_H
+#include "Cluster/ClusterRegistry.h"
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/context.hpp>
+#include <map>
+#include <memory>
+
+class HubClusterSession;
+class HubClusterServer
+{
+public:
+    HubClusterServer();
+    ~HubClusterServer();
+    bool Open(std::string const& address, std::uint16_t port, std::string const& certificate,
+        std::string const& key, std::string const& ca, std::uint32_t leaseSeconds, std::size_t maxConnections);
+    void Update();
+    void Close();
+    bool IsOpen() const { return !_closed; }
+    std::vector<Skyfire::Cluster::Node> Snapshot() const { return _registry.Snapshot(); }
+private:
+    friend class HubClusterSession;
+    void Accept();
+    static std::uint64_t Now();
+    boost::asio::io_context _io;
+    boost::asio::ssl::context _tls;
+    boost::asio::ip::tcp::acceptor _acceptor;
+    Skyfire::Cluster::Registry _registry;
+    std::map<std::uint64_t, std::shared_ptr<HubClusterSession>> _sessions;
+    std::uint64_t _nextOwner = 0;
+    std::uint32_t _leaseSeconds = 15;
+    std::size_t _maxConnections = 128;
+    bool _closed = true;
+};
+#endif
