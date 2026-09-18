@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026091801
+ConfVersion=2026091802
 
 ###################################################################################################
 # SECTION INDEX
@@ -52,6 +52,19 @@ ConfVersion=2026091801
 # restart while the login service stays running. Registration does not enable remote commands.
 
 Cluster.Enable = 0
+
+# Shared short-lived session handoffs through the registered hub (Phase 5).
+# Apply sql/updates/auth/2026_09_18_auth_00.sql before upgrading any service.
+# Enable on ALL participating auth/world nodes after updating hubserver too.
+# Requires Cluster.Enable. Disabled preserves standalone/direct authentication behavior.
+# Hub requests use the same mutual-TLS identity, a separate connection, and a 5-second deadline.
+# Hub failure/restart fails pending handoffs closed; clients must log in again. No replay/retry
+# of uncertain consumption and no active-world-session migration. The hub stores no session keys.
+# Tokens bind account, purpose, client IP, realm and the current destination world registration.
+# One ready world registration per realm is required until live realm routing chooses destinations.
+# All auth nodes continue sharing LoginDatabaseInfo for account and Authnet session-key records.
+Cluster.Handoff.Enable = 0
+
 Cluster.HubHost = "localhost"
 Cluster.HubPort = 9100
 Cluster.NodeKey = ""

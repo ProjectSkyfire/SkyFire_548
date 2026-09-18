@@ -3,6 +3,8 @@
  * See LICENSE.md file for Copyright information.
  */
 #include "HubClusterServer.h"
+#include "Cluster/HandoffService.h"
+#include "Cluster/HandoffClient.h"
 #include "Log.h"
 #include "Database/DatabaseEnv.h"
 #include "Network/BoostAsioUtils.h"
@@ -80,7 +82,8 @@ private:
             if (!DecodeHeader(self->_headerBytes, self->_header)) { self->Reject(Error::Malformed, "Invalid frame or payload exceeds 4096 bytes."); return; }
             if (self->_header.Version != ProtocolVersion) { self->Reject(Error::Version, "Incompatible cluster protocol; hub requires version 1."); return; }
             if (self->_header.Type != Message::Register && self->_header.Type != Message::Ready &&
-                self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms)
+                self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms &&
+                self->_header.Type != Handoff::RequestType)
             { self->Reject(Error::Malformed, "Unsupported request type."); return; }
             self->_body.resize(self->_header.Length);
             if (self->_body.empty()) { self->Handle(); return; }
@@ -93,6 +96,26 @@ private:
     }
     void Handle()
     {
+        if (_header.Type == Handoff::RequestType)
+        {
+            Handoff::Request request;
+            if (!_key.empty() || !Handoff::Decode(_body,request))
+            { Reject(Error::Malformed,"Invalid handoff request; use a separate TLS connection."); return; }
+            boost::system::error_code addressError;
+            auto address = boost::asio::ip::make_address(request.Bind.Address,addressError);
+            if (addressError || address.is_unspecified() || address.is_multicast())
+            { Reject(Error::Malformed,"Handoff requires a concrete client address."); return; }
+            request.Bind.Address = address.to_string();
+            auto const now = HubClusterServer::Now();
+            auto result = Handoff::Authorize(_identity,_server._registry.Snapshot(),now,request);
+            std::string token;
+            if (result == Handoff::Result::Ok) result = Handoff::Execute(_server._handoffs,request,now,token);
+            // Never include token, evidence, session key or client payload in diagnostics.
+            SF_LOG_INFO("server.handoff", "Handoff node '%s' operation %u account %u realm %u result %u.",
+                _identity.c_str(),unsigned(request.Action),request.Bind.Account,request.Bind.Realm,unsigned(result));
+            Writer reply; reply.U8(std::uint8_t(result)); reply.String(token.empty() ? "-" : token);
+            Write(Frame(Handoff::ReplyType,reply),true); return;
+        }
         if (_header.Type == Message::Register)
         {
             Node node;
@@ -102,10 +125,10 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(63)) ||
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(127)) ||
                 (node.Type == Service::Auth && (node.Capabilities & 8)) ||
                 (node.Type == Service::World && (node.Capabilities & 48)))
-            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..63)."); return; }
+            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..127)."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
             { Reject(Error::Conflict, "Node key is already leased or registry capacity is exhausted."); return; }
             _key = node.Key;
@@ -183,7 +206,7 @@ private:
     std::vector<std::uint8_t> _body, _response;
 };
 
-HubClusterServer::HubClusterServer() : _tls(boost::asio::ssl::context::tls_server), _acceptor(_io) { }
+HubClusterServer::HubClusterServer() : _tls(boost::asio::ssl::context::tls_server), _acceptor(_io), _handoffs(Handoff::RandomToken) { }
 HubClusterServer::~HubClusterServer() { Close(); }
 bool HubClusterServer::LoadAdministration(std::string& error)
 {
@@ -289,7 +312,7 @@ void HubClusterServer::Accept()
         if (_closed) return;
         if (!error)
         {
-            if (_sessions.size() >= _maxConnections) Skyfire::Net::CloseTcpSocket(socket);
+            if (_sessions.size() >= _maxConnections + 32) Skyfire::Net::CloseTcpSocket(socket);
             else
             {
                 auto session = std::make_shared<HubClusterSession>(*this, std::move(socket), ++_nextOwner);
@@ -304,6 +327,7 @@ void HubClusterServer::Update()
 {
     if (_closed) return;
     _registry.Expire(Now());
+    if (Now() >= _handoffCleanupAt) { _handoffs.Cleanup(Now()); _handoffCleanupAt = Now() + 1000; }
     // Bound work per main-loop iteration so network floods cannot starve supervision.
     for (unsigned i = 0; i < 128 && _io.poll_one(); ++i) { }
 }
@@ -315,6 +339,7 @@ void HubClusterServer::Close()
     auto sessions = _sessions;
     for (auto const& entry : sessions) entry.second->Stop();
     _registry.Clear();
+    _handoffs.Clear();
     // Drain cancelled callbacks while the server is still closed, including the
     // accept callback, before a possible later Open() restarts this context.
     _io.restart();

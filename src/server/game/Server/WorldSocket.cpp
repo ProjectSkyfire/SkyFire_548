@@ -5,6 +5,7 @@
 
 #include "AccountMgr.h"
 #include "AuthnetConnectTo.h"
+#include "Cluster/HandoffClient.h"
 #include "Auth/LoginIdentity.h"
 #include "BigNumber.h"
 #include "ByteBuffer.h"
@@ -1076,7 +1077,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
 
     PreparedQueryResult result = LoginDatabase.Query(stmt);
-    if (!result && useAuthnetTokenLookup)
+    if (!result && useAuthnetTokenLookup && !Skyfire::Cluster::Handoff::Enabled())
     {
         SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: authnet world token '%s' had no stored session for %s; trying latest-login fallback.",
             account.c_str(), GetRemoteAddress().c_str());
@@ -1151,6 +1152,8 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     uint32 recruiter = fields[7].GetUInt32();
     std::string os = fields[8].GetString();
     bool hasBoost = fields[9].GetBool();
+    bool const requiresHubHandoff = fields[10].GetBool() ||
+        (useAuthnetWorldToken && Skyfire::Cluster::Handoff::Enabled());
 
     // Must be done before WorldSession is created
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_WARDEN_ENABLED) && os != "Win" && os != "OSX")
@@ -1223,6 +1226,19 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
             authnetWorldSessionKeySource.c_str(), ByteArrayToHexStr(clientSeed).c_str(), ByteArrayToHexStr(m_Seed).c_str(),
             ByteArrayToHexStr(digest).c_str(), ByteArrayToHexStr(expectedDigest).c_str());
         return -1;
+    }
+
+    if (requiresHubHandoff)
+    {
+        using namespace Skyfire::Cluster::Handoff;
+        Request request; request.Action = Operation::Consume; request.Bind.Use = Purpose::World;
+        request.Bind.Account = id; request.Bind.Realm = VirtualRealmID;
+        request.Bind.Address = address; request.Bind.Evidence = Evidence(sessionKey.data(),sessionKey.size());
+        if (Call(request) != Result::Ok)
+        {
+            SF_LOG_WARN("network", "World handoff rejected for account %u realm %u; expired, replayed, mismatched or hub unavailable.",id,VirtualRealmID);
+            SendAuthResponseError(ResponseCodes::AUTH_FAILED); return -1;
+        }
     }
 
     SF_LOG_DEBUG("network", "WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",

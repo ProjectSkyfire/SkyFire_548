@@ -11,6 +11,7 @@ namespace Skyfire::Cluster
     struct AgentOptions
     {
         bool Enabled = false;
+        bool HandoffEnabled = false;
         std::string Host, Certificate, PrivateKey, CA;
         std::uint16_t Port = 9100;
         Node Advertisement;

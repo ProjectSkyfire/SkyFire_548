@@ -203,6 +203,14 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         PrintRegistry();
     else if (command == "routing")
         PrintRouting();
+    else if (command == "handoffs")
+    {
+        auto const status = _clusterServer.HandoffStatus();
+        std::printf("Handoffs: issued %llu, consumed %llu, revoked %llu, expired %llu, rejected %llu, replayed %llu.\n",
+            static_cast<unsigned long long>(status.Issued),static_cast<unsigned long long>(status.Consumed),
+            static_cast<unsigned long long>(status.Revoked),static_cast<unsigned long long>(status.Expired),
+            static_cast<unsigned long long>(status.Rejected),static_cast<unsigned long long>(status.Replayed));
+    }
     else if (command == "cluster")
     {
         std::string action, key, extra, error;
@@ -366,6 +374,7 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  nodes      List enabled routing nodes.\n");
     std::printf("  registry   List authenticated live cluster registrations.\n");
     std::printf("  routing    Show authentication ingress connections, routes and failures.\n");
+    std::printf("  handoffs   Show shared handoff counters (no token material).\n");
     std::printf("  cluster <drain|disable|enable> <node-key>  Persist authentication routing policy.\n");
     std::printf("  start <service>\n");
     std::printf("             Start and supervise a database-configured service.\n");

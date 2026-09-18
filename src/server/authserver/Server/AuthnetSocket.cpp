@@ -5,6 +5,7 @@
 
 #include "AuthnetSocket.h"
 #include "AuthnetLoginGrant.h"
+#include "Cluster/HandoffClient.h"
 #include "Auth/LoginIdentity.h"
 #include "Authentication/BsnBitStream.h"
 #include "Authentication/AuthnetSRP6.h"
@@ -2644,7 +2645,7 @@ bool AuthnetSocket::DecodeInitialRequest(void)
     _authnetOS = GetAuthnetOSFromPlatform(request.platform);
     _authnetSelectedRealmField = ResolveAuthnetSelectedRealmField(accountId, BuildAuthnetRealmRoutes());
     _authnetLoginCompleteRealmField = _authnetSelectedRealmField;
-    _authnetLoginGrantAccepted = Skyfire::Authnet::HasLoginGrant(accountId, socket().getRemoteAddress());
+    _authnetLoginGrantAccepted = Skyfire::Authnet::HasLoginGrant(accountId, socket().getRemoteAddress(), &_authnetLoginGrantToken);
 
     Skyfire::Auth::LoginIdentity loginIdentity = Skyfire::Auth::NormalizeLoginIdentity(request.identity);
     if (!loginIdentity.Valid || loginIdentity.Kind != Skyfire::Auth::LoginIdentityKind::Email)
@@ -2723,7 +2724,7 @@ void AuthnetSocket::ConsumeAcceptedLoginGrant(char const* reason)
     if (!_authnetLoginGrantAccepted)
         return;
 
-    if (Skyfire::Authnet::ConsumeLoginGrant(_authnetAccountId, socket().getRemoteAddress()))
+    if (Skyfire::Authnet::ConsumeLoginGrant(_authnetAccountId, socket().getRemoteAddress(), _authnetLoginGrantToken))
     {
         AUTHNET_LOG_VERBOSE("'%s:%d' authnet probe: consumed login grant for account %u (%s), reason=%s.",
             socket().getRemoteAddress().c_str(), socket().getRemotePort(),
@@ -2737,6 +2738,7 @@ void AuthnetSocket::ConsumeAcceptedLoginGrant(char const* reason)
     }
 
     _authnetLoginGrantAccepted = false;
+    _authnetLoginGrantToken.clear();
 }
 
 std::vector<uint8> AuthnetSocket::GetOrCreateStartupModuleKey(void)
@@ -2750,13 +2752,13 @@ std::vector<uint8> AuthnetSocket::GetOrCreateStartupModuleKey(void)
     return std::vector<uint8>(_authnetStartupModuleKey.begin(), _authnetStartupModuleKey.end());
 }
 
-void AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, uint32 selectedRealmField, char const* reason)
+bool AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, uint32 selectedRealmField, char const* reason)
 {
     if (!_authnetAccountId || _authnetWorldAccountToken.empty())
     {
         SF_LOG_ERROR("server.authserver", "'%s:%d' authnet probe: cannot persist world session key before account context is ready.",
             socket().getRemoteAddress().c_str(), socket().getRemotePort());
-        return;
+        return false;
     }
 
     _authnetWorldConnectionSeed = connectionSeed;
@@ -2768,12 +2770,30 @@ void AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 
 
     std::string const remoteAddress = socket().getRemoteAddress();
 
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_LOGONPROOF_BY_ID);
+    if (Skyfire::Cluster::Handoff::Enabled())
+    {
+        using namespace Skyfire::Cluster::Handoff;
+        Request request; request.Action = Operation::Issue; request.Bind.Use = Purpose::World;
+        request.Bind.Account = _authnetAccountId; request.Bind.Realm = _authnetSelectedRealmField;
+        request.Bind.Address = remoteAddress;
+        request.Bind.Evidence = Evidence(_authnetWorldSessionKey.data(),_authnetWorldSessionKey.size());
+        request.Ttl = (std::min)(GetAuthnetWorldSessionTtlSeconds(),900u);
+        if (Call(request) != Result::Ok)
+        {
+            _authnetWorldSessionKeyPersisted = false;
+            SF_LOG_WARN("server.authserver", "World handoff unavailable for account %u realm %u; login must retry.",
+                _authnetAccountId,_authnetSelectedRealmField);
+            socket().Close(); return false;
+        }
+    }
+
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_AUTHNET_LOGONPROOF);
     stmt->setBinary(0, _authnetWorldSessionKey);
     stmt->setString(1, remoteAddress);
     stmt->setUInt32(2, _authnetLocaleId);
     stmt->setString(3, _authnetOS);
-    stmt->setUInt32(4, _authnetAccountId);
+    stmt->setUInt8(4, Skyfire::Cluster::Handoff::Enabled() ? 1 : 0);
+    stmt->setUInt32(5, _authnetAccountId);
     LoginDatabase.DirectExecute(stmt);
 
     uint32 const sessionTtl = GetAuthnetWorldSessionTtlSeconds();
@@ -2793,10 +2813,11 @@ void AuthnetSocket::PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 
 
     _authnetWorldSessionKeyPersisted = true;
 
-    AUTHNET_LOG_VERBOSE("'%s:%d' authnet probe: persisted %s world session key for account %u (%s), token=%s, seed=%u, realm_field=%u, selected_realm_field=%u, ttl=%u, key=%s.",
+    AUTHNET_LOG_VERBOSE("'%s:%d' authnet probe: persisted %s world session key for account %u (%s), seed=%u, realm_field=%u, selected_realm_field=%u, ttl=%u.",
         remoteAddress.c_str(), socket().getRemotePort(), reason ? reason : "authnet",
-        _authnetAccountId, _authnetAccountName.c_str(), _authnetWorldAccountToken.c_str(),
-        connectionSeed, realmField, _authnetSelectedRealmField, sessionTtl, MaskSessionKey(_authnetWorldSessionKey).c_str());
+        _authnetAccountId, _authnetAccountName.c_str(),
+        connectionSeed, realmField, _authnetSelectedRealmField, sessionTtl);
+    return true;
 }
 
 bool AuthnetSocket::TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8> const& packet)
@@ -2821,7 +2842,7 @@ bool AuthnetSocket::TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8>
         selectedRealm.connectionSeed, selectedRealmField, selectedRealmName.empty() ? "<unknown>" : selectedRealmName.c_str(), keyRealmField,
         previousRealmField, selectedRealm.hasRealmField ? "packet" : "default");
 
-    PersistAuthnetWorldSessionKey(selectedRealm.connectionSeed, keyRealmField, selectedRealmField, "selected-realm");
+    if (!PersistAuthnetWorldSessionKey(selectedRealm.connectionSeed, keyRealmField, selectedRealmField, "selected-realm")) return false;
     ConsumeAcceptedLoginGrant("selected-realm");
     return true;
 }
@@ -3612,7 +3633,8 @@ void AuthnetSocket::ProcessEncryptedClientBytes(size_t encryptedFollowupOffset)
         if (plain.size() > ClientModeSwitchRequestLen &&
             header.command == 8 && header.modeSwitch && header.mode == 2)
         {
-            TryUpdateWorldSessionKeyFromSelectedRealm(plain);
+            if (!TryUpdateWorldSessionKeyFromSelectedRealm(plain) && Skyfire::Cluster::Handoff::Enabled())
+            { socket().Close(); return; }
 
             char const* responseMode = GetMode2Command8RequestResponseMode();
             if (StringEquals(responseMode, "none") || StringEquals(responseMode, "skip") ||
@@ -3941,7 +3963,7 @@ void AuthnetSocket::TrySendProbeResponse(size_t readOffset, size_t readSize)
         _initialRequestLen += proof.packetLength;
         _authnetRiskFingerprintPending = false;
         uint32 const preferredRealmField = GetAuthnetPreferredRealmField();
-        PersistAuthnetWorldSessionKey(0, preferredRealmField, preferredRealmField, "native-password");
+        if (!PersistAuthnetWorldSessionKey(0, preferredRealmField, preferredRealmField, "native-password")) return;
         ConsumeAcceptedLoginGrant("native-password");
 
         std::vector<uint8> response = BuildNativeLogonSuccess(_authnetAccountId, _authnetWorldAccountToken);

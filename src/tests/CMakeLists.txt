@@ -888,6 +888,23 @@ add_executable(cluster_foundation_tests ClusterFoundationTests.cpp)
 target_include_directories(cluster_foundation_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
 add_test(NAME cluster_foundation_tests COMMAND cluster_foundation_tests)
 
+add_executable(handoff_store_tests HandoffStoreTests.cpp)
+target_include_directories(handoff_store_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+add_test(NAME handoff_store_tests COMMAND handoff_store_tests)
+
+add_executable(handoff_client_tests HandoffClientTests.cpp ${CMAKE_SOURCE_DIR}/src/server/shared/Cluster/HandoffClient.cpp)
+target_include_directories(handoff_client_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+target_link_libraries(handoff_client_tests Threads::Threads ${OPENSSL_LIBRARIES})
+if(TARGET Boost::headers)
+  target_link_libraries(handoff_client_tests Boost::headers)
+elseif(TARGET Boost::boost)
+  target_link_libraries(handoff_client_tests Boost::boost)
+endif()
+if(WIN32)
+  target_link_libraries(handoff_client_tests ws2_32 mswsock)
+endif()
+add_test(NAME handoff_client_tests COMMAND handoff_client_tests)
+
 add_executable(hub_auth_proxy_tests
   HubAuthProxyTests.cpp
   ${CMAKE_SOURCE_DIR}/src/server/hub/HubAuthProxy.cpp

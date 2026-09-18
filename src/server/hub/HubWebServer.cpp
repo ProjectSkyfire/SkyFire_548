@@ -677,6 +677,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
              << " | policy " << Skyfire::Cluster::AdministrationName(node.Admin);
         if (!node.Address.empty()) json << " | " << JsonEscape(node.Address) << ':' << node.Port;
         if (node.Live) json << " | load " << node.Load << '/' << node.Capacity;
+        if (node.Capabilities & 64) json << " | shared handoff enabled";
         if (node.Type == Skyfire::Cluster::Service::Auth) json << " | hub connections " << connections;
         if (!node.Realms.empty())
         {

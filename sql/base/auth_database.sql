@@ -18,6 +18,7 @@ CREATE TABLE `account` (
   `salt` binary(32) NOT NULL,
   `verifier` binary(32) NOT NULL,
   `session_key` binary(40) DEFAULT NULL,
+  `session_handoff_required` tinyint unsigned NOT NULL DEFAULT '0',
   `token_key` varchar(100) NOT NULL DEFAULT '',
   `email` varchar(255) NOT NULL DEFAULT '',
   `reg_mail` varchar(255) NOT NULL DEFAULT '',

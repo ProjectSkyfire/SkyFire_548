@@ -13,8 +13,8 @@
 namespace Skyfire::Authnet
 {
     bool IssueLoginGrant(uint32 accountId, std::string const& remoteAddress, uint32 ttlSeconds);
-    bool HasLoginGrant(uint32 accountId, std::string const& remoteAddress);
-    bool ConsumeLoginGrant(uint32 accountId, std::string const& remoteAddress);
+    bool HasLoginGrant(uint32 accountId, std::string const& remoteAddress, std::string* token = nullptr);
+    bool ConsumeLoginGrant(uint32 accountId, std::string const& remoteAddress, std::string const& token = "-");
 }
 
 #endif

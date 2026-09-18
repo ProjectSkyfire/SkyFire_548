@@ -38,7 +38,7 @@ private:
     void TrySendProbeResponse(size_t readOffset, size_t readSize);
     bool DecodeInitialRequest(void);
     void PrepareWorldSessionKey(std::string const& identity, std::string const& platform, std::string const& locale);
-    void PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, uint32 selectedRealmField, char const* reason);
+    bool PersistAuthnetWorldSessionKey(uint32 connectionSeed, uint32 realmField, uint32 selectedRealmField, char const* reason);
     void ConsumeAcceptedLoginGrant(char const* reason);
     std::vector<uint8> GetOrCreateStartupModuleKey(void);
     bool TryUpdateWorldSessionKeyFromSelectedRealm(std::vector<uint8> const& packet);
@@ -66,6 +66,7 @@ private:
     std::string _authnetAccountName;
     std::string _authnetOS;
     std::string _authnetWorldAccountToken;
+    std::string _authnetLoginGrantToken;
     SessionKey _authnetWorldSessionKey;
     std::array<uint8, 40> _authnetStartupModuleKey;
     std::array<uint8, 64> _authnetSecret;

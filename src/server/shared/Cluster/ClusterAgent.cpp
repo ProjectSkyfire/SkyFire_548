@@ -1,5 +1,6 @@
 /* Part of Project SkyFire. See LICENSE.md for copyright information. */
 #include "ClusterAgent.h"
+#include "HandoffClient.h"
 #include "Configuration/Config.h"
 #include "Log.h"
 #include <boost/asio/connect.hpp>
@@ -20,7 +21,12 @@ namespace Skyfire::Cluster
     bool LoadAgentOptions(Node advertisement, AgentOptions& options, std::string& error)
     {
         options.Enabled = sConfigMgr->GetBoolDefault("Cluster.Enable", false);
-        if (!options.Enabled) return true;
+        options.HandoffEnabled = sConfigMgr->GetBoolDefault("Cluster.Handoff.Enable", false);
+        if (!options.Enabled)
+        {
+            if (options.HandoffEnabled) { error = "Cluster.Handoff.Enable requires Cluster.Enable."; return false; }
+            Handoff::ConfigureClient(options); return true;
+        }
         options.Host = sConfigMgr->GetStringDefault("Cluster.HubHost", "localhost");
         int const port = sConfigMgr->GetIntDefault("Cluster.HubPort", 9100);
         int const capacity = sConfigMgr->GetIntDefault("Cluster.Capacity", 0);
@@ -54,8 +60,10 @@ namespace Skyfire::Cluster
         if (options.Certificate.empty() || options.PrivateKey.empty() || options.CA.empty())
         { error = "Cluster mode requires a client certificate, private key and trusted hub CA."; return false; }
         advertisement.Capacity = std::uint32_t(capacity);
+        if (options.HandoffEnabled) advertisement.Capabilities |= 64;
         options.Port = std::uint16_t(port);
         options.Advertisement = std::move(advertisement);
+        Handoff::ConfigureClient(options);
         return true;
     }
 
@@ -249,6 +257,7 @@ namespace Skyfire::Cluster
     Agent::~Agent() { Stop(); }
     bool Agent::Start(AgentOptions options, std::function<AgentSample()> sample, std::string& error)
     {
+        Handoff::ConfigureClient(options);
         if (!options.Enabled) return true;
         if (_state) { error = "Cluster agent is already started."; return false; }
         try

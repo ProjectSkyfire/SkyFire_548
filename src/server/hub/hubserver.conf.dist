@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091803
+ConfVersion=2026091804
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -78,6 +78,19 @@ Hub.Cluster.PrivateKey = ""
 Hub.Cluster.CA = ""
 Hub.Cluster.LeaseSeconds = 15
 Hub.Cluster.MaxConnections = 128
+
+# Phase 5: the hub owns up to 65536 short-lived handoff records (maximum TTL 900 seconds).
+# Auth/world nodes opt in with Cluster.Handoff.Enable. Deploy matching binaries together.
+# Handoff requests require a current ready registration and mutual TLS; tokens/evidence are
+# never sent to browsers or written to hub diagnostics. Use console 'handoffs' for counters.
+# Consumed/revoked records remain until expiry to reject replay. Hub restart clears all records;
+# pending logins must retry. Existing world sessions are unaffected by handoff-store restart.
+# World destinations bind the registration owner, so a restarted world cannot inherit an old grant.
+# At this phase exactly one ready world node must advertise a requested realm. Multiple worlds
+# for different realms are supported; ambiguous destinations are rejected until realm routing lands.
+# Apply sql/updates/auth/2026_09_18_auth_00.sql before upgrading. Authnet session keys remain
+# in the auth database; the account row also records whether its key requires hub handoff.
+
 
 # Optional public authentication ingress. Each connection stays on one ready, leased auth node.
 # Authnet and legacy protocols have separate listeners and are never mixed. Gameplay stays direct.
@@ -233,3 +246,6 @@ Log.Async.Enable = 0
 
 Appender.Console=1,2,0, 13 11 9 5 3 1
 Logger.root=3,Console
+# Bounded handoff audit files contain identities/results, never tokens or key fingerprints.
+Appender.Handoff=2,3,0,Handoff.log,a,10485760
+Logger.server.handoff=3,Handoff
