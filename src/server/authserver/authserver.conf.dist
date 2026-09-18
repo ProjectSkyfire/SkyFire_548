@@ -2,13 +2,14 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026090802
+ConfVersion=2026091801
 
 ###################################################################################################
 # SECTION INDEX
 #
 #    EXAMPLE CONFIG
 #    AUTH SERVER SETTINGS
+#    CLUSTER REGISTRATION
 #    MYSQL SETTINGS
 #    LOGGING SYSTEM SETTINGS
 #
@@ -28,6 +29,54 @@ ConfVersion=2026090802
 # - Copy this example to keep the formatting.
 # - Line breaks should be at column 100.
 ###################################################################################################
+
+###################################################################################################
+# CLUSTER REGISTRATION
+#
+# Optional registration with hubserver (also enable Hub.Cluster.Enable there).
+# Clustering disabled preserves direct login and standalone startup. Network failure retries
+# in the background (1..30 seconds), without changing client login or the existing realmlist.
+# Locally managed processes still honor the inherited hub control pipe and graceful shutdown.
+# Launch directly without hub handles to run independently across hub process restarts.
+#
+# NodeKey is a unique stable identity matching the client certificate's sole CN (1..64 ASCII
+# letters, digits, '-', '_' or '.'). Empty NodeName uses NodeKey.
+# HubHost must match the hub TLS certificate hostname/IP SAN. AdvertiseAddress must be a
+# concrete numeric IP reachable by clients, never 0.0.0.0 or ::. The actual listener port is used.
+# AuthEndpoint: auto selects Authnet when enabled, otherwise legacy; explicit options are
+# authnet and legacy. Only this endpoint and its active connection count are advertised.
+# Capacity is advertised maximum connections, 0 = unspecified; this does not enforce a limit.
+# Certificate, PrivateKey and CA are mandatory when enabled; relative paths use this config's
+# directory. Use a dedicated cluster CA and protect private keys. Settings require restart.
+# Invalid local configuration fails startup. An incompatible hub disables registration until
+# restart while the login service stays running. Registration does not enable remote commands.
+
+Cluster.Enable = 0
+Cluster.HubHost = "localhost"
+Cluster.HubPort = 9100
+Cluster.NodeKey = ""
+Cluster.NodeName = ""
+Cluster.AdvertiseAddress = ""
+Cluster.AuthEndpoint = "auto"
+Cluster.Capacity = 0
+Cluster.Certificate = ""
+Cluster.PrivateKey = ""
+Cluster.CA = ""
+
+# Enable only when this backend listener is reached through a trusted hub ingress.
+# When enabled, ALL connections require a PROXY v1 header from an exact TrustedPeers IP;
+# ordinary direct client connections on that listener are rejected, including localhost clients.
+# TrustedPeers is a space-separated list of 1..16 numeric hub source IPs (no CIDR/wildcards).
+# The original client address is restored before login, IP bans and packet logging run.
+# Headers are bounded to 108 bytes with a 5-second deadline and 128 pending headers per listener.
+# Keep backend listeners firewalled to the trusted hubs. Do not trust public client addresses.
+# Leave disabled to preserve standalone/direct login. Changes require authserver restart.
+# Cluster.AuthEndpoint advertises the selected listener's proxy requirement to the hub.
+
+Authnet.ProxyProtocol.Enable = 0
+Authnet.ProxyProtocol.TrustedPeers = "127.0.0.1"
+Realm.ProxyProtocol.Enable = 0
+Realm.ProxyProtocol.TrustedPeers = "127.0.0.1"
 
 ###################################################################################################
 # AUTH SERVER SETTINGS

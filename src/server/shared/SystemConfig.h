@@ -13,15 +13,6 @@
 
 #define _PACKAGENAME "SkyFire 5.x.x"
 
-// Format is YYYYMMDDRR where RR is the change in the conf file
-// for that day.
-#ifndef SKYFIREWORLD_CONFIG_VERSION
-# define SKYFIREWORLD_CONFIG_VERSION 2026272803
-#endif
-#ifndef SKYFIREAUTH_CONFIG_VERSION
-# define SKYFIREAUTH_CONFIG_VERSION 2026090802
-#endif
-
 #if SKYFIRE_ENDIAN == SKYFIRE_BIGENDIAN
 # define _ENDIAN_STRING "big-endian"
 #else

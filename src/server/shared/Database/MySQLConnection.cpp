@@ -359,7 +359,8 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
     if (queries.empty())
         return false;
 
-    BeginTransaction();
+    if (!Execute("START TRANSACTION"))
+        return false;
 
     std::list<SQLElementData>::const_iterator itr;
     for (itr = queries.begin(); itr != queries.end(); ++itr)
@@ -399,8 +400,7 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
     // This is done in calling functions DatabaseWorkerPool<T>::DirectCommitTransaction and TransactionTask::Execute,
     // and not while iterating over every element.
 
-    CommitTransaction();
-    return true;
+    return Execute("COMMIT");
 }
 
 MySQLPreparedStatement* MySQLConnection::GetPreparedStatement(uint32 index)

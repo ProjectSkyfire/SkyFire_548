@@ -33,8 +33,9 @@ public:
         virtual void OnClose(void) = 0;
     };
 
-    RealmSocket(std::unique_ptr<RealmSocketHandle> socket, std::string remoteAddress, uint16 remotePort);
+    RealmSocket(std::unique_ptr<RealmSocketHandle> socket, std::string remoteAddress, uint16 remotePort, bool authnet = false);
     ~RealmSocket(void);
+    static uint32 GetActiveConnections(bool authnet);
 
     void Start();
     void Close();
@@ -80,6 +81,7 @@ private:
     bool _closeWhenWritesFlush;
     std::atomic<bool> _closed;
     std::atomic<bool> _closeNotified;
+    bool const _authnet;
 };
 
 #endif

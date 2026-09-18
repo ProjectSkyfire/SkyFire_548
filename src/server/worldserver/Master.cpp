@@ -12,8 +12,10 @@
 #endif
 #include <mysql.h>
 #include <csignal>
+#include <chrono>
 #include <filesystem>
 #include <memory>
+#include <thread>
 
 #include "Common.h"
 #include "Configuration/Config.h"
@@ -21,9 +23,11 @@
 #include "Database/DatabaseSetup/DatabaseSetup.h"
 #include "Database/DatabaseSetup/DatabaseSetupRuntime.h"
 #include "Database/DatabaseWorkerPool.h"
+#include "Configuration/ConfigVersion.h"
 #include "SystemConfig.h"
 #include "World.h"
 #include "WorldRunnable.h"
+#include "Cluster/ClusterAgent.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
 
@@ -32,6 +36,7 @@
 #include "Log.h"
 #include "Master.h"
 #include "Platform/TimeUtils.h"
+#include "Platform/HubProcessControl.h"
 #include "RARunnable.h"
 #include "RealmList.h"
 #include "SFSoap.h"
@@ -349,7 +354,7 @@ public:
 };
 
 /// Main function
-int Master::Run()
+int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
 {
     BigNumber seed1;
     seed1.SetRand(16 * 8);
@@ -366,7 +371,7 @@ int Master::Run()
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
-    if (confVersion < SKYFIREWORLD_CONFIG_VERSION)
+    if (confVersion < Skyfire::ConfigVersion::World)
     {
         SF_LOG_INFO("server.worldserver", "*****************************************************************************");
         SF_LOG_INFO("server.worldserver", " WARNING: Your worldserver.conf version indicates your conf file is out of date!");
@@ -400,6 +405,23 @@ int Master::Run()
 
     ///- Initialize the World
     sWorld->SetInitialWorldSettings();
+
+    Skyfire::Cluster::Agent clusterAgent;
+    Skyfire::Cluster::AgentOptions clusterOptions;
+    Skyfire::Cluster::Node advertisement;
+    advertisement.Type = Skyfire::Cluster::Service::World;
+    advertisement.Port = uint16(sWorld->getIntConfig(WorldIntConfigs::CONFIG_PORT_WORLD));
+    advertisement.Build = 18414;
+    advertisement.Capabilities = 8; // Realm list; remote commands are not implemented on this transport yet.
+    for (auto const& realm : realmNameStore) advertisement.Realms.push_back(realm.first);
+    if (!advertisement.Realms.empty()) advertisement.Realm = advertisement.Realms.front();
+    std::string clusterError;
+    if (!Skyfire::Cluster::LoadAgentOptions(std::move(advertisement), clusterOptions, clusterError))
+    {
+        SF_LOG_ERROR("server.worldserver", "%s", clusterError.c_str());
+        _StopDB();
+        return 1;
+    }
 
     ///- Register worldserver's signal handlers
     std::signal(SIGINT, WorldServerSignalHandler);
@@ -547,9 +569,84 @@ int Master::Run()
 
     SF_LOG_INFO("server.worldserver",  " % s (worldserver-daemon) ready...", SKYFIRE_VER_PRODUCTVERSION_STR);
 
+    std::thread hubControlThread;
+    if (!World::IsStopped() && !clusterAgent.Start(std::move(clusterOptions),
+        [lastTick = uint64(0), lastProgress = std::chrono::steady_clock::now()]() mutable
+        {
+            auto const now = std::chrono::steady_clock::now();
+            uint64 const tick = HubWorldTick.load(std::memory_order_relaxed);
+            if (tick != lastTick) { lastTick = tick; lastProgress = now; }
+            bool const ready = tick && HubWorldReady.load(std::memory_order_relaxed) &&
+                now - lastProgress < std::chrono::seconds(15);
+            return Skyfire::Cluster::AgentSample{ready, uint32(HubWorldMetrics.load(std::memory_order_relaxed) >> 32)};
+        }, clusterError))
+    {
+        SF_LOG_ERROR("server.worldserver", "%s", clusterError.c_str());
+        World::StopNow(ERROR_EXIT_CODE);
+    }
+    if (hubControl && !World::IsStopped())
+    {
+        if (!hubControl->SendStatus(Skyfire::HubControl::AccountReadyMessage))
+        {
+            SF_LOG_ERROR("server.worldserver", "Hubserver control channel was lost during startup.");
+            World::StopNow(ERROR_EXIT_CODE);
+        }
+        else
+        {
+            hubControlThread = std::thread([hubControl]
+            {
+                auto nextHeartbeat = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+                while (!World::IsStopped())
+                {
+                    std::vector<std::string> commands;
+                    std::vector<std::string> accounts;
+                    if (hubControl->StopRequested(&commands, &accounts))
+                    {
+                        SF_LOG_INFO("server.worldserver", "Hubserver requested worldserver shutdown.");
+                        World::StopNow(SHUTDOWN_EXIT_CODE);
+                        break;
+                    }
+
+                    for (std::string const& request : accounts)
+                        commands.push_back("account hub " + request);
+                    for (std::string const& command : commands)
+                        sWorld->QueueCliCommand(new CliCommandHolder(hubControl, command.c_str(),
+                            [](void* context, char const* text)
+                            { static_cast<Skyfire::HubControl::ChildChannel*>(context)->AppendCommandOutput(text); },
+                            [](void* context, bool success)
+                            { static_cast<Skyfire::HubControl::ChildChannel*>(context)->FinishCommand(success); }));
+
+                    auto const now = std::chrono::steady_clock::now();
+                    if (now >= nextHeartbeat)
+                    {
+                        if (!hubControl->SendStatus(Skyfire::HubControl::HeartbeatMessage))
+                        {
+                            SF_LOG_ERROR("server.worldserver", "Hubserver control channel was lost; stopping worldserver.");
+                            World::StopNow(SHUTDOWN_EXIT_CODE);
+                            break;
+                        }
+                        uint64 const metrics = HubWorldMetrics.load(std::memory_order_relaxed);
+                        std::string const message = "METRICS " + std::to_string(metrics >> 32) + " " +
+                            std::to_string(uint32(metrics)) + " " + std::to_string(HubWorldTick.load(std::memory_order_relaxed)) + " " +
+                            std::to_string(hubControl->SampleCpuUsage());
+                        (void)hubControl->SendStatus(message.c_str());
+                        nextHeartbeat = now + std::chrono::seconds(1);
+                    }
+                    Skyfire::SleepForMilliseconds(100);
+                }
+                (void)hubControl->SendStatus(Skyfire::HubControl::StoppingMessage);
+            });
+        }
+    }
+
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
     worldRunner.Join();
+
+    clusterAgent.Stop();
+
+    if (hubControlThread.joinable())
+        hubControlThread.join();
 
     raRunner.Join();
 

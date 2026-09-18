@@ -115,6 +115,11 @@ namespace
     }
 }
 
+bool NormalizeCredential(std::string& value, size_t maxLength)
+{
+    return NormalizeSrpIdentityString(value, maxLength);
+}
+
 void DeleteLoginIdentities(uint32 accountId)
 {
     if (!accountId)

@@ -883,3 +883,28 @@ target_include_directories(game_domain_tests PRIVATE
 )
 
 add_test(NAME game_domain_tests COMMAND game_domain_tests)
+
+add_executable(cluster_foundation_tests ClusterFoundationTests.cpp)
+target_include_directories(cluster_foundation_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+add_test(NAME cluster_foundation_tests COMMAND cluster_foundation_tests)
+
+add_executable(hub_auth_proxy_tests
+  HubAuthProxyTests.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/hub/HubAuthProxy.cpp
+)
+target_include_directories(hub_auth_proxy_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/hub
+  ${Boost_INCLUDE_DIRS}
+)
+if(TARGET Boost::headers)
+  target_link_libraries(hub_auth_proxy_tests Boost::headers)
+elseif(TARGET Boost::boost)
+  target_link_libraries(hub_auth_proxy_tests Boost::boost)
+endif()
+target_link_libraries(hub_auth_proxy_tests Threads::Threads)
+if(WIN32)
+  target_link_libraries(hub_auth_proxy_tests ws2_32 mswsock)
+endif()
+add_test(NAME hub_auth_proxy_tests COMMAND hub_auth_proxy_tests)
+set_tests_properties(hub_auth_proxy_tests PROPERTIES TIMEOUT 60)

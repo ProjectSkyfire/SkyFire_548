@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Project SkyFire Hub</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="/" aria-label="Project SkyFire Hub home">
+            <img src="/assets/skyfire-logo.png" alt="Project SkyFire">
+            <span>
+                <strong>Project SkyFire</strong>
+                <small>Hub Server</small>
+            </span>
+        </a>
+        <nav id="main-nav" class="nav" aria-label="Hub navigation" hidden>
+            <button id="status-tab" class="nav-item active" type="button" aria-current="page">Console</button>
+            <button id="accounts-tab" class="nav-item" type="button" hidden>Accounts</button>
+            <button id="logout-button" class="nav-item command" type="button">Sign out</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="login-view" class="login-view" aria-labelledby="login-title">
+            <form id="login-form" class="login-panel" autocomplete="on">
+                <div class="panel-heading">
+                    <p class="eyebrow">Hub administration</p>
+                    <h1 id="login-title">Sign in</h1>
+                    <p>Use a hub administrator account.</p>
+                </div>
+
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" autocomplete="username" required maxlength="64">
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+                <p id="login-error" class="form-error" role="alert" hidden></p>
+                <button id="login-button" class="primary-button" type="submit">Sign in</button>
+            </form>
+        </section>
+
+        <div id="app-shell" class="app-shell" hidden>
+            <aside id="server-sidebar" class="server-sidebar" aria-labelledby="server-status-title">
+                <h2 id="server-status-title">Server status</h2>
+                <div id="status-summary" class="summary"></div>
+                <p id="service-action-message" role="status" aria-live="polite"></p>
+                <div id="component-grid" class="component-grid"></div>
+                <div class="refresh-meta">
+                    <span id="signed-in-user"></span>
+                    <span id="last-updated">Waiting for status</span>
+                </div>
+            </aside>
+            <div class="app-content">
+        <section id="status-view" class="status-view" aria-labelledby="status-title" hidden>
+            <div class="page-heading">
+                <div>
+                    <p class="eyebrow">World administration</p>
+                    <h1 id="status-title">Console</h1>
+                </div>
+            </div>
+            <section id="world-console" class="world-console" aria-labelledby="world-console-title" hidden>
+                <h2 id="world-console-title">World server console</h2>
+                <p>Send world commands with or without the leading dot. Shutdown and restart use the normal player-save sequence.</p>
+                <label for="world-node">World node</label>
+                <select id="world-node" aria-describedby="world-command-state"></select>
+                <form id="world-command-form">
+                    <label for="world-command">Command</label>
+                    <div class="world-command-row">
+                        <input id="world-command" name="command" required maxlength="1024" autocomplete="off" spellcheck="false" placeholder=".server restart 300" aria-describedby="world-command-help">
+                        <button id="world-command-send" class="primary-button" type="submit">Send command</button>
+                    </div>
+                </form>
+                <p id="world-command-help">Countdown: <code>server shutdown 300</code> or <code>server restart 300</code> (seconds). At a clock time: <code>server shutdown time 23:00</code> or <code>server restart time 23:00</code> (server local time; next occurrence). Cancel: <code>server shutdown cancel</code> or <code>server restart cancel</code>.</p>
+                <p id="world-command-state"></p>
+                <pre id="world-command-result" role="status" aria-live="polite">No command response yet.</pre>
+            </section>
+            <details id="world-node-settings" class="account-panel" hidden>
+                <summary>Add or edit a world node</summary>
+                <p>Each world needs its own configuration, realm ID and listening port. Nodes share the hub's auth database. Save a name at any time; stop the node before changing launch paths. Saving does not start the server.</p>
+                <form id="world-node-form" class="account-form">
+                    <label>Node key<input name="key" required maxlength="64" pattern="world|world-[a-z0-9_-]+" value="world" title="world or world- followed by lowercase letters, numbers, underscores or hyphens"></label>
+                    <label>Display name<input name="name" required maxlength="100" placeholder="SkyFire PvE"></label>
+                    <label>Executable<input name="executablePath" required maxlength="1024" value="worldserver"></label>
+                    <label>Configuration file<input name="configPath" required maxlength="1024" value="worldserver.conf"></label>
+                    <label>Working directory<input name="workingDirectory" required maxlength="1024" value="."></label>
+                    <button class="primary-button" type="submit">Save world node</button>
+                </form>
+                <p id="world-node-message" role="status" aria-live="polite"></p>
+            </details>
+        </section>
+
+        <section id="accounts-view" class="status-view" aria-labelledby="accounts-title" hidden>
+            <div class="page-heading"><div><p class="eyebrow">Player administration</p><h1 id="accounts-title">Accounts</h1></div></div>
+            <p id="accounts-routing"></p>
+            <p id="accounts-message" role="status" aria-live="polite"></p>
+            <p id="accounts-disabled" hidden>Account administration is disabled. Configure LoginDatabaseInfo in hubserver.conf after applying the auth database update, then restart the hub.</p>
+            <div id="accounts-workspace">
+                <section class="account-panel"><h2>Find an account</h2>
+<form id="account-search" class="account-form"><label>Username, email or account ID<input name="query" type="text" maxlength="64"></label><button type="submit" class="primary-button" >Search</button></form><div id="account-results" class="account-table"></div><button id="account-next" type="button" class="service-button" disabled>Next page</button>
+                </section>
+                <details class="account-panel"><summary>Create player account</summary>
+<form id="account-create" class="account-form"><label>Username<input name="username" type="text" required maxlength="16" pattern="[A-Za-z0-9_.-]{1,16}" autocomplete="off"></label><label>Login email<input name="email" type="email" required maxlength="64" autocomplete="off"></label><label>New password (maximum 16 bytes)<input name="password" type="password" maxlength="16" autocomplete="new-password" required></label><label>Expansion<select name="expansion"><option value="4">Mists of Pandaria</option><option value="3">Cataclysm</option><option value="2">Wrath of the Lich King</option><option value="1">The Burning Crusade</option><option value="0">Classic</option></select></label><button type="submit" class="primary-button" data-mutation>Create account</button></form>
+                </details>
+                <section id="account-editor" class="account-panel" hidden>
+                    <div class="component-heading"><h2 id="account-selected">Selected account</h2><button id="account-refresh" type="button" class="service-button">Refresh</button></div>
+                    <p id="account-current-state"></p>
+                    <h3>Account details</h3><p>Leave the password blank to keep it. Changing the username or login email requires a new password and replaces the registration email. Credential and permission changes disconnect active sessions so the player reconnects with the new settings.</p>
+<form id="account-profile" class="account-form"><label>Username<input name="username" type="text" required maxlength="16" pattern="[A-Za-z0-9_.-]{1,16}" autocomplete="off"></label><label>Login email<input name="email" type="email" required maxlength="64" autocomplete="off"></label><label>New password (maximum 16 bytes)<input name="password" type="password" maxlength="16" autocomplete="new-password"></label><label>Expansion<select name="expansion"><option value="4">Mists of Pandaria</option><option value="3">Cataclysm</option><option value="2">Wrath of the Lich King</option><option value="1">The Burning Crusade</option><option value="0">Classic</option></select></label><button type="submit" class="primary-button" data-mutation>Save account</button></form>
+                    <div class="account-columns"><section><h3>Account ban</h3>
+<form id="account-ban" class="account-form"><label>Duration in minutes (0 = permanent)<input name="minutes" type="number" required min="0" max="525600" value="60"></label><label>Reason<input name="reason" type="text" required maxlength="255"></label><button type="submit" class="primary-button" data-mutation>Ban account</button></form><button id="account-unban" class="service-button" type="button" data-mutation>Unban account</button></section>
+                    <section><h3>Chat mute</h3>
+<form id="account-mute" class="account-form"><label>Duration in minutes (starts now, even offline)<input name="minutes" type="number" required min="1" max="525600" value="60"></label><label>Reason<input name="reason" type="text" required maxlength="255"></label><button type="submit" class="primary-button" data-mutation>Mute account</button></form><button id="account-unmute" class="service-button" type="button" data-mutation>Unmute account</button></section></div>
+                    <h3>GM access</h3><p>All realms replaces existing realm-specific GM levels. Selecting one realm replaces any global GM level. Level 0 removes GM access for the selected scope.</p>
+<div id="account-gm-current" class="account-table"></div><form id="account-gm" class="account-form"><label>Realm<select name="realm"><option value="-1">All realms</option></select></label><label>GM level<select name="level"><option value="0">0 — Player</option><option value="1">1 — Moderator</option><option value="2">2 — Game master</option><option value="3">3 — Administrator</option></select></label><button type="submit" class="primary-button" data-mutation>Set GM access</button></form>
+                    <h3>RBAC permissions</h3><p>These are explicit account overrides; GM roles may also supply inherited permissions. Revoke removes the override for the selected realm, allowing inherited permissions to apply.</p>
+<div id="account-rbac-current" class="account-table"></div><form id="account-rbac" class="account-form"><label>Realm<select name="realm"><option value="-1">All realms</option></select></label><label>Permission ID<input name="permission" type="number" required min="1" max="4294967295"></label><label>Action<select name="mode"><option value="grant">Grant</option><option value="deny">Deny</option><option value="revoke">Revoke override</option></select></label><button type="submit" class="primary-button" data-mutation>Apply permission</button></form>
+                    <details><summary>Find an RBAC permission</summary>
+<form id="permission-search" class="account-form"><label>Permission name or ID<input name="query" type="text" maxlength="64"></label><button type="submit" class="primary-button" >Search permissions</button></form><div id="permission-results" class="account-table"></div><button id="permission-next" type="button" class="service-button" disabled>Next page</button></details>
+                    <details><summary>Recent account ban history</summary>
+<div id="account-ban-history" class="account-table"></div></details>
+                </section>
+                <section class="account-panel"><h2>IP bans</h2><p>Ban a single IPv4 address. This applies to all accounts connecting from that address.</p>
+<form id="ip-ban-form" class="account-form"><label>IPv4 address<input name="ip" type="text" required maxlength="15" placeholder="192.0.2.10"></label><label>Duration in minutes (0 = permanent)<input name="minutes" type="number" required min="0" max="525600" value="60"></label><label>Reason<input name="reason" type="text" required maxlength="255"></label><button type="submit" class="primary-button" data-mutation>Ban IP</button></form><button id="ip-unban" class="service-button" type="button" data-mutation>Unban entered IP</button>
+<form id="ip-search" class="account-form"><label>Find active IP bans<input name="query" type="text" maxlength="15"></label><button type="submit" class="primary-button" >Search IP bans</button></form><div id="ip-results" class="account-table"></div><button id="ip-next" type="button" class="service-button" disabled>Next page</button>
+                </section>
+            </div>
+        </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="/status.js" defer></script>
+    <script src="/accounts.js" defer></script>
+    <script src="/app.js" defer></script>
+</body>
+</html>

@@ -105,7 +105,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_ACCOUNT_ACCESS_GMLEVEL_TEST, "SELECT 1 FROM account_access WHERE id = ? AND gmlevel > ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_ACCESS, "SELECT a.id, aa.gmlevel, aa.RealmID FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE a.username = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_RECRUITER, "SELECT 1 FROM account WHERE recruiter = ?", CONNECTION_SYNCH);
-    PrepareStatement(LOGIN_SEL_BANS, "SELECT 1 FROM account_banned WHERE id = ? AND active = 1 UNION SELECT 1 FROM ip_banned WHERE ip = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_BANS, "SELECT 1 FROM account_banned WHERE id = ? AND active = 1 AND (bandate = unbandate OR unbandate > UNIX_TIMESTAMP()) UNION SELECT 1 FROM ip_banned WHERE ip = ? AND (bandate = unbandate OR unbandate > UNIX_TIMESTAMP())", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_WHOIS, "SELECT username, email, last_ip FROM account WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_REALMLIST_SECURITY_LEVEL, "SELECT allowedSecurityLevel from realmlist WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_DEL_ACCOUNT, "DELETE FROM account WHERE id = ?", CONNECTION_ASYNC);
@@ -119,5 +119,35 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_RBAC_ACCOUNT_PERMISSIONS, "SELECT permissionId, granted FROM rbac_account_permissions WHERE accountId = ? AND (realmId = ? OR realmId = -1) ORDER BY permissionId, realmId", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_INS_RBAC_ACCOUNT_PERMISSION, "INSERT INTO rbac_account_permissions (accountId, permissionId, granted, realmId) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE granted = VALUES(granted)", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_DEL_RBAC_ACCOUNT_PERMISSION, "DELETE FROM rbac_account_permissions WHERE accountId = ? AND permissionId = ? AND (realmId = ? OR realmId = -1)", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_HUB_ACCOUNT_SEARCH, "SELECT a.id,a.username,a.email,a.last_ip,a.online,EXISTS(SELECT 1 FROM account_banned b WHERE b.id=a.id AND b.active=1 AND (b.bandate=b.unbandate OR b.unbandate>UNIX_TIMESTAMP())) FROM account a WHERE a.id>? AND (?='' OR LOCATE(?,a.username)>0 OR LOCATE(?,a.email)>0 OR a.id=?) ORDER BY a.id LIMIT 51", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_ACCOUNT_DETAIL, "SELECT a.id,a.username,a.email,a.reg_mail,a.expansion,a.last_ip,a.online,a.mutetime,a.mutereason,a.muteby,EXISTS(SELECT 1 FROM account_banned b WHERE b.id=a.id AND b.active=1 AND (b.bandate=b.unbandate OR b.unbandate>UNIX_TIMESTAMP())) FROM account a WHERE a.id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_ACCOUNT_ACCESS, "SELECT RealmID,gmlevel FROM account_access WHERE id=? ORDER BY RealmID", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_ACCOUNT_RBAC, "SELECT a.realmId,a.permissionId,a.granted,p.name FROM rbac_account_permissions a JOIN rbac_permissions p ON p.id=a.permissionId WHERE a.accountId=? ORDER BY a.realmId,a.permissionId", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_ACCOUNT_BANS, "SELECT bandate,unbandate,bannedby,banreason,active FROM account_banned WHERE id=? ORDER BY bandate DESC LIMIT 10", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_PERMISSION_SEARCH, "SELECT id,name FROM rbac_permissions WHERE id>? AND (?='' OR LOCATE(?,name)>0 OR id=?) ORDER BY id LIMIT 51", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_PERMISSION_EXISTS, "SELECT 1 FROM rbac_permissions WHERE id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_REALMS, "SELECT id,name FROM realmlist ORDER BY id", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_CREATE_EXPANSION, "UPDATE account SET expansion=? WHERE username=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_UPD_PROFILE, "UPDATE account SET expansion=? WHERE id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_UPD_CREDENTIALS, "UPDATE account SET username=?,email=?,reg_mail=?,salt=?,verifier=?,session_key=NULL,expansion=? WHERE id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_INS_IDENTITY, "INSERT INTO account_login_identity(account_id,identity_type,identity,identity_canonical,salt,verifier,authnet_salt,authnet_verifier) SELECT id,?,?,?,?,?,?,? FROM account WHERE username=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_DEL_AUTHNET_SESSIONS, "DELETE FROM account_authnet_session WHERE account_id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_INS_EVENT, "INSERT INTO account_admin_events(action,account_id,ip,actor) VALUES(?,?,?,?)", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_INS_CREATE_EVENT, "INSERT INTO account_admin_events(action,account_id,ip,actor) SELECT 'create',id,'',? FROM account WHERE username=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_BAN, "INSERT INTO account_banned(id,bandate,unbandate,bannedby,banreason,active) VALUES(?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+?,?,?,1) ON DUPLICATE KEY UPDATE unbandate=VALUES(unbandate),bannedby=VALUES(bannedby),banreason=VALUES(banreason),active=1", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_UNBAN, "UPDATE account_banned SET active=0 WHERE id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_MUTE, "UPDATE account SET mutetime=?,mutereason=?,muteby=? WHERE id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_GM_CLEAR, "DELETE FROM account_access WHERE id=? AND (?=-1 OR RealmID=? OR RealmID=-1)", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_GM_SET, "INSERT INTO account_access(id,gmlevel,RealmID) VALUES(?,?,?)", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_RBAC_SET, "INSERT INTO rbac_account_permissions(accountId,permissionId,granted,realmId) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE granted=VALUES(granted)", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_RBAC_REVOKE, "DELETE FROM rbac_account_permissions WHERE accountId=? AND permissionId=? AND realmId=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_IP_BAN, "INSERT INTO ip_banned(ip,bandate,unbandate,bannedby,banreason) VALUES(?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+?,?,?) ON DUPLICATE KEY UPDATE unbandate=VALUES(unbandate),bannedby=VALUES(bannedby),banreason=VALUES(banreason)", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_IP_UNBAN, "DELETE FROM ip_banned WHERE ip=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_IP_LIST, "SELECT ip,bandate,unbandate,bannedby,banreason FROM ip_banned WHERE ip>? AND (bandate=unbandate OR unbandate>UNIX_TIMESTAMP()) AND (?='' OR LOCATE(?,ip)>0) ORDER BY ip LIMIT 51", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_EVENT_LATEST, "SELECT COALESCE(MAX(id),0) FROM account_admin_events", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_EVENTS, "SELECT id,action,account_id,ip FROM account_admin_events WHERE id>? ORDER BY id LIMIT 100", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_CURRENT_MODERATION, "SELECT a.mutetime,EXISTS(SELECT 1 FROM account_banned b WHERE b.id=a.id AND b.active=1 AND (b.bandate=b.unbandate OR b.unbandate>UNIX_TIMESTAMP())) FROM account a WHERE a.id=?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_HUB_IP_ACTIVE, "SELECT 1 FROM ip_banned WHERE ip=? AND (bandate=unbandate OR unbandate>UNIX_TIMESTAMP()) LIMIT 1", CONNECTION_SYNCH);
+
     PrepareStatement(LOGIN_INS_GM_NOTE, "INSERT INTO gm_notes (realm_id, account_id, player_id, note_date, note_time, map_id, zone_id, area_id, position_x, position_y, position_z, orientation, location, note) VALUES (?, ?, ?, CURDATE(), CURTIME(), ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }

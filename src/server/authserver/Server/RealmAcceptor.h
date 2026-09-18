@@ -22,6 +22,7 @@ public:
     bool Open(uint16 port, std::string const& bindIp);
     void Close();
     void Update();
+    bool UsesProxyProtocol() const { return _proxyEnabled; }
 
 private:
     void AsyncAccept();
@@ -30,6 +31,9 @@ private:
     Skyfire::Asio::IoContextThreadGroup _threadGroup;
     boost::asio::ip::tcp::acceptor _acceptor;
     std::atomic<bool> _closed;
+    bool _proxyEnabled = false;
+    unsigned _pendingProxy = 0;
+    std::vector<boost::asio::ip::address> _proxyPeers;
 };
 
 #endif

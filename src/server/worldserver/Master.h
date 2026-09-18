@@ -13,11 +13,16 @@
 #include "Common.h"
 #include "Platform/Singleton.h"
 
+namespace Skyfire::HubControl
+{
+    class ChildChannel;
+}
+
 /// Start the server
 class Master
 {
 public:
-    int Run();
+    int Run(Skyfire::HubControl::ChildChannel* hubControl = nullptr);
 
     void SetNoUseConfigDatabaseInfo(bool noUseConfigDatabaseInfo) { _noUseConfigDatabaseInfo = noUseConfigDatabaseInfo; }
     void SetDatabaseHost(const char* db_Host) { _dbHost = db_Host; }

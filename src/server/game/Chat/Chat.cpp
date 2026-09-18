@@ -275,6 +275,7 @@ bool ChatHandler::ExecuteCommandInTable(std::vector<ChatCommand> const& table, c
                     SendSysMessage(LANG_CMD_SYNTAX);
 
                 ShowHelpForCommand(table[i].ChildCommands, text);
+                SetSentErrorMessage(true);
             }
 
             return true;
@@ -322,6 +323,7 @@ bool ChatHandler::ExecuteCommandInTable(std::vector<ChatCommand> const& table, c
                 SendSysMessage(table[i].Help.c_str());
             else
                 SendSysMessage(LANG_CMD_SYNTAX);
+            SetSentErrorMessage(true);
         }
 
         return true;
@@ -418,6 +420,7 @@ bool ChatHandler::ParseCommands(char const* text)
             return false;
 
         SendSysMessage(LANG_NO_CMD);
+        SetSentErrorMessage(true);
     }
     return true;
 }

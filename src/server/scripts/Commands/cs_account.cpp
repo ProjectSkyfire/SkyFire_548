@@ -11,6 +11,7 @@ Category: commandscripts
 EndScriptData */
 
 #include "AccountMgr.h"
+#include "Auth/AccountAdministration.h"
 #include "Auth/TOTP.h"
 #include "Chat.h"
 #include "Language.h"
@@ -69,6 +70,7 @@ public:
             { "addon",          rbac::RBAC_PERM_COMMAND_ACCOUNT_ADDON,           false, &HandleAccountAddonCommand,        "",      },
             { "boost",          rbac::RBAC_PERM_COMMAND_ACCOUNT_BOOST,           false, NULL,          "", accountBoostCommandTable },
             { "convert",        rbac::RBAC_PERM_COMMAND_ACCOUNT_CONVERT,         false, NULL,        "", accountConvertCommandTable },
+            { "hub",            rbac::RBAC_PERM_COMMAND_ACCOUNT_SET,             true,  &HandleHubAccountCommand,          "",      },
             { "create",         rbac::RBAC_PERM_COMMAND_ACCOUNT_CREATE,          true,  &HandleAccountCreateCommand,       "",      },
             { "delete",         rbac::RBAC_PERM_COMMAND_ACCOUNT_DELETE,          true,  &HandleAccountDeleteCommand,       "",      },
             { "email",          rbac::RBAC_PERM_COMMAND_ACCOUNT_EMAIL,           false, &HandleAccountEmailCommand,        "",      },
@@ -82,6 +84,16 @@ public:
             { "account",        rbac::RBAC_PERM_COMMAND_ACCOUNT,                 true,  NULL,              "",  accountCommandTable },
         };
         return commandTable;
+    }
+
+    static bool HandleHubAccountCommand(ChatHandler* handler, char const* args)
+    {
+        // This private transport command is never available to a player session.
+        if (handler->GetSession()) return false;
+        auto const reply = Skyfire::Auth::AccountAdministration::HandleEncodedRequest(args);
+        handler->SendSysMessage(("ACCOUNT " + std::to_string(reply.Status) + " " + reply.Body).c_str());
+        if (reply.Status >= 400) handler->SetSentErrorMessage(true);
+        return reply.Status < 400;
     }
 
     static std::string UrlEncode(std::string const& value)

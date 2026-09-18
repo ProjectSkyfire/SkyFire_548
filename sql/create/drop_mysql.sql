@@ -12,6 +12,10 @@ REVOKE ALL PRIVILEGES ON `auth` . * FROM 'skyfire'@'localhost';
 
 REVOKE GRANT OPTION ON `auth` . * FROM 'skyfire'@'localhost';
 
+REVOKE ALL PRIVILEGES ON `hub` . * FROM 'skyfire'@'localhost';
+
+REVOKE GRANT OPTION ON `hub` . * FROM 'skyfire'@'localhost';
+
 DROP USER 'skyfire'@'localhost';
 
 DROP DATABASE IF EXISTS `world`;
@@ -19,3 +23,5 @@ DROP DATABASE IF EXISTS `world`;
 DROP DATABASE IF EXISTS `characters`;
 
 DROP DATABASE IF EXISTS `auth`;
+
+DROP DATABASE IF EXISTS `hub`;
