@@ -23,6 +23,7 @@ enum WarlockSpells
     SPELL_WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST         = 62388, 
     SPELL_WARLOCK_DEMONIC_CIRCLE_SUMMON             = 48018,
     SPELL_WARLOCK_DEMONIC_CIRCLE_TELEPORT           = 48020,
+    SPELL_WARLOCK_DRAIN_LIFE_HEAL                   = 89653,
 
     SPELL_WARLOCK_FEL_SYNERGY_HEAL                  = 54181,
 
@@ -230,6 +231,54 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_warl_demonic_circle_teleport_AuraScript();
+    }
+};
+
+// 689 - Drain Life
+class spell_warl_drain_life : public SpellScriptLoader
+{
+public:
+    spell_warl_drain_life() : SpellScriptLoader("spell_warl_drain_life") { }
+
+    class spell_warl_drain_life_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_drain_life_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARLOCK_DRAIN_LIFE_HEAL))
+                return false;
+            return true;
+        }
+
+        void HandlePeriodic(AuraEffect const* aurEff)
+        {
+            Unit* caster = GetCaster();
+            if (!caster || !caster->IsAlive())
+                return;
+
+            // Effect 1 is a dummy on the caster holding the percentage of maximum health returned
+            // per tick. Read it from the spell so glyphs and talents that change it are picked up.
+            int32 pct = GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster);
+            if (pct <= 0)
+                return;
+
+            int32 const heal = caster->CountPctFromMaxHealth(pct);
+            if (!heal)
+                return;
+
+            caster->CastCustomSpell(SPELL_WARLOCK_DRAIN_LIFE_HEAL, SPELLVALUE_BASE_POINT0, heal, caster, true, nullptr, aurEff);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_drain_life_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_warl_drain_life_AuraScript();
     }
 };
 
@@ -724,6 +773,7 @@ void AddSC_warlock_spell_scripts()
 
     new spell_warl_demonic_circle_summon();
     new spell_warl_demonic_circle_teleport();
+    new spell_warl_drain_life();
     
     new spell_warl_fel_synergy();
     
