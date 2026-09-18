@@ -115,7 +115,7 @@ class BattlePetMgr
 {
 public:
     BattlePetMgr(Player* owner)
-        : m_owner(owner), m_summon(NULL), m_summonId(0), m_summonLastId(0), m_loadoutSave(false), m_loadoutFlags(0),
+        : m_owner(owner), m_summonGuid(0), m_summonId(0), m_summonLastId(0), m_loadoutSave(false), m_loadoutFlags(0),
         m_activePetBattlePlayerStateApplied(false) { }
 
     ~BattlePetMgr();
@@ -129,9 +129,11 @@ public:
     uint8 GetLoadoutSlotForBattlePet(uint64 id) const;
 
     uint64 GetCurrentSummonId() const { return m_summonId; }
-    TempSummon* GetCurrentSummon() const { return m_summon; }
+    // Resolved from the guid on every call, so it goes NULL by itself once the creature is
+    // destroyed. May return NULL while GetCurrentSummonId() is still set -- always check it.
+    TempSummon* GetCurrentSummon() const;
     void SetCurrentSummonId(uint64 summonId) { m_summonId = summonId; }
-    void SetCurrentSummon(TempSummon* summon) { m_summon = summon; }
+    void SetCurrentSummon(TempSummon* summon);
 
     void UnSummonCurrentBattlePet(bool temporary);
     void ResummonLastBattlePet();
@@ -245,7 +247,10 @@ private:
     Player* m_owner;
     BattlePetSet m_battlePetSet;
 
-    TempSummon* m_summon;
+    // The companion is held by guid, never as a pointer. Nothing in the core tells us when a
+    // TempSummon dies, despawns, or goes down with its map, so a cached TempSummon* here
+    // outlives the creature -- see the comment on UnSummonCurrentBattlePet().
+    uint64 m_summonGuid;
     uint64 m_summonId;
     uint64 m_summonLastId;
 
