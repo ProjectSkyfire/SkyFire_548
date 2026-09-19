@@ -495,6 +495,8 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
         return HandleLogin(body, remoteAddress, remoteIsLoopback);
     if (path == "/api/v1/logout" && method == "POST")
         return HandleLogout(headers);
+    if (path == "/api/v1/backup/schedules")
+        return HandleBackupSchedule(method,headers,body);
     if (path == "/api/v1/status" && method == "GET")
         return HandleStatus(headers);
     if (path.compare(0,16,"/api/v1/cluster/") == 0 && method == "POST")
@@ -906,6 +908,8 @@ std::string HubWebServer::ServeAsset(std::string const& target) const
         relativePath = "app.js";
     else if (target == "/status.js")
         relativePath = "status.js";
+    else if (target == "/backup.js")
+        relativePath = "backup.js";
     else if (target == "/accounts.js")
         relativePath = "accounts.js";
     else if (target == "/assets/skyfire-logo.png")

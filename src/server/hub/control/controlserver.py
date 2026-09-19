@@ -93,12 +93,14 @@ class ControlServer:
         self.app.router.add_post('/control/v1/session', self.login)
         self.app.router.add_post('/control/v1/logout', self.logout)
         self.app.router.add_get('/control/v1/status', self.status)
+        self.app.router.add_get('/control/v1/backup/schedules', self.backup_schedules)
+        self.app.router.add_post('/control/v1/backup/schedules', self.backup_schedules)
         self.app.router.add_get('/control/v1/capabilities', self.capabilities)
         self.app.router.add_post('/control/v1/commands', self.dispatch)
         self.app.router.add_get('/control/v1/commands/{id}', self.result)
         self.app.router.add_get('/control/v1/events', self.events)
         self.app.router.add_get('/', self.index)
-        for asset in ('control.js', 'control.css'):
+        for asset in ('control.js', 'control.css', 'backup.js'):
             self.app.router.add_get('/' + asset, self.asset)
         self.app.on_startup.append(self.start)
         self.app.on_cleanup.append(self.close)
@@ -299,7 +301,37 @@ class ControlServer:
         session = await self.authenticated(request)
         return self.reply('capabilities', {'protocol': 1, 'commands': sorted(ACTIONS) if session.status['permissions']['operate'] else [],
                           'topics': sorted(TOPICS), 'maxRequestBytes': MAX_BODY, 'maxEventBytes': MAX_EVENT,
-                          'historyEvents': 32, 'pendingEvents': 8, 'backupAvailable': False, 'recoveryActionsAvailable': False}, request)
+                          'historyEvents': 32, 'pendingEvents': 8, 'backupAvailable': False, 'backupScheduleConfigurationAvailable': True, 'recoveryActionsAvailable': False}, request)
+
+    async def backup_schedules(self, request):
+        mutation = request.method == 'POST'
+        request['action'] = 'backup.schedule'
+        session = await self.authenticated(request, mutation)
+        if not mutation:
+            value, _ = await self.hub('GET', 'backup/schedules', session)
+            return self.reply('backup.schedules', value, request)
+        value = await self.json(request)
+        expected = {'id', 'target', 'enabled', 'mode', 'intervalMinutes', 'minuteOfDay', 'weekday', 'revision'}
+        if set(value) != expected or not isinstance(value['id'], str) or not IDENTIFIER.fullmatch(value['id']):
+            raise ValueError('Invalid schedule')
+        request['id'] = value['id']
+        if session.status['permissions']['role'] != 'administrator':
+            raise Failure(403, 'Administrator permission required to change backup schedules')
+        if value['target'] not in ('auth', 'characters', 'world', 'hub') or value['mode'] not in ('interval', 'daily', 'weekly'):
+            raise ValueError('Invalid schedule target or mode')
+        for key, maximum in (('enabled', 1), ('intervalMinutes', 10080), ('minuteOfDay', 1439), ('weekday', 6), ('revision', 4294967294)):
+            if type(value[key]) is not int or not 0 <= value[key] <= maximum:
+                raise ValueError('Invalid schedule number')
+        if value['mode'] == 'interval':
+            if value['intervalMinutes'] < 15 or value['minuteOfDay'] or value['weekday']:
+                raise ValueError('Invalid interval')
+        elif value['intervalMinutes'] != 60 or (value['mode'] == 'daily' and value['weekday']):
+            raise ValueError('Invalid calendar schedule')
+        self.audit.write(request['id'], session.username, 'backup.schedule', 'attempt')
+        saved, _ = await self.hub('POST', 'backup/schedules', session, {key: str(item) for key, item in value.items()})
+        self.audit.write(request['id'], session.username, 'backup.schedule', 'saved')
+        request['audited'] = True
+        return self.reply('backup.schedules', saved, request)
 
     async def dispatch(self, request):
         value = await self.json(request)
@@ -450,6 +482,8 @@ class ControlServer:
         return web.Response(body=self.gui, content_type='text/html', charset='utf-8')
 
     async def asset(self, request):
+        if request.path == '/backup.js':
+            return web.FileResponse(ROOT.parent / 'web/backup.js')
         return web.FileResponse(ROOT / 'gui' / request.path[1:])
 
 

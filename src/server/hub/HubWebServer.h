@@ -103,6 +103,9 @@ private:
 
     std::string HandleControl(std::string const& method, std::string const& path,
         std::map<std::string,std::string> const& headers, std::string const& body, bool loopback);
+    std::string HandleBackupSchedule(std::string const& method, std::map<std::string,std::string> const& headers,
+        std::string const& body, bool remote = false);
+    std::string BackupSchedules(bool canEdit);
     std::string ControlStatus(AuthenticatedSession const& session);
     std::string ControlCommand(std::map<std::string,std::string> const& headers, std::string const& body);
     bool AuditControl(std::string const& id, std::string const& phase, std::string const& actor,

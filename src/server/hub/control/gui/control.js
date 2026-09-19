@@ -7,6 +7,7 @@ const byId = id => document.getElementById(id);
 let csrf = "", snapshot = null, socket = null, retry = null, cursor = null, backoff = 1000, signedIn = false, sending = false, generation = 0;
 let targetSignature = "", connected = false;
 const operations = new Map(), serviceCards = new Map();
+const backupSchedules = new window.HubBackupSchedules(byId('backup-schedules'), value => api('backup/schedules',value));
 function text(element, value) { if (element.textContent !== String(value)) element.textContent = String(value); }
 async function api(path, body) {
     const response = await fetch(`/control/v1/${path}`, {
@@ -24,6 +25,7 @@ async function api(path, body) {
 }
 function connection(message, stale = false) { text(byId("connection"), message); byId("connection").classList.toggle("stale", stale); }
 function reset(message = "") {
+    backupSchedules.reset();
     ++generation; connected = false; signedIn = false; csrf = ""; snapshot = cursor = null;
     clearTimeout(retry); retry = null;
     if (socket) { const old = socket; socket = null; old.close(); }
@@ -68,6 +70,7 @@ function targets() {
 function render() {
     if (!snapshot) return;
     byId("workspace").hidden = byId("logout").hidden = false; byId("login-panel").hidden = true;
+    backupSchedules.update(snapshot.permissions.role === 'administrator');
     text(byId("hub-name"), `Hub · ${uptime(snapshot.hub?.uptimeSeconds)}`);
     text(byId("identity"), `${byId("identity").dataset.username || ""} · ${snapshot.permissions.role}`);
     byId("operations").hidden = !snapshot.permissions.operate;

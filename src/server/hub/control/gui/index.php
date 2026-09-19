@@ -14,6 +14,7 @@ $brand = 'Project SkyFire';
     <meta name="color-scheme" content="dark">
     <title><?= htmlspecialchars($brand, ENT_QUOTES, 'UTF-8') ?> · Cluster control</title>
     <link rel="stylesheet" href="/control.css">
+    <script src="/backup.js" defer></script>
     <script src="/control.js" defer></script>
 </head>
 <body>
@@ -57,7 +58,7 @@ $brand = 'Project SkyFire';
                     <p id="command-result" role="status" aria-live="polite"></p>
                 </section>
                 <section class="panel"><h2>Recent operations</h2><ol id="events" class="event-list"></ol><p id="no-events" class="muted">No commands submitted in this session.</p></section>
-                <section class="panel muted"><h2>Backups</h2><p>Backup and recovery operations will be available in Phase 8.</p></section>
+                <section id="backup-schedules" class="panel"></section>
             </div>
         </div>
     </main>

@@ -4,6 +4,7 @@
 */
 #include "HubWebServer.h"
 #include "HubControlProtocol.h"
+#include "HubBackupSchedule.h"
 #include "HubProcessSupervisor.h"
 #include "Cluster/RealmDirectory.h"
 #include "Cryptography/CryptoRandom.h"
@@ -35,7 +36,7 @@ namespace
     std::string Error(int status, char const* message) { return Response(status,"{\"error\":"+Quote(message)+"}"); }
     std::string Header(std::map<std::string,std::string> const& headers, char const* name)
     { auto found = headers.find(name); return found == headers.end() ? "" : found->second; }
-    bool Form(std::string const& body, std::map<std::string,std::string>& result)
+    bool Form(std::string const& body, std::map<std::string,std::string>& result, std::size_t limit = 4)
     {
         if (body.empty() || body.size() > 4096) return false;
         auto decode = [](std::string const& value, std::string& out)
@@ -61,7 +62,7 @@ namespace
             auto end = body.find('&',start); auto pair = body.substr(start,end == std::string::npos ? end : end-start);
             auto equal = pair.find('='); std::string key,value;
             if (equal == std::string::npos || !decode(pair.substr(0,equal),key) || !decode(pair.substr(equal+1),value) ||
-                !result.emplace(key,value).second || result.size() > 4) return false;
+                !result.emplace(key,value).second || result.size() > limit) return false;
             if (end == std::string::npos) break;
             start = end+1;
         } while (start <= body.size());
@@ -83,6 +84,7 @@ std::string HubWebServer::HandleControl(std::string const& method, std::string c
         if (ec || parsed.is_unspecified() || parsed.is_multicast()) return Error(400,"Concrete client address required.");
         return HandleLogin(body,"control:"+parsed.to_string(),false);
     }
+    if (action == "backup/schedules") return HandleBackupSchedule(method,headers,body,true);
     if (method == "POST" && action == "commands") return ControlCommand(headers,body);
     AuthenticatedSession session;
     if (!FindSession(headers,session) || !session.Remote || !(session.AccessFlags & Skyfire::Control::Remote))
@@ -258,4 +260,79 @@ std::string HubWebServer::ControlStatus(AuthenticatedSession const& session)
     }
     out << "],\"backup\":{\"available\":false,\"jobs\":[]}}";
     return Response(200,out.str());
+}
+
+std::string HubWebServer::BackupSchedules(bool canEdit)
+{
+    auto rows = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_SCHEDULES));
+    if (!rows || rows->GetRowCount() != 4) return Error(503,"Backup schedule storage unavailable; apply the hub migration.");
+    std::ostringstream out;
+    out << "{\"available\":false,\"scheduleConfigurationAvailable\":true,\"canEdit\":" << (canEdit ? "true" : "false")
+        << ",\"timezone\":\"UTC\",\"executionState\":\"awaiting_backup_service\",\"schedules\":[";
+    bool comma = false;
+    do
+    {
+        auto f = rows->Fetch(); if (comma) out << ','; comma = true;
+        out << "{\"target\":" << Quote(f[0].GetString()) << ",\"enabled\":" << unsigned(f[1].GetUInt8())
+            << ",\"mode\":" << Quote(f[2].GetString()) << ",\"intervalMinutes\":" << f[3].GetUInt32()
+            << ",\"minuteOfDay\":" << f[4].GetUInt32() << ",\"weekday\":" << unsigned(f[5].GetUInt8())
+            << ",\"revision\":" << f[6].GetUInt32() << '}';
+    } while (rows->NextRow());
+    out << "]}"; return Response(200,out.str());
+}
+
+std::string HubWebServer::HandleBackupSchedule(std::string const& method,
+    std::map<std::string,std::string> const& headers, std::string const& body, bool remote)
+{
+    using namespace Skyfire::Control;
+    AuthenticatedSession session;
+    bool authenticated = FindSession(headers,session) && (!remote || (session.Remote && (session.AccessFlags & Remote)));
+    bool administrator = authenticated && (session.AccessFlags & Administrator) == Administrator;
+    if (method == "GET")
+    {
+        if (!authenticated) return Error(401,"Authentication required.");
+        if (!(session.AccessFlags & View)) return Error(403,"Viewer permission required.");
+        return BackupSchedules(administrator);
+    }
+    if (method != "POST") return Error(405,"Use GET or POST.");
+    std::lock_guard<std::mutex> lock(_controlAdmissionMutex);
+    std::map<std::string,std::string> form; Skyfire::Backup::Schedule schedule;
+    bool valid = Form(body,form,8) && Skyfire::Backup::Decode(form,schedule);
+    auto id = form["id"];
+    if (!RequestId(id))
+    {
+        id = ByteArrayToHexStr(SkyFire::Crypto::GetRandomBytes<16>());
+        std::transform(id.begin(),id.end(),id.begin(),[](unsigned char c) { return char(std::tolower(c)); });
+    }
+    auto previous = HubDatabase.GetPreparedStatement(HUB_SEL_CONTROL_AUDIT); previous->setString(0,id);
+    if (HubDatabase.Query(previous)) return Error(409,"Request already used. Reload the saved schedule before retrying.");
+    std::string actor = authenticated ? session.Username : "-", target = valid ? schedule.Target : "-";
+    if (!AuditControl(id,"attempt",actor,"backup.schedule",target,"received")) return Error(503,"Audit storage unavailable; schedule unchanged.");
+    auto deny = [&](int status, char const* outcome, char const* message)
+    {
+        if (!AuditControl(id,"rejected",actor,"backup.schedule",target,outcome)) return Error(503,"Audit storage unavailable.");
+        return Error(status,message);
+    };
+    if (!authenticated) return deny(401,"authentication","Authentication required.");
+    if (!administrator) return deny(403,"permission","Administrator permission required to change backup schedules.");
+    if (Header(headers,"x-hub-csrf") != session.CsrfToken) return deny(403,"csrf","Invalid request token.");
+    if (!valid) return deny(400,"invalid","Invalid backup schedule. Use interval (15..10080 minutes), daily, or weekly, in UTC.");
+    auto update = HubDatabase.GetPreparedStatement(HUB_UPD_BACKUP_SCHEDULE);
+    update->setUInt8(0,uint8(schedule.Enabled)); update->setString(1,schedule.Mode);
+    update->setUInt32(2,schedule.IntervalMinutes); update->setUInt32(3,schedule.MinuteOfDay);
+    update->setUInt8(4,uint8(schedule.Weekday)); update->setString(5,id); update->setString(6,actor);
+    update->setString(7,schedule.Target); update->setUInt32(8,schedule.Revision);
+    HubDatabase.DirectExecute(update);
+    auto rows = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_SCHEDULES));
+    if (!rows) return Error(503,"Cannot verify save outcome. Reload before retrying.");
+    bool saved = false;
+    do
+    {
+        auto f = rows->Fetch();
+        if (f[0].GetString() == schedule.Target && f[7].GetString() == id && f[6].GetUInt32() == schedule.Revision+1)
+            saved = true;
+    } while (rows->NextRow());
+    if (!saved) return deny(409,"conflict","Schedule changed or could not be saved. Reload its current settings before retrying.");
+    if (!AuditControl(id,"applied",actor,"backup.schedule",target,"saved")) return Error(503,"Schedule may be saved, but audit verification failed. Reload before retrying.");
+    return BackupSchedules(true);
 }

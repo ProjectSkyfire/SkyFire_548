@@ -18,7 +18,7 @@ packages are installed separately; CMake never downloads or executes them.
 3. Create a private file containing 64 cryptographically random lowercase hex characters.
    Set `token_file` and hub `Web.ControlTokenFile` to that same file. Restrict this file and
    TLS keys to the service identity. Keep the hub web listener on numeric loopback with
-   `Web.AllowRemote = 0`. Apply `sql/updates/hub/2026_09_18_hub_02.sql` first.
+   `Web.AllowRemote = 0`. Apply all hub migrations, including `2026_09_18_hub_02.sql` and `2026_09_18_hub_03.sql`, first.
 4. Configure a TLS certificate trusted by your browser, its private key, and matching
    HTTPS `public_origin`. For remote access explicitly set `allow_remote = true` and the
    desired numeric bind address. Do not expose the private hub HTTP port.
@@ -104,3 +104,36 @@ reconnect checks. With the gateway dependencies installed, run
 The integration test requires the audit migration, creates ephemeral TLS identities and
 ports, starts only an isolated hub without managed children, and removes its temporary
 hub identities and routing policy afterward. Immutable test audit records remain.
+
+## Backup schedule configuration
+
+The local hub Console page and HTTPS dashboard both contain **Backup schedules**.
+Administrators can configure auth, characters, world and hub schedules independently.
+Viewers/operators/recovery users can read schedules; only full administrators can save.
+Schedules are stored by hubserver in `hub_backup_schedules`, not in browser storage or
+Python/PHP configuration. Apply `sql/updates/hub/2026_09_18_hub_03.sql` before starting
+this hub build. Existing running hubs can continue until their planned upgrade/restart.
+
+Each schedule is disabled initially. Choose an interval (15..10080 minutes), a daily UTC
+clock time, or a weekday and UTC clock time. UTC avoids ambiguous daylight-saving hours.
+Saving only configures the future service: backup execution, next-run timestamps and
+recovery points are unavailable until the Phase 8 worker is implemented. Neither an
+enabled preference nor a successful save means that a backup has run.
+
+GET/POST `/api/v1/backup/schedules` in the local interface, or `/control/v1/backup/schedules`
+in the HTTPS gateway, reads/saves the same records. The local POST uses URL-encoded fields
+and X-Hub-CSRF; the gateway POST accepts the same fields as JSON and X-Control-CSRF:
+`id,target,enabled,mode,intervalMinutes,minuteOfDay,weekday,revision`. IDs are fresh 32-digit
+lowercase hex strings. `enabled` is 0/1; weekdays are Monday=0 through Sunday=6. Calendar
+modes require intervalMinutes=60; interval mode requires minuteOfDay=weekday=0. Daily mode
+requires weekday=0. Extra fields and arbitrary database names are rejected.
+
+Saves compare the displayed revision atomically and reject conflicts with HTTP 409. Reload
+saved settings before retrying; writes are not retried automatically. Status updates do
+not replace schedule forms. Attempted and applied changes use the hub's correlated audit.
+Capabilities distinguish schedule configuration from unavailable backup execution.
+
+Run `node tools/dev/tests/backup_schedule_ui.test.js` and the C++ control protocol test.
+`tools/dev/tests/backup_schedule.test.py` accepts the control test arguments plus
+`--mysqldump`. It copies schema only to a disposable database, tests both interfaces and
+removes that database afterward; it never changes live schedules or starts game servers.

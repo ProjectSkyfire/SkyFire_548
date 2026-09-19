@@ -10,6 +10,10 @@ void HubDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_HUBDATABASE_STATEMENTS);
 
+    PrepareStatement(HUB_SEL_BACKUP_SCHEDULES,
+        "SELECT target,enabled,mode,interval_minutes,minute_of_day,weekday,revision,last_request FROM hub_backup_schedules ORDER BY target", CONNECTION_SYNCH);
+    PrepareStatement(HUB_UPD_BACKUP_SCHEDULE,
+        "UPDATE hub_backup_schedules SET enabled=?,mode=?,interval_minutes=?,minute_of_day=?,weekday=?,revision=revision+1,last_request=?,updated_by=?,updated_at=CURRENT_TIMESTAMP WHERE target=? AND revision=?", CONNECTION_SYNCH);
     PrepareStatement(HUB_INS_CONTROL_AUDIT,
         "INSERT INTO hub_control_audit(request_id,phase,actor,action,target,outcome) VALUES (?,?,?,?,?,?)", CONNECTION_SYNCH);
     PrepareStatement(HUB_SEL_CONTROL_AUDIT,

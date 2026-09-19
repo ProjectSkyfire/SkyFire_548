@@ -10,6 +10,7 @@ class Element {
     append(...items) { this.children.push(...items); }
     replaceChildren(...items) { this.children = items; }
     addEventListener() {}
+    setAttribute() {}
     remove() {}
     reset() {}
 }
@@ -21,8 +22,9 @@ class WebSocket {
     send(value) { this.sent = JSON.parse(value); }
     close() { this.closed = true; }
 }
-const context = vm.createContext({ document, WebSocket, location: { protocol: "https:", host: "localhost" },
+const context = vm.createContext({ window: {}, document, WebSocket, location: { protocol: "https:", host: "localhost" },
     fetch: () => new Promise(() => {}), AbortSignal, setTimeout: () => 1, clearTimeout() {}, console });
+vm.runInContext(fs.readFileSync(path.join(__dirname, "../../../src/server/hub/web/backup.js"), "utf8"), context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, "../../../src/server/hub/control/gui/control.js"), "utf8"), context);
 const state = { hub: { uptimeSeconds: 42 }, permissions: { role: "operator", operate: true }, stale: false,
     services: [{ key: "world", name: "World one", enabled: true, world: true, state: "running", uptimeSeconds: 40, metricsAvailable: true, players: 5, cpuBasisPoints: 1200, updateTimeMs: 7 }],

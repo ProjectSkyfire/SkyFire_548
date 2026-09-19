@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 #include "HubControlProtocol.h"
+#include "HubBackupSchedule.h"
 #include <iostream>
 #include <stdexcept>
 using namespace Skyfire::Control;
@@ -34,6 +35,22 @@ int main()
         form["id"] = std::string(32,'A'); Check(!Decode(form,decoded),"Noncanonical identifier accepted");
         Check(std::string(Role(17)) == "viewer" && std::string(Role(21)) == "operator" &&
               std::string(Role(31)) == "administrator" && std::string(Role(49)) == "recovery", "Role mapping changed");
+        Skyfire::Backup::Schedule schedule;
+        std::map<std::string,std::string> backup = {{"id",std::string(32,'a')},{"target","auth"},{"enabled","1"},
+            {"mode","interval"},{"intervalMinutes","30"},{"minuteOfDay","0"},{"weekday","0"},{"revision","0"}};
+        Check(Skyfire::Backup::Decode(backup,schedule),"Valid interval rejected");
+        for (auto bad : {"0","14","10081","015","-1","true","99999999999"})
+        { backup["intervalMinutes"] = bad; Check(!Skyfire::Backup::Decode(backup,schedule),"Invalid backup interval accepted"); }
+        backup["intervalMinutes"] = "60"; backup["mode"] = "daily"; backup["minuteOfDay"] = "1439";
+        Check(Skyfire::Backup::Decode(backup,schedule),"Daily UTC schedule rejected");
+        backup["minuteOfDay"] = "1440"; Check(!Skyfire::Backup::Decode(backup,schedule),"Invalid time accepted");
+        backup["minuteOfDay"] = "180"; backup["mode"] = "weekly"; backup["weekday"] = "6";
+        Check(Skyfire::Backup::Decode(backup,schedule),"Weekly UTC schedule rejected");
+        backup["weekday"] = "7"; Check(!Skyfire::Backup::Decode(backup,schedule),"Invalid weekday accepted");
+        backup["weekday"] = "0"; backup["target"] = "../database";
+        Check(!Skyfire::Backup::Decode(backup,schedule),"Arbitrary database accepted");
+        backup["target"] = "world"; backup["cron"] = "* * * * *";
+        Check(!Skyfire::Backup::Decode(backup,schedule),"Unknown schedule field accepted");
         std::cout << "Control protocol checks passed.\n";
         return 0;
     }

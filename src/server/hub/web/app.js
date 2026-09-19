@@ -26,12 +26,23 @@ let worldCommandAllowed = false;
 let statusSubscription = "";
 let worldOptionsSignature = "";
 let csrfToken = "";
+const backupSchedules = new window.HubBackupSchedules(document.querySelector('#backup-schedules'), async value => {
+    const response = await fetch('/api/v1/backup/schedules', {
+        method:value ? 'POST' : 'GET', credentials:'same-origin', cache:'no-store',
+        headers:value ? {'Content-Type':'application/x-www-form-urlencoded','X-Hub-CSRF':csrfToken} : {},
+        body:value ? new URLSearchParams(value) : undefined, signal:AbortSignal.timeout(8000)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Backup schedule request failed');
+    return data;
+});
 
 function showLogin(message = "") {
     window.HubStatus.stop();
     statusSubscription = "";
     worldOptionsSignature = "";
     window.HubAccounts?.reset();
+    backupSchedules.reset();
     worldCommandAllowed = false;
     currentStatus = null;
     worldNode.replaceChildren();
@@ -61,6 +72,7 @@ function renderStatus(data) {
     currentStatus = data;
     window.HubAccounts?.update(data);
     csrfToken = data.csrfToken || "";
+    backupSchedules.update(data.canSendWorldCommands === true);
     const worlds = data.components.filter(isWorld);
     const selected = worldNode.value;
     const signature = JSON.stringify(worlds.map((world) => [world.key, world.name]));

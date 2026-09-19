@@ -180,6 +180,43 @@ async def integration(args, root):
                 assert response.status == expected, (path, response.status, value)
                 assert value['version'] == 1 and value['source'] == 'hub'
                 return value
+        if args.test_backup_schedules:
+            assert database.startswith('skyfire_controltest_'), 'Schedule mutations require an isolated test database'
+            initial = (await req(viewer, 'backup/schedules'))['payload']
+            assert len(initial['schedules']) == 4 and not initial['canEdit'] and not initial['available']
+            assert initial['timezone'] == 'UTC' and initial['executionState'] == 'awaiting_backup_service'
+            auth = next(row for row in initial['schedules'] if row['target'] == 'auth')
+            value = dict(auth, id=secrets.token_hex(16), enabled=1, mode='interval', intervalMinutes=30, minuteOfDay=0, weekday=0)
+            for client in (viewer, operator, recovery):
+                await req(client, 'backup/schedules', value, 403)
+            await req(administrator, 'backup/schedules', value, 403, {'X-Control-CSRF': 'invalid'})
+            for patch in ({'enabled': True}, {'intervalMinutes': 14}, {'minuteOfDay': 1440}, {'weekday': 7}, {'target': '../auth'}, {'cron': '* * * * *'}):
+                await req(administrator, 'backup/schedules', dict(value, **patch), 400)
+            saved = (await req(administrator, 'backup/schedules', value))['payload']
+            assert next(row for row in saved['schedules'] if row['target']=='auth')['revision'] == auth['revision']+1
+            await req(administrator, 'backup/schedules', value, 409)
+            await req(administrator, 'backup/schedules', dict(value,id=secrets.token_hex(16)), 409)
+            async with ClientSession(cookie_jar=CookieJar(unsafe=True)) as local:
+                url = settings['hub_url']
+                async with local.post(url+'/api/v1/session',data={'username':prefix+'_administrator','password':identity_password}) as response:
+                    assert response.status == 200
+                async with local.get(url+'/api/v1/status') as response:
+                    local_csrf = (await response.json())['csrfToken']
+                async with local.get(url+'/api/v1/backup/schedules') as response:
+                    row = next(row for row in (await response.json())['schedules'] if row['target']=='auth')
+                for mode, minute, day in (('daily', 1325, 0), ('weekly', 190, 6)):
+                    data = dict(row,id=secrets.token_hex(16),mode=mode,minuteOfDay=minute,weekday=day,intervalMinutes=60)
+                    async with local.post(url+'/api/v1/backup/schedules',data=data,headers={'X-Hub-CSRF':local_csrf}) as response:
+                        assert response.status == 200
+                        row = next(row for row in (await response.json())['schedules'] if row['target']=='auth')
+                    assert row['mode']==mode and row['minuteOfDay']==minute and row['weekday']==day
+                async with local.post(url+'/api/v1/backup/schedules',data=dict(data,id=secrets.token_hex(16),target='../bad'),headers={'X-Hub-CSRF':local_csrf}) as response:
+                    assert response.status == 400
+            remote = (await req(administrator,'backup/schedules'))['payload']
+            assert next(item for item in remote['schedules'] if item['target']=='auth') == row
+            assert sql("SELECT mode,minute_of_day,weekday FROM hub_backup_schedules WHERE target='auth'") == 'weekly\t190\t6'
+            assert int(sql("SELECT COUNT(*) FROM hub_control_audit WHERE action='backup.schedule' AND phase='applied'")) >= 3
+            print('PASS persisted schedules, both web interfaces, UTC modes, admin checks, malformed inputs and revision conflicts')
         def cmd(action='cluster.drain', **extra):
             return {'version': 1, 'type': 'command', 'requestId': secrets.token_hex(16), 'timestamp': utc_now(),
                     'payload': {'action': action, 'target': node, **extra}}
@@ -288,6 +325,7 @@ def main():
     parser.add_argument('--php', required=True)
     parser.add_argument('--mysql', default='mysql')
     parser.add_argument('--openssl', default='openssl')
+    parser.add_argument('--test-backup-schedules', action='store_true')
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix='skyfire-control-') as directory:
         root = Path(directory)
