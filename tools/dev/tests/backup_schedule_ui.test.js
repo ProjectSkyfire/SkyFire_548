@@ -18,7 +18,8 @@ async function main() {
     let reads = 0, writes = [];
     const saved = {canEdit:true, schedules:[{target:'auth',enabled:0,mode:'daily',intervalMinutes:60,minuteOfDay:180,weekday:0,revision:0}]};
     const root = new Element('section');
-    const widget = new context.window.HubBackupSchedules(root, async value => {
+    const widget = new context.window.HubBackupSchedules(root, async (value, section) => {
+        if(section==='jobs') return {available:false,canRun:false,targets:'',jobs:[]};
         if (value) { writes.push(value); saved.schedules[0] = {...value,revision:value.revision+1}; }
         else reads++;
         return saved;
@@ -41,7 +42,7 @@ async function main() {
     assert.equal(writes[1].revision,1); assert.equal(writes[1].intervalMinutes,45); assert.equal(writes[1].minuteOfDay,0);
     widget.update(false); assert.equal(button.disabled,true);
     await form.events.submit({preventDefault(){}}); assert.equal(writes.length,2);
-    assert.match(form.children.at(-1).textContent,/no backups are running/);
+    assert.match(form.children.at(-1).textContent,/no scheduled backups are running/);
     widget.reset(); assert.equal(root.children.length,0);
     console.log('PASS schedule drafts survive 100 status updates; UTC/interval saves, revision advancement, permission revocation and logout reset.');
 }

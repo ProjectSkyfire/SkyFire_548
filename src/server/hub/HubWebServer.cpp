@@ -2,6 +2,7 @@
 * This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
+#include "HubBackupGuard.h"
 
 #include "HubWebServer.h"
 #include "HubProcessSupervisor.h"
@@ -443,6 +444,16 @@ void HubWebServer::UpdateStatus(HubWebStatusSnapshot const& status)
 {
     std::lock_guard<std::mutex> lock(_statusMutex);
     _status = status;
+    bool stopped = std::all_of(status.Services.begin(),status.Services.end(),[](HubWebManagedServiceStatus const& service)
+        { return service.State=="stopped" || service.State=="exited"; }) &&
+        std::none_of(status.ClusterNodes.begin(),status.ClusterNodes.end(),[](Skyfire::Cluster::Node const& node) { return node.Live; });
+    auto now = std::chrono::steady_clock::now();
+    if (stopped != _backupServicesStopped || now - _backupHealthAt >= std::chrono::seconds(1))
+    {
+        _backupServicesStopped = stopped; _backupHealthAt = now;
+        auto update = HubDatabase.GetPreparedStatement(HUB_UPD_BACKUP_HUB_HEALTH); update->setUInt8(0,stopped ? 1 : 0);
+        HubDatabase.DirectExecute(update);
+    }
 }
 
 bool HubWebServer::PollServiceCommand(HubWebServiceCommand& command)
@@ -495,6 +506,8 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
         return HandleLogin(body, remoteAddress, remoteIsLoopback);
     if (path == "/api/v1/logout" && method == "POST")
         return HandleLogout(headers);
+    if (path == "/api/v1/backup/jobs")
+        return HandleBackupJobs(method,headers,body);
     if (path == "/api/v1/backup/schedules")
         return HandleBackupSchedule(method,headers,body);
     if (path == "/api/v1/status" && method == "GET")
@@ -838,6 +851,8 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
 std::string HubWebServer::HandleAccounts(std::string const& action,
     std::map<std::string, std::string> const& headers, std::string const& body)
 {
+    std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
+    if (HubBackupMaintenance()) return MakeResponse(503,"application/json","{\"error\":\"Database recovery maintenance is active.\"}");
     using Skyfire::Auth::AccountAdministration;
     AuthenticatedSession session;
     if (!FindSession(headers, session))

@@ -23,6 +23,7 @@
 #include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
 #include "HubConsole.h"
+#include "HubBackupGuard.h"
 #include "HubClusterServer.h"
 #include "HubAuthProxy.h"
 #include "Auth/AccountAdministration.h"
@@ -389,6 +390,12 @@ int main(int argc, char** argv)
             }
             if (webCommand.AccountResult)
             {
+                std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
+                if (HubBackupMaintenance())
+                {
+                    webCommand.AccountResult->set_value({503,"{\"error\":\"Database recovery maintenance is active.\"}"});
+                    continue;
+                }
                 using Skyfire::Auth::AccountAdministration;
                 using Skyfire::Auth::AccountAdminReply;
                 auto const promise = webCommand.AccountResult;

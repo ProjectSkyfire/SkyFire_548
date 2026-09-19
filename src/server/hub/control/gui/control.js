@@ -9,7 +9,7 @@ const pages = new window.HubPageNavigation();
 const healthDashboard = new window.HubHealthDashboard(byId('control-health-dashboard'));
 let targetSignature = "", connected = false;
 const operations = new Map(), serviceCards = new Map();
-const backupSchedules = new window.HubBackupSchedules(byId('backup-schedules'), value => api('backup/schedules',value));
+const backupSchedules = new window.HubBackupSchedules(byId('backup-schedules'), (value, section = 'schedules') => api('backup/' + section,value));
 function text(element, value) { if (element.textContent !== String(value)) element.textContent = String(value); }
 async function api(path, body) {
     const response = await fetch(`/control/v1/${path}`, {

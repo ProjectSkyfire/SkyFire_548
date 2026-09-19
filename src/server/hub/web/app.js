@@ -28,8 +28,8 @@ let worldCommandAllowed = false;
 let statusSubscription = "";
 let worldOptionsSignature = "";
 let csrfToken = "";
-const backupSchedules = new window.HubBackupSchedules(document.querySelector('#backup-schedules'), async value => {
-    const response = await fetch('/api/v1/backup/schedules', {
+const backupSchedules = new window.HubBackupSchedules(document.querySelector('#backup-schedules'), async (value, section = 'schedules') => {
+    const response = await fetch('/api/v1/backup/' + section, {
         method:value ? 'POST' : 'GET', credentials:'same-origin', cache:'no-store',
         headers:value ? {'Content-Type':'application/x-www-form-urlencoded','X-Hub-CSRF':csrfToken} : {},
         body:value ? new URLSearchParams(value) : undefined, signal:AbortSignal.timeout(8000)
@@ -162,6 +162,7 @@ worldCommandForm.addEventListener("submit", async (event) => {
 // Server Status owns polling and sidebar rendering. Page consumers receive only
 // changed control data; metric-only ticks never touch account forms or the console.
 function acceptStatus(data) {
+    if (backupSchedules.manual && Date.now() - backupSchedules.jobLastRead >= 3000) backupSchedules.loadJobs();
     if (appShell.hidden) showStatus();
     healthDashboard.update({hubUptime:data.uptimeSeconds||0,services:data.components.filter(item=>item.managed).map(item=>({
         ...item,world:isWorld(item),cpu:item.cpuPercent,update:item.updateTimeMs}))});

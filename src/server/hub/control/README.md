@@ -18,7 +18,7 @@ packages are installed separately; CMake never downloads or executes them.
 3. Create a private file containing 64 cryptographically random lowercase hex characters.
    Set `token_file` and hub `Web.ControlTokenFile` to that same file. Restrict this file and
    TLS keys to the service identity. Keep the hub web listener on numeric loopback with
-   `Web.AllowRemote = 0`. Apply all hub migrations, including `2026_09_18_hub_02.sql` and `2026_09_18_hub_03.sql`, first.
+   `Web.AllowRemote = 0`. Apply all hub migrations, including `2026_09_18_hub_02.sql` and `2026_09_18_hub_03.sql` and `2026_09_19_hub_00.sql`, first.
 4. Configure a TLS certificate trusted by your browser, its private key, and matching
    HTTPS `public_origin`. For remote access explicitly set `allow_remote = true` and the
    desired numeric bind address. Do not expose the private hub HTTP port.
@@ -137,3 +137,6 @@ Run `node tools/dev/tests/backup_schedule_ui.test.js` and the C++ control protoc
 `tools/dev/tests/backup_schedule.test.py` accepts the control test arguments plus
 `--mysqldump`. It copies schema only to a disposable database, tests both interfaces and
 removes that database afterward; it never changes live schedules or starts game servers.
+
+Manual backups, storage usage and restore operations are in the Backup menu.
+See `../backup/README.md` for worker setup, maintenance requirements and offline hub recovery.

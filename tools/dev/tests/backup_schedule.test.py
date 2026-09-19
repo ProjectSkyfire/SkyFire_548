@@ -41,6 +41,8 @@ def main():
         run(args.mysql, ['--database=' + database], schema)
         migration = Path(__file__).resolve().parents[3] / 'sql/updates/hub/2026_09_18_hub_03.sql'
         run(args.mysql, ['--database=' + database], migration.read_text())
+        manual = Path(__file__).resolve().parents[3] / 'sql/updates/hub/2026_09_19_hub_00.sql'
+        run(args.mysql, ['--database=' + database], manual.read_text())
         new_connection = ';'.join((host, port, user, password, database))
         config = config[:match.start(1)] + new_connection + config[match.end(1):]
         # These tests never need access to game-account data.

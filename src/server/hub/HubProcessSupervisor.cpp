@@ -2,6 +2,7 @@
 * This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
+#include "HubBackupGuard.h"
 
 #include "HubProcessSupervisor.h"
 
@@ -125,6 +126,9 @@ HubProcessSupervisor::~HubProcessSupervisor()
 bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& error)
 {
     Update();
+    std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
+    if (HubBackupMaintenance()) { error = "Backup recovery maintenance blocks service starts."; return false; }
+    HubDatabase.DirectExecute("UPDATE hub_backup_worker SET services_stopped=0 WHERE id=1");
     auto service = _services.find(serviceKey);
     if (service == _services.end())
     {

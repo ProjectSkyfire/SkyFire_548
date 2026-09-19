@@ -10,6 +10,18 @@ void HubDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_HUBDATABASE_STATEMENTS);
 
+    PrepareStatement(HUB_SEL_BACKUP_WORKER,
+        "SELECT CAST(COALESCE(lease_until > CURRENT_TIMESTAMP,0) AS UNSIGNED), targets, storage_total, storage_free, maintenance, recovery_safe, services_stopped, CAST(COALESCE(hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND),0) AS UNSIGNED),restore_enabled,archive_bytes,archive_count FROM hub_backup_worker WHERE id=1", CONNECTION_SYNCH);
+    PrepareStatement(HUB_SEL_BACKUP_JOBS,
+        "SELECT id,target,actor,state,CAST(UNIX_TIMESTAMP(created_at) AS UNSIGNED),CAST(COALESCE(UNIX_TIMESTAMP(finished_at),0) AS UNSIGNED),bytes,sha256,message,kind,source_id FROM hub_backup_jobs ORDER BY created_at DESC,id DESC LIMIT 30", CONNECTION_SYNCH);
+    PrepareStatement(HUB_SEL_BACKUP_JOB,
+        "SELECT target,actor,kind,source_id FROM hub_backup_jobs WHERE id=?", CONNECTION_SYNCH);
+    PrepareStatement(HUB_INS_BACKUP_JOB,
+        "INSERT IGNORE INTO hub_backup_jobs(id,target,actor) SELECT ?,?,? FROM hub_backup_worker WHERE id=1 AND lease_until > CURRENT_TIMESTAMP AND FIND_IN_SET(?,targets)>0", CONNECTION_SYNCH);
+    PrepareStatement(HUB_UPD_BACKUP_HUB_HEALTH,
+        "UPDATE hub_backup_worker SET services_stopped=?,hub_seen=NOW() WHERE id=1", CONNECTION_SYNCH);
+    PrepareStatement(HUB_INS_RESTORE_JOB,
+        "INSERT IGNORE INTO hub_backup_jobs(id,target,actor,kind,source_id) SELECT ?,target,?,'restore',id FROM hub_backup_jobs WHERE id=? AND kind='backup' AND state='completed' AND target<>'hub'", CONNECTION_SYNCH);
     PrepareStatement(HUB_SEL_BACKUP_SCHEDULES,
         "SELECT target,enabled,mode,interval_minutes,minute_of_day,weekday,revision,last_request FROM hub_backup_schedules ORDER BY target", CONNECTION_SYNCH);
     PrepareStatement(HUB_UPD_BACKUP_SCHEDULE,

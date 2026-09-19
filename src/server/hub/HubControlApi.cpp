@@ -2,6 +2,7 @@
 * This file is part of Project SkyFire https://www.projectskyfire.org.
 * See LICENSE.md file for Copyright information
 */
+#include "HubBackupGuard.h"
 #include "HubWebServer.h"
 #include "HubControlProtocol.h"
 #include "HubBackupSchedule.h"
@@ -84,6 +85,7 @@ std::string HubWebServer::HandleControl(std::string const& method, std::string c
         if (ec || parsed.is_unspecified() || parsed.is_multicast()) return Error(400,"Concrete client address required.");
         return HandleLogin(body,"control:"+parsed.to_string(),false);
     }
+    if (action == "backup/jobs") return HandleBackupJobs(method,headers,body,true);
     if (action == "backup/schedules") return HandleBackupSchedule(method,headers,body,true);
     if (method == "POST" && action == "commands") return ControlCommand(headers,body);
     AuthenticatedSession session;
@@ -258,7 +260,9 @@ std::string HubWebServer::ControlStatus(AuthenticatedSession const& session)
             << ",\"rejected\":" << route.Rejected << ",\"failures\":" << route.ConnectFailures
             << ",\"eligibleNodes\":" << route.AvailableNodes << '}';
     }
-    out << "],\"backup\":{\"available\":false,\"jobs\":[]}}";
+    auto worker = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_WORKER));
+    out << "],\"backup\":{\"available\":" << (worker && worker->Fetch()[0].GetUInt64()!=0 ? "true" : "false")
+        << ",\"scheduled\":false,\"jobs\":[]}}";
     return Response(200,out.str());
 }
 
@@ -335,4 +339,116 @@ std::string HubWebServer::HandleBackupSchedule(std::string const& method,
     if (!saved) return deny(409,"conflict","Schedule changed or could not be saved. Reload its current settings before retrying.");
     if (!AuditControl(id,"applied",actor,"backup.schedule",target,"saved")) return Error(503,"Schedule may be saved, but audit verification failed. Reload before retrying.");
     return BackupSchedules(true);
+}
+
+std::string HubWebServer::BackupJobs(bool administrator)
+{
+    auto worker = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_WORKER));
+    if (!worker) return Error(503,"Backup storage unavailable; apply the hub migration.");
+    auto f = worker->Fetch();
+    std::ostringstream out;
+    out << "{\"available\":" << (f[0].GetUInt64()!=0 ? "true" : "false")
+        << ",\"canRestore\":" << (administrator && f[8].GetBool() ? "true" : "false")
+        << ",\"archiveBytes\":" << f[9].GetUInt64() << ",\"archiveCount\":" << f[10].GetUInt32()
+        << ",\"storageTotal\":" << f[2].GetUInt64() << ",\"storageFree\":" << f[3].GetUInt64()
+        << ",\"maintenance\":" << (f[4].GetBool() ? "true" : "false") << ",\"recoverySafe\":" << (f[5].GetBool() ? "true" : "false")
+        << ",\"canRun\":" << (administrator ? "true" : "false") << ",\"targets\":" << Quote(f[1].GetString()) << ",\"jobs\":[";
+    auto rows = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_JOBS));
+    bool comma = false;
+    if (rows) do
+    {
+        auto row = rows->Fetch(); if (comma) out << ','; comma = true;
+        out << "{\"id\":" << Quote(row[0].GetString()) << ",\"target\":" << Quote(row[1].GetString())
+            << ",\"actor\":" << Quote(row[2].GetString()) << ",\"state\":" << Quote(row[3].GetString())
+            << ",\"createdAt\":" << row[4].GetUInt64() << ",\"finishedAt\":" << row[5].GetUInt64()
+            << ",\"bytes\":" << row[6].GetUInt64() << ",\"sha256\":" << Quote(row[7].GetString())
+            << ",\"message\":" << Quote(row[8].GetString()) << ",\"kind\":" << Quote(row[9].GetString()) << ",\"sourceId\":" << Quote(row[10].GetString()) << '}';
+    } while (rows->NextRow());
+    out << "]}"; return Response(200,out.str());
+}
+
+std::string HubWebServer::HandleBackupJobs(std::string const& method,
+    std::map<std::string,std::string> const& headers, std::string const& body, bool remote)
+{
+    using namespace Skyfire::Control;
+    AuthenticatedSession session;
+    if (!FindSession(headers,session) || (remote && (!session.Remote || !(session.AccessFlags & Remote))))
+        return Error(401,"Authentication required.");
+    bool administrator = (session.AccessFlags & Administrator) == Administrator;
+    if (!(session.AccessFlags & View)) return Error(403,"Viewer permission required.");
+    if (method == "GET") return BackupJobs(administrator);
+    if (method != "POST") return Error(405,"Use GET or POST.");
+    if (!administrator) return Error(403,"Administrator permission required to run backups.");
+    if (Header(headers,"x-hub-csrf") != session.CsrfToken) return Error(403,"Invalid request token.");
+    std::map<std::string,std::string> form;
+    if (!Form(body,form,4) || !RequestId(form["id"])) return Error(400,"Invalid backup request.");
+    bool restore = form.count("sourceId") != 0, release = form.count("release") != 0;
+    if (release)
+    {
+        if (form.size()!=2 || form["release"]!="maintenance") return Error(400,"Invalid maintenance request.");
+        std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
+        auto previous = HubDatabase.GetPreparedStatement(HUB_SEL_CONTROL_AUDIT); previous->setString(0,form["id"]);
+        if (HubDatabase.Query(previous)) return Error(409,"Request id already used.");
+        if (!AuditControl(form["id"],"attempt",session.Username,"backup.release","hub","received")) return Error(503,"Audit unavailable.");
+        HubDatabase.DirectExecute("UPDATE hub_backup_worker SET maintenance=0 WHERE id=1 AND recovery_safe=1 AND NOT EXISTS(SELECT 1 FROM hub_backup_jobs WHERE state IN ('queued','running'))");
+        if (HubBackupMaintenance()) return Error(409,"Recovery is unfinished or failed. Resolve it before ending maintenance.");
+        AuditControl(form["id"],"applied",session.Username,"backup.release","hub","released");
+        return BackupJobs(true);
+    }
+    if ((restore && (form.size()!=4 || !RequestId(form["sourceId"]) || form["confirm"]!="RESTORE " + form["target"])) ||
+        (!restore && form.size()!=2) ||
+        (form["target"]!="auth" && form["target"]!="characters" && form["target"]!="world" && form["target"]!="hub"))
+        return Error(400,"Choose an allowlisted target; restore requires its source id and typed confirmation.");
+    std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
+    std::lock_guard<std::mutex> lock(_controlAdmissionMutex);
+    auto existing = HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_JOB); existing->setString(0,form["id"]);
+    if (auto row = HubDatabase.Query(existing))
+    {
+        auto f = row->Fetch();
+        if (f[0].GetString()!=form["target"] || f[1].GetString()!=session.Username ||
+            f[2].GetString()!=(restore ? "restore" : "backup") || (restore && f[3].GetString()!=form["sourceId"]))
+            return Error(409,"Request id already used.");
+        return BackupJobs(true);
+    }
+    auto previous = HubDatabase.GetPreparedStatement(HUB_SEL_CONTROL_AUDIT); previous->setString(0,form["id"]);
+    if (HubDatabase.Query(previous)) return Error(409,"Request id already used.");
+    std::string action = restore ? "backup.restore" : "backup.now";
+    if (!AuditControl(form["id"],"attempt",session.Username,action,form["target"],"received"))
+        return Error(503,"Audit storage unavailable; job not queued.");
+    auto worker = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_WORKER));
+    if (!worker || worker->Fetch()[0].GetUInt64()==0) return Error(503,"Backup worker is offline.");
+    auto state = worker->Fetch();
+    if (restore)
+    {
+        if (form["target"]=="hub") return Error(409,"Hub database recovery requires the offline recovery command.");
+        if (("," + state[1].GetString() + ",").find("," + form["target"] + ",") == std::string::npos)
+            return Error(409,"Restore target is not configured in the backup worker.");
+        if (!state[8].GetBool()) return Error(409,"Live restore is disabled in the backup worker configuration.");
+        if (!state[6].GetBool() || state[7].GetUInt64()==0 || state[4].GetBool())
+            return Error(409,"Gracefully stop all game services and cluster nodes before restoring; existing maintenance must be resolved.");
+        auto source = HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_JOB); source->setString(0,form["sourceId"]);
+        auto sourceRow = HubDatabase.Query(source);
+        if (!sourceRow || sourceRow->Fetch()[0].GetString()!=form["target"]) return Error(400,"Backup source does not match target.");
+        // Persist maintenance before job admission. A crash stays fenced until an administrator releases it.
+        HubDatabase.DirectExecute("UPDATE hub_backup_worker SET maintenance=1,recovery_safe=1 WHERE id=1");
+        if (!HubBackupMaintenance()) return Error(503,"Cannot establish recovery maintenance.");
+        auto insert = HubDatabase.GetPreparedStatement(HUB_INS_RESTORE_JOB);
+        insert->setString(0,form["id"]); insert->setString(1,session.Username); insert->setString(2,form["sourceId"]);
+        HubDatabase.DirectExecute(insert);
+    }
+    else
+    {
+        if (state[4].GetBool()) return Error(409,"Recovery maintenance blocks new backups.");
+        auto insert = HubDatabase.GetPreparedStatement(HUB_INS_BACKUP_JOB);
+        insert->setString(0,form["id"]); insert->setString(1,form["target"]);
+        insert->setString(2,session.Username); insert->setString(3,form["target"]); HubDatabase.DirectExecute(insert);
+    }
+    auto verify = HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_JOB); verify->setString(0,form["id"]);
+    if (!HubDatabase.Query(verify))
+    {
+        AuditControl(form["id"],"rejected",session.Username,action,form["target"],"unavailable_or_busy");
+        return Error(409,"Target unavailable or another job is active. Refresh history; release maintenance if necessary.");
+    }
+    AuditControl(form["id"],"queued",session.Username,action,form["target"],"queued");
+    return BackupJobs(true);
 }

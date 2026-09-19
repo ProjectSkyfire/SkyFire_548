@@ -512,3 +512,10 @@ input:focus {
 #health-dashboard>label,#control-health-dashboard>label { display:block; max-width:360px; }
 
 #health-dashboard>label select,#control-health-dashboard>label select { display:block; width:100%; margin-top:8px; padding:10px; background:#1b212a; color:#e8ebef; border:1px solid #354252; border-radius:6px; }
+
+.manual-backups { padding-bottom:24px; border-bottom:1px solid #354252; }
+.manual-backups label { display:block; margin:12px 0; }
+.manual-backups select,.manual-backups input { display:block; width:100%; max-width:600px; padding:10px; background:#1b212a; color:#e8ebef; border:1px solid #354252; border-radius:6px; }
+.manual-backups button { margin:8px 12px 8px 0; }
+.manual-backups li { margin:12px 0; overflow-wrap:anywhere; }
+.manual-backups small { display:block; }

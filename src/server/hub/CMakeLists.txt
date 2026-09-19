@@ -83,7 +83,10 @@ add_custom_target(hubserver_web
   COMMAND "${CMAKE_COMMAND}" -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/control"
     "$<TARGET_FILE_DIR:hubserver>/control"
-  COMMENT "Updating hubserver web and control assets"
+  COMMAND "${CMAKE_COMMAND}" -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/backup"
+    "$<TARGET_FILE_DIR:hubserver>/backup"
+  COMMENT "Updating hubserver web, control and backup assets"
   VERBATIM
 )
 add_dependencies(hubserver hubserver_web)
@@ -114,9 +117,9 @@ endif()
 if(UNIX)
   install(TARGETS hubserver DESTINATION bin)
   install(FILES hubserver.conf.dist DESTINATION ${CONF_DIR})
-  install(DIRECTORY web control DESTINATION bin)
+  install(DIRECTORY web control backup DESTINATION bin)
 elseif(WIN32)
   install(TARGETS hubserver RUNTIME DESTINATION ".")
   install(FILES hubserver.conf.dist DESTINATION ".")
-  install(DIRECTORY web control DESTINATION ".")
+  install(DIRECTORY web control backup DESTINATION ".")
 endif()

@@ -217,6 +217,29 @@ async def integration(args, root):
             assert sql("SELECT mode,minute_of_day,weekday FROM hub_backup_schedules WHERE target='auth'") == 'weekly\t190\t6'
             assert int(sql("SELECT COUNT(*) FROM hub_control_audit WHERE action='backup.schedule' AND phase='applied'")) >= 3
             print('PASS persisted schedules, both web interfaces, UTC modes, admin checks, malformed inputs and revision conflicts')
+            # Wrapper runs this block only against its disposable hub schema. No worker is started.
+            jobs=(await req(administrator,'backup/jobs'))['payload']
+            assert not jobs['available'] and jobs['jobs']==[]
+            for client in (viewer,operator,recovery):
+                await req(client,'backup/jobs',{'id':secrets.token_hex(16),'target':'auth'},403)
+            await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'target':'auth'},403,{'X-Control-CSRF':'invalid'})
+            await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'target':'../auth'},400)
+            await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'target':'auth'},503)
+            sql("UPDATE hub_backup_worker SET lease_until=DATE_ADD(NOW(),INTERVAL 60 SECOND),targets='auth' WHERE id=1")
+            manual={'id':secrets.token_hex(16),'target':'auth'}
+            accepted=(await req(administrator,'backup/jobs',manual))['payload']
+            assert accepted['jobs'][0]['id']==manual['id'] and accepted['jobs'][0]['state']=='queued'
+            await req(administrator,'backup/jobs',manual)
+            assert sql('SELECT COUNT(*) FROM hub_backup_jobs')=='1'
+            await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'target':'auth'},409)
+            await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'target':'auth','sourceId':manual['id'],'confirm':'wrong'},400)
+            sql("UPDATE hub_backup_worker SET maintenance=1 WHERE id=1")
+            await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'release':'maintenance'},409)
+            sql("UPDATE hub_backup_jobs SET state='failed',message='Isolated API fixture completed' WHERE state='queued'")
+            await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'release':'maintenance'})
+            sql("UPDATE hub_backup_worker SET lease_until=NULL,targets='',restore_enabled=0 WHERE id=1")
+            print('PASS manual backup API permissions, CSRF, offline rejection, idempotency, concurrency and recovery maintenance gates')
+
         def cmd(action='cluster.drain', **extra):
             return {'version': 1, 'type': 'command', 'requestId': secrets.token_hex(16), 'timestamp': utc_now(),
                     'payload': {'action': action, 'target': node, **extra}}

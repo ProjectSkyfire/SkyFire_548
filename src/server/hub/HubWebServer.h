@@ -106,6 +106,9 @@ private:
     std::string HandleBackupSchedule(std::string const& method, std::map<std::string,std::string> const& headers,
         std::string const& body, bool remote = false);
     std::string BackupSchedules(bool canEdit);
+    std::string BackupJobs(bool administrator);
+    std::string HandleBackupJobs(std::string const& method, std::map<std::string,std::string> const& headers,
+        std::string const& body, bool remote = false);
     std::string ControlStatus(AuthenticatedSession const& session);
     std::string ControlCommand(std::map<std::string,std::string> const& headers, std::string const& body);
     bool AuditControl(std::string const& id, std::string const& phase, std::string const& actor,
@@ -141,6 +144,8 @@ private:
 
     std::mutex _statusMutex;
     HubWebStatusSnapshot _status;
+    std::chrono::steady_clock::time_point _backupHealthAt{};
+    bool _backupServicesStopped = false;
 
     std::mutex _authMutex;
     std::map<std::string, AuthenticatedSession> _sessions;

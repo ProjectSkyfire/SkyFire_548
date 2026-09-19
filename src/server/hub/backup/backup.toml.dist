@@ -1,0 +1,15 @@
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See LICENSE.md file for Copyright information
+# Paths are relative to this file. Python 3.11+ is required.
+hub_config = "../hubserver.conf"
+world_config = "../worldserver.conf"
+# Absolute paths to MySQL 8+ client tools. On Linux, commonly /usr/bin/mysql and /usr/bin/mysqldump.
+mysql = "C:/Program Files/MySQL/MySQL Server 9.7/bin/mysql.exe"
+mysqldump = "C:/Program Files/MySQL/MySQL Server 9.7/bin/mysqldump.exe"
+output_directory = "../backups"
+timeout_seconds = 3600
+minimum_free_mb = 1024
+
+# Enable only when this hub controls all writers to these databases.
+# Other installations, scripts, and schema migrations must remain stopped during recovery.
+allow_live_restore = false

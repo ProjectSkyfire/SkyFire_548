@@ -93,6 +93,8 @@ class ControlServer:
         self.app.router.add_post('/control/v1/session', self.login)
         self.app.router.add_post('/control/v1/logout', self.logout)
         self.app.router.add_get('/control/v1/status', self.status)
+        self.app.router.add_get('/control/v1/backup/jobs', self.backup_jobs)
+        self.app.router.add_post('/control/v1/backup/jobs', self.backup_jobs)
         self.app.router.add_get('/control/v1/backup/schedules', self.backup_schedules)
         self.app.router.add_post('/control/v1/backup/schedules', self.backup_schedules)
         self.app.router.add_get('/control/v1/capabilities', self.capabilities)
@@ -301,7 +303,39 @@ class ControlServer:
         session = await self.authenticated(request)
         return self.reply('capabilities', {'protocol': 1, 'commands': sorted(ACTIONS) if session.status['permissions']['operate'] else [],
                           'topics': sorted(TOPICS), 'maxRequestBytes': MAX_BODY, 'maxEventBytes': MAX_EVENT,
-                          'historyEvents': 32, 'pendingEvents': 8, 'backupAvailable': False, 'backupScheduleConfigurationAvailable': True, 'recoveryActionsAvailable': False}, request)
+                          'historyEvents': 32, 'pendingEvents': 8, 'backupAvailable': session.status.get('backup', {}).get('available', False), 'backupScheduleConfigurationAvailable': True, 'recoveryActionsAvailable': session.status['permissions']['role'] == 'administrator'}, request)
+
+    async def backup_jobs(self, request):
+        mutation = request.method == 'POST'
+        request['action'] = 'backup.now'
+        session = await self.authenticated(request, mutation)
+        if not mutation:
+            value, _ = await self.hub('GET', 'backup/jobs', session)
+            return self.reply('backup.jobs', value, request)
+        value = await self.json(request)
+        if not isinstance(value.get('id'), str) or not IDENTIFIER.fullmatch(value['id']):
+            raise ValueError('Invalid backup request')
+        if 'release' in value:
+            if set(value) != {'id', 'release'} or value['release'] != 'maintenance':
+                raise ValueError('Invalid maintenance request')
+            request['action'] = 'backup.release'
+        else:
+            restore = 'sourceId' in value
+            expected = {'id', 'target', 'sourceId', 'confirm'} if restore else {'id', 'target'}
+            if set(value) != expected or value['target'] not in ('auth', 'characters', 'world', 'hub'):
+                raise ValueError('Invalid backup target')
+            if restore:
+                if not isinstance(value['sourceId'], str) or not IDENTIFIER.fullmatch(value['sourceId']) or value['confirm'] != 'RESTORE ' + value['target']:
+                    raise ValueError('Restore requires the source archive and typed confirmation')
+                request['action'] = 'backup.restore'
+        request['id'] = value['id']
+        if session.status['permissions']['role'] != 'administrator':
+            raise Failure(403, 'Administrator permission required to run backups')
+        self.audit.write(request['id'], session.username, request['action'], 'attempt')
+        saved, _ = await self.hub('POST', 'backup/jobs', session, value)
+        self.audit.write(request['id'], session.username, request['action'], 'queued')
+        request['audited'] = True
+        return self.reply('backup.jobs', saved, request)
 
     async def backup_schedules(self, request):
         mutation = request.method == 'POST'
