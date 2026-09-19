@@ -22,7 +22,8 @@ const {chromium}=require('playwright');
     if(route.request().method()==='POST') {
      assert.equal(route.request().headers()['x-hub-csrf'],'token');
      const value=Object.fromEntries(new URLSearchParams(route.request().postData())); writes.push(value);
-     if(value.release) state.maintenance=false;
+     if(value.pin!==undefined) state.jobs.find(job=>job.id===value.archiveId).pinned=value.pin==='1';
+     else if(value.release) state.maintenance=false;
      else { state.jobs.unshift({id:value.id,target:value.target,kind:value.sourceId?'restore':'backup',state:'queued',createdAt:1789800300,bytes:0,message:''}); if(value.sourceId)state.maintenance=true; }
     }
     return json(state);
@@ -54,11 +55,22 @@ const {chromium}=require('playwright');
   await page.getByRole('button',{name:'End recovery maintenance',exact:true}).click();
   await page.waitForFunction(()=>backupSchedules.jobSending===false);
   assert.equal(writes[2].release,'maintenance');
+  completed.verifiedAt=1789800050; completed.verificationSeconds=3;
+  state.automation=JSON.stringify({retentionDays:30,schedules:[{target:'characters',nextRun:1789800600,status:'Scheduled',backupAt:1789800000,verifiedAt:1789800050}]});
+  await page.evaluate(()=>backupSchedules.loadJobs());
+  const archiveRow=page.getByLabel('Backup jobs').locator('li').filter({hasText:completed.sha256});
+  await archiveRow.getByRole('button',{name:'Pin archive',exact:true}).click();
+  await page.waitForFunction(()=>backupSchedules.jobSending===false);
+  assert.equal(writes[3].archiveId,completed.id); assert.equal(writes[3].pin,'1');
+  assert.equal(await archiveRow.getByRole('button',{name:'Unpin archive',exact:true}).count(),1);
+  assert.match(await page.getByLabel('Backup automation').textContent(),/Retention: 30 days/);
+  assert.match(await archiveRow.textContent(),/Restore verified/);
   state.available=false; await page.evaluate(()=>backupSchedules.loadJobs());
   assert.equal(await page.getByRole('button',{name:'Backup now',exact:true}).isEnabled(),false);
   assert.match(await page.getByLabel('Backup volume usage').textContent(),/1 archives/);
   state.available=true; state.canRun=false; state.canRestore=false; await page.evaluate(()=>backupSchedules.loadJobs());
   assert.equal(await page.getByRole('button',{name:'Backup now',exact:true}).isEnabled(),false);
+  assert.equal(await archiveRow.getByRole('button',{name:'Unpin archive',exact:true}).isEnabled(),false);
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'backup layout must fit mobile');
   assert.deepEqual(errors,[]);

@@ -315,7 +315,11 @@ class ControlServer:
         value = await self.json(request)
         if not isinstance(value.get('id'), str) or not IDENTIFIER.fullmatch(value['id']):
             raise ValueError('Invalid backup request')
-        if 'release' in value:
+        if 'pin' in value:
+            if set(value) != {'id', 'archiveId', 'pin'} or not isinstance(value['archiveId'], str) or not IDENTIFIER.fullmatch(value['archiveId']) or str(value['pin']) not in ('0', '1'):
+                raise ValueError('Invalid archive protection request')
+            request['action'] = 'backup.pin'
+        elif 'release' in value:
             if set(value) != {'id', 'release'} or value['release'] != 'maintenance':
                 raise ValueError('Invalid maintenance request')
             request['action'] = 'backup.release'

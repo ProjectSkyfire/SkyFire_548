@@ -1,6 +1,6 @@
 # This file is part of Project SkyFire https://www.projectskyfire.org.
 # See LICENSE.md file for Copyright information
-"""Manual backup worker. Python 3.11+, MySQL mysql/mysqldump; no third-party modules."""
+"""Scheduled backup and recovery worker. Python 3.11+, MySQL client tools."""
 import argparse
 from contextlib import contextmanager
 import queue
@@ -121,6 +121,15 @@ class Worker:
         if len(names) != len(set(names)):
             raise RuntimeError('Backup domains must use distinct database names; target aliases are not allowed.')
         self.allow_live_restore = config.get('allow_live_restore', False) is True
+        self.verification_database = None
+        if config.get('verification_config'):
+            info = connection(path('verification_config'), 'VerificationDatabaseInfo')
+            if not info:
+                raise RuntimeError('Verification database connection is missing.')
+            self.verification_database = Database(info, self.mysql)
+        self.retention_days = int(config.get('retention_days', 30))
+        if not 0 <= self.retention_days <= 36500:
+            raise RuntimeError('Retention days must be 0 (disabled) through 36500.')
         self.timeout = int(config.get('timeout_seconds', 3600))
         self.free_bytes = int(config.get('minimum_free_mb', 1024)) * 1024 * 1024
         if not 30 <= self.timeout <= 86400 or self.free_bytes < 0:
@@ -255,8 +264,21 @@ class Worker:
             if job['target']=='hub':
                 raise RuntimeError('Hub control tables must use InnoDB; locking them would block backup coordination.')
             with self.locked_snapshot(database,publish):
-                return self.create_backup(job,publish,True)
-        return self.create_backup(job,publish,False)
+                manifest = self.create_backup(job,publish,True)
+        else:
+            manifest = self.create_backup(job,publish,False)
+        if publish:
+            # Release MyISAM locks before the independent restore drill.
+            self.hub.query("UPDATE hub_backup_jobs SET message='Restoring into an isolated verification database' WHERE id=" +
+                literal(job['id']) + " AND state='running' AND owner=" + literal(self.owner))
+            try:
+                self.verify_archive(job)
+                message = 'Dump, checksum and isolated restore verified.'
+            except Exception:
+                # A valid dump remains available even when restoration cannot be verified.
+                message = 'Dump and checksum complete; isolated restore verification failed. Archive retained; inspect worker privileges or archive objects.'
+            self.finish(job, 'completed', message, manifest['bytes'], manifest['sha256'])
+        return manifest
 
     def create_backup(self, job, publish, locked):
         target, job_id = job['target'], job['id']
@@ -325,9 +347,160 @@ class Worker:
         partial.rename(directory / 'database.sql')
         (directory / 'manifest.json.partial').rename(directory / 'manifest.json')
         self.inventory_at = 0
-        if publish:
-            self.finish(job, 'completed', 'Dump and checksum verified; restore verification pending.', size, checksum)
         return manifest
+
+    def verify_archive(self, job):
+        started = time.monotonic()
+        archive, manifest = self.load_archive(job['id'], job['target'])
+        source_database = self.targets[job['target']]
+        database = self.verification_database or source_database
+        stage = 'skyfire_verify_' + secrets.token_hex(16)
+        user = 'sf_verify_' + secrets.token_hex(10)
+        password = secrets.token_hex(32)
+        account = "'" + user + "'@'%'"
+        created_user = False
+        charset = source_database.query("SELECT CONCAT(DEFAULT_CHARACTER_SET_NAME,' ',DEFAULT_COLLATION_NAME) FROM information_schema.schemata WHERE schema_name=DATABASE()").split()
+        if len(charset) != 2 or any(not re.fullmatch('[A-Za-z0-9_]+', value) for value in charset):
+            raise RuntimeError('Cannot verify database character set.')
+        database.query('CREATE DATABASE `' + stage + '` CHARACTER SET ' + charset[0] + ' COLLATE ' + charset[1], use_database=False)
+        try:
+            # The importer cannot write to any deployment database, even through qualified SQL.
+            database.query('CREATE USER ' + account + " IDENTIFIED BY '" + password + "'", use_database=False)
+            created_user = True
+            database.query('GRANT ALL PRIVILEGES ON `' + stage.replace('_', r'\_') + '`.* TO ' + account, use_database=False)
+            info = list(database.info); info[2:5] = [user, password, stage]
+            isolated = Database(info, self.mysql)
+            # Dump headers may preserve privileged DEFINER identities. Rebind those headers
+            # to the restricted verification principal; leave the original archive untouched.
+            verification_dump = archive.parent / 'verification.sql.partial'
+            try:
+                with archive.open('r', encoding='utf-8', newline='') as source, verification_dump.open('x', encoding='utf-8', newline='') as output:
+                    for line in source:
+                        if line.startswith(('/*!', 'CREATE ')):
+                            line = re.sub(r'DEFINER=`(?:``|[^`])*`@`(?:``|[^`])*`', 'DEFINER=CURRENT_USER', line)
+                        output.write(line)
+                        self.tick()
+                self.import_archive(isolated, stage, verification_dump)
+            finally:
+                verification_dump.unlink(missing_ok=True)
+            counts = self.table_counts(isolated, stage)
+            if len(counts) != manifest['tables']:
+                raise RuntimeError('Verification table count differs from the manifest.')
+            for table in counts:
+                self.tick(disk=False)
+                result = isolated.query('CHECK TABLE `' + table.replace('`','``') + '`')
+                if not result.endswith('\tstatus\tOK'):
+                    raise RuntimeError('Restored table failed its database integrity check.')
+            manifest.update(restoreVerified=True, verifiedAt=dt.datetime.now(dt.timezone.utc).isoformat(),
+                            verificationSeconds=round(time.monotonic()-started), verifiedRows=counts)
+            path = archive.parent / 'manifest.json'
+            temporary = path.with_suffix('.json.partial')
+            with temporary.open('w', encoding='utf-8') as stream:
+                json.dump(manifest, stream, indent=2); stream.flush(); os.fsync(stream.fileno())
+            temporary.replace(path)
+            self.hub.query('UPDATE hub_backup_jobs SET verified_at=NOW(),verification_seconds=' +
+                str(manifest['verificationSeconds']) + ' WHERE id=' + literal(job['id']) +
+                ' AND owner=' + literal(self.owner) + " AND state='running'")
+        finally:
+            try:
+                database.query('DROP DATABASE `' + stage + '`', use_database=False)
+            finally:
+                if created_user:
+                    database.query('DROP USER ' + account, use_database=False)
+
+    @staticmethod
+    def next_run(schedule, after):
+        if schedule['mode'] == 'interval':
+            return int(after) + int(schedule['interval']) * 60
+        current = dt.datetime.fromtimestamp(after, dt.timezone.utc)
+        candidate = current.replace(hour=0, minute=0, second=0, microsecond=0) + dt.timedelta(minutes=schedule['minute'])
+        if schedule['mode'] == 'weekly':
+            candidate += dt.timedelta(days=(schedule['weekday']-candidate.weekday()) % 7)
+            if candidate.timestamp() <= after: candidate += dt.timedelta(days=7)
+        elif candidate.timestamp() <= after:
+            candidate += dt.timedelta(days=1)
+        return int(candidate.timestamp())
+
+    def schedule(self):
+        now = int(self.hub.query('SELECT UNIX_TIMESTAMP()'))
+        rows = self.hub.query("SELECT JSON_OBJECT('target',target,'enabled',enabled,'mode',mode,'interval',interval_minutes,'minute',minute_of_day,'weekday',weekday,'revision',revision) FROM hub_backup_schedules ORDER BY target")
+        statuses = []
+        for line in rows.splitlines():
+            self.tick(disk=False)
+            schedule = json.loads(line); target = schedule['target']; revision = schedule['revision']
+            if not schedule['enabled']:
+                latest = self.hub.query("SELECT JSON_OBJECT('backupAt',COALESCE(MAX(UNIX_TIMESTAMP(finished_at)),0),'verifiedAt',COALESCE(MAX(UNIX_TIMESTAMP(verified_at)),0)) FROM hub_backup_jobs WHERE kind='backup' AND state='completed' AND target=" + literal(target))
+                statuses.append(dict(target=target,nextRun=0,status='Disabled',**json.loads(latest)))
+                continue
+            # Edits establish a fresh future occurrence; restarting resumes the persisted cursor.
+            upcoming = self.next_run(schedule, now)
+            self.hub.query(f"INSERT INTO hub_backup_schedule_runs(target,revision,next_run) VALUES({literal(target)},{revision},{upcoming}) "
+                f"ON DUPLICATE KEY UPDATE next_run=IF(revision<>{revision},{upcoming},next_run),revision={revision}")
+            due = int(self.hub.query('SELECT next_run FROM hub_backup_schedule_runs WHERE target=' + literal(target)))
+            status = 'Scheduled'
+            if due <= now:
+                status = 'Waiting for worker availability'
+                ready = self.hub.query("SELECT maintenance=0 AND recovery_safe=1 AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) AND NOT EXISTS(SELECT 1 FROM hub_backup_jobs WHERE state IN ('queued','running')) FROM hub_backup_worker WHERE id=1") == '1'
+                database = self.targets.get(target)
+                if database is None:
+                    ready = False; status = 'Target is not configured'
+                elif ready:
+                    locks = database.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE' AND engine<>'InnoDB'") != '0'
+                    if locks and self.hub.query('SELECT services_stopped FROM hub_backup_worker WHERE id=1') != '1':
+                        ready = False; status = 'Waiting for gracefully stopped game services (MyISAM)'
+                if ready:
+                    identifier = hashlib.sha256(f'{target}:{revision}:{due}'.encode()).hexdigest()[:32]
+                    # Job admission and cursor advancement are atomic. Unique active_slot serializes
+                    # manual and scheduled requests; duplicate occurrence IDs survive worker restarts.
+                    self.hub.query("START TRANSACTION; "
+                        "SELECT id FROM hub_backup_worker WHERE id=1 FOR UPDATE; "
+                        "INSERT IGNORE INTO hub_backup_jobs(id,target,actor) SELECT " + literal(identifier) + ',' + literal(target) + ",'scheduler' FROM hub_backup_worker w "
+                        f"WHERE w.id=1 AND owner={literal(self.owner)} AND lease_until>NOW() AND maintenance=0 AND recovery_safe=1 "
+                        "AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) AND EXISTS(SELECT 1 FROM hub_backup_schedules WHERE target=" + literal(target) + f" AND enabled=1 AND revision={revision}); "
+                        f"UPDATE hub_backup_schedule_runs SET next_run={upcoming},last_job={literal(identifier)} WHERE target={literal(target)} "
+                        f"AND revision={revision} AND next_run={due} AND EXISTS(SELECT 1 FROM hub_backup_jobs WHERE id={literal(identifier)}); "
+                        "INSERT IGNORE INTO hub_control_audit(request_id,phase,actor,action,target,outcome) "
+                        f"SELECT id,'queued',actor,'backup.schedule',target,'queued' FROM hub_backup_jobs WHERE id={literal(identifier)}; COMMIT;")
+                    due = int(self.hub.query('SELECT next_run FROM hub_backup_schedule_runs WHERE target=' + literal(target)))
+                    status = 'Scheduled' if due > now else status
+            latest = self.hub.query("SELECT JSON_OBJECT('backupAt',COALESCE(MAX(UNIX_TIMESTAMP(finished_at)),0),'verifiedAt',COALESCE(MAX(UNIX_TIMESTAMP(verified_at)),0)) FROM hub_backup_jobs WHERE kind='backup' AND state='completed' AND target=" + literal(target))
+            statuses.append(dict(target=target, nextRun=due, status=status, **json.loads(latest)))
+        self.hub.query('UPDATE hub_backup_worker SET automation_status=' + literal(json.dumps({'retentionDays':self.retention_days,'schedules':statuses})) + ' WHERE id=1 AND owner=' + literal(self.owner))
+
+    def retention(self):
+        if not self.retention_days: return
+        self.heartbeat()
+        rows = self.hub.query("SELECT JSON_OBJECT('id',id,'target',target) FROM hub_backup_jobs WHERE kind='backup' AND state IN ('completed','deleting') "
+            "AND pinned=0 AND source_id='' AND finished_at<DATE_SUB(NOW(),INTERVAL " + str(self.retention_days) + " DAY) ORDER BY created_at")
+        for line in rows.splitlines():
+            self.tick(disk=False)
+            job = json.loads(line); identifier = literal(job['id'])
+            if not re.fullmatch('[0-9a-f]{32}', job['id']): continue
+            # Locking the worker row excludes scheduled admission. The conditional update races
+            # safely with pinning and manual recovery admission on the source job row.
+            result = self.hub.query("START TRANSACTION; SELECT id FROM hub_backup_worker WHERE id=1 FOR UPDATE; "
+                "UPDATE hub_backup_jobs SET state='deleting' WHERE id=" + identifier + " AND state IN ('completed','deleting') AND pinned=0 AND source_id='' "
+                "AND EXISTS(SELECT 1 FROM hub_backup_worker WHERE id=1 AND owner=" + literal(self.owner) + " AND lease_until>NOW() AND maintenance=0 AND recovery_safe=1) "
+                "AND NOT EXISTS(SELECT 1 FROM (SELECT source_id FROM hub_backup_jobs WHERE state IN ('queued','running')) active WHERE source_id=" + identifier + ") "
+                "AND EXISTS(SELECT 1 FROM (SELECT id,target,finished_at FROM hub_backup_jobs WHERE state='completed' AND verified_at IS NOT NULL) newer "
+                "WHERE newer.target=" + literal(job['target']) + " AND newer.id<>" + identifier + " AND newer.finished_at>(SELECT cutoff.finished_at FROM (SELECT id,finished_at FROM hub_backup_jobs) cutoff WHERE cutoff.id=" + identifier + ")); SELECT ROW_COUNT(); COMMIT;")
+            if result.splitlines()[-1] != '1':
+                # Resume only an already-admitted deletion while still holding a valid lease.
+                if self.hub.query("SELECT COUNT(*) FROM hub_backup_jobs j JOIN hub_backup_worker w ON w.id=1 WHERE j.id=" + identifier +
+                    " AND j.state='deleting' AND w.owner=" + literal(self.owner) + " AND w.lease_until>NOW() AND w.maintenance=0 AND w.recovery_safe=1") != '1':
+                    continue
+            directory = self.output / job['id']
+            # Delete only the two archive files in the validated exact job directory. Never recurse.
+            if directory.is_symlink() or directory.resolve().parent != self.output.resolve():
+                raise RuntimeError('Unsafe retention archive directory.')
+            for name in ('database.sql','manifest.json'):
+                file = directory / name
+                if file.is_symlink(): raise RuntimeError('Unsafe retention archive file.')
+                file.unlink(missing_ok=True)
+            if directory.exists() and not any(directory.iterdir()): directory.rmdir()
+            self.hub.query("START TRANSACTION; UPDATE hub_backup_jobs SET state='expired',message='Expired by retention policy' WHERE id=" + identifier + "; "
+                "INSERT IGNORE INTO hub_control_audit(request_id,phase,actor,action,target,outcome) VALUES(" + identifier + ",'retention','worker','backup.retention'," + literal(job['target']) + ",'expired'); COMMIT;")
+            self.inventory_at = 0
 
     def load_archive(self, source_id, target):
         if not re.fullmatch('[0-9a-f]{32}', source_id):
@@ -494,6 +667,9 @@ class Worker:
             self.recover()
             while not STOP:
                 self.heartbeat()
+                if time.monotonic() - getattr(self, 'schedule_at', 0) > 15:
+                    self.schedule()
+                    self.schedule_at = time.monotonic()
                 job = self.claim()
                 if job:
                     try:
@@ -505,6 +681,9 @@ class Worker:
                         # Only fixed application messages reach job history, never database/tool stderr or credentials.
                         message = str(error) if type(error) is RuntimeError else 'Backup failed; check worker storage and configuration.'
                         self.finish(job, 'failed', message[:255])
+                if time.monotonic() - getattr(self, 'retention_at', 0) > 3600:
+                    self.retention()
+                    self.retention_at = time.monotonic()
                 if once:
                     break
                 time.sleep(2)

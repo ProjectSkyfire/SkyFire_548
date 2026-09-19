@@ -1,4 +1,4 @@
-# Hub manual backup and recovery worker
+# Hub scheduled backup and recovery worker
 
 Python 3.11+ and MySQL 8+ `mysql` / `mysqldump` are required. The worker has no third-party
 Python dependencies. CMake build and INSTALL copy `backup/` alongside `web/` and `control/`;
@@ -6,7 +6,8 @@ existing `backup.toml` and archives are preserved. The worker runs independently
 
 ## Setup
 
-1. Back up the hub database and apply `sql/updates/hub/2026_09_19_hub_00.sql` **before**
+1. Back up the hub database and apply `sql/updates/hub/2026_09_19_hub_00.sql` and
+   `2026_09_19_hub_01.sql` (plus the existing schedule migration) **before**
    starting the new hub binary. New installations include these tables in `hub_database.sql`.
 2. Copy `backup.toml.dist` to `backup.toml`. Set absolute MySQL client paths and the output
    directory. Point `hub_config` and `world_config` at this installation's configurations.
@@ -38,8 +39,53 @@ The volume display reports filesystem capacity/free space and completed archive 
 including rollback copies. Inventory refreshes every 30 seconds. The storage directory is
 restricted to the worker identity (plus SYSTEM on Windows). Use a dedicated local directory,
 not a shared web root. Archive files cannot be downloaded through the hub web server.
-Retention, encryption, automatic scheduled execution and remote archive storage are not
-implemented. Existing saved schedule preferences remain inactive. Nothing deletes archives.
+Encryption and remote archive storage are not implemented.
+
+## Schedules, verification and retention
+
+Enabled interval, daily and weekly UTC schedules now execute. On first activation or a
+schedule edit, the worker establishes a future occurrence. A persisted cursor survives
+restarts; missed occurrences coalesce into one run. An atomic job/cursor transaction and
+deterministic occurrence id prevent duplicate runs. Manual and scheduled jobs share the
+single active job slot. A failed run is recorded and the next occurrence remains scheduled.
+MyISAM schedules wait for gracefully stopped game services; they never kill a server or
+automatically interrupt players. The Backup page reports next run, last successful backup,
+last verified restore, and maintenance waits independently of form editing.
+
+Every new ordinary backup attempts an isolated restore after releasing its snapshot locks.
+Verification creates an exclusive temporary database and a random temporary MySQL account
+with privileges only on that database. Dump DEFINER headers are rebound to this restricted
+account in a temporary copy. Import, table-count validation and CHECK TABLE must all succeed.
+The original archive is unchanged. The stage and account are removed even after failure.
+The configured database identity therefore needs CREATE USER, DROP USER and permission to
+grant database-local privileges, in addition to CREATE/DROP DATABASE and dump access.
+For full verification on servers with binary logging, configure `verification_config` to
+point at a separate compatible MySQL instance with binary logging disabled. Its file uses
+`VerificationDatabaseInfo = "host;port;user;password;mysql"`. Verification stages and accounts
+are created on that instance; dump identity still refers to the original database. A hub
+archive contains audit triggers, and MySQL's binary-logging restrictions may reject their
+creation by a restricted account on the live instance. The worker does not change global
+logging settings or grant SUPER to the importer. See the
+[MySQL stored-program binary logging rules](https://dev.mysql.com/doc/refman/8.0/en/stored-programs-logging.html).
+SQL events remain unsupported for automatic verification. Cross-database objects may fail
+verification under these restrictions; they do not gain access to live databases.
+
+A completed dump with failed restore verification remains available and is explicitly
+reported as unverified. Verified time, duration and restored row counts are recorded in the
+manifest; verified time and duration are also recorded in the hub. This checks that the dump
+can be imported and tables are readable; it does not prove application correctness or that
+separate domain snapshots form a coordinated recovery point. Interrupted verification can
+leave a `skyfire_verify_*` database/account; inspect and remove those orphaned resources as
+a DBA after confirming no worker is using them.
+
+Set `retention_days` in backup.toml (default 30; 0 disables deletion). Once an hour, the worker
+expires older completed archives only when a newer verified recovery point exists for that
+domain. The newest verified point, pinned archives, all pre-restore rollback copies, unknown
+archives, and active restore sources are protected. Administrators can pin/unpin ordinary
+completed archives in job history. Retention records an audit event, preserves job history,
+and deletes only the exact dump and manifest files, never a directory tree. Interrupted
+deletions resume on the next pass. Back up archives externally before enabling retention
+where a different storage policy is required.
 
 ## Live restore: auth, characters or world
 
@@ -100,3 +146,14 @@ Do not use this command for a database version older than the installed hub sche
 `tools/dev/tests/manual_backup.test.py` creates disposable databases and verifies a real dump,
 corruption rejection, serialized jobs, staging/live restore, automatic rollback after an
 injected failure and worker fencing. It never restores deployment databases.
+Run it with `--domain auth`, `--domain characters`, and `--domain world`; each invocation also
+tests offline hub recovery, UTC schedule boundaries/restarts, isolated verification and
+retention protection. `--report PATH` writes measured durations. These small fixtures measure
+functional recovery overhead, not production RTO. Operational RPO is time since the last
+successful verified backup; scheduled maintenance waits can extend it without bound. Measure
+production-sized isolated restores before committing to an RTO/RPO service objective.
+
+`backup_recovery_drill.test.py` accepts `--mysqld`, `--mysql`, `--mysqldump`, `--work-directory`
+and `--reports`. It initializes an exclusive local MySQL instance, runs all three game-domain
+drills plus offline hub recovery, verifies cleanup, then shuts down only its own child server.
+No installed server configurations, services or deployment databases are changed.

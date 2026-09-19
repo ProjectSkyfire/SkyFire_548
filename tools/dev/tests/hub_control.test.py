@@ -237,6 +237,20 @@ async def integration(args, root):
             await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'release':'maintenance'},409)
             sql("UPDATE hub_backup_jobs SET state='failed',message='Isolated API fixture completed' WHERE state='queued'")
             await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'release':'maintenance'})
+            pin={'id':secrets.token_hex(16),'archiveId':manual['id'],'pin':1}
+            for client in (viewer,operator,recovery):
+                await req(client,'backup/jobs',pin,403)
+            await req(administrator,'backup/jobs',pin,403,{'X-Control-CSRF':'invalid'})
+            await req(administrator,'backup/jobs',pin,409)
+            sql("UPDATE hub_backup_jobs SET state='completed',verified_at=NOW(),verification_seconds=2 WHERE id='"+manual['id']+"'")
+            pin['id']=secrets.token_hex(16)
+            pinned=(await req(administrator,'backup/jobs',pin))['payload']['jobs'][0]
+            assert pinned['pinned'] and pinned['verifiedAt'] and pinned['verificationSeconds']==2
+            pin.update(id=secrets.token_hex(16),pin=0)
+            assert not (await req(administrator,'backup/jobs',pin))['payload']['jobs'][0]['pinned']
+            sql("UPDATE hub_backup_jobs SET state='deleting' WHERE id='"+manual['id']+"'")
+            pin.update(id=secrets.token_hex(16),pin=1)
+            await req(administrator,'backup/jobs',pin,409)
             sql("UPDATE hub_backup_worker SET lease_until=NULL,targets='',restore_enabled=0 WHERE id=1")
             print('PASS manual backup API permissions, CSRF, offline rejection, idempotency, concurrency and recovery maintenance gates')
 

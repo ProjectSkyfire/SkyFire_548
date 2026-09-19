@@ -9,6 +9,11 @@ mysqldump = "C:/Program Files/MySQL/MySQL Server 9.7/bin/mysqldump.exe"
 output_directory = "../backups"
 timeout_seconds = 3600
 minimum_free_mb = 1024
+# 0 disables deletion. The newest verified point, pinned archives and rollback copies are protected.
+retention_days = 30
+# Optional separate MySQL instance for restore verification (recommended, binary logging off).
+# File format: VerificationDatabaseInfo = "127.0.0.1;3307;verification_admin;password;mysql"
+# verification_config = "verification.conf"
 
 # Enable only when this hub controls all writers to these databases.
 # Other installations, scripts, and schema migrations must remain stopped during recovery.

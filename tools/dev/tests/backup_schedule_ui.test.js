@@ -42,7 +42,7 @@ async function main() {
     assert.equal(writes[1].revision,1); assert.equal(writes[1].intervalMinutes,45); assert.equal(writes[1].minuteOfDay,0);
     widget.update(false); assert.equal(button.disabled,true);
     await form.events.submit({preventDefault(){}}); assert.equal(writes.length,2);
-    assert.match(form.children.at(-1).textContent,/no scheduled backups are running/);
+    assert.match(form.children.at(-1).textContent,/update the next run time/);
     widget.reset(); assert.equal(root.children.length,0);
     console.log('PASS schedule drafts survive 100 status updates; UTC/interval saves, revision advancement, permission revocation and logout reset.');
 }

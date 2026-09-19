@@ -31,13 +31,13 @@ window.HubBackupSchedules = class {
             this.root.replaceChildren(); this.forms = [];
             const heading = document.createElement('h2'); heading.textContent = 'Backup schedules';
             const explanation = document.createElement('p');
-            explanation.textContent = 'Manual backups run through the hub. Automatic scheduling is not implemented yet; saved schedules do not run jobs. All schedule times are UTC.';
+            explanation.textContent = 'The backup worker executes enabled schedules. All schedule times are UTC. Missed occurrences are combined into one run. MyISAM backups wait for game services to be stopped gracefully.';
             this.createManual();
             this.root.append(heading, explanation);
             const reload = document.createElement('button'); reload.type = 'button'; reload.textContent = 'Reload saved schedules'; reload.className = 'service-button';
             reload.addEventListener('click', () => this.load()); this.root.append(reload);
             for (const schedule of data.schedules) this.add(schedule);
-            this.message.textContent = this.allowed ? 'Choose schedules below; saving does not start a backup.' : 'Administrator permission is required to change schedules.';
+            this.message.textContent = this.allowed ? 'Save a schedule to set its next occurrence.' : 'Administrator permission is required to change schedules.';
             this.root.append(this.message);
         } catch (error) {
             if (generation !== this.generation) return;
@@ -61,6 +61,7 @@ window.HubBackupSchedules = class {
         const status = document.createElement('p'); status.setAttribute('role','status');
         const result = document.createElement('p'); result.setAttribute('role','status');
         const storage = document.createElement('p'); storage.setAttribute('aria-label','Backup volume usage');
+        const automation = document.createElement('p'); automation.setAttribute('aria-label','Backup automation');
         const restoreLabel = document.createElement('label'); restoreLabel.textContent = 'Recovery point';
         const restoreSelect = document.createElement('select'); restoreSelect.setAttribute('aria-label','Restore recovery point'); restoreLabel.append(restoreSelect);
         const confirmLabel = document.createElement('label'); confirmLabel.textContent = 'Type RESTORE followed by the database target to replace live data';
@@ -70,8 +71,8 @@ window.HubBackupSchedules = class {
         const restoreNote = document.createElement('p'); restoreNote.textContent='Gracefully stop all game services before restoring. A staging check and fresh rollback backup precede replacement. Hub database recovery is offline. Rollback archives are protected from automatic deletion.';
         const historyHeading=document.createElement('h3'); historyHeading.textContent='Latest 30 jobs';
         const history = document.createElement('ol'); history.setAttribute('aria-label','Backup jobs');
-        section.append(heading,label,button,status,storage,restoreLabel,confirmLabel,restore,release,restoreNote,result,historyHeading,history); this.root.append(section);
-        this.manual = {select,button,status,result,history,storage,restoreSelect,confirm,restore,release}; this.restoreSignature = null; this.jobData = null;
+        section.append(heading,label,button,status,storage,automation,restoreLabel,confirmLabel,restore,release,restoreNote,result,historyHeading,history); this.root.append(section);
+        this.manual = {select,button,status,result,history,storage,automation,restoreSelect,confirm,restore,release}; this.restoreSignature = null; this.jobData = null;
         select.addEventListener('change',()=>this.jobPermissions());
         button.addEventListener('click',()=>this.startBackup());
         confirm.addEventListener('input',()=>this.jobPermissions()); restoreSelect.addEventListener('change',()=>this.jobPermissions());
@@ -91,6 +92,7 @@ window.HubBackupSchedules = class {
         this.manual.restoreSelect.disabled = this.jobSending; this.manual.confirm.disabled = this.jobSending;
         this.manual.release.hidden = !data?.maintenance;
         this.manual.release.disabled = !this.allowed || !data?.canRun || !data?.recoverySafe || active || this.jobSending;
+        for (const button of this.pinButtons || []) button.disabled = !this.allowed || !data?.canRun || this.jobSending;
     }
     renderJobs(data) {
         if (!this.manual) return;
@@ -98,6 +100,10 @@ window.HubBackupSchedules = class {
         this.manual.status.textContent = data.available ? 'Backup worker online. Dumps are checksum checked; restore verification is separate.' : 'Backup worker offline. Start the configured backup worker to run backups.';
         const size=value=>{ let unit=0; value=Number(value)||0; while(value>=1024 && unit<4) { value/=1024; unit++; } return value.toFixed(unit ? 2 : 0)+' '+['B','KiB','MiB','GiB','TiB'][unit]; };
         this.manual.storage.textContent = `Backup volume: ${size(data.storageFree||0)} free of ${size(data.storageTotal||0)}. ${data.archiveCount||0} archives using ${size(data.archiveBytes||0)} (including rollback copies). ${data.maintenance ? 'Recovery maintenance is active.' : ''}`;
+        let automation = {}; try { automation = JSON.parse(data.automation || '{}'); } catch (_) {}
+        const date = value => value ? new Date(value*1000).toLocaleString() : 'none';
+        this.manual.automation.textContent = `Retention: ${automation.retentionDays ? automation.retentionDays+' days' : 'disabled or worker policy unavailable'}. Pinned archives, rollback copies and the newest verified recovery point per database are protected. ` +
+            (automation.schedules || []).map(item=>`${item.target}: ${item.status}; next ${date(item.nextRun)}; last backup ${date(item.backupAt)}; last verified restore ${date(item.verifiedAt)}.`).join(' ');
         const sources=data.jobs.filter(job=>job.kind==='backup' && job.state==='completed' && job.target!=='hub');
         const signature=JSON.stringify(sources.map(job=>job.id));
         if (signature!==this.restoreSignature) {
@@ -108,14 +114,34 @@ window.HubBackupSchedules = class {
             }));
             this.manual.restoreSelect.value=sources.some(job=>job.id===selected) ? selected : '';
         }
+        this.pinButtons = [];
         this.manual.history.replaceChildren(...data.jobs.map(job=>{
             const item=document.createElement('li');
             item.textContent=`${new Date(job.createdAt*1000).toLocaleString()} · ${job.target} · ${job.kind || "backup"} · ${job.state} · ${job.message || job.id}`;
             if (job.bytes) item.textContent+=` · ${size(job.bytes)}`;
             if (job.sha256) { const hash=document.createElement('small'); hash.textContent=' SHA-256: '+job.sha256; item.append(hash); }
+            if (job.kind==='backup' && job.state==='completed') {
+                const verification=document.createElement('span'); verification.textContent=job.verifiedAt ? ` · Restore verified ${date(job.verifiedAt)} (${job.verificationSeconds || 0}s)` : ' · Restore not verified'; item.append(verification);
+                if (job.sourceId) { const protectedNote=document.createElement('span'); protectedNote.textContent=' · Protected rollback'; item.append(protectedNote); }
+                else {
+                    const pin=document.createElement('button'); pin.type='button'; pin.className='service-button'; pin.textContent=job.pinned ? 'Unpin archive' : 'Pin archive';
+                    pin.addEventListener('click',()=>this.pinArchive(job)); this.pinButtons.push(pin); item.append(pin);
+                }
+            }
             return item;
         }));
         this.jobPermissions();
+    }
+    async pinArchive(job) {
+        if (!this.allowed || !this.jobData?.canRun || this.jobSending) return;
+        const generation=this.generation;
+        const id=Array.from(crypto.getRandomValues(new Uint8Array(16)),byte=>byte.toString(16).padStart(2,'0')).join('');
+        this.jobSending=true; this.jobPermissions();
+        try {
+            const data=await this.transport({id,archiveId:job.id,pin:job.pinned ? 0 : 1},'jobs');
+            if (generation===this.generation) this.renderJobs(data);
+        } catch (error) { if (generation===this.generation) this.manual.result.textContent=error.message; }
+        finally { if (generation===this.generation) { this.jobSending=false; this.jobPermissions(); } }
     }
     async loadJobs() {
         if (this.jobLoading || this.jobSending || !this.manual) return;
@@ -154,7 +180,7 @@ window.HubBackupSchedules = class {
             else input.type = type;
             input.value = String(value); label.append(input); form.append(label); controls.push(input); return input;
         };
-        const enabled = field('Use this schedule when automatic scheduling becomes available', '', schedule.enabled, [['0','Disabled'],['1','Enabled — awaiting scheduler']]);
+        const enabled = field('Automatic backup schedule', '', schedule.enabled, [['0','Disabled'],['1','Enabled']]);
         const mode = field('Frequency', '', schedule.mode, [['interval','Every N minutes'],['daily','Daily'],['weekly','Weekly']]);
         const interval = field('Interval in minutes (15–10080)', 'number', schedule.intervalMinutes); interval.min = '15'; interval.max = '10080'; interval.step = '1';
         const time = field('Time (UTC)', 'time', String(Math.floor(schedule.minuteOfDay/60)).padStart(2,'0')+':'+String(schedule.minuteOfDay%60).padStart(2,'0')); time.step = '60';
@@ -182,7 +208,7 @@ window.HubBackupSchedules = class {
                 const data = await this.transport(value);
                 if (generation !== this.generation) return;
                 schedule.revision = data.schedules.find(item=>item.target===schedule.target).revision;
-                message.textContent = 'Schedule saved. Awaiting the scheduler; no scheduled backups are running yet.';
+                message.textContent = 'Schedule saved. The worker will update the next run time.';
             } catch (error) { if (generation === this.generation) message.textContent = error.message + ' Reload saved schedules before retrying.'; }
             finally { entry.saving = false; if (generation === this.generation) this.permissions(entry); }
         });

@@ -352,6 +352,7 @@ std::string HubWebServer::BackupJobs(bool administrator)
         << ",\"archiveBytes\":" << f[9].GetUInt64() << ",\"archiveCount\":" << f[10].GetUInt32()
         << ",\"storageTotal\":" << f[2].GetUInt64() << ",\"storageFree\":" << f[3].GetUInt64()
         << ",\"maintenance\":" << (f[4].GetBool() ? "true" : "false") << ",\"recoverySafe\":" << (f[5].GetBool() ? "true" : "false")
+        << ",\"automation\":" << Quote(f[11].GetString())
         << ",\"canRun\":" << (administrator ? "true" : "false") << ",\"targets\":" << Quote(f[1].GetString()) << ",\"jobs\":[";
     auto rows = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_JOBS));
     bool comma = false;
@@ -362,7 +363,9 @@ std::string HubWebServer::BackupJobs(bool administrator)
             << ",\"actor\":" << Quote(row[2].GetString()) << ",\"state\":" << Quote(row[3].GetString())
             << ",\"createdAt\":" << row[4].GetUInt64() << ",\"finishedAt\":" << row[5].GetUInt64()
             << ",\"bytes\":" << row[6].GetUInt64() << ",\"sha256\":" << Quote(row[7].GetString())
-            << ",\"message\":" << Quote(row[8].GetString()) << ",\"kind\":" << Quote(row[9].GetString()) << ",\"sourceId\":" << Quote(row[10].GetString()) << '}';
+            << ",\"message\":" << Quote(row[8].GetString()) << ",\"kind\":" << Quote(row[9].GetString()) << ",\"sourceId\":" << Quote(row[10].GetString())
+            << ",\"verifiedAt\":" << row[11].GetUInt64() << ",\"verificationSeconds\":" << row[12].GetUInt32()
+            << ",\"pinned\":" << (row[13].GetBool() ? "true" : "false") << '}';
     } while (rows->NextRow());
     out << "]}"; return Response(200,out.str());
 }
@@ -382,6 +385,28 @@ std::string HubWebServer::HandleBackupJobs(std::string const& method,
     if (Header(headers,"x-hub-csrf") != session.CsrfToken) return Error(403,"Invalid request token.");
     std::map<std::string,std::string> form;
     if (!Form(body,form,4) || !RequestId(form["id"])) return Error(400,"Invalid backup request.");
+    if (form.count("pin"))
+    {
+        if (form.size()!=3 || !RequestId(form["archiveId"]) || (form["pin"]!="0" && form["pin"]!="1"))
+            return Error(400,"Invalid archive protection request.");
+        std::lock_guard<std::mutex> lock(_controlAdmissionMutex);
+        auto previous = HubDatabase.GetPreparedStatement(HUB_SEL_CONTROL_AUDIT); previous->setString(0,form["id"]);
+        if (HubDatabase.Query(previous)) return Error(409,"Request id already used.");
+        if (!AuditControl(form["id"],"attempt",session.Username,"backup.pin",form["archiveId"],form["pin"]))
+            return Error(503,"Audit unavailable.");
+        auto update = HubDatabase.GetPreparedStatement(HUB_UPD_BACKUP_PIN);
+        update->setUInt8(0,form["pin"]=="1" ? 1 : 0); update->setString(1,form["archiveId"]);
+        HubDatabase.DirectExecute(update);
+        auto verify = HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_JOB); verify->setString(0,form["archiveId"]);
+        auto row = HubDatabase.Query(verify);
+        if (!row || row->Fetch()[5].GetString()!="completed" || row->Fetch()[4].GetBool()!=(form["pin"]=="1"))
+        {
+            AuditControl(form["id"],"rejected",session.Username,"backup.pin",form["archiveId"],"unavailable");
+            return Error(409,"Archive is unavailable or retention has already started. Refresh history.");
+        }
+        AuditControl(form["id"],"applied",session.Username,"backup.pin",form["archiveId"],"processed");
+        return BackupJobs(true);
+    }
     bool restore = form.count("sourceId") != 0, release = form.count("release") != 0;
     if (release)
     {

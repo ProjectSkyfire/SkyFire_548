@@ -11,11 +11,13 @@ void HubDatabaseConnection::DoPrepareStatements()
         m_stmts.resize(MAX_HUBDATABASE_STATEMENTS);
 
     PrepareStatement(HUB_SEL_BACKUP_WORKER,
-        "SELECT CAST(COALESCE(lease_until > CURRENT_TIMESTAMP,0) AS UNSIGNED), targets, storage_total, storage_free, maintenance, recovery_safe, services_stopped, CAST(COALESCE(hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND),0) AS UNSIGNED),restore_enabled,archive_bytes,archive_count FROM hub_backup_worker WHERE id=1", CONNECTION_SYNCH);
+        "SELECT CAST(COALESCE(lease_until > CURRENT_TIMESTAMP,0) AS UNSIGNED), targets, storage_total, storage_free, maintenance, recovery_safe, services_stopped, CAST(COALESCE(hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND),0) AS UNSIGNED),restore_enabled,archive_bytes,archive_count,COALESCE(automation_status,'{}') FROM hub_backup_worker WHERE id=1", CONNECTION_SYNCH);
     PrepareStatement(HUB_SEL_BACKUP_JOBS,
-        "SELECT id,target,actor,state,CAST(UNIX_TIMESTAMP(created_at) AS UNSIGNED),CAST(COALESCE(UNIX_TIMESTAMP(finished_at),0) AS UNSIGNED),bytes,sha256,message,kind,source_id FROM hub_backup_jobs ORDER BY created_at DESC,id DESC LIMIT 30", CONNECTION_SYNCH);
+        "SELECT id,target,actor,state,CAST(UNIX_TIMESTAMP(created_at) AS UNSIGNED),CAST(COALESCE(UNIX_TIMESTAMP(finished_at),0) AS UNSIGNED),bytes,sha256,message,kind,source_id,CAST(COALESCE(UNIX_TIMESTAMP(verified_at),0) AS UNSIGNED),verification_seconds,pinned FROM hub_backup_jobs ORDER BY created_at DESC,id DESC LIMIT 30", CONNECTION_SYNCH);
+    PrepareStatement(HUB_UPD_BACKUP_PIN,
+        "UPDATE hub_backup_jobs SET pinned=? WHERE id=? AND kind='backup' AND state='completed'", CONNECTION_SYNCH);
     PrepareStatement(HUB_SEL_BACKUP_JOB,
-        "SELECT target,actor,kind,source_id FROM hub_backup_jobs WHERE id=?", CONNECTION_SYNCH);
+        "SELECT target,actor,kind,source_id,pinned,state FROM hub_backup_jobs WHERE id=?", CONNECTION_SYNCH);
     PrepareStatement(HUB_INS_BACKUP_JOB,
         "INSERT IGNORE INTO hub_backup_jobs(id,target,actor) SELECT ?,?,? FROM hub_backup_worker WHERE id=1 AND lease_until > CURRENT_TIMESTAMP AND FIND_IN_SET(?,targets)>0", CONNECTION_SYNCH);
     PrepareStatement(HUB_UPD_BACKUP_HUB_HEALTH,
