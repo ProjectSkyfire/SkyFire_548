@@ -37,7 +37,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
                 return json({ job: "test-job" }, 202);
             }
             const name = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
-            if (["status.js", "index.html", "app.js", "accounts.js", "app.css"].includes(name))
+            if (["status.js", "index.html", "app.js", "accounts.js", "backup.js", "metrics.js", "navigation.js", "app.css"].includes(name))
                 return route.fulfill({ contentType: name.endsWith("js") ? "text/javascript" : name.endsWith("css") ? "text/css" : "text/html", body: fs.readFileSync(path.join(web, name)) });
             return route.fulfill({ status: 404, body: "" });
         });
@@ -113,12 +113,12 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         if (process.env.HUB_TEST_SCREENSHOT) await page.screenshot({ path: process.env.HUB_TEST_SCREENSHOT, fullPage: true });
         allowed = false;
         await page.evaluate(() => loadStatus());
-        assert.equal(await page.locator("#accounts-tab").isVisible(), false);
+        await page.locator("#accounts-tab").waitFor({state:"hidden"});
         assert.equal(await page.locator("#accounts-view").isVisible(), false);
         allowed = true; enabled = false;
         await page.evaluate(() => loadStatus());
         await page.locator("#accounts-tab").click();
-        assert.equal(await page.locator("#accounts-disabled").isVisible(), true);
+        await page.locator("#accounts-disabled").waitFor({state:"visible"});
         assert.equal(await page.locator("#accounts-workspace").isVisible(), false);
         assert.deepEqual(errors, []);
         console.log("Hub account browser checks passed: create/edit, bans, mutes, GM, RBAC, IP bans, routing errors, permissions and mobile layout.");

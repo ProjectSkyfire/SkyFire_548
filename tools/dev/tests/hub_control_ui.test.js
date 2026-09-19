@@ -11,11 +11,12 @@ class Element {
     replaceChildren(...items) { this.children = items; }
     addEventListener() {}
     setAttribute() {}
+    removeAttribute() {}
     remove() {}
     reset() {}
 }
 const elements = new Map();
-const document = { getElementById(id) { if (!elements.has(id)) elements.set(id, new Element()); return elements.get(id); }, createElement() { return new Element(); } };
+const document = { querySelectorAll() { return []; }, createElementNS() { return new Element(); }, getElementById(id) { if (!elements.has(id)) elements.set(id, new Element()); return elements.get(id); }, createElement() { return new Element(); } };
 const sockets = [];
 class WebSocket {
     constructor() { sockets.push(this); }
@@ -24,7 +25,7 @@ class WebSocket {
 }
 const context = vm.createContext({ window: {}, document, WebSocket, location: { protocol: "https:", host: "localhost" },
     fetch: () => new Promise(() => {}), AbortSignal, setTimeout: () => 1, clearTimeout() {}, console });
-vm.runInContext(fs.readFileSync(path.join(__dirname, "../../../src/server/hub/web/backup.js"), "utf8"), context);
+for (const asset of ["navigation.js", "metrics.js", "backup.js"]) vm.runInContext(fs.readFileSync(path.join(__dirname, "../../../src/server/hub/web/" + asset), "utf8"), context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, "../../../src/server/hub/control/gui/control.js"), "utf8"), context);
 const state = { hub: { uptimeSeconds: 42 }, permissions: { role: "operator", operate: true }, stale: false,
     services: [{ key: "world", name: "World one", enabled: true, world: true, state: "running", uptimeSeconds: 40, metricsAvailable: true, players: 5, cpuBasisPoints: 1200, updateTimeMs: 7 }],

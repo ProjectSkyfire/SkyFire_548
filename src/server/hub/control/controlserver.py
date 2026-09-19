@@ -100,7 +100,7 @@ class ControlServer:
         self.app.router.add_get('/control/v1/commands/{id}', self.result)
         self.app.router.add_get('/control/v1/events', self.events)
         self.app.router.add_get('/', self.index)
-        for asset in ('control.js', 'control.css', 'backup.js'):
+        for asset in ('control.js', 'control.css', 'backup.js', 'metrics.js', 'navigation.js'):
             self.app.router.add_get('/' + asset, self.asset)
         self.app.on_startup.append(self.start)
         self.app.on_cleanup.append(self.close)
@@ -482,8 +482,8 @@ class ControlServer:
         return web.Response(body=self.gui, content_type='text/html', charset='utf-8')
 
     async def asset(self, request):
-        if request.path == '/backup.js':
-            return web.FileResponse(ROOT.parent / 'web/backup.js')
+        if request.path in ('/backup.js', '/metrics.js', '/navigation.js'):
+            return web.FileResponse(ROOT.parent / 'web' / request.path[1:])
         return web.FileResponse(ROOT / 'gui' / request.path[1:])
 
 

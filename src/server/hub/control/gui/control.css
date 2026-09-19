@@ -41,3 +41,23 @@ tr:last-child td { border-bottom: 0; }
 @media (max-width: 650px) { header { padding: 16px; gap: 14px; } header span { display: none; } #workspace { display: block; } .sidebar { min-height: auto; border-right: 0; border-bottom: 1px solid var(--border); } #services { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .content { padding: 16px; } .panel { padding: 18px; } .login { margin: 40px 16px; } .heading { align-items: start; } }
 
 .backup-schedule { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 24px; max-width: 540px; }
+
+/* Shared health dashboard: client-session metrics, independently refreshed. */
+.health-grid,.metric-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin:20px 0; }
+.health-card,.metric-panel { background:#1b212a; color:#e8ebef; border:1px solid #354252; border-radius:8px; padding:18px; min-width:0; }
+.health-card h2,.metric-panel h2 { font-size:16px; margin:0 0 12px; }
+.health-card p { color:#f5af66; text-transform:capitalize; }
+.health-card[data-state="running"] p { color:#88d7ac; }
+.health-card small { color:#adb9c7; }
+.metric-value { font-size:24px; margin:12px 0; }
+.metric-panel svg { width:100%; height:auto; display:block; }
+.metric-panel svg text { fill:#adb9c7; font-size:11px; }
+.metric-gridline { stroke:#354252; stroke-width:1; }
+.metric-line { fill:none; stroke:#f5af66; stroke-width:2; }
+.metric-dot { fill:#f5af66; }
+#health-dashboard>label,#control-health-dashboard>label { display:block; max-width:360px; }
+
+#control-nav { display:flex; gap:8px; flex-wrap:wrap; } #control-nav .active { border-color:var(--accent); color:var(--accent); }
+@media(max-width:650px) { header { flex-wrap:wrap; } #control-nav { width:100%; order:2; } }
+
+#health-dashboard>label select,#control-health-dashboard>label select { display:block; width:100%; margin-top:8px; padding:10px; background:#1b212a; color:#e8ebef; border:1px solid #354252; border-radius:6px; }

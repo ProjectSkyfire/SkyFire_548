@@ -18,8 +18,10 @@
             </span>
         </a>
         <nav id="main-nav" class="nav" aria-label="Hub navigation" hidden>
-            <button id="status-tab" class="nav-item active" type="button" aria-current="page">Console</button>
-            <button id="accounts-tab" class="nav-item" type="button" hidden>Accounts</button>
+            <button id="health-tab" data-page="health" class="nav-item active" type="button" aria-current="page">Server health</button>
+            <button id="status-tab" data-page="console" class="nav-item" type="button">Console</button>
+            <button id="backup-tab" data-page="backup" class="nav-item" type="button">Backup</button>
+            <button id="accounts-tab" data-page="accounts" class="nav-item" type="button" hidden>Accounts</button>
             <button id="logout-button" class="nav-item command" type="button">Sign out</button>
         </nav>
     </header>
@@ -56,7 +58,9 @@
                 </div>
             </aside>
             <div class="app-content">
-        <section id="status-view" class="status-view" aria-labelledby="status-title" hidden>
+        <section id="health-view" data-page-view="health" class="status-view"><div class="page-heading"><h1>Server health</h1></div><div id="health-dashboard"></div></section>
+        <section id="backup-view" data-page-view="backup" class="status-view" hidden><div class="page-heading"><h1>Backup</h1></div><section id="backup-schedules" class="account-panel"></section></section>
+        <section id="status-view" data-page-view="console" class="status-view" aria-labelledby="status-title" hidden>
             <div class="page-heading">
                 <div>
                     <p class="eyebrow">World administration</p>
@@ -92,10 +96,9 @@
                 </form>
                 <p id="world-node-message" role="status" aria-live="polite"></p>
             </details>
-            <section id="backup-schedules" class="account-panel"></section>
         </section>
 
-        <section id="accounts-view" class="status-view" aria-labelledby="accounts-title" hidden>
+        <section id="accounts-view" data-page-view="accounts" class="status-view" aria-labelledby="accounts-title" hidden>
             <div class="page-heading"><div><p class="eyebrow">Player administration</p><h1 id="accounts-title">Accounts</h1></div></div>
             <p id="accounts-routing"></p>
             <p id="accounts-message" role="status" aria-live="polite"></p>
@@ -135,6 +138,8 @@
         </div>
     </main>
 
+    <script src="/navigation.js" defer></script>
+    <script src="/metrics.js" defer></script>
     <script src="/status.js" defer></script>
     <script src="/accounts.js" defer></script>
     <script src="/backup.js" defer></script>

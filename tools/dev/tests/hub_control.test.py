@@ -301,7 +301,7 @@ async def integration(args, root):
         print('PASS reconnect replay/resync, read-only WebSocket, live permission revocation, expiry and flood rejection')
         server.rate.buckets.clear()
         async with recovery.get(origin + '/', ssl=trust) as response:
-            assert response.status == 200 and 'Your cluster' in await response.text()
+            assert response.status == 200 and 'Server health' in await response.text()
         process.terminate(); process.wait(timeout=10)
         await req(recovery, 'logout', {}, 200)
         assert not any(value.username == prefix + '_recovery' for value in server.sessions.values())

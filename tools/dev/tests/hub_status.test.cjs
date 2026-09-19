@@ -36,14 +36,41 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
                 await new Promise(resolve => { releaseOperation = resolve; });
                 return json({ accepted: true }, 202);
             }
+            if (url.pathname === "/api/v1/backup/schedules") return json({canEdit: true, schedules: [
+                {target:"hub", enabled:0, mode:"interval", intervalMinutes:60, minuteOfDay:0, weekday:0, revision:1}
+            ]});
             if (url.pathname.startsWith("/api/v1/accounts/")) return json({ items: [], next: 0 });
             if (url.pathname === "/api/v1/logout") { authenticated = false; return json({ ok: true }); }
             const name = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
-            if (["index.html", "app.js", "status.js", "accounts.js", "app.css"].includes(name))
+            if (["index.html", "app.js", "status.js", "accounts.js", "backup.js", "metrics.js", "navigation.js", "app.css"].includes(name))
                 return route.fulfill({ contentType: name.endsWith("js") ? "text/javascript" : name.endsWith("css") ? "text/css" : "text/html", body: fs.readFileSync(path.join(web, name)) });
             return route.fulfill({ status: 404, body: "" });
         });
         await page.goto("http://hub.test/");
+        await page.locator("#health-view").waitFor({ state: "visible" });
+        assert.equal(await page.locator("#status-view").isVisible(), false);
+        assert.equal(await page.locator("#backup-view").isVisible(), false);
+        assert.equal(await page.locator("#health-dashboard svg").count(), 3);
+        await page.evaluate(() => {
+            const now=Date.now(), data=healthDashboard.latest;
+            for (let i=0;i<130;i++) healthDashboard.update(data,now+i*5000);
+            if (healthDashboard.history.get('world').length !== 120) throw Error('History must be bounded');
+            healthDashboard.stale();
+            if (healthDashboard.history.get('world').at(-1).cpu !== null) throw Error('Connection loss must break graph lines');
+            healthDashboard.update({...data, services:data.services.map(item=>({...item,cpu:null}))},now+650000);
+        });
+        assert.equal(await page.locator('.metric-value').nth(1).textContent(), 'Metrics unavailable');
+        await page.evaluate(() => { healthDashboard.reset(); return loadStatus(); });
+        if (process.env.HUB_TEST_HEALTH_SCREENSHOT) await page.screenshot({path:process.env.HUB_TEST_HEALTH_SCREENSHOT,fullPage:true});
+        await page.setViewportSize({width:390,height:844});
+        assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth),true,'health fits mobile');
+        await page.setViewportSize({width:1280,height:800});
+        await page.locator('#backup-tab').click();
+        await page.locator('.backup-schedule input[type=number]').fill('125');
+        await page.evaluate(() => loadStatus());
+        assert.equal(await page.locator('#backup-view').isVisible(),true);
+        assert.equal(await page.locator('.backup-schedule input[type=number]').inputValue(),'125');
+        await page.locator("#status-tab").click();
         await page.locator("#world-console").waitFor({ state: "visible" });
         await page.locator("#world-command").fill(".server restart 300");
         await page.evaluate(() => {

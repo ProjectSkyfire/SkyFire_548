@@ -5,6 +5,8 @@
 "use strict";
 const byId = id => document.getElementById(id);
 let csrf = "", snapshot = null, socket = null, retry = null, cursor = null, backoff = 1000, signedIn = false, sending = false, generation = 0;
+const pages = new window.HubPageNavigation();
+const healthDashboard = new window.HubHealthDashboard(byId('control-health-dashboard'));
 let targetSignature = "", connected = false;
 const operations = new Map(), serviceCards = new Map();
 const backupSchedules = new window.HubBackupSchedules(byId('backup-schedules'), value => api('backup/schedules',value));
@@ -25,7 +27,7 @@ async function api(path, body) {
 }
 function connection(message, stale = false) { text(byId("connection"), message); byId("connection").classList.toggle("stale", stale); }
 function reset(message = "") {
-    backupSchedules.reset();
+    backupSchedules.reset(); healthDashboard.reset(); pages.reset(); byId("control-nav").hidden = true;
     ++generation; connected = false; signedIn = false; csrf = ""; snapshot = cursor = null;
     clearTimeout(retry); retry = null;
     if (socket) { const old = socket; socket = null; old.close(); }
@@ -70,6 +72,11 @@ function targets() {
 function render() {
     if (!snapshot) return;
     byId("workspace").hidden = byId("logout").hidden = false; byId("login-panel").hidden = true;
+    byId('control-nav').hidden = false;
+    byId('control-console-tab').hidden = !snapshot.permissions.operate;
+    pages.refresh();
+    healthDashboard.update({hubUptime:snapshot.hub?.uptimeSeconds||0,stale:snapshot.stale,services:snapshot.services.map(item=>({
+        ...item,cpu:typeof item.cpuBasisPoints === "number" && item.cpuBasisPoints>=0?item.cpuBasisPoints/100:null,update:item.updateTimeMs}))});
     backupSchedules.update(snapshot.permissions.role === 'administrator');
     text(byId("hub-name"), `Hub · ${uptime(snapshot.hub?.uptimeSeconds)}`);
     text(byId("identity"), `${byId("identity").dataset.username || ""} · ${snapshot.permissions.role}`);
@@ -118,7 +125,7 @@ function connect() {
         socket = null;
         if (event.code === 1008) { reset("Session ended or access changed. Sign in again."); return; }
         connection("Disconnected · reconnecting (values may be stale)", true);
-        connected = false; if (snapshot) targets();
+        connected = false; healthDashboard.stale(); if (snapshot) targets();
         retry = setTimeout(connect, backoff); backoff = Math.min(backoff * 2, 15000);
     };
 }

@@ -150,8 +150,10 @@ window.HubStatus = (() => {
                 const data = await response.json();
                 if (requestGeneration === generation) render(data);
             } catch (error) {
-                if (requestGeneration === generation)
+                if (requestGeneration === generation) {
                     text(updated, "Connection lost · retrying (values may be stale)");
+                    callbacks.onStale?.();
+                }
             } finally { window.clearTimeout(timeout); }
         })();
         request = activeRequest;

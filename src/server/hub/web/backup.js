@@ -21,7 +21,7 @@ window.HubBackupSchedules = class {
         if (this.loading) return;
         const generation = this.generation; this.loading = true;
         if (!this.message) { this.message = document.createElement('p'); this.message.setAttribute('role','status'); }
-        this.root.append(this.message); this.message.textContent = 'Loading backup schedules…';
+        this.root.append(this.message); this.message.textContent = 'Loading backup schedulesâ€¦';
         try {
             const data = await this.transport();
             if (generation !== this.generation) return;
@@ -56,9 +56,9 @@ window.HubBackupSchedules = class {
             else input.type = type;
             input.value = String(value); label.append(input); form.append(label); controls.push(input); return input;
         };
-        const enabled = field('Use this schedule when backups become available', '', schedule.enabled, [['0','Disabled'],['1','Enabled — awaiting backup service']]);
+        const enabled = field('Use this schedule when backups become available', '', schedule.enabled, [['0','Disabled'],['1','Enabled â€” awaiting backup service']]);
         const mode = field('Frequency', '', schedule.mode, [['interval','Every N minutes'],['daily','Daily'],['weekly','Weekly']]);
-        const interval = field('Interval in minutes (15–10080)', 'number', schedule.intervalMinutes); interval.min = '15'; interval.max = '10080'; interval.step = '1';
+        const interval = field('Interval in minutes (15â€“10080)', 'number', schedule.intervalMinutes); interval.min = '15'; interval.max = '10080'; interval.step = '1';
         const time = field('Time (UTC)', 'time', String(Math.floor(schedule.minuteOfDay/60)).padStart(2,'0')+':'+String(schedule.minuteOfDay%60).padStart(2,'0')); time.step = '60';
         const weekday = field('Day (UTC)', '', schedule.weekday, ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map((day,index)=>[String(index),day]));
         const modeChanged = () => {
@@ -79,7 +79,7 @@ window.HubBackupSchedules = class {
             const value = { id, target:schedule.target, enabled:Number(enabled.value), mode:mode.value,
                 intervalMinutes:mode.value === 'interval' ? Number(interval.value) : 60,
                 minuteOfDay:mode.value === 'interval' ? 0 : parts[0]*60+parts[1], weekday:mode.value === 'weekly' ? Number(weekday.value) : 0, revision:schedule.revision };
-            entry.saving = true; this.permissions(entry); message.textContent = 'Saving…';
+            entry.saving = true; this.permissions(entry); message.textContent = 'Savingâ€¦';
             try {
                 const data = await this.transport(value);
                 if (generation !== this.generation) return;

@@ -908,6 +908,8 @@ std::string HubWebServer::ServeAsset(std::string const& target) const
         relativePath = "app.js";
     else if (target == "/status.js")
         relativePath = "status.js";
+    else if (target == "/metrics.js" || target == "/navigation.js")
+        relativePath = target.substr(1);
     else if (target == "/backup.js")
         relativePath = "backup.js";
     else if (target == "/accounts.js")

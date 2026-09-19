@@ -2,25 +2,17 @@
 
 (() => {
     const view = document.querySelector("#accounts-view");
-    const statusTab = document.querySelector("#status-tab");
     const accountsTab = document.querySelector("#accounts-tab");
     const message = document.querySelector("#accounts-message");
     const workspace = document.querySelector("#accounts-workspace");
-    let csrf = "", permitted = false, enabled = false, active = false, busy = false;
+    let csrf = "", permitted = false, enabled = false, busy = false;
     let selectedId = 0, searchNext = 0, permissionNext = 0, ipNext = "", generation = 0;
 
     const byId = (id) => document.getElementById(id);
     const field = (form, name) => form.elements.namedItem(name);
     const values = (form) => Object.fromEntries(new FormData(form));
     function announce(text, error = false) { message.textContent = text; message.classList.toggle("form-error", error); }
-    function showView() {
-        view.hidden = !active || !permitted;
-        document.querySelector("#status-view").hidden = active && permitted;
-        statusTab.classList.toggle("active", !active);
-        accountsTab.classList.toggle("active", active);
-        statusTab.setAttribute("aria-current", active ? "false" : "page");
-        accountsTab.setAttribute("aria-current", active ? "page" : "false");
-    }
+    function showView() { window.hubPages?.refresh(); }
     function setBusy(value) {
         busy = value;
         workspace.querySelectorAll("[data-mutation]").forEach((button) => { button.disabled = value || !enabled || !permitted; });
@@ -127,9 +119,8 @@
             select.replaceChildren(...data.items.map((item) => { const option = document.createElement("option"); option.value = String(item.id); option.textContent = `${item.name} (${item.id})`; return option; }));
         });
     }
-    statusTab.addEventListener("click", () => { active = false; showView(); });
     accountsTab.addEventListener("click", readAction(async () => {
-        active = true; showView();
+        window.hubPages?.select("accounts");
         if (enabled) await Promise.all([search(), loadRealms(), ipList()]);
     }));
     byId("account-search").addEventListener("submit", readAction(() => search()));
@@ -178,7 +169,7 @@
             setBusy(busy); showView();
         },
         reset() {
-            generation++; csrf = ""; permitted = false; enabled = false; active = false; busy = false; selectedId = 0;
+            generation++; csrf = ""; permitted = false; enabled = false; busy = false; selectedId = 0;
             view.hidden = true; accountsTab.hidden = true; byId("account-editor").hidden = true;
             workspace.querySelectorAll("form").forEach((form) => form.reset());
             workspace.querySelectorAll(".account-table").forEach((target) => target.replaceChildren());

@@ -19,6 +19,8 @@ const worldNode = document.querySelector("#world-node");
 const nodeSettings = document.querySelector("#world-node-settings");
 const nodeForm = document.querySelector("#world-node-form");
 const nodeMessage = document.querySelector("#world-node-message");
+window.hubPages = new window.HubPageNavigation();
+const healthDashboard = new window.HubHealthDashboard(document.querySelector('#health-dashboard'));
 let currentStatus = null;
 const isWorld = (component) => component.isWorld === true || component.key === "world";
 let worldCommandSending = false;
@@ -43,6 +45,8 @@ function showLogin(message = "") {
     worldOptionsSignature = "";
     window.HubAccounts?.reset();
     backupSchedules.reset();
+    healthDashboard.reset();
+    window.hubPages.reset();
     worldCommandAllowed = false;
     currentStatus = null;
     worldNode.replaceChildren();
@@ -64,12 +68,13 @@ function showLogin(message = "") {
 function showStatus() {
     appShell.hidden = false;
     loginView.hidden = true;
-    statusView.hidden = false;
+    window.hubPages.reset();
     mainNav.hidden = false;
 }
 
 function renderStatus(data) {
     currentStatus = data;
+    document.querySelector("#status-tab").hidden = data.canSendWorldCommands !== true && data.canOperateServices !== true;
     window.HubAccounts?.update(data);
     csrfToken = data.csrfToken || "";
     backupSchedules.update(data.canSendWorldCommands === true);
@@ -158,9 +163,11 @@ worldCommandForm.addEventListener("submit", async (event) => {
 // changed control data; metric-only ticks never touch account forms or the console.
 function acceptStatus(data) {
     if (appShell.hidden) showStatus();
+    healthDashboard.update({hubUptime:data.uptimeSeconds||0,services:data.components.filter(item=>item.managed).map(item=>({
+        ...item,world:isWorld(item),cpu:item.cpuPercent,update:item.updateTimeMs}))});
     const controlData = {
         csrfToken: data.csrfToken, canSendWorldCommands: data.canSendWorldCommands,
-        accountsEnabled: data.accountsEnabled,
+        accountsEnabled: data.accountsEnabled, canOperateServices: data.canOperateServices,
         components: data.components.filter(isWorld).map(({key, name, isWorld, enabled, state,
             canSendCommands, commandPending, commandResult}) =>
             ({key, name, isWorld, enabled, state, canSendCommands, commandPending, commandResult}))
@@ -185,7 +192,7 @@ function editWorldNode(component) {
 function loadStatus() {
     return window.HubStatus.refresh();
 }
-window.HubStatus.configure({ onStatus: acceptStatus, onUnauthorized: showLogin, onEdit: editWorldNode });
+window.HubStatus.configure({ onStatus: acceptStatus, onUnauthorized: showLogin, onStale: () => healthDashboard.stale(), onEdit: editWorldNode });
 
 loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
