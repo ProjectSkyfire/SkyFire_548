@@ -2,6 +2,7 @@
 # See LICENSE.md file for Copyright information
 """Isolated MySQL backup/restore drill. Never writes to configured deployment databases."""
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import ast
 import re
 import importlib.util
@@ -45,7 +46,7 @@ def main():
             if name in selected:
                 text=''.join(ast.literal_eval(part) for part in re.findall(r'"(?:[^"\\]|\\.)*"',body))
                 hub.query('SET @backup_sql='+module.literal(text)+'; PREPARE backup_check FROM @backup_sql; DEALLOCATE PREPARE backup_check;')
-        data.query("CREATE TABLE example(id INT PRIMARY KEY,value VARCHAR(100)) ENGINE=InnoDB; INSERT INTO example VALUES(1,'saved character');")
+        data.query("CREATE TABLE example(id INT PRIMARY KEY,value VARCHAR(100)) ENGINE=InnoDB; INSERT INTO example VALUES(1,'saved character'); CREATE TABLE legacy(id INT PRIMARY KEY,value VARCHAR(100)) ENGINE=MyISAM; INSERT INTO legacy VALUES(1,'world data');")
         with tempfile.TemporaryDirectory(prefix='skyfire-backup-drill-') as temporary:
             root = Path(temporary)
             (root / 'hub.conf').write_text('HubDatabaseInfo = "' + ';'.join(hub_info) + '"', encoding='utf-8')
@@ -65,7 +66,28 @@ def main():
                 hub.query("INSERT INTO hub_backup_jobs(id,target,actor,kind,source_id) VALUES(" +
                           ','.join(module.literal(value) for value in (identifier,'characters','test',kind,source or '')) + ')')
                 return worker.claim()
+            hub.query('UPDATE hub_backup_worker SET services_stopped=1,hub_seen=NOW() WHERE id=1')
+            # READ (not READ LOCAL) must block concurrent MyISAM inserts.
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                with worker.locked_snapshot(data,True):
+                    blocked=executor.submit(data.query,"INSERT INTO legacy VALUES(2,'concurrent insert')")
+                    time.sleep(.5)
+                    assert not blocked.done(), 'MyISAM inserts must wait for the snapshot lock'
+                blocked.result(timeout=5)
+            data.query('DELETE FROM legacy WHERE id=2')
+            stop_health.set(); thread.join()
+            hub.query('UPDATE hub_backup_worker SET services_stopped=0,hub_seen=NOW() WHERE id=1')
+            try:
+                worker.backup({'id':secrets.token_hex(16),'target':'characters'})
+                raise AssertionError('MyISAM backup accepted while services were active')
+            except RuntimeError as error:
+                assert 'all game services stopped' in str(error)
+            assert hub.query('SELECT maintenance FROM hub_backup_worker WHERE id=1')=='0'
+            hub.query('UPDATE hub_backup_worker SET services_stopped=1,hub_seen=NOW() WHERE id=1')
+            stop_health.clear(); thread=threading.Thread(target=health); thread.start()
             job = enqueue(); worker.backup(job)
+            assert hub.query('SELECT maintenance FROM hub_backup_worker WHERE id=1')=='0'
+            assert json.loads((root/'archives'/job['id']/'manifest.json').read_text())['consistency']=='maintenance table READ locks'
             record = hub.query('SELECT state,bytes,sha256 FROM hub_backup_jobs WHERE id='+module.literal(job['id'])).split('\t')
             assert record[0]=='completed' and int(record[1])>0 and len(record[2])==64
             archive = root/'archives'/job['id']/'database.sql'

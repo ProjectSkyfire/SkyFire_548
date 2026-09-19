@@ -2,6 +2,9 @@
 # See LICENSE.md file for Copyright information
 """Manual backup worker. Python 3.11+, MySQL mysql/mysqldump; no third-party modules."""
 import argparse
+from contextlib import contextmanager
+import queue
+import threading
 import csv
 import datetime as dt
 import hashlib
@@ -153,6 +156,8 @@ class Worker:
         self.last_heartbeat = time.monotonic()
 
     def tick(self, disk=True):
+        if getattr(self, "snapshot_lock", None) is not None and self.snapshot_lock.poll() is not None:
+            raise RuntimeError("Database read locks were lost; backup is not valid.")
         if STOP and not getattr(self, "rolling_back", False):
             raise RuntimeError('Backup interrupted by worker shutdown.')
         if time.monotonic() - self.last_heartbeat >= 5:
@@ -190,15 +195,74 @@ class Worker:
         if self.hub.query(f"SELECT state FROM hub_backup_jobs WHERE id={job_id}") != state:
             raise RuntimeError('Cannot verify backup completion; worker lease may have expired.')
 
+    @contextmanager
+    def locked_snapshot(self, database, publish):
+        owner = literal(self.owner)
+        acquired = False
+        process = None
+        try:
+            # Target-table READ locks do not block hub heartbeat/audit writes in the separate hub database.
+            if publish:
+                result = self.hub.query("UPDATE hub_backup_worker SET maintenance=1 WHERE id=1 AND maintenance=0 "
+                    "AND recovery_safe=1 AND services_stopped=1 AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) "
+                    f"AND owner={owner} AND lease_until>NOW(); SELECT ROW_COUNT();")
+                acquired = result == '1'
+                if not acquired:
+                    raise RuntimeError('MyISAM backup requires all game services stopped and healthy hub recovery state. Stop services gracefully, then retry.')
+            elif self.hub.query("SELECT maintenance=1 AND services_stopped=1 AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) FROM hub_backup_worker WHERE id=1") != '1':
+                raise RuntimeError('MyISAM rollback backup requires active recovery maintenance with services stopped.')
+            tables = database.query("SELECT table_name FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE' ORDER BY table_name").splitlines()
+            if not tables:
+                raise RuntimeError('Cannot determine the tables to lock for backup.')
+            qualified = ['`' + database.info[4].replace('`','``') + '`.`' + table.replace('`','``') + '` READ' for table in tables]
+            args, env = database.command(self.mysql)
+            args += ['--connect-timeout=10','--database='+database.info[4],'--batch','--raw','--skip-column-names','--unbuffered']
+            process = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL, text=True, encoding='utf-8', env=env, **hidden())
+            self.snapshot_lock = process
+            ready = queue.Queue()
+            reader = threading.Thread(target=lambda: ready.put(process.stdout.readline()), daemon=True)
+            reader.start()
+            process.stdin.write('LOCK TABLES '+','.join(qualified)+"; SELECT 'SKYFIRE_BACKUP_LOCKED';\n")
+            process.stdin.flush()
+            deadline = time.monotonic()+30
+            while True:
+                self.tick()
+                try:
+                    if ready.get(timeout=.25).strip() != 'SKYFIRE_BACKUP_LOCKED':
+                        raise RuntimeError('Cannot acquire database read locks; check LOCK TABLES privileges.')
+                    break
+                except queue.Empty:
+                    if time.monotonic()>=deadline:
+                        raise RuntimeError('Timed out acquiring backup read locks. Check other database operations.')
+            yield
+        finally:
+            self.snapshot_lock = None
+            if process is not None:
+                if process.poll() is None: process.kill()
+                process.wait()
+                if process.stdin: process.stdin.close()
+                if process.stdout: process.stdout.close()
+            if acquired:
+                self.hub.query(f"UPDATE hub_backup_worker SET maintenance=0 WHERE id=1 AND owner={owner} AND recovery_safe=1 AND lease_until>NOW()")
+
     def backup(self, job, publish=True):
+        database = self.targets.get(job['target'])
+        if database is None:
+            raise RuntimeError('Backup target is not configured.')
+        needs_locks = database.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE' AND engine<>'InnoDB'") != '0'
+        if needs_locks:
+            if job['target']=='hub':
+                raise RuntimeError('Hub control tables must use InnoDB; locking them would block backup coordination.')
+            with self.locked_snapshot(database,publish):
+                return self.create_backup(job,publish,True)
+        return self.create_backup(job,publish,False)
+
+    def create_backup(self, job, publish, locked):
         target, job_id = job['target'], job['id']
         if target not in self.targets or not re.fullmatch('[0-9a-f]{32}', job_id):
             raise RuntimeError('Backup target is not configured.')
         database = self.targets[target]
-        # Single-transaction cannot give a consistent snapshot for MyISAM or other nontransactional tables.
-        nontransactional = database.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE' AND engine<>'InnoDB'")
-        if nontransactional != '0':
-            raise RuntimeError('Backup requires InnoDB tables; nontransactional tables need a maintenance backup.')
         version = database.query('SELECT VERSION()')
         events = int(database.query('SELECT COUNT(*) FROM information_schema.events WHERE event_schema=DATABASE()'))
         table_count = int(database.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE'"))
@@ -206,7 +270,7 @@ class Worker:
         directory.mkdir(mode=0o700)  # Exclusive job directory; never overwrite an existing archive.
         partial = directory / 'database.sql.partial'
         args, env = database.command(self.dump)
-        args += ['--single-transaction', '--quick', '--skip-lock-tables', '--no-tablespaces',
+        args += ([] if locked else ['--single-transaction']) + ['--quick', '--skip-lock-tables', '--no-tablespaces',
                  '--column-statistics=0', '--set-gtid-purged=OFF', '--hex-blob', '--routines', '--events',
                  '--triggers', '--default-character-set=utf8mb4', '--', database.info[4]]
         started = dt.datetime.now(dt.timezone.utc).isoformat()
@@ -251,7 +315,7 @@ class Worker:
                     'toolVersion': self.tool_version, 'startedAt': started,
                     'completedAt': dt.datetime.now(dt.timezone.utc).isoformat(), 'tables': table_count,
                     'bytes': size, 'sha256': checksum, 'archive': 'database.sql',
-                    'consistency': 'single-database InnoDB snapshot; no concurrent schema changes permitted',
+                    'consistency': 'maintenance table READ locks' if locked else 'single-database InnoDB snapshot; no concurrent schema changes permitted',
                     'restoreVerified': False, 'events': events}
         self.heartbeat()
         with (directory / 'manifest.json.partial').open('x', encoding='utf-8') as output:

@@ -23,8 +23,11 @@ one explicit worldserver.conf. Domains must use distinct database names; aliases
 credentials or other databases. Access credentials are read locally and passed to MySQL in
 its child environment, never in command-line arguments, logs or web responses.
 
-The worker uses an InnoDB single-transaction dump with routines, events and triggers. It
-refuses nontransactional tables. Do not run schema migrations during a backup. Each target
+The worker uses an InnoDB single-transaction dump with routines, events and triggers. For a database containing MyISAM or other nontransactional tables, gracefully stop all
+game services first. The worker enters temporary maintenance and holds table-level READ
+locks in a separate connection throughout the dump. These locks also block concurrent
+inserts; the hub database remains writable for heartbeat and audit updates. Temporary
+maintenance is released when the backup finishes or fails. Hub control tables must remain InnoDB. Do not run schema migrations during a backup. Each target
 is a separate snapshot; separate databases are not a coordinated cluster recovery point.
 The archive and manifest are published only after a successful dump and checksum readback.
 This verifies file integrity, not restoration. The manifest explicitly records that distinction.
