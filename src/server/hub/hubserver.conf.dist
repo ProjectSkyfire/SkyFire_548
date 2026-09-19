@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091805
+ConfVersion=2026091806
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -225,9 +225,18 @@ Web.Root = "web"
 
 Web.AllowRemote = 0
 
+# Phase 7 Python HTTPS/WebSocket gateway. Leave empty to disable the private gateway API.
+# Apply sql/updates/hub/2026_09_18_hub_02.sql first. Generate 32 random bytes as 64 lowercase
+# hex characters in this file; share it only with the control service. Relative to this config.
+# Requires Web.BindIP to be loopback and Web.AllowRemote=0. Public TLS terminates in control/.
+# Gateway logins also require access flag 16. Local console: admin role <name> <role> remote.
+# Roles: viewer, operator, administrator, recovery (reserved; backups arrive in Phase 8).
+# Remote requests accept only typed lifecycle/maintenance commands, never console text or paths.
+Web.ControlTokenFile = ""
+
 #
 #    Web.SessionTimeout
-#        Description: Authenticated web session lifetime in seconds, refreshed by activity.
+#        Description: Absolute authenticated web session lifetime in seconds; polling does not extend it.
 #        Default:     1800 - (30 minutes)
 
 Web.SessionTimeout = 1800

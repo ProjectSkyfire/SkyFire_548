@@ -1,0 +1,41 @@
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
+:root { color-scheme: dark; font-family: Inter, "Segoe UI", sans-serif; background: #111419; color: #e8ebef; --muted: #9ca9b8; --border: #303944; --accent: #f5af66; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+header { display: flex; align-items: center; gap: 24px; padding: 18px 28px; border-bottom: 1px solid var(--border); background: #171c24; }
+header span { color: var(--muted); } header button { margin-left: auto; }
+a.brand { text-decoration: none; font-size: 20px; font-weight: 700; color: var(--accent); }
+h1 { font-size: 30px; margin: 8px 0 24px; } h2 { margin: 0 0 16px; font-size: 18px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .11em; color: var(--accent); font-size: 11px; font-weight: 700; margin: 0 0 8px; }
+.muted { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.panel { padding: 24px; margin-bottom: 22px; background: #1b212a; border: 1px solid var(--border); border-radius: 10px; }
+.login { max-width: 430px; margin: 80px auto; } .login h1 { margin-bottom: 12px; }
+label { display: block; color: #cdd5df; margin: 14px 0 7px; font-size: 13px; }
+input, select, button { font: inherit; border-radius: 5px; }
+input, select { color: inherit; width: 100%; background: #111821; border: 1px solid #465260; padding: 10px; }
+button { border: 1px solid #465260; background: #273342; color: inherit; padding: 9px 14px; cursor: pointer; }
+button.primary { background: var(--accent); color: #211c15; font-weight: 650; border: 0; margin-top: 20px; }
+button:disabled { cursor: not-allowed; opacity: .5; } :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#workspace { display: grid; grid-template-columns: 264px minmax(0, 1fr); }
+.sidebar { padding: 24px 18px; border-right: 1px solid var(--border); background: #151a22; min-height: calc(100vh - 78px); }
+.content { padding: 30px; max-width: 1240px; width: 100%; margin: 0 auto; }
+.heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.service { padding: 14px 0; border-top: 1px solid var(--border); }
+.service strong { font-size: 14px; } .service p { font-size: 12px; margin: 7px 0 0; color: var(--muted); white-space: pre-line; }
+.service .state { color: var(--accent); }
+.note { margin-top: 24px; font-size: 12px; }
+.table-wrap { overflow-x: auto; } table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+th, td { padding: 12px 10px; border-bottom: 1px solid var(--border); } th:first-child, td:first-child { padding-left: 0; }
+tr:last-child td { border-bottom: 0; }
+.fields { display: grid; grid-template-columns: 1fr 1fr 160px; gap: 16px; }
+#connection { font-size: 13px; color: #88d7ac; } #connection.stale { color: #f5af66; }
+#login-error { color: #ffb0a8; font-size: 14px; }
+#command-result { white-space: pre-line; overflow-wrap: anywhere; font-size: 13px; }
+.event-list { padding-left: 20px; font-size: 13px; color: #cdd5df; } .event-list li { padding: 6px 0; overflow-wrap: anywhere; }
+@media (max-width: 900px) { #workspace { grid-template-columns: 220px minmax(0, 1fr); } .content { padding: 22px; } .fields { grid-template-columns: 1fr; gap: 0; } }
+@media (max-width: 650px) { header { padding: 16px; gap: 14px; } header span { display: none; } #workspace { display: block; } .sidebar { min-height: auto; border-right: 0; border-bottom: 1px solid var(--border); } #services { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .content { padding: 16px; } .panel { padding: 18px; } .login { margin: 40px 16px; } .heading { align-items: start; } }

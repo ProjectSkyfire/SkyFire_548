@@ -1,0 +1,16 @@
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See LICENSE.md file for Copyright information
+# Python 3.11+ and PHP 8.2+. Install requirements in a private virtual environment.
+enabled = false
+allow_remote = false
+bind = "127.0.0.1"
+port = 54881
+public_origin = "https://localhost:54881"
+hub_url = "http://127.0.0.1:54880"
+token_file = "control.token"
+certificate = "tls/control.pem"
+private_key = "tls/control.key"
+audit_file = "audit/control.jsonl"
+session_seconds = 900
+# Set an absolute path, or a path relative to this config directory.
+php = "runtime/php/php.exe"

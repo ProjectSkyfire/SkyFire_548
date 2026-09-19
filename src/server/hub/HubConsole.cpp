@@ -292,6 +292,44 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         input >> subcommand;
         subcommand = ToLower(subcommand);
 
+        if (subcommand == "role")
+        {
+            if (origin != HubCommandOrigin::LocalConsole)
+            {
+                std::printf("Roles can only be assigned from the local hub console.\n");
+                return true;
+            }
+            std::string username, role, scope, extra;
+            input >> username >> role >> scope;
+            uint64 flags = role == "viewer" ? 1 : role == "operator" ? 5 :
+                role == "administrator" ? 15 : role == "recovery" ? 33 : 0;
+            if (!IsValidAdminUsername(username) || !flags || (!scope.empty() && scope != "remote") || input >> extra)
+            {
+                std::printf("Usage: admin role <username> <viewer|operator|administrator|recovery> [remote]\n");
+                return true;
+            }
+            if (scope == "remote") flags |= HUB_ADMIN_ACCESS_REMOTE_LOGIN;
+            auto select = HubDatabase.GetPreparedStatement(HUB_SEL_ADMIN_BY_USERNAME);
+            select->setString(0, username);
+            if (!HubDatabase.Query(select))
+            {
+                std::printf("Administrator does not exist. Create it first.\n");
+                return true;
+            }
+            auto update = HubDatabase.GetPreparedStatement(HUB_UPD_ADMIN_ACCESS);
+            update->setUInt64(0, flags); update->setString(1, username);
+            HubDatabase.DirectExecute(update);
+            select = HubDatabase.GetPreparedStatement(HUB_SEL_ADMIN_BY_USERNAME);
+            select->setString(0, username);
+            auto verified = HubDatabase.Query(select);
+            if (!verified || verified->Fetch()[3].GetUInt64() != flags)
+                std::printf("Role update failed.\n");
+            else
+                std::printf("Assigned %s role to %s (%s). Existing sessions are rechecked on their next request.\n",
+                    role.c_str(), username.c_str(), scope == "remote" ? "remote enabled" : "local only");
+            return true;
+        }
+
         if (subcommand != "create")
         {
             std::printf("Usage: admin create <username> <password> [access_flags]\n");
@@ -403,6 +441,7 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  .server restart 300 | .server shutdown 300  Graceful countdown in seconds.\n");
     std::printf("  .server shutdown time 23:00 | .server restart time 23:00  Server local time.\n");
     std::printf("  .server shutdown cancel | .server restart cancel  Cancel the countdown.\n");
+    std::printf("  admin role <username> <viewer|operator|administrator|recovery> [remote]\n");
     std::printf("  admins     List hub administrator identities and access flags.\n");
     std::printf("  admin create <username> <password> [access_flags]\n");
     std::printf("             Create a local-only administrator (default access flags: 0xF).\n");

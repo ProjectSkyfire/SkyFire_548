@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <sstream>
 #include <utility>
@@ -277,9 +278,25 @@ int main(int argc, char** argv)
         webSessionTimeout = 1800;
     }
 
+    std::string controlToken;
+    auto controlTokenPath = sConfigMgr->GetStringDefault("Web.ControlTokenFile", "");
+    if (!controlTokenPath.empty())
+    {
+        std::filesystem::path path(controlTokenPath);
+        if (path.is_relative()) path = std::filesystem::absolute(sConfigMgr->GetFilename()).parent_path() / path;
+        std::ifstream tokenFile(path); std::getline(tokenFile,controlToken);
+        if (!controlToken.empty() && controlToken.back() == '\r') controlToken.pop_back();
+        boost::system::error_code ec; auto address = boost::asio::ip::make_address(webBindIp,ec);
+        if (ec || !address.is_loopback() || webAllowRemote || controlToken.size() != 64 ||
+            controlToken.find_first_not_of("0123456789abcdef") != std::string::npos)
+        {
+            SF_LOG_ERROR("server.hub","Control gateway requires a loopback-only web listener and a 64-character lowercase hex token file.");
+            StopDatabase(); return 1;
+        }
+    }
     HubWebServer webServer;
     if (webEnabled && !webServer.Open(webBindIp, uint16(webPort), webRoot.string(), webAllowRemote,
-        uint32(webSessionTimeout)))
+        uint32(webSessionTimeout),controlToken))
     {
         SF_LOG_ERROR("server.hub", "Unable to start the hub web console.");
         StopDatabase();
@@ -366,6 +383,7 @@ int main(int argc, char** argv)
             if (!webCommand.ClusterAction.empty())
             {
                 bool const applied = clusterServer.SetAdministration(webCommand.ServiceKey, webCommand.ClusterAction, webCommand.Actor, error);
+                webServer.CompleteControlCommand(webCommand,applied);
                 webCommand.DispatchResult->set_value(applied ? "" : error);
                 continue;
             }
@@ -410,6 +428,7 @@ int main(int argc, char** argv)
                 : webCommand.Start
                 ? processSupervisor.Start(webCommand.ServiceKey, error)
                 : processSupervisor.Stop(webCommand.ServiceKey, error);
+            webServer.CompleteControlCommand(webCommand,accepted);
             if (webCommand.DispatchResult)
                 webCommand.DispatchResult->set_value(accepted ? "" : error);
             if (!accepted)

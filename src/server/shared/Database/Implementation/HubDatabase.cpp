@@ -10,6 +10,12 @@ void HubDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_HUBDATABASE_STATEMENTS);
 
+    PrepareStatement(HUB_INS_CONTROL_AUDIT,
+        "INSERT INTO hub_control_audit(request_id,phase,actor,action,target,outcome) VALUES (?,?,?,?,?,?)", CONNECTION_SYNCH);
+    PrepareStatement(HUB_SEL_CONTROL_AUDIT,
+        "SELECT phase,actor,outcome FROM hub_control_audit WHERE request_id = ? ORDER BY id", CONNECTION_SYNCH);
+    PrepareStatement(HUB_UPD_ADMIN_ACCESS,
+        "UPDATE hub_admins SET access_flags = ? WHERE username = ?", CONNECTION_SYNCH);
     PrepareStatement(HUB_SEL_ACTIVE_ROUTING_NODES,
         "SELECT id, node_key, name, node_type, route_address, route_port, realm_id, region, "
         "priority, weight, capacity, current_load, fallback_node_id, maintenance, status "

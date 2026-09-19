@@ -61,7 +61,7 @@ struct HubWebServiceCommand
     std::string Name, ExecutablePath, ConfigPath, WorkingDirectory;
     std::string WorldCommand;
     std::string AccountRequest;
-    std::string ClusterAction, Actor;
+    std::string ClusterAction, Actor, CorrelationId, ControlAction;
     std::shared_ptr<std::promise<Skyfire::Auth::AccountAdminReply>> AccountResult;
     std::shared_ptr<std::promise<std::string>> DispatchResult;
 };
@@ -76,10 +76,11 @@ public:
     HubWebServer& operator=(HubWebServer const&) = delete;
 
     bool Open(std::string const& bindIp, uint16 port, std::string webRoot,
-        bool allowRemote, uint32 sessionTimeoutSeconds);
+        bool allowRemote, uint32 sessionTimeoutSeconds, std::string controlToken = "");
     void Close();
     void UpdateStatus(HubWebStatusSnapshot const& status);
     bool PollServiceCommand(HubWebServiceCommand& command);
+    void CompleteControlCommand(HubWebServiceCommand const& command, bool accepted);
 
 private:
     friend class HubWebSession;
@@ -87,6 +88,8 @@ private:
     struct AuthenticatedSession
     {
         std::string Username;
+        std::string CredentialHash;
+        bool Remote = false;
         std::string CsrfToken;
         uint64 AccessFlags = 0;
         std::chrono::steady_clock::time_point ExpiresAt;
@@ -98,6 +101,16 @@ private:
         std::chrono::steady_clock::time_point RetryAfter;
     };
 
+    std::string HandleControl(std::string const& method, std::string const& path,
+        std::map<std::string,std::string> const& headers, std::string const& body, bool loopback);
+    std::string ControlStatus(AuthenticatedSession const& session);
+    std::string ControlCommand(std::map<std::string,std::string> const& headers, std::string const& body);
+    bool AuditControl(std::string const& id, std::string const& phase, std::string const& actor,
+        std::string const& action, std::string const& target, std::string const& outcome);
+    std::string _controlToken;
+    struct ControlResult { std::string Owner, State; std::chrono::steady_clock::time_point ExpiresAt; };
+    std::mutex _controlMutex, _controlAdmissionMutex;
+    std::map<std::string,ControlResult> _controlResults;
     void AsyncAccept();
     std::string HandleRequest(std::string const& method, std::string const& target,
         std::map<std::string, std::string> const& headers, std::string const& body,

@@ -397,8 +397,9 @@ HubWebServer::~HubWebServer()
 }
 
 bool HubWebServer::Open(std::string const& bindIp, uint16 port, std::string webRoot,
-    bool allowRemote, uint32 sessionTimeoutSeconds)
+    bool allowRemote, uint32 sessionTimeoutSeconds, std::string controlToken)
 {
+    _controlToken = std::move(controlToken);
     if (!Skyfire::Net::OpenTcpAcceptor(_threadGroup.GetIoContext(), _acceptor, port, bindIp,
         "server.hub", "hub web console"))
         return false;
@@ -484,6 +485,8 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
     std::map<std::string, std::string> const& headers, std::string const& body,
     std::string const& remoteAddress, bool remoteIsLoopback)
 {
+    if (target.compare(0,21,"/internal/control/v1/") == 0)
+        return HandleControl(method,target,headers,body,remoteIsLoopback);
     if (!remoteIsLoopback && !_allowRemote)
         return MakeResponse(403, "application/json", "{\"error\":\"remote web access is disabled\"}");
 
@@ -531,10 +534,12 @@ std::string HubWebServer::HandleLogin(std::string const& body, std::string const
 
     bool authenticated = false;
     uint64 accessFlags = 0;
+    std::string credentialHash;
     if (result)
     {
         Field* fields = result->Fetch();
         accessFlags = fields[3].GetUInt64();
+        credentialHash = fields[2].GetString();
         authenticated = fields[4].GetUInt8() != 0 &&
             VerifyPassword(passwordValue->second, fields[2].GetString()) &&
             (remoteIsLoopback || HubAdminCanLoginRemotely(accessFlags));
@@ -557,6 +562,8 @@ std::string HubWebServer::HandleLogin(std::string const& body, std::string const
         _loginAttempts.erase(remoteAddress);
         AuthenticatedSession session;
         session.Username = usernameValue->second;
+        session.CredentialHash = credentialHash;
+        session.Remote = !remoteIsLoopback;
         session.CsrfToken = ByteArrayToHexStr(SkyFire::Crypto::GetRandomBytes<32>());
         session.AccessFlags = accessFlags;
         session.ExpiresAt = now + std::chrono::seconds(_sessionTimeoutSeconds);
@@ -935,7 +942,14 @@ bool HubWebServer::FindSession(std::map<std::string, std::string> const& headers
     if (found == _sessions.end())
         return false;
 
-    found->second.ExpiresAt = now + std::chrono::seconds(_sessionTimeoutSeconds);
+    // Absolute expiry: background status polling must not keep an unattended session alive.
+    auto statement = HubDatabase.GetPreparedStatement(HUB_SEL_ADMIN_BY_USERNAME);
+    statement->setString(0,found->second.Username);
+    auto result = HubDatabase.Query(statement);
+    if (!result || !result->Fetch()[4].GetUInt8() || result->Fetch()[2].GetString() != found->second.CredentialHash ||
+        (found->second.Remote && !HubAdminCanLoginRemotely(result->Fetch()[3].GetUInt64())))
+    { _sessions.erase(found); return false; }
+    found->second.AccessFlags = result->Fetch()[3].GetUInt64();
     session = found->second;
     return true;
 }
