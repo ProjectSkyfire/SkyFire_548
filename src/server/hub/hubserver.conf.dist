@@ -14,6 +14,27 @@ ConfVersion=2026091806
 
 HubDatabaseInfo = "127.0.0.1;3306;skyfire;skyfire;hub"
 
+# Startup setup/update checks run before database pools, listeners and managed services.
+# Empty SqlPath disables the updater. Otherwise updates/hub must exist under this root.
+# Use an absolute path, e.g. "D:/SkyFire/sql" or "/opt/skyfire/sql".
+HubDatabase.SqlPath = ""
+
+# Install base/hub_database.sql only into an empty schema (disabled by default).
+# AutoCreate additionally allows creation of a missing database; requires CREATE privilege.
+HubDatabase.AutoSetup = 0
+HubDatabase.AutoCreate = 0
+
+# One-time adoption of an existing, fully updated database without tracking.
+# Records ALL discovered updates as applied without executing them. Apply outstanding
+# migrations manually first; enable for one startup only, then disable it again.
+HubDatabase.AutoBaseline = 0
+
+# Reject changes to previously applied files by default. 1 warns and skips reapplication.
+HubDatabase.AllowUpdateHashMismatch = 0
+
+# Development/staging only: also scan pending_updates/hub. Leave disabled in production.
+HubDatabase.ImportPendingUpdates = 0
+
 #
 #    HubDatabase.WorkerThreads
 #        Description: Number of asynchronous hub database worker threads.

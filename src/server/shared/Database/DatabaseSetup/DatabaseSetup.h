@@ -71,6 +71,9 @@ namespace Database
         bool IsValid() const;
     };
 
+    SetupOptions MakeHubDatabaseSetupOptions(bool autoSetup, bool autoCreate, bool autoBaseline, std::string sqlPath);
+    SetupPlan BuildHubDatabaseSetupPlan(SetupOptions const& options, SetupState const& state, bool baseSqlExists,
+        std::vector<SqlUpdateFile> const& updates);
     SetupOptions MakeAuthDatabaseSetupOptions(bool autoSetup, bool autoCreate, std::string sqlPath);
     SetupOptions MakeAuthDatabaseSetupOptions(bool autoSetup, bool autoCreate, bool autoBaseline, std::string sqlPath);
     SetupOptions MakeCharacterDatabaseSetupOptions(bool autoSetup, bool autoCreate, std::string sqlPath);

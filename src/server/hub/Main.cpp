@@ -23,6 +23,7 @@
 #include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
 #include "HubConsole.h"
+#include "HubDatabaseSetup.h"
 #include "HubBackupGuard.h"
 #include "HubClusterServer.h"
 #include "HubAuthProxy.h"
@@ -137,6 +138,12 @@ namespace
             return false;
         }
 
+        if (!SetupHubDatabase(connectionInfo))
+        {
+            MySQL::Library_End();
+            return false;
+        }
+
         int32 workerThreads = sConfigMgr->GetIntDefault("HubDatabase.WorkerThreads", 1);
         if (workerThreads < 1 || workerThreads > 32)
         {
@@ -153,7 +160,7 @@ namespace
 
         if (!HubDatabase.Open(connectionInfo, uint8(workerThreads), uint8(synchronousThreads)))
         {
-            SF_LOG_ERROR("server.hub", "Cannot open the hub database. Check HubDatabaseInfo and apply hub SQL updates, including 2026_09_18_hub_00.sql.");
+            SF_LOG_ERROR("server.hub", "Cannot open the hub database. Check HubDatabaseInfo and HubDatabase.SqlPath; the hub schema must match this build.");
             MySQL::Library_End();
             return false;
         }

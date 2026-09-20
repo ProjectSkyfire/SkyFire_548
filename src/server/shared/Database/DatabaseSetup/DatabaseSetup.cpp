@@ -192,6 +192,58 @@ namespace Database
         return Error.empty();
     }
 
+    SetupOptions MakeHubDatabaseSetupOptions(bool autoSetup, bool autoCreate, bool autoBaseline, std::string sqlPath)
+    {
+        SetupOptions options;
+        options.AutoSetup = autoSetup;
+        options.AutoCreate = autoCreate;
+        options.AutoBaseline = autoBaseline;
+        options.Domain = "hub";
+        options.SqlPath = std::move(sqlPath);
+        options.BaseFileName = "hub_database.sql";
+        options.UpdatesDirectory = "updates/hub";
+        options.PendingUpdatesDirectory = "pending_updates/hub";
+        return options;
+    }
+
+    SetupPlan BuildHubDatabaseSetupPlan(SetupOptions const& options, SetupState const& state, bool baseSqlExists,
+        std::vector<SqlUpdateFile> const& updates)
+    {
+        SetupPlan plan = BuildDatabaseSetupPlan(options, state, baseSqlExists, updates);
+        if (!plan.IsValid() || !plan.ShouldInstallBase)
+            return plan;
+
+        // The hub base is a rolled-up schema. Only these released migrations are
+        // included; future releases and development SQL must still execute.
+        static std::set<std::string> const included =
+        {
+            "2026_09_15_hub_00.sql", "2026_09_15_hub_01.sql",
+            "2026_09_18_hub_00.sql", "2026_09_18_hub_01.sql",
+            "2026_09_18_hub_02.sql", "2026_09_18_hub_03.sql",
+            "2026_09_19_hub_00.sql", "2026_09_19_hub_01.sql",
+            "2026_09_19_hub_02.sql"
+        };
+        plan.PendingUpdates.clear();
+        for (SqlUpdateFile const& update : updates)
+        {
+            bool const released = std::filesystem::path(update.Path).parent_path().lexically_normal() ==
+                (std::filesystem::path(options.SqlPath) / options.UpdatesDirectory).lexically_normal();
+            if (released && included.count(update.Name))
+            {
+                if (update.Hash.empty())
+                {
+                    plan.Error = "hub database base migration has no content hash: " + update.Name;
+                    return plan;
+                }
+                plan.BaselineUpdates.push_back(update);
+            }
+            else
+                plan.PendingUpdates.push_back(update);
+        }
+        plan.ShouldBaselineUpdates = !plan.BaselineUpdates.empty();
+        return plan;
+    }
+
     SetupOptions MakeAuthDatabaseSetupOptions(bool autoSetup, bool autoCreate, std::string sqlPath)
     {
         return MakeAuthDatabaseSetupOptions(autoSetup, autoCreate, false, std::move(sqlPath));

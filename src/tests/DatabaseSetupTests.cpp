@@ -32,6 +32,95 @@ namespace
         return false;
     }
 
+    bool TestHubSetupAndUpgradePlans()
+    {
+        using namespace Skyfire::Database;
+        auto options = MakeHubDatabaseSetupOptions(false, false, false, "sql");
+        bool passed = Expect(options.Domain == "hub" && options.BaseFileName == "hub_database.sql" &&
+            options.UpdatesDirectory == "updates/hub" && options.PendingUpdatesDirectory == "pending_updates/hub" &&
+            !options.AutoSetup && !options.AutoCreate && !options.AutoBaseline &&
+            !options.AllowUpdateHashMismatch && !options.ImportPendingUpdates,
+            "Hub setup defaults must be opt-in and use the hub SQL domain");
+        std::vector<SqlUpdateFile> updates =
+        {
+            { "2026_09_19_hub_02.sql", "sql/updates/hub/2026_09_19_hub_02.sql", "base-hash" },
+            { "2026_09_20_hub_00.sql", "sql/updates/hub/2026_09_20_hub_00.sql", "new-hash" },
+            { "2026_09_21_feature.sql", "sql/pending_updates/hub/2026_09_21_feature.sql", "pending-hash" }
+        };
+        SetupState empty;
+        empty.DatabaseExists = true;
+        passed &= Expect(!BuildHubDatabaseSetupPlan(options, empty, true, updates).IsValid(),
+            "Empty hub must require explicit setup");
+        options.AutoSetup = true;
+        auto fresh = BuildHubDatabaseSetupPlan(options, empty, true, updates);
+        passed &= Expect(fresh.IsValid() && fresh.ShouldInstallBase && fresh.ShouldBaselineUpdates &&
+            fresh.BaselineUpdates.size() == 1 && fresh.PendingUpdates.size() == 2,
+            "Hub base must skip included DDL while still applying future and pending updates");
+        passed &= Expect(!BuildHubDatabaseSetupPlan(options, empty, false, updates).IsValid(),
+            "Fresh hub must require a readable base SQL file");
+        empty.DatabaseExists = false;
+        passed &= Expect(!BuildHubDatabaseSetupPlan(options, empty, true, updates).IsValid(),
+            "Missing hub must require AutoCreate");
+        options.AutoCreate = true;
+        passed &= Expect(BuildHubDatabaseSetupPlan(options, empty, true, updates).ShouldCreateDatabase,
+            "Explicit AutoCreate must allow missing hub setup");
+        auto noHash = updates;
+        noHash[0].Hash.clear();
+        passed &= Expect(!BuildHubDatabaseSetupPlan(options, empty, true, noHash).IsValid(),
+            "Hub base cannot record an unreadable included migration");
+
+        SetupState existing;
+        existing.DatabaseExists = true;
+        existing.SchemaTableCount = 20;
+        options.AutoSetup = false;
+        passed &= Expect(!BuildHubDatabaseSetupPlan(options, existing, false, updates).IsValid(),
+            "Untracked existing hubs must fail without explicit adoption");
+        options.AutoBaseline = true;
+        auto adopt = BuildHubDatabaseSetupPlan(options, existing, false, updates);
+        passed &= Expect(adopt.IsValid() && adopt.ShouldBaselineUpdates && !adopt.ShouldInstallBase &&
+            adopt.BaselineUpdates.size() == updates.size() && adopt.PendingUpdates.empty(),
+            "Explicit adoption must record existing releases without executing SQL");
+        options.AutoBaseline = false;
+        existing.UpdateTrackingExists = true;
+        existing.AppliedUpdates.insert(updates[0].Name);
+        existing.AppliedUpdateHashes[updates[0].Name] = updates[0].Hash;
+        auto upgrade = BuildHubDatabaseSetupPlan(options, existing, false, updates);
+        passed &= Expect(upgrade.IsValid() && !upgrade.ShouldInstallBase && !upgrade.ShouldBaselineUpdates &&
+            upgrade.PendingUpdates.size() == 2,
+            "Tracked hub must apply only unapplied updates with AutoSetup off");
+        existing.AppliedUpdateHashes[updates[0].Name] = "changed";
+        passed &= Expect(!BuildHubDatabaseSetupPlan(options, existing, false, updates).IsValid(),
+            "Hub startup must reject edited applied migrations by default");
+        options.AllowUpdateHashMismatch = true;
+        passed &= Expect(BuildHubDatabaseSetupPlan(options, existing, false, updates).IsValid(),
+            "Explicit hub hash override must preserve the shared updater behavior");
+        return passed;
+    }
+
+    bool TestHubPendingDiscoveryOrder()
+    {
+        using namespace Skyfire::Database;
+        auto root = std::filesystem::temp_directory_path() / "skyfire_hub_sql_discovery_test";
+        // Use a distinct empty fixture; never remove an existing directory.
+        if (!std::filesystem::create_directory(root))
+            return Expect(false, "Hub SQL discovery test directory already exists");
+        std::filesystem::create_directories(root / "updates/hub");
+        std::filesystem::create_directories(root / "pending_updates/hub");
+        std::ofstream(root / "updates/hub/2026_09_20_hub_00.sql") << "SELECT 1;";
+        std::ofstream(root / "pending_updates/hub/2026_09_21_002.sql") << "SELECT 3;";
+        std::ofstream(root / "pending_updates/hub/2026_09_21_001.sql") << "SELECT 2;";
+        auto options = MakeHubDatabaseSetupOptions(false, false, false, root.string());
+        bool passed = Expect(DiscoverSqlUpdates(options).size() == 1,
+            "Hub pending SQL must be excluded by default");
+        options.ImportPendingUpdates = true;
+        auto updates = DiscoverSqlUpdates(options);
+        passed &= Expect(updates.size() == 3 && updates[0].Name == "2026_09_20_hub_00.sql" &&
+            updates[1].Name == "2026_09_21_001.sql" && updates[2].Name == "2026_09_21_002.sql" &&
+            !updates[2].Hash.empty(), "Hub pending SQL must be hashed and ordered by filename");
+        std::filesystem::remove_all(root);
+        return passed;
+    }
+
     bool TestAuthDefaultsAreConservative()
     {
         Skyfire::Database::SetupOptions options = Skyfire::Database::MakeAuthDatabaseSetupOptions(false, false, "");
@@ -828,6 +917,8 @@ int main()
 {
     bool passed = true;
 
+    passed &= TestHubSetupAndUpgradePlans();
+    passed &= TestHubPendingDiscoveryOrder();
     passed &= TestAuthDefaultsAreConservative();
     passed &= TestCharacterDefaultsAreConservative();
     passed &= TestWorldDefaultsAreConservative();

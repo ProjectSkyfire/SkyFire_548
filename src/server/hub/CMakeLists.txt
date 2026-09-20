@@ -8,6 +8,7 @@
 file(GLOB sources_Localdir *.cpp *.h)
 file(GLOB_RECURSE web_assets web/*)
 list(APPEND sources_Localdir HubAuthProxy.cpp HubAuthProxy.h HubClusterServer.cpp HubClusterServer.h HubProcessSupervisor.cpp HubProcessSupervisor.h HubBackupCycle.cpp HubWebServer.cpp HubWebServer.h)
+list(APPEND sources_Localdir HubDatabaseSetup.cpp HubDatabaseSetup.h)
 list(REMOVE_DUPLICATES sources_Localdir)
 
 source_group(CMake FILES CMakeLists.txt)
@@ -123,3 +124,13 @@ elseif(WIN32)
   install(FILES hubserver.conf.dist DESTINATION ".")
   install(DIRECTORY web control backup DESTINATION ".")
 endif()
+
+# Ship the hub schema and update stream with INSTALL; runtime import remains opt-in.
+if(WIN32)
+  set(hub_sql_destination "sql")
+else()
+  set(hub_sql_destination "bin/sql")
+endif()
+install(FILES "${CMAKE_SOURCE_DIR}/sql/base/hub_database.sql" DESTINATION "${hub_sql_destination}/base")
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/sql/updates/hub" DESTINATION "${hub_sql_destination}/updates")
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/sql/pending_updates/hub" DESTINATION "${hub_sql_destination}/pending_updates")
