@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <functional>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -63,6 +64,7 @@ public:
     bool SendAccountRequest(std::string const& request, std::function<void(std::string const&)> callback, std::string& error);
     bool ReloadDatabaseRecords(std::string& error);
     void Update();
+    void UpdateBackupCycle(bool clusterIdle);
     void StopAll();
 
     HubManagedServiceStatus GetStatus(std::string const& serviceKey) const;
@@ -95,6 +97,7 @@ private:
         bool CommandPending = false;
         bool RestartPending = false;
         bool SuppressRestart = false;
+        bool BackupControlled = false;
         std::string CommandResult;
         bool MetricsAvailable = false;
         uint32 Players = 0;
@@ -124,6 +127,11 @@ private:
 
     std::unordered_map<std::string, ManagedServiceRuntime> _services;
     bool _shuttingDown = false;
+    bool _backupInternalCommand = false;
+    bool _backupLaunching = false;
+    std::string _backupBoot, _backupCycle;
+    std::set<std::string> _backupSent, _backupAcknowledged, _backupStarted;
+    std::chrono::steady_clock::time_point _backupUpdateAt;
 };
 
 #endif

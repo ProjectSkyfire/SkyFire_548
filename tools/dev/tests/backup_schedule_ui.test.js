@@ -27,14 +27,15 @@ async function main() {
     widget.update(true); await new Promise(resolve=>setImmediate(resolve));
     const form = root.children.find(element=>element.tag==='form');
     const inputs = widget.forms[0].controls;
-    const [enabled, mode, interval, time, weekday, button] = inputs;
+    const [enabled, mode, interval, time, weekday, timezone, button] = inputs;
     time.value = '22:35';
     for (let i=0;i<100;i++) widget.update(true);
     assert.equal(reads,1); assert.equal(time.value,'22:35'); assert.equal(root.children.includes(form),true);
-    mode.value = 'weekly'; mode.events.change(); weekday.value = '6'; enabled.value = '1';
+    mode.value = 'weekly'; mode.events.change(); weekday.value = '6'; enabled.value = '1'; timezone.value='server';
     await form.events.submit({preventDefault(){}});
     assert.equal(writes.length,1); assert.equal(writes[0].minuteOfDay,1355); assert.equal(writes[0].weekday,6);
     assert.equal(writes[0].mode,'weekly'); assert.equal(writes[0].revision,0);
+    assert.equal(writes[0].timeZone,'server');
     assert.equal(time.value,'22:35');
     mode.value = 'interval'; mode.events.change(); interval.value = '45';
     assert.equal(time.disabled,true); assert.equal(interval.disabled,false);

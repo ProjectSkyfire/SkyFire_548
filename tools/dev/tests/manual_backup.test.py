@@ -46,8 +46,9 @@ def main():
         hub.query((repo / 'sql/updates/hub/2026_09_19_hub_00.sql').read_text())
         hub.query((repo / 'sql/updates/hub/2026_09_18_hub_03.sql').read_text())
         hub.query((repo / 'sql/updates/hub/2026_09_19_hub_01.sql').read_text())
+        hub.query((repo / 'sql/updates/hub/2026_09_19_hub_02.sql').read_text())
         statements=(repo/'src/server/shared/Database/Implementation/HubDatabase.cpp').read_text()
-        selected={'HUB_SEL_BACKUP_WORKER','HUB_SEL_BACKUP_JOBS','HUB_SEL_BACKUP_JOB','HUB_INS_BACKUP_JOB','HUB_UPD_BACKUP_HUB_HEALTH','HUB_INS_RESTORE_JOB','HUB_UPD_BACKUP_PIN'}
+        selected={'HUB_SEL_BACKUP_WORKER','HUB_SEL_BACKUP_JOBS','HUB_SEL_BACKUP_JOB','HUB_INS_BACKUP_JOB','HUB_UPD_BACKUP_HUB_HEALTH','HUB_INS_RESTORE_JOB','HUB_UPD_BACKUP_PIN','HUB_SEL_BACKUP_CYCLE','HUB_SEL_BACKUP_SCHEDULES','HUB_UPD_BACKUP_SCHEDULE'}
         for name,body in re.findall(r'PrepareStatement\((HUB_\w+),\s*(.*?)CONNECTION_SYNCH\);',statements,re.S):
             if name in selected:
                 text=''.join(ast.literal_eval(part) for part in re.findall(r'"(?:[^"\\]|\\.)*"',body))
@@ -122,27 +123,61 @@ def main():
             assert worker.next_run(schedule,monday)==monday+86400
             schedule['mode']='weekly'; assert worker.next_run(schedule,monday)==monday+7*86400
             schedule['mode']='interval'; assert worker.next_run(schedule,monday)==monday+900
-            # A persisted overdue occurrence survives restarts without duplicate admission.
-            hub.query("UPDATE hub_backup_schedules SET enabled=1,mode='interval',interval_minutes=15 WHERE target="+module.literal(args.domain))
+            # Central wall-clock schedules account for DST, gaps and repeated times.
+            central={'mode':'daily','minute':180,'weekday':0,'interval':15,'timezone':'server'}
+            epoch=lambda value: int(module.dt.datetime.fromisoformat(value).timestamp())
+            assert worker.next_run(central,epoch('2026-01-15T00:00:00+00:00'),'America/Chicago')==epoch('2026-01-15T09:00:00+00:00')
+            assert worker.next_run(central,epoch('2026-07-15T00:00:00+00:00'),'America/Chicago')==epoch('2026-07-15T08:00:00+00:00')
+            central['minute']=90
+            assert worker.next_run(central,epoch('2026-11-01T05:00:00+00:00'),'America/Chicago')==epoch('2026-11-01T06:30:00+00:00')
+            assert worker.next_run(central,epoch('2026-11-01T06:31:00+00:00'),'America/Chicago')==epoch('2026-11-02T07:30:00+00:00')
+            central['minute']=150
+            assert worker.next_run(central,epoch('2026-03-08T06:00:00+00:00'),'America/Chicago')==epoch('2026-03-08T08:30:00+00:00')
+            # One hour before a due set, request ONE hub-owned shutdown for both domains.
+            hub.query("UPDATE hub_backup_schedules SET enabled=1,mode='interval',interval_minutes=15 WHERE target IN ('hub',"+module.literal(args.domain)+')')
             worker.schedule()
-            hub.query('UPDATE hub_backup_schedule_runs SET next_run=UNIX_TIMESTAMP()-60 WHERE target='+module.literal(args.domain))
+            assert hub.query('SELECT COUNT(*) FROM hub_backup_cycles')=='0'
+            hub.query('UPDATE hub_backup_schedule_runs SET next_run=UNIX_TIMESTAMP()+3600')
             stop_health.set(); thread.join()
             hub.query('UPDATE hub_backup_worker SET services_stopped=0,hub_seen=NOW() WHERE id=1')
             worker.schedule(); assert worker.claim() is None
-            assert 'Waiting for gracefully stopped' in hub.query('SELECT automation_status FROM hub_backup_worker WHERE id=1')
+            cycle=hub.query("SELECT id FROM hub_backup_cycles WHERE active_slot=1")
+            assert cycle and hub.query('SELECT countdown_seconds FROM hub_backup_cycles WHERE id='+module.literal(cycle))=='3600'
+            assert hub.query('SELECT COUNT(*) FROM hub_backup_cycle_targets WHERE cycle_id='+module.literal(cycle))=='2'
+            assert worker.cycle_job() and worker.claim() is None
+            assert hub.query('SELECT maintenance FROM hub_backup_worker WHERE id=1')=='1'
+            worker.schedule(); assert hub.query('SELECT COUNT(*) FROM hub_backup_cycles')=='1'
+            # Simulate hub acknowledgements; the worker cannot dispatch countdown commands itself.
+            hub.query("UPDATE hub_backup_cycles SET state='countdown' WHERE id="+module.literal(cycle))
+            assert worker.cycle_job() and worker.claim() is None
+            hub.query("UPDATE hub_backup_cycles SET state='backup' WHERE id="+module.literal(cycle))
+            assert worker.cycle_job() and worker.claim() is None, 'live services must block all dumps'
             hub.query('UPDATE hub_backup_worker SET services_stopped=1,hub_seen=NOW() WHERE id=1')
             stop_health.clear(); thread=threading.Thread(target=health); thread.start()
-            worker.schedule(); scheduled=worker.claim(); assert scheduled and scheduled['target']==args.domain
-            worker.schedule(); assert hub.query("SELECT COUNT(*) FROM hub_backup_jobs WHERE actor='scheduler'")=='1'
-            worker.backup(scheduled)
-            assert hub.query('SELECT verified_at IS NOT NULL FROM hub_backup_jobs WHERE id='+module.literal(scheduled['id']))=='1'
-            # Simulate a worker restart with the same leased owner and the persisted schedule cursor.
+            for _ in range(3): worker.cycle_job()
+            assert hub.query('SELECT state FROM hub_backup_cycles WHERE id='+module.literal(cycle))=='restarting'
+            assert hub.query('SELECT maintenance FROM hub_backup_worker WHERE id=1')=='1','worker must wait for hub restart readiness'
+            assert hub.query("SELECT COUNT(*) FROM hub_backup_jobs WHERE cycle_id="+module.literal(cycle)+" AND state='completed' AND verified_at IS NOT NULL")=='2'
+            scheduled={'id':hub.query('SELECT id FROM hub_backup_jobs WHERE cycle_id='+module.literal(cycle)+' AND target='+module.literal(args.domain))}
+            # Simulate the hub completing restarts, then prove worker restart does not replay the set.
+            hub.query("UPDATE hub_backup_cycles SET state='completed' WHERE id="+module.literal(cycle)+"; UPDATE hub_backup_worker SET maintenance=0 WHERE id=1")
             restarted=module.Worker(root/'backup.toml'); restarted.owner=worker.owner; restarted.schedule()
-            assert hub.query("SELECT COUNT(*) FROM hub_backup_jobs WHERE actor='scheduler'")=='1'
-            # No backlog storm; changing a schedule revision establishes a future run.
-            hub.query('UPDATE hub_backup_schedule_runs SET next_run=1 WHERE target='+module.literal(args.domain))
-            hub.query('UPDATE hub_backup_schedules SET revision=revision+1 WHERE target='+module.literal(args.domain))
+            assert hub.query("SELECT COUNT(*) FROM hub_backup_jobs WHERE actor='scheduler'")=='2'
+            hub.query('UPDATE hub_backup_schedule_runs SET next_run=1')
+            hub.query('UPDATE hub_backup_schedules SET revision=revision+1')
             worker.schedule(); assert worker.claim() is None
+            # A failed member leaves the set failed and maintenance held, never automatic restart.
+            hub.query('UPDATE hub_backup_schedule_runs SET next_run=1')
+            worker.schedule()
+            failed_cycle=hub.query('SELECT id FROM hub_backup_cycles WHERE active_slot=1')
+            assert failed_cycle
+            hub.query("UPDATE hub_backup_cycles SET state='backup' WHERE id="+module.literal(failed_cycle))
+            backup_method=worker.backup
+            def failed_backup(current): raise RuntimeError('Injected backup set failure')
+            worker.backup=failed_backup; worker.cycle_job(); worker.backup=backup_method; worker.cycle_job()
+            assert hub.query('SELECT state FROM hub_backup_cycles WHERE id='+module.literal(failed_cycle))=='failed'
+            assert hub.query('SELECT maintenance FROM hub_backup_worker WHERE id=1')=='1'
+            hub.query('UPDATE hub_backup_worker SET maintenance=0 WHERE id=1')
             hub.query('UPDATE hub_backup_schedules SET enabled=0')
             # Pinning and the last verified recovery point prevent expiration.
             hub.query('UPDATE hub_backup_jobs SET finished_at=DATE_SUB(NOW(),INTERVAL 40 DAY),pinned=1 WHERE id='+module.literal(job['id']))
@@ -230,7 +265,7 @@ def main():
             assert hub.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='after_archive'")=='0'
             assert hub.query('SELECT maintenance,recovery_safe FROM hub_backup_worker WHERE id=1')=='1\t1'
             print('PASS dump/checksum, corruption rejection, concurrency, staging/live restore, protected rollback, injected failure recovery, worker fencing and offline hub recovery.')
-            print('PASS UTC schedules, restart deduplication, revision reset, automatic isolated verification, pinning and verified recovery retention.')
+            print('PASS grouped maintenance sets, full-hour warning, live-service gate, restart handoff, failure hold, Central DST, schedule deduplication, isolated verification and protected retention.')
             if args.report: args.report.write_text(json.dumps(timings,indent=2),encoding='utf-8')
     finally:
         stop_health.set()

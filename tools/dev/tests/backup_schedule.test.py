@@ -47,6 +47,10 @@ def main():
                "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema=DATABASE() AND table_name='hub_backup_jobs' AND column_name='verified_at'").strip() == '0':
             automation = Path(__file__).resolve().parents[3] / 'sql/updates/hub/2026_09_19_hub_01.sql'
             run(args.mysql, ['--database=' + database], automation.read_text())
+        if run(args.mysql, ['--batch','--skip-column-names','--database='+database],
+               "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='hub_backup_cycles'").strip() == '0':
+            cycles = Path(__file__).resolve().parents[3] / 'sql/updates/hub/2026_09_19_hub_02.sql'
+            run(args.mysql, ['--database=' + database], cycles.read_text())
         new_connection = ';'.join((host, port, user, password, database))
         config = config[:match.start(1)] + new_connection + config[match.end(1):]
         # These tests never need access to game-account data.

@@ -18,6 +18,7 @@ import signal
 import subprocess
 import time
 import tomllib
+from zoneinfo import ZoneInfo
 
 TARGETS = ('auth', 'characters', 'world', 'hub')
 STOP = False
@@ -128,6 +129,14 @@ class Worker:
                 raise RuntimeError('Verification database connection is missing.')
             self.verification_database = Database(info, self.mysql)
         self.retention_days = int(config.get('retention_days', 30))
+        self.shutdown_warning = int(config.get('shutdown_warning_seconds', 3600))
+        zone_name = config.get('server_timezone', 'system')
+        if zone_name == 'system':
+            from tzlocal import get_localzone_name
+            zone_name = get_localzone_name()
+        self.server_timezone = ZoneInfo(zone_name).key
+        if not 60 <= self.shutdown_warning <= 86400:
+            raise RuntimeError('Shutdown warning must be between 60 seconds and one day.')
         if not 0 <= self.retention_days <= 36500:
             raise RuntimeError('Retention days must be 0 (disabled) through 36500.')
         self.timeout = int(config.get('timeout_seconds', 3600))
@@ -190,7 +199,7 @@ class Worker:
         self.hub.query("UPDATE hub_backup_jobs SET state='running',owner=" + owner +
                        " WHERE state='queued' AND EXISTS(SELECT 1 FROM hub_backup_worker WHERE id=1 AND owner=" +
                        owner + " AND lease_until>NOW()) ORDER BY created_at LIMIT 1;")
-        raw = self.hub.query("SELECT JSON_OBJECT('id',id,'target',target,'kind',kind,'sourceId',source_id) FROM hub_backup_jobs WHERE state='running' AND owner=" + owner + " LIMIT 1")
+        raw = self.hub.query("SELECT JSON_OBJECT('id',id,'target',target,'kind',kind,'sourceId',source_id,'cycleId',cycle_id) FROM hub_backup_jobs WHERE state='running' AND owner=" + owner + " LIMIT 1")
         return json.loads(raw) if raw else None
 
     def finish(self, job, state, message, size=0, checksum=''):
@@ -263,7 +272,7 @@ class Worker:
         if needs_locks:
             if job['target']=='hub':
                 raise RuntimeError('Hub control tables must use InnoDB; locking them would block backup coordination.')
-            with self.locked_snapshot(database,publish):
+            with self.locked_snapshot(database,publish and not job.get('cycleId')):
                 manifest = self.create_backup(job,publish,True)
         else:
             manifest = self.create_backup(job,publish,False)
@@ -409,63 +418,101 @@ class Worker:
                     database.query('DROP USER ' + account, use_database=False)
 
     @staticmethod
-    def next_run(schedule, after):
+    def next_run(schedule, after, server_timezone='UTC'):
         if schedule['mode'] == 'interval':
             return int(after) + int(schedule['interval']) * 60
-        current = dt.datetime.fromtimestamp(after, dt.timezone.utc)
-        candidate = current.replace(hour=0, minute=0, second=0, microsecond=0) + dt.timedelta(minutes=schedule['minute'])
-        if schedule['mode'] == 'weekly':
-            candidate += dt.timedelta(days=(schedule['weekday']-candidate.weekday()) % 7)
-            if candidate.timestamp() <= after: candidate += dt.timedelta(days=7)
-        elif candidate.timestamp() <= after:
-            candidate += dt.timedelta(days=1)
-        return int(candidate.timestamp())
+        zone = ZoneInfo(server_timezone) if schedule.get('timezone') == 'server' else dt.timezone.utc
+        current = dt.datetime.fromtimestamp(after, zone)
+        # First occurrence of a repeated fall-back time; spring gaps shift forward by the gap.
+        for offset in range(15):
+            day = current.date() + dt.timedelta(days=offset)
+            if schedule['mode'] == 'weekly' and day.weekday() != schedule['weekday']: continue
+            candidate = dt.datetime.combine(day, dt.time(schedule['minute']//60,schedule['minute']%60),zone).replace(fold=0)
+            if candidate.timestamp() > after: return int(candidate.timestamp())
+        raise RuntimeError('Cannot calculate the next backup occurrence.')
 
     def schedule(self):
         now = int(self.hub.query('SELECT UNIX_TIMESTAMP()'))
-        rows = self.hub.query("SELECT JSON_OBJECT('target',target,'enabled',enabled,'mode',mode,'interval',interval_minutes,'minute',minute_of_day,'weekday',weekday,'revision',revision) FROM hub_backup_schedules ORDER BY target")
-        statuses = []
+        rows = self.hub.query("SELECT JSON_OBJECT('target',target,'enabled',enabled,'mode',mode,'interval',interval_minutes,'minute',minute_of_day,'weekday',weekday,'revision',revision,'timezone',time_zone) FROM hub_backup_schedules ORDER BY target")
+        statuses, due_schedules = [], []
         for line in rows.splitlines():
             self.tick(disk=False)
             schedule = json.loads(line); target = schedule['target']; revision = schedule['revision']
-            if not schedule['enabled']:
-                latest = self.hub.query("SELECT JSON_OBJECT('backupAt',COALESCE(MAX(UNIX_TIMESTAMP(finished_at)),0),'verifiedAt',COALESCE(MAX(UNIX_TIMESTAMP(verified_at)),0)) FROM hub_backup_jobs WHERE kind='backup' AND state='completed' AND target=" + literal(target))
-                statuses.append(dict(target=target,nextRun=0,status='Disabled',**json.loads(latest)))
-                continue
-            # Edits establish a fresh future occurrence; restarting resumes the persisted cursor.
-            upcoming = self.next_run(schedule, now)
-            self.hub.query(f"INSERT INTO hub_backup_schedule_runs(target,revision,next_run) VALUES({literal(target)},{revision},{upcoming}) "
-                f"ON DUPLICATE KEY UPDATE next_run=IF(revision<>{revision},{upcoming},next_run),revision={revision}")
-            due = int(self.hub.query('SELECT next_run FROM hub_backup_schedule_runs WHERE target=' + literal(target)))
-            status = 'Scheduled'
-            if due <= now:
-                status = 'Waiting for worker availability'
-                ready = self.hub.query("SELECT maintenance=0 AND recovery_safe=1 AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) AND NOT EXISTS(SELECT 1 FROM hub_backup_jobs WHERE state IN ('queued','running')) FROM hub_backup_worker WHERE id=1") == '1'
-                database = self.targets.get(target)
-                if database is None:
-                    ready = False; status = 'Target is not configured'
-                elif ready:
-                    locks = database.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_type='BASE TABLE' AND engine<>'InnoDB'") != '0'
-                    if locks and self.hub.query('SELECT services_stopped FROM hub_backup_worker WHERE id=1') != '1':
-                        ready = False; status = 'Waiting for gracefully stopped game services (MyISAM)'
-                if ready:
-                    identifier = hashlib.sha256(f'{target}:{revision}:{due}'.encode()).hexdigest()[:32]
-                    # Job admission and cursor advancement are atomic. Unique active_slot serializes
-                    # manual and scheduled requests; duplicate occurrence IDs survive worker restarts.
-                    self.hub.query("START TRANSACTION; "
-                        "SELECT id FROM hub_backup_worker WHERE id=1 FOR UPDATE; "
-                        "INSERT IGNORE INTO hub_backup_jobs(id,target,actor) SELECT " + literal(identifier) + ',' + literal(target) + ",'scheduler' FROM hub_backup_worker w "
-                        f"WHERE w.id=1 AND owner={literal(self.owner)} AND lease_until>NOW() AND maintenance=0 AND recovery_safe=1 "
-                        "AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) AND EXISTS(SELECT 1 FROM hub_backup_schedules WHERE target=" + literal(target) + f" AND enabled=1 AND revision={revision}); "
-                        f"UPDATE hub_backup_schedule_runs SET next_run={upcoming},last_job={literal(identifier)} WHERE target={literal(target)} "
-                        f"AND revision={revision} AND next_run={due} AND EXISTS(SELECT 1 FROM hub_backup_jobs WHERE id={literal(identifier)}); "
-                        "INSERT IGNORE INTO hub_control_audit(request_id,phase,actor,action,target,outcome) "
-                        f"SELECT id,'queued',actor,'backup.schedule',target,'queued' FROM hub_backup_jobs WHERE id={literal(identifier)}; COMMIT;")
-                    due = int(self.hub.query('SELECT next_run FROM hub_backup_schedule_runs WHERE target=' + literal(target)))
-                    status = 'Scheduled' if due > now else status
+            due, status = 0, 'Disabled'
+            if schedule['enabled']:
+                # A newly enabled schedule must leave enough time for the full player warning.
+                upcoming = self.next_run(schedule, now + self.shutdown_warning, self.server_timezone)
+                zone_name = self.server_timezone if schedule['timezone']=='server' and schedule['mode']!='interval' else 'UTC'
+                self.hub.query(f"INSERT INTO hub_backup_schedule_runs(target,revision,next_run,zone_name) VALUES({literal(target)},{revision},{upcoming},{literal(zone_name)}) "
+                    f"ON DUPLICATE KEY UPDATE next_run=IF(revision<>{revision} OR zone_name<>{literal(zone_name)},{upcoming},next_run),revision={revision},zone_name={literal(zone_name)}")
+                due = int(self.hub.query('SELECT next_run FROM hub_backup_schedule_runs WHERE target=' + literal(target)))
+                status = 'Scheduled; player warning begins one countdown before backup'
+                if target not in self.targets:
+                    status = 'Target is not configured'
+                elif due <= now + self.shutdown_warning:
+                    due_schedules.append(dict(schedule, due=due, upcoming=upcoming))
+                    status = 'Waiting for scheduled maintenance set'
             latest = self.hub.query("SELECT JSON_OBJECT('backupAt',COALESCE(MAX(UNIX_TIMESTAMP(finished_at)),0),'verifiedAt',COALESCE(MAX(UNIX_TIMESTAMP(verified_at)),0)) FROM hub_backup_jobs WHERE kind='backup' AND state='completed' AND target=" + literal(target))
-            statuses.append(dict(target=target, nextRun=due, status=status, **json.loads(latest)))
-        self.hub.query('UPDATE hub_backup_worker SET automation_status=' + literal(json.dumps({'retentionDays':self.retention_days,'schedules':statuses})) + ' WHERE id=1 AND owner=' + literal(self.owner))
+            statuses.append(dict(target=target,nextRun=due,status=status,timeZone=schedule['timezone'],**json.loads(latest)))
+        if due_schedules:
+            # Group occurrences due within this warning window into one shutdown/backup/restart.
+            identity = '|'.join(f"{s['target']}:{s['revision']}:{s['due']}" for s in due_schedules)
+            cycle_id = hashlib.sha256(identity.encode()).hexdigest()[:32]
+            cycle = literal(cycle_id)
+            sql = ["START TRANSACTION; SELECT id FROM hub_backup_worker WHERE id=1 FOR UPDATE;",
+                "INSERT IGNORE INTO hub_backup_cycles(id,countdown_seconds,scheduled_at,services,message) SELECT " +
+                f"{cycle},{self.shutdown_warning},{max(s['due'] for s in due_schedules)},'','Awaiting hub shutdown countdown' FROM hub_backup_worker " +
+                f"WHERE id=1 AND owner={literal(self.owner)} AND lease_until>NOW() AND maintenance=0 AND recovery_safe=1 " +
+                "AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) AND NOT EXISTS(SELECT 1 FROM hub_backup_jobs WHERE state IN ('queued','running')) " +
+                ' AND '.join([''] + [f"EXISTS(SELECT 1 FROM hub_backup_schedules WHERE target={literal(s['target'])} AND enabled=1 AND revision={s['revision']})" for s in due_schedules]) + ';']
+            for schedule in due_schedules:
+                target = literal(schedule['target'])
+                job_id = hashlib.sha256(f"{cycle_id}:{schedule['target']}".encode()).hexdigest()[:32]
+                sql.append(f"INSERT IGNORE INTO hub_backup_cycle_targets(cycle_id,target,job_id) SELECT id,{target},{literal(job_id)} FROM hub_backup_cycles WHERE id={cycle} AND state='requested';")
+                sql.append(f"UPDATE hub_backup_schedule_runs SET next_run={schedule['upcoming']},last_job={literal(job_id)} WHERE target={target} AND revision={schedule['revision']} AND next_run={schedule['due']} AND EXISTS(SELECT 1 FROM hub_backup_cycles WHERE id={cycle});")
+            sql += [f"UPDATE hub_backup_worker SET maintenance=1 WHERE id=1 AND EXISTS(SELECT 1 FROM hub_backup_cycles WHERE id={cycle} AND state='requested');",
+                "INSERT IGNORE INTO hub_control_audit(request_id,phase,actor,action,target,outcome) " +
+                f"SELECT id,'requested','scheduler','backup.cycle','set','requested' FROM hub_backup_cycles WHERE id={cycle}; COMMIT;"]
+            self.hub.query(' '.join(sql))
+        cycle = self.hub.query("SELECT JSON_OBJECT('id',id,'state',state,'message',message,'stopAt',stop_at,'scheduledAt',scheduled_at,'countdownSeconds',countdown_seconds) FROM hub_backup_cycles ORDER BY created_at DESC,id DESC LIMIT 1")
+        self.hub.query('UPDATE hub_backup_worker SET automation_status=' + literal(json.dumps({
+            'retentionDays':self.retention_days, 'shutdownWarningSeconds':self.shutdown_warning, 'serverTimezone':self.server_timezone,
+            'schedules':statuses, 'cycle':json.loads(cycle) if cycle else None})) + ' WHERE id=1 AND owner=' + literal(self.owner))
+
+    def cycle_job(self):
+        """Admit one member only after the hub has confirmed every writer is offline."""
+        raw = self.hub.query("SELECT id,state FROM hub_backup_cycles WHERE active_slot=1")
+        if not raw: return False
+        identifier, state = raw.split('\t')
+        if state != 'backup': return True
+        cycle = literal(identifier)
+        healthy = self.hub.query("SELECT maintenance=1 AND recovery_safe=1 AND services_stopped=1 AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) FROM hub_backup_worker WHERE id=1") == '1'
+        if not healthy: return True
+        failed = self.hub.query(f"SELECT COUNT(*) FROM hub_backup_jobs WHERE cycle_id={cycle} AND state='failed'")
+        if failed != '0':
+            self.hub.query(f"UPDATE hub_backup_cycles SET state='failed',message='Backup set failed. Services remain stopped; review jobs before ending maintenance.' WHERE id={cycle} AND state='backup'")
+            return True
+        remaining = self.hub.query(f"SELECT target,job_id FROM hub_backup_cycle_targets t WHERE cycle_id={cycle} AND NOT EXISTS(SELECT 1 FROM hub_backup_jobs j WHERE j.id=t.job_id AND j.state='completed') ORDER BY target LIMIT 1")
+        if not remaining:
+            self.hub.query(f"UPDATE hub_backup_cycles SET state='restarting',message='Backup set complete; restarting previously running services' WHERE id={cycle} AND state='backup'")
+            return True
+        target, job_id = remaining.split('\t')
+        self.hub.query("START TRANSACTION; SELECT id FROM hub_backup_worker WHERE id=1 FOR UPDATE; " +
+            f"INSERT IGNORE INTO hub_backup_jobs(id,target,actor,cycle_id) SELECT {literal(job_id)},{literal(target)},'scheduler',{cycle} FROM hub_backup_worker " +
+            f"WHERE id=1 AND owner={literal(self.owner)} AND lease_until>NOW() AND maintenance=1 AND recovery_safe=1 AND services_stopped=1 " +
+            "AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) " +
+            f"AND EXISTS(SELECT 1 FROM hub_backup_cycles WHERE id={cycle} AND state='backup'); " +
+            "INSERT IGNORE INTO hub_control_audit(request_id,phase,actor,action,target,outcome) " +
+            f"SELECT id,'queued',actor,'backup.schedule',target,'queued' FROM hub_backup_jobs WHERE id={literal(job_id)}; COMMIT;")
+        job = self.claim()
+        if job:
+            if job.get('cycleId') != identifier:
+                raise RuntimeError('Unexpected job during scheduled maintenance.')
+            try: self.backup(job)
+            except Exception as error:
+                message = str(error) if type(error) is RuntimeError else 'Scheduled backup failed; check storage and configuration.'
+                self.finish(job,'failed',message[:255])
+        return True
 
     def retention(self):
         if not self.retention_days: return
@@ -670,7 +717,8 @@ class Worker:
                 if time.monotonic() - getattr(self, 'schedule_at', 0) > 15:
                     self.schedule()
                     self.schedule_at = time.monotonic()
-                job = self.claim()
+                in_cycle = self.cycle_job()
+                job = None if in_cycle else self.claim()
                 if job:
                     try:
                         if job['kind'] == 'restore':
@@ -757,7 +805,8 @@ def offline_restore_hub(worker, source_id, confirmation):
             raise RuntimeError('Hub restore row counts differ from the verified stage.')
         # Restored backup may contain a former lease or queued backup. Fence them before the hub starts.
         database.query("UPDATE hub_backup_worker SET maintenance=1,recovery_safe=1,owner='',lease_until=NULL,targets='',services_stopped=1 WHERE id=1;"
-                       "UPDATE hub_backup_jobs SET state='failed',finished_at=NOW(),message='Interrupted by offline hub recovery.' WHERE state IN ('queued','running')")
+                       "UPDATE hub_backup_jobs SET state='failed',finished_at=NOW(),message='Interrupted by offline hub recovery.' WHERE state IN ('queued','running');"
+                       "UPDATE hub_backup_cycles SET state='failed',message='Interrupted by offline hub recovery.' WHERE active_slot=1")
         save('completed')
     except Exception:
         if touched:

@@ -1,13 +1,13 @@
 # Hub scheduled backup and recovery worker
 
-Python 3.11+ and MySQL 8+ `mysql` / `mysqldump` are required. The worker has no third-party
-Python dependencies. CMake build and INSTALL copy `backup/` alongside `web/` and `control/`;
+Python 3.11+ and MySQL 8+ `mysql` / `mysqldump` are required. Install timezone support with
+`python -m pip install -r backup/requirements.txt`. CMake build and INSTALL copy `backup/` alongside `web/` and `control/`;
 existing `backup.toml` and archives are preserved. The worker runs independently of the hub.
 
 ## Setup
 
 1. Back up the hub database and apply `sql/updates/hub/2026_09_19_hub_00.sql` and
-   `2026_09_19_hub_01.sql` (plus the existing schedule migration) **before**
+   `2026_09_19_hub_01.sql`, then `2026_09_19_hub_02.sql` (plus the existing schedule migration) **before**
    starting the new hub binary. New installations include these tables in `hub_database.sql`.
 2. Copy `backup.toml.dist` to `backup.toml`. Set absolute MySQL client paths and the output
    directory. Point `hub_config` and `world_config` at this installation's configurations.
@@ -43,14 +43,40 @@ Encryption and remote archive storage are not implemented.
 
 ## Schedules, verification and retention
 
-Enabled interval, daily and weekly UTC schedules now execute. On first activation or a
-schedule edit, the worker establishes a future occurrence. A persisted cursor survives
-restarts; missed occurrences coalesce into one run. An atomic job/cursor transaction and
-deterministic occurrence id prevent duplicate runs. Manual and scheduled jobs share the
-single active job slot. A failed run is recorded and the next occurrence remains scheduled.
-MyISAM schedules wait for gracefully stopped game services; they never kill a server or
-automatically interrupt players. The Backup page reports next run, last successful backup,
-last verified restore, and maintenance waits independently of form editing.
+Operators and administrators can configure interval, daily and weekly schedules. Daily and
+weekly schedules offer UTC or the server time zone. Existing schedules remain UTC until
+explicitly edited. `server_timezone = "system"` resolves the worker host's OS timezone on
+Windows/Linux; an IANA override such as `America/Chicago` is also accepted. Central uses
+CST/CDT automatically. Repeated fall-back times run once at the first occurrence; nonexistent
+spring-forward times shift forward by the DST gap (02:30 becomes 03:30). Interval schedules
+measure elapsed minutes independently of DST. Next-run labels include the selected zone.
+
+`shutdown_warning_seconds = 3600` sends each running, hub-managed world a normal
+`server shutdown 3600` command one hour before the scheduled set. Players see the normal
+in-game countdown. Occurrences due together share a durable maintenance set. The hub records
+which services were running, blocks new starts and conflicting world commands, waits for
+clean world exits and player saves, then gracefully stops authentication services. It does
+not kill a world or use `server restart`, which would restart before the backups finish.
+All cluster leases must also be offline before dumping. Nodes outside this hub's process
+supervisor must be stopped separately; a live external node causes the set to wait/fail.
+
+The worker serializes every member of the set and its verification attempt. Only after all
+dumps complete does the hub restart the recorded services and wait for their ready messages
+before releasing maintenance. Previously stopped services stay stopped. A dump that completed
+but failed isolated verification is reported as unverified; it does not prevent restart.
+Shutdown, dump or restart failures retain maintenance for operator review. No forced shutdown
+is used for scheduled maintenance. After the countdown, a ten-minute graceful-stop timeout
+reports failure. Hub restart during an active set fails closed because prior process ownership
+cannot be safely reconstructed. Pending countdowns may still fire: stop/review services before
+ending failed maintenance. An active set cannot be released through the maintenance button.
+
+New schedules/edits leave a full warning interval before their first occurrence. Late runs
+receive a full countdown rather than shortening the player warning. Missed occurrences
+coalesce; intervals shorter than the warning cannot produce overlapping shutdown cycles.
+A persisted cursor and atomic set/cursor transaction prevent replay across worker restarts.
+Manual backup remains an immediate request and does not initiate this scheduled restart cycle.
+The Backup page reports set progress, next run, last successful backup and last verified
+restore independently of form editing. Archive protection and live restore remain admin-only.
 
 Every new ordinary backup attempts an isolated restore after releasing its snapshot locks.
 Verification creates an exclusive temporary database and a random temporary MySQL account

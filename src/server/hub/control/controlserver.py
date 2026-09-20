@@ -350,11 +350,14 @@ class ControlServer:
             return self.reply('backup.schedules', value, request)
         value = await self.json(request)
         expected = {'id', 'target', 'enabled', 'mode', 'intervalMinutes', 'minuteOfDay', 'weekday', 'revision'}
+        if 'timeZone' in value:
+            expected.add('timeZone')
+            if value['timeZone'] not in ('UTC','server'): raise ValueError('Invalid schedule time zone')
         if set(value) != expected or not isinstance(value['id'], str) or not IDENTIFIER.fullmatch(value['id']):
             raise ValueError('Invalid schedule')
         request['id'] = value['id']
-        if session.status['permissions']['role'] != 'administrator':
-            raise Failure(403, 'Administrator permission required to change backup schedules')
+        if session.status['permissions']['role'] not in ('administrator','operator'):
+            raise Failure(403, 'Operator permission required to change backup schedules')
         if value['target'] not in ('auth', 'characters', 'world', 'hub') or value['mode'] not in ('interval', 'daily', 'weekly'):
             raise ValueError('Invalid schedule target or mode')
         for key, maximum in (('enabled', 1), ('intervalMinutes', 10080), ('minuteOfDay', 1439), ('weekday', 6), ('revision', 4294967294)):

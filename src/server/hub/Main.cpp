@@ -444,6 +444,7 @@ int main(int argc, char** argv)
         }
 
         auto const liveNodes = clusterServer.Snapshot();
+        processSupervisor.UpdateBackupCycle(liveNodes.empty());
         authnetProxy.Update(liveNodes);
         legacyProxy.Update(liveNodes);
 

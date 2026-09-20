@@ -77,15 +77,16 @@ function render() {
     pages.refresh();
     healthDashboard.update({hubUptime:snapshot.hub?.uptimeSeconds||0,stale:snapshot.stale,services:snapshot.services.map(item=>({
         ...item,cpu:typeof item.cpuBasisPoints === "number" && item.cpuBasisPoints>=0?item.cpuBasisPoints/100:null,update:item.updateTimeMs}))});
-    backupSchedules.update(snapshot.permissions.role === 'administrator');
-    text(byId("hub-name"), `Hub · ${uptime(snapshot.hub?.uptimeSeconds)}`);
+    backupSchedules.update(snapshot.permissions.operate === true);
+    text(byId("hub-name"), snapshot.stale ? 'Hub offline · status unavailable' : `Hub · ${uptime(snapshot.hub?.uptimeSeconds)}`);
     text(byId("identity"), `${byId("identity").dataset.username || ""} · ${snapshot.permissions.role}`);
     byId("operations").hidden = !snapshot.permissions.operate;
     for (const service of snapshot.services) {
         let card = serviceCards.get(service.key);
         if (!card) { card = document.createElement("div"); card.className = "service"; card.append(document.createElement("strong"), document.createElement("p"), document.createElement("p")); card.children[1].className = "state"; serviceCards.set(service.key, card); byId("services").append(card); }
-        text(card.children[0], service.name); text(card.children[1], service.state);
+        text(card.children[0], service.name); text(card.children[1], snapshot.stale ? 'unknown · stale' : service.state);
         text(card.children[2], `Uptime ${uptime(service.uptimeSeconds)}` + (service.world ? service.metricsAvailable ? `\n${service.players} players · CPU ${service.cpuBasisPoints < 0 ? "—" : (service.cpuBasisPoints / 100).toFixed(1) + "%"} · ${service.updateTimeMs} ms` : "\nPlayers / load unavailable" : ""));
+        if (snapshot.stale) text(card.children[2], 'Live metrics unavailable');
     }
     for (const [key, card] of serviceCards) if (!snapshot.services.some(item => item.key === key)) { card.remove(); serviceCards.delete(key); }
     table("realms", ["Realm", "State", "Endpoint"], snapshot.realms.map(item => [item.name, `${item.state}${item.locked ? " · restricted" : ""}`, item.address ? `${item.address}:${item.port}` : "—"]), "No configured realms.");
@@ -126,6 +127,8 @@ function connect() {
         if (event.code === 1008) { reset("Session ended or access changed. Sign in again."); return; }
         connection("Disconnected · reconnecting (values may be stale)", true);
         connected = false; healthDashboard.stale(); if (snapshot) targets();
+        text(byId('hub-name'), 'Hub offline · status unavailable');
+        for (const card of serviceCards.values()) { text(card.children[1], 'unknown · stale'); text(card.children[2], 'Live metrics unavailable'); }
         retry = setTimeout(connect, backoff); backoff = Math.min(backoff * 2, 15000);
     };
 }

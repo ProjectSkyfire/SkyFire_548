@@ -77,7 +77,7 @@ function renderStatus(data) {
     document.querySelector("#status-tab").hidden = data.canSendWorldCommands !== true && data.canOperateServices !== true;
     window.HubAccounts?.update(data);
     csrfToken = data.csrfToken || "";
-    backupSchedules.update(data.canSendWorldCommands === true);
+    backupSchedules.update(data.canOperateServices === true || data.canSendWorldCommands === true);
     const worlds = data.components.filter(isWorld);
     const selected = worldNode.value;
     const signature = JSON.stringify(worlds.map((world) => [world.key, world.name]));

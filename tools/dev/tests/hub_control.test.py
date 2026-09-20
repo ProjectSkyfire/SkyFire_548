@@ -184,10 +184,10 @@ async def integration(args, root):
             assert database.startswith('skyfire_controltest_'), 'Schedule mutations require an isolated test database'
             initial = (await req(viewer, 'backup/schedules'))['payload']
             assert len(initial['schedules']) == 4 and not initial['canEdit'] and not initial['available']
-            assert initial['timezone'] == 'UTC' and initial['executionState'] == 'awaiting_backup_service'
+            assert initial['timezone'] == 'per_schedule' and initial['executionState'] == 'hub_managed_maintenance'
             auth = next(row for row in initial['schedules'] if row['target'] == 'auth')
             value = dict(auth, id=secrets.token_hex(16), enabled=1, mode='interval', intervalMinutes=30, minuteOfDay=0, weekday=0)
-            for client in (viewer, operator, recovery):
+            for client in (viewer, recovery):
                 await req(client, 'backup/schedules', value, 403)
             await req(administrator, 'backup/schedules', value, 403, {'X-Control-CSRF': 'invalid'})
             for patch in ({'enabled': True}, {'intervalMinutes': 14}, {'minuteOfDay': 1440}, {'weekday': 7}, {'target': '../auth'}, {'cron': '* * * * *'}):
@@ -215,6 +215,10 @@ async def integration(args, root):
             remote = (await req(administrator,'backup/schedules'))['payload']
             assert next(item for item in remote['schedules'] if item['target']=='auth') == row
             assert sql("SELECT mode,minute_of_day,weekday FROM hub_backup_schedules WHERE target='auth'") == 'weekly\t190\t6'
+            operator_schedule=dict(row,id=secrets.token_hex(16),timeZone='server')
+            edited=(await req(operator,'backup/schedules',operator_schedule))['payload']
+            assert edited['canEdit'] and next(item for item in edited['schedules'] if item['target']=='auth')['timeZone']=='server'
+            await req(operator,'backup/schedules',dict(operator_schedule,id=secrets.token_hex(16),timeZone='CST'),400)
             assert int(sql("SELECT COUNT(*) FROM hub_control_audit WHERE action='backup.schedule' AND phase='applied'")) >= 3
             print('PASS persisted schedules, both web interfaces, UTC modes, admin checks, malformed inputs and revision conflicts')
             # Wrapper runs this block only against its disposable hub schema. No worker is started.
@@ -236,6 +240,7 @@ async def integration(args, root):
             sql("UPDATE hub_backup_worker SET maintenance=1 WHERE id=1")
             await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'release':'maintenance'},409)
             sql("UPDATE hub_backup_jobs SET state='failed',message='Isolated API fixture completed' WHERE state='queued'")
+            sql('UPDATE hub_backup_worker SET services_stopped=1 WHERE id=1')
             await req(administrator,'backup/jobs',{'id':secrets.token_hex(16),'release':'maintenance'})
             pin={'id':secrets.token_hex(16),'archiveId':manual['id'],'pin':1}
             for client in (viewer,operator,recovery):

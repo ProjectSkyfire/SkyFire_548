@@ -127,7 +127,7 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
 {
     Update();
     std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
-    if (HubBackupMaintenance()) { error = "Backup recovery maintenance blocks service starts."; return false; }
+    if (HubBackupMaintenance() && !_backupLaunching) { error = "Backup recovery maintenance blocks service starts."; return false; }
     HubDatabase.DirectExecute("UPDATE hub_backup_worker SET services_stopped=0 WHERE id=1");
     auto service = _services.find(serviceKey);
     if (service == _services.end())
@@ -211,6 +211,7 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
     runtime.CanManageAccounts = false;
     runtime.CommandPending = false;
     runtime.SuppressRestart = false;
+    runtime.BackupControlled = false;
     runtime.RestartPending = false;
     runtime.LastExitCode = 0;
     runtime.MetricsAvailable = false;
@@ -225,6 +226,7 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
 
 bool HubProcessSupervisor::Stop(std::string const& serviceKey, std::string& error)
 {
+    if (HubBackupMaintenance()) { error = "Backup maintenance blocks world launch configuration changes."; return false; }
     Update();
     auto service = _services.find(serviceKey);
     if (service == _services.end())
@@ -257,6 +259,7 @@ bool HubProcessSupervisor::Stop(std::string const& serviceKey, std::string& erro
 
 bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& error, std::string const& key)
 {
+    if (!_backupInternalCommand && HubBackupMaintenance()) { error = "Backup maintenance owns the world shutdown countdown."; return false; }
     size_t const first = command.find_first_not_of(" ");
     if (first != std::string::npos)
         command.erase(0, first);
@@ -329,6 +332,7 @@ bool HubProcessSupervisor::SendAccountRequest(std::string const& request,
 
 bool HubProcessSupervisor::ReloadDatabaseRecords(std::string& error)
 {
+    if (!_backupCycle.empty() && HubBackupMaintenance()) { error = "Backup maintenance blocks managed-service reloads."; return false; }
     PreparedQueryResult result = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_MANAGED_SERVICES));
     std::unordered_map<std::string, ManagedServiceDefinition> definitions;
     if (result)
@@ -496,7 +500,7 @@ void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime&
 #endif
     ReadStatusMessages(key, runtime);
     auto const now = std::chrono::steady_clock::now();
-    if (!IsWorldKey(key) && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
+    if (!IsWorldKey(key) && !runtime.BackupControlled && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
         ForceStop(key, runtime);
     else if (runtime.State == HubManagedProcessState::Starting && now - runtime.StartedAt > StartupTimeout)
         runtime.State = HubManagedProcessState::Unresponsive;

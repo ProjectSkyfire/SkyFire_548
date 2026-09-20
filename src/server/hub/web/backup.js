@@ -31,13 +31,13 @@ window.HubBackupSchedules = class {
             this.root.replaceChildren(); this.forms = [];
             const heading = document.createElement('h2'); heading.textContent = 'Backup schedules';
             const explanation = document.createElement('p');
-            explanation.textContent = 'The backup worker executes enabled schedules. All schedule times are UTC. Missed occurrences are combined into one run. MyISAM backups wait for game services to be stopped gracefully.';
+            explanation.textContent = 'Choose UTC or the server time zone for daily and weekly schedules. The hub sends a player shutdown countdown before the backup set, waits for clean shutdowns, and restarts previously running services when the set finishes. Missed runs receive a full warning.';
             this.createManual();
             this.root.append(heading, explanation);
             const reload = document.createElement('button'); reload.type = 'button'; reload.textContent = 'Reload saved schedules'; reload.className = 'service-button';
             reload.addEventListener('click', () => this.load()); this.root.append(reload);
             for (const schedule of data.schedules) this.add(schedule);
-            this.message.textContent = this.allowed ? 'Save a schedule to set its next occurrence.' : 'Administrator permission is required to change schedules.';
+            this.message.textContent = this.allowed ? 'Save a schedule to set its next occurrence.' : 'Operator permission is required to change schedules.';
             this.root.append(this.message);
         } catch (error) {
             if (generation !== this.generation) return;
@@ -91,7 +91,9 @@ window.HubBackupSchedules = class {
             !source || this.manual.confirm.value !== 'RESTORE ' + source.target;
         this.manual.restoreSelect.disabled = this.jobSending; this.manual.confirm.disabled = this.jobSending;
         this.manual.release.hidden = !data?.maintenance;
-        this.manual.release.disabled = !this.allowed || !data?.canRun || !data?.recoverySafe || active || this.jobSending;
+        let cycle = null; try { cycle = JSON.parse(data?.automation || '{}').cycle; } catch (_) {}
+        const cycleActive = cycle && !['completed','failed'].includes(cycle.state);
+        this.manual.release.disabled = !this.allowed || !data?.canRun || !data?.recoverySafe || active || cycleActive || this.jobSending;
         for (const button of this.pinButtons || []) button.disabled = !this.allowed || !data?.canRun || this.jobSending;
     }
     renderJobs(data) {
@@ -102,8 +104,12 @@ window.HubBackupSchedules = class {
         this.manual.storage.textContent = `Backup volume: ${size(data.storageFree||0)} free of ${size(data.storageTotal||0)}. ${data.archiveCount||0} archives using ${size(data.archiveBytes||0)} (including rollback copies). ${data.maintenance ? 'Recovery maintenance is active.' : ''}`;
         let automation = {}; try { automation = JSON.parse(data.automation || '{}'); } catch (_) {}
         const date = value => value ? new Date(value*1000).toLocaleString() : 'none';
+        const scheduledDate = item => item.nextRun ? new Date(item.nextRun*1000).toLocaleString(undefined, {
+            timeZone:item.timeZone==='server' ? (automation.serverTimezone || 'UTC') : 'UTC', timeZoneName:'short'}) : 'none';
         this.manual.automation.textContent = `Retention: ${automation.retentionDays ? automation.retentionDays+' days' : 'disabled or worker policy unavailable'}. Pinned archives, rollback copies and the newest verified recovery point per database are protected. ` +
-            (automation.schedules || []).map(item=>`${item.target}: ${item.status}; next ${date(item.nextRun)}; last backup ${date(item.backupAt)}; last verified restore ${date(item.verifiedAt)}.`).join(' ');
+            `Server time zone: ${automation.serverTimezone || 'awaiting worker'}. Player shutdown warning: ${Math.round((automation.shutdownWarningSeconds || 3600)/60)} minutes. ` +
+            (automation.cycle ? `Backup set: ${automation.cycle.state} — ${automation.cycle.message}. ` : '') +
+            (automation.schedules || []).map(item=>`${item.target}: ${item.status}; next ${scheduledDate(item)}; last backup ${date(item.backupAt)}; last verified restore ${date(item.verifiedAt)}.`).join(' ');
         const sources=data.jobs.filter(job=>job.kind==='backup' && job.state==='completed' && job.target!=='hub');
         const signature=JSON.stringify(sources.map(job=>job.id));
         if (signature!==this.restoreSignature) {
@@ -183,12 +189,14 @@ window.HubBackupSchedules = class {
         const enabled = field('Automatic backup schedule', '', schedule.enabled, [['0','Disabled'],['1','Enabled']]);
         const mode = field('Frequency', '', schedule.mode, [['interval','Every N minutes'],['daily','Daily'],['weekly','Weekly']]);
         const interval = field('Interval in minutes (15–10080)', 'number', schedule.intervalMinutes); interval.min = '15'; interval.max = '10080'; interval.step = '1';
-        const time = field('Time (UTC)', 'time', String(Math.floor(schedule.minuteOfDay/60)).padStart(2,'0')+':'+String(schedule.minuteOfDay%60).padStart(2,'0')); time.step = '60';
-        const weekday = field('Day (UTC)', '', schedule.weekday, ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map((day,index)=>[String(index),day]));
+        const time = field('Backup time', 'time', String(Math.floor(schedule.minuteOfDay/60)).padStart(2,'0')+':'+String(schedule.minuteOfDay%60).padStart(2,'0')); time.step = '60';
+        const weekday = field('Day', '', schedule.weekday, ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map((day,index)=>[String(index),day]));
+        const timezone = field('Time zone', '', schedule.timeZone || 'UTC', [['UTC','UTC'],['server','Server time zone (includes daylight saving)']]);
         const modeChanged = () => {
             interval.parentElement.hidden = mode.value !== 'interval'; interval.required = mode.value === 'interval';
             time.parentElement.hidden = mode.value === 'interval'; time.required = mode.value !== 'interval';
             weekday.parentElement.hidden = mode.value !== 'weekly';
+            timezone.parentElement.hidden = mode.value === 'interval';
         };
         mode.addEventListener('change', () => { modeChanged(); this.permissions(entry); }); modeChanged();
         const save = document.createElement('button'); save.type = 'submit'; save.textContent = 'Save schedule'; save.className = 'primary-button'; controls.push(save);
@@ -202,7 +210,7 @@ window.HubBackupSchedules = class {
             const parts = time.value.split(':').map(Number);
             const value = { id, target:schedule.target, enabled:Number(enabled.value), mode:mode.value,
                 intervalMinutes:mode.value === 'interval' ? Number(interval.value) : 60,
-                minuteOfDay:mode.value === 'interval' ? 0 : parts[0]*60+parts[1], weekday:mode.value === 'weekly' ? Number(weekday.value) : 0, revision:schedule.revision };
+                minuteOfDay:mode.value === 'interval' ? 0 : parts[0]*60+parts[1], weekday:mode.value === 'weekly' ? Number(weekday.value) : 0, revision:schedule.revision, timeZone:timezone.value };
             entry.saving = true; this.permissions(entry); message.textContent = 'Saving…';
             try {
                 const data = await this.transport(value);

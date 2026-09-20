@@ -11,6 +11,11 @@ timeout_seconds = 3600
 minimum_free_mb = 1024
 # 0 disables deletion. The newest verified point, pinned archives and rollback copies are protected.
 retention_days = 30
+# Full in-game .server shutdown warning before a scheduled backup set. Default: one hour.
+shutdown_warning_seconds = 3600
+# Resolve the OS time zone (Central on a server configured for Central), including DST.
+# An explicit IANA name such as America/Chicago may also be used.
+server_timezone = "system"
 # Optional separate MySQL instance for restore verification (recommended, binary logging off).
 # File format: VerificationDatabaseInfo = "127.0.0.1;3307;verification_admin;password;mysql"
 # verification_config = "verification.conf"

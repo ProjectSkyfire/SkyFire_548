@@ -43,6 +43,10 @@ int main()
         { backup["intervalMinutes"] = bad; Check(!Skyfire::Backup::Decode(backup,schedule),"Invalid backup interval accepted"); }
         backup["intervalMinutes"] = "60"; backup["mode"] = "daily"; backup["minuteOfDay"] = "1439";
         Check(Skyfire::Backup::Decode(backup,schedule),"Daily UTC schedule rejected");
+        backup["timeZone"]="server";
+        Check(Skyfire::Backup::Decode(backup,schedule) && schedule.TimeZone=="server","Server time zone rejected");
+        backup["timeZone"]="CST"; Check(!Skyfire::Backup::Decode(backup,schedule),"Ambiguous fixed time-zone abbreviation accepted");
+        backup.erase("timeZone");
         backup["minuteOfDay"] = "1440"; Check(!Skyfire::Backup::Decode(backup,schedule),"Invalid time accepted");
         backup["minuteOfDay"] = "180"; backup["mode"] = "weekly"; backup["weekday"] = "6";
         Check(Skyfire::Backup::Decode(backup,schedule),"Weekly UTC schedule rejected");

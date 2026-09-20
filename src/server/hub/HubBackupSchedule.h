@@ -11,14 +11,16 @@ namespace Skyfire::Backup
 {
     struct Schedule
     {
-        std::string Id, Target, Mode;
+        std::string Id, Target, Mode, TimeZone = "UTC";
         std::uint32_t Enabled = 0, IntervalMinutes = 60, MinuteOfDay = 0, Weekday = 0, Revision = 0;
     };
     inline bool Decode(std::map<std::string,std::string> const& form, Schedule& schedule)
     {
-        if (form.size() != 8) return false;
+        if (form.size() != 8 && form.size() != 9) return false;
         auto value = [&](char const* name) { auto it = form.find(name); return it == form.end() ? std::string() : it->second; };
         schedule.Id = value("id"); schedule.Target = value("target"); schedule.Mode = value("mode");
+        schedule.TimeZone = form.count("timeZone") ? value("timeZone") : "UTC";
+        if ((form.size()==9 && !form.count("timeZone")) || (schedule.TimeZone!="UTC" && schedule.TimeZone!="server")) return false;
         if (schedule.Id.size() != 32 || schedule.Id.find_first_not_of("0123456789abcdef") != std::string::npos ||
             (schedule.Target != "auth" && schedule.Target != "characters" && schedule.Target != "world" && schedule.Target != "hub")) return false;
         auto number = [&](char const* key, std::uint32_t max, std::uint32_t& result)

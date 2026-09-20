@@ -270,9 +270,11 @@ std::string HubWebServer::BackupSchedules(bool canEdit)
 {
     auto rows = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_SCHEDULES));
     if (!rows || rows->GetRowCount() != 4) return Error(503,"Backup schedule storage unavailable; apply the hub migration.");
+    auto worker = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_WORKER));
+    bool const available = worker && worker->Fetch()[0].GetUInt64()!=0;
     std::ostringstream out;
-    out << "{\"available\":false,\"scheduleConfigurationAvailable\":true,\"canEdit\":" << (canEdit ? "true" : "false")
-        << ",\"timezone\":\"UTC\",\"executionState\":\"awaiting_backup_service\",\"schedules\":[";
+    out << "{\"available\":" << (available ? "true" : "false") << ",\"scheduleConfigurationAvailable\":true,\"canEdit\":" << (canEdit ? "true" : "false")
+        << ",\"timezone\":\"per_schedule\",\"executionState\":\"hub_managed_maintenance\",\"schedules\":[";
     bool comma = false;
     do
     {
@@ -280,7 +282,7 @@ std::string HubWebServer::BackupSchedules(bool canEdit)
         out << "{\"target\":" << Quote(f[0].GetString()) << ",\"enabled\":" << unsigned(f[1].GetUInt8())
             << ",\"mode\":" << Quote(f[2].GetString()) << ",\"intervalMinutes\":" << f[3].GetUInt32()
             << ",\"minuteOfDay\":" << f[4].GetUInt32() << ",\"weekday\":" << unsigned(f[5].GetUInt8())
-            << ",\"revision\":" << f[6].GetUInt32() << '}';
+            << ",\"revision\":" << f[6].GetUInt32() << ",\"timeZone\":" << Quote(f[8].GetString()) << '}';
     } while (rows->NextRow());
     out << "]}"; return Response(200,out.str());
 }
@@ -291,17 +293,17 @@ std::string HubWebServer::HandleBackupSchedule(std::string const& method,
     using namespace Skyfire::Control;
     AuthenticatedSession session;
     bool authenticated = FindSession(headers,session) && (!remote || (session.Remote && (session.AccessFlags & Remote)));
-    bool administrator = authenticated && (session.AccessFlags & Administrator) == Administrator;
+    bool canEdit = authenticated && (session.AccessFlags & Operate) != 0;
     if (method == "GET")
     {
         if (!authenticated) return Error(401,"Authentication required.");
         if (!(session.AccessFlags & View)) return Error(403,"Viewer permission required.");
-        return BackupSchedules(administrator);
+        return BackupSchedules(canEdit);
     }
     if (method != "POST") return Error(405,"Use GET or POST.");
     std::lock_guard<std::mutex> lock(_controlAdmissionMutex);
     std::map<std::string,std::string> form; Skyfire::Backup::Schedule schedule;
-    bool valid = Form(body,form,8) && Skyfire::Backup::Decode(form,schedule);
+    bool valid = Form(body,form,9) && Skyfire::Backup::Decode(form,schedule);
     auto id = form["id"];
     if (!RequestId(id))
     {
@@ -318,14 +320,14 @@ std::string HubWebServer::HandleBackupSchedule(std::string const& method,
         return Error(status,message);
     };
     if (!authenticated) return deny(401,"authentication","Authentication required.");
-    if (!administrator) return deny(403,"permission","Administrator permission required to change backup schedules.");
+    if (!canEdit) return deny(403,"permission","Operator permission required to change backup schedules.");
     if (Header(headers,"x-hub-csrf") != session.CsrfToken) return deny(403,"csrf","Invalid request token.");
-    if (!valid) return deny(400,"invalid","Invalid backup schedule. Use interval (15..10080 minutes), daily, or weekly, in UTC.");
+    if (!valid) return deny(400,"invalid","Invalid backup schedule. Use interval (15..10080 minutes), daily, or weekly; time zone must be UTC or server.");
     auto update = HubDatabase.GetPreparedStatement(HUB_UPD_BACKUP_SCHEDULE);
     update->setUInt8(0,uint8(schedule.Enabled)); update->setString(1,schedule.Mode);
     update->setUInt32(2,schedule.IntervalMinutes); update->setUInt32(3,schedule.MinuteOfDay);
     update->setUInt8(4,uint8(schedule.Weekday)); update->setString(5,id); update->setString(6,actor);
-    update->setString(7,schedule.Target); update->setUInt32(8,schedule.Revision);
+    update->setString(7,schedule.TimeZone); update->setString(8,schedule.Target); update->setUInt32(9,schedule.Revision);
     HubDatabase.DirectExecute(update);
     auto rows = HubDatabase.Query(HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_SCHEDULES));
     if (!rows) return Error(503,"Cannot verify save outcome. Reload before retrying.");
@@ -415,7 +417,7 @@ std::string HubWebServer::HandleBackupJobs(std::string const& method,
         auto previous = HubDatabase.GetPreparedStatement(HUB_SEL_CONTROL_AUDIT); previous->setString(0,form["id"]);
         if (HubDatabase.Query(previous)) return Error(409,"Request id already used.");
         if (!AuditControl(form["id"],"attempt",session.Username,"backup.release","hub","received")) return Error(503,"Audit unavailable.");
-        HubDatabase.DirectExecute("UPDATE hub_backup_worker SET maintenance=0 WHERE id=1 AND recovery_safe=1 AND NOT EXISTS(SELECT 1 FROM hub_backup_jobs WHERE state IN ('queued','running'))");
+        HubDatabase.DirectExecute("UPDATE hub_backup_worker SET maintenance=0 WHERE id=1 AND recovery_safe=1 AND services_stopped=1 AND NOT EXISTS(SELECT 1 FROM hub_backup_jobs WHERE state IN ('queued','running')) AND NOT EXISTS(SELECT 1 FROM hub_backup_cycles WHERE active_slot=1)");
         if (HubBackupMaintenance()) return Error(409,"Recovery is unfinished or failed. Resolve it before ending maintenance.");
         AuditControl(form["id"],"applied",session.Username,"backup.release","hub","released");
         return BackupJobs(true);

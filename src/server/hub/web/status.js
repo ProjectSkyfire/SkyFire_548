@@ -13,7 +13,7 @@ window.HubStatus = (() => {
     const cards = new Map();
     const pending = new Set();
     let callbacks = {}, snapshot = null, timer = null, request = null, controller = null;
-    let running = false, generation = 0;
+    let running = false, generation = 0, connectionLost = false;
     const text = (element, value) => { if (element.textContent !== value) element.textContent = value; };
     const isWorld = component => component.isWorld === true || component.key === "world";
     function formatUptime(seconds) {
@@ -81,8 +81,24 @@ window.HubStatus = (() => {
             card[action].title = action === "enable" ? "Allow new authentication connections or world handoffs when the node is ready." :
                 "Stop new authentication connections or world handoffs. Existing sessions continue; the process remains running.";
         }
+        if (connectionLost) {
+            card.article.className = 'component offline';
+            text(card.state, component.key === 'hub' ? 'offline' : 'unknown');
+            text(card.detail, component.key === 'hub' ? 'Hub is unreachable; waiting for a successful status response.' : 'Live status unavailable; last report is stale.');
+            text(card.metrics, 'Live metrics unavailable');
+            for (const action of ['start','stop','edit','drain','disable','enable']) card[action].disabled = true;
+        } else card.edit.disabled = false;
+    }
+    function markStale() {
+        connectionLost = true;
+        text(updated, 'Connection lost · retrying');
+        text(online, 'Hub offline · status unavailable');
+        text(uptime, 'Hub uptime unavailable');
+        if (snapshot) for (const card of cards.values()) updateCard(card,card.data,snapshot);
+        callbacks.onStale?.();
     }
     function render(data) {
+        connectionLost = false;
         snapshot = data;
         text(user, data.username);
         text(updated, `Live · ${new Date().toLocaleTimeString()}`);
@@ -102,7 +118,7 @@ window.HubStatus = (() => {
         callbacks.onStatus?.(data);
     }
     async function operate(key, action) {
-        if (!running || !snapshot || pending.has(key)) return;
+        if (!running || connectionLost || !snapshot || pending.has(key)) return;
         const operationGeneration = generation;
         pending.add(key);
         updateCard(cards.get(key), cards.get(key).data, snapshot);
@@ -151,8 +167,7 @@ window.HubStatus = (() => {
                 if (requestGeneration === generation) render(data);
             } catch (error) {
                 if (requestGeneration === generation) {
-                    text(updated, "Connection lost · retrying (values may be stale)");
-                    callbacks.onStale?.();
+                    markStale();
                 }
             } finally { window.clearTimeout(timeout); }
         })();
