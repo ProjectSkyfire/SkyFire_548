@@ -7,6 +7,7 @@
 #include "Cluster/HandoffClient.h"
 #include "Cluster/RealmDirectory.h"
 #include "Log.h"
+#include "Configuration/Config.h"
 #include "Database/DatabaseEnv.h"
 #include "Network/BoostAsioUtils.h"
 #include <boost/asio/read.hpp>
@@ -123,7 +124,8 @@ private:
             auto const now = HubClusterServer::Now();
             auto result = Handoff::Authorize(_identity,_server._registry.Snapshot(),now,request);
             std::string token;
-            if (result == Handoff::Result::Ok) result = Handoff::Execute(_server._handoffs,request,now,token);
+            if (result == Handoff::Result::Ok) result = Handoff::Execute(_server._databaseHandoffs ? static_cast<Handoff::Store&>(*_server._databaseHandoffs) :
+                static_cast<Handoff::Store&>(_server._handoffs),request,now,token);
             // Never include token, evidence, session key or client payload in diagnostics.
             SF_LOG_INFO("server.handoff", "Handoff node '%s' operation %u account %u realm %u result %u.",
                 _identity.c_str(),unsigned(request.Action),request.Bind.Account,request.Bind.Realm,unsigned(result));
@@ -296,6 +298,23 @@ bool HubClusterServer::Open(std::string const& address, std::uint16_t port, std:
         maxConnections < 1 || maxConnections > 1024) return false;
     try
     {
+        auto const store = sConfigMgr->GetStringDefault("Hub.Handoff.Store", "memory");
+        if (store != "memory" && store != "database")
+        { SF_LOG_ERROR("server.hub", "Hub.Handoff.Store must be memory or database."); return false; }
+        std::unique_ptr<HubHandoffStore> databaseHandoffs;
+        if (store == "database")
+        {
+            databaseHandoffs = std::make_unique<HubHandoffStore>();
+            if (!databaseHandoffs->Open(sConfigMgr->GetStringDefault("HubDatabaseInfo", "")))
+            {
+                SF_LOG_ERROR("server.hub", "Database handoff store unavailable; apply the durable handoff migration before enabling it.");
+                return false;
+            }
+        }
+        // Registration owners must not repeat across boots when grants survive a restart.
+        auto ownerSeed = Handoff::RandomToken();
+        if (!Handoff::IsToken(ownerSeed)) return false;
+        _nextOwner = std::stoull(ownerSeed.substr(0, 16), nullptr, 16);
         if (!SSL_CTX_set_min_proto_version(_tls.native_handle(), TLS1_2_VERSION)) return false;
         _tls.use_certificate_chain_file(certificate);
         _tls.use_private_key_file(key, boost::asio::ssl::context::pem);
@@ -303,6 +322,7 @@ bool HubClusterServer::Open(std::string const& address, std::uint16_t port, std:
         _tls.load_verify_file(ca);
         _tls.set_verify_mode(boost::asio::ssl::verify_peer | boost::asio::ssl::verify_fail_if_no_peer_cert);
         if (!Skyfire::Net::OpenTcpAcceptor(_io, _acceptor, port, address, "server.hub", "cluster listener")) return false;
+        _databaseHandoffs = std::move(databaseHandoffs);
         _registry = Registry(maxConnections);
         _leaseSeconds = leaseSeconds; _maxConnections = maxConnections;
         _closed = false;
@@ -313,6 +333,7 @@ bool HubClusterServer::Open(std::string const& address, std::uint16_t port, std:
     }
     catch (std::exception const&)
     {
+        _databaseHandoffs.reset();
         SF_LOG_ERROR("server.hub", "Unable to initialize cluster TLS listener; check certificate, key and CA settings.");
         Skyfire::Net::CloseTcpAcceptor(_acceptor);
         return false;
@@ -340,7 +361,11 @@ void HubClusterServer::Update()
 {
     if (_closed) return;
     _registry.Expire(Now());
-    if (Now() >= _handoffCleanupAt) { _handoffs.Cleanup(Now()); _handoffCleanupAt = Now() + 1000; }
+    if (Now() >= _handoffCleanupAt)
+    {
+        if (_databaseHandoffs) _databaseHandoffs->Cleanup(Now()); else _handoffs.Cleanup(Now());
+        _handoffCleanupAt = Now() + 1000;
+    }
     // Bound work per main-loop iteration so network floods cannot starve supervision.
     for (unsigned i = 0; i < 128 && _io.poll_one(); ++i) { }
 }
@@ -353,6 +378,7 @@ void HubClusterServer::Close()
     for (auto const& entry : sessions) entry.second->Stop();
     _registry.Clear();
     _handoffs.Clear();
+    _databaseHandoffs.reset();
     // Drain cancelled callbacks while the server is still closed, including the
     // accept callback, before a possible later Open() restarts this context.
     _io.restart();

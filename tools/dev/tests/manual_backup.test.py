@@ -47,6 +47,7 @@ def main():
         hub.query((repo / 'sql/updates/hub/2026_09_18_hub_03.sql').read_text())
         hub.query((repo / 'sql/updates/hub/2026_09_19_hub_01.sql').read_text())
         hub.query((repo / 'sql/updates/hub/2026_09_19_hub_02.sql').read_text())
+        hub.query((repo / 'sql/pending_updates/hub/001_durable_handoffs.sql').read_text())
         statements=(repo/'src/server/shared/Database/Implementation/HubDatabase.cpp').read_text()
         selected={'HUB_SEL_BACKUP_WORKER','HUB_SEL_BACKUP_JOBS','HUB_SEL_BACKUP_JOB','HUB_INS_BACKUP_JOB','HUB_UPD_BACKUP_HUB_HEALTH','HUB_INS_RESTORE_JOB','HUB_UPD_BACKUP_PIN','HUB_SEL_BACKUP_CYCLE','HUB_SEL_BACKUP_SCHEDULES','HUB_UPD_BACKUP_SCHEDULE'}
         for name,body in re.findall(r'PrepareStatement\((HUB_\w+),\s*(.*?)CONNECTION_SYNCH\);',statements,re.S):
@@ -250,10 +251,14 @@ def main():
             stop_health.set(); thread.join()
             # Exercise the offline hub path against this disposable schema only. Process detection
             # is tested separately; the real deployment hub intentionally remains running.
+            restored_token=secrets.token_hex(32)
+            hub.query("INSERT INTO hub_handoff_tokens(token,account,purpose,realm,address,destination,evidence,expires_at) VALUES("+
+                      module.literal(restored_token)+",123,1,0,'127.0.0.1','authnet','-',DATE_ADD(UTC_TIMESTAMP(6),INTERVAL 900 SECOND))")
             hub_job=secrets.token_hex(16)
             hub.query("INSERT INTO hub_backup_jobs(id,target,actor) VALUES("+module.literal(hub_job)+",'hub','test')")
             worker.backup(worker.claim())
             assert hub.query('SELECT verified_at IS NOT NULL FROM hub_backup_jobs WHERE id='+module.literal(hub_job))=='1', hub.query('SELECT message FROM hub_backup_jobs WHERE id='+module.literal(hub_job))
+            hub.query('UPDATE hub_handoff_tokens SET state=1')
             hub.query('CREATE TABLE after_archive(id INT PRIMARY KEY) ENGINE=InnoDB; INSERT INTO after_archive VALUES(1)')
             hub.query("UPDATE hub_backup_worker SET services_stopped=1,hub_seen=DATE_SUB(NOW(),INTERVAL 120 SECOND),lease_until=NULL WHERE id=1")
             def assert_disposable(current):
@@ -264,6 +269,7 @@ def main():
             timings['offlineHubRestoreSeconds']=round(time.monotonic()-started,3)
             assert hub.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='after_archive'")=='0'
             assert hub.query('SELECT maintenance,recovery_safe FROM hub_backup_worker WHERE id=1')=='1\t1'
+            assert hub.query('SELECT COUNT(*) FROM hub_handoff_tokens')=='0', 'Restore revived an old handoff token'
             print('PASS dump/checksum, corruption rejection, concurrency, staging/live restore, protected rollback, injected failure recovery, worker fencing and offline hub recovery.')
             print('PASS grouped maintenance sets, full-hour warning, live-service gate, restart handoff, failure hold, Central DST, schedule deduplication, isolated verification and protected retention.')
             if args.report: args.report.write_text(json.dumps(timings,indent=2),encoding='utf-8')

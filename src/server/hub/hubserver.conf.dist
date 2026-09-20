@@ -104,9 +104,15 @@ Hub.Cluster.MaxConnections = 128
 # Auth/world nodes opt in with Cluster.Handoff.Enable. Deploy matching binaries together.
 # Handoff requests require a current ready registration and mutual TLS; tokens/evidence are
 # never sent to browsers or written to hub diagnostics. Use console 'handoffs' for counters.
-# Consumed/revoked records remain until expiry to reject replay. Hub restart clears all records;
-# pending logins must retry. Existing world sessions are unaffected by handoff-store restart.
+# Consumed/revoked records remain until expiry to reject replay. Memory mode clears records
+# on hub restart; database mode retains them using database UTC expiration.
+# Existing world sessions are unaffected by handoff-store restart.
 # World destinations bind the registration owner, so a restarted world cannot inherit an old grant.
+# Store: memory (default) or database (requires pending hub durable-handoff migration).
+# Database mode never falls back to memory on failure; affected logins must retry.
+# This is shared handoff storage only, not multi-active hub/registry failover support.
+Hub.Handoff.Store = "memory"
+
 # Exactly one ready world node must own a requested realm. Multiple worlds
 # for different realms are supported; overlapping realm ownership fails closed.
 # Apply sql/updates/auth/2026_09_18_auth_00.sql before upgrading. Authnet session keys remain

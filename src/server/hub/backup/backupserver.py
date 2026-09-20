@@ -755,6 +755,12 @@ def assert_local_services_stopped(worker):
         raise RuntimeError('Gracefully stop hubserver and all game services before offline recovery.')
 
 
+def invalidate_restored_handoffs(database):
+    # Restoring an older snapshot must never make consumed grants usable again.
+    if database.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='hub_handoff_tokens'") == '1':
+        database.query('DELETE FROM hub_handoff_tokens')
+
+
 def offline_restore_hub(worker, source_id, confirmation):
     database = worker.hub
     name = database.info[4]
@@ -807,6 +813,7 @@ def offline_restore_hub(worker, source_id, confirmation):
         database.query("UPDATE hub_backup_worker SET maintenance=1,recovery_safe=1,owner='',lease_until=NULL,targets='',services_stopped=1 WHERE id=1;"
                        "UPDATE hub_backup_jobs SET state='failed',finished_at=NOW(),message='Interrupted by offline hub recovery.' WHERE state IN ('queued','running');"
                        "UPDATE hub_backup_cycles SET state='failed',message='Interrupted by offline hub recovery.' WHERE active_slot=1")
+        invalidate_restored_handoffs(database)
         save('completed')
     except Exception:
         if touched:
@@ -819,6 +826,7 @@ def offline_restore_hub(worker, source_id, confirmation):
                 if worker.table_counts(database,name)!=worker.table_counts(database,stage):
                     raise RuntimeError('Offline rollback verification failed.')
                 database.query('UPDATE hub_backup_worker SET maintenance=1,recovery_safe=1 WHERE id=1')
+                invalidate_restored_handoffs(database)
                 save('rolled_back')
             except Exception:
                 save('recovery_required')

@@ -106,3 +106,47 @@ For staging only, set `HubDatabase.ImportPendingUpdates = 1` to include
 `pending_updates/hub`. See the [pending SQL guide](../sql/pending_updates/README.md)
 for dependency ordering and the limitations of promoting already imported pending
 files. CI and the promotion script have not been modified to accept hub updates yet.
+
+## Durable handoffs (Phase 9 foundation)
+
+`Hub.Handoff.Store = "database"` selects the shared MySQL handoff store. The default
+`"memory"` preserves the previous behavior. Database mode requires
+`sql/pending_updates/hub/001_durable_handoffs.sql`, applied manually or through the
+opt-in pending updater on staging. It is not in the released update stream yet;
+CI remains unchanged. Do not modify the hub base to include pending features.
+
+The store keeps up to 65,536 tokens with a maximum 900-second TTL. Database UTC
+controls expiry. A singleton InnoDB row serializes mutations across connections;
+consumption and revocation commit before success is returned. Used/revoked tokens
+remain until expiry to reject replay. SQL failures and uncertain commits return
+unavailable, with no automatic replay or fallback to local memory. The store uses
+a dedicated connection with bounded connection/read/write/lock waits. Operations
+are synchronous on the hub loop; measure latency before enabling this beyond the
+test deployment. Counters are local to each hub process, not cluster-wide totals.
+
+Login grants survive a hub restart after auth nodes register again. World grants
+bind the world's registration owner; owner IDs now use a random boot seed, so
+re-registering after hub/world loss invalidates earlier world grants and the
+client must retry. Existing gameplay sessions are unaffected. Registry leases and
+routing decisions are still local: **do not run multiple active hubs** on the
+strength of shared token storage alone. Leader ownership, registry coordination,
+a stable ingress endpoint and failure-injection acceptance are the next steps.
+
+Offline hub restore and rollback clear durable handoffs after validating restored
+row counts. This prevents an old backup from reviving a consumed token. Deploy the
+matching backup worker when enabling database handoffs. For manual DBA recovery,
+clear `hub_handoff_tokens` before starting any hub. Keep database snapshots and
+credentials private; token/evidence fields are internal capabilities.
+
+Validation after compilation:
+
+- Build `hub_handoff_store_tests`. Its ordinary CTest invocation skips unless an
+  explicit disposable fixture is provided.
+- Run `tools/dev/tests/hub_handoff_database.test.py --verification-config PATH
+  --mysql PATH --probe PATH_TO_HUB_HANDOFF_STORE_TESTS`. The private config uses
+  `VerificationDatabaseInfo`; the runner creates/removes its own test schema and
+  supplies credentials through the child environment.
+- Run the existing TLS integration test with `--handoff-store database` against a
+  dedicated hub test database with the migration applied. The default remains
+  `--handoff-store memory`. This validates the backend through authenticated nodes;
+  it does not claim leader or public-endpoint failover acceptance.

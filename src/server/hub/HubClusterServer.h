@@ -6,6 +6,7 @@
 #define SKYFIRE_HUB_CLUSTER_SERVER_H
 #include "Cluster/ClusterRegistry.h"
 #include "Cluster/HandoffStore.h"
+#include "HubHandoffStore.h"
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ssl/context.hpp>
@@ -27,7 +28,7 @@ public:
     std::vector<Skyfire::Cluster::Node> Directory() const;
     bool LoadAdministration(std::string& error);
     bool SetAdministration(std::string const& key, std::string const& action, std::string const& actor, std::string& error);
-    Skyfire::Cluster::Handoff::Counters HandoffStatus() const { return _handoffs.Status(); }
+    Skyfire::Cluster::Handoff::Counters HandoffStatus() const { return _databaseHandoffs ? _databaseHandoffs->Status() : _handoffs.Status(); }
 private:
     friend class HubClusterSession;
     void Accept();
@@ -37,6 +38,7 @@ private:
     boost::asio::ip::tcp::acceptor _acceptor;
     Skyfire::Cluster::Registry _registry;
     Skyfire::Cluster::Handoff::MemoryStore _handoffs;
+    std::unique_ptr<HubHandoffStore> _databaseHandoffs;
     std::uint64_t _handoffCleanupAt = 0;
     std::map<std::string,Skyfire::Cluster::Node> _policies;
     std::map<std::uint64_t, std::shared_ptr<HubClusterSession>> _sessions;

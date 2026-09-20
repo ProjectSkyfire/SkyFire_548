@@ -161,6 +161,9 @@ python backup/backupserver.py --config backup/backup.toml --offline-restore-hub 
 
 This performs staging verification, a fresh rollback backup, live replacement and rollback
 on failure. Its `offline_restore_<id>/recovery.json` journal remains outside the database.
+Durable handoff tokens, when present, are cleared after hub restore or rollback so
+consumed grants cannot be revived from an old snapshot. Manual DBA recovery must
+also clear `hub_handoff_tokens` before starting any hub.
 Keep services stopped for the entire command. Start the hub afterward; restored maintenance
 blocks game-service starts until an administrator reviews recovery and ends maintenance.
 The restored hub contains the administrators, policies and job history from the selected

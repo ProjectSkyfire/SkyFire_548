@@ -47,6 +47,7 @@ def main():
     parser.add_argument('--client-probe', required=True)
     parser.add_argument('--openssl', default='openssl')
     parser.add_argument('--agent-probe')
+    parser.add_argument('--handoff-store', choices=('memory','database'), default='memory')
     args = parser.parse_args()
     hidden = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
     with tempfile.TemporaryDirectory(prefix='skyfire-handoff-') as temp:
@@ -71,7 +72,7 @@ def main():
             free.bind(('127.0.0.1',0))
             port = free.getsockname()[1]
         config = Path(args.hub_config).read_text(encoding='utf-8-sig')
-        values = {'Hub.Port':str(port),'Hub.BindIP':'"127.0.0.1"','Hub.Cluster.Enable':'1',
+        values = {'Hub.Handoff.Store':'"'+args.handoff_store+'"','HubDatabase.SqlPath':'""','Hub.Port':str(port),'Hub.BindIP':'"127.0.0.1"','Hub.Cluster.Enable':'1',
                   'Hub.Cluster.Certificate':'"'+str(root/'hub.pem')+'"',
                   'Hub.Cluster.PrivateKey':'"'+str(root/'hub.key')+'"',
                   'Hub.Cluster.CA':'"'+str(root/'ca.pem')+'"',

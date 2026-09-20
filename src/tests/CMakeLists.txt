@@ -968,3 +968,22 @@ endif()
 if(WIN32)
   target_link_libraries(realm_directory_agent_probe ws2_32.lib mswsock.lib)
 endif()
+
+# Optional real-MySQL fixture; ordinary CTest runs skip without explicit test credentials.
+add_executable(hub_handoff_store_tests HubHandoffStoreTests.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/hub/HubHandoffStore.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cluster/HandoffClient.cpp)
+target_include_directories(hub_handoff_store_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/hub ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR})
+target_link_libraries(hub_handoff_store_tests Threads::Threads ${OPENSSL_LIBRARIES} ${MYSQL_LIBRARY})
+if(TARGET Boost::headers)
+  target_link_libraries(hub_handoff_store_tests Boost::headers)
+elseif(TARGET Boost::boost)
+  target_link_libraries(hub_handoff_store_tests Boost::boost)
+endif()
+if(WIN32)
+  target_link_libraries(hub_handoff_store_tests ws2_32 mswsock)
+endif()
+add_test(NAME hub_handoff_store_tests COMMAND hub_handoff_store_tests)
+set_tests_properties(hub_handoff_store_tests PROPERTIES SKIP_RETURN_CODE 77)
