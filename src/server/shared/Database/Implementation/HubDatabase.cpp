@@ -47,7 +47,7 @@ void HubDatabaseConnection::DoPrepareStatements()
         "SELECT id, username, access_flags, enabled, last_login_at FROM hub_admins ORDER BY username",
         CONNECTION_SYNCH);
     PrepareStatement(HUB_SEL_MANAGED_SERVICES,
-        "SELECT service_key, name, executable_path, config_path, working_directory, enabled "
+        "SELECT service_key, name, executable_path, config_path, working_directory, enabled, service_kind, cluster_key "
         "FROM hub_managed_services ORDER BY service_key", CONNECTION_SYNCH);
     PrepareStatement(HUB_UPSERT_WORLD_SERVICE,
         "INSERT INTO hub_managed_services (service_key,name,executable_path,config_path,working_directory,enabled) "

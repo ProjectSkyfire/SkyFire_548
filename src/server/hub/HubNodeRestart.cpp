@@ -33,6 +33,7 @@ bool HubProcessSupervisor::RestartNodes(std::string& error)
     for (auto const& entry : _services)
     {
         auto const& runtime = entry.second;
+        if (runtime.Definition.ServiceKind) continue; // Map refresh uses its cluster channel; persistence stays online.
         if (!IsActive(runtime)) continue;
         if (!runtime.Definition.Enabled || runtime.State != HubManagedProcessState::Running || runtime.CommandPending || runtime.AccountCallback ||
             (IsWorldKey(entry.first) && !runtime.CanSendCommands))

@@ -3,6 +3,7 @@
  * See LICENSE.md file for Copyright information.
  */
 #include "Cluster/ClusterRegistry.h"
+#include "Cluster/CharacterMetrics.h"
 #include <algorithm>
 #include <iostream>
 using namespace Skyfire::Cluster;
@@ -24,6 +25,22 @@ namespace
 int main()
 {
     bool ok = true;
+    Writer characterMetrics; characterMetrics.U8(1);
+    for (unsigned value : {10u,500u,64u,20u,2u,10u,8u,3u,2u,1u,1500u,4u,1u}) characterMetrics.U32(value);
+    CharacterMetrics metrics;
+    ok &= Check(DecodeCharacterMetrics(characterMetrics.Bytes,metrics) && metrics.Connections==2 && metrics.LatencyUs==1500,
+        "Character metrics decoding failed");
+    for (std::size_t size=0; size<characterMetrics.Bytes.size(); ++size)
+    {
+        auto partial=characterMetrics.Bytes; partial.resize(size);
+        ok &= Check(!DecodeCharacterMetrics(partial,metrics),"Truncated character metrics accepted");
+    }
+    Registry characterRegistry;
+    Node characterNode; characterNode.Key="character-test"; characterNode.Type=Service::Character;
+    characterRegistry.Register(characterNode,1,0,100);
+    ok &= Check(!characterRegistry.SetCharacterMetrics(characterNode.Key,2,1,metrics) &&
+        characterRegistry.SetCharacterMetrics(characterNode.Key,1,2,metrics) &&
+        !characterRegistry.SetCharacterMetrics(characterNode.Key,1,100,metrics),"Character metric owner/lease fencing failed");
     for (std::uint32_t realm : {0u, 1u})
     {
         Writer character;

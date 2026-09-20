@@ -45,6 +45,18 @@ def rows(payload):
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_metrics_count_only_acknowledged_writes_and_include_failures(self):
+        from metrics import Metrics
+        metrics=Metrics()
+        metrics.finish(metrics.begin(),2,True)
+        metrics.finish(metrics.begin(),3,True)
+        metrics.finish(metrics.begin(),3,False)
+        packet=metrics.packet(2,True)
+        self.assertEqual(len(packet),53)
+        values=struct.unpack('!13I',packet[1:])
+        self.assertEqual(values[3:10],(3,1,1,1,1,2,0))
+        self.assertEqual(values[12],1)
+
     def test_live_character_restore_rejected_before_database_access(self):
         spec = importlib.util.spec_from_file_location('character_backup_fixture',ROOT/'src/server/hub/backup/backupserver.py')
         module = importlib.util.module_from_spec(spec)
@@ -163,6 +175,25 @@ class DatabaseTests(unittest.TestCase):
         finally:
             recovered.close()
 
+    def test_managed_service_migration_preserves_existing_records(self):
+        from pymysql.constants import CLIENT
+        cfg=self.config
+        import pymysql
+        conn=pymysql.connect(host=cfg['mysql_host'],port=cfg['mysql_port'],user=cfg['mysql_user'],password=cfg['mysql_password'],
+                             database=self.schema,autocommit=True,client_flag=CLIENT.MULTI_STATEMENTS)
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute('CREATE TABLE hub_managed_services(service_key VARCHAR(64) PRIMARY KEY,enabled INT NOT NULL) ENGINE=InnoDB')
+                cursor.execute("INSERT INTO hub_managed_services VALUES('world',1)")
+                migration=(ROOT/'sql/pending_updates/hub/003_managed_data_services.sql').read_text()
+                for _ in range(2):
+                    cursor.execute(migration)
+                    while cursor.nextset(): pass
+                cursor.execute('SELECT service_key,enabled,service_kind,cluster_key FROM hub_managed_services')
+                self.assertEqual(cursor.fetchall(),(('world',1,0,''),))
+        finally:
+            conn.close()
+
     def test_tls_daemon_and_hub_registration(self):
         asyncio.run(self.tls_fixture())
 
@@ -208,6 +239,9 @@ class DatabaseTests(unittest.TestCase):
                             self.assertEqual(body[offset],4)
                         writer.write(b'SFHC'+struct.pack('!HHIHI',1,0x8000,6,kind,15)); await writer.drain()
                         if kind==2: registered.set()
+                        if kind==10:
+                            self.assertEqual(len(body),53)
+                            self.assertEqual(body[0],1)
                 except (asyncio.IncompleteReadError,ConnectionError):
                     pass
                 finally:

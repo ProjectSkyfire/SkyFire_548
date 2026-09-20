@@ -41,6 +41,8 @@ struct HubManagedServiceStatus
     std::string CommandResult;
     std::string ExecutablePath, ConfigPath, WorkingDirectory;
     bool IsWorld = false;
+    uint8 ServiceKind = 0;
+    std::string ClusterKey;
     uint64 UptimeSeconds = 0;
     bool MetricsAvailable = false;
     uint32 Players = 0;
@@ -75,6 +77,8 @@ public:
     std::string const& NodeRestartState() const { return _nodeRestartState; }
     std::string const& NodeRestartMessage() const { return _nodeRestartMessage; }
     bool Stop(std::string const& serviceKey, std::string& error);
+    bool RestartDataService(std::string const& serviceKey, std::string& error);
+    bool CheckDataServiceStop(std::string& error) const;
     static bool IsWorldKey(std::string const& key);
     bool HasActiveWorld() const;
     bool SaveWorldNode(std::string const& key, std::string const& name, std::string const& executable,
@@ -98,6 +102,8 @@ private:
         std::string ConfigPath;
         std::string WorkingDirectory;
         bool Enabled = false;
+        uint8 ServiceKind = 0;
+        std::string ClusterKey;
     };
 
     struct ManagedServiceRuntime
@@ -115,6 +121,7 @@ private:
         std::function<void(std::string const&)> AccountCallback;
         bool CommandPending = false;
         bool RestartPending = false;
+        bool RequestedRestart = false;
         bool SuppressRestart = false;
         bool BackupControlled = false;
         bool ExpectedExit = false;

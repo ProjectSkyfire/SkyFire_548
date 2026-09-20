@@ -64,16 +64,17 @@ window.HubStatus = (() => {
         text(card.title, component.name);
         text(card.state, component.clusterKey && component.live && component.adminState !== "enabled" ? component.adminState : component.status);
         text(card.detail, component.detail || "");
-        card.metrics.hidden = !component.managed && !component.mapserver;
+        card.metrics.hidden = !component.managed && !component.mapserver && !component.characterserver;
         const cluster = component.clusterCanAdmin === true;
-        card.controls.hidden = !component.managed && !cluster;
+        card.controls.hidden = !component.managed && !cluster && !component.canRestart;
         card.start.hidden = card.stop.hidden = !component.managed;
         const pairMember = data.fallback?.enabled && [data.fallback.primary, data.fallback.standby].includes(component.key);
         card.promote.hidden = !component.managed || !pairMember;
         card.promote.disabled = active || pending.has(component.key) || !data.canOperateServices || data.restartActive;
         card.promote.title = 'Gracefully stop the other world, confirm exclusive ownership, then start this world. Players must reconnect.';
-        card.restart.hidden = !component.mapserver || !component.canRestart;
-        card.restart.disabled = pending.has(component.key) || !component.live || !data.canOperateServices || data.restartActive;
+        card.restart.hidden = !component.canRestart;
+        card.restart.disabled = pending.has(component.key) || !(component.managed ? active && component.state !== 'stopping' : component.live) || !data.canOperateServices || data.restartActive;
+        card.restart.title = 'Data-service restart requires graceful world shutdown first.';
         let metrics = `Uptime ${active ? formatUptime(component.uptimeSeconds) : "—"}`;
         if (isWorld(component)) {
             metrics += component.state === "running" && component.metricsAvailable
@@ -86,6 +87,12 @@ window.HubStatus = (() => {
                 ? `Uptime ${formatUptime(component.uptimeSeconds)} · Maps ${(component.maps||[]).join(', ')}\nCPU ${component.cpuPercent.toFixed(1)}% · Memory ${component.memoryMiB} MiB · Transfers ${component.transfers}\nSent ${(component.sentKiB/1024).toFixed(1)} MiB · Errors ${component.failures}`
                 : 'Mapserver metrics unavailable';
             card.metrics.title = 'Metrics reported through the hub every 5 seconds; expire after 15 seconds. CPU is a percentage of total logical CPU capacity.';
+        }
+        if (component.characterserver) {
+            metrics = component.metricsAvailable
+                ? `Uptime ${formatUptime(component.uptimeSeconds)} · DB ${component.databaseReady ? 'ready' : 'unavailable'}\nCPU ${component.cpuPercent.toFixed(1)}% · Memory ${component.memoryMiB} MiB\nConnections ${component.connections} · Pending ${component.pendingRequests}\nReads ${component.reads} · Writes ${component.writes} · Batches ${component.transactions}\nAverage ${component.latencyMs.toFixed(2)} ms · Errors ${component.failures}\nLast commit ${component.lastCommitAgeSeconds == null ? '—' : component.lastCommitAgeSeconds + 's ago'}`
+                : 'Character-server metrics unavailable';
+            card.metrics.title = 'Metrics expire after 15 seconds. Pending includes queued and executing requests; latency includes queue time. Write totals count acknowledged requests, not saved characters.';
         }
         text(card.metrics, metrics);
         card.start.disabled = pending.has(component.key) || !data.canOperateServices || !component.enabled || active;
@@ -152,7 +159,7 @@ window.HubStatus = (() => {
         pending.add(key);
         updateCard(cards.get(key), cards.get(key).data, snapshot);
         const component = cards.get(key).data;
-        const cluster = ["drain", "disable", "enable", "restart"].includes(action);
+        const cluster = ["drain", "disable", "enable"].includes(action) || (action === 'restart' && !component.managed);
         const label = action[0].toUpperCase() + action.slice(1);
         const progress = { start: "Starting", stop: "Stopping", restart: "Restarting", promote: "Promoting", drain: "Draining", disable: "Disabling", enable: "Enabling" }[action];
         text(actionMessage, `${progress} ${component.name}...`);

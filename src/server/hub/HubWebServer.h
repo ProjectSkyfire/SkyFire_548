@@ -38,6 +38,8 @@ struct HubWebManagedServiceStatus
     std::string CommandResult;
     std::string ExecutablePath, ConfigPath, WorkingDirectory;
     bool IsWorld = false;
+    uint8 ServiceKind = 0;
+    std::string ClusterKey;
     uint64 UptimeSeconds = 0;
     bool MetricsAvailable = false;
     uint32 Players = 0;
@@ -62,6 +64,7 @@ struct HubWebServiceCommand
     std::string ServiceKey;
     bool Start = false;
     bool RestartAll = false;
+    bool RestartService = false;
     bool Promote = false;
     bool Configure = false;
     std::string Name, ExecutablePath, ConfigPath, WorkingDirectory;

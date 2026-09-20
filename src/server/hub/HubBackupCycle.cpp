@@ -31,7 +31,7 @@ void HubProcessSupervisor::UpdateBackupCycle(bool clusterIdle)
     auto const tick = std::chrono::steady_clock::now();
     if (tick - _backupUpdateAt < std::chrono::seconds(1)) return;
     _backupUpdateAt = tick;
-    bool const localIdle = std::none_of(_services.begin(),_services.end(),[](auto const& entry) { return IsActive(entry.second); });
+    bool const localIdle = std::none_of(_services.begin(),_services.end(),[](auto const& entry) { return !entry.second.Definition.ServiceKind && IsActive(entry.second); });
     // Keep worker health valid even when the web listener is disabled.
     auto health = HubDatabase.GetPreparedStatement(HUB_UPD_BACKUP_HUB_HEALTH);
     health->setUInt8(0,localIdle && clusterIdle ? 1 : 0); HubDatabase.DirectExecute(health);
@@ -83,6 +83,7 @@ void HubProcessSupervisor::UpdateBackupCycle(bool clusterIdle)
         for (auto const& entry : _services)
         {
             auto const& runtime = entry.second;
+            if (runtime.Definition.ServiceKind) continue; // Dependencies remain available while world saves finish.
             if (!IsActive(runtime)) continue;
             if (runtime.State != HubManagedProcessState::Running || runtime.CommandPending || runtime.AccountCallback ||
                 (IsWorldKey(entry.first) && !runtime.CanSendCommands))

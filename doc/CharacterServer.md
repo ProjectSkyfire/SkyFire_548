@@ -83,7 +83,8 @@ After it registers as ready, start the world through the hub. The hub checks
 the configured node identity, endpoint, readiness, available connections, and live
 lease before launching a dependent world. The world also performs a TLS handshake
 and exact statement-catalog check before opening its character pool. This Python
-daemon is independently operated; hub start/stop supervision is not added here.
+daemon can run independently or under [hub process supervision](ManagedDataServices.md)
+for web Start, Stop, Restart, and live health metrics.
 "Restart all" leaves it online while restarting gameplay nodes.
 
 ## Save and ownership guarantees

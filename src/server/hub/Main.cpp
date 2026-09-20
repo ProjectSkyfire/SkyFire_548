@@ -422,7 +422,7 @@ int main(int argc, char** argv)
             {
                 bool applied = false;
                 if (HubNodeRestartActive || HubBackupMaintenance()) error = "Node operations are blocked during maintenance.";
-                else if (webCommand.ClusterAction == "restart") applied = clusterServer.RestartMap(webCommand.ServiceKey,error);
+                else if (webCommand.ClusterAction == "restart") applied = processSupervisor.CheckDataServiceStop(error) && clusterServer.RestartMap(webCommand.ServiceKey,error);
                 else applied = clusterServer.SetAdministration(webCommand.ServiceKey, webCommand.ClusterAction, webCommand.Actor, error);
                 webServer.CompleteControlCommand(webCommand,applied);
                 webCommand.DispatchResult->set_value(applied ? "" : error);
@@ -469,6 +469,8 @@ int main(int argc, char** argv)
             }
             bool const accepted = webCommand.RestartAll
                 ? processSupervisor.RestartNodes(error)
+                : webCommand.RestartService
+                ? processSupervisor.RestartDataService(webCommand.ServiceKey,error)
                 : webCommand.Promote
                 ? processSupervisor.PromoteWorld(webCommand.ServiceKey, error)
                 : webCommand.Configure
@@ -516,6 +518,8 @@ int main(int argc, char** argv)
                 webService.Key = service.Key;
                 webService.Name = service.Name;
                 webService.IsWorld = service.IsWorld;
+                webService.ServiceKind = service.ServiceKind;
+                webService.ClusterKey = service.ClusterKey;
                 webService.ExecutablePath = service.ExecutablePath;
                 webService.ConfigPath = service.ConfigPath;
                 webService.WorkingDirectory = service.WorkingDirectory;
@@ -566,9 +570,9 @@ int main(int argc, char** argv)
     }
 
     authnetProxy.Close(); legacyProxy.Close();
-    clusterServer.Close();
     webServer.Close();
     processSupervisor.StopAll();
+    clusterServer.Close();
     StopDatabase();
     SF_LOG_INFO("server.hub", "Hub server stopped.");
     return 0;

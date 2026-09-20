@@ -445,7 +445,7 @@ void HubWebServer::UpdateStatus(HubWebStatusSnapshot const& status)
     std::lock_guard<std::mutex> lock(_statusMutex);
     _status = status;
     bool stopped = std::all_of(status.Services.begin(),status.Services.end(),[](HubWebManagedServiceStatus const& service)
-        { return service.State=="stopped" || service.State=="exited"; }) &&
+        { return service.ServiceKind || service.State=="stopped" || service.State=="exited"; }) &&
         std::none_of(status.ClusterNodes.begin(),status.ClusterNodes.end(),[](Skyfire::Cluster::Node const& node) { return node.Live && node.Type != Skyfire::Cluster::Service::Map &&
             (node.Type != Skyfire::Cluster::Service::Character || node.Load != 0); });
     auto now = std::chrono::steady_clock::now();
@@ -640,6 +640,37 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
          << "{\"key\":\"database\",\"name\":\"Hub Database\",\"status\":\"online\",\"detail\":\"Connection pool is active\"},"
          << "{\"key\":\"web\",\"name\":\"Web Console\",\"status\":\"online\",\"detail\":\"Secure session is active\"}";
 
+    auto appendDataMetrics = [&](Skyfire::Cluster::Node const* node, uint8 kind)
+    {
+        auto const now = uint64(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
+        auto const received = node ? (kind == 3 ? node->Metrics.ReceivedAt : node->Character.ReceivedAt) : 0;
+        bool const fresh = node && node->Live && node->ExpiresAt > now && received && now >= received && now-received <= 15000;
+        auto number = [&](auto value) { return fresh ? std::to_string(value) : "null"; };
+        json << ",\"metricsAvailable\":" << (fresh ? "true" : "false");
+        if (kind == 3)
+        {
+            auto const metrics = node ? node->Metrics : Skyfire::Cluster::MapMetrics{};
+            json << ",\"mapserver\":true,\"uptimeSeconds\":" << number(metrics.Uptime)
+                 << ",\"cpuPercent\":" << number(metrics.CpuBasisPoints/100.0) << ",\"memoryMiB\":" << number(metrics.MemoryMiB)
+                 << ",\"requests\":" << number(metrics.Requests) << ",\"failures\":" << number(metrics.Failures)
+                 << ",\"sentKiB\":" << number(metrics.SentKiB) << ",\"assets\":" << number(metrics.Assets)
+                 << ",\"transfers\":" << number(metrics.Active) << ",\"maps\":[";
+            for (std::size_t i=0; fresh && i<metrics.Maps.size(); ++i) { if(i) json << ','; json << metrics.Maps[i]; }
+            json << ']';
+        }
+        else
+        {
+            auto const metrics = node ? node->Character : Skyfire::Cluster::CharacterMetrics{};
+            json << ",\"characterserver\":true,\"uptimeSeconds\":" << number(metrics.Uptime)
+                 << ",\"cpuPercent\":" << number(metrics.CpuBasisPoints/100.0) << ",\"memoryMiB\":" << number(metrics.MemoryMiB)
+                 << ",\"requests\":" << number(metrics.Requests) << ",\"failures\":" << number(metrics.Failures)
+                 << ",\"reads\":" << number(metrics.Reads) << ",\"writes\":" << number(metrics.Writes)
+                 << ",\"transactions\":" << number(metrics.Transactions) << ",\"connections\":" << number(metrics.Connections)
+                 << ",\"pendingRequests\":" << number(metrics.Pending) << ",\"latencyMs\":" << number(metrics.LatencyUs/1000.0)
+                 << ",\"lastCommitAgeSeconds\":" << (metrics.LastCommitAge==0xffffffffu ? "null" : number(metrics.LastCommitAge))
+                 << ",\"databaseReady\":" << (fresh ? (metrics.DatabaseReady ? "true" : "false") : "null");
+        }
+    };
     for (HubWebManagedServiceStatus const& service : status.Services)
     {
         std::string health = "offline";
@@ -656,8 +687,16 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
             json << " | PID " << service.ProcessId;
         if (service.State == "exited")
             json << " | Exit " << service.LastExitCode;
-        json << "\",\"isWorld\":" << (service.IsWorld ? "true" : "false")
-             << ",\"uptimeSeconds\":" << service.UptimeSeconds
+        if (service.ServiceKind && !service.CommandResult.empty()) json << " | " << JsonEscape(service.CommandResult);
+        json << "\",\"isWorld\":" << (service.IsWorld ? "true" : "false");
+        if (service.ServiceKind)
+        {
+            auto node = std::find_if(status.ClusterNodes.begin(),status.ClusterNodes.end(),[&](auto const& current)
+                { return current.Key==service.ClusterKey && uint8(current.Type)==service.ServiceKind; });
+            appendDataMetrics(node==status.ClusterNodes.end() ? nullptr : &*node,service.ServiceKind);
+            json << ",\"canRestart\":true,\"dataService\":true,\"clusterKey\":\"" << JsonEscape(service.ClusterKey) << "\"";
+        }
+        else json << ",\"uptimeSeconds\":" << service.UptimeSeconds
              << ",\"metricsAvailable\":" << (service.MetricsAvailable ? "true" : "false")
              << ",\"players\":" << service.Players << ",\"updateTimeMs\":" << service.UpdateTimeMs
              << ",\"cpuPercent\":" << (service.CpuBasisPoints < 0 ? "null" : std::to_string(service.CpuBasisPoints / 100.0));
@@ -693,6 +732,8 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
     }
     for (auto const& node : status.ClusterNodes)
     {
+        if (std::any_of(status.Services.begin(),status.Services.end(),[&](auto const& service)
+            { return service.ServiceKind && service.ClusterKey==node.Key; })) continue;
         uint64 connections = 0;
         for (auto const& ingress : status.AuthIngress)
         {
@@ -714,29 +755,14 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
             for (auto realm : node.Realms) json << ' ' << realm;
         }
         json << "\",\"managed\":false,\"clusterKey\":\"" << JsonEscape(node.Key)
-             << "\",\"clusterCanAdmin\":" << (node.Type == Skyfire::Cluster::Service::Character ? "false" : "true")
+             << "\",\"clusterCanAdmin\":" << ((node.Type == Skyfire::Cluster::Service::Character || node.Type == Skyfire::Cluster::Service::Map) ? "false" : "true")
              << ",\"live\":" << (node.Live ? "true" : "false") << ",\"hubConnections\":" << connections
              << ",\"adminState\":\"" << Skyfire::Cluster::AdministrationName(node.Admin) << "\"";
-        if (node.Type == Skyfire::Cluster::Service::Map)
+        if (node.Type == Skyfire::Cluster::Service::Map || node.Type == Skyfire::Cluster::Service::Character)
         {
-            auto const now = std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now().time_since_epoch()).count());
-            auto const& metrics = node.Metrics;
-            bool fresh = node.Live && node.ExpiresAt > now && metrics.ReceivedAt && now >= metrics.ReceivedAt && now - metrics.ReceivedAt <= 15000;
-            json << ",\"canRestart\":" << ((node.Capabilities & 512) ? "true" : "false") << ",\"mapserver\":true,\"state\":\"" << (!node.Live ? "offline" : node.Ready ? "running" : "starting")
-                 << "\",\"metricsAvailable\":" << (fresh ? "true" : "false")
-                 << ",\"uptimeSeconds\":" << (fresh ? std::to_string(metrics.Uptime) : "null")
-                 << ",\"cpuPercent\":" << (fresh ? std::to_string(metrics.CpuBasisPoints / 100.0) : "null")
-                 << ",\"memoryMiB\":" << (fresh ? std::to_string(metrics.MemoryMiB) : "null")
-                 << ",\"requests\":" << (fresh ? std::to_string(metrics.Requests) : "null")
-                 << ",\"failures\":" << (fresh ? std::to_string(metrics.Failures) : "null")
-                 << ",\"sentKiB\":" << (fresh ? std::to_string(metrics.SentKiB) : "null")
-                 << ",\"assets\":" << (fresh ? std::to_string(metrics.Assets) : "null")
-                 << ",\"transfers\":" << (fresh ? std::to_string(metrics.Active) : "null")
-                 << ",\"maps\":[";
-            for (std::size_t i = 0; fresh && i < metrics.Maps.size(); ++i)
-            { if (i) json << ','; json << metrics.Maps[i]; }
-            json << ']';
+            appendDataMetrics(&node,uint8(node.Type));
+            json << ",\"canRestart\":" << (node.Type == Skyfire::Cluster::Service::Map && (node.Capabilities & 512) ? "true" : "false")
+                 << ",\"state\":\"" << (!node.Live ? "offline" : node.Ready ? "running" : "starting") << "\"";
         }
         json << '}';
     }
@@ -796,7 +822,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     std::string const serviceKey = route.substr(0, slash);
     std::string const action = route.substr(slash + 1);
-    if (action != "start" && action != "stop" && action != "configure" && action != "command" && action != "promote" && !(action == "restart" && serviceKey == "all"))
+    if (action != "start" && action != "stop" && action != "configure" && action != "command" && action != "promote" && action != "restart")
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     if (!std::all_of(serviceKey.begin(), serviceKey.end(), [](unsigned char character)
         { return std::isalnum(character) || character == '_' || character == '-'; }))
@@ -806,6 +832,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
     bool found = restartAll;
     bool enabled = restartAll;
     bool commandReady = false;
+    bool dataService = false;
     {
         std::lock_guard<std::mutex> lock(_statusMutex);
         for (HubWebManagedServiceStatus const& service : _status.Services)
@@ -814,6 +841,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
             {
                 found = true;
                 enabled = service.Enabled;
+                dataService = service.ServiceKind != 0;
                 commandReady = service.State == "running" && service.CanSendCommands && !service.CommandPending;
                 break;
             }
@@ -825,13 +853,16 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
         return MakeResponse(403, "application/json", "{\"error\":\"managed service is disabled\"}");
 
     HubWebServiceCommand command;
+    if (action == "restart" && !restartAll && !dataService)
+        return MakeResponse(400,"application/json","{\"error\":\"Use a graceful world command for world restarts.\"}");
     command.ServiceKey = serviceKey;
     command.Start = action == "start";
     command.RestartAll = restartAll;
+    command.RestartService = action == "restart" && !restartAll;
     command.Promote = action == "promote";
     command.Actor = session.Username;
     std::future<std::string> dispatchResult;
-    if (restartAll || command.Promote)
+    if (restartAll || command.Promote || command.RestartService || action == "start" || action == "stop")
     {
         command.DispatchResult = std::make_shared<std::promise<std::string>>();
         dispatchResult = command.DispatchResult->get_future();

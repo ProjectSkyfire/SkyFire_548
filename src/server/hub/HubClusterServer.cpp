@@ -7,6 +7,7 @@
 #include "Cluster/HandoffClient.h"
 #include "Cluster/RealmDirectory.h"
 #include "Cluster/MapDataDirectory.h"
+#include "Cluster/CharacterMetrics.h"
 #include <sstream>
 #include "Log.h"
 #include "Configuration/Config.h"
@@ -103,6 +104,14 @@ private:
     }
     void Handle()
     {
+        if (_header.Type == CharacterMetricsType)
+        {
+            CharacterMetrics metrics;
+            if (!DecodeCharacterMetrics(_body, metrics) ||
+                !_server._registry.SetCharacterMetrics(_key, _owner, HubClusterServer::Now(), metrics))
+            { Reject(Error::Malformed, "Character metrics require a live character service and valid payload."); return; }
+            Acknowledge(false); return;
+        }
         if (_header.Type == MapData::MetricsType)
         {
             MapMetrics metrics;

@@ -14,6 +14,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         let count = 0, inFlight = 0, maxInFlight = 0, slow = false, fail = false, authenticated = true;
         let releaseStatus = null, releaseOperation = null;
         let registryNodes = [];
+        const dataActions = [];
         let restart = {}, restartRequests = 0, mapRestartRequests = 0;
         let rejectRestart = false;
         let fallback = {enabled:false}, canOperate = true, promotionRequests = 0, rejectPromotion = false;
@@ -51,6 +52,11 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
             }
             if (url.pathname === '/api/v1/cluster/maps-east/restart') {
                 assert.equal(route.request().headers()['x-hub-csrf'],'token'); ++mapRestartRequests;
+                return json({accepted:true},202);
+            }
+            if (/^\/api\/v1\/services\/(characters|maps-local)\/(start|stop|restart)$/.test(url.pathname)) {
+                assert.equal(route.request().headers()['x-hub-csrf'],'token');
+                dataActions.push(url.pathname);
                 return json({accepted:true},202);
             }
             if (url.pathname === "/api/v1/services/world/stop") {
@@ -220,6 +226,38 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         registryNodes[0].metricsAvailable=false; registryNodes[0].live=false; registryNodes[0].status='offline'; registryNodes[0].state='offline';
         await page.evaluate(() => loadStatus());
         assert.match(await mapCard.locator('.service-metrics').textContent(),/unavailable/);
+        registryNodes = [{key:'characters',name:'Character data',characterserver:true,managed:true,enabled:true,canRestart:true,
+            status:'online',state:'running',metricsAvailable:true,uptimeSeconds:60,cpuPercent:2,memoryMiB:70,connections:2,pendingRequests:1,
+            reads:20,writes:10,transactions:3,latencyMs:1.2,failures:0,lastCommitAgeSeconds:2,databaseReady:true}];
+        await page.evaluate(()=>loadStatus());
+        const characterCard=page.locator('#component-grid article').filter({hasText:'Character data'});
+        assert.match(await characterCard.locator('.service-metrics').textContent(),/Reads 20.*Writes 10/);
+        await characterCard.getByRole('button',{name:'Restart',exact:true}).click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Restart requested'));
+        await characterCard.getByRole('button',{name:'Stop',exact:true}).click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Stop requested'));
+        registryNodes[0].state='stopped';registryNodes[0].status='offline';registryNodes[0].metricsAvailable=false;
+        await page.evaluate(()=>loadStatus());
+        assert.equal(await characterCard.getByRole('button',{name:'Restart',exact:true}).isDisabled(),true);
+        await characterCard.getByRole('button',{name:'Start',exact:true}).click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Start requested'));
+        assert.deepEqual(dataActions,['/api/v1/services/characters/restart','/api/v1/services/characters/stop','/api/v1/services/characters/start']);
+        canOperate=false;await page.evaluate(()=>loadStatus());
+        assert.equal(await characterCard.getByRole('button',{name:'Start',exact:true}).isDisabled(),true);
+        canOperate=true;
+        registryNodes = [{key:'maps-local',name:'Managed maps',mapserver:true,managed:true,enabled:true,canRestart:true,
+            state:'stopped',status:'offline',metricsAvailable:false}];
+        await page.evaluate(()=>loadStatus());
+        const managedMap=page.locator('#component-grid article').filter({hasText:'Managed maps'});
+        await managedMap.getByRole('button',{name:'Start',exact:true}).click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Start requested'));
+        registryNodes[0].state='running';registryNodes[0].status='online';
+        await page.evaluate(()=>loadStatus());
+        await managedMap.getByRole('button',{name:'Restart',exact:true}).click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Restart requested'));
+        await managedMap.getByRole('button',{name:'Stop',exact:true}).click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Stop requested'));
+        assert.deepEqual(dataActions.slice(3),['/api/v1/services/maps-local/start','/api/v1/services/maps-local/restart','/api/v1/services/maps-local/stop']);
         registryNodes = [{ key: "ingress:Authnet ingress", name: "Authnet ingress", status: "online",
             detail: "127.0.0.1:1118 | active 1 | routed 3 | rejected 0", managed: false }];
         await page.evaluate(() => loadStatus());

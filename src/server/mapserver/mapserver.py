@@ -17,6 +17,8 @@ import uuid
 import tomllib
 from aiohttp import web
 from map_common import KEY, catalog, certificate_key, client_tls, frame, wire_string
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'shared/Platform'))
+import hub_service
 
 
 def memory_mib():
@@ -70,7 +72,7 @@ def restart_process(config):
     os.execv(sys.executable, args)
 
 
-async def serve(config_path, stop=None):
+async def serve(config_path, stop=None, channel=None):
     started = time.monotonic()
     generation = uuid.uuid4().hex
     config_path = Path(config_path).resolve()
@@ -160,6 +162,7 @@ async def serve(config_path, stop=None):
     inbound.load_cert_chain(str(path('certificate')), str(path('private_key')))
     outbound = client_tls(path('ca'), path('certificate'), path('private_key'))
     stop = stop or asyncio.Event()
+    supervision = asyncio.create_task(channel.run(stop,lambda: state['active'] == 0)) if channel else None
     restart = False
     runner = web.AppRunner(app, access_log=None, shutdown_timeout=5)
     await runner.setup()
@@ -177,6 +180,8 @@ async def serve(config_path, stop=None):
                 lease = await exchange(reader, writer, 1, payload)
                 await exchange(reader, writer, 2, struct.pack('!BI', 1, state['active']))
                 await exchange(reader, writer, 9, metrics())
+                if channel:
+                    channel.set_ready(True)
                 backoff = 1
                 while not stop.is_set():
                     try:
@@ -198,16 +203,22 @@ async def serve(config_path, stop=None):
                         pass
                     backoff = min(backoff * 2, 30)
             finally:
+                if channel:
+                    channel.set_ready(False)
                 if writer:
                     writer.close()
                     with contextlib.suppress(Exception):
                         await asyncio.wait_for(writer.wait_closed(), 2)
     finally:
         await runner.cleanup()
+        if supervision:
+            supervision.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await supervision
     return restart
 
 
-async def main(config):
+async def main(config, channel=None):
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
@@ -215,14 +226,18 @@ async def main(config):
             loop.add_signal_handler(sig, stop.set)
         except NotImplementedError:
             signal.signal(sig, lambda *_: loop.call_soon_threadsafe(stop.set))
-    return await serve(config, stop)
+    return await serve(config, stop, channel)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='mapserver.toml')
+    hub_service.arguments(parser)
     args = parser.parse_args()
-    if asyncio.run(main(args.config)):
+    channel = hub_service.channel(args,tomllib.loads(Path(args.config).read_text(encoding='utf-8-sig')))
+    if asyncio.run(main(args.config,channel)):
+        if channel:
+            sys.exit(2)  # Parent owns relaunch and fresh supervision handles.
         # Re-exec only this daemon after listeners and transfers have been closed.
         # Preserve absolute paths and invocation flags, independent of working directory.
         restart_process(args.config)

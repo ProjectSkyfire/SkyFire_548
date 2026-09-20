@@ -68,6 +68,8 @@ separate processes; install their dependencies on the hosts that run them.
 
 See [clustering setup notes](doc/ClusteringSetup.md) for package installation,
 configuration, database migrations and service startup references.
+See [managed data services](doc/ManagedDataServices.md) for web lifecycle controls
+and character-server health metrics.
 
 ## Install
 Detailed installation guides are available in the wiki for

@@ -5,6 +5,7 @@ set(mapserver_sources)
 foreach(asset IN LISTS mapserver_files)
   list(APPEND mapserver_sources "${CMAKE_CURRENT_SOURCE_DIR}/${asset}")
 endforeach()
+list(APPEND mapserver_sources "${CMAKE_SOURCE_DIR}/src/server/shared/Platform/hub_service.py")
 add_custom_target(mapserver_assets
   COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:worldserver>/mapserver"
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different ${mapserver_sources} "$<TARGET_FILE_DIR:worldserver>/mapserver"

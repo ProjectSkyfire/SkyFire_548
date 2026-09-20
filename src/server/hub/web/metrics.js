@@ -14,7 +14,7 @@ window.HubHealthDashboard = class {
         this.note = this.el('p','Last 10 minutes in this browser session. Samples every 5 seconds; gaps mean unavailable data.',root);
         this.note.className = 'muted'; this.charts = [];
         const grid = this.el('div','',root); grid.className = 'metric-grid';
-        for (const [key,title,unit] of [['players','Players online','players'],['cpu','CPU usage','%'],['update','World update time','ms'],['memoryMiB','Mapserver memory','MiB'],['transfers','Active map transfers','transfers'],['traffic','Map data sent','MiB/s']]) {
+        for (const [key,title,unit] of [['players','Players online','players'],['cpu','CPU usage','%'],['update','World update time','ms'],['memoryMiB','Process memory','MiB'],['transfers','Active map transfers','transfers'],['traffic','Map data sent','MiB/s'],['connections','Character connections','connections'],['pendingRequests','Pending character requests','requests'],['latencyMs','Average character request latency','ms'],['failures','Character request failures','failures']]) {
             const panel = this.el('section','',grid); panel.className = 'metric-panel'; this.el('h2',title,panel);
             const current = this.el('p','Waiting for metrics',panel); current.className = 'metric-value';
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -45,11 +45,12 @@ window.HubHealthDashboard = class {
             if (!card) { card=this.el('article','',this.health); card.className='health-card'; this.el('h2','',card); this.el('p','',card); this.el('small','',card); this.cards.set(item.key,card); }
             card.children[0].textContent=item.name; card.children[1].textContent=item.state;
             card.dataset.state=item.state;
-            card.children[2].textContent=item.mapserver && !item.metricsAvailable ? 'Metrics unavailable' : `Uptime ${Math.floor((item.uptimeSeconds||0)/3600)}h ${Math.floor((item.uptimeSeconds||0)%3600/60)}m`;
-            if (item.mapserver && item.metricsAvailable) card.children[2].textContent+=` � Maps ${(item.maps||[]).join(', ')} � ${item.assets} assets � ${item.requests} requests � ${item.failures} errors � ${(item.sentKiB/1024).toFixed(1)} MiB sent`;
+            card.children[2].textContent=(item.mapserver || item.characterserver) && !item.metricsAvailable ? 'Metrics unavailable' : `Uptime ${Math.floor((item.uptimeSeconds||0)/3600)}h ${Math.floor((item.uptimeSeconds||0)%3600/60)}m`;
+            if (item.characterserver && item.metricsAvailable) card.children[2].textContent+=` · DB ${item.databaseReady ? 'ready' : 'unavailable'} · ${item.reads} reads · ${item.writes} writes · ${item.failures} errors`;
+            if (item.mapserver && item.metricsAvailable) card.children[2].textContent+=` · Maps ${(item.maps||[]).join(', ')} · ${item.assets} assets · ${item.requests} requests · ${item.failures} errors · ${(item.sentKiB/1024).toFixed(1)} MiB sent`;
         }
         for (const [key,card] of this.cards) if (!services.some(item=>item.key===key)) { card.remove(); this.cards.delete(key); this.history.delete(key); this.mapCounters.delete(key); }
-        const worlds=services.filter(item=>item.world || item.mapserver);
+        const worlds=services.filter(item=>item.world || item.mapserver || item.characterserver);
         const signature=JSON.stringify(worlds.map(item=>[item.key,item.name]));
         if (signature!==this.signature) {
             this.signature=signature; const selected=this.select.value;
@@ -85,8 +86,9 @@ window.HubHealthDashboard = class {
         const service=this.latest?.services.find(item=>item.key===this.select.value);
         const ns='http://www.w3.org/2000/svg';
         for (const chart of this.charts) {
-            const mapMetric=['memoryMiB','transfers','traffic'].includes(chart.key);
-            chart.panel.hidden=chart.key!=='cpu' && mapMetric!==!!service?.mapserver;
+            const visible = service?.characterserver ? ['cpu','memoryMiB','connections','pendingRequests','latencyMs','failures'] :
+                service?.mapserver ? ['cpu','memoryMiB','transfers','traffic'] : ['players','cpu','update'];
+            chart.panel.hidden=!visible.includes(chart.key);
             const usable=service?.state==='running' && service.metricsAvailable && !this.isStale;
             const value=usable ? (chart.key==='traffic' ? points.at(-1)?.traffic : service[chart.key]) : null;
             chart.current.textContent=typeof value==='number' && Number.isFinite(value) && value>=0 ? `${Number(value.toFixed(1))} ${chart.unit}` : this.isStale ? 'Stale — reconnecting' : 'Metrics unavailable';

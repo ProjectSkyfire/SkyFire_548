@@ -52,11 +52,19 @@ namespace Skyfire::Cluster
         std::vector<std::uint32_t> Maps;
         std::uint64_t ReceivedAt = 0;
     };
+    struct CharacterMetrics
+    {
+        std::uint32_t Uptime = 0, CpuBasisPoints = 0, MemoryMiB = 0, Requests = 0, Failures = 0,
+            Reads = 0, Writes = 0, Transactions = 0, Connections = 0, Pending = 0,
+            LatencyUs = 0, LastCommitAge = 0xffffffffu, DatabaseReady = 0;
+        std::uint64_t ReceivedAt = 0;
+    };
     struct Node
     {
         std::string Key, Name, Address;
         std::vector<std::uint32_t> Realms;
         MapMetrics Metrics;
+        CharacterMetrics Character;
         Service Type = Service::Auth;
         std::uint16_t Port = 0;
         std::uint32_t Realm = 0, Build = 0, Capacity = 0, Capabilities = 0, Load = 0;

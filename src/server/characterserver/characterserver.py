@@ -11,10 +11,14 @@ import re
 import signal
 import ssl
 import struct
+import sys
 import time
 import tomllib
 from database import CharacterDatabase
 from wire import MAX_FRAME, u32
+from metrics import Metrics
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'shared/Platform'))
+import hub_service
 
 
 def identity(certificate):
@@ -36,7 +40,7 @@ async def hub_exchange(reader, writer, kind, body):
     return lease
 
 
-async def serve(config_file, stop=None, database_factory=CharacterDatabase):
+async def serve(config_file, stop=None, database_factory=CharacterDatabase, channel=None):
     config_file = Path(config_file).resolve()
     config = tomllib.loads(config_file.read_text(encoding='utf-8-sig'))
     stop = stop or asyncio.Event()
@@ -77,6 +81,8 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase):
             raise
     registered_until = 0.0
     clients, tasks = set(), set()
+    metrics = Metrics()
+    supervision = asyncio.create_task(channel.run(stop,lambda: not clients and not metrics.pending)) if channel else None
     async def client(reader,writer):
         task = asyncio.current_task()
         tasks.add(task)
@@ -100,7 +106,13 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase):
                     instance,epoch = await sql(db.attach,peer,payload[1:])
                     reply = b'\0'
                 else:
-                    reply = b'\0' + await sql(db.execute,peer,instance,epoch,payload)
+                    started = metrics.begin()
+                    success = False
+                    try:
+                        reply = b'\0' + await sql(db.execute,peer,instance,epoch,payload)
+                        success = True
+                    finally:
+                        metrics.finish(started,payload[0],success)
                 writer.write(u32(len(reply)) + reply)
                 await asyncio.wait_for(writer.drain(),30)
         except (asyncio.IncompleteReadError, ConnectionError, asyncio.TimeoutError):
@@ -143,6 +155,9 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase):
                     sent=time.monotonic()
                     lease=await asyncio.wait_for(hub_exchange(reader,writer,2,struct.pack('!BI',int(not db.failed),len(clients))),5)
                     registered_until=sent+lease if not db.failed else 0.0
+                    await asyncio.wait_for(hub_exchange(reader,writer,10,metrics.packet(len(clients),not db.failed)),5)
+                    if channel:
+                        channel.set_ready(not db.failed)
                     backoff=1
                     try:
                         await asyncio.wait_for(stop.wait(),min(5,lease/3))
@@ -158,6 +173,8 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase):
                 backoff=min(backoff*2,30)
             finally:
                 registered_until=0.0
+                if channel:
+                    channel.set_ready(False)
                 if writer:
                     writer.close()
                     with contextlib.suppress(Exception):
@@ -173,9 +190,13 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase):
             await asyncio.gather(*list(tasks),return_exceptions=True)
         executor.shutdown(wait=True)
         db.close()
+        if supervision:
+            supervision.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await supervision
 
 
-async def main(config):
+async def main(config, channel=None):
     stop=asyncio.Event()
     loop=asyncio.get_running_loop()
     for sig in (signal.SIGINT,signal.SIGTERM):
@@ -183,11 +204,13 @@ async def main(config):
             loop.add_signal_handler(sig,stop.set)
         except NotImplementedError:
             signal.signal(sig,lambda *_:loop.call_soon_threadsafe(stop.set))
-    await serve(config,stop)
+    await serve(config,stop,channel=channel)
 
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--config',default='characterserver.toml')
+    hub_service.arguments(parser)
     args=parser.parse_args()
-    asyncio.run(main(args.config))
+    channel=hub_service.channel(args,tomllib.loads(Path(args.config).read_text(encoding='utf-8-sig')))
+    asyncio.run(main(args.config,channel))
