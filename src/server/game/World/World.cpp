@@ -77,7 +77,7 @@ void StartEluna(bool restart);
 #include "WaypointMovementGenerator.h"
 #include "WeatherMgr.h"
 #include "World.h"
-#include "MapDataBootstrap.h"
+#include "Platform/MapDataBootstrap.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "WorldSocket.h"
