@@ -7,6 +7,10 @@ window.HubStatus = (() => {
     const user = document.querySelector("#signed-in-user");
     const updated = document.querySelector("#last-updated");
     const actionMessage = document.querySelector("#service-action-message");
+    const restartAll = document.querySelector("#restart-all-nodes");
+    const restartStatus = document.querySelector("#node-restart-status");
+    let restartSending = false;
+    let restartError = '';
     const online = document.createElement("strong");
     const uptime = document.createElement("span");
     summary.replaceChildren(online, uptime);
@@ -40,7 +44,7 @@ window.HubStatus = (() => {
         card.metrics.className = "service-metrics";
         card.controls = document.createElement("div");
         card.controls.className = "service-controls";
-        for (const action of ["start", "stop", "edit", "drain", "disable", "enable"]) {
+        for (const action of ["start", "stop", "restart", "edit", "drain", "disable", "enable"]) {
             const button = document.createElement("button");
             button.type = "button";
             button.className = `service-button ${action}`;
@@ -63,6 +67,8 @@ window.HubStatus = (() => {
         const cluster = component.clusterCanAdmin === true;
         card.controls.hidden = !component.managed && !cluster;
         card.start.hidden = card.stop.hidden = !component.managed;
+        card.restart.hidden = !component.mapserver || !component.canRestart;
+        card.restart.disabled = pending.has(component.key) || !component.live || !data.canOperateServices || data.restartActive;
         let metrics = `Uptime ${active ? formatUptime(component.uptimeSeconds) : "â€”"}`;
         if (isWorld(component)) {
             metrics += component.state === "running" && component.metricsAvailable
@@ -72,7 +78,7 @@ window.HubStatus = (() => {
         }
         if (component.mapserver) {
             metrics = component.metricsAvailable
-                ? `Uptime ${formatUptime(component.uptimeSeconds)} · Maps ${(component.maps||[]).join(', ')}\nCPU ${component.cpuPercent.toFixed(1)}% · Memory ${component.memoryMiB} MiB · Transfers ${component.transfers}\nSent ${(component.sentKiB/1024).toFixed(1)} MiB · Errors ${component.failures}`
+                ? `Uptime ${formatUptime(component.uptimeSeconds)} Â· Maps ${(component.maps||[]).join(', ')}\nCPU ${component.cpuPercent.toFixed(1)}% Â· Memory ${component.memoryMiB} MiB Â· Transfers ${component.transfers}\nSent ${(component.sentKiB/1024).toFixed(1)} MiB Â· Errors ${component.failures}`
                 : 'Mapserver metrics unavailable';
             card.metrics.title = 'Metrics reported through the hub every 5 seconds; expire after 15 seconds. CPU is a percentage of total logical CPU capacity.';
         }
@@ -87,16 +93,18 @@ window.HubStatus = (() => {
             card[action].title = action === "enable" ? "Allow new authentication connections or world handoffs when the node is ready." :
                 "Stop new authentication connections or world handoffs. Existing sessions continue; the process remains running.";
         }
+        if (data.restartActive) for (const action of ["start","stop","restart","edit","drain","disable","enable"]) card[action].disabled = true;
         if (connectionLost) {
             card.article.className = 'component offline';
             text(card.state, component.key === 'hub' ? 'offline' : 'unknown');
             text(card.detail, component.key === 'hub' ? 'Hub is unreachable; waiting for a successful status response.' : 'Live status unavailable; last report is stale.');
             text(card.metrics, 'Live metrics unavailable');
-            for (const action of ['start','stop','edit','drain','disable','enable']) card[action].disabled = true;
-        } else card.edit.disabled = false;
+            for (const action of ['start','stop','restart','edit','drain','disable','enable']) card[action].disabled = true;
+        } else card.edit.disabled = !!data.restartActive;
     }
     function markStale() {
         connectionLost = true;
+        if (restartAll) restartAll.disabled = true;
         text(updated, 'Connection lost Â· retrying');
         text(online, 'Hub offline Â· status unavailable');
         text(uptime, 'Hub uptime unavailable');
@@ -104,6 +112,12 @@ window.HubStatus = (() => {
         callbacks.onStale?.();
     }
     function render(data) {
+        if (restartAll) {
+            restartAll.disabled = restartSending || data.restartActive || !data.canOperateServices;
+            restartAll.title = 'Gracefully restart running worlds, authentication and mapserver nodes. Hub/web stays online.';
+            if (data.restartActive) restartError = '';
+            text(restartStatus, restartError || data.restartMessage || 'Restart refreshes running server nodes; the hub stays online.');
+        }
         connectionLost = false;
         snapshot = data;
         text(user, data.username);
@@ -129,9 +143,9 @@ window.HubStatus = (() => {
         pending.add(key);
         updateCard(cards.get(key), cards.get(key).data, snapshot);
         const component = cards.get(key).data;
-        const cluster = ["drain", "disable", "enable"].includes(action);
+        const cluster = ["drain", "disable", "enable", "restart"].includes(action);
         const label = action[0].toUpperCase() + action.slice(1);
-        const progress = { start: "Starting", stop: "Stopping", drain: "Draining", disable: "Disabling", enable: "Enabling" }[action];
+        const progress = { start: "Starting", stop: "Stopping", restart: "Restarting", drain: "Draining", disable: "Disabling", enable: "Enabling" }[action];
         text(actionMessage, `${progress} ${component.name}...`);
         try {
             const path = cluster ? `/api/v1/cluster/${encodeURIComponent(component.clusterKey)}/${action}` :
@@ -154,6 +168,28 @@ window.HubStatus = (() => {
             }
         }
     }
+    if (restartAll) restartAll.addEventListener('click', async () => {
+        if (!running || connectionLost || !snapshot || restartSending || snapshot.restartActive) return;
+        const operationGeneration = generation;
+        restartError = ''; restartSending = true; restartAll.disabled = true;
+        text(restartStatus,'Requesting graceful node restart...');
+        try {
+            const response = await fetch('/api/v1/services/all/restart', {
+                method:'POST',credentials:'same-origin',headers:{'X-Hub-CSRF':snapshot.csrfToken}
+            });
+            const data = await response.json();
+            if (operationGeneration !== generation) return;
+            if (!response.ok) throw new Error(data.error || 'Node restart was rejected');
+            await refresh();
+        } catch (error) {
+            if (operationGeneration === generation) { restartError = error.message; text(restartStatus,restartError); }
+        } finally {
+            if (operationGeneration === generation) {
+                restartSending=false;
+                restartAll.disabled=connectionLost || snapshot?.restartActive || !snapshot?.canOperateServices;
+            }
+        }
+    });
     function refresh() {
         if (!running) return Promise.resolve();
         if (request) return request;
@@ -195,9 +231,11 @@ window.HubStatus = (() => {
         controller?.abort();
         timer = request = controller = snapshot = null;
         pending.clear();
+        restartSending = false; restartError = '';
         cards.clear();
         grid.replaceChildren();
         text(actionMessage, "");
+        if (restartAll) restartAll.disabled = true;
     }
     document.addEventListener("visibilitychange", () => { if (!document.hidden && running) refresh(); });
     return { configure(options) { callbacks = options; }, start, stop, refresh };

@@ -628,6 +628,8 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
          << ",\"canSendWorldCommands\":"
          << (((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) == HUB_ADMIN_ACCESS_ALL_LOCAL) ? "true" : "false")
          << ",\"accountsEnabled\":" << (Skyfire::Auth::AccountAdministration::IsEnabled() ? "true" : "false")
+         << ",\"restartActive\":" << (status.RestartActive ? "true" : "false")
+         << ",\"restartState\":\"" << JsonEscape(status.RestartState) << "\",\"restartMessage\":\"" << JsonEscape(status.RestartMessage) << "\""
          << ",\"uptimeSeconds\":" << status.UptimeSeconds << ",\"components\":["
          << "{\"key\":\"hub\",\"name\":\"Hub Runtime\",\"status\":\"online\",\"detail\":\"Control process is running\"},"
          << "{\"key\":\"database\",\"name\":\"Hub Database\",\"status\":\"online\",\"detail\":\"Connection pool is active\"},"
@@ -716,7 +718,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
                 std::chrono::steady_clock::now().time_since_epoch()).count());
             auto const& metrics = node.Metrics;
             bool fresh = node.Live && node.ExpiresAt > now && metrics.ReceivedAt && now >= metrics.ReceivedAt && now - metrics.ReceivedAt <= 15000;
-            json << ",\"mapserver\":true,\"state\":\"" << (!node.Live ? "offline" : node.Ready ? "running" : "starting")
+            json << ",\"canRestart\":" << ((node.Capabilities & 512) ? "true" : "false") << ",\"mapserver\":true,\"state\":\"" << (!node.Live ? "offline" : node.Ready ? "running" : "starting")
                  << "\",\"metricsAvailable\":" << (fresh ? "true" : "false")
                  << ",\"uptimeSeconds\":" << (fresh ? std::to_string(metrics.Uptime) : "null")
                  << ",\"cpuPercent\":" << (fresh ? std::to_string(metrics.CpuBasisPoints / 100.0) : "null")
@@ -750,7 +752,7 @@ std::string HubWebServer::HandleClusterCommand(std::string const& path, std::map
     auto const slash = route.find('/');
     std::string const key = route.substr(0,slash);
     std::string const action = slash == std::string::npos ? "" : route.substr(slash+1);
-    if (!Skyfire::Cluster::ValidKey(key) || (action != "enable" && action != "disable" && action != "drain"))
+    if (!Skyfire::Cluster::ValidKey(key) || (action != "enable" && action != "disable" && action != "drain" && action != "restart"))
         return MakeResponse(400,"application/json","{\"error\":\"Invalid node key or cluster action.\"}");
     HubWebServiceCommand command;
     command.ServiceKey = key; command.ClusterAction = action; command.Actor = session.Username;
@@ -789,14 +791,15 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     std::string const serviceKey = route.substr(0, slash);
     std::string const action = route.substr(slash + 1);
-    if (action != "start" && action != "stop" && action != "configure" && action != "command")
+    if (action != "start" && action != "stop" && action != "configure" && action != "command" && !(action == "restart" && serviceKey == "all"))
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     if (!std::all_of(serviceKey.begin(), serviceKey.end(), [](unsigned char character)
         { return std::isalnum(character) || character == '_' || character == '-'; }))
         return MakeResponse(400, "application/json", "{\"error\":\"invalid service key\"}");
 
-    bool found = false;
-    bool enabled = false;
+    bool const restartAll = serviceKey == "all" && action == "restart";
+    bool found = restartAll;
+    bool enabled = restartAll;
     bool commandReady = false;
     {
         std::lock_guard<std::mutex> lock(_statusMutex);
@@ -819,7 +822,14 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
     HubWebServiceCommand command;
     command.ServiceKey = serviceKey;
     command.Start = action == "start";
+    command.RestartAll = restartAll;
+    command.Actor = session.Username;
     std::future<std::string> dispatchResult;
+    if (restartAll)
+    {
+        command.DispatchResult = std::make_shared<std::promise<std::string>>();
+        dispatchResult = command.DispatchResult->get_future();
+    }
     if (action == "configure")
     {
         if ((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) != HUB_ADMIN_ACCESS_ALL_LOCAL)

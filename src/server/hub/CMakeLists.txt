@@ -8,7 +8,7 @@
 file(GLOB sources_Localdir *.cpp *.h)
 file(GLOB_RECURSE web_assets web/*)
 list(APPEND sources_Localdir HubAuthProxy.cpp HubAuthProxy.h HubClusterServer.cpp HubClusterServer.h HubProcessSupervisor.cpp HubProcessSupervisor.h HubBackupCycle.cpp HubWebServer.cpp HubWebServer.h)
-list(APPEND sources_Localdir HubDatabaseSetup.cpp HubDatabaseSetup.h HubHandoffStore.cpp HubHandoffStore.h)
+list(APPEND sources_Localdir HubNodeRestart.cpp HubDatabaseSetup.cpp HubDatabaseSetup.h HubHandoffStore.cpp HubHandoffStore.h)
 list(REMOVE_DUPLICATES sources_Localdir)
 
 source_group(CMake FILES CMakeLists.txt)

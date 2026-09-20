@@ -22,6 +22,8 @@ public:
     bool Open(std::string const& address, std::uint16_t port, std::string const& certificate,
         std::string const& key, std::string const& ca, std::uint32_t leaseSeconds, std::size_t maxConnections);
     void Update();
+    bool RestartMap(std::string const& key, std::string& error);
+    bool HasPendingMapRestarts() const { return !_mapRestarts.empty(); }
     void Close();
     bool IsOpen() const { return !_closed; }
     std::vector<Skyfire::Cluster::Node> Snapshot() const { return _registry.Snapshot(); }
@@ -43,6 +45,7 @@ private:
     std::map<std::string,Skyfire::Cluster::Node> _policies;
     std::map<std::uint64_t, std::shared_ptr<HubClusterSession>> _sessions;
     std::uint64_t _nextOwner = 0;
+    std::map<std::string, std::uint64_t> _mapRestarts;
     std::uint32_t _leaseSeconds = 15;
     std::size_t _maxConnections = 128;
     bool _closed = true;

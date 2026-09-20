@@ -39,7 +39,7 @@ async def exercise(root):
     for key in ('hub', 'world', 'east', 'west', 'outsider'):
         openssl(root, 'req', '-newkey', 'rsa:2048', '-nodes', '-keyout', key+'.key', '-out', key+'.csr', '-subj', '/CN='+key)
         openssl(root, 'x509', '-req', '-in', key+'.csr', '-CA', 'ca.crt', '-CAkey', 'ca.key', '-CAcreateserial', '-out', key+'.crt', '-days', '1', '-extfile', 'extensions')
-    routes, ready, reports = {}, set(), {}
+    routes, ready, reports, restart_requests, generations = {}, set(), {}, set(), {}
     hub_port = port()
     async def hub(reader, writer):
         registered = None
@@ -60,9 +60,15 @@ async def exercise(root):
                 if kind == 2: ready.add(registered)
                 if kind == 9:
                     version, *values = struct.unpack('!B8IH',body[:35])
-                    assert version == 1 and values[1] <= 10000 and values[7] <= 32
-                    maps = list(struct.unpack('!'+str(values[8])+'I',body[35:]))
+                    assert version == 2 and values[1] <= 10000 and values[7] <= 32
+                    end = 35 + values[8]*4
+                    maps = list(struct.unpack('!'+str(values[8])+'I',body[35:end]))
+                    assert body[end:end+2] == b'\x00\x20' and len(body[end+2:]) == 32
+                    generations[registered] = body[end+2:].decode()
                     reports[registered] = (values, maps)
+                if kind == 3 and registered in restart_requests:
+                    restart_requests.remove(registered)
+                    writer.write(frame(0x8004, struct.pack('!HI', kind, 15))); await writer.drain(); break
                 writer.write(frame(0x8000, struct.pack('!HI', kind, 15))); await writer.drain()
                 if kind == 4: break
         except (asyncio.IncompleteReadError, ConnectionError):
@@ -125,7 +131,16 @@ async def exercise(root):
         assert reports['east'][0][4] > 0, 'Denied requests must appear in failure metrics'
         (snapshot/'maps/0000_00_00.map').write_bytes(b'corrupt')
         await rejected(text, 'cache is corrupt')
-        print('PASS: two providers, TLS authentication, hub lifecycle/discovery, metric reports and rejection counters, verified downloads, cache reuse, duplicate assignment, unavailable provider, denied identity, corrupt cache, atomic marker preservation.')
+        previous_generation = generations['east']
+        restart_requests.add('east')
+        assert await asyncio.wait_for(tasks[0],10) is True, 'Restart request did not close the daemon cleanly'
+        new_stop = asyncio.Event(); stops.append(new_stop)
+        tasks.append(asyncio.create_task(serve(root/'east.toml',new_stop)))
+        for _ in range(100):
+            if generations['east'] != previous_generation: break
+            await asyncio.sleep(.05)
+        assert generations['east'] != previous_generation and 'east' in ready
+        print('PASS: two providers, TLS authentication, hub lifecycle/discovery, metric reports, rejection counters, restart handoff/new generation, verified downloads, cache reuse, duplicate assignment, unavailable provider, denied identity, corrupt cache, atomic marker preservation.')
     finally:
         for stop in stops: stop.set()
         await asyncio.gather(*tasks, return_exceptions=True)

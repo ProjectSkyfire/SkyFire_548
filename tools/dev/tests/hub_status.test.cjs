@@ -14,6 +14,8 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         let count = 0, inFlight = 0, maxInFlight = 0, slow = false, fail = false, authenticated = true;
         let releaseStatus = null, releaseOperation = null;
         let registryNodes = [];
+        let restart = {}, restartRequests = 0, mapRestartRequests = 0;
+        let rejectRestart = false;
         const component = { key: "world", name: "SkyFire", managed: true, isWorld: true, enabled: true,
             status: "online", state: "running", canSendCommands: true, metricsAvailable: true, players: 4,
             cpuPercent: 1.5, updateTimeMs: 2, executablePath: "worldserver", configPath: "worldserver.conf", workingDirectory: "." };
@@ -24,13 +26,23 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
                 ++count; ++inFlight; maxInFlight = Math.max(inFlight, maxInFlight);
                 const requestCount = count;
                 const data = { username: "admin", csrfToken: "token", canSendWorldCommands: true, canOperateServices: true,
-                    accountsEnabled: true, uptimeSeconds: 60 + requestCount,
+                    accountsEnabled: true, uptimeSeconds: 60 + requestCount, ...restart,
                     components: [{ ...component, uptimeSeconds: 60 + requestCount, players: requestCount }, ...registryNodes] };
                 try {
                     if (slow) await new Promise(resolve => { releaseStatus = resolve; });
                     if (fail) return await json({ error: "temporarily unavailable" }, 503);
                     return await json(data, authenticated ? 200 : 401);
                 } finally { --inFlight; }
+            }
+            if (url.pathname === '/api/v1/services/all/restart') {
+                assert.equal(route.request().headers()['x-hub-csrf'],'token');
+                if (rejectRestart) return json({error:'Mapserver needs an external refresh.'},409);
+                ++restartRequests; restart={restartActive:true,restartState:'countdown',restartMessage:'World shutdown countdown; hub stays online.'};
+                return json({accepted:true},202);
+            }
+            if (url.pathname === '/api/v1/cluster/maps-east/restart') {
+                assert.equal(route.request().headers()['x-hub-csrf'],'token'); ++mapRestartRequests;
+                return json({accepted:true},202);
             }
             if (url.pathname === "/api/v1/services/world/stop") {
                 await new Promise(resolve => { releaseOperation = resolve; });
@@ -95,6 +107,20 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         assert.equal(await page.evaluate(() => document.activeElement === document.querySelector('#account-create [name="username"]')), true);
         assert.equal(await page.evaluate(() => window.scrollY), scroll);
         await page.locator("#status-tab").click();
+        await page.locator('#restart-all-nodes').click();
+        await page.waitForFunction(()=>document.querySelector('#node-restart-status').textContent.includes('countdown'));
+        assert.equal(restartRequests,1);
+        assert.equal(await page.locator('#restart-all-nodes').isDisabled(),true);
+        assert.equal(await page.locator('#component-grid .stop').isDisabled(),true);
+        restart={restartActive:false,restartState:'completed',restartMessage:'Nodes ready; hub stayed online.'};
+        await page.evaluate(()=>loadStatus());
+        assert.equal(await page.locator('#restart-all-nodes').isEnabled(),true);
+        rejectRestart = true;
+        await page.locator('#restart-all-nodes').click();
+        await page.waitForFunction(()=>document.querySelector('#node-restart-status').textContent.includes('external refresh'));
+        await page.evaluate(() => loadStatus());
+        assert.match(await page.locator('#node-restart-status').textContent(),/external refresh/,'polling retains rejection details');
+        rejectRestart = false;
         await page.locator("#component-grid .stop").click();
         await page.waitForFunction(() => document.querySelector("#service-action-message").textContent.includes("Stopping"));
         const beforeOperationTick = await page.locator(".service-metrics").textContent();
@@ -113,13 +139,16 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         await page.evaluate(() => loadStatus());
         assert.equal(await page.locator("#component-grid article").count(), 1);
         registryNodes = [{key:'cluster:maps-east',name:'Eastern map data',mapserver:true,clusterKey:'maps-east',clusterCanAdmin:true,
-            live:true,adminState:'enabled',managed:false,status:'online',state:'running',metricsAvailable:true,
+            live:true,canRestart:true,adminState:'enabled',managed:false,status:'online',state:'running',metricsAvailable:true,
             uptimeSeconds:60,cpuPercent:2,memoryMiB:64,transfers:1,sentKiB:1024,failures:0,requests:5,assets:40,maps:[0]}];
         await page.evaluate(() => loadStatus());
         const mapCard = page.locator('#component-grid article').filter({hasText:'Eastern map data'});
         assert.equal(await mapCard.locator('.service-metrics').isVisible(),true);
         assert.match(await mapCard.locator('.service-metrics').textContent(),/Memory 64 MiB.*Transfers 1/);
         assert.equal(await mapCard.getByRole('button',{name:'Start',exact:true}).isVisible(),false);
+        await mapCard.getByRole('button',{name:'Restart',exact:true}).click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Restart requested'));
+        assert.equal(mapRestartRequests,1);
         registryNodes[0].metricsAvailable=false; registryNodes[0].live=false; registryNodes[0].status='offline'; registryNodes[0].state='offline';
         await page.evaluate(() => loadStatus());
         assert.match(await mapCard.locator('.service-metrics').textContent(),/unavailable/);

@@ -141,6 +141,7 @@ CREATE TABLE IF NOT EXISTS hub_backup_worker (
  maintenance tinyint unsigned NOT NULL DEFAULT 0,
  recovery_safe tinyint unsigned NOT NULL DEFAULT 1,
  services_stopped tinyint unsigned NOT NULL DEFAULT 0,
+ restart_owner varchar(32) NOT NULL DEFAULT '',
  hub_seen timestamp NULL
 ) ENGINE=InnoDB;
 INSERT IGNORE INTO hub_backup_worker(id) VALUES (1);

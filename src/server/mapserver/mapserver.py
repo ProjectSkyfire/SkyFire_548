@@ -11,6 +11,9 @@ from pathlib import Path
 import signal
 import ssl
 import struct
+import subprocess
+import sys
+import uuid
 import tomllib
 from aiohttp import web
 from map_common import KEY, catalog, certificate_key, client_tls, frame, wire_string
@@ -37,6 +40,10 @@ def memory_mib():
     return 0
 
 
+class RestartRequested(Exception):
+    pass
+
+
 async def exchange(reader, writer, kind, body):
     writer.write(frame(kind, body))
     await writer.drain()
@@ -45,16 +52,27 @@ async def exchange(reader, writer, kind, body):
     if magic != b'SFHC' or version != 1 or size > 4096:
         raise RuntimeError('Invalid hub response')
     data = await asyncio.wait_for(reader.readexactly(size), 5)
-    if reply != 0x8000 or len(data) != 6:
+    if reply not in (0x8000,0x8004) or len(data) != 6 or (reply == 0x8004 and kind != 3):
         raise RuntimeError('Hub rejected mapserver registration/lifecycle')
     request, lease = struct.unpack('!HI', data)
     if request != kind or not 5 <= lease <= 300:
         raise RuntimeError('Invalid hub acknowledgement')
+    if reply == 0x8004:
+        raise RestartRequested()
     return lease
+
+
+def restart_process(config):
+    args = [sys.executable, '-B', str(Path(__file__).resolve()), '--config', str(Path(config).resolve())]
+    # Windows CRT exec joins argv without quoting paths that contain spaces.
+    if os.name == 'nt':
+        args = [subprocess.list2cmdline([arg]) for arg in args]
+    os.execv(sys.executable, args)
 
 
 async def serve(config_path, stop=None):
     started = time.monotonic()
+    generation = uuid.uuid4().hex
     config_path = Path(config_path).resolve()
     config = tomllib.loads(config_path.read_text(encoding='utf-8-sig'))
     def path(key):
@@ -87,7 +105,7 @@ async def serve(config_path, stop=None):
         load = min(10000, max(0, int((cpu-previous_cpu) / max(.001, wall-previous_wall) / (os.cpu_count() or 1) * 10000)))
         previous_wall, previous_cpu = wall, cpu
         values = [int(wall-started), load, memory_mib(), state['requests'], state['failures'], state['bytes']//1024, len(assets), state['active']]
-        return bytes([1]) + struct.pack('!8IH', *(min(0xffffffff,value) for value in values),len(maps)) + b''.join(struct.pack('!I',value) for value in sorted(maps))
+        return bytes([2]) + struct.pack('!8IH', *(min(0xffffffff,value) for value in values),len(maps)) + b''.join(struct.pack('!I',value) for value in sorted(maps)) + wire_string(generation)
     @web.middleware
     async def authorize(request, handler):
         state['requests'] += 1
@@ -139,6 +157,7 @@ async def serve(config_path, stop=None):
     inbound.load_cert_chain(str(path('certificate')), str(path('private_key')))
     outbound = client_tls(path('ca'), path('certificate'), path('private_key'))
     stop = stop or asyncio.Event()
+    restart = False
     runner = web.AppRunner(app, access_log=None, shutdown_timeout=5)
     await runner.setup()
     try:
@@ -151,7 +170,7 @@ async def serve(config_path, stop=None):
                 reader, writer = await asyncio.wait_for(asyncio.open_connection(config['hub_host'], hub_port,
                     ssl=outbound, server_hostname=config['hub_host']), 5)
                 payload = wire_string(node) + wire_string(config.get('node_name', node)) + bytes([3]) + wire_string(address)
-                payload += struct.pack('!HIIII', port, 0, 18414, limit, 256)
+                payload += struct.pack('!HIIII', port, 0, 18414, limit, 768)
                 lease = await exchange(reader, writer, 1, payload)
                 await exchange(reader, writer, 2, struct.pack('!BI', 1, state['active']))
                 await exchange(reader, writer, 9, metrics())
@@ -163,6 +182,10 @@ async def serve(config_path, stop=None):
                         await exchange(reader, writer, 3, struct.pack('!I', state['active']))
                         await exchange(reader, writer, 9, metrics())
                 await exchange(reader, writer, 4, b'')
+            except RestartRequested:
+                print('Hub requested restart; finishing active transfers and reloading the process.', flush=True)
+                restart = True
+                stop.set()
             except (OSError, RuntimeError, asyncio.TimeoutError, asyncio.IncompleteReadError):
                 if not stop.is_set():
                     print('Hub registration unavailable; mapserver will retry.', flush=True)
@@ -178,6 +201,7 @@ async def serve(config_path, stop=None):
                         await asyncio.wait_for(writer.wait_closed(), 2)
     finally:
         await runner.cleanup()
+    return restart
 
 
 async def main(config):
@@ -188,11 +212,14 @@ async def main(config):
             loop.add_signal_handler(sig, stop.set)
         except NotImplementedError:
             signal.signal(sig, lambda *_: loop.call_soon_threadsafe(stop.set))
-    await serve(config, stop)
+    return await serve(config, stop)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='mapserver.toml')
     args = parser.parse_args()
-    asyncio.run(main(args.config))
+    if asyncio.run(main(args.config)):
+        # Re-exec only this daemon after listeners and transfers have been closed.
+        # Preserve absolute paths and invocation flags, independent of working directory.
+        restart_process(args.config)

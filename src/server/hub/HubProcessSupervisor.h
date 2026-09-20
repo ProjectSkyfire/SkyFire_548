@@ -11,6 +11,7 @@
 #include <chrono>
 #include <functional>
 #include <set>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -46,6 +47,7 @@ struct HubManagedServiceStatus
     int32 CpuBasisPoints = -1;
 };
 
+class HubClusterServer;
 class HubProcessSupervisor
 {
 public:
@@ -57,6 +59,11 @@ public:
 
     void SetWorldStartCheck(std::function<bool(std::string const&, std::string&)> check) { _worldStartCheck = std::move(check); }
     bool Start(std::string const& serviceKey, std::string& error);
+    void SetClusterServer(HubClusterServer* server) { _clusterServer = server; }
+    bool RestartNodes(std::string& error);
+    void UpdateNodeRestart();
+    std::string const& NodeRestartState() const { return _nodeRestartState; }
+    std::string const& NodeRestartMessage() const { return _nodeRestartMessage; }
     bool Stop(std::string const& serviceKey, std::string& error);
     static bool IsWorldKey(std::string const& key);
     bool HasActiveWorld() const;
@@ -132,6 +139,13 @@ private:
     bool _shuttingDown = false;
     bool _backupInternalCommand = false;
     bool _backupLaunching = false;
+    bool _restartInternal = false;
+    HubClusterServer* _clusterServer = nullptr;
+    std::string _nodeRestartState = "idle", _nodeRestartMessage, _nodeRestartToken;
+    std::vector<std::string> _restartTargets;
+    std::map<std::string, std::string> _restartMapGenerations;
+    std::set<std::string> _restartStarted;
+    std::chrono::steady_clock::time_point _nodeRestartDeadline, _nodeRestartUpdated;
     std::string _backupBoot, _backupCycle;
     std::set<std::string> _backupSent, _backupAcknowledged, _backupStarted;
     std::chrono::steady_clock::time_point _backupUpdateAt;

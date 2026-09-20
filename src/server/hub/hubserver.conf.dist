@@ -293,3 +293,6 @@ Logger.server.handoff=3,Handoff
 # Certificate common names allowed to discover map data providers during world startup.
 # Space-separated node keys; empty disables map discovery. Mapserver also has its own allowlist.
 Hub.MapData.Readers = ""
+
+# Player warning before Restart all stops worlds gracefully (0..3600 seconds).
+Hub.Restart.Countdown = 60

@@ -40,6 +40,14 @@ int main()
     check(registry.SetMapMetrics("west",1,2,metrics));
     check(registry.Snapshot().at(0).Metrics.ReceivedAt == 2);
     check(!registry.SetMapMetrics("west",1,1001,metrics));
+    report.Bytes[0] = 2; report.String(std::string(32,'a'));
+    check(MapData::DecodeMetrics(report.Bytes,metrics) && metrics.Generation == std::string(32,'a'));
+    west.Capabilities = MapData::Capability | MapData::RestartCapability;
+    west.Metrics = metrics; west.Metrics.ReceivedAt = 2;
+    check(!MapData::RestartReady(west,std::string(32,'a'),3));
+    check(MapData::RestartReady(west,std::string(32,'b'),3));
+    west.Ready = false; check(!MapData::RestartReady(west,std::string(32,'b'),3));
+    west.Ready = true; west.Type = Service::World; check(!MapData::RestartReady(west,std::string(32,'b'),3));
     report.U8(0); check(!MapData::DecodeMetrics(report.Bytes,metrics));
     Writer query; query.U8(1); query.String("east"); std::string key;
     check(MapData::DecodeQuery(query.Bytes,key) && key == "east");

@@ -315,6 +315,7 @@ int main(int argc, char** argv)
     }
 
     HubClusterServer clusterServer;
+    processSupervisor.SetClusterServer(&clusterServer);
     processSupervisor.SetWorldStartCheck([&clusterServer](std::string const& config, std::string& error)
     {
         std::ifstream input(config);
@@ -393,6 +394,7 @@ int main(int argc, char** argv)
     {
         clusterServer.Update();
         processSupervisor.Update();
+        processSupervisor.UpdateNodeRestart();
 
         HubWebServiceCommand webCommand;
         while (webEnabled && webServer.PollServiceCommand(webCommand))
@@ -400,7 +402,10 @@ int main(int argc, char** argv)
             std::string error;
             if (!webCommand.ClusterAction.empty())
             {
-                bool const applied = clusterServer.SetAdministration(webCommand.ServiceKey, webCommand.ClusterAction, webCommand.Actor, error);
+                bool applied = false;
+                if (HubNodeRestartActive || HubBackupMaintenance()) error = "Node operations are blocked during maintenance.";
+                else if (webCommand.ClusterAction == "restart") applied = clusterServer.RestartMap(webCommand.ServiceKey,error);
+                else applied = clusterServer.SetAdministration(webCommand.ServiceKey, webCommand.ClusterAction, webCommand.Actor, error);
                 webServer.CompleteControlCommand(webCommand,applied);
                 webCommand.DispatchResult->set_value(applied ? "" : error);
                 continue;
@@ -444,7 +449,9 @@ int main(int argc, char** argv)
                     promise->set_value({409, "{\"error\":\"Worldserver is busy, transitioning, or needs an update. No direct database fallback was attempted.\"}"});
                 continue;
             }
-            bool const accepted = webCommand.Configure
+            bool const accepted = webCommand.RestartAll
+                ? processSupervisor.RestartNodes(error)
+                : webCommand.Configure
                 ? processSupervisor.SaveWorldNode(webCommand.ServiceKey, webCommand.Name, webCommand.ExecutablePath,
                     webCommand.ConfigPath, webCommand.WorkingDirectory, error)
                 : !webCommand.WorldCommand.empty()
@@ -452,12 +459,13 @@ int main(int argc, char** argv)
                 : webCommand.Start
                 ? processSupervisor.Start(webCommand.ServiceKey, error)
                 : processSupervisor.Stop(webCommand.ServiceKey, error);
+            if (webCommand.RestartAll) SF_LOG_INFO("server.hub", "Node restart requested by %s: %s",webCommand.Actor.c_str(),accepted ? "accepted" : error.c_str());
             webServer.CompleteControlCommand(webCommand,accepted);
             if (webCommand.DispatchResult)
                 webCommand.DispatchResult->set_value(accepted ? "" : error);
             if (!accepted)
                 SF_LOG_WARN("server.hub", "Web console could not %s managed service '%s': %s.",
-                    webCommand.Configure ? "configure" : !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
+                    webCommand.RestartAll ? "restart all" : webCommand.Configure ? "configure" : !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
         }
 
         auto const liveNodes = clusterServer.Snapshot();
@@ -469,6 +477,9 @@ int main(int argc, char** argv)
         if (webEnabled)
         {
             HubWebStatusSnapshot status;
+            status.RestartState = processSupervisor.NodeRestartState();
+            status.RestartMessage = processSupervisor.NodeRestartMessage();
+            status.RestartActive = HubNodeRestartActive;
             status.UptimeSeconds = uint64(std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::steady_clock::now() - hubStartedAt).count());
             for (HubManagedServiceStatus const& service : processSupervisor.GetStatuses())

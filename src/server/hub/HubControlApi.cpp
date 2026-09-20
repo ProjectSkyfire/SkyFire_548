@@ -301,6 +301,7 @@ std::string HubWebServer::HandleBackupSchedule(std::string const& method,
         return BackupSchedules(canEdit);
     }
     if (method != "POST") return Error(405,"Use GET or POST.");
+    if (HubNodeRestartActive) return Error(409,"Server node restart is in progress.");
     std::lock_guard<std::mutex> lock(_controlAdmissionMutex);
     std::map<std::string,std::string> form; Skyfire::Backup::Schedule schedule;
     bool valid = Form(body,form,9) && Skyfire::Backup::Decode(form,schedule);
@@ -383,6 +384,7 @@ std::string HubWebServer::HandleBackupJobs(std::string const& method,
     if (!(session.AccessFlags & View)) return Error(403,"Viewer permission required.");
     if (method == "GET") return BackupJobs(administrator);
     if (method != "POST") return Error(405,"Use GET or POST.");
+    if (HubNodeRestartActive) return Error(409,"Server node restart is in progress.");
     if (!administrator) return Error(403,"Administrator permission required to run backups.");
     if (Header(headers,"x-hub-csrf") != session.CsrfToken) return Error(403,"Invalid request token.");
     std::map<std::string,std::string> form;
@@ -414,6 +416,7 @@ std::string HubWebServer::HandleBackupJobs(std::string const& method,
     {
         if (form.size()!=2 || form["release"]!="maintenance") return Error(400,"Invalid maintenance request.");
         std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
+        if (HubNodeRestartActive) return Error(409,"Server node restart is in progress.");
         auto previous = HubDatabase.GetPreparedStatement(HUB_SEL_CONTROL_AUDIT); previous->setString(0,form["id"]);
         if (HubDatabase.Query(previous)) return Error(409,"Request id already used.");
         if (!AuditControl(form["id"],"attempt",session.Username,"backup.release","hub","received")) return Error(503,"Audit unavailable.");
@@ -427,6 +430,7 @@ std::string HubWebServer::HandleBackupJobs(std::string const& method,
         (form["target"]!="auth" && form["target"]!="characters" && form["target"]!="world" && form["target"]!="hub"))
         return Error(400,"Choose an allowlisted target; restore requires its source id and typed confirmation.");
     std::lock_guard<std::mutex> backupLock(HubBackupAdmission);
+    if (HubNodeRestartActive) return Error(409,"Server node restart is in progress.");
     std::lock_guard<std::mutex> lock(_controlAdmissionMutex);
     auto existing = HubDatabase.GetPreparedStatement(HUB_SEL_BACKUP_JOB); existing->setString(0,form["id"]);
     if (auto row = HubDatabase.Query(existing))

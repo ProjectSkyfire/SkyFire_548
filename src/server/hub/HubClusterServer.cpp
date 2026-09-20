@@ -63,6 +63,8 @@ public:
         if (!_key.empty())
         {
             _server._registry.Remove(_key, _owner);
+            auto pending = _server._mapRestarts.find(_key);
+            if (pending != _server._mapRestarts.end() && pending->second == _owner) _server._mapRestarts.erase(pending);
             SF_LOG_INFO("server.hub", "Cluster node '%s' disconnected or its lease expired.", _key.c_str());
         }
         _server._sessions.erase(_owner);
@@ -164,10 +166,10 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(511)) ||
-                (node.Type == Service::Auth && (node.Capabilities & 264)) ||
-                (node.Type == Service::World && (node.Capabilities & 432)) ||
-                (node.Type == Service::Map && node.Capabilities != MapData::Capability))
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(1023)) ||
+                (node.Type == Service::Auth && (node.Capabilities & 776)) ||
+                (node.Type == Service::World && (node.Capabilities & 944)) ||
+                (node.Type == Service::Map && (node.Capabilities != MapData::Capability && node.Capabilities != (MapData::Capability | MapData::RestartCapability))))
             { Reject(Error::Version, "Requires client build 18414 and supported service capabilities."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
             { Reject(Error::Conflict, "Node key is already leased or registry capacity is exhausted."); return; }
@@ -214,6 +216,12 @@ private:
     void Acknowledge(bool close)
     {
         Writer payload; payload.U16(std::uint16_t(_header.Type)); payload.U32(_server._leaseSeconds);
+        auto restart = _server._mapRestarts.find(_key);
+        if (!close && _header.Type == Message::Heartbeat && restart != _server._mapRestarts.end() && restart->second == _owner)
+        {
+            _server._mapRestarts.erase(restart);
+            Write(Frame(MapData::RestartReply, payload), true); return;
+        }
         Write(Frame(Message::Ack, payload), close);
     }
     void Reject(Error code, char const* message)
@@ -248,6 +256,20 @@ private:
 
 HubClusterServer::HubClusterServer() : _tls(boost::asio::ssl::context::tls_server), _acceptor(_io), _handoffs(Handoff::RandomToken) { }
 HubClusterServer::~HubClusterServer() { Close(); }
+bool HubClusterServer::RestartMap(std::string const& key, std::string& error)
+{
+    for (auto const& node : _registry.Snapshot())
+        if (node.Key == key && node.Type == Service::Map && node.Live && node.Ready && node.ExpiresAt > Now())
+        {
+            if (!(node.Capabilities & MapData::RestartCapability))
+            { error = "Mapserver must be restarted once with the updated Python script to enable hub restarts."; return false; }
+            if (!_mapRestarts.emplace(key,node.Owner).second)
+            { error = "Mapserver restart is already queued."; return false; }
+            SF_LOG_INFO("server.hub", "Restart queued for mapserver '%s'.",key.c_str()); return true;
+        }
+    error = "Mapserver is offline or not ready."; return false;
+}
+
 bool HubClusterServer::LoadAdministration(std::string& error)
 {
     auto count = HubDatabase.Query("SELECT COUNT(*) FROM hub_cluster_policy");
