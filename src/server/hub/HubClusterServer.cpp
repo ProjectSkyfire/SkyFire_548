@@ -91,7 +91,8 @@ private:
             if (self->_header.Type != Message::Register && self->_header.Type != Message::Ready &&
                 self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms &&
                 self->_header.Type != Handoff::RequestType && self->_header.Type != Realms::RequestType &&
-                self->_header.Type != MapData::RequestType && self->_header.Type != MapData::MetricsType)
+                self->_header.Type != MapData::RequestType && self->_header.Type != MapData::MetricsType &&
+                self->_header.Type != CharacterMetricsType)
             { self->Reject(Error::Malformed, "Unsupported request type."); return; }
             self->_body.resize(self->_header.Length);
             if (self->_body.empty()) { self->Handle(); return; }
