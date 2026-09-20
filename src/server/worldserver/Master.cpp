@@ -870,10 +870,19 @@ bool Master::_StartDB()
         }
     }
 
-    // Load realm names into a store
-    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_REALMLIST);
-    stmt->setInt32(0, sConfigMgr->GetIntDefault("WorldServerPort", 8085));
+    // A clustered replacement can listen on a different port from the static realm row.
+    // Explicit realm ownership must not depend on that port; retain legacy multi-realm discovery otherwise.
+    int32 const configuredRealm = sConfigMgr->GetIntDefault("RealmID", 0);
+    bool const explicitClusterRealm = sConfigMgr->GetBoolDefault("Cluster.Enable", false) && configuredRealm > 0;
+    PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(explicitClusterRealm ? LOGIN_SEL_WORLD_REALM_BY_ID : LOGIN_SEL_REALMLIST);
+    stmt->setInt32(0, explicitClusterRealm ? configuredRealm : sConfigMgr->GetIntDefault("WorldServerPort", 8085));
     PreparedQueryResult result = LoginDatabase.Query(stmt);
+    if (explicitClusterRealm && !result)
+    {
+        SF_LOG_ERROR("server.worldserver", "Configured cluster RealmID %d is missing, disabled, or could not be read from the login database.", configuredRealm);
+        _StopDB();
+        return false;
+    }
     if (result)
     {
         do

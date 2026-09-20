@@ -13,6 +13,7 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_CLUSTER_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild FROM realmlist ORDER BY name", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_AUTH_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild FROM realmlist WHERE flag <> 3 ORDER BY name", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_REALMLIST, "SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild FROM realmlist WHERE port = ? AND flag <> 3 ORDER BY name", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_WORLD_REALM_BY_ID, "SELECT id, name FROM realmlist WHERE id = ? AND flag <> 3", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_REALMNAME_BY_ID, "SELECT name FROM realmlist WHERE id = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_DEL_EXPIRED_IP_BANS, "DELETE FROM ip_banned WHERE unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_UPD_EXPIRED_ACCOUNT_BANS, "UPDATE account_banned SET active = 0 WHERE active = 1 AND unbandate<>bandate AND unbandate<=UNIX_TIMESTAMP()", CONNECTION_SYNCH);

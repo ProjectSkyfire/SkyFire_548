@@ -13,8 +13,16 @@ session migration. A missed heartbeat never authorizes takeover.
 2. Give the second world its own `.conf`, cluster node key/certificate, display name,
    logs, cache and port. Use the same worldserver executable for both managed rows.
    Keep identical explicit `RealmID`, `LoginDatabaseInfo`, `WorldDatabaseInfo`,
-   `CharacterDatabaseInfo`, `Cluster.HubHost` and `Cluster.HubPort`. Enable cluster
-   registration, handoffs and the authserver live realm directory.
+   `Cluster.HubHost` and `Cluster.HubPort`. With the character service enabled,
+   both worlds must explicitly use the same `CharacterService.Host`,
+   `CharacterService.Port` and `CharacterService.NodeKey`, with
+   `CharacterService.Enable = 1` and no direct character database credentials.
+   Legacy direct-database pairs instead require identical `CharacterDatabaseInfo`.
+   Enable cluster registration, handoffs and the authserver live realm directory.
+   Clustered worlds with a positive `RealmID` load that exact realm regardless of
+   `realmlist.port`; the live cluster directory publishes the active node's port.
+   Leave the static realm row intact when switching nodes. Worlds without an
+   explicit cluster realm retain the legacy port-based realm discovery.
 3. Create a local directory owned by the service identity, for example
    `C:/SkyFire/locks` or `/var/lib/skyfire/locks`. In **both** world configurations:
 
@@ -30,8 +38,10 @@ session migration. A missed heartbeat never authorizes takeover.
    Worldserver acquires ownership before database setup and holds it through
    database cleanup. Database CLI overrides are disabled when ownership is set.
 4. Authorize the standby certificate identity in `Hub.MapData.Readers` and each
-   provider's `allowed_world_nodes`. Prewarm the standby's separate cache using
-   `fetch_maps.py --world-config PATH_TO_STANDBY_CONFIG`.
+   provider's `allowed_world_nodes`. When using the character service, also add it
+   to `characterserver.toml`'s `allowed_world_nodes`. Gracefully stop the active
+   world before restarting data services to load these permissions. Prewarm the
+   standby's separate cache using `fetch_maps.py --world-config PATH_TO_STANDBY_CONFIG`.
 5. Add the standby through the existing web world-node configuration form, using
    service key `world-standby`, its own configuration path, the same executable
    path as `world`, and the correct working directory. Both records must be enabled;
@@ -136,11 +146,13 @@ before starting the other member. Never remove the lock file to bypass ownership
 Native compilation and live failure drills are required; browser fixtures and
 policy tests alone do not establish runtime failover safety.
 
-## Next phase: character service
+## Character service and future warm standby
 
-Move character database reads/writes behind a dedicated character service, with
-exclusive writer epochs, revocation/fencing and explicit session transfer rules.
-Only then can a running standby be developed without direct character DB ownership.
+The [character service](CharacterServer.md) now provides character database
+reads/writes, exclusive writer epochs and rejection of retired world writers.
+Both members use that same service; the target acquires a new writer generation
+after the source disconnects. The local ownership lock remains required.
+Explicit gameplay and session transfer rules are still needed for a running standby.
 Centralizing queries alone does not transfer player objects, pending saves, combat
 or other unsaved simulation state. Keep this cold-standby mode until those guarantees
 are implemented and tested.
