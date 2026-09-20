@@ -4,6 +4,9 @@
 node_key = "maps-eastern"
 node_name = "Eastern Kingdoms terrain"
 maps = [0]
+# Include shared dbc/db2/cameras files as well as the assigned map assets.
+# Use MapData.FullData=1 on worldserver and assign every extracted map ID for a full data cache.
+full_data = false
 data_root = "../Data"
 bind_address = "127.0.0.1"
 advertise_address = "127.0.0.1"

@@ -13,11 +13,12 @@ from pathlib import Path
 import re
 import shutil
 import socket
+import stat
 import struct
 import time
 from urllib.parse import quote
-from map_common import (KEY, MAX_FILE, MAX_FILES, MAX_MANIFEST, MAX_TOTAL, asset_map,
-                        certificate_key, client_tls, digest_file, encoded, frame, wire_string)
+from map_common import (KEY, MAX_FILE, MAX_FILES, MAX_MANIFEST, MAX_TOTAL, MAX_MAPS, asset_map,
+                        certificate_key, client_tls, digest_file, encoded, frame, wire_string, valid_asset_size)
 
 
 def read_world_config(path):
@@ -129,6 +130,25 @@ def cache_lock(root, timeout=1800):
                 fcntl.flock(lock, fcntl.LOCK_UN)
 
 
+def file_stamp(path):
+    info = path.stat()
+    if not stat.S_ISREG(info.st_mode):
+        raise ValueError('Cache asset must be a regular file')
+    return [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns]
+
+
+def verification_records(path, snapshot):
+    try:
+        if path.is_symlink() or path.stat().st_size > MAX_MANIFEST:
+            return {}
+        data = json.loads(path.read_text(encoding='utf-8'))
+        if data.get('version') == 1 and data.get('snapshot') == snapshot and isinstance(data.get('files'), dict):
+            return data['files']
+    except (OSError, ValueError, AttributeError):
+        pass
+    return {}
+
+
 def fetch(config_path, receipt=None):
     if receipt is not None and not re.fullmatch(r"receipt-[0-9a-f]{32}", receipt):
         raise ValueError("Invalid bootstrap receipt")
@@ -142,14 +162,17 @@ def fetch(config_path, receipt=None):
     sources, assigned = {}, set()
     for assignment in config.get('MapData.Sources', '').split():
         node, separator, values = assignment.partition('=')
-        if not separator or not KEY.fullmatch(node) or node in sources or not re.fullmatch(r'\d{1,4}(?:,\d{1,4}){0,63}', values):
+        if not separator or not KEY.fullmatch(node) or node in sources or not re.fullmatch(r'\d{1,4}(?:,\d{1,4}){0,511}', values):
             raise ValueError('Use MapData.Sources = "maps-east=0 maps-west=1"')
         maps = [int(value) for value in values.split(',')]
         if len(maps) != len(set(maps)) or assigned.intersection(maps):
             raise ValueError('A map can have only one configured data provider')
         assigned.update(maps); sources[node] = maps
-    if not sources or len(sources) > 16 or len(assigned) > 64:
-        raise ValueError('Configure 1..16 providers and at most 64 maps')
+    if not sources or len(sources) > 16 or len(assigned) > MAX_MAPS:
+        raise ValueError('Configure 1..16 providers and at most 512 maps')
+    full_data = config.get('MapData.FullData', '0')
+    if full_data not in ('0', '1'):
+        raise ValueError('MapData.FullData must be 0 or 1')
     context = client_tls(path('Cluster.CA'), path('Cluster.Certificate'), path('Cluster.PrivateKey'))
     root = path('MapData.CachePath', 'map-cache')
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -158,6 +181,9 @@ def fetch(config_path, receipt=None):
     timeout = int(config.get('MapData.StartupTimeout', '1800'))
     if not 1 <= timeout <= 86400:
         raise ValueError('Invalid map startup timeout')
+    verify = config.get('MapData.VerifyCache', '0')
+    if verify not in ('0', '1'):
+        raise ValueError('MapData.VerifyCache must be 0 or 1')
     with cache_lock(root, timeout):
         connections, datasets, selected, seen, manifests = {}, {}, {}, {}, {}
         def request(node, url):
@@ -186,8 +212,10 @@ def fetch(config_path, receipt=None):
                     raise ValueError('Manifest hash mismatch')
                 datasets[node] = dataset
                 manifest = json.loads(payload)
-                if manifest.get('version') != 1 or manifest.get('build') != 18414 or not set(maps).issubset(manifest.get('maps', [])):
+                if manifest.get('version') not in (1, 2) or manifest.get('build') != 18414 or not set(maps).issubset(manifest.get('maps', [])):
                     raise ValueError('Dataset build/maps do not match the requested maps')
+                if full_data == '1' and (manifest['version'] != 2 or set(maps) != set(manifest['maps'])):
+                    raise ValueError('Full data requires complete assignments and full-data providers')
                 entries = manifest.get('files')
                 if not isinstance(entries, list) or not 1 <= len(entries) <= MAX_FILES:
                     raise ValueError('Invalid manifest file count')
@@ -195,7 +223,7 @@ def fetch(config_path, receipt=None):
                 for entry in entries:
                     name = entry['path']
                     map_id = asset_map(name)
-                    if name.casefold() in names or type(entry['size']) is not int or not 0 < entry['size'] <= MAX_FILE or not re.fullmatch('[0-9a-f]{64}', entry['sha256']):
+                    if name.casefold() in names or not valid_asset_size(name, entry['size']) or not re.fullmatch('[0-9a-f]{64}', entry['sha256']):
                         raise ValueError('Invalid/duplicate manifest entry')
                     names.add(name.casefold()); total += entry['size']
                     if total > MAX_TOTAL:
@@ -208,10 +236,16 @@ def fetch(config_path, receipt=None):
                             seen[name.casefold()] = entry
                             selected[name] = dict(entry, provider=node)
                 for map_id in maps:
+                    if full_data == '1':
+                        if not any(asset_map(e['path']) == map_id for e in entries):
+                            raise ValueError('Requested map has no extracted assets')
+                        continue
                     if not any(e['path'].startswith(f'maps/{map_id:04d}_') for e in entries) or f'vmaps/{map_id:04d}.vmtree'.casefold() not in names or f'mmaps/{map_id:04d}.mmap'.casefold() not in names:
                         raise ValueError('Requested map is incomplete')
                 if 'vmaps/gameobjectmodels.dtree' not in names or not any(e['path'].endswith('.vmo') for e in entries):
                     raise ValueError('Missing shared collision models')
+                if full_data == '1' and any(not any(e['path'].startswith(folder + '/') for e in entries) for folder in ('dbc','db2','cameras')):
+                    raise ValueError('Missing dbc, db2 or cameras assets')
                 manifests[node] = {'dataset':dataset, 'maps':sorted(maps)}
             selected = list(selected.values())
             if len(selected) > MAX_FILES or sum(e['size'] for e in selected) > MAX_TOTAL:
@@ -226,12 +260,34 @@ def fetch(config_path, receipt=None):
             if shutil.disk_usage(root).free < remaining + 64 * 1024 * 1024:
                 raise RuntimeError('Insufficient free space for map cache')
             downloaded = 0
+            checked = reused = 0
+            record_path = root / (snapshot + '.verified.json')
+            records = verification_records(record_path, snapshot) if verify == '0' and stage == destination else {}
+            verified = {}
+            progress_at = time.monotonic()
+            print(f'Preparing map cache: {len(selected)} assets; previously verified metadata available for {len(records)}.', flush=True)
             for entry in selected:
                 target = stage / entry['path']
                 if target.parent.is_symlink() or target.is_symlink() or target.resolve() != target:
                     raise ValueError('Cache asset cannot be a link')
-                target.parent.mkdir(exist_ok=True)
-                if target.is_file() and target.stat().st_size == entry['size'] and digest_file(target) == entry['sha256']:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                valid = False
+                if target.is_file():
+                    before = file_stamp(target)
+                    if before[2] == entry['size']:
+                        if records.get(entry['path']) == [entry['sha256'], before]:
+                            valid = True
+                            reused += 1
+                        else:
+                            checked += 1
+                            valid = digest_file(target) == entry['sha256']
+                            if before != file_stamp(target):
+                                raise RuntimeError('Cache asset changed during verification')
+                if valid:
+                    verified[entry['path']] = [entry['sha256'], before]
+                    if time.monotonic() - progress_at >= 5:
+                        print(f'Map cache: {len(verified)}/{len(selected)} ready; {reused} reused, {checked} hashed, {downloaded} downloaded.', flush=True)
+                        progress_at = time.monotonic()
                     continue
                 if stage == destination:
                     raise RuntimeError('Published cache is corrupt; use a new empty cache directory')
@@ -254,8 +310,17 @@ def fetch(config_path, receipt=None):
                     raise ValueError('Asset checksum mismatch')
                 os.replace(temporary, target)
                 downloaded += 1
+                verified[entry['path']] = [entry['sha256'], file_stamp(target)]
+                if time.monotonic() - progress_at >= 5:
+                    print(f'Map cache: {len(verified)}/{len(selected)} ready; {reused} reused, {checked} hashed, {downloaded} downloaded.', flush=True)
+                    progress_at = time.monotonic()
             if stage != destination:
                 os.replace(stage, destination)
+            record_tmp = root / (snapshot + '.verified.tmp')
+            if record_path.is_symlink() or record_tmp.is_symlink():
+                raise ValueError('Verification record cannot be a link')
+            record_tmp.write_text(json.dumps({'version':1, 'snapshot':snapshot, 'files':verified}, separators=(',', ':')), encoding='utf-8')
+            os.replace(record_tmp, record_path)
             active = root / 'active.tmp'
             if active.is_symlink() or (root / 'active').is_symlink():
                 raise ValueError('Cache marker cannot be a link')
@@ -265,7 +330,9 @@ def fetch(config_path, receipt=None):
                 receipt_path = root / receipt
                 with receipt_path.open('x', encoding='ascii') as output:
                     output.write(snapshot + '\n')
-            print(f'Map data ready: {len(selected)} verified assets, {downloaded} downloaded, maps {sorted(assigned)} from {len(sources)} providers.', flush=True)
+                    if full_data == '1':
+                        output.write('full-data\n')
+            print(f'Map data ready: {len(selected)} verified assets, {downloaded} downloaded, {reused} reused without hashing, {checked} hashed, maps {sorted(assigned)} from {len(sources)} providers.', flush=True)
             return destination
         finally:
             for connection in connections.values():

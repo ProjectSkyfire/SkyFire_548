@@ -15,6 +15,7 @@ import subprocess
 import sys
 sys.dont_write_bytecode = True
 import tempfile
+from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'server' / 'mapserver'))
 from mapserver import serve
 from fetch_maps import fetch
@@ -84,11 +85,14 @@ async def exercise(root):
     try:
         for node, map_id in [('east',0), ('west',1)]:
             data = root/node
-            for folder in ('maps','vmaps','mmaps'): (data/folder).mkdir(parents=True)
+            for folder in ('maps','vmaps','mmaps','dbc/enUS','db2','cameras'): (data/folder).mkdir(parents=True)
             for name in (f'maps/{map_id:04d}_00_00.map', f'vmaps/{map_id:04d}.vmtree', f'vmaps/{map_id:04d}_00_00.vmtile', f'mmaps/{map_id:04d}.mmap', f'mmaps/{map_id:04d}_00_00.mmtile', 'vmaps/shared.vmo', 'vmaps/GameObjectModels.dtree'):
                 (data/name).write_bytes(('fixture:'+name).encode() * 256)
+            for name in ('dbc/Map.dbc','dbc/enUS/Map.dbc','db2/Item.db2','cameras/FlyBy.m2'):
+                (data/name).write_bytes(('shared:'+name).encode())
+            (data/'dbc/Unused.dbc').write_bytes(b'')
             routes[node] = port()
-            settings = dict(node_key=node, node_name=node, maps=[map_id], data_root=node,
+            settings = dict(node_key=node, node_name=node, maps=[map_id], data_root=node, full_data=True,
                 advertise_address='127.0.0.1', port=routes[node], hub_host='localhost', hub_port=hub_port,
                 ca='ca.crt', certificate=node+'.crt', private_key=node+'.key', allowed_world_nodes=['world'])
             config = root/(node+'.toml')
@@ -107,11 +111,37 @@ async def exercise(root):
         assert (root/('map-cache/receipt-'+'0'*32)).read_text().strip() == snapshot.name
         assert (snapshot/'maps/0000_00_00.map').is_file() and (snapshot/'maps/0001_00_00.map').is_file()
         assert snapshot == await asyncio.to_thread(fetch, config), 'cache reuse failed'
+        config.write_text(text + 'MapData.FullData = 1\n')
+        assert snapshot == await asyncio.to_thread(fetch, config, 'receipt-'+'1'*32)
+        assert (root/('map-cache/receipt-'+'1'*32)).read_text().splitlines() == [snapshot.name,'full-data']
+        for name in ('dbc/Map.dbc','dbc/enUS/Map.dbc','db2/Item.db2','cameras/FlyBy.m2'):
+            assert (snapshot/name).is_file(), name
+        assert (snapshot/'dbc/Unused.dbc').read_bytes() == b''
+        text += 'MapData.FullData = 1\n'
+        with patch('fetch_maps.digest_file', side_effect=AssertionError('Warm cache must not hash file contents')):
+            assert snapshot == await asyncio.to_thread(fetch, config)
+        import fetch_maps
+        changed = snapshot/'cameras/FlyBy.m2'
+        stamp = changed.stat()
+        os.utime(changed, ns=(stamp.st_atime_ns, stamp.st_mtime_ns + 1000000000))
+        with patch('fetch_maps.digest_file', wraps=fetch_maps.digest_file) as hashed:
+            assert snapshot == await asyncio.to_thread(fetch, config)
+            assert hashed.call_count == 1, 'Only changed metadata should require hashing'
+        with patch('fetch_maps.digest_file', wraps=fetch_maps.digest_file) as hashed:
+            config.write_text(text + 'MapData.VerifyCache = 1\n')
+            assert snapshot == await asyncio.to_thread(fetch, config)
+            assert hashed.call_count > 0, 'Forced verification must hash cached contents'
+        config.write_text(text)
+        record = root/'map-cache'/(snapshot.name+'.verified.json')
+        record.write_text('{broken')
+        with patch('fetch_maps.digest_file', wraps=fetch_maps.digest_file) as hashed:
+            assert snapshot == await asyncio.to_thread(fetch, config)
+            assert hashed.call_count > 0, 'Invalid metadata must fall back to full verification'
         for _ in range(120):
             if len(reports) == 2 and all(report[0][3] > 0 for report in reports.values()): break
             await asyncio.sleep(.05)
         assert reports['east'][1] == [0] and reports['west'][1] == [1]
-        assert all(report[0][6] == 7 and report[0][3] > 0 and report[0][5] > 0 for report in reports.values())
+        assert all(report[0][6] == 12 and report[0][3] > 0 and report[0][5] > 0 for report in reports.values())
         original = (root/'map-cache/active').read_bytes()
         async def rejected(settings, expected):
             config.write_text(settings)
@@ -129,7 +159,11 @@ async def exercise(root):
             if reports['east'][0][4] > 0: break
             await asyncio.sleep(.05)
         assert reports['east'][0][4] > 0, 'Denied requests must appear in failure metrics'
-        (snapshot/'maps/0000_00_00.map').write_bytes(b'corrupt')
+        damaged = snapshot/'maps/0000_00_00.map'
+        previous = damaged.stat()
+        contents = bytearray(damaged.read_bytes()); contents[0] ^= 1
+        damaged.write_bytes(contents)
+        os.utime(damaged, ns=(previous.st_atime_ns, previous.st_mtime_ns + 1000000000))
         await rejected(text, 'cache is corrupt')
         previous_generation = generations['east']
         restart_requests.add('east')

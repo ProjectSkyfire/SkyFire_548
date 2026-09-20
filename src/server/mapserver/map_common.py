@@ -12,10 +12,12 @@ MAX_FILES = 100000
 MAX_FILE = 64 * 1024 * 1024
 MAX_MANIFEST = 32 * 1024 * 1024
 MAX_TOTAL = 16 * 1024 * 1024 * 1024
+MAX_MAPS = 512
 KEY = re.compile(r'[A-Za-z0-9_.-]{1,64}\Z')
 TILE = re.compile(r'(maps|vmaps|mmaps)/(\d{4})_(\d{2})_(\d{2})\.(map|vmtile|mmtile)\Z')
 ROOT_FILE = re.compile(r'(vmaps|mmaps)/(\d{4})\.(vmtree|mmap)\Z')
 MODEL = re.compile(r'vmaps/[A-Za-z0-9_. ()-]{1,220}\.vmo\Z')
+CLIENT_DATA = re.compile(r'(dbc|db2|cameras)/(?:[a-z]{2}[A-Z]{2}/)?[A-Za-z0-9_. ()-]{1,220}\.(dbc|db2|m2)\Z')
 
 
 def asset_map(name):
@@ -29,6 +31,9 @@ def asset_map(name):
         return int(match[2])
     if MODEL.fullmatch(name) or name == 'vmaps/GameObjectModels.dtree':
         return None
+    match = CLIENT_DATA.fullmatch(name)
+    if match and (match[1], match[2]) in {('dbc','dbc'),('db2','db2'),('cameras','m2')}:
+        return None
     raise ValueError('Unsupported asset name')
 
 
@@ -38,6 +43,12 @@ def digest_file(path):
         for chunk in iter(lambda: source.read(1024 * 1024), b''):
             hashed.update(chunk)
     return hashed.hexdigest()
+
+
+def valid_asset_size(name, size):
+    # Extractors leave empty placeholders for some unused client tables.
+    minimum = 0 if name.startswith(('dbc/', 'db2/')) else 1
+    return type(size) is int and minimum <= size <= MAX_FILE
 
 
 def encoded(value):
@@ -71,17 +82,21 @@ def frame(kind, body):
     return b'SFHC' + struct.pack('!HHI', 1, kind, len(body)) + body
 
 
-def catalog(data_root, maps):
+def catalog(data_root, maps, full_data=False):
     root = Path(data_root).resolve(strict=True)
-    if not maps or len(maps) > 64 or any(type(m) is not int or not 0 <= m <= 9999 for m in maps):
-        raise ValueError('Configure 1..64 unique map IDs in 0..9999')
+    if not maps or len(maps) > MAX_MAPS or any(type(m) is not int or not 0 <= m <= 9999 for m in maps):
+        raise ValueError('Configure 1..512 unique map IDs in 0..9999')
     files, paths, folded, total = [], {}, set(), 0
-    for folder in ('maps', 'vmaps', 'mmaps'):
+    for folder in ('maps', 'vmaps', 'mmaps') + (('dbc', 'db2', 'cameras') if full_data else ()):
         directory = root / folder
         if directory.is_symlink() or not directory.is_dir() or directory.resolve() != directory:
             raise ValueError('Asset directories must be real directories under data_root')
-        for path in sorted(directory.iterdir()):
-            name = folder + '/' + path.name
+        for path in sorted(directory.rglob('*')):
+            if path.is_symlink() or path.resolve() != path:
+                raise ValueError('Asset links are forbidden')
+            if path.is_dir():
+                continue
+            name = path.relative_to(root).as_posix()
             try:
                 map_id = asset_map(name)
             except ValueError:
@@ -93,7 +108,7 @@ def catalog(data_root, maps):
             if path.is_symlink() or not path.is_file() or path.resolve() != path:
                 raise ValueError('Asset links and non-files are forbidden')
             stat = path.stat()
-            if not 0 < stat.st_size <= MAX_FILE or name.casefold() in folded:
+            if not valid_asset_size(name, stat.st_size) or name.casefold() in folded:
                 raise ValueError('Asset is empty, oversized or case-ambiguous')
             folded.add(name.casefold())
             total += stat.st_size
@@ -103,13 +118,19 @@ def catalog(data_root, maps):
             paths[name] = (path, stat.st_size, stat.st_mtime_ns)
     for map_id in maps:
         prefix = f'{map_id:04d}'
+        if full_data:
+            if not any(asset_map(f['path']) == map_id for f in files):
+                raise ValueError('Selected map has no extracted assets')
+            continue
         if not any(f['path'].startswith('maps/' + prefix + '_') for f in files):
             raise ValueError('Selected map has no terrain tiles')
         if 'vmaps/' + prefix + '.vmtree' not in paths or 'mmaps/' + prefix + '.mmap' not in paths:
             raise ValueError('Selected map needs its vmtree and mmap roots')
     if not any(name.endswith('.vmo') for name in paths) or 'vmaps/GameObjectModels.dtree' not in paths:
         raise ValueError('Collision model files and GameObjectModels.dtree are required')
-    document = {'version': 1, 'build': 18414, 'maps': sorted(maps), 'files': files}
+    if full_data and any(not any(f['path'].startswith(folder + '/') for f in files) for folder in ('dbc','db2','cameras')):
+        raise ValueError('Full data requires dbc, db2 and cameras assets')
+    document = {'version': 2 if full_data else 1, 'build': 18414, 'maps': sorted(maps), 'files': files}
     payload = encoded(document)
     if len(payload) > MAX_MANIFEST:
         raise ValueError('Manifest too large')

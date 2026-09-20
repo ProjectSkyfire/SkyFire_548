@@ -1404,6 +1404,11 @@ void World::SetInitialWorldSettings()
         SF_LOG_ERROR("maps", "%s", mapDataError.c_str());
         exit(1);
     }
+    if (sConfigMgr->GetBoolDefault("MapData.Enable", false) && sConfigMgr->GetBoolDefault("MapData.FullData", false))
+    {
+        m_dataPath = m_remoteMapPath;
+        SF_LOG_INFO("server.loading", "All game data (maps, vmaps, mmaps, dbc, db2 and cameras) uses verified mapserver cache %s.", m_dataPath.c_str());
+    }
 
     ///- Initialize Allowed Security Level
     LoadDBAllowedSecurityLevel();

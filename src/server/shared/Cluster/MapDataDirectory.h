@@ -26,7 +26,7 @@ namespace Skyfire::Cluster::MapData
             !input.U32(metrics.CpuBasisPoints) || metrics.CpuBasisPoints > 10000 ||
             !input.U32(metrics.MemoryMiB) || !input.U32(metrics.Requests) || !input.U32(metrics.Failures) ||
             !input.U32(metrics.SentKiB) || !input.U32(metrics.Assets) || !input.U32(metrics.Active) ||
-            metrics.Active > 32 || !input.U16(count) || !count || count > 64) return false;
+            metrics.Active > 32 || !input.U16(count) || !count || count > 512) return false;
         metrics.Maps.clear();
         for (unsigned i = 0; i < count; ++i)
         {

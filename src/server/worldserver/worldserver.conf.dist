@@ -3395,12 +3395,19 @@ Eluna.ScriptPath = "lua_scripts"
 # Optional startup-only terrain/collision providers. Gameplay simulation stays in worldserver.
 # A map ID can belong to exactly one provider. Use matching extraction sets on every provider.
 MapData.Enable = 0
+# FullData redirects all DataDir consumers to the verified snapshot, including DBC/DB2/cameras.
+# Requires full_data=true on every provider and assignments covering every extracted map.
+# No local DataDir fallback in this mode. Leave 0 for legacy selected-map distribution.
+MapData.FullData = 0
 MapData.Sources = "maps-eastern=0 maps-kalimdor=1"
 MapData.CachePath = "map-cache"
 # Python 3.11+. A bare executable is resolved through PATH; other paths are config-relative.
 MapData.Python = "python3"
 MapData.Bootstrap = "mapserver/fetch_maps.py"
 MapData.StartupTimeout = 1800
+# Immutable cache: reuse verified files whose identity, size and timestamps match.
+# Set 1 to force a full SHA-256 scan (e.g. to investigate disk corruption).
+MapData.VerifyCache = 0
 
 # Keep continent files cached; preload terrain/collision/navigation near players.
 # Radius in map grids: 0 disables, 1 = nearby 3x3, 2 = 5x5.

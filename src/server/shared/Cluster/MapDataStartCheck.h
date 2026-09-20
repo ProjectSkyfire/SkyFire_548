@@ -50,7 +50,7 @@ namespace Skyfire::Cluster::MapData
             return reject("invalid MapData.Enable.");
         std::istringstream sources(settings["MapData.Sources"]);
         std::set<std::string> providers; std::set<unsigned> maps;
-        std::regex format("([A-Za-z0-9_.-]{1,64})=([0-9]{1,4}(,[0-9]{1,4}){0,63})");
+        std::regex format("([A-Za-z0-9_.-]{1,64})=([0-9]{1,4}(,[0-9]{1,4}){0,511})");
         std::string source;
         while (sources >> source)
         {
@@ -63,8 +63,8 @@ namespace Skyfire::Cluster::MapData
             if (Resolve(match[1].str(),nodes,now).Bytes.at(1) != 1)
                 return reject("required mapserver '" + match[1].str() + "' is offline, unready, drained, disabled or full. Start it and retry.");
         }
-        if (providers.empty() || providers.size() > 16 || maps.size() > 64)
-            return reject("configure 1..16 map providers and 1..64 map IDs.");
+        if (providers.empty() || providers.size() > 16 || maps.size() > 512)
+            return reject("configure 1..16 map providers and 1..512 map IDs.");
         return true;
     }
 }

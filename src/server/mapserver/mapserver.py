@@ -93,7 +93,10 @@ async def serve(config_path, stop=None):
     maps = config['maps']
     if len(maps) != len(set(maps)):
         raise ValueError('Duplicate map ID')
-    manifest, dataset, assets = await asyncio.to_thread(catalog, path('data_root'), set(maps))
+    full_data = config.get('full_data', False)
+    if type(full_data) is not bool:
+        raise ValueError('full_data must be true or false')
+    manifest, dataset, assets = await asyncio.to_thread(catalog, path('data_root'), set(maps), full_data)
     limit = config.get('max_transfers', 4)
     if not 1 <= limit <= 32:
         raise ValueError('max_transfers must be 1..32')

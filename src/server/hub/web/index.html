@@ -47,6 +47,7 @@
         </section>
 
         <div id="app-shell" class="app-shell" hidden>
+            <div class="status-dock">
             <aside id="server-sidebar" class="server-sidebar" aria-labelledby="server-status-title">
                 <h2 id="server-status-title">Server status</h2>
                 <div id="status-summary" class="summary"></div>
@@ -59,6 +60,9 @@
                     <span id="last-updated">Waiting for status</span>
                 </div>
             </aside>
+                <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-controls="server-sidebar" aria-expanded="true" title="Fold server status"><span id="sidebar-toggle-icon" aria-hidden="true">‹</span><span>Server status</span></button>
+                <div id="sidebar-resize" class="sidebar-resize" role="separator" tabindex="0" aria-label="Resize server status" aria-orientation="vertical" aria-controls="server-sidebar" aria-valuemin="240" aria-valuemax="560" aria-valuenow="292" title="Drag to resize; use arrow keys when focused"></div>
+            </div>
             <div class="app-content">
         <section id="health-view" data-page-view="health" class="status-view"><div class="page-heading"><h1>Server health</h1></div><div id="health-dashboard"></div></section>
         <section id="backup-view" data-page-view="backup" class="status-view" hidden><div class="page-heading"><h1>Backup</h1></div><section id="backup-schedules" class="account-panel"></section></section>

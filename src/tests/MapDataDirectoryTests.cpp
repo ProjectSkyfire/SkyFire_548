@@ -31,6 +31,17 @@ int main()
     check(!start("MapData.Enable=1\nMapData.Sources=west=1 west=0", {west}));
     check(!start("MapData.Enable=1\nMapData.Sources=west=1 east=1", {east,west}));
     check(!start("MapData.Enable=1\nMapData.Sources=", {west}));
+    std::string many = "MapData.Enable=1\nMapData.Sources=west=0";
+    for (unsigned id = 1; id < 512; ++id) many += "," + std::to_string(id);
+    check(start(many, {west}));
+    check(!start(many + ",512", {west}));
+    Writer largeReport; largeReport.U8(2);
+    for (unsigned i = 0; i < 8; ++i) largeReport.U32(0);
+    largeReport.U16(512);
+    for (unsigned i = 0; i < 512; ++i) largeReport.U32(i);
+    largeReport.String(std::string(32,'a'));
+    MapMetrics largeMetrics;
+    check(MapData::DecodeMetrics(largeReport.Bytes,largeMetrics) && largeMetrics.Maps.size() == 512);
     Writer report; report.U8(1);
     for (auto value : {30u,100u,42u,5u,1u,1024u,7u,2u}) report.U32(value);
     report.U16(1); report.U32(0); MapMetrics metrics;
