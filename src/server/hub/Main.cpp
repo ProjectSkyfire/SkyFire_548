@@ -319,9 +319,25 @@ int main(int argc, char** argv)
     processSupervisor.SetClusterServer(&clusterServer);
     processSupervisor.SetWorldStartCheck([&clusterServer](std::string const& config, std::string& error)
     {
-        std::ifstream input(config);
+        Config settings;
+        if (!ConfigLoader::Load(config, settings)) { error = "Cannot read world configuration."; return false; }
+        auto value = [&](char const* key, std::string fallback = "") {
+            for (auto const& section : settings) { auto entry=section.second.find(key); if(entry!=section.second.end()) return entry->second; }
+            return fallback;
+        };
+        auto enabled=value("CharacterService.Enable");
         auto now = std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count());
+        if (enabled=="1" || enabled=="true" || enabled=="TRUE" || enabled=="yes" || enabled=="YES")
+        {
+            bool found=false;
+            for(auto const& node:clusterServer.Snapshot())
+                if(node.Type==Skyfire::Cluster::Service::Character && node.Key==value("CharacterService.NodeKey","characters-1") &&
+                    node.Address==value("CharacterService.Host","127.0.0.1") && std::to_string(node.Port)==value("CharacterService.Port","54930") &&
+                    node.Live && node.ExpiresAt>now && node.Ready && node.Admin==Skyfire::Cluster::Administration::Enabled && (!node.Capacity || node.Load<node.Capacity)) found=true;
+            if(!found) { error="Required character server is offline, unready, full or its endpoint differs from the world configuration."; return false; }
+        }
+        std::ifstream input(config);
         return Skyfire::Cluster::MapData::CheckWorldStart(input, clusterServer.Snapshot(), now, error);
     });
     bool const clusterEnabled = sConfigMgr->GetBoolDefault("Hub.Cluster.Enable", false);
@@ -475,7 +491,8 @@ int main(int argc, char** argv)
 
         auto const liveNodes = clusterServer.Snapshot();
         processSupervisor.UpdateBackupCycle(std::none_of(liveNodes.begin(), liveNodes.end(),
-            [](Skyfire::Cluster::Node const& node) { return node.Type != Skyfire::Cluster::Service::Map; }));
+            [](Skyfire::Cluster::Node const& node) { return node.Type != Skyfire::Cluster::Service::Map &&
+                (node.Type != Skyfire::Cluster::Service::Character || node.Load != 0); }));
         authnetProxy.Update(liveNodes);
         legacyProxy.Update(liveNodes);
 

@@ -118,6 +118,15 @@ class Worker:
                 info = connection(path('world_config'), key)
                 if info:
                     self.targets[target] = Database(info, self.mysql)
+        # In character-service mode the credentials are deliberately absent from worldserver.
+        self.character_service = bool(config.get('character_service_config'))
+        if self.character_service:
+            character = tomllib.loads(path('character_service_config').read_text(encoding='utf-8-sig'))
+            info = [character['mysql_host'], str(character.get('mysql_port',3306)), character['mysql_user'],
+                    character['mysql_password'], character['mysql_database']]
+            if not info[0] or not info[4] or not info[1].isdigit() or not 1 <= int(info[1]) <= 65535:
+                raise RuntimeError('Invalid character-service backup database endpoint.')
+            self.targets['characters'] = Database(info, self.mysql)
         names = [database.info[4] for database in self.targets.values()]
         if len(names) != len(set(names)):
             raise RuntimeError('Backup domains must use distinct database names; target aliases are not allowed.')
@@ -615,6 +624,8 @@ class Worker:
             raise RuntimeError('Live restore is disabled in the backup worker configuration.')
         if job['target'] == 'hub':
             raise RuntimeError('Hub recovery requires the offline recovery command.')
+        if job['target'] == 'characters' and getattr(self, 'character_service', False):
+            raise RuntimeError('Character-service database replacement requires offline recovery with the character service stopped. Online restore fencing is not implemented yet.')
         status = self.hub.query("SELECT maintenance=1 AND services_stopped=1 AND hub_seen>DATE_SUB(NOW(),INTERVAL 5 SECOND) FROM hub_backup_worker WHERE id=1")
         if status != '1':
             raise RuntimeError('Hub must be online in recovery maintenance with all game services stopped.')

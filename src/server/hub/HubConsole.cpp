@@ -523,7 +523,7 @@ void HubCommandHandler::PrintRegistry() const
     for (auto const& node : nodes)
     {
         std::printf("  %s (%s) %s %s:%u realm %u build %u load %u/%u %s\n", node.Key.c_str(), node.Name.c_str(),
-            node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : node.Type == Skyfire::Cluster::Service::Map ? "mapserver" : "world", node.Address.c_str(), unsigned(node.Port),
+            node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : node.Type == Skyfire::Cluster::Service::Map ? "mapserver" : node.Type == Skyfire::Cluster::Service::Character ? "characterserver" : "world", node.Address.c_str(), unsigned(node.Port),
             node.Realm, node.Build, node.Load, node.Capacity, node.Ready ? "ready" : "not ready");
         std::printf("    %s | policy %s | hub connections %llu\n",node.Live ? "registered" : "offline",
             Skyfire::Cluster::AdministrationName(node.Admin),static_cast<unsigned long long>(counts[node.Key]));

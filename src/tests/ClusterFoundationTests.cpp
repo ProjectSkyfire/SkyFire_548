@@ -24,6 +24,19 @@ namespace
 int main()
 {
     bool ok = true;
+    for (std::uint32_t realm : {0u, 1u})
+    {
+        Writer character;
+        character.String("characters-1"); character.String("Characters"); character.U8(4);
+        character.String("127.0.0.1"); character.U16(54930); character.U32(realm);
+        character.U32(18414); character.U32(32); character.U32(1024);
+        Node decodedCharacter;
+        bool accepted = DecodeRegistration(character.Bytes, decodedCharacter);
+        ok &= Check(accepted == (realm == 0), "Character directory registration realm validation failed");
+        if (accepted)
+            ok &= Check(decodedCharacter.Type == Service::Character && decodedCharacter.Capabilities == 1024,
+                "Character service registration lost its role or capability");
+    }
     auto payload = Registration();
     Node node;
     ok &= Check(DecodeRegistration(payload.Bytes, node), "Valid registration rejected");

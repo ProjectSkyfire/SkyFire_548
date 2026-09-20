@@ -18,6 +18,7 @@ public:
 
     //- Loads database type specific prepared statements
     void DoPrepareStatements();
+    bool IsCharacterConnection() const override { return true; }
 };
 
 typedef DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabaseWorkerPool;

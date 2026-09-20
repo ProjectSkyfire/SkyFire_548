@@ -1,0 +1,24 @@
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See LICENSE.md file for Copyright information
+node_key = "characters-1"
+node_name = "Realm 1 character service"
+realm_id = 1
+bind_address = "127.0.0.1"
+advertise_address = "127.0.0.1"
+port = 54930
+hub_host = "localhost"
+hub_port = 9100
+ca = "../cluster-tls/ca.pem"
+certificate = "../cluster-tls/characters-1.pem"
+private_key = "../cluster-tls/characters-1-key.pem"
+allowed_world_nodes = ["world-1", "world-standby"]
+max_connections = 32
+catalog = "statements.json"
+
+# Only this service holds character database credentials. Grant access to this schema only.
+# Initialize/update the character schema while worlds and this service are stopped.
+mysql_host = "127.0.0.1"
+mysql_port = 3306
+mysql_user = "skyfire_characters"
+mysql_password = "REPLACE_PASSWORD"
+mysql_database = "characters"

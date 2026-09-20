@@ -6,6 +6,24 @@
 #include "DatabaseEnv.h"
 #include "Log.h"
 
+ResultSet::ResultSet(CharacterServiceRows rows) : _rowCount(rows.Rows.size()),
+    _currentRow(new Field[rows.Types.size()]), _fieldCount(uint32(rows.Types.size())),
+    _result(nullptr), _fields(nullptr), _remoteRows(std::move(rows)), _remote(true) { }
+
+PreparedResultSet::PreparedResultSet(CharacterServiceRows rows) : m_rowCount(rows.Rows.size()),
+    m_rowPosition(0), m_fieldCount(uint32(rows.Types.size())), m_rBind(nullptr), m_stmt(nullptr),
+    m_res(nullptr), m_isNull(nullptr), m_length(nullptr)
+{
+    for (auto& row : rows.Rows)
+    {
+        Field* fields = new Field[m_fieldCount];
+        for (uint32 i=0;i<m_fieldCount;++i)
+            fields[i].SetStructuredValue(row[i] ? row[i]->data() : nullptr,
+                enum_field_types(rows.Types[i]), row[i] ? uint32(row[i]->size()) : 0);
+        m_rows.push_back(fields);
+    }
+}
+
 ResultSet::ResultSet(MYSQL_RES* result, MYSQL_FIELD* fields, uint64 rowCount, uint32 fieldCount) :
     _rowCount(rowCount),
     _fieldCount(fieldCount),
@@ -138,6 +156,15 @@ PreparedResultSet::~PreparedResultSet()
 
 bool ResultSet::NextRow()
 {
+    if (_remote)
+    {
+        if (_remotePosition == _remoteRows.Rows.size()) return false;
+        auto& row = _remoteRows.Rows[_remotePosition++];
+        for (uint32 i=0;i<_fieldCount;++i)
+            _currentRow[i].SetStructuredValue(row[i] ? row[i]->data() : nullptr,
+                enum_field_types(_remoteRows.Types[i]), row[i] ? uint32(row[i]->size()) : 0);
+        return true;
+    }
     MYSQL_ROW row;
 
     if (!_result)

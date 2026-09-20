@@ -166,9 +166,10 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(1023)) ||
-                (node.Type == Service::Auth && (node.Capabilities & 776)) ||
-                (node.Type == Service::World && (node.Capabilities & 944)) ||
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(2047)) ||
+                (node.Type == Service::Auth && (node.Capabilities & (776 | 1024))) ||
+                (node.Type == Service::World && (node.Capabilities & (944 | 1024))) ||
+                (node.Type == Service::Character && node.Capabilities != 1024) ||
                 (node.Type == Service::Map && (node.Capabilities != MapData::Capability && node.Capabilities != (MapData::Capability | MapData::RestartCapability))))
             { Reject(Error::Version, "Requires client build 18414 and supported service capabilities."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
@@ -285,7 +286,7 @@ bool HubClusterServer::LoadAdministration(std::string& error)
         node.Capabilities = fields[2].GetUInt32(); node.Admin = Administration(fields[3].GetUInt8());
         node.Type = Service(fields[4].GetUInt8());
         node.Live = false; node.Ready = false;
-        if ((node.Type != Service::Auth && node.Type != Service::World && node.Type != Service::Map) || !ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
+        if ((node.Type != Service::Auth && node.Type != Service::World && node.Type != Service::Map && node.Type != Service::Character) || !ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
         { error = "Invalid persisted cluster policy; correct the hub_cluster_policy row before startup."; return false; }
         _policies[node.Key] = node;
         _registry.SetAdministration(node.Key,node.Admin);
@@ -306,6 +307,7 @@ bool HubClusterServer::SetAdministration(std::string const& key, std::string con
         node = policy->second;
     }
     if (!_policies.count(key) && _policies.size() >= 4096) { error = "Cluster policy limit reached."; return false; }
+    if (node.Type == Service::Character) { error = "Stop worlds before operating the character service; routing drain is not database fencing."; return false; }
     auto const state = action == "drain" ? Administration::Draining : action == "disable" ? Administration::Disabled : Administration::Enabled;
     auto stmt = HubDatabase.GetPreparedStatement(HUB_UPSERT_CLUSTER_POLICY);
     stmt->setString(0,key); stmt->setString(1,node.Name); stmt->setUInt32(2,node.Capabilities);

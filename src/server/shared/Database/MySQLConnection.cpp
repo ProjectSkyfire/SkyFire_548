@@ -61,6 +61,18 @@ void MySQLConnection::Close()
 
 bool MySQLConnection::Open()
 {
+    if (IsCharacterConnection() && CharacterServiceClient::Enabled())
+    {
+        // Local handle is an unconnected compatibility object; no character credentials
+        // or mysql_real_connect call are used by worldserver in character-service mode.
+        m_Mysql = mysql_init(nullptr);
+        if (!m_Mysql) return false;
+        _characterService = std::make_unique<CharacterServiceClient>();
+        DoPrepareStatements();
+        std::map<std::uint32_t,std::string> catalog;
+        for (auto const& entry : m_queries) catalog.emplace(entry.first,entry.second.first);
+        return _characterService->Open(catalog);
+    }
     MYSQL* mysqlInit;
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
@@ -142,6 +154,7 @@ bool MySQLConnection::PrepareStatements()
 
 bool MySQLConnection::Execute(const char* sql)
 {
+    if (_characterService) { _characterService->Execute(sql); return true; }
     if (!m_Mysql)
         return false;
 
@@ -169,6 +182,7 @@ bool MySQLConnection::Execute(const char* sql)
 
 bool MySQLConnection::Execute(PreparedStatement* stmt)
 {
+    if (_characterService) { _characterService->Execute(stmt); return true; }
     if (!m_Mysql)
         return false;
 
@@ -283,6 +297,7 @@ bool MySQLConnection::_Query(PreparedStatement* stmt, MYSQL_RES** pResult, uint6
 
 ResultSet* MySQLConnection::Query(const char* sql)
 {
+    if (_characterService) return new ResultSet(_characterService->Query(sql));
     if (!sql)
         return NULL;
 
@@ -355,6 +370,11 @@ void MySQLConnection::CommitTransaction()
 
 bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
 {
+    if (_characterService)
+    {
+        if (!transaction->GetSize()) return false;
+        _characterService->Execute(*transaction); return true;
+    }
     std::list<SQLElementData> const& queries = transaction->m_queries;
     if (queries.empty())
         return false;
@@ -417,6 +437,7 @@ MySQLPreparedStatement* MySQLConnection::GetPreparedStatement(uint32 index)
 void MySQLConnection::PrepareStatement(uint32 index, std::string sql, ConnectionFlags flags)
 {
     m_queries.insert(PreparedStatementMap::value_type(index, std::make_pair(sql, flags)));
+    if (_characterService) return;
 
     // For reconnection case
     if (m_reconnecting)
@@ -457,6 +478,7 @@ void MySQLConnection::PrepareStatement(uint32 index, std::string sql, Connection
 
 PreparedResultSet* MySQLConnection::Query(PreparedStatement* stmt)
 {
+    if (_characterService) return new PreparedResultSet(_characterService->Query(stmt));
     MYSQL_RES* result = NULL;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;

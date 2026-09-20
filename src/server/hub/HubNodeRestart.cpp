@@ -60,6 +60,7 @@ bool HubProcessSupervisor::RestartNodes(std::string& error)
     }
     for (auto const& node : _clusterServer->Snapshot())
     {
+        if (node.Type == Skyfire::Cluster::Service::Character) continue; // Persistence stays available throughout world restarts.
         if (node.Type != Skyfire::Cluster::Service::Map)
         {
             if (!identities.count(node.Key))

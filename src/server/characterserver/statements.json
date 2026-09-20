@@ -1,0 +1,2577 @@
+[
+  {
+    "id": 0,
+    "name": "CHAR_DEL_QUEST_POOL_SAVE",
+    "sql": "DELETE FROM pool_quest_save WHERE pool_id = ?"
+  },
+  {
+    "id": 1,
+    "name": "CHAR_INS_QUEST_POOL_SAVE",
+    "sql": "INSERT INTO pool_quest_save (pool_id, quest_id) VALUES (?, ?)"
+  },
+  {
+    "id": 2,
+    "name": "CHAR_DEL_NONEXISTENT_GUILD_BANK_ITEM",
+    "sql": "DELETE FROM guild_bank_item WHERE guildid = ? AND TabId = ? AND SlotId = ?"
+  },
+  {
+    "id": 3,
+    "name": "CHAR_DEL_EXPIRED_BANS",
+    "sql": "UPDATE character_banned SET active = 0 WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate <> bandate"
+  },
+  {
+    "id": 4,
+    "name": "CHAR_SEL_GUID_BY_NAME",
+    "sql": "SELECT guid FROM characters WHERE name = ?"
+  },
+  {
+    "id": 5,
+    "name": "CHAR_SEL_CHECK_NAME",
+    "sql": "SELECT 1 FROM characters WHERE name = ?"
+  },
+  {
+    "id": 6,
+    "name": "CHAR_SEL_CHECK_GUID",
+    "sql": "SELECT 1 FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 7,
+    "name": "CHAR_SEL_SUM_CHARS",
+    "sql": "SELECT COUNT(guid) FROM characters WHERE account = ?"
+  },
+  {
+    "id": 8,
+    "name": "CHAR_SEL_SUM_CHARS_BY_REALM",
+    "sql": "SELECT COUNT(guid) FROM characters WHERE account = ? AND realm = ?"
+  },
+  {
+    "id": 9,
+    "name": "CHAR_SEL_CHAR_CREATE_INFO",
+    "sql": "SELECT level, race, class FROM characters WHERE account = ? LIMIT 0, ?"
+  },
+  {
+    "id": 10,
+    "name": "CHAR_INS_CHARACTER_BAN",
+    "sql": "INSERT INTO character_banned VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)"
+  },
+  {
+    "id": 11,
+    "name": "CHAR_UPD_CHARACTER_BAN",
+    "sql": "UPDATE character_banned SET active = 0 WHERE guid = ? AND active != 0"
+  },
+  {
+    "id": 12,
+    "name": "CHAR_DEL_CHARACTER_BAN",
+    "sql": "DELETE cb FROM character_banned cb INNER JOIN characters c ON c.guid = cb.guid WHERE c.account = ?"
+  },
+  {
+    "id": 13,
+    "name": "CHAR_SEL_BANINFO",
+    "sql": "SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate, banreason, bannedby FROM character_banned WHERE guid = ? ORDER BY bandate ASC"
+  },
+  {
+    "id": 14,
+    "name": "CHAR_SEL_GUID_BY_NAME_FILTER",
+    "sql": "SELECT guid, name FROM characters WHERE name LIKE CONCAT('%%', ?, '%%')"
+  },
+  {
+    "id": 15,
+    "name": "CHAR_SEL_BANINFO_LIST",
+    "sql": "SELECT bandate, unbandate, bannedby, banreason FROM character_banned WHERE guid = ? ORDER BY unbandate"
+  },
+  {
+    "id": 16,
+    "name": "CHAR_SEL_BANNED_NAME",
+    "sql": "SELECT characters.name FROM characters, character_banned WHERE character_banned.guid = ? AND character_banned.guid = characters.guid"
+  },
+  {
+    "id": 17,
+    "name": "CHAR_SEL_MAIL_LIST_COUNT",
+    "sql": "SELECT COUNT(id) FROM mail WHERE receiver = ? "
+  },
+  {
+    "id": 18,
+    "name": "CHAR_SEL_MAIL_LIST_INFO",
+    "sql": "SELECT id, sender, (SELECT name FROM characters WHERE guid = sender) AS sendername, receiver, (SELECT name FROM characters WHERE guid = receiver) AS receivername, subject, deliver_time, expire_time, money, has_items FROM mail WHERE receiver = ? "
+  },
+  {
+    "id": 19,
+    "name": "CHAR_SEL_MAIL_LIST_ITEMS",
+    "sql": "SELECT itemEntry,count FROM item_instance WHERE guid = ?"
+  },
+  {
+    "id": 20,
+    "name": "CHAR_SEL_ENUM",
+    "sql": "SELECT c.guid, c.name, c.race, c.class, c.gender, c.playerBytes, c.playerBytes2, c.level, c.zone, c.map, c.position_x, c.position_y, c.position_z, gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level, c.equipmentCache, cb.guid, c.slot, c.realm FROM characters AS c LEFT JOIN character_pet AS cp ON c.guid = cp.owner AND cp.active = 1 LEFT JOIN guild_member AS gm ON c.guid = gm.guid LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 WHERE c.account = ? AND c.realm = ? AND c.deleteInfos_Name IS NULL"
+  },
+  {
+    "id": 21,
+    "name": "CHAR_SEL_ENUM_DECLINED_NAME",
+    "sql": "SELECT c.guid, c.name, c.race, c.class, c.gender, c.playerBytes, c.playerBytes2, c.level, c.zone, c.map, c.position_x, c.position_y, c.position_z, gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level, c.equipmentCache, cb.guid, c.slot, cd.genitive FROM characters AS c LEFT JOIN character_pet AS cp ON c.guid = cp.owner AND cp.active = 1 LEFT JOIN character_declinedname AS cd ON c.guid = cd.guid LEFT JOIN guild_member AS gm ON c.guid = gm.guid LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 WHERE c.account = ? AND c.realm = ? AND c.deleteInfos_Name IS NULL"
+  },
+  {
+    "id": 22,
+    "name": "CHAR_SEL_FREE_NAME",
+    "sql": "SELECT guid, name FROM characters WHERE guid = ? AND account = ? AND (at_login & ?) = ? AND NOT EXISTS (SELECT NULL FROM characters WHERE name = ?)"
+  },
+  {
+    "id": 23,
+    "name": "CHAR_SEL_GUID_RACE_ACC_BY_NAME",
+    "sql": "SELECT guid, race, account FROM characters WHERE name = ?"
+  },
+  {
+    "id": 24,
+    "name": "CHAR_SEL_CHAR_RACE",
+    "sql": "SELECT race FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 25,
+    "name": "CHAR_SEL_CHAR_LEVEL",
+    "sql": "SELECT level FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 26,
+    "name": "CHAR_SEL_CHAR_ZONE",
+    "sql": "SELECT zone FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 27,
+    "name": "CHAR_SEL_CHARACTER_NAME_DATA",
+    "sql": "SELECT race, class, gender, level, realm FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 28,
+    "name": "CHAR_SEL_CHAR_POSITION_XYZ",
+    "sql": "SELECT map, position_x, position_y, position_z FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 29,
+    "name": "CHAR_SEL_CHAR_POSITION",
+    "sql": "SELECT position_x, position_y, position_z, orientation, map, taxi_path FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 30,
+    "name": "CHAR_DEL_QUEST_STATUS_DAILY",
+    "sql": "DELETE FROM character_queststatus_daily"
+  },
+  {
+    "id": 31,
+    "name": "CHAR_DEL_QUEST_STATUS_WEEKLY",
+    "sql": "DELETE FROM character_queststatus_weekly"
+  },
+  {
+    "id": 32,
+    "name": "CHAR_DEL_QUEST_STATUS_MONTHLY",
+    "sql": "DELETE FROM character_queststatus_monthly"
+  },
+  {
+    "id": 33,
+    "name": "CHAR_DEL_QUEST_STATUS_SEASONAL",
+    "sql": "DELETE FROM character_queststatus_seasonal WHERE event = ?"
+  },
+  {
+    "id": 34,
+    "name": "CHAR_DEL_QUEST_STATUS_DAILY_CHAR",
+    "sql": "DELETE FROM character_queststatus_daily WHERE guid = ?"
+  },
+  {
+    "id": 35,
+    "name": "CHAR_DEL_QUEST_STATUS_WEEKLY_CHAR",
+    "sql": "DELETE FROM character_queststatus_weekly WHERE guid = ?"
+  },
+  {
+    "id": 36,
+    "name": "CHAR_DEL_QUEST_STATUS_MONTHLY_CHAR",
+    "sql": "DELETE FROM character_queststatus_monthly WHERE guid = ?"
+  },
+  {
+    "id": 37,
+    "name": "CHAR_DEL_QUEST_STATUS_SEASONAL_CHAR",
+    "sql": "DELETE FROM character_queststatus_seasonal WHERE guid = ?"
+  },
+  {
+    "id": 38,
+    "name": "CHAR_DEL_BATTLEGROUND_RANDOM",
+    "sql": "DELETE FROM character_battleground_random"
+  },
+  {
+    "id": 39,
+    "name": "CHAR_INS_BATTLEGROUND_RANDOM",
+    "sql": "INSERT INTO character_battleground_random (guid) VALUES (?)"
+  },
+  {
+    "id": 40,
+    "name": "CHAR_SEL_CHARACTER",
+    "sql": "SELECT guid, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, talentTree, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeondifficulty, totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, power4, power5, instance_id, speccount, activespec, exploredZones, equipmentCache, knownTitles, actionBars, grantableLevels, lfgbonusfaction, raiddifficulty FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 41,
+    "name": "CHAR_SEL_GROUP_MEMBER",
+    "sql": "SELECT guid FROM party_member WHERE memberGuid = ?"
+  },
+  {
+    "id": 42,
+    "name": "CHAR_SEL_CHARACTER_INSTANCE",
+    "sql": "SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = ?"
+  },
+  {
+    "id": 43,
+    "name": "CHAR_SEL_CHARACTER_AURAS",
+    "sql": "SELECT caster_guid, spell, effect_mask, recalculate_mask, stackcount, amount0, amount1, amount2, base_amount0, base_amount1, base_amount2, maxduration, remaintime, remaincharges FROM character_aura WHERE guid = ?"
+  },
+  {
+    "id": 44,
+    "name": "CHAR_SEL_CHARACTER_SPELL",
+    "sql": "SELECT spell, active, disabled FROM character_spell WHERE guid = ?"
+  },
+  {
+    "id": 45,
+    "name": "CHAR_SEL_CHARACTER_QUESTSTATUS",
+    "sql": "SELECT quest, status, explored, timer FROM character_queststatus WHERE guid = ? AND status <> 0"
+  },
+  {
+    "id": 46,
+    "name": "CHAR_SEL_CHARACTER_QUEST_OBJECTIVE_STATUS",
+    "sql": "SELECT `objectiveId`, `amount` FROM `character_queststatus_objective` WHERE guid = ?"
+  },
+  {
+    "id": 47,
+    "name": "CHAR_SEL_CHARACTER_DAILYQUESTSTATUS",
+    "sql": "SELECT quest, time FROM character_queststatus_daily WHERE guid = ?"
+  },
+  {
+    "id": 48,
+    "name": "CHAR_SEL_CHARACTER_WEEKLYQUESTSTATUS",
+    "sql": "SELECT quest FROM character_queststatus_weekly WHERE guid = ?"
+  },
+  {
+    "id": 49,
+    "name": "CHAR_SEL_CHARACTER_MONTHLYQUESTSTATUS",
+    "sql": "SELECT quest FROM character_queststatus_monthly WHERE guid = ?"
+  },
+  {
+    "id": 50,
+    "name": "CHAR_SEL_CHARACTER_SEASONALQUESTSTATUS",
+    "sql": "SELECT quest, event FROM character_queststatus_seasonal WHERE guid = ?"
+  },
+  {
+    "id": 51,
+    "name": "CHAR_INS_CHARACTER_DAILYQUESTSTATUS",
+    "sql": "INSERT INTO character_queststatus_daily (guid, quest, time) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 52,
+    "name": "CHAR_INS_CHARACTER_WEEKLYQUESTSTATUS",
+    "sql": "INSERT INTO character_queststatus_weekly (guid, quest) VALUES (?, ?)"
+  },
+  {
+    "id": 53,
+    "name": "CHAR_INS_CHARACTER_MONTHLYQUESTSTATUS",
+    "sql": "INSERT INTO character_queststatus_monthly (guid, quest) VALUES (?, ?)"
+  },
+  {
+    "id": 54,
+    "name": "CHAR_INS_CHARACTER_SEASONALQUESTSTATUS",
+    "sql": "INSERT INTO character_queststatus_seasonal (guid, quest, event) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 55,
+    "name": "CHAR_SEL_CHARACTER_REPUTATION",
+    "sql": "SELECT faction, standing, flags FROM character_reputation WHERE guid = ?"
+  },
+  {
+    "id": 56,
+    "name": "CHAR_SEL_CHARACTER_INVENTORY",
+    "sql": "SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, reforgeID, iit.transmogrifyId, durability, playedTime, text, bag, slot, item, itemEntry FROM character_inventory ci JOIN item_instance ii ON ci.item = ii.guid LEFT JOIN item_instance_transmog iit ON ii.guid = iit.itemGuid WHERE ci.guid = ? ORDER BY bag, slot"
+  },
+  {
+    "id": 57,
+    "name": "CHAR_SEL_CHARACTER_ACTIONS",
+    "sql": "SELECT a.button, a.action, a.type FROM character_action as a, characters as c WHERE a.guid = c.guid AND a.spec = c.activespec AND a.guid = ? ORDER BY button"
+  },
+  {
+    "id": 58,
+    "name": "CHAR_SEL_CHARACTER_ACTIONS_SPEC",
+    "sql": "SELECT button, action, type FROM character_action WHERE guid = ? AND spec = ? ORDER BY button"
+  },
+  {
+    "id": 59,
+    "name": "CHAR_SEL_CHARACTER_MAILCOUNT",
+    "sql": "SELECT COUNT(id) FROM mail WHERE receiver = ? AND (checked & 1) = 0 AND deliver_time <= ?"
+  },
+  {
+    "id": 60,
+    "name": "CHAR_SEL_CHARACTER_MAILDATE",
+    "sql": "SELECT MIN(deliver_time) FROM mail WHERE receiver = ? AND (checked & 1) = 0"
+  },
+  {
+    "id": 61,
+    "name": "CHAR_SEL_MAIL_COUNT",
+    "sql": "SELECT COUNT(*) FROM mail WHERE receiver = ?"
+  },
+  {
+    "id": 62,
+    "name": "CHAR_SEL_CHARACTER_SOCIALLIST",
+    "sql": "SELECT friend, flags, note FROM character_social JOIN characters ON characters.guid = character_social.friend WHERE character_social.guid = ? AND deleteinfos_name IS NULL LIMIT 255"
+  },
+  {
+    "id": 63,
+    "name": "CHAR_SEL_CHARACTER_HOMEBIND",
+    "sql": "SELECT mapId, zoneId, posX, posY, posZ FROM character_homebind WHERE guid = ?"
+  },
+  {
+    "id": 64,
+    "name": "CHAR_SEL_CHARACTER_SPELLCOOLDOWNS",
+    "sql": "SELECT spell, item, time FROM character_spell_cooldown WHERE guid = ?"
+  },
+  {
+    "id": 65,
+    "name": "CHAR_SEL_CHARACTER_SPELL_CHARGES",
+    "sql": "SELECT category, consumedCharges, resetTime, baseRegenTime FROM character_spell_charges WHERE guid = ?"
+  },
+  {
+    "id": 66,
+    "name": "CHAR_SEL_CHARACTER_DECLINEDNAMES",
+    "sql": "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = ?"
+  },
+  {
+    "id": 67,
+    "name": "CHAR_SEL_GUILD_MEMBER",
+    "sql": "SELECT guildid, member_rank FROM guild_member WHERE guid = ?"
+  },
+  {
+    "id": 68,
+    "name": "CHAR_SEL_GUILD_MEMBER_EXTENDED",
+    "sql": "SELECT g.guildid, g.name, gr.rname, gr.rid, gm.pnote, gm.offnote FROM guild g JOIN guild_member gm ON g.guildid = gm.guildid JOIN guild_rank gr ON g.guildid = gr.guildid AND gm.member_rank = gr.rid WHERE gm.guid = ?"
+  },
+  {
+    "id": 70,
+    "name": "CHAR_SEL_CHARACTER_ACHIEVEMENTS",
+    "sql": "SELECT achievement, date FROM character_achievement WHERE guid = ?"
+  },
+  {
+    "id": 71,
+    "name": "CHAR_SEL_CHARACTER_CRITERIAPROGRESS",
+    "sql": "SELECT criteria, counter, date FROM character_achievement_progress WHERE guid = ?"
+  },
+  {
+    "id": 72,
+    "name": "CHAR_SEL_CHARACTER_EQUIPMENTSETS",
+    "sql": "SELECT setguid, setindex, name, iconname, ignore_mask, item0, item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, item18 FROM character_equipmentsets WHERE guid = ? ORDER BY setindex"
+  },
+  {
+    "id": 73,
+    "name": "CHAR_SEL_CHARACTER_BGDATA",
+    "sql": "SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell FROM character_battleground_data WHERE guid = ?"
+  },
+  {
+    "id": 74,
+    "name": "CHAR_SEL_CHARACTER_GLYPHS",
+    "sql": "SELECT spec, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6 FROM character_glyphs WHERE guid = ?"
+  },
+  {
+    "id": 75,
+    "name": "CHAR_SEL_CHARACTER_TALENTS",
+    "sql": "SELECT spell, spec FROM character_talent WHERE guid = ?"
+  },
+  {
+    "id": 76,
+    "name": "CHAR_SEL_CHARACTER_SKILLS",
+    "sql": "SELECT skill, value, max FROM character_skills WHERE guid = ?"
+  },
+  {
+    "id": 77,
+    "name": "CHAR_SEL_CHARACTER_RANDOMBG",
+    "sql": "SELECT guid FROM character_battleground_random WHERE guid = ?"
+  },
+  {
+    "id": 78,
+    "name": "CHAR_SEL_CHARACTER_BANNED",
+    "sql": "SELECT guid FROM character_banned WHERE guid = ? AND active = 1"
+  },
+  {
+    "id": 79,
+    "name": "CHAR_SEL_CHARACTER_QUESTSTATUSREW",
+    "sql": "SELECT quest FROM character_queststatus_rewarded WHERE guid = ? AND active = 1"
+  },
+  {
+    "id": 80,
+    "name": "CHAR_SEL_ACCOUNT_INSTANCELOCKTIMES",
+    "sql": "SELECT instanceId, releaseTime FROM account_instance_times WHERE accountId = ?"
+  },
+  {
+    "id": 81,
+    "name": "CHAR_SEL_MAILITEMS",
+    "sql": "SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, item_guid, itemEntry, owner_guid FROM mail_items mi JOIN item_instance ii ON mi.item_guid = ii.guid WHERE mail_id = ?"
+  },
+  {
+    "id": 82,
+    "name": "CHAR_SEL_AUCTION_ITEMS",
+    "sql": "SELECT creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, itemguid, itemEntry FROM auctionhouse ah JOIN item_instance ii ON ah.itemguid = ii.guid"
+  },
+  {
+    "id": 83,
+    "name": "CHAR_INS_AUCTION",
+    "sql": "INSERT INTO auctionhouse (id, auctioneerguid, itemguid, itemowner, buyoutprice, time, buyguid, lastbid, startbid, deposit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 84,
+    "name": "CHAR_DEL_AUCTION",
+    "sql": "DELETE FROM auctionhouse WHERE id = ?"
+  },
+  {
+    "id": 85,
+    "name": "CHAR_SEL_AUCTION_BY_TIME",
+    "sql": "SELECT id FROM auctionhouse WHERE time <= ? ORDER BY TIME ASC"
+  },
+  {
+    "id": 86,
+    "name": "CHAR_UPD_AUCTION_BID",
+    "sql": "UPDATE auctionhouse SET buyguid = ?, lastbid = ? WHERE id = ?"
+  },
+  {
+    "id": 87,
+    "name": "CHAR_SEL_AUCTIONS",
+    "sql": "SELECT id, auctioneerguid, itemguid, itemEntry, count, itemowner, buyoutprice, time, buyguid, lastbid, startbid, deposit FROM auctionhouse ah INNER JOIN item_instance ii ON ii.guid = ah.itemguid"
+  },
+  {
+    "id": 88,
+    "name": "CHAR_INS_MAIL",
+    "sql": "INSERT INTO mail(id, messageType, stationery, mailTemplateId, sender, receiver, subject, body, has_items, expire_time, deliver_time, money, cod, checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 89,
+    "name": "CHAR_DEL_MAIL_BY_ID",
+    "sql": "DELETE FROM mail WHERE id = ?"
+  },
+  {
+    "id": 90,
+    "name": "CHAR_INS_MAIL_ITEM",
+    "sql": "INSERT INTO mail_items(mail_id, item_guid, receiver) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 91,
+    "name": "CHAR_DEL_MAIL_ITEM",
+    "sql": "DELETE FROM mail_items WHERE item_guid = ?"
+  },
+  {
+    "id": 92,
+    "name": "CHAR_DEL_INVALID_MAIL_ITEM",
+    "sql": "DELETE FROM mail_items WHERE item_guid = ?"
+  },
+  {
+    "id": 93,
+    "name": "CHAR_DEL_EMPTY_EXPIRED_MAIL",
+    "sql": "DELETE FROM mail WHERE expire_time < ? AND has_items = 0 AND body = ''"
+  },
+  {
+    "id": 94,
+    "name": "CHAR_SEL_EXPIRED_MAIL",
+    "sql": "SELECT id, messageType, sender, receiver, has_items, expire_time, cod, checked, mailTemplateId FROM mail WHERE expire_time < ?"
+  },
+  {
+    "id": 95,
+    "name": "CHAR_SEL_EXPIRED_MAIL_ITEMS",
+    "sql": "SELECT item_guid, itemEntry, mail_id FROM mail_items mi INNER JOIN item_instance ii ON ii.guid = mi.item_guid LEFT JOIN mail mm ON mi.mail_id = mm.id WHERE mm.id IS NOT NULL AND mm.expire_time < ?"
+  },
+  {
+    "id": 96,
+    "name": "CHAR_UPD_MAIL_RETURNED",
+    "sql": "UPDATE mail SET sender = ?, receiver = ?, expire_time = ?, deliver_time = ?, cod = 0, checked = ? WHERE id = ?"
+  },
+  {
+    "id": 97,
+    "name": "CHAR_UPD_MAIL_ITEM_RECEIVER",
+    "sql": "UPDATE mail_items SET receiver = ? WHERE item_guid = ?"
+  },
+  {
+    "id": 98,
+    "name": "CHAR_UPD_ITEM_OWNER",
+    "sql": "UPDATE item_instance SET owner_guid = ? WHERE guid = ?"
+  },
+  {
+    "id": 99,
+    "name": "CHAR_SEL_ITEM_REFUNDS",
+    "sql": "SELECT player_guid, paidMoney, paidExtendedCost FROM item_refund_instance WHERE item_guid = ? AND player_guid = ? LIMIT 1"
+  },
+  {
+    "id": 100,
+    "name": "CHAR_SEL_ITEM_BOP_TRADE",
+    "sql": "SELECT allowedPlayers FROM item_soulbound_trade_data WHERE itemGuid = ? LIMIT 1"
+  },
+  {
+    "id": 101,
+    "name": "CHAR_DEL_ITEM_BOP_TRADE",
+    "sql": "DELETE FROM item_soulbound_trade_data WHERE itemGuid = ? LIMIT 1"
+  },
+  {
+    "id": 102,
+    "name": "CHAR_INS_ITEM_BOP_TRADE",
+    "sql": "INSERT INTO item_soulbound_trade_data VALUES (?, ?)"
+  },
+  {
+    "id": 103,
+    "name": "CHAR_REP_INVENTORY_ITEM",
+    "sql": "REPLACE INTO character_inventory (guid, bag, slot, item) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 104,
+    "name": "CHAR_REP_ITEM_INSTANCE",
+    "sql": "REPLACE INTO item_instance (itemEntry, owner_guid, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, reforgeID, durability, playedTime, text, guid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 105,
+    "name": "CHAR_UPD_ITEM_INSTANCE",
+    "sql": "UPDATE item_instance SET itemEntry = ?, owner_guid = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, reforgeID = ?, durability = ?, playedTime = ?, text = ? WHERE guid = ?"
+  },
+  {
+    "id": 106,
+    "name": "CHAR_UPD_ITEM_INSTANCE_ON_LOAD",
+    "sql": "UPDATE item_instance SET duration = ?, flags = ?, durability = ? WHERE guid = ?"
+  },
+  {
+    "id": 107,
+    "name": "CHAR_DEL_ITEM_INSTANCE",
+    "sql": "DELETE FROM item_instance WHERE guid = ?"
+  },
+  {
+    "id": 108,
+    "name": "CHAR_DEL_ITEM_INSTANCE_BY_OWNER",
+    "sql": "DELETE FROM item_instance WHERE owner_guid = ?"
+  },
+  {
+    "id": 109,
+    "name": "CHAR_INS_ITEM_INSTANCE_TRANSMOG",
+    "sql": "INSERT INTO item_instance_transmog (itemGuid, transmogrifyId) VALUES (?, ?)"
+  },
+  {
+    "id": 110,
+    "name": "CHAR_DEL_ITEM_INSTANCE_TRANSMOG",
+    "sql": "DELETE FROM item_instance_transmog WHERE itemGuid = ?"
+  },
+  {
+    "id": 111,
+    "name": "CHAR_DEL_ITEM_INSTANCE_TRANSMOG_BY_OWNER",
+    "sql": "DELETE iit FROM item_instance_transmog iit LEFT JOIN item_instance ii ON iit.itemGuid = ii.guid WHERE ii.owner_guid = ?"
+  },
+  {
+    "id": 112,
+    "name": "CHAR_UPD_GIFT_OWNER",
+    "sql": "UPDATE character_gifts SET guid = ? WHERE item_guid = ?"
+  },
+  {
+    "id": 113,
+    "name": "CHAR_DEL_GIFT",
+    "sql": "DELETE FROM character_gifts WHERE item_guid = ?"
+  },
+  {
+    "id": 114,
+    "name": "CHAR_SEL_CHARACTER_GIFT_BY_ITEM",
+    "sql": "SELECT entry, flags FROM character_gifts WHERE item_guid = ?"
+  },
+  {
+    "id": 115,
+    "name": "CHAR_SEL_ACCOUNT_BY_NAME",
+    "sql": "SELECT account FROM characters WHERE name = ?"
+  },
+  {
+    "id": 116,
+    "name": "CHAR_SEL_ACCOUNT_BY_GUID",
+    "sql": "SELECT account FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 117,
+    "name": "CHAR_DEL_ACCOUNT_INSTANCE_LOCK_TIMES",
+    "sql": "DELETE FROM account_instance_times WHERE accountId = ?"
+  },
+  {
+    "id": 118,
+    "name": "CHAR_INS_ACCOUNT_INSTANCE_LOCK_TIMES",
+    "sql": "INSERT INTO account_instance_times (accountId, instanceId, releaseTime) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 119,
+    "name": "CHAR_SEL_CHARACTER_NAME_CLASS",
+    "sql": "SELECT name, class FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 120,
+    "name": "CHAR_SEL_CHARACTER_NAME",
+    "sql": "SELECT name FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 121,
+    "name": "CHAR_SEL_MATCH_MAKER_RATING",
+    "sql": "SELECT matchMakerRating FROM character_arena_stats WHERE guid = ? AND slot = ?"
+  },
+  {
+    "id": 122,
+    "name": "CHAR_SEL_CHARACTER_COUNT",
+    "sql": "SELECT realm, COUNT(guid) FROM characters WHERE account = ? GROUP BY realm"
+  },
+  {
+    "id": 123,
+    "name": "CHAR_UPD_NAME",
+    "sql": "UPDATE characters set name = ?, at_login = at_login & ~ ? WHERE guid = ?"
+  },
+  {
+    "id": 124,
+    "name": "CHAR_UPD_NAME_BY_GUID",
+    "sql": "UPDATE characters SET name = ? WHERE guid = ?"
+  },
+  {
+    "id": 125,
+    "name": "CHAR_DEL_DECLINED_NAME",
+    "sql": "DELETE FROM character_declinedname WHERE guid = ?"
+  },
+  {
+    "id": 126,
+    "name": "CHAR_SEL_CHARACTER_DATA_BY_GUID",
+    "sql": "SELECT account, name, level FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 127,
+    "name": "CHAR_INS_GUILD",
+    "sql": "INSERT INTO guild (guildid, name, leaderguid, info, motd, createdate, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, BankMoney) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 128,
+    "name": "CHAR_DEL_GUILD",
+    "sql": "DELETE FROM guild WHERE guildid = ?"
+  },
+  {
+    "id": 129,
+    "name": "CHAR_UPD_GUILD_NAME",
+    "sql": "UPDATE guild SET name = ? WHERE guildid = ?"
+  },
+  {
+    "id": 130,
+    "name": "CHAR_INS_GUILD_MEMBER",
+    "sql": "INSERT INTO guild_member (guildid, guid, member_rank, pnote, offnote) VALUES (?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 131,
+    "name": "CHAR_DEL_GUILD_MEMBER",
+    "sql": "DELETE FROM guild_member WHERE guid = ?"
+  },
+  {
+    "id": 132,
+    "name": "CHAR_DEL_GUILD_MEMBERS",
+    "sql": "DELETE FROM guild_member WHERE guildid = ?"
+  },
+  {
+    "id": 133,
+    "name": "CHAR_INS_GUILD_RANK",
+    "sql": "INSERT INTO guild_rank (guildid, rid, rname, rights, BankMoneyPerDay) VALUES (?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 134,
+    "name": "CHAR_DEL_GUILD_RANKS",
+    "sql": "DELETE FROM guild_rank WHERE guildid = ?"
+  },
+  {
+    "id": 135,
+    "name": "CHAR_DEL_GUILD_RANK",
+    "sql": "DELETE FROM guild_rank WHERE guildid = ? AND rid = ?"
+  },
+  {
+    "id": 136,
+    "name": "CHAR_INS_GUILD_BANK_TAB",
+    "sql": "INSERT INTO guild_bank_tab (guildid, TabId) VALUES (?, ?)"
+  },
+  {
+    "id": 137,
+    "name": "CHAR_DEL_GUILD_BANK_TAB",
+    "sql": "DELETE FROM guild_bank_tab WHERE guildid = ? AND TabId = ?"
+  },
+  {
+    "id": 138,
+    "name": "CHAR_DEL_GUILD_BANK_TABS",
+    "sql": "DELETE FROM guild_bank_tab WHERE guildid = ?"
+  },
+  {
+    "id": 139,
+    "name": "CHAR_INS_GUILD_BANK_ITEM",
+    "sql": "INSERT INTO guild_bank_item (guildid, TabId, SlotId, item_guid) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 140,
+    "name": "CHAR_DEL_GUILD_BANK_ITEM",
+    "sql": "DELETE FROM guild_bank_item WHERE guildid = ? AND TabId = ? AND SlotId = ?"
+  },
+  {
+    "id": 141,
+    "name": "CHAR_DEL_GUILD_BANK_ITEMS",
+    "sql": "DELETE FROM guild_bank_item WHERE guildid = ?"
+  },
+  {
+    "id": 142,
+    "name": "CHAR_INS_GUILD_BANK_RIGHT",
+    "sql": "INSERT INTO guild_bank_right (guildid, TabId, rid, gbright, SlotPerDay) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE gbright = VALUES(gbright), SlotPerDay = VALUES(SlotPerDay)"
+  },
+  {
+    "id": 143,
+    "name": "CHAR_DEL_GUILD_BANK_RIGHTS",
+    "sql": "DELETE FROM guild_bank_right WHERE guildid = ?"
+  },
+  {
+    "id": 144,
+    "name": "CHAR_DEL_GUILD_BANK_RIGHTS_FOR_RANK",
+    "sql": "DELETE FROM guild_bank_right WHERE guildid = ? AND rid = ?"
+  },
+  {
+    "id": 145,
+    "name": "CHAR_INS_GUILD_BANK_EVENTLOG",
+    "sql": "INSERT INTO guild_bank_eventlog (guildid, LogGuid, TabId, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 146,
+    "name": "CHAR_DEL_GUILD_BANK_EVENTLOG",
+    "sql": "DELETE FROM guild_bank_eventlog WHERE guildid = ? AND LogGuid = ? AND TabId = ?"
+  },
+  {
+    "id": 147,
+    "name": "CHAR_DEL_GUILD_BANK_EVENTLOGS",
+    "sql": "DELETE FROM guild_bank_eventlog WHERE guildid = ?"
+  },
+  {
+    "id": 148,
+    "name": "CHAR_INS_GUILD_EVENTLOG",
+    "sql": "INSERT INTO guild_eventlog (guildid, LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 149,
+    "name": "CHAR_DEL_GUILD_EVENTLOG",
+    "sql": "DELETE FROM guild_eventlog WHERE guildid = ? AND LogGuid = ?"
+  },
+  {
+    "id": 150,
+    "name": "CHAR_DEL_GUILD_EVENTLOGS",
+    "sql": "DELETE FROM guild_eventlog WHERE guildid = ?"
+  },
+  {
+    "id": 151,
+    "name": "CHAR_UPD_GUILD_MEMBER_PNOTE",
+    "sql": "UPDATE guild_member SET pnote = ? WHERE guid = ?"
+  },
+  {
+    "id": 152,
+    "name": "CHAR_UPD_GUILD_MEMBER_OFFNOTE",
+    "sql": "UPDATE guild_member SET offnote = ? WHERE guid = ?"
+  },
+  {
+    "id": 153,
+    "name": "CHAR_UPD_GUILD_MEMBER_RANK",
+    "sql": "UPDATE guild_member SET member_rank = ? WHERE guid = ?"
+  },
+  {
+    "id": 154,
+    "name": "CHAR_UPD_GUILD_MOTD",
+    "sql": "UPDATE guild SET motd = ? WHERE guildid = ?"
+  },
+  {
+    "id": 155,
+    "name": "CHAR_UPD_GUILD_INFO",
+    "sql": "UPDATE guild SET info = ? WHERE guildid = ?"
+  },
+  {
+    "id": 156,
+    "name": "CHAR_UPD_GUILD_LEADER",
+    "sql": "UPDATE guild SET leaderguid = ? WHERE guildid = ?"
+  },
+  {
+    "id": 157,
+    "name": "CHAR_UPD_GUILD_RANK_NAME",
+    "sql": "UPDATE guild_rank SET rname = ? WHERE rid = ? AND guildid = ?"
+  },
+  {
+    "id": 158,
+    "name": "CHAR_UPD_GUILD_RANK_RIGHTS",
+    "sql": "UPDATE guild_rank SET rights = ? WHERE rid = ? AND guildid = ?"
+  },
+  {
+    "id": 159,
+    "name": "CHAR_UPD_GUILD_EMBLEM_INFO",
+    "sql": "UPDATE guild SET EmblemStyle = ?, EmblemColor = ?, BorderStyle = ?, BorderColor = ?, BackgroundColor = ? WHERE guildid = ?"
+  },
+  {
+    "id": 160,
+    "name": "CHAR_UPD_GUILD_BANK_TAB_INFO",
+    "sql": "UPDATE guild_bank_tab SET TabName = ?, TabIcon = ? WHERE guildid = ? AND TabId = ?"
+  },
+  {
+    "id": 161,
+    "name": "CHAR_UPD_GUILD_BANK_MONEY",
+    "sql": "UPDATE guild SET BankMoney = ? WHERE guildid = ?"
+  },
+  {
+    "id": 162,
+    "name": "CHAR_UPD_GUILD_BANK_EVENTLOG_TAB",
+    "sql": "UPDATE guild_bank_eventlog SET TabId = ? WHERE guildid = ? AND TabId = ? AND LogGuid = ?"
+  },
+  {
+    "id": 163,
+    "name": "CHAR_UPD_GUILD_RANK_BANK_MONEY",
+    "sql": "UPDATE guild_rank SET BankMoneyPerDay = ? WHERE rid = ? AND guildid = ?"
+  },
+  {
+    "id": 164,
+    "name": "CHAR_UPD_GUILD_BANK_TAB_TEXT",
+    "sql": "UPDATE guild_bank_tab SET TabText = ? WHERE guildid = ? AND TabId = ?"
+  },
+  {
+    "id": 165,
+    "name": "CHAR_INS_GUILD_MEMBER_WITHDRAW",
+    "sql": "INSERT INTO guild_member_withdraw (guid, tab0, tab1, tab2, tab3, tab4, tab5, tab6, tab7, money) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE tab0 = VALUES (tab0), tab1 = VALUES (tab1), tab2 = VALUES (tab2), tab3 = VALUES (tab3), tab4 = VALUES (tab4), tab5 = VALUES (tab5), tab6 = VALUES (tab6), tab7 = VALUES (tab7), money = VALUES (money)"
+  },
+  {
+    "id": 166,
+    "name": "CHAR_DEL_GUILD_MEMBER_WITHDRAW",
+    "sql": "TRUNCATE guild_member_withdraw"
+  },
+  {
+    "id": 167,
+    "name": "CHAR_SEL_CHAR_DATA_FOR_GUILD",
+    "sql": "SELECT name, level, class, zone, account, realm FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 168,
+    "name": "CHAR_DEL_GUILD_ACHIEVEMENT",
+    "sql": "DELETE FROM guild_achievement WHERE guildId = ? AND achievement = ?"
+  },
+  {
+    "id": 169,
+    "name": "CHAR_INS_GUILD_ACHIEVEMENT",
+    "sql": "INSERT INTO guild_achievement (guildId, achievement, date, guids) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 170,
+    "name": "CHAR_DEL_GUILD_ACHIEVEMENT_CRITERIA",
+    "sql": "DELETE FROM guild_achievement_progress WHERE guildId = ? AND criteria = ?"
+  },
+  {
+    "id": 171,
+    "name": "CHAR_INS_GUILD_ACHIEVEMENT_CRITERIA",
+    "sql": "INSERT INTO guild_achievement_progress (guildId, criteria, counter, date, completedGuid) VALUES (?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 172,
+    "name": "CHAR_DEL_ALL_GUILD_ACHIEVEMENTS",
+    "sql": "DELETE FROM guild_achievement WHERE guildId = ?"
+  },
+  {
+    "id": 173,
+    "name": "CHAR_DEL_ALL_GUILD_ACHIEVEMENT_CRITERIA",
+    "sql": "DELETE FROM guild_achievement_progress WHERE guildId = ?"
+  },
+  {
+    "id": 174,
+    "name": "CHAR_SEL_GUILD_ACHIEVEMENT",
+    "sql": "SELECT achievement, date, guids FROM guild_achievement WHERE guildId = ?"
+  },
+  {
+    "id": 175,
+    "name": "CHAR_SEL_GUILD_ACHIEVEMENT_CRITERIA",
+    "sql": "SELECT criteria, counter, date, completedGuid FROM guild_achievement_progress WHERE guildId = ?"
+  },
+  {
+    "id": 176,
+    "name": "CHAR_UPD_GUILD_EXPERIENCE",
+    "sql": "UPDATE guild SET level = ?, experience = ?, todayExperience = ? WHERE guildId = ?"
+  },
+  {
+    "id": 177,
+    "name": "CHAR_UPD_GUILD_RESET_TODAY_EXPERIENCE",
+    "sql": "UPDATE guild SET todayExperience = 0"
+  },
+  {
+    "id": 178,
+    "name": "CHAR_INS_GUILD_NEWS",
+    "sql": "INSERT INTO guild_newslog (guildid, LogGuid, EventType, PlayerGuid, Flags, Value, Timestamp) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE LogGuid = VALUES (LogGuid), EventType = VALUES (EventType), PlayerGuid = VALUES (PlayerGuid), Flags = VALUES (Flags), Value = VALUES (Value), Timestamp = VALUES (Timestamp)"
+  },
+  {
+    "id": 179,
+    "name": "CHAR_SEL_CHANNEL",
+    "sql": "SELECT announce, ownership, password, bannedList FROM channels WHERE name = ? AND team = ?"
+  },
+  {
+    "id": 180,
+    "name": "CHAR_INS_CHANNEL",
+    "sql": "INSERT INTO channels(name, team, lastUsed) VALUES (?, ?, UNIX_TIMESTAMP())"
+  },
+  {
+    "id": 181,
+    "name": "CHAR_UPD_CHANNEL",
+    "sql": "UPDATE channels SET announce = ?, ownership = ?, password = ?, bannedList = ?, lastUsed = UNIX_TIMESTAMP() WHERE name = ? AND team = ?"
+  },
+  {
+    "id": 182,
+    "name": "CHAR_UPD_CHANNEL_USAGE",
+    "sql": "UPDATE channels SET lastUsed = UNIX_TIMESTAMP() WHERE name = ? AND team = ?"
+  },
+  {
+    "id": 183,
+    "name": "CHAR_UPD_CHANNEL_OWNERSHIP",
+    "sql": "UPDATE channels SET ownership = ? WHERE name LIKE ?"
+  },
+  {
+    "id": 184,
+    "name": "CHAR_DEL_OLD_CHANNELS",
+    "sql": "DELETE FROM channels WHERE ownership = 1 AND lastUsed + ? < UNIX_TIMESTAMP()"
+  },
+  {
+    "id": 185,
+    "name": "CHAR_UPD_EQUIP_SET",
+    "sql": "UPDATE character_equipmentsets SET name=?, iconname=?, ignore_mask=?, item0=?, item1=?, item2=?, item3=?, item4=?, item5=?, item6=?, item7=?, item8=?, item9=?, item10=?, item11=?, item12=?, item13=?, item14=?, item15=?, item16=?, item17=?, item18=? WHERE guid=? AND setguid=? AND setindex=?"
+  },
+  {
+    "id": 186,
+    "name": "CHAR_INS_EQUIP_SET",
+    "sql": "INSERT INTO character_equipmentsets (guid, setguid, setindex, name, iconname, ignore_mask, item0, item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14, item15, item16, item17, item18) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 187,
+    "name": "CHAR_DEL_EQUIP_SET",
+    "sql": "DELETE FROM character_equipmentsets WHERE setguid=?"
+  },
+  {
+    "id": 188,
+    "name": "CHAR_INS_AURA",
+    "sql": "INSERT INTO character_aura (guid, caster_guid, item_guid, spell, effect_mask, recalculate_mask, stackcount, amount0, amount1, amount2, base_amount0, base_amount1, base_amount2, maxduration, remaintime, remaincharges) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 189,
+    "name": "CHAR_SEL_PLAYER_CURRENCY",
+    "sql": "SELECT currency, quantity, weekly_quantity, tracked_quantity, flags FROM character_currency WHERE guid = ?"
+  },
+  {
+    "id": 190,
+    "name": "CHAR_UPD_PLAYER_CURRENCY",
+    "sql": "UPDATE character_currency SET quantity = ?, weekly_quantity = ?, tracked_quantity = ?, flags = ? WHERE guid = ? AND currency = ?"
+  },
+  {
+    "id": 191,
+    "name": "CHAR_REP_PLAYER_CURRENCY",
+    "sql": "REPLACE INTO character_currency (guid, currency, quantity, weekly_quantity, tracked_quantity, flags) VALUES (?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 192,
+    "name": "CHAR_SEL_ACCOUNT_DATA",
+    "sql": "SELECT type, time, data FROM account_data WHERE accountId = ?"
+  },
+  {
+    "id": 193,
+    "name": "CHAR_REP_ACCOUNT_DATA",
+    "sql": "REPLACE INTO account_data (accountId, type, time, data) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 194,
+    "name": "CHAR_DEL_ACCOUNT_DATA",
+    "sql": "DELETE FROM account_data WHERE accountId = ?"
+  },
+  {
+    "id": 195,
+    "name": "CHAR_SEL_PLAYER_ACCOUNT_DATA",
+    "sql": "SELECT type, time, data FROM character_account_data WHERE guid = ?"
+  },
+  {
+    "id": 196,
+    "name": "CHAR_REP_PLAYER_ACCOUNT_DATA",
+    "sql": "REPLACE INTO character_account_data(guid, type, time, data) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 197,
+    "name": "CHAR_DEL_PLAYER_ACCOUNT_DATA",
+    "sql": "DELETE FROM character_account_data WHERE guid = ?"
+  },
+  {
+    "id": 198,
+    "name": "CHAR_SEL_TUTORIALS",
+    "sql": "SELECT tut0, tut1, tut2, tut3, tut4, tut5, tut6, tut7 FROM account_tutorial WHERE accountId = ?"
+  },
+  {
+    "id": 199,
+    "name": "CHAR_SEL_HAS_TUTORIALS",
+    "sql": "SELECT 1 FROM account_tutorial WHERE accountId = ?"
+  },
+  {
+    "id": 200,
+    "name": "CHAR_INS_TUTORIALS",
+    "sql": "INSERT INTO account_tutorial(tut0, tut1, tut2, tut3, tut4, tut5, tut6, tut7, accountId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 201,
+    "name": "CHAR_UPD_TUTORIALS",
+    "sql": "UPDATE account_tutorial SET tut0 = ?, tut1 = ?, tut2 = ?, tut3 = ?, tut4 = ?, tut5 = ?, tut6 = ?, tut7 = ? WHERE accountId = ?"
+  },
+  {
+    "id": 202,
+    "name": "CHAR_DEL_TUTORIALS",
+    "sql": "DELETE FROM account_tutorial WHERE accountId = ?"
+  },
+  {
+    "id": 203,
+    "name": "CHAR_INS_INSTANCE_SAVE",
+    "sql": "INSERT INTO instance (id, map, resettime, difficulty, completedEncounters, data) VALUES (?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 204,
+    "name": "CHAR_UPD_INSTANCE_DATA",
+    "sql": "UPDATE instance SET completedEncounters=?, data=? WHERE id=?"
+  },
+  {
+    "id": 205,
+    "name": "CHAR_DEL_GAME_EVENT_SAVE",
+    "sql": "DELETE FROM game_event_save WHERE eventEntry = ?"
+  },
+  {
+    "id": 206,
+    "name": "CHAR_INS_GAME_EVENT_SAVE",
+    "sql": "INSERT INTO game_event_save (eventEntry, state, next_start) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 207,
+    "name": "CHAR_DEL_ALL_GAME_EVENT_CONDITION_SAVE",
+    "sql": "DELETE FROM game_event_condition_save WHERE eventEntry = ?"
+  },
+  {
+    "id": 208,
+    "name": "CHAR_DEL_GAME_EVENT_CONDITION_SAVE",
+    "sql": "DELETE FROM game_event_condition_save WHERE eventEntry = ? AND condition_id = ?"
+  },
+  {
+    "id": 209,
+    "name": "CHAR_INS_GAME_EVENT_CONDITION_SAVE",
+    "sql": "INSERT INTO game_event_condition_save (eventEntry, condition_id, done) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 210,
+    "name": "CHAR_REP_CHARACTER_ARENA_STATS",
+    "sql": "REPLACE INTO character_arena_stats (guid, slot, matchMakerRating) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 211,
+    "name": "CHAR_SEL_PETITION",
+    "sql": "SELECT ownerguid, name, type FROM petition WHERE petitionguid = ?"
+  },
+  {
+    "id": 212,
+    "name": "CHAR_SEL_PETITION_SIGNATURE",
+    "sql": "SELECT playerguid FROM petition_sign WHERE petitionguid = ?"
+  },
+  {
+    "id": 213,
+    "name": "CHAR_DEL_ALL_PETITION_SIGNATURES",
+    "sql": "DELETE FROM petition_sign WHERE playerguid = ?"
+  },
+  {
+    "id": 214,
+    "name": "CHAR_DEL_PETITION_SIGNATURE",
+    "sql": "DELETE FROM petition_sign WHERE playerguid = ? AND type = ?"
+  },
+  {
+    "id": 215,
+    "name": "CHAR_SEL_PETITION_BY_OWNER",
+    "sql": "SELECT petitionguid FROM petition WHERE ownerguid = ? AND type = ?"
+  },
+  {
+    "id": 216,
+    "name": "CHAR_SEL_PETITION_SIGNATURES",
+    "sql": "SELECT ownerguid, (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = ?) AS signs, type FROM petition WHERE petitionguid = ?"
+  },
+  {
+    "id": 217,
+    "name": "CHAR_SEL_PETITION_SIG_BY_ACCOUNT",
+    "sql": "SELECT playerguid FROM petition_sign WHERE player_account = ? AND petitionguid = ?"
+  },
+  {
+    "id": 218,
+    "name": "CHAR_SEL_PETITION_OWNER_BY_GUID",
+    "sql": "SELECT ownerguid FROM petition WHERE petitionguid = ?"
+  },
+  {
+    "id": 219,
+    "name": "CHAR_SEL_PETITION_SIG_BY_GUID",
+    "sql": "SELECT ownerguid, petitionguid FROM petition_sign WHERE playerguid = ?"
+  },
+  {
+    "id": 220,
+    "name": "CHAR_SEL_PETITION_SIG_BY_GUID_TYPE",
+    "sql": "SELECT ownerguid, petitionguid FROM petition_sign WHERE playerguid = ? AND type = ?"
+  },
+  {
+    "id": 221,
+    "name": "CHAR_INS_PLAYER_BGDATA",
+    "sql": "INSERT INTO character_battleground_data (guid, instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 222,
+    "name": "CHAR_DEL_PLAYER_BGDATA",
+    "sql": "DELETE FROM character_battleground_data WHERE guid = ?"
+  },
+  {
+    "id": 223,
+    "name": "CHAR_INS_PLAYER_HOMEBIND",
+    "sql": "INSERT INTO character_homebind (guid, mapId, zoneId, posX, posY, posZ) VALUES (?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 224,
+    "name": "CHAR_UPD_PLAYER_HOMEBIND",
+    "sql": "UPDATE character_homebind SET mapId = ?, zoneId = ?, posX = ?, posY = ?, posZ = ? WHERE guid = ?"
+  },
+  {
+    "id": 225,
+    "name": "CHAR_DEL_PLAYER_HOMEBIND",
+    "sql": "DELETE FROM character_homebind WHERE guid = ?"
+  },
+  {
+    "id": 226,
+    "name": "CHAR_SEL_CORPSES",
+    "sql": "SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, bytes1, bytes2, flags, dynFlags, time, corpseType, instanceId, phaseMask, corpseGuid, guid FROM corpse WHERE corpseType <> 0"
+  },
+  {
+    "id": 227,
+    "name": "CHAR_INS_CORPSE",
+    "sql": "INSERT INTO corpse (corpseGuid, guid, posX, posY, posZ, orientation, mapId, displayId, itemCache, bytes1, bytes2, flags, dynFlags, time, corpseType, instanceId, phaseMask) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 228,
+    "name": "CHAR_DEL_CORPSE",
+    "sql": "DELETE FROM corpse WHERE corpseGuid = ?"
+  },
+  {
+    "id": 229,
+    "name": "CHAR_DEL_PLAYER_CORPSES",
+    "sql": "DELETE FROM corpse WHERE guid = ? AND corpseType <> 0"
+  },
+  {
+    "id": 230,
+    "name": "CHAR_DEL_OLD_CORPSES",
+    "sql": "DELETE FROM corpse WHERE corpseType = 0 OR time < (UNIX_TIMESTAMP(NOW()) - ?)"
+  },
+  {
+    "id": 231,
+    "name": "CHAR_SEL_CREATURE_RESPAWNS",
+    "sql": "SELECT guid, respawnTime FROM creature_respawn WHERE mapId = ? AND instanceId = ?"
+  },
+  {
+    "id": 232,
+    "name": "CHAR_REP_CREATURE_RESPAWN",
+    "sql": "REPLACE INTO creature_respawn (guid, respawnTime, mapId, instanceId) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 233,
+    "name": "CHAR_DEL_CREATURE_RESPAWN",
+    "sql": "DELETE FROM creature_respawn WHERE guid = ? AND mapId = ? AND instanceId = ?"
+  },
+  {
+    "id": 234,
+    "name": "CHAR_DEL_CREATURE_RESPAWN_BY_INSTANCE",
+    "sql": "DELETE FROM creature_respawn WHERE mapId = ? AND instanceId = ?"
+  },
+  {
+    "id": 235,
+    "name": "CHAR_SEL_MAX_CREATURE_RESPAWNS",
+    "sql": "SELECT MAX(respawnTime), instanceId FROM creature_respawn WHERE instanceId > 0 GROUP BY instanceId"
+  },
+  {
+    "id": 236,
+    "name": "CHAR_SEL_GO_RESPAWNS",
+    "sql": "SELECT guid, respawnTime FROM gameobject_respawn WHERE mapId = ? AND instanceId = ?"
+  },
+  {
+    "id": 237,
+    "name": "CHAR_REP_GO_RESPAWN",
+    "sql": "REPLACE INTO gameobject_respawn (guid, respawnTime, mapId, instanceId) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 238,
+    "name": "CHAR_DEL_GO_RESPAWN",
+    "sql": "DELETE FROM gameobject_respawn WHERE guid = ? AND mapId = ? AND instanceId = ?"
+  },
+  {
+    "id": 239,
+    "name": "CHAR_DEL_GO_RESPAWN_BY_INSTANCE",
+    "sql": "DELETE FROM gameobject_respawn WHERE mapId = ? AND instanceId = ?"
+  },
+  {
+    "id": 240,
+    "name": "CHAR_SEL_GM_TICKETS",
+    "sql": "SELECT ticketId, guid, name, message, createTime, mapId, posX, posY, posZ, lastModifiedTime, closedBy, assignedTo, comment, response, completed, escalated, viewed, haveTicket FROM gm_tickets"
+  },
+  {
+    "id": 241,
+    "name": "CHAR_REP_GM_TICKET",
+    "sql": "REPLACE INTO gm_tickets (ticketId, guid, name, message, createTime, mapId, posX, posY, posZ, lastModifiedTime, closedBy, assignedTo, comment, response, completed, escalated, viewed, haveTicket) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 242,
+    "name": "CHAR_DEL_GM_TICKET",
+    "sql": "DELETE FROM gm_tickets WHERE ticketId = ?"
+  },
+  {
+    "id": 243,
+    "name": "CHAR_DEL_ALL_GM_TICKETS",
+    "sql": "TRUNCATE TABLE gm_tickets"
+  },
+  {
+    "id": 244,
+    "name": "CHAR_DEL_PLAYER_GM_TICKETS",
+    "sql": "DELETE FROM gm_tickets WHERE guid = ?"
+  },
+  {
+    "id": 245,
+    "name": "CHAR_SEL_GM_BUGS",
+    "sql": "SELECT ticketId, playerGuid, bugNote, ticketCreateTime, mapId, posX, posY, posZ, orientation, closedBy, assignedTo, comment FROM ticket_bug"
+  },
+  {
+    "id": 246,
+    "name": "CHAR_DEL_ALL_GM_BUGS",
+    "sql": "TRUNCATE TABLE ticket_bug"
+  },
+  {
+    "id": 247,
+    "name": "CHAR_REP_GM_BUG",
+    "sql": "REPLACE INTO ticket_bug (ticketId, playerGuid, bugNote, ticketCreateTime, mapId, posX, posY, posZ, orientation, closedBy, assignedTo, comment) VALUES (?, ?, ?, UNIX_TIMESTAMP(NOW()), ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 248,
+    "name": "CHAR_DEL_GM_BUG",
+    "sql": "DELETE FROM ticket_bug WHERE ticketId = ?"
+  },
+  {
+    "id": 249,
+    "name": "CHAR_SEL_GM_SUGGESTS",
+    "sql": "SELECT ticketId, playerGuid, suggestNote, ticketCreateTime, mapId, posX, posY, posZ, orientation, closedBy, assignedTo, comment FROM ticket_suggest"
+  },
+  {
+    "id": 250,
+    "name": "CHAR_DEL_ALL_GM_SUGGESTS",
+    "sql": "TRUNCATE TABLE ticket_suggest"
+  },
+  {
+    "id": 251,
+    "name": "CHAR_REP_GM_SUGGEST",
+    "sql": "REPLACE INTO ticket_suggest (ticketId, playerGuid, suggestNote, ticketCreateTime, mapId, posX, posY, posZ, orientation, closedBy, assignedTo, comment) VALUES (?, ?, ?, UNIX_TIMESTAMP(NOW()), ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 252,
+    "name": "CHAR_DEL_GM_SUGGEST",
+    "sql": "DELETE FROM ticket_suggest WHERE ticketId = ?"
+  },
+  {
+    "id": 253,
+    "name": "CHAR_INS_GM_SURVEY",
+    "sql": "INSERT INTO gm_surveys (guid, surveyId, mainSurvey, overallComment, createTime) VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(NOW()))"
+  },
+  {
+    "id": 254,
+    "name": "CHAR_INS_GM_SUBSURVEY",
+    "sql": "INSERT INTO gm_subsurveys (surveyId, subsurveyId, `rank`, comment) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 255,
+    "name": "CHAR_INS_LAG_REPORT",
+    "sql": "INSERT INTO lag_reports (guid, lagType, mapId, posX, posY, posZ, latency, createTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 256,
+    "name": "CHAR_SEL_EXPIRED_AUCTIONS",
+    "sql": "SELECT id, auctioneerguid, itemguid, itemEntry, count, itemowner, buyoutprice, time, buyguid, lastbid, startbid, deposit FROM auctionhouse ah INNER JOIN item_instance ii ON ii.guid = ah.itemguid WHERE ah.time <= ?"
+  },
+  {
+    "id": 257,
+    "name": "CHAR_INS_CHARACTER",
+    "sql": "INSERT INTO characters (guid, realm, account, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags, map, instance_id, dungeondifficulty,raiddifficulty, position_x, position_y, position_z, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, talentTree, extra_flags, stable_slots, at_login, zone, death_expire_time, taxi_path, totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, lfgbonusfaction, drunk, health, power1, power2, power3, power4, power5, latency, speccount, activespec, exploredZones, equipmentCache, knownTitles, actionBars, grantableLevels) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+  },
+  {
+    "id": 258,
+    "name": "CHAR_UPD_CHARACTER",
+    "sql": "UPDATE characters SET name=?,race=?,class=?,gender=?,level=?,xp=?,money=?,playerBytes=?,playerBytes2=?,playerFlags=?,map=?,instance_id=?,dungeondifficulty=?,raiddifficulty=?,position_x=?,position_y=?,position_z=?,orientation=?,taximask=?,cinematic=?,totaltime=?,leveltime=?,rest_bonus=?,logout_time=?,is_logout_resting=?,resettalents_cost=?,resettalents_time=?,talentTree=?,extra_flags=?,stable_slots=?,at_login=?,zone=?,death_expire_time=?,taxi_path=?,totalKills=?,todayKills=?,yesterdayKills=?,chosenTitle=?,watchedFaction=?,lfgbonusfaction=?,drunk=?,health=?,power1=?,power2=?,power3=?,power4=?,power5=?,latency=?,speccount=?,activespec=?,exploredZones=?,equipmentCache=?,knownTitles=?,actionBars=?,grantableLevels=?,online=? WHERE guid=?"
+  },
+  {
+    "id": 259,
+    "name": "CHAR_UPD_CHARACTER_BOOST",
+    "sql": "UPDATE characters SET race = ?, money = money + ?, level = ?, position_x = ?, position_y = ?, position_z = ?, orientation = ?, map = ?, talenttree = ?,trans_x = 0, trans_y = 0, trans_z = 0, trans_o = 0, transguid = 0, at_login = at_login & ~ ?, activespec = 0, equipmentCache = ? WHERE guid = ?"
+  },
+  {
+    "id": 260,
+    "name": "CHAR_UPD_ADD_AT_LOGIN_FLAG",
+    "sql": "UPDATE characters SET at_login = at_login | ? WHERE guid = ?"
+  },
+  {
+    "id": 261,
+    "name": "CHAR_UPD_REM_AT_LOGIN_FLAG",
+    "sql": "UPDATE characters set at_login = at_login & ~ ? WHERE guid = ?"
+  },
+  {
+    "id": 262,
+    "name": "CHAR_UPD_ALL_AT_LOGIN_FLAGS",
+    "sql": "UPDATE characters SET at_login = at_login | ?"
+  },
+  {
+    "id": 263,
+    "name": "CHAR_INS_BUG_REPORT",
+    "sql": "INSERT INTO bugreport (type, content) VALUES(?, ?)"
+  },
+  {
+    "id": 264,
+    "name": "CHAR_UPD_PETITION_NAME",
+    "sql": "UPDATE petition SET name = ? WHERE petitionguid = ?"
+  },
+  {
+    "id": 265,
+    "name": "CHAR_INS_PETITION_SIGNATURE",
+    "sql": "INSERT INTO petition_sign (ownerguid, petitionguid, playerguid, player_account, type) VALUES (?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 266,
+    "name": "CHAR_UPD_ACCOUNT_ONLINE",
+    "sql": "UPDATE characters SET online = 0 WHERE account = ?"
+  },
+  {
+    "id": 267,
+    "name": "CHAR_INS_GROUP",
+    "sql": "INSERT INTO parties (guid, leaderGuid, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, partyType, difficulty, raiddifficulty) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 268,
+    "name": "CHAR_INS_GROUP_MEMBER",
+    "sql": "INSERT INTO party_member (guid, memberGuid, memberFlags, subparty, roles) VALUES(?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 269,
+    "name": "CHAR_DEL_GROUP_MEMBER",
+    "sql": "DELETE FROM party_member WHERE memberGuid = ?"
+  },
+  {
+    "id": 270,
+    "name": "CHAR_DEL_GROUP_INSTANCE_PERM_BINDING",
+    "sql": "DELETE FROM party_instance WHERE guid = ? AND instance = ?"
+  },
+  {
+    "id": 271,
+    "name": "CHAR_UPD_GROUP_LEADER",
+    "sql": "UPDATE parties SET leaderGuid = ? WHERE guid = ?"
+  },
+  {
+    "id": 272,
+    "name": "CHAR_UPD_GROUP_TYPE",
+    "sql": "UPDATE parties SET partyType = ? WHERE guid = ?"
+  },
+  {
+    "id": 273,
+    "name": "CHAR_UPD_GROUP_MEMBER_SUBGROUP",
+    "sql": "UPDATE party_member SET subparty = ? WHERE memberGuid = ?"
+  },
+  {
+    "id": 274,
+    "name": "CHAR_UPD_GROUP_MEMBER_FLAG",
+    "sql": "UPDATE party_member SET memberFlags = ? WHERE memberGuid = ?"
+  },
+  {
+    "id": 275,
+    "name": "CHAR_UPD_GROUP_DIFFICULTY",
+    "sql": "UPDATE parties SET difficulty = ? WHERE guid = ?"
+  },
+  {
+    "id": 276,
+    "name": "CHAR_UPD_GROUP_RAID_DIFFICULTY",
+    "sql": "UPDATE parties SET raiddifficulty = ? WHERE guid = ?"
+  },
+  {
+    "id": 277,
+    "name": "CHAR_DEL_INVALID_SPELL_SPELLS",
+    "sql": "DELETE FROM character_spell WHERE spell = ?"
+  },
+  {
+    "id": 278,
+    "name": "CHAR_DEL_INVALID_SPELL_TALENTS",
+    "sql": "DELETE FROM character_talent WHERE spell = ?"
+  },
+  {
+    "id": 279,
+    "name": "CHAR_UPD_DELETE_INFO",
+    "sql": "UPDATE characters SET deleteInfos_Name = name, deleteInfos_Account = account, deleteDate = UNIX_TIMESTAMP(), name = '', account = 0 WHERE guid = ?"
+  },
+  {
+    "id": 280,
+    "name": "CHAR_UDP_RESTORE_DELETE_INFO",
+    "sql": "UPDATE characters SET name = ?, account = ?, deleteDate = NULL, deleteInfos_Name = NULL, deleteInfos_Account = NULL WHERE deleteDate IS NOT NULL AND guid = ?"
+  },
+  {
+    "id": 281,
+    "name": "CHAR_UPD_ZONE",
+    "sql": "UPDATE characters SET zone = ? WHERE guid = ?"
+  },
+  {
+    "id": 282,
+    "name": "CHAR_UPD_LEVEL",
+    "sql": "UPDATE characters SET level = ?, xp = 0 WHERE guid = ?"
+  },
+  {
+    "id": 283,
+    "name": "CHAR_DEL_INVALID_ACHIEV_PROGRESS_CRITERIA",
+    "sql": "DELETE FROM character_achievement_progress WHERE criteria = ?"
+  },
+  {
+    "id": 284,
+    "name": "CHAR_DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD",
+    "sql": "DELETE FROM guild_achievement_progress WHERE criteria = ?"
+  },
+  {
+    "id": 285,
+    "name": "CHAR_DEL_INVALID_ACHIEVMENT",
+    "sql": "DELETE FROM character_achievement WHERE achievement = ?"
+  },
+  {
+    "id": 286,
+    "name": "CHAR_INS_ADDON",
+    "sql": "INSERT INTO addons (name, crc) VALUES (?, ?)"
+  },
+  {
+    "id": 287,
+    "name": "CHAR_DEL_INVALID_PET_SPELL",
+    "sql": "DELETE FROM pet_spell WHERE spell = ?"
+  },
+  {
+    "id": 288,
+    "name": "CHAR_DEL_GROUP_INSTANCE_BY_INSTANCE",
+    "sql": "DELETE FROM party_instance WHERE instance = ?"
+  },
+  {
+    "id": 289,
+    "name": "CHAR_DEL_GROUP_INSTANCE_BY_GUID",
+    "sql": "DELETE FROM party_instance WHERE guid = ? AND instance = ?"
+  },
+  {
+    "id": 290,
+    "name": "CHAR_REP_GROUP_INSTANCE",
+    "sql": "REPLACE INTO party_instance (guid, instance, permanent) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 291,
+    "name": "CHAR_UPD_INSTANCE_RESETTIME",
+    "sql": "UPDATE instance SET resettime = ? WHERE id = ?"
+  },
+  {
+    "id": 292,
+    "name": "CHAR_UPD_GLOBAL_INSTANCE_RESETTIME",
+    "sql": "UPDATE instance_reset SET resettime = ? WHERE mapid = ? AND difficulty = ?"
+  },
+  {
+    "id": 293,
+    "name": "CHAR_UPD_CHAR_ONLINE",
+    "sql": "UPDATE characters SET online = 1 WHERE guid = ?"
+  },
+  {
+    "id": 294,
+    "name": "CHAR_UPD_CHAR_NAME_AT_LOGIN",
+    "sql": "UPDATE characters set name = ?, at_login = at_login & ~ ? WHERE guid = ?"
+  },
+  {
+    "id": 295,
+    "name": "CHAR_UPD_WORLDSTATE",
+    "sql": "UPDATE worldstates SET value = ? WHERE entry = ?"
+  },
+  {
+    "id": 296,
+    "name": "CHAR_INS_WORLDSTATE",
+    "sql": "INSERT INTO worldstates (entry, value) VALUES (?, ?)"
+  },
+  {
+    "id": 297,
+    "name": "CHAR_DEL_CHAR_INSTANCE_BY_INSTANCE_GUID",
+    "sql": "DELETE FROM character_instance WHERE guid = ? AND instance = ?"
+  },
+  {
+    "id": 298,
+    "name": "CHAR_UPD_CHAR_INSTANCE",
+    "sql": "UPDATE character_instance SET instance = ?, permanent = ? WHERE guid = ? AND instance = ?"
+  },
+  {
+    "id": 299,
+    "name": "CHAR_INS_CHAR_INSTANCE",
+    "sql": "INSERT INTO character_instance (guid, instance, permanent) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 300,
+    "name": "CHAR_UPD_GENDER_PLAYERBYTES",
+    "sql": "UPDATE characters SET gender = ?, playerBytes = ?, playerBytes2 = ? WHERE guid = ?"
+  },
+  {
+    "id": 301,
+    "name": "CHAR_DEL_CHARACTER_SKILL",
+    "sql": "DELETE FROM character_skills WHERE guid = ? AND skill = ?"
+  },
+  {
+    "id": 302,
+    "name": "CHAR_UPD_ADD_CHARACTER_SOCIAL_FLAGS",
+    "sql": "UPDATE character_social SET flags = flags | ? WHERE guid = ? AND friend = ?"
+  },
+  {
+    "id": 303,
+    "name": "CHAR_UPD_REM_CHARACTER_SOCIAL_FLAGS",
+    "sql": "UPDATE character_social SET flags = flags & ~ ? WHERE guid = ? AND friend = ?"
+  },
+  {
+    "id": 304,
+    "name": "CHAR_INS_CHARACTER_SOCIAL",
+    "sql": "INSERT INTO character_social (guid, friend, flags) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 305,
+    "name": "CHAR_DEL_CHARACTER_SOCIAL",
+    "sql": "DELETE FROM character_social WHERE guid = ? AND friend = ?"
+  },
+  {
+    "id": 306,
+    "name": "CHAR_UPD_CHARACTER_SOCIAL_NOTE",
+    "sql": "UPDATE character_social SET note = ? WHERE guid = ? AND friend = ?"
+  },
+  {
+    "id": 307,
+    "name": "CHAR_UPD_CHARACTER_POSITION",
+    "sql": "UPDATE characters SET position_x = ?, position_y = ?, position_z = ?, orientation = ?, map = ?, zone = ?, trans_x = 0, trans_y = 0, trans_z = 0, transguid = 0, taxi_path = '' WHERE guid = ?"
+  },
+  {
+    "id": 308,
+    "name": "CHAR_INS_LFG_DATA",
+    "sql": "INSERT INTO lfg_data (guid, dungeon, state) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 309,
+    "name": "CHAR_DEL_LFG_DATA",
+    "sql": "DELETE FROM lfg_data WHERE guid = ?"
+  },
+  {
+    "id": 310,
+    "name": "CHAR_SEL_CHARACTER_AURA_FROZEN",
+    "sql": "SELECT characters.name FROM characters LEFT JOIN character_aura ON (characters.guid = character_aura.guid) WHERE character_aura.spell = 9454"
+  },
+  {
+    "id": 311,
+    "name": "CHAR_SEL_CHARACTER_ONLINE",
+    "sql": "SELECT name, account, map, zone FROM characters WHERE online > 0"
+  },
+  {
+    "id": 312,
+    "name": "CHAR_SEL_CHAR_DEL_INFO_BY_GUID",
+    "sql": "SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL AND guid = ?"
+  },
+  {
+    "id": 313,
+    "name": "CHAR_SEL_CHAR_DEL_INFO_BY_NAME",
+    "sql": "SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL AND deleteInfos_Name LIKE CONCAT('%%', ?, '%%')"
+  },
+  {
+    "id": 314,
+    "name": "CHAR_SEL_CHAR_DEL_INFO",
+    "sql": "SELECT guid, deleteInfos_Name, deleteInfos_Account, deleteDate FROM characters WHERE deleteDate IS NOT NULL"
+  },
+  {
+    "id": 315,
+    "name": "CHAR_SEL_CHARS_BY_ACCOUNT_ID",
+    "sql": "SELECT guid FROM characters WHERE account = ?"
+  },
+  {
+    "id": 316,
+    "name": "CHAR_SEL_CHAR_PINFO",
+    "sql": "SELECT totaltime, level, money, account, race, class, map, zone, gender, health, playerFlags FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 317,
+    "name": "CHAR_SEL_PINFO_XP",
+    "sql": "SELECT a.xp, b.guid FROM characters a LEFT JOIN guild_member b ON a.guid = b.guid WHERE a.guid = ?"
+  },
+  {
+    "id": 318,
+    "name": "CHAR_SEL_PINFO_MAILS",
+    "sql": "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?"
+  },
+  {
+    "id": 319,
+    "name": "CHAR_SEL_PINFO_BANS",
+    "sql": "SELECT unbandate, bandate = unbandate, bannedby, banreason FROM character_banned WHERE guid = ? AND active ORDER BY bandate ASC LIMIT 1"
+  },
+  {
+    "id": 320,
+    "name": "CHAR_SEL_CHAR_HOMEBIND",
+    "sql": "SELECT mapId, zoneId, posX, posY, posZ FROM character_homebind WHERE guid = ?"
+  },
+  {
+    "id": 321,
+    "name": "CHAR_SEL_CHAR_GUID_NAME_BY_ACC",
+    "sql": "SELECT guid, name FROM characters WHERE account = ?"
+  },
+  {
+    "id": 322,
+    "name": "CHAR_SEL_POOL_QUEST_SAVE",
+    "sql": "SELECT quest_id FROM pool_quest_save WHERE pool_id = ?"
+  },
+  {
+    "id": 323,
+    "name": "CHAR_SEL_CHARACTER_AT_LOGIN",
+    "sql": "SELECT at_login FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 324,
+    "name": "CHAR_SEL_CHAR_CLASS_LVL_AT_LOGIN",
+    "sql": "SELECT class, level, at_login, knownTitles FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 325,
+    "name": "CHAR_SEL_CHAR_AT_LOGIN_TITLES",
+    "sql": "SELECT at_login, knownTitles FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 326,
+    "name": "CHAR_SEL_INSTANCE",
+    "sql": "SELECT data, completedEncounters FROM instance WHERE map = ? AND id = ?"
+  },
+  {
+    "id": 327,
+    "name": "CHAR_SEL_CHAR_COD_ITEM_MAIL",
+    "sql": "SELECT id, messageType, mailTemplateId, sender, subject, body, money, has_items FROM mail WHERE receiver = ? AND has_items <> 0 AND cod <> 0"
+  },
+  {
+    "id": 328,
+    "name": "CHAR_SEL_CHAR_SOCIAL",
+    "sql": "SELECT DISTINCT guid FROM character_social WHERE friend = ?"
+  },
+  {
+    "id": 329,
+    "name": "CHAR_SEL_CHAR_OLD_CHARS",
+    "sql": "SELECT guid, deleteInfos_Account FROM characters WHERE deleteDate IS NOT NULL AND deleteDate < ?"
+  },
+  {
+    "id": 330,
+    "name": "CHAR_SEL_MAIL",
+    "sql": "SELECT id, messageType, sender, receiver, subject, body, has_items, expire_time, deliver_time, money, cod, checked, stationery, mailTemplateId FROM mail WHERE receiver = ? ORDER BY id DESC"
+  },
+  {
+    "id": 331,
+    "name": "CHAR_SEL_CHAR_PLAYERBYTES2",
+    "sql": "SELECT playerBytes2 FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 332,
+    "name": "CHAR_SEL_CHAR_GUID_BY_NAME",
+    "sql": "SELECT guid FROM characters WHERE name = ?"
+  },
+  {
+    "id": 333,
+    "name": "CHAR_DEL_CHAR_AURA_FROZEN",
+    "sql": "DELETE FROM character_aura WHERE spell = 9454 AND guid = ?"
+  },
+  {
+    "id": 334,
+    "name": "CHAR_SEL_CHAR_INVENTORY_COUNT_ITEM",
+    "sql": "SELECT COUNT(itemEntry) FROM character_inventory ci INNER JOIN item_instance ii ON ii.guid = ci.item WHERE itemEntry = ?"
+  },
+  {
+    "id": 335,
+    "name": "CHAR_SEL_MAIL_COUNT_ITEM",
+    "sql": "SELECT COUNT(itemEntry) FROM mail_items mi INNER JOIN item_instance ii ON ii.guid = mi.item_guid WHERE itemEntry = ?"
+  },
+  {
+    "id": 336,
+    "name": "CHAR_SEL_AUCTIONHOUSE_COUNT_ITEM",
+    "sql": "SELECT COUNT(itemEntry) FROM auctionhouse ah INNER JOIN item_instance ii ON ii.guid = ah.itemguid WHERE itemEntry = ?"
+  },
+  {
+    "id": 337,
+    "name": "CHAR_SEL_GUILD_BANK_COUNT_ITEM",
+    "sql": "SELECT COUNT(itemEntry) FROM guild_bank_item gbi INNER JOIN item_instance ii ON ii.guid = gbi.item_guid WHERE itemEntry = ?"
+  },
+  {
+    "id": 338,
+    "name": "CHAR_SEL_CHAR_INVENTORY_ITEM_BY_ENTRY",
+    "sql": "SELECT ci.item, cb.slot AS bag, ci.slot, ci.guid, c.account, c.name FROM characters c INNER JOIN character_inventory ci ON ci.guid = c.guid INNER JOIN item_instance ii ON ii.guid = ci.item LEFT JOIN character_inventory cb ON cb.item = ci.bag WHERE ii.itemEntry = ? LIMIT ?"
+  },
+  {
+    "id": 339,
+    "name": "CHAR_SEL_CHAR_INVENTORY_ITEM_GUID_UNTIL_BAG_SLOT",
+    "sql": "SELECT item FROM character_inventory WHERE bag = ? AND slot < ? AND guid = ?"
+  },
+  {
+    "id": 340,
+    "name": "CHAR_SEL_MAIL_ITEMS_BY_ENTRY",
+    "sql": "SELECT mi.item_guid, m.sender, m.receiver, cs.account, cs.name, cr.account, cr.name FROM mail m INNER JOIN mail_items mi ON mi.mail_id = m.id INNER JOIN item_instance ii ON ii.guid = mi.item_guid INNER JOIN characters cs ON cs.guid = m.sender INNER JOIN characters cr ON cr.guid = m.receiver WHERE ii.itemEntry = ? LIMIT ?"
+  },
+  {
+    "id": 341,
+    "name": "CHAR_SEL_AUCTIONHOUSE_ITEM_BY_ENTRY",
+    "sql": "SELECT  ah.itemguid, ah.itemowner, c.account, c.name FROM auctionhouse ah INNER JOIN characters c ON c.guid = ah.itemowner INNER JOIN item_instance ii ON ii.guid = ah.itemguid WHERE ii.itemEntry = ? LIMIT ?"
+  },
+  {
+    "id": 342,
+    "name": "CHAR_SEL_GUILD_BANK_ITEM_BY_ENTRY",
+    "sql": "SELECT gi.item_guid, gi.guildid, g.name FROM guild_bank_item gi INNER JOIN guild g ON g.guildid = gi.guildid INNER JOIN item_instance ii ON ii.guid = gi.item_guid WHERE ii.itemEntry = ? LIMIT ?"
+  },
+  {
+    "id": 343,
+    "name": "CHAR_DEL_CHAR_ACHIEVEMENT",
+    "sql": "DELETE FROM character_achievement WHERE guid = ?"
+  },
+  {
+    "id": 344,
+    "name": "CHAR_DEL_CHAR_ACHIEVEMENT_PROGRESS",
+    "sql": "DELETE FROM character_achievement_progress WHERE guid = ?"
+  },
+  {
+    "id": 345,
+    "name": "CHAR_INS_CHAR_ACHIEVEMENT",
+    "sql": "INSERT INTO character_achievement (guid, achievement, date) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 346,
+    "name": "CHAR_DEL_CHAR_ACHIEVEMENT_PROGRESS_BY_CRITERIA",
+    "sql": "DELETE FROM character_achievement_progress WHERE guid = ? AND criteria = ?"
+  },
+  {
+    "id": 347,
+    "name": "CHAR_INS_CHAR_ACHIEVEMENT_PROGRESS",
+    "sql": "INSERT INTO character_achievement_progress (guid, criteria, counter, date) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 348,
+    "name": "CHAR_DEL_CHAR_REPUTATION_BY_FACTION",
+    "sql": "DELETE FROM character_reputation WHERE guid = ? AND faction = ?"
+  },
+  {
+    "id": 349,
+    "name": "CHAR_INS_CHAR_REPUTATION_BY_FACTION",
+    "sql": "INSERT INTO character_reputation (guid, faction, standing, flags) VALUES (?, ?, ? , ?)"
+  },
+  {
+    "id": 350,
+    "name": "CHAR_DEL_ITEM_REFUND_INSTANCE",
+    "sql": "DELETE FROM item_refund_instance WHERE item_guid = ?"
+  },
+  {
+    "id": 351,
+    "name": "CHAR_INS_ITEM_REFUND_INSTANCE",
+    "sql": "INSERT INTO item_refund_instance (item_guid, player_guid, paidMoney, paidExtendedCost) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 352,
+    "name": "CHAR_DEL_GROUP",
+    "sql": "DELETE FROM parties WHERE guid = ?"
+  },
+  {
+    "id": 353,
+    "name": "CHAR_DEL_GROUP_MEMBER_ALL",
+    "sql": "DELETE FROM party_member WHERE guid = ?"
+  },
+  {
+    "id": 354,
+    "name": "CHAR_INS_CHAR_GIFT",
+    "sql": "INSERT INTO character_gifts (guid, item_guid, entry, flags) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 355,
+    "name": "CHAR_DEL_INSTANCE_BY_INSTANCE",
+    "sql": "DELETE FROM instance WHERE id = ?"
+  },
+  {
+    "id": 356,
+    "name": "CHAR_DEL_CHAR_INSTANCE_BY_INSTANCE",
+    "sql": "DELETE FROM character_instance WHERE instance = ?"
+  },
+  {
+    "id": 357,
+    "name": "CHAR_DEL_CHAR_INSTANCE_BY_MAP_DIFF",
+    "sql": "DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = id WHERE map = ? and difficulty = ?"
+  },
+  {
+    "id": 358,
+    "name": "CHAR_DEL_GROUP_INSTANCE_BY_MAP_DIFF",
+    "sql": "DELETE FROM party_instance USING party_instance LEFT JOIN instance ON party_instance.instance = id WHERE map = ? and difficulty = ?"
+  },
+  {
+    "id": 359,
+    "name": "CHAR_DEL_INSTANCE_BY_MAP_DIFF",
+    "sql": "DELETE FROM instance WHERE map = ? and difficulty = ?"
+  },
+  {
+    "id": 360,
+    "name": "CHAR_DEL_MAIL_ITEM_BY_ID",
+    "sql": "DELETE FROM mail_items WHERE mail_id = ?"
+  },
+  {
+    "id": 361,
+    "name": "CHAR_INS_PETITION",
+    "sql": "INSERT INTO petition (ownerguid, petitionguid, name, type) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 362,
+    "name": "CHAR_DEL_PETITION_BY_GUID",
+    "sql": "DELETE FROM petition WHERE petitionguid = ?"
+  },
+  {
+    "id": 363,
+    "name": "CHAR_DEL_PETITION_SIGNATURE_BY_GUID",
+    "sql": "DELETE FROM petition_sign WHERE petitionguid = ?"
+  },
+  {
+    "id": 364,
+    "name": "CHAR_DEL_CHAR_DECLINED_NAME",
+    "sql": "DELETE FROM character_declinedname WHERE guid = ?"
+  },
+  {
+    "id": 365,
+    "name": "CHAR_INS_CHAR_DECLINED_NAME",
+    "sql": "INSERT INTO character_declinedname (guid, genitive, dative, accusative, instrumental, prepositional) VALUES (?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 366,
+    "name": "CHAR_UPD_FACTION_OR_RACE",
+    "sql": "UPDATE characters SET name = ?, race = ?, at_login = at_login & ~ ? WHERE guid = ?"
+  },
+  {
+    "id": 367,
+    "name": "CHAR_DEL_CHAR_SKILL_LANGUAGES",
+    "sql": "DELETE FROM character_skills WHERE skill IN (98, 113, 759, 111, 313, 109, 115, 315, 673, 137) AND guid = ?"
+  },
+  {
+    "id": 368,
+    "name": "CHAR_INS_CHAR_SKILL_LANGUAGE",
+    "sql": "INSERT INTO `character_skills` (guid, skill, value, max) VALUES (?, ?, 300, 300)"
+  },
+  {
+    "id": 369,
+    "name": "CHAR_UPD_CHAR_TAXI_PATH",
+    "sql": "UPDATE characters SET taxi_path = '' WHERE guid = ?"
+  },
+  {
+    "id": 370,
+    "name": "CHAR_UPD_CHAR_TAXIMASK",
+    "sql": "UPDATE characters SET taximask = ? WHERE guid = ?"
+  },
+  {
+    "id": 371,
+    "name": "CHAR_DEL_CHAR_QUESTSTATUS",
+    "sql": "DELETE FROM character_queststatus WHERE guid = ?"
+  },
+  {
+    "id": 372,
+    "name": "CHAR_DEL_CHAR_SOCIAL_BY_GUID",
+    "sql": "DELETE FROM character_social WHERE guid = ?"
+  },
+  {
+    "id": 373,
+    "name": "CHAR_DEL_CHAR_SOCIAL_BY_FRIEND",
+    "sql": "DELETE FROM character_social WHERE friend = ?"
+  },
+  {
+    "id": 374,
+    "name": "CHAR_DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT",
+    "sql": "DELETE FROM character_achievement WHERE achievement = ? AND guid = ?"
+  },
+  {
+    "id": 375,
+    "name": "CHAR_UPD_CHAR_ACHIEVEMENT",
+    "sql": "UPDATE character_achievement SET achievement = ? where achievement = ? AND guid = ?"
+  },
+  {
+    "id": 376,
+    "name": "CHAR_UPD_CHAR_INVENTORY_FACTION_CHANGE",
+    "sql": "UPDATE item_instance ii, character_inventory ci SET ii.itemEntry = ? WHERE ii.itemEntry = ? AND ci.guid = ? AND ci.item = ii.guid"
+  },
+  {
+    "id": 377,
+    "name": "CHAR_DEL_CHAR_SPELL_BY_SPELL",
+    "sql": "DELETE FROM character_spell WHERE spell = ? AND guid = ?"
+  },
+  {
+    "id": 378,
+    "name": "CHAR_UPD_CHAR_SPELL_FACTION_CHANGE",
+    "sql": "UPDATE character_spell SET spell = ? where spell = ? AND guid = ?"
+  },
+  {
+    "id": 379,
+    "name": "CHAR_SEL_CHAR_REP_BY_FACTION",
+    "sql": "SELECT standing FROM character_reputation WHERE faction = ? AND guid = ?"
+  },
+  {
+    "id": 380,
+    "name": "CHAR_DEL_CHAR_REP_BY_FACTION",
+    "sql": "DELETE FROM character_reputation WHERE faction = ? AND guid = ?"
+  },
+  {
+    "id": 381,
+    "name": "CHAR_UPD_CHAR_REP_FACTION_CHANGE",
+    "sql": "UPDATE character_reputation SET faction = ?, standing = ? WHERE faction = ? AND guid = ?"
+  },
+  {
+    "id": 382,
+    "name": "CHAR_UPD_CHAR_TITLES_FACTION_CHANGE",
+    "sql": "UPDATE characters SET knownTitles = ? WHERE guid = ?"
+  },
+  {
+    "id": 383,
+    "name": "CHAR_RES_CHAR_TITLES_FACTION_CHANGE",
+    "sql": "UPDATE characters SET chosenTitle = 0 WHERE guid = ?"
+  },
+  {
+    "id": 384,
+    "name": "CHAR_DEL_CHAR_SPELL_COOLDOWN",
+    "sql": "DELETE FROM character_spell_cooldown WHERE guid = ?"
+  },
+  {
+    "id": 385,
+    "name": "CHAR_DEL_CHAR_SPELL_CHARGES",
+    "sql": "DELETE FROM character_spell_charges WHERE guid = ?"
+  },
+  {
+    "id": 386,
+    "name": "CHAR_DEL_CHARACTER",
+    "sql": "DELETE FROM characters WHERE guid = ?"
+  },
+  {
+    "id": 387,
+    "name": "CHAR_DEL_CHAR_ACTION",
+    "sql": "DELETE FROM character_action WHERE guid = ?"
+  },
+  {
+    "id": 388,
+    "name": "CHAR_DEL_CHAR_AURA",
+    "sql": "DELETE FROM character_aura WHERE guid = ?"
+  },
+  {
+    "id": 389,
+    "name": "CHAR_DEL_CHAR_GIFT",
+    "sql": "DELETE FROM character_gifts WHERE guid = ?"
+  },
+  {
+    "id": 390,
+    "name": "CHAR_DEL_CHAR_INSTANCE",
+    "sql": "DELETE FROM character_instance WHERE guid = ?"
+  },
+  {
+    "id": 391,
+    "name": "CHAR_DEL_CHAR_INVENTORY",
+    "sql": "DELETE FROM character_inventory WHERE guid = ?"
+  },
+  {
+    "id": 392,
+    "name": "CHAR_DEL_CHAR_QUESTSTATUS_REWARDED",
+    "sql": "DELETE FROM character_queststatus_rewarded WHERE guid = ?"
+  },
+  {
+    "id": 393,
+    "name": "CHAR_DEL_CHAR_REPUTATION",
+    "sql": "DELETE FROM character_reputation WHERE guid = ?"
+  },
+  {
+    "id": 394,
+    "name": "CHAR_DEL_CHAR_SPELL",
+    "sql": "DELETE FROM character_spell WHERE guid = ?"
+  },
+  {
+    "id": 395,
+    "name": "CHAR_DEL_MAIL",
+    "sql": "DELETE FROM mail WHERE receiver = ?"
+  },
+  {
+    "id": 396,
+    "name": "CHAR_DEL_MAIL_ITEMS",
+    "sql": "DELETE FROM mail_items WHERE receiver = ?"
+  },
+  {
+    "id": 397,
+    "name": "CHAR_DEL_CHAR_ACHIEVEMENTS",
+    "sql": "DELETE FROM character_achievement WHERE guid = ? AND achievement NOT BETWEEN '456' AND '467' AND achievement NOT BETWEEN '1400' AND '1427' AND achievement NOT IN(1463, 3117, 3259)"
+  },
+  {
+    "id": 398,
+    "name": "CHAR_DEL_CHAR_EQUIPMENTSETS",
+    "sql": "DELETE FROM character_equipmentsets WHERE guid = ?"
+  },
+  {
+    "id": 399,
+    "name": "CHAR_DEL_GUILD_EVENTLOG_BY_PLAYER",
+    "sql": "DELETE FROM guild_eventlog WHERE PlayerGuid1 = ? OR PlayerGuid2 = ?"
+  },
+  {
+    "id": 400,
+    "name": "CHAR_DEL_GUILD_BANK_EVENTLOG_BY_PLAYER",
+    "sql": "DELETE FROM guild_bank_eventlog WHERE PlayerGuid = ?"
+  },
+  {
+    "id": 401,
+    "name": "CHAR_DEL_CHAR_GLYPHS",
+    "sql": "DELETE FROM character_glyphs WHERE guid = ?"
+  },
+  {
+    "id": 402,
+    "name": "CHAR_DEL_CHAR_QUESTSTATUS_DAILY",
+    "sql": "DELETE FROM character_queststatus_daily WHERE guid = ?"
+  },
+  {
+    "id": 403,
+    "name": "CHAR_DEL_CHAR_TALENT",
+    "sql": "DELETE FROM character_talent WHERE guid = ?"
+  },
+  {
+    "id": 404,
+    "name": "CHAR_DEL_CHAR_SKILLS",
+    "sql": "DELETE FROM character_skills WHERE guid = ?"
+  },
+  {
+    "id": 405,
+    "name": "CHAR_UDP_CHAR_MONEY",
+    "sql": "UPDATE characters SET money = ? WHERE guid = ?"
+  },
+  {
+    "id": 406,
+    "name": "CHAR_INS_CHAR_ACTION",
+    "sql": "INSERT INTO character_action (guid, spec, button, action, type) VALUES (?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 407,
+    "name": "CHAR_UPD_CHAR_ACTION",
+    "sql": "UPDATE character_action SET action = ?, type = ? WHERE guid = ? AND button = ? AND spec = ?"
+  },
+  {
+    "id": 408,
+    "name": "CHAR_DEL_CHAR_ACTION_BY_BUTTON_SPEC",
+    "sql": "DELETE FROM character_action WHERE guid = ? and button = ? and spec = ?"
+  },
+  {
+    "id": 409,
+    "name": "CHAR_DEL_CHAR_INVENTORY_BY_ITEM",
+    "sql": "DELETE FROM character_inventory WHERE item = ?"
+  },
+  {
+    "id": 410,
+    "name": "CHAR_DEL_CHAR_INVENTORY_BY_BAG_SLOT",
+    "sql": "DELETE FROM character_inventory WHERE bag = ? AND slot = ? AND guid = ?"
+  },
+  {
+    "id": 411,
+    "name": "CHAR_DEL_CHAR_INVENTORY_UNTIL_BAG_SLOT",
+    "sql": "DELETE FROM character_inventory WHERE bag = ? AND slot < ? AND guid = ?"
+  },
+  {
+    "id": 412,
+    "name": "CHAR_INS_CHAR_INVENTORY",
+    "sql": "INSERT INTO character_inventory (guid, bag, slot, item) VALUES (?, ?, ?, ?)ON DUPLICATE KEY UPDATE item = VALUES(item)"
+  },
+  {
+    "id": 413,
+    "name": "CHAR_UPD_MAIL",
+    "sql": "UPDATE mail SET has_items = ?, expire_time = ?, deliver_time = ?, money = ?, cod = ?, checked = ? WHERE id = ?"
+  },
+  {
+    "id": 414,
+    "name": "CHAR_REP_CHAR_QUESTSTATUS",
+    "sql": "REPLACE INTO character_queststatus (guid, quest, status, explored, timer) VALUES (?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 415,
+    "name": "CHAR_DEL_CHAR_QUESTSTATUS_BY_QUEST",
+    "sql": "DELETE FROM character_queststatus WHERE guid = ? AND quest = ?"
+  },
+  {
+    "id": 416,
+    "name": "CHAR_REP_CHAR_QUESTSTATUS_OBJECTIVE",
+    "sql": "REPLACE INTO `character_queststatus_objective` (`guid`, `objectiveId`, `amount`) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 417,
+    "name": "CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE",
+    "sql": "DELETE FROM `character_queststatus_objective` WHERE `guid` = ? AND `objectiveId` = ?"
+  },
+  {
+    "id": 418,
+    "name": "CHAR_DEL_CHAR_QUESTSTATUS_OBJECTIVE_ALL",
+    "sql": "DELETE FROM `character_queststatus_objective` WHERE `guid` = ?"
+  },
+  {
+    "id": 419,
+    "name": "CHAR_INS_CHAR_QUESTSTATUS_REWARDED",
+    "sql": "INSERT IGNORE INTO character_queststatus_rewarded (guid, quest, active) VALUES (?, ?, 1)"
+  },
+  {
+    "id": 420,
+    "name": "CHAR_DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST",
+    "sql": "DELETE FROM character_queststatus_rewarded WHERE guid = ? AND quest = ?"
+  },
+  {
+    "id": 421,
+    "name": "CHAR_UPD_CHAR_QUESTSTATUS_REWARDED_FACTION_CHANGE",
+    "sql": "UPDATE character_queststatus_rewarded SET quest = ? WHERE quest = ? AND guid = ?"
+  },
+  {
+    "id": 422,
+    "name": "CHAR_UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE",
+    "sql": "UPDATE character_queststatus_rewarded SET active = 1 WHERE guid = ?"
+  },
+  {
+    "id": 423,
+    "name": "CHAR_UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST",
+    "sql": "UPDATE character_queststatus_rewarded SET active = 0 WHERE quest = ? AND guid = ?"
+  },
+  {
+    "id": 424,
+    "name": "CHAR_DEL_CHAR_SKILL_BY_SKILL",
+    "sql": "DELETE FROM character_skills WHERE guid = ? AND skill = ?"
+  },
+  {
+    "id": 425,
+    "name": "CHAR_INS_CHAR_SKILLS",
+    "sql": "INSERT INTO character_skills (guid, skill, value, max) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 426,
+    "name": "CHAR_UDP_CHAR_SKILLS",
+    "sql": "UPDATE character_skills SET value = ?, max = ? WHERE guid = ? AND skill = ?"
+  },
+  {
+    "id": 427,
+    "name": "CHAR_INS_CHAR_SPELL",
+    "sql": "INSERT INTO character_spell (guid, spell, active, disabled) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 428,
+    "name": "CHAR_DEL_CHAR_STATS",
+    "sql": "DELETE FROM character_stats WHERE guid = ?"
+  },
+  {
+    "id": 429,
+    "name": "CHAR_INS_CHAR_STATS",
+    "sql": "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, blockPct, dodgePct, parryPct, critPct, rangedCritPct, offhandCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, resilience, mastery, pvpDamage, pvpHealing) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?)"
+  },
+  {
+    "id": 430,
+    "name": "CHAR_DEL_PETITION_BY_OWNER",
+    "sql": "DELETE FROM petition WHERE ownerguid = ?"
+  },
+  {
+    "id": 431,
+    "name": "CHAR_DEL_PETITION_SIGNATURE_BY_OWNER",
+    "sql": "DELETE FROM petition_sign WHERE ownerguid = ?"
+  },
+  {
+    "id": 432,
+    "name": "CHAR_DEL_PETITION_BY_OWNER_AND_TYPE",
+    "sql": "DELETE FROM petition WHERE ownerguid = ? AND type = ?"
+  },
+  {
+    "id": 433,
+    "name": "CHAR_DEL_PETITION_SIGNATURE_BY_OWNER_AND_TYPE",
+    "sql": "DELETE FROM petition_sign WHERE ownerguid = ? AND type = ?"
+  },
+  {
+    "id": 434,
+    "name": "CHAR_INS_CHAR_GLYPHS",
+    "sql": "INSERT INTO character_glyphs (guid, spec, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6) VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 435,
+    "name": "CHAR_DEL_CHAR_TALENT_BY_SPELL_SPEC",
+    "sql": "DELETE FROM character_talent WHERE guid = ? and spell = ? and spec = ?"
+  },
+  {
+    "id": 436,
+    "name": "CHAR_INS_CHAR_TALENT",
+    "sql": "INSERT INTO character_talent (guid, spell, spec) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 437,
+    "name": "CHAR_SEL_CHAR_TALENT",
+    "sql": "SELECT spell FROM character_talent WHERE guid = ?"
+  },
+  {
+    "id": 438,
+    "name": "CHAR_DEL_CHAR_ACTION_EXCEPT_SPEC",
+    "sql": "DELETE FROM character_action WHERE spec<>? AND guid = ?"
+  },
+  {
+    "id": 439,
+    "name": "CHAR_UPD_CHAR_LIST_SLOT",
+    "sql": "UPDATE characters SET slot = ? WHERE guid = ?"
+  },
+  {
+    "id": 440,
+    "name": "CHAR_SEL_CHAR_VOID_STORAGE",
+    "sql": "SELECT itemId, itemEntry, slot, creatorGuid, randomProperty, suffixFactor FROM character_void_storage WHERE playerGuid = ?"
+  },
+  {
+    "id": 441,
+    "name": "CHAR_REP_CHAR_VOID_STORAGE_ITEM",
+    "sql": "REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomProperty, suffixFactor) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 442,
+    "name": "CHAR_DEL_CHAR_VOID_STORAGE_ITEM_BY_SLOT",
+    "sql": "DELETE FROM character_void_storage WHERE slot = ? AND playerGuid = ?"
+  },
+  {
+    "id": 443,
+    "name": "CHAR_SEL_CHAR_CUF_PROFILES",
+    "sql": "SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154 FROM character_cuf_profiles WHERE guid = ?"
+  },
+  {
+    "id": 444,
+    "name": "CHAR_REP_CHAR_CUF_PROFILES",
+    "sql": "REPLACE INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, unk146, unk147, unk148, unk150, unk152, unk154) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 445,
+    "name": "CHAR_DEL_CHAR_CUF_PROFILES",
+    "sql": "DELETE FROM character_cuf_profiles WHERE guid = ? and id = ?"
+  },
+  {
+    "id": 446,
+    "name": "CHAR_REP_GUILD_FINDER_APPLICANT",
+    "sql": "REPLACE INTO guild_finder_applicant (guildId, playerGuid, availability, classRole, interests, comment, submitTime) VALUES(?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 447,
+    "name": "CHAR_DEL_GUILD_FINDER_APPLICANT",
+    "sql": "DELETE FROM guild_finder_applicant WHERE guildId = ? AND playerGuid = ?"
+  },
+  {
+    "id": 448,
+    "name": "CHAR_REP_GUILD_FINDER_GUILD_SETTINGS",
+    "sql": "REPLACE INTO guild_finder_guild_settings (guildId, availability, classRoles, interests, level, listed, comment) VALUES(?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 449,
+    "name": "CHAR_DEL_GUILD_FINDER_GUILD_SETTINGS",
+    "sql": "DELETE FROM guild_finder_guild_settings WHERE guildId = ?"
+  },
+  {
+    "id": 450,
+    "name": "CHAR_REP_CALENDAR_EVENT",
+    "sql": "REPLACE INTO calendar_events (id, creator, title, description, type, dungeon, eventtime, flags) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 451,
+    "name": "CHAR_DEL_CALENDAR_EVENT",
+    "sql": "DELETE FROM calendar_events WHERE id = ?"
+  },
+  {
+    "id": 452,
+    "name": "CHAR_REP_CALENDAR_INVITE",
+    "sql": "REPLACE INTO calendar_invites (id, event, invitee, sender, status, statustime, mod_rank, text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 453,
+    "name": "CHAR_DEL_CALENDAR_INVITE",
+    "sql": "DELETE FROM calendar_invites WHERE id = ?"
+  },
+  {
+    "id": 454,
+    "name": "CHAR_SEL_PET_AURA",
+    "sql": "SELECT caster_guid, spell, effect_mask, recalculate_mask, stackcount, amount0, amount1, amount2, base_amount0, base_amount1, base_amount2, maxduration, remaintime, remaincharges FROM pet_aura WHERE guid = ?"
+  },
+  {
+    "id": 455,
+    "name": "CHAR_SEL_PET_SPELL",
+    "sql": "SELECT spell, active FROM pet_spell WHERE guid = ?"
+  },
+  {
+    "id": 456,
+    "name": "CHAR_SEL_PET_SPELL_COOLDOWN",
+    "sql": "SELECT spell, time FROM pet_spell_cooldown WHERE guid = ?"
+  },
+  {
+    "id": 457,
+    "name": "CHAR_SEL_PET_DECLINED_NAME",
+    "sql": "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_pet_declinedname WHERE owner = ? AND id = ?"
+  },
+  {
+    "id": 458,
+    "name": "CHAR_DEL_PET_AURAS",
+    "sql": "DELETE FROM pet_aura WHERE guid = ?"
+  },
+  {
+    "id": 459,
+    "name": "CHAR_DEL_PET_SPELL_COOLDOWNS",
+    "sql": "DELETE FROM pet_spell_cooldown WHERE guid = ?"
+  },
+  {
+    "id": 460,
+    "name": "CHAR_INS_PET_SPELL_COOLDOWN",
+    "sql": "INSERT INTO pet_spell_cooldown (guid, spell, time) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 461,
+    "name": "CHAR_DEL_PET_SPELL_BY_SPELL",
+    "sql": "DELETE FROM pet_spell WHERE guid = ? and spell = ?"
+  },
+  {
+    "id": 462,
+    "name": "CHAR_INS_PET_SPELL",
+    "sql": "INSERT INTO pet_spell (guid, spell, active) VALUES (?, ?, ?)"
+  },
+  {
+    "id": 463,
+    "name": "CHAR_INS_PET_AURA",
+    "sql": "INSERT INTO pet_aura (guid, caster_guid, spell, effect_mask, recalculate_mask, stackcount, amount0, amount1, amount2, base_amount0, base_amount1, base_amount2, maxduration, remaintime, remaincharges) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 464,
+    "name": "CHAR_DEL_PET_SPELLS",
+    "sql": "DELETE FROM pet_spell WHERE guid = ?"
+  },
+  {
+    "id": 465,
+    "name": "CHAR_DEL_CHAR_PET_BY_OWNER",
+    "sql": "DELETE FROM character_pet WHERE owner = ?"
+  },
+  {
+    "id": 466,
+    "name": "CHAR_DEL_CHAR_PET_DECLINEDNAME_BY_OWNER",
+    "sql": "DELETE FROM character_pet_declinedname WHERE owner = ?"
+  },
+  {
+    "id": 467,
+    "name": "CHAR_SEL_CHAR_PET_BY_ENTRY_AND_SLOT",
+    "sql": "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, PetSpecId, active FROM character_pet WHERE owner = ? AND slot = ?"
+  },
+  {
+    "id": 468,
+    "name": "CHAR_SEL_PET_SLOTS",
+    "sql": "SELECT owner, slot FROM character_pet WHERE owner = ?  AND slot >= ? AND slot <= ? ORDER BY slot"
+  },
+  {
+    "id": 469,
+    "name": "CHAR_SEL_PET_SLOTS_DETAIL",
+    "sql": "SELECT id, entry, level, name, modelid, slot FROM character_pet WHERE owner = ? AND slot >= ? AND slot <= ? ORDER BY slot"
+  },
+  {
+    "id": 470,
+    "name": "CHAR_SEL_PET_ENTRY",
+    "sql": "SELECT entry FROM character_pet WHERE owner = ? AND id = ? AND slot >= ? AND slot <= ?"
+  },
+  {
+    "id": 471,
+    "name": "CHAR_SEL_PET_SLOT_BY_ID",
+    "sql": "SELECT slot, entry FROM character_pet WHERE owner = ? AND id = ?"
+  },
+  {
+    "id": 472,
+    "name": "CHAR_SEL_PET_SPELL_LIST",
+    "sql": "SELECT DISTINCT pet_spell.spell FROM pet_spell, character_pet WHERE character_pet.owner = ? AND character_pet.id = pet_spell.guid AND character_pet.id <> ?"
+  },
+  {
+    "id": 473,
+    "name": "CHAR_SEL_CHAR_PET",
+    "sql": "SELECT id FROM character_pet WHERE owner = ? AND id <> ?"
+  },
+  {
+    "id": 474,
+    "name": "CHAR_SEL_CHAR_PETS",
+    "sql": "SELECT id FROM character_pet WHERE owner = ?"
+  },
+  {
+    "id": 475,
+    "name": "CHAR_SEL_CHAR_ACTIVE_PET",
+    "sql": "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, PetSpecId, active FROM character_pet WHERE owner = ? AND active = 1 ORDER BY slot ASC LIMIT 1"
+  },
+  {
+    "id": 476,
+    "name": "CHAR_SEL_CHAR_PET_BY_ENTRY",
+    "sql": "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, PetSpecId, active FROM character_pet WHERE owner = ? AND id = ?"
+  },
+  {
+    "id": 477,
+    "name": "CHAR_SEL_CHAR_PET_BY_ENTRY_AND_SLOT_2",
+    "sql": "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, PetSpecId, active FROM character_pet WHERE owner = ? AND entry = ? AND (slot <= ? OR slot = 100) ORDER BY active DESC, slot ASC LIMIT 1"
+  },
+  {
+    "id": 478,
+    "name": "CHAR_SEL_CHAR_PET_BY_SLOT",
+    "sql": "SELECT id, entry, owner, modelid, level, exp, Reactstate, slot, name, renamed, curhealth, curmana, abdata, savetime, CreatedBySpell, PetType, PetSpecId, active FROM character_pet WHERE owner = ? AND slot <= ? ORDER BY active DESC, slot ASC LIMIT 1"
+  },
+  {
+    "id": 479,
+    "name": "CHAR_DEL_CHAR_PET_DECLINEDNAME",
+    "sql": "DELETE FROM character_pet_declinedname WHERE id = ?"
+  },
+  {
+    "id": 480,
+    "name": "CHAR_ADD_CHAR_PET_DECLINEDNAME",
+    "sql": "INSERT INTO character_pet_declinedname (id, owner, genitive, dative, accusative, instrumental, prepositional) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 481,
+    "name": "CHAR_UPD_CHAR_PET_NAME",
+    "sql": "UPDATE character_pet SET name = ?, renamed = 1 WHERE owner = ? AND id = ?"
+  },
+  {
+    "id": 482,
+    "name": "CHAR_UDP_CHAR_PET_SLOT_BY_SLOT_EXCLUDE_ID",
+    "sql": "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ? AND id <> ?"
+  },
+  {
+    "id": 483,
+    "name": "CHAR_UDP_CHAR_PET_SLOT_BY_SLOT",
+    "sql": "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ?"
+  },
+  {
+    "id": 484,
+    "name": "CHAR_UPD_CHAR_PET_SLOT_BY_ID",
+    "sql": "UPDATE character_pet SET slot = ? WHERE owner = ? AND id = ?"
+  },
+  {
+    "id": 485,
+    "name": "CHAR_UPD_CHAR_PET_ACTIVE_BY_OWNER",
+    "sql": "UPDATE character_pet SET active = 0 WHERE owner = ?"
+  },
+  {
+    "id": 486,
+    "name": "CHAR_UPD_CHAR_PET_ACTIVE_BY_ID",
+    "sql": "UPDATE character_pet SET active = 1 WHERE owner = ? AND id = ?"
+  },
+  {
+    "id": 487,
+    "name": "CHAR_DEL_CHAR_PET_BY_ID",
+    "sql": "DELETE FROM character_pet WHERE id = ?"
+  },
+  {
+    "id": 488,
+    "name": "CHAR_DEL_CHAR_PET_BY_SLOT",
+    "sql": "DELETE FROM character_pet WHERE owner = ? AND (slot = ? OR slot > ?)"
+  },
+  {
+    "id": 489,
+    "name": "CHAR_SEL_ITEMCONTAINER_ITEMS",
+    "sql": "SELECT item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix FROM item_loot_items WHERE container_id = ?"
+  },
+  {
+    "id": 490,
+    "name": "CHAR_DEL_ITEMCONTAINER_ITEMS",
+    "sql": "DELETE FROM item_loot_items WHERE container_id = ?"
+  },
+  {
+    "id": 491,
+    "name": "CHAR_DEL_ITEMCONTAINER_ITEM",
+    "sql": "DELETE FROM item_loot_items WHERE container_id = ? AND item_id = ?"
+  },
+  {
+    "id": 492,
+    "name": "CHAR_INS_ITEMCONTAINER_ITEMS",
+    "sql": "INSERT INTO item_loot_items (container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 493,
+    "name": "CHAR_SEL_ITEMCONTAINER_MONEY",
+    "sql": "SELECT money FROM item_loot_money WHERE container_id = ?"
+  },
+  {
+    "id": 494,
+    "name": "CHAR_DEL_ITEMCONTAINER_MONEY",
+    "sql": "DELETE FROM item_loot_money WHERE container_id = ?"
+  },
+  {
+    "id": 495,
+    "name": "CHAR_INS_ITEMCONTAINER_MONEY",
+    "sql": "INSERT INTO item_loot_money (container_id, money) VALUES (?, ?)"
+  },
+  {
+    "id": 496,
+    "name": "CHAR_UPD_GROUP_ROLE",
+    "sql": "UPDATE party_member SET roles = ? WHERE memberGuid = ?"
+  },
+  {
+    "id": 497,
+    "name": "CHAR_SEL_CHAR_RESEARCH_DIGSITES",
+    "sql": "SELECT digsiteId, currentFindGUID, remainingFindCount FROM character_research_digsites WHERE guid = ?"
+  },
+  {
+    "id": 498,
+    "name": "CHAR_INS_CHAR_RESEARCH_DIGSITE",
+    "sql": "INSERT INTO character_research_digsites (guid, digsiteId, currentFindGUID, remainingFindCount) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 499,
+    "name": "CHAR_DEL_CHAR_RESEARCH_DIGSITE",
+    "sql": "DELETE FROM character_research_digsites WHERE guid = ? AND digsiteId = ?"
+  },
+  {
+    "id": 500,
+    "name": "CHAR_SEL_CHAR_RESEARCH_HISTORY",
+    "sql": "SELECT projectId, researchCount, firstResearchTimestamp FROM character_research_history WHERE guid = ?"
+  },
+  {
+    "id": 501,
+    "name": "CHAR_INS_CHAR_RESEARCH_HISTORY",
+    "sql": "INSERT INTO character_research_history (guid, projectId, researchCount, firstResearchTimestamp) VALUES (?, ?, ?, ?)"
+  },
+  {
+    "id": 502,
+    "name": "CHAR_DEL_CHAR_RESEARCH_HISTORY",
+    "sql": "DELETE FROM character_research_history WHERE guid = ?"
+  },
+  {
+    "id": 503,
+    "name": "CHAR_SEL_CHAR_RESEARCH_PROJECTS",
+    "sql": "SELECT projectId FROM character_research_projects WHERE guid = ?"
+  },
+  {
+    "id": 504,
+    "name": "CHAR_INS_CHAR_RESEARCH_PROJECT",
+    "sql": "INSERT INTO character_research_projects (guid, projectId) VALUES (?, ?)"
+  },
+  {
+    "id": 505,
+    "name": "CHAR_DEL_CHAR_RESEARCH_PROJECTS",
+    "sql": "DELETE FROM character_research_projects WHERE guid = ?"
+  },
+  {
+    "id": 506,
+    "name": "CHAR_SEL_ACCOUNT_BATTLE_PETS",
+    "sql": "SELECT id, species, nickname, timestamp, level, xp, health, maxHealth, power, speed, quality, breed, flags FROM account_battle_pet WHERE accountId = ?"
+  },
+  {
+    "id": 507,
+    "name": "CHAR_DEL_ACCOUNT_BATTLE_PET",
+    "sql": "DELETE FROM account_battle_pet WHERE id = ?"
+  },
+  {
+    "id": 508,
+    "name": "CHAR_INS_ACCOUNT_BATTLE_PET",
+    "sql": "INSERT INTO account_battle_pet (id, accountId, species, nickname, timestamp, level, xp, health, maxHealth, power, speed, quality, breed, flags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 509,
+    "name": "CHAR_SEL_ACCOUNT_BATTLE_PET_SLOTS",
+    "sql": "SELECT slot1, slot2, slot3, flags FROM account_battle_pet_slots WHERE accountId = ?"
+  },
+  {
+    "id": 510,
+    "name": "CHAR_DEL_ACCOUNT_BATTLE_PET_SLOTS",
+    "sql": "DELETE FROM account_battle_pet_slots WHERE accountId = ?"
+  },
+  {
+    "id": 511,
+    "name": "CHAR_INS_ACCOUNT_BATTLE_PET_SLOTS",
+    "sql": "INSERT INTO account_battle_pet_slots (accountId, slot1, slot2, slot3, flags) VALUES (?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 512,
+    "name": "CHAR_SEL_BLACKMARKET_AUCTIONS",
+    "sql": "SELECT auctionId, templateId, startTime, currentBidder, currentBid, minIncrement, numBids FROM blackmarket_auctions"
+  },
+  {
+    "id": 513,
+    "name": "CHAR_INS_BLACKMARKET_AUCTION",
+    "sql": "INSERT INTO blackmarket_auctions (auctionId, templateId, startTime, currentBidder, currentBid, minIncrement, numBids) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  },
+  {
+    "id": 514,
+    "name": "CHAR_DEL_BLACKMARKET_AUCTION",
+    "sql": "DELETE FROM blackmarket_auctions WHERE auctionId = ?"
+  },
+  {
+    "id": 515,
+    "name": "CHAR_UPD_BLACKMARKET_AUCTION",
+    "sql": "UPDATE blackmarket_auctions SET currentBidder = ?, currentBid = ?, minIncrement = ?, numBids = ? WHERE auctionId = ?"
+  }
+]

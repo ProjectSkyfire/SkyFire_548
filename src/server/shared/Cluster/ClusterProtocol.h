@@ -34,7 +34,8 @@ namespace Skyfire::Cluster
     constexpr std::size_t HeaderSize = 12;
     constexpr std::uint32_t MaximumPayload = 4096;
     enum class Message : std::uint16_t { Register = 1, Ready = 2, Heartbeat = 3, Deregister = 4, Realms = 5, Ack = 0x8000, Error = 0xffff };
-    enum class Service : std::uint8_t { Auth = 1, World = 2, Map = 3 };
+    // Character database service: capability 1024; directory registration uses realm 0.
+    enum class Service : std::uint8_t { Auth = 1, World = 2, Map = 3, Character = 4 };
     // Hub-owned policy, never accepted from a node registration or heartbeat.
     enum class Administration : std::uint8_t { Enabled = 0, Draining = 1, Disabled = 2 };
     inline char const* AdministrationName(Administration state)
@@ -143,13 +144,13 @@ namespace Skyfire::Cluster
         Reader reader(bytes);
         std::uint8_t type;
         if (!reader.String(node.Key, 64) || !ValidKey(node.Key) || !reader.String(node.Name, 100) ||
-            !reader.U8(type) || (type != 1 && type != 2 && type != 3) || !reader.String(node.Address, 64) ||
+            !reader.U8(type) || (type != 1 && type != 2 && type != 3 && type != 4) || !reader.String(node.Address, 64) ||
             !reader.U16(node.Port) || !node.Port || !reader.U32(node.Realm) || !reader.U32(node.Build) || !node.Build ||
             !reader.U32(node.Capacity) || !reader.U32(node.Capabilities) || !reader.End()) return false;
         node.Type = Service(type);
         node.Realms.clear();
         if (node.Type == Service::World) node.Realms.push_back(node.Realm);
-        return ((node.Type == Service::Auth || node.Type == Service::Map) && node.Realm == 0) || (node.Type == Service::World && node.Realm != 0);
+        return ((node.Type == Service::Auth || node.Type == Service::Map || node.Type == Service::Character) && node.Realm == 0) || (node.Type == Service::World && node.Realm != 0);
     }
     inline bool DecodeRealms(std::vector<std::uint8_t> const& bytes, std::vector<std::uint32_t>& realms)
     {

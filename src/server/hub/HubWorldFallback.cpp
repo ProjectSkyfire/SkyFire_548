@@ -79,9 +79,20 @@ bool HubProcessSupervisor::ValidateFallbackPair(std::string& error)
         Config primary, standby;
         if (!ConfigLoader::Load(file(a, a.ConfigPath).string(), primary) || !ConfigLoader::Load(file(b, b.ConfigPath).string(), standby))
             return reject("Cannot read both fallback world configurations.");
-        for (char const* key : {"LoginDatabaseInfo", "WorldDatabaseInfo", "CharacterDatabaseInfo", "RealmID", "Cluster.HubHost", "Cluster.HubPort"})
+        for (char const* key : {"LoginDatabaseInfo", "WorldDatabaseInfo", "RealmID", "Cluster.HubHost", "Cluster.HubPort"})
             if (Value(primary, key).empty() || Value(primary, key) != Value(standby, key))
                 return reject("Fallback worlds must explicitly configure identical databases, realm ID and hub endpoint.");
+        bool const remoteCharacters = Enabled(primary,"CharacterService.Enable");
+        if (remoteCharacters != Enabled(standby,"CharacterService.Enable"))
+            return reject("Both fallback worlds must use the same character persistence mode.");
+        if (remoteCharacters)
+        {
+            for (char const* key : {"CharacterService.Host","CharacterService.Port","CharacterService.NodeKey"})
+                if (Value(primary,key).empty() || Value(primary,key)!=Value(standby,key))
+                    return reject("Fallback worlds must explicitly configure the same character service endpoint and identity.");
+        }
+        else if (Value(primary,"CharacterDatabaseInfo").empty() || Value(primary,"CharacterDatabaseInfo")!=Value(standby,"CharacterDatabaseInfo"))
+            return reject("Fallback worlds must configure the same character database.");
         for (char const* key : {"Cluster.Enable", "Cluster.Handoff.Enable"})
             if (!Enabled(primary, key) || !Enabled(standby, key))
                 return reject("Both fallback worlds require cluster registration and handoffs.");

@@ -15,6 +15,8 @@ list(APPEND sources_Auth Auth/AccountAdministration.cpp Auth/AccountAdministrati
 list(REMOVE_DUPLICATES sources_Auth)
 file(GLOB_RECURSE sources_Cryptography Cryptography/*.cpp Cryptography/*.h)
 file(GLOB_RECURSE sources_Database Database/*.cpp Database/*.h)
+list(APPEND sources_Database Database/CharacterServiceClient.cpp Database/CharacterServiceClient.h)
+list(REMOVE_DUPLICATES sources_Database)
 file(GLOB_RECURSE sources_DataStores DataStores/*.cpp DataStores/*.h)
 file(GLOB_RECURSE sources_Dynamic Dynamic/*.cpp Dynamic/*.h)
 file(GLOB_RECURSE sources_Logging Logging/*.cpp Logging/*.h)

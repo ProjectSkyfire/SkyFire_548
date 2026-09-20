@@ -63,7 +63,7 @@ public:
         {
             T* t = new T(_queue, *_connectionInfo);
             res &= t->Open();
-            if (res) // only check mysql version if connection is valid
+            if (res && !t->IsRemote()) // only check mysql version if connection is valid
                 WPFatal(mysql_get_server_version(t->GetHandle()) >= MIN_MYSQL_SERVER_VERSION, "SkyFire does not support MySQL versions below 5.1");
             _connections[IDX_ASYNC][i] = t;
             ++_connectionCount[IDX_ASYNC];
@@ -102,7 +102,7 @@ public:
         {
             T* t = new T(_queue, *_connectionInfo);
             res &= t->Open();
-            if (res) // only check mysql version if connection is valid
+            if (res && !t->IsRemote()) // only check mysql version if connection is valid
                 WPFatal(mysql_get_server_version(t->GetHandle()) >= MIN_MYSQL_SERVER_VERSION, "Skyfire does not support MySQL versions below 5.1");
             _connections[IDX_ASYNC][i] = t;
             ++_connectionCount[IDX_ASYNC];
@@ -501,7 +501,7 @@ private:
         if (!to || !from || !length)
             return 0;
 
-        return mysql_real_escape_string(_connections[IDX_SYNCH][0]->GetHandle(), to, from, length);
+        return _connections[IDX_SYNCH][0]->Escape(to, from, length);
     }
 
     void Enqueue(SQLOperation* op)

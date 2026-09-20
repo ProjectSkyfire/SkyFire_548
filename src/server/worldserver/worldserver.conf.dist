@@ -108,6 +108,17 @@ Cluster.CA = ""
 # Database command-line overrides are rejected when this setting is enabled.
 World.OwnershipLock = ""
 
+# Character service owns ALL character MySQL operations in this mode. Worldserver does
+# not use CharacterDatabaseInfo or run its character schema updater. No direct fallback.
+# Install matching hub/world/Python assets, initialize character schema offline, authorize
+# the world certificate, then start characterserver before enabling. See doc/CharacterServer.md.
+# Transport failures stop the world rather than continue on missing/unsaved state.
+# This is still a cold standby: startup writes and live object/session transfer remain separate.
+CharacterService.Enable = 0
+CharacterService.NodeKey = "characters-1"
+CharacterService.Host = "127.0.0.1"
+CharacterService.Port = 54930
+
 ###################################################################################################
 # CONNECTIONS AND DIRECTORIES
 #

@@ -9,6 +9,7 @@
 #include "AutoPtr.h"
 
 #include "Field.h"
+#include "CharacterServiceClient.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -19,6 +20,7 @@ class ResultSet
 {
 public:
     ResultSet(MYSQL_RES* result, MYSQL_FIELD* fields, uint64 rowCount, uint32 fieldCount);
+    explicit ResultSet(CharacterServiceRows rows);
     ~ResultSet();
 
     bool NextRow();
@@ -41,6 +43,9 @@ private:
     void CleanUp();
     MYSQL_RES* _result;
     MYSQL_FIELD* _fields;
+    CharacterServiceRows _remoteRows;
+    std::size_t _remotePosition = 0;
+    bool _remote = false;
     ResultSet(ResultSet const& right) = delete;
     ResultSet& operator=(ResultSet const& right) = delete;
 };
@@ -51,6 +56,7 @@ class PreparedResultSet
 {
 public:
     PreparedResultSet(MYSQL_STMT* stmt, MYSQL_RES* result, uint64 rowCount, uint32 fieldCount);
+    explicit PreparedResultSet(CharacterServiceRows rows);
     ~PreparedResultSet();
 
     bool NextRow();
@@ -94,4 +100,3 @@ private:
 typedef Skyfire::AutoPtr<PreparedResultSet, Skyfire::Mutex> PreparedQueryResult;
 
 #endif
-

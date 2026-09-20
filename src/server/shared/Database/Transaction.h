@@ -15,6 +15,7 @@ class PreparedStatement;
 /*! Transactions, high level class. */
 class Transaction
 {
+    friend class CharacterServiceClient;
     friend class TransactionTask;
     friend class MySQLConnection;
 

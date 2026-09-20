@@ -11,6 +11,7 @@
 
 #ifndef _MYSQLCONNECTION_H
 #define _MYSQLCONNECTION_H
+#include "CharacterServiceClient.h"
 
 class DatabaseWorker;
 class PreparedStatement;
@@ -87,7 +88,11 @@ public:
     bool ExecuteTransaction(SQLTransaction& transaction);
 
     operator bool() const { return m_Mysql != NULL; }
-    void Ping() { mysql_ping(m_Mysql); }
+    void Ping() { if (_characterService) _characterService->Query("SELECT 1"); else mysql_ping(m_Mysql); }
+
+    bool IsRemote() const { return bool(_characterService); }
+    unsigned long Escape(char* to, char const* from, unsigned long length)
+    { return _characterService ? CharacterServiceClient::Escape(to,from,length) : mysql_real_escape_string(m_Mysql,to,from,length); }
 
     uint32 GetLastError() { return mysql_errno(m_Mysql); }
 
@@ -111,6 +116,7 @@ protected:
 
     bool PrepareStatements();
     virtual void DoPrepareStatements() = 0;
+    virtual bool IsCharacterConnection() const { return false; }
 
 protected:
     std::vector<MySQLPreparedStatement*> m_stmts;         //! PreparedStatements storage
@@ -120,6 +126,7 @@ protected:
 
 private:
     bool _HandleMySQLErrno(uint32 errNo);
+    std::unique_ptr<CharacterServiceClient> _characterService;
 
 private:
     Skyfire::DatabaseQueue* m_queue;          //! Queue shared with other asynchronous connections.

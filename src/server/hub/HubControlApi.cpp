@@ -230,7 +230,7 @@ std::string HubWebServer::ControlStatus(AuthenticatedSession const& session)
             if (found != route.ConnectionsByNode.end()) connections += found->second;
         }
         out << "{\"key\":" << Quote(node.Key) << ",\"name\":" << Quote(node.Name)
-            << ",\"service\":" << Quote(node.Type == Cluster::Service::World ? "world" : node.Type == Cluster::Service::Map ? "mapserver" : "auth")
+            << ",\"service\":" << Quote(node.Type == Cluster::Service::World ? "world" : node.Type == Cluster::Service::Map ? "mapserver" : node.Type == Cluster::Service::Character ? "characterserver" : "auth")
             << ",\"live\":" << (live ? "true" : "false") << ",\"ready\":" << (live && node.Ready ? "true" : "false")
             << ",\"policy\":" << Quote(Cluster::AdministrationName(node.Admin)) << ",\"load\":" << node.Load
             << ",\"hubConnections\":" << connections << ",\"capacity\":" << node.Capacity << ",\"leaseSeconds\":" << (live ? (node.ExpiresAt-now)/1000 : 0)

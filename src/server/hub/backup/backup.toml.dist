@@ -3,6 +3,8 @@
 # Paths are relative to this file. Python 3.11+ is required.
 hub_config = "../hubserver.conf"
 world_config = "../worldserver.conf"
+# When character-service mode removes credentials from worldserver.conf:
+# character_service_config = "../characterserver/characterserver.toml"
 # Absolute paths to MySQL 8+ client tools. On Linux, commonly /usr/bin/mysql and /usr/bin/mysqldump.
 mysql = "C:/Program Files/MySQL/MySQL Server 9.7/bin/mysql.exe"
 mysqldump = "C:/Program Files/MySQL/MySQL Server 9.7/bin/mysqldump.exe"

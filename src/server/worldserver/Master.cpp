@@ -781,7 +781,7 @@ bool Master::_StartDB()
     if (_noUseConfigDatabaseInfo == false)
     {
         ///- Get character database info from configuration file
-        dbString = sConfigMgr->GetStringDefault("CharacterDatabaseInfo", "");
+        dbString = CharacterServiceClient::Enabled() ? "service;0;unused;unused;characters-service" : sConfigMgr->GetStringDefault("CharacterDatabaseInfo", "");
         if (dbString.empty())
         {
             SF_LOG_ERROR("server.worldserver", "Character database not specified in configuration file");
@@ -804,7 +804,12 @@ bool Master::_StartDB()
         ? MySQLConnectionInfo(dbString)
         : MySQLConnectionInfo(_dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB);
 
-    if (!RunCharacterDatabaseSetup(characterSetupConnectionInfo, characterSetupOptions))
+    if (CharacterServiceClient::Enabled() && _noUseConfigDatabaseInfo)
+    {
+        SF_LOG_ERROR("server.worldserver", "Character-service mode forbids database command-line overrides.");
+        return false;
+    }
+    if (!CharacterServiceClient::Enabled() && !RunCharacterDatabaseSetup(characterSetupConnectionInfo, characterSetupOptions))
         return false;
 
     if (_noUseConfigDatabaseInfo == false)

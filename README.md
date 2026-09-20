@@ -63,6 +63,7 @@ separate processes; install their dependencies on the hosts that run them.
 | Local hub web interface | A browser and the installed `web/` directory. No Python, PHP or Node.js runtime is required for this interface. |
 | Optional HTTPS/WebSocket control gateway | Python 3.11+, `pip`, a Python virtual environment, PHP 8.2+ CLI, and `aiohttp==3.14.3` from `control/requirements.txt`. Also requires an HTTPS certificate/private key and the shared hub control token. |
 | Backup and recovery worker | Python 3.11+, `pip`, a Python virtual environment, MySQL 8+ `mysql` and `mysqldump` executables, and `tzlocal>=5.2,<6` plus `tzdata>=2025.2` from `backup/requirements.txt`. Configure absolute paths to the MySQL tools and a writable backup volume. |
+| Optional character service (experimental) | Python 3.11+, `pip`, and `PyMySQL[rsa]==1.1.2` from `characterserver/requirements.txt`; an initialized InnoDB character schema and a dedicated cluster certificate. See [character service setup and limitations](doc/CharacterServer.md). |
 | Isolated restore verification | A separate compatible MySQL server instance with binary logging disabled, configured through `verification_config`. The verification identity needs permission to create/drop temporary databases and users and grant database-local privileges; see the backup guide. |
 
 See [clustering setup notes](doc/ClusteringSetup.md) for package installation,

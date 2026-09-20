@@ -1,0 +1,221 @@
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See LICENSE.md file for Copyright information
+"""Character SQL ownership, typed statement execution and atomic save receipts."""
+from decimal import Decimal
+import hashlib
+import json
+import re
+import threading
+from pathlib import Path
+from wire import Reader, blob, u32, prepared_sql, MAX_FRAME, MAX_STATEMENTS
+
+IDENTITY = re.compile(r'[0-9a-f]{32}\Z')
+
+
+def one(cursor):
+    """Consume the EOF packet even for single-row streaming metadata queries."""
+    row = cursor.fetchone()
+    cursor.fetchall()
+    return row
+
+
+class CharacterDatabase:
+    def __init__(self, config, catalog_path, connector=None):
+        cursor_options = {}
+        if connector is None:
+            import pymysql
+            connector = pymysql.connect
+            cursor_options['cursorclass'] = pymysql.cursors.SSCursor
+        self.lock = threading.Lock()
+        self.sessions = {}
+        self.realm = config['realm_id']
+        self.failed = False
+        self.catalog = {entry['id']: entry['sql'] for entry in json.loads(Path(catalog_path).read_text())}
+        self.catalog_hash = hashlib.sha256(b''.join(u32(key) + blob(value) for key,value in sorted(self.catalog.items()))).hexdigest()
+        self.db = connector(host=config['mysql_host'], port=config.get('mysql_port',3306),
+                            user=config['mysql_user'], password=config['mysql_password'],
+                            database=config['mysql_database'], charset='utf8mb4', binary_prefix=True, autocommit=True,
+                            connect_timeout=5, read_timeout=30, write_timeout=30, **cursor_options)
+        try:
+            with self.db.cursor() as cursor:
+                cursor.execute("SELECT GET_LOCK(%s,0)", ('skyfire-character:' + hashlib.sha256(config['mysql_database'].encode()).hexdigest()[:40],))
+                if one(cursor)[0] != 1:
+                    raise RuntimeError('Another character service owns this database')
+                cursor.execute("SET SESSION sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'")
+                cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND engine IS NOT NULL AND engine <> 'InnoDB'")
+                if one(cursor)[0]:
+                    raise RuntimeError('Character service requires transactional InnoDB tables')
+                cursor.execute('SELECT guid FROM characters LIMIT 0')
+                cursor.fetchall()
+                cursor.execute('''CREATE TABLE IF NOT EXISTS character_service_owners (
+                    realm INT UNSIGNED PRIMARY KEY, epoch BIGINT UNSIGNED NOT NULL,
+                    node VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+                    instance CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL) ENGINE=InnoDB''')
+                cursor.execute('''CREATE TABLE IF NOT EXISTS character_service_retired (
+                    instance CHAR(32) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY) ENGINE=InnoDB''')
+                cursor.execute('''CREATE TABLE IF NOT EXISTS character_service_commits (
+                    request_id CHAR(32) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+                    instance CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+                    digest CHAR(64) CHARACTER SET ascii NOT NULL,
+                    committed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB''')
+        except BaseException:
+            self.db.close()
+            raise
+
+    def close(self):
+        self.db.close()
+
+    def attach(self, peer, request):
+        reader = Reader(request)
+        if reader.u8() != 1 or reader.u32() != self.realm:
+            raise ValueError('Character protocol or realm mismatch')
+        instance, catalog_hash = reader.text(32), reader.text(64)
+        reader.end()
+        if not IDENTITY.fullmatch(instance) or catalog_hash != self.catalog_hash:
+            raise ValueError('World and character server statement catalogs differ')
+        with self.lock:
+            if self.failed:
+                raise RuntimeError('Character database unavailable')
+            self.db.begin()
+            try:
+                with self.db.cursor() as cursor:
+                    cursor.execute('SELECT instance FROM character_service_retired WHERE instance=%s', (instance,))
+                    if one(cursor):
+                        raise ValueError('This world generation has been fenced')
+                    cursor.execute('SELECT epoch,node,instance FROM character_service_owners WHERE realm=%s FOR UPDATE', (self.realm,))
+                    owner = one(cursor)
+                    if owner and (owner[1],owner[2]) != (peer,instance):
+                        if any(self.sessions.values()):
+                            raise ValueError('Another world still owns active character connections')
+                        cursor.execute('INSERT IGNORE INTO character_service_retired VALUES(%s)', (owner[2],))
+                        # A permanently fenced incarnation can never replay its receipts.
+                        cursor.execute('DELETE FROM character_service_commits WHERE instance=%s', (owner[2],))
+                    epoch = owner[0] if owner and (owner[1],owner[2]) == (peer,instance) else (owner[0] + 1 if owner else 1)
+                    cursor.execute('REPLACE INTO character_service_owners VALUES(%s,%s,%s,%s)', (self.realm,epoch,peer,instance))
+                self.db.commit()
+                self.sessions[instance] = self.sessions.get(instance,0) + 1
+                return instance, epoch
+            except BaseException:
+                self.db.rollback()
+                raise
+
+    def detach(self, instance):
+        with self.lock:
+            if instance in self.sessions:
+                self.sessions[instance] -= 1
+                if not self.sessions[instance]:
+                    del self.sessions[instance]
+
+    def statement(self, reader):
+        kind = reader.u8()
+        if kind == 0:
+            sql = reader.text(1024 * 1024)
+            # Compatibility for existing raw character callers. Database credentials must
+            # have access ONLY to this character schema. No DDL/transaction/session escape.
+            if not re.match(r'\s*(SELECT|INSERT|REPLACE|UPDATE|DELETE)\b', sql, re.I):
+                raise ValueError('Unsupported raw character operation')
+            if re.search(r'character_service_|GET_LOCK|RELEASE_LOCK|INTO\s+(?:OUTFILE|DUMPFILE)|FOR\s+UPDATE', sql, re.I):
+                raise ValueError('Reserved character operation')
+            return sql, None
+        if kind != 1:
+            raise ValueError('Invalid statement kind')
+        sql = self.catalog.get(reader.u32())
+        if sql is None:
+            raise ValueError('Unknown character statement')
+        # Legacy ticket/guild clearing uses TRUNCATE, which implicitly commits in
+        # MySQL. Keep those operations inside the fenced transaction instead.
+        truncate = re.fullmatch(r'\s*TRUNCATE\s+(?:TABLE\s+)?([A-Za-z0-9_]+)\s*',sql,re.I)
+        if truncate:
+            sql = 'DELETE FROM ' + truncate[1]
+        if not re.match(r'\s*(SELECT|INSERT|REPLACE|UPDATE|DELETE)\b',sql,re.I):
+            raise ValueError('Catalog operation is not transactional')
+        count = reader.u32()
+        if count > 256:
+            raise ValueError('Too many statement parameters')
+        args = []
+        for _ in range(count):
+            tag = reader.u8()
+            if tag == 0:
+                args.append(None)
+            elif tag == 1:
+                value = reader.text(128)
+                if not re.fullmatch(r'-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?', value):
+                    raise ValueError('Invalid numeric parameter')
+                args.append(Decimal(value))
+            elif tag == 2:
+                args.append(reader.blob().decode('utf-8'))
+            elif tag == 3:
+                args.append(reader.blob())
+            else:
+                raise ValueError('Invalid parameter type')
+        return prepared_sql(sql), tuple(args)
+
+    def execute(self, peer, instance, epoch, payload):
+        reader = Reader(payload)
+        operation = reader.u8()
+        request_id = reader.text(32)
+        if not IDENTITY.fullmatch(request_id) or operation not in (1,2,3):
+            raise ValueError('Invalid character request')
+        count = reader.u32() if operation == 3 else 1
+        if not 1 <= count <= MAX_STATEMENTS:
+            raise ValueError('Invalid transaction size')
+        statements = [self.statement(reader) for _ in range(count)]
+        reader.end()
+        digest = hashlib.sha256(payload).hexdigest()
+        with self.lock:
+            if self.failed:
+                raise RuntimeError('Character database unavailable')
+            self.db.begin()
+            try:
+                with self.db.cursor() as cursor:
+                    # Read-only calls must not execute a write hidden behind the query opcode.
+                    if operation == 2 and any(not re.match(r'\s*SELECT\b', sql, re.I) for sql,_ in statements):
+                        raise ValueError('Character query opcode only accepts SELECT')
+                    cursor.execute('SELECT epoch,node,instance FROM character_service_owners WHERE realm=%s FOR UPDATE', (self.realm,))
+                    if one(cursor) != (epoch,peer,instance):
+                        raise ValueError('World writer generation was revoked')
+                    if operation != 2:
+                        cursor.execute('SELECT instance,digest FROM character_service_commits WHERE request_id=%s', (request_id,))
+                        receipt = one(cursor)
+                        if receipt:
+                            if receipt != (instance,digest):
+                                raise ValueError('Request ID reused with different content')
+                            self.db.rollback()
+                            return b''
+                    answer = b''
+                    for sql,args in statements:
+                        cursor.execute(sql, args)
+                        if operation == 2:
+                            if not cursor.description:
+                                raise ValueError('Query must return rows')
+                            fields = [field[1] for field in cursor.description]
+                            if len(fields) > 1024:
+                                raise ValueError('Too many result columns')
+                            rows, size = [], 0
+                            # Result size is bounded before serialization/return; no partial data.
+                            while True:
+                                row = cursor.fetchone()
+                                if row is None:
+                                    break
+                                values = []
+                                for field_type,value in zip(fields,row):
+                                    if field_type == 16 and isinstance(value,bytes):  # MYSQL_TYPE_BIT
+                                        value = int.from_bytes(value,'big')
+                                    value = value if isinstance(value, bytes) or value is None else str(value).encode()
+                                    values.append(b'\0' if value is None else b'\1' + blob(value))
+                                packed = b''.join(values)
+                                size += len(packed)
+                                if size > MAX_FRAME - 8192 or len(rows) >= 1000000:
+                                    raise ValueError('Character result exceeds transport limit')
+                                rows.append(packed)
+                            answer = u32(len(fields)) + b''.join(u32(field) for field in fields) + u32(len(rows)) + b''.join(rows)
+                    if operation != 2:
+                        cursor.execute('INSERT INTO character_service_commits(request_id,instance,digest) VALUES(%s,%s,%s)', (request_id,instance,digest))
+                self.db.commit()  # Save and idempotency receipt commit together, before acknowledgement.
+                return answer
+            except BaseException:
+                try:
+                    self.db.rollback()
+                except Exception:
+                    self.failed = True
+                raise

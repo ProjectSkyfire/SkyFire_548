@@ -61,6 +61,7 @@ class MySQLPreparedStatement;
 //- Upper-level class that is used in code
 class PreparedStatement
 {
+    friend class CharacterServiceClient;
     friend class PreparedStatementTask;
     friend class MySQLPreparedStatement;
     friend class MySQLConnection;
