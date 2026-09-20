@@ -36,6 +36,13 @@ namespace Skyfire::Cluster
             if (ready >= 0) it->second.Ready = ready != 0;
             return true;
         }
+        bool SetMapMetrics(std::string const& key, std::uint64_t owner, std::uint64_t now, MapMetrics metrics)
+        {
+            auto it = _nodes.find(key);
+            if (it == _nodes.end() || it->second.Owner != owner || now >= it->second.ExpiresAt ||
+                it->second.Type != Service::Map) return false;
+            metrics.ReceivedAt = now; it->second.Metrics = std::move(metrics); return true;
+        }
         bool Remove(std::string const& key, std::uint64_t owner)
         {
             auto it = _nodes.find(key);

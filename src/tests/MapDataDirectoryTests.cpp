@@ -4,6 +4,7 @@
 */
 #include "Cluster/MapDataDirectory.h"
 #include "Cluster/MapDataStartCheck.h"
+#include "Cluster/ClusterRegistry.h"
 #include <stdexcept>
 using namespace Skyfire::Cluster;
 int main()
@@ -30,6 +31,16 @@ int main()
     check(!start("MapData.Enable=1\nMapData.Sources=west=1 west=0", {west}));
     check(!start("MapData.Enable=1\nMapData.Sources=west=1 east=1", {east,west}));
     check(!start("MapData.Enable=1\nMapData.Sources=", {west}));
+    Writer report; report.U8(1);
+    for (auto value : {30u,100u,42u,5u,1u,1024u,7u,2u}) report.U32(value);
+    report.U16(1); report.U32(0); MapMetrics metrics;
+    check(MapData::DecodeMetrics(report.Bytes,metrics) && metrics.Maps == std::vector<std::uint32_t>{0});
+    Registry registry; check(registry.Register(west,1,1,1000));
+    check(!registry.SetMapMetrics("west",2,2,metrics));
+    check(registry.SetMapMetrics("west",1,2,metrics));
+    check(registry.Snapshot().at(0).Metrics.ReceivedAt == 2);
+    check(!registry.SetMapMetrics("west",1,1001,metrics));
+    report.U8(0); check(!MapData::DecodeMetrics(report.Bytes,metrics));
     Writer query; query.U8(1); query.String("east"); std::string key;
     check(MapData::DecodeQuery(query.Bytes,key) && key == "east");
     query.U8(0); check(!MapData::DecodeQuery(query.Bytes,key));

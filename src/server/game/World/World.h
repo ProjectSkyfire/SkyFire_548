@@ -634,6 +634,10 @@ public:
     std::string const& GetDataPath() const { return m_dataPath; }
     std::string const& GetMapDataPath(uint32 mapId) const { return m_remoteMapIds.count(mapId) ? m_remoteMapPath : m_dataPath; }
 
+    bool UsesRemoteMapData(uint32 mapId) const { return m_remoteMapIds.count(mapId) != 0; }
+    uint32 GetMapPrefetchRadius() const { return m_mapPrefetchRadius; }
+    uint32 GetMapPrefetchBudget() const { return m_mapPrefetchBudget; }
+
     /// When server started?
     time_t const& GetStartTime() const { return m_startTime; }
     /// What time is it?
@@ -867,6 +871,8 @@ private:
     std::string m_dataPath;
     std::set<uint32> m_remoteMapIds;
     std::string m_remoteMapPath;
+    uint32 m_mapPrefetchRadius = 1;
+    uint32 m_mapPrefetchBudget = 1;
 
     // for max speed access
     static float m_MaxVisibleDistanceOnContinents;

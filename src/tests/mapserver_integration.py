@@ -39,7 +39,7 @@ async def exercise(root):
     for key in ('hub', 'world', 'east', 'west', 'outsider'):
         openssl(root, 'req', '-newkey', 'rsa:2048', '-nodes', '-keyout', key+'.key', '-out', key+'.csr', '-subj', '/CN='+key)
         openssl(root, 'x509', '-req', '-in', key+'.csr', '-CA', 'ca.crt', '-CAkey', 'ca.key', '-CAcreateserial', '-out', key+'.crt', '-days', '1', '-extfile', 'extensions')
-    routes, ready = {}, set()
+    routes, ready, reports = {}, set(), {}
     hub_port = port()
     async def hub(reader, writer):
         registered = None
@@ -58,6 +58,11 @@ async def exercise(root):
                 if kind == 1:
                     length = struct.unpack('!H', body[:2])[0]; registered = body[2:2+length].decode()
                 if kind == 2: ready.add(registered)
+                if kind == 9:
+                    version, *values = struct.unpack('!B8IH',body[:35])
+                    assert version == 1 and values[1] <= 10000 and values[7] <= 32
+                    maps = list(struct.unpack('!'+str(values[8])+'I',body[35:]))
+                    reports[registered] = (values, maps)
                 writer.write(frame(0x8000, struct.pack('!HI', kind, 15))); await writer.drain()
                 if kind == 4: break
         except (asyncio.IncompleteReadError, ConnectionError):
@@ -75,7 +80,7 @@ async def exercise(root):
             data = root/node
             for folder in ('maps','vmaps','mmaps'): (data/folder).mkdir(parents=True)
             for name in (f'maps/{map_id:04d}_00_00.map', f'vmaps/{map_id:04d}.vmtree', f'vmaps/{map_id:04d}_00_00.vmtile', f'mmaps/{map_id:04d}.mmap', f'mmaps/{map_id:04d}_00_00.mmtile', 'vmaps/shared.vmo', 'vmaps/GameObjectModels.dtree'):
-                (data/name).write_bytes(('fixture:'+name).encode())
+                (data/name).write_bytes(('fixture:'+name).encode() * 256)
             routes[node] = port()
             settings = dict(node_key=node, node_name=node, maps=[map_id], data_root=node,
                 advertise_address='127.0.0.1', port=routes[node], hub_host='localhost', hub_port=hub_port,
@@ -96,6 +101,11 @@ async def exercise(root):
         assert (root/('map-cache/receipt-'+'0'*32)).read_text().strip() == snapshot.name
         assert (snapshot/'maps/0000_00_00.map').is_file() and (snapshot/'maps/0001_00_00.map').is_file()
         assert snapshot == await asyncio.to_thread(fetch, config), 'cache reuse failed'
+        for _ in range(120):
+            if len(reports) == 2 and all(report[0][3] > 0 for report in reports.values()): break
+            await asyncio.sleep(.05)
+        assert reports['east'][1] == [0] and reports['west'][1] == [1]
+        assert all(report[0][6] == 7 and report[0][3] > 0 and report[0][5] > 0 for report in reports.values())
         original = (root/'map-cache/active').read_bytes()
         async def rejected(settings, expected):
             config.write_text(settings)
@@ -109,9 +119,13 @@ async def exercise(root):
         await rejected(text, 'unavailable')
         ready.add('west')
         await rejected(text.replace('world.crt','outsider.crt').replace('world.key','outsider.key'), 'rejected')
+        for _ in range(120):
+            if reports['east'][0][4] > 0: break
+            await asyncio.sleep(.05)
+        assert reports['east'][0][4] > 0, 'Denied requests must appear in failure metrics'
         (snapshot/'maps/0000_00_00.map').write_bytes(b'corrupt')
         await rejected(text, 'cache is corrupt')
-        print('PASS: two providers, TLS authentication, hub lifecycle/discovery, verified downloads, cache reuse, duplicate assignment, unavailable provider, denied identity, corrupt cache, atomic marker preservation.')
+        print('PASS: two providers, TLS authentication, hub lifecycle/discovery, metric reports and rejection counters, verified downloads, cache reuse, duplicate assignment, unavailable provider, denied identity, corrupt cache, atomic marker preservation.')
     finally:
         for stop in stops: stop.set()
         await asyncio.gather(*tasks, return_exceptions=True)

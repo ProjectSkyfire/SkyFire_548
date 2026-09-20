@@ -24,6 +24,10 @@
 #include "Transport.h"
 #include "Vehicle.h"
 #include "VMapFactory.h"
+#include <filesystem>
+#include <chrono>
+#include <algorithm>
+#include <vector>
 
 u_map_magic MapMagic = { {'M', 'A', 'P', 'S'} };
 u_map_magic MapVersionMagic = { {'v', '1', '.', '4'} };
@@ -628,9 +632,55 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Skyfire::Obj
     }
 }
 
+void Map::PrefetchNearbyMapData(uint32 diff)
+{
+    // The provider's verified files are already on disk. Only warm nearby terrain,
+    // collision and navigation here; do not spawn creatures or pin whole continents.
+    if (i_InstanceId || !sWorld->UsesRemoteMapData(GetId()) || !sWorld->GetMapPrefetchRadius()) return;
+    _mapPrefetchElapsed += diff;
+    if (_mapPrefetchElapsed < 1000) return;
+    _mapPrefetchElapsed = 0;
+    std::vector<Player*> players;
+    for (auto it = m_mapRefManager.begin(); it != m_mapRefManager.end(); ++it)
+        if (Player* player = it->GetSource(); player && player->IsInWorld()) players.push_back(player);
+    if (players.empty()) return;
+    auto const started = std::chrono::steady_clock::now();
+    uint32 loaded = 0;
+    int const radius = int(sWorld->GetMapPrefetchRadius());
+    // Rotate priority so one player cannot consume every preload slot.
+    std::size_t const first = _mapPrefetchPlayer++ % players.size();
+    for (std::size_t n = 0; n < players.size(); ++n)
+    {
+        Player* player = players[(first + n) % players.size()];
+        GridCoord center = Skyfire::ComputeGridCoord(player->GetPositionX(), player->GetPositionY());
+        if (!center.IsCoordValid()) continue;
+        for (int distance = 0; distance <= radius; ++distance)
+            for (int dx = -distance; dx <= distance; ++dx)
+                for (int dy = -distance; dy <= distance; ++dy)
+                {
+                    if (std::max(std::abs(dx),std::abs(dy)) != distance) continue;
+                    int x = int(center.x_coord) + dx, y = int(center.y_coord) + dy;
+                    if (x < 0 || y < 0 || x >= MAX_NUMBER_OF_GRIDS || y >= MAX_NUMBER_OF_GRIDS) continue;
+                    if (auto grid = getNGrid(x,y)) { ResetGridExpiry(*grid); continue; }
+                    if (loaded >= sWorld->GetMapPrefetchBudget() ||
+                        std::chrono::steady_clock::now() - started >= std::chrono::milliseconds(5)) continue;
+                    int gx = MAX_NUMBER_OF_GRIDS - 1 - x, gy = MAX_NUMBER_OF_GRIDS - 1 - y;
+                    std::size_t index = gx * MAX_NUMBER_OF_GRIDS + gy;
+                    if (_mapPrefetchAbsent[index]) continue;
+                    char filename[64]; snprintf(filename,sizeof(filename),"maps/%04u_%02u_%02u.map",GetId(),gx,gy);
+                    std::error_code error;
+                    if (!std::filesystem::is_regular_file(sWorld->GetMapDataPath(GetId()) + filename,error))
+                    { if (!error) _mapPrefetchAbsent.set(index); continue; }
+                    EnsureGridCreated(GridCoord(x,y));
+                    ++loaded;
+                }
+    }
+}
+
 void Map::Update(const uint32 t_diff)
 {
     _dynamicTree.update(t_diff);
+    PrefetchNearbyMapData(t_diff);
     /// update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
     {

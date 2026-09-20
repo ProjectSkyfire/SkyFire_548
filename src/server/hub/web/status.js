@@ -59,7 +59,7 @@ window.HubStatus = (() => {
         text(card.title, component.name);
         text(card.state, component.clusterKey && component.live && component.adminState !== "enabled" ? component.adminState : component.status);
         text(card.detail, component.detail || "");
-        card.metrics.hidden = !component.managed;
+        card.metrics.hidden = !component.managed && !component.mapserver;
         const cluster = component.clusterCanAdmin === true;
         card.controls.hidden = !component.managed && !cluster;
         card.start.hidden = card.stop.hidden = !component.managed;
@@ -69,6 +69,12 @@ window.HubStatus = (() => {
                 ? ` Â· ${component.players} players\nCPU ${component.cpuPercent == null ? "â€”" : component.cpuPercent.toFixed(1) + "%"} Â· Update ${component.updateTimeMs} ms`
                 : "\nPlayers / load unavailable";
             card.metrics.title = "CPU: total logical CPU capacity. Update: world tick processing time, excluding sleep. Metrics expire after 15 seconds without a new tick.";
+        }
+        if (component.mapserver) {
+            metrics = component.metricsAvailable
+                ? `Uptime ${formatUptime(component.uptimeSeconds)} · Maps ${(component.maps||[]).join(', ')}\nCPU ${component.cpuPercent.toFixed(1)}% · Memory ${component.memoryMiB} MiB · Transfers ${component.transfers}\nSent ${(component.sentKiB/1024).toFixed(1)} MiB · Errors ${component.failures}`
+                : 'Mapserver metrics unavailable';
+            card.metrics.title = 'Metrics reported through the hub every 5 seconds; expire after 15 seconds. CPU is a percentage of total logical CPU capacity.';
         }
         text(card.metrics, metrics);
         card.start.disabled = pending.has(component.key) || !data.canOperateServices || !component.enabled || active;

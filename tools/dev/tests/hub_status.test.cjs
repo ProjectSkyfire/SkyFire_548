@@ -50,7 +50,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         await page.locator("#health-view").waitFor({ state: "visible" });
         assert.equal(await page.locator("#status-view").isVisible(), false);
         assert.equal(await page.locator("#backup-view").isVisible(), false);
-        assert.equal(await page.locator("#health-dashboard svg").count(), 3);
+        assert.equal(await page.locator("#health-dashboard svg:visible").count(), 3);
         await page.evaluate(() => {
             const now=Date.now(), data=healthDashboard.latest;
             for (let i=0;i<130;i++) healthDashboard.update(data,now+i*5000);
@@ -112,6 +112,17 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         registryNodes = [];
         await page.evaluate(() => loadStatus());
         assert.equal(await page.locator("#component-grid article").count(), 1);
+        registryNodes = [{key:'cluster:maps-east',name:'Eastern map data',mapserver:true,clusterKey:'maps-east',clusterCanAdmin:true,
+            live:true,adminState:'enabled',managed:false,status:'online',state:'running',metricsAvailable:true,
+            uptimeSeconds:60,cpuPercent:2,memoryMiB:64,transfers:1,sentKiB:1024,failures:0,requests:5,assets:40,maps:[0]}];
+        await page.evaluate(() => loadStatus());
+        const mapCard = page.locator('#component-grid article').filter({hasText:'Eastern map data'});
+        assert.equal(await mapCard.locator('.service-metrics').isVisible(),true);
+        assert.match(await mapCard.locator('.service-metrics').textContent(),/Memory 64 MiB.*Transfers 1/);
+        assert.equal(await mapCard.getByRole('button',{name:'Start',exact:true}).isVisible(),false);
+        registryNodes[0].metricsAvailable=false; registryNodes[0].live=false; registryNodes[0].status='offline'; registryNodes[0].state='offline';
+        await page.evaluate(() => loadStatus());
+        assert.match(await mapCard.locator('.service-metrics').textContent(),/unavailable/);
         registryNodes = [{ key: "ingress:Authnet ingress", name: "Authnet ingress", status: "online",
             detail: "127.0.0.1:1118 | active 1 | routed 3 | rejected 0", managed: false }];
         await page.evaluate(() => loadStatus());

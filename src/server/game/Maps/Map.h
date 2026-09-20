@@ -577,6 +577,10 @@ private:
 
     NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     GridMap* GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+    void PrefetchNearbyMapData(uint32 diff);
+    uint32 _mapPrefetchElapsed = 0;
+    std::size_t _mapPrefetchPlayer = 0;
+    std::bitset<MAX_NUMBER_OF_GRIDS * MAX_NUMBER_OF_GRIDS> _mapPrefetchAbsent;
     std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP* TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
     //these functions used to process player/mob aggro reactions and

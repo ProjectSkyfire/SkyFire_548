@@ -78,6 +78,7 @@ void StartEluna(bool restart);
 #include "WeatherMgr.h"
 #include "World.h"
 #include "Platform/MapDataBootstrap.h"
+#include <algorithm>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "WorldSocket.h"
@@ -1395,6 +1396,8 @@ void World::SetInitialWorldSettings()
 
     ///- Initialize config settings
     LoadConfigSettings();
+    m_mapPrefetchRadius = uint32(std::clamp(sConfigMgr->GetIntDefault("MapData.PrefetchRadius", 1), 0, 2));
+    m_mapPrefetchBudget = uint32(std::clamp(sConfigMgr->GetIntDefault("MapData.PrefetchTilesPerSecond", 1), 1, 8));
     std::string mapDataError;
     if (!PrepareMapData(m_remoteMapIds, m_remoteMapPath, mapDataError))
     {

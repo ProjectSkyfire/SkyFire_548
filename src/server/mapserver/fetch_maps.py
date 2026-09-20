@@ -3,6 +3,7 @@
 """Startup-only worldserver client: discover through hub, verify and stage an immutable cache."""
 import argparse
 import contextlib
+import errno
 import hashlib
 import http.client
 import ipaddress
@@ -13,6 +14,7 @@ import re
 import shutil
 import socket
 import struct
+import time
 from urllib.parse import quote
 from map_common import (KEY, MAX_FILE, MAX_FILES, MAX_MANIFEST, MAX_TOTAL, asset_map,
                         certificate_key, client_tls, digest_file, encoded, frame, wire_string)
@@ -87,20 +89,36 @@ def discover(host, port, context, node):
 
 
 @contextlib.contextmanager
-def cache_lock(root):
+def cache_lock(root, timeout=1800):
     lock_path = root / '.lock'
     if lock_path.is_symlink():
         raise ValueError('Cache lock cannot be a link')
     with lock_path.open('a+b') as lock:
-        lock.seek(0)
         if os.name == 'nt':
             import msvcrt
             if lock_path.stat().st_size == 0:
-                lock.write(b'0'); lock.flush(); lock.seek(0)
-            msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+                lock.write(b'0'); lock.flush()
         else:
             import fcntl
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        deadline = time.monotonic() + timeout
+        waiting = False
+        while True:
+            try:
+                lock.seek(0)
+                if os.name == 'nt':
+                    msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError as error:
+                if error.errno not in (errno.EACCES, errno.EAGAIN, errno.EDEADLK):
+                    raise
+                if time.monotonic() >= deadline:
+                    raise TimeoutError('Timed out waiting for another map cache preparation') from error
+                if not waiting:
+                    print('Waiting for another map cache preparation to finish...', flush=True)
+                    waiting = True
+                time.sleep(min(0.25, max(0, deadline - time.monotonic())))
         try:
             yield
         finally:
@@ -137,7 +155,10 @@ def fetch(config_path, receipt=None):
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
     if root.resolve() != root:
         raise ValueError('Cache path must not contain links')
-    with cache_lock(root):
+    timeout = int(config.get('MapData.StartupTimeout', '1800'))
+    if not 1 <= timeout <= 86400:
+        raise ValueError('Invalid map startup timeout')
+    with cache_lock(root, timeout):
         connections, datasets, selected, seen, manifests = {}, {}, {}, {}, {}
         def request(node, url):
             connection = connections[node]

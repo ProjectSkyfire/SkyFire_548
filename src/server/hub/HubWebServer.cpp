@@ -709,7 +709,29 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
         json << "\",\"managed\":false,\"clusterKey\":\"" << JsonEscape(node.Key)
              << "\",\"clusterCanAdmin\":" << "true"
              << ",\"live\":" << (node.Live ? "true" : "false") << ",\"hubConnections\":" << connections
-             << ",\"adminState\":\"" << Skyfire::Cluster::AdministrationName(node.Admin) << "\"}";
+             << ",\"adminState\":\"" << Skyfire::Cluster::AdministrationName(node.Admin) << "\"";
+        if (node.Type == Skyfire::Cluster::Service::Map)
+        {
+            auto const now = std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now().time_since_epoch()).count());
+            auto const& metrics = node.Metrics;
+            bool fresh = node.Live && node.ExpiresAt > now && metrics.ReceivedAt && now >= metrics.ReceivedAt && now - metrics.ReceivedAt <= 15000;
+            json << ",\"mapserver\":true,\"state\":\"" << (!node.Live ? "offline" : node.Ready ? "running" : "starting")
+                 << "\",\"metricsAvailable\":" << (fresh ? "true" : "false")
+                 << ",\"uptimeSeconds\":" << (fresh ? std::to_string(metrics.Uptime) : "null")
+                 << ",\"cpuPercent\":" << (fresh ? std::to_string(metrics.CpuBasisPoints / 100.0) : "null")
+                 << ",\"memoryMiB\":" << (fresh ? std::to_string(metrics.MemoryMiB) : "null")
+                 << ",\"requests\":" << (fresh ? std::to_string(metrics.Requests) : "null")
+                 << ",\"failures\":" << (fresh ? std::to_string(metrics.Failures) : "null")
+                 << ",\"sentKiB\":" << (fresh ? std::to_string(metrics.SentKiB) : "null")
+                 << ",\"assets\":" << (fresh ? std::to_string(metrics.Assets) : "null")
+                 << ",\"transfers\":" << (fresh ? std::to_string(metrics.Active) : "null")
+                 << ",\"maps\":[";
+            for (std::size_t i = 0; fresh && i < metrics.Maps.size(); ++i)
+            { if (i) json << ','; json << metrics.Maps[i]; }
+            json << ']';
+        }
+        json << '}';
     }
     json << "]}";
     return MakeResponse(200, "application/json", json.str());

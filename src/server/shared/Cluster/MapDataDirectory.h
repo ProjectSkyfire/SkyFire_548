@@ -11,11 +11,29 @@
 namespace Skyfire::Cluster::MapData
 {
     constexpr Message RequestType = Message(8), ReplyType = Message(0x8003);
+    constexpr Message MetricsType = Message(9);
     constexpr std::uint32_t Capability = 256;
     inline bool DecodeQuery(std::vector<std::uint8_t> const& bytes, std::string& key)
     {
         Reader input(bytes); std::uint8_t version;
         return input.U8(version) && version == 1 && input.String(key, 64) && ValidKey(key) && input.End();
+    }
+    inline bool DecodeMetrics(std::vector<std::uint8_t> const& bytes, MapMetrics& metrics)
+    {
+        Reader input(bytes); std::uint8_t version; std::uint16_t count;
+        if (!input.U8(version) || version != 1 || !input.U32(metrics.Uptime) ||
+            !input.U32(metrics.CpuBasisPoints) || metrics.CpuBasisPoints > 10000 ||
+            !input.U32(metrics.MemoryMiB) || !input.U32(metrics.Requests) || !input.U32(metrics.Failures) ||
+            !input.U32(metrics.SentKiB) || !input.U32(metrics.Assets) || !input.U32(metrics.Active) ||
+            metrics.Active > 32 || !input.U16(count) || !count || count > 64) return false;
+        metrics.Maps.clear();
+        for (unsigned i = 0; i < count; ++i)
+        {
+            std::uint32_t id;
+            if (!input.U32(id) || id > 9999 || std::find(metrics.Maps.begin(), metrics.Maps.end(), id) != metrics.Maps.end()) return false;
+            metrics.Maps.push_back(id);
+        }
+        return input.End();
     }
     inline Writer Resolve(std::string const& key, std::vector<Node> const& nodes, std::uint64_t now)
     {

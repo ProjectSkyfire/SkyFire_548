@@ -3401,3 +3401,9 @@ MapData.CachePath = "map-cache"
 MapData.Python = "python3"
 MapData.Bootstrap = "mapserver/fetch_maps.py"
 MapData.StartupTimeout = 1800
+
+# Keep continent files cached; preload terrain/collision/navigation near players.
+# Radius in map grids: 0 disables, 1 = nearby 3x3, 2 = 5x5.
+# Per base map per second; loading stops after the current tile if 5 ms elapsed.
+MapData.PrefetchRadius = 1
+MapData.PrefetchTilesPerSecond = 1

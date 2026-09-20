@@ -164,7 +164,7 @@ worldCommandForm.addEventListener("submit", async (event) => {
 function acceptStatus(data) {
     if (backupSchedules.manual && Date.now() - backupSchedules.jobLastRead >= 3000) backupSchedules.loadJobs();
     if (appShell.hidden) showStatus();
-    healthDashboard.update({hubUptime:data.uptimeSeconds||0,services:data.components.filter(item=>item.managed).map(item=>({
+    healthDashboard.update({hubUptime:data.uptimeSeconds||0,services:data.components.filter(item=>item.managed || item.mapserver).map(item=>({
         ...item,world:isWorld(item),cpu:item.cpuPercent,update:item.updateTimeMs}))});
     const controlData = {
         csrfToken: data.csrfToken, canSendWorldCommands: data.canSendWorldCommands,

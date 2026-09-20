@@ -26,6 +26,8 @@ namespace Skyfire::Cluster
     // Realms: count(u16, 1..64), unique nonzero realm IDs(u32), including the primary realm.
     // Nodes advertising bit 8 must send Realms before readiness; older peers use the primary realm.
     // Ready: ready(u8), load(u32). Heartbeat: load(u32). Deregister: empty.
+    // Map metrics (message 9, registered map providers only): v1(u8), uptime/CPU basis points/
+    // resident MiB/requests/failures/sent KiB/assets/active transfers(u32), map count(u16), IDs(u32).
     // Ack: request type(u16), lease seconds(u32). Error: code(u16), description(string).
     constexpr std::uint16_t ProtocolVersion = 1;
     constexpr std::size_t HeaderSize = 12;
@@ -40,10 +42,18 @@ namespace Skyfire::Cluster
     }
     enum class Error : std::uint16_t { Malformed = 1, Version = 2, Identity = 3, Conflict = 4, NotRegistered = 5, Capacity = 6 };
     struct Header { std::uint16_t Version = 0; Message Type = Message::Error; std::uint32_t Length = 0; };
+    struct MapMetrics
+    {
+        std::uint32_t Uptime = 0, CpuBasisPoints = 0, MemoryMiB = 0, Requests = 0, Failures = 0,
+            SentKiB = 0, Assets = 0, Active = 0;
+        std::vector<std::uint32_t> Maps;
+        std::uint64_t ReceivedAt = 0;
+    };
     struct Node
     {
         std::string Key, Name, Address;
         std::vector<std::uint32_t> Realms;
+        MapMetrics Metrics;
         Service Type = Service::Auth;
         std::uint16_t Port = 0;
         std::uint32_t Realm = 0, Build = 0, Capacity = 0, Capabilities = 0, Load = 0;

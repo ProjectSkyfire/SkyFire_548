@@ -5,6 +5,8 @@ import argparse
 import asyncio
 import contextlib
 import ipaddress
+import os
+import time
 from pathlib import Path
 import signal
 import ssl
@@ -12,6 +14,27 @@ import struct
 import tomllib
 from aiohttp import web
 from map_common import KEY, catalog, certificate_key, client_tls, frame, wire_string
+
+
+def memory_mib():
+    if os.name == 'nt':
+        import ctypes
+        from ctypes import wintypes
+        class Counters(ctypes.Structure):
+            _fields_ = [('cb', wintypes.DWORD), ('faults', wintypes.DWORD)] + [(name, ctypes.c_size_t) for name in ('peak', 'working', 'peakPaged', 'paged', 'peakNonpaged', 'nonpaged', 'pagefile', 'peakPagefile')]
+        info = Counters(); info.cb = ctypes.sizeof(info)
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.GetCurrentProcess.restype = wintypes.HANDLE
+        psapi = ctypes.WinDLL('psapi', use_last_error=True)
+        psapi.GetProcessMemoryInfo.argtypes = [wintypes.HANDLE, ctypes.POINTER(Counters), wintypes.DWORD]
+        if psapi.GetProcessMemoryInfo(kernel.GetCurrentProcess(), ctypes.byref(info), info.cb):
+            return info.working // (1024 * 1024)
+    else:
+        try:
+            return int(Path('/proc/self/statm').read_text().split()[1]) * os.sysconf('SC_PAGE_SIZE') // (1024 * 1024)
+        except (OSError, ValueError, IndexError):
+            pass
+    return 0
 
 
 async def exchange(reader, writer, kind, body):
@@ -31,6 +54,7 @@ async def exchange(reader, writer, kind, body):
 
 
 async def serve(config_path, stop=None):
+    started = time.monotonic()
     config_path = Path(config_path).resolve()
     config = tomllib.loads(config_path.read_text(encoding='utf-8-sig'))
     def path(key):
@@ -55,20 +79,35 @@ async def serve(config_path, stop=None):
     limit = config.get('max_transfers', 4)
     if not 1 <= limit <= 32:
         raise ValueError('max_transfers must be 1..32')
-    state = {'active': 0}
+    previous_wall, previous_cpu = time.monotonic(), time.process_time()
+    state = {'active': 0, 'requests': 0, 'failures': 0, 'bytes': 0}
+    def metrics():
+        nonlocal previous_wall, previous_cpu
+        wall, cpu = time.monotonic(), time.process_time()
+        load = min(10000, max(0, int((cpu-previous_cpu) / max(.001, wall-previous_wall) / (os.cpu_count() or 1) * 10000)))
+        previous_wall, previous_cpu = wall, cpu
+        values = [int(wall-started), load, memory_mib(), state['requests'], state['failures'], state['bytes']//1024, len(assets), state['active']]
+        return bytes([1]) + struct.pack('!8IH', *(min(0xffffffff,value) for value in values),len(maps)) + b''.join(struct.pack('!I',value) for value in sorted(maps))
     @web.middleware
     async def authorize(request, handler):
+        state['requests'] += 1
         try:
             peer = certificate_key(request.transport.get_extra_info('peercert') or {})
         except ValueError:
+            state['failures'] += 1
             raise web.HTTPForbidden()
         if peer not in allowed:
+            state['failures'] += 1
             raise web.HTTPForbidden()
         if state['active'] >= limit:
+            state['failures'] += 1
             raise web.HTTPServiceUnavailable()
         state['active'] += 1
         try:
             return await handler(request)
+        except Exception:
+            state['failures'] += 1
+            raise
         finally:
             state['active'] -= 1
     async def get_manifest(request):
@@ -88,6 +127,7 @@ async def serve(config_path, stop=None):
         with asset.open('rb') as source:
             while chunk := await asyncio.to_thread(source.read, 256 * 1024):
                 await asyncio.wait_for(response.write(chunk), 15)
+                state['bytes'] += len(chunk)
         await response.write_eof()
         return response
     app = web.Application(middlewares=[authorize], client_max_size=1024)
@@ -114,12 +154,14 @@ async def serve(config_path, stop=None):
                 payload += struct.pack('!HIIII', port, 0, 18414, limit, 256)
                 lease = await exchange(reader, writer, 1, payload)
                 await exchange(reader, writer, 2, struct.pack('!BI', 1, state['active']))
+                await exchange(reader, writer, 9, metrics())
                 backoff = 1
                 while not stop.is_set():
                     try:
                         await asyncio.wait_for(stop.wait(), min(5, max(1, lease // 3)))
                     except asyncio.TimeoutError:
                         await exchange(reader, writer, 3, struct.pack('!I', state['active']))
+                        await exchange(reader, writer, 9, metrics())
                 await exchange(reader, writer, 4, b'')
             except (OSError, RuntimeError, asyncio.TimeoutError, asyncio.IncompleteReadError):
                 if not stop.is_set():
