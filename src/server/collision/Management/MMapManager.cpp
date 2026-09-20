@@ -27,9 +27,9 @@ namespace MMAP
             return true;
 
         // load and init dtNavMesh - read parameters from file
-        uint32 pathLen = sWorld->GetDataPath().length() + strlen("mmaps/%04i.mmap") + 1;
+        uint32 pathLen = sWorld->GetMapDataPath(mapId).length() + strlen("mmaps/%04i.mmap") + 1;
         char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld->GetDataPath() + "mmaps/%04i.mmap").c_str(), mapId);
+        snprintf(fileName, pathLen, (sWorld->GetMapDataPath(mapId) + "mmaps/%04i.mmap").c_str(), mapId);
 
         FILE* file = fopen(fileName, "rb");
         if (!file)
@@ -91,10 +91,10 @@ namespace MMAP
             return false;
 
         // load this tile :: mmaps/MMMM_XX_YY.mmtile
-        uint32 pathLen = sWorld->GetDataPath().length() + strlen("mmaps/%04i_%02i_%02i.mmtile") + 1;
+        uint32 pathLen = sWorld->GetMapDataPath(mapId).length() + strlen("mmaps/%04i_%02i_%02i.mmtile") + 1;
         char* fileName = new char[pathLen];
 
-        snprintf(fileName, pathLen, (sWorld->GetDataPath() + "mmaps/%04i_%02i_%02i.mmtile").c_str(), mapId, x, y);
+        snprintf(fileName, pathLen, (sWorld->GetMapDataPath(mapId) + "mmaps/%04i_%02i_%02i.mmtile").c_str(), mapId, x, y);
 
         FILE* file = fopen(fileName, "rb");
         if (!file)
@@ -162,10 +162,10 @@ namespace MMAP
     PhasedTile* MMapManager::LoadTile(uint32 mapId, int32 x, int32 y)
     {
         // load this tile :: mmaps/MMMM_XX_YY.mmtile
-        uint32 pathLen = sWorld->GetDataPath().length() + strlen("mmaps/%04i_%02i_%02i.mmtile") + 1;
+        uint32 pathLen = sWorld->GetMapDataPath(mapId).length() + strlen("mmaps/%04i_%02i_%02i.mmtile") + 1;
         char* fileName = new char[pathLen];
 
-        snprintf(fileName, pathLen, (sWorld->GetDataPath() + "mmaps/%04i_%02i_%02i.mmtile").c_str(), mapId, x, y);
+        snprintf(fileName, pathLen, (sWorld->GetMapDataPath(mapId) + "mmaps/%04i_%02i_%02i.mmtile").c_str(), mapId, x, y);
 
         FILE* file = fopen(fileName, "rb");
         if (!file)

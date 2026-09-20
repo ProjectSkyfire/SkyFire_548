@@ -195,6 +195,13 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
                         return false;
                     }
                 }
+        if (IsWorldKey(serviceKey) && (!_worldStartCheck || !_worldStartCheck(configPath.string(), error)))
+        {
+            if (error.empty()) error = "World start blocked: dependency checker is unavailable.";
+            runtime.CommandResult = error;
+            SF_LOG_ERROR("server.hub", "%s", error.c_str());
+            return false;
+        }
         if (!Launch(serviceKey, runtime, executablePath.string(), configPath.string(),
             workingDirectory.string(), error))
             return false;

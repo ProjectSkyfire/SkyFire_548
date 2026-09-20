@@ -100,3 +100,5 @@ Forum: [https://www.projectskyfire.org/](https://www.projectskyfire.org/)
 Database Releases: [https://github.com/ProjectSkyfire/SkyFire_548/releases](https://github.com/ProjectSkyfire/SkyFire_548/releases)
 
 Wiki: [https://wiki.projectskyfire.org](https://wiki.projectskyfire.org)
+
+The optional terrain/collision mapserver proof of concept requires Python 3.11+ and `src/server/mapserver/requirements.txt` (aiohttp). Its world startup helper needs Python 3.11+ without third-party packages. See [mapserver setup and multi-continent assignments](doc/MapServer.md).

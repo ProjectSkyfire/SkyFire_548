@@ -14,6 +14,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <utility>
 
 enum class HubManagedProcessState
 {
@@ -54,6 +55,7 @@ public:
     HubProcessSupervisor(HubProcessSupervisor const&) = delete;
     HubProcessSupervisor& operator=(HubProcessSupervisor const&) = delete;
 
+    void SetWorldStartCheck(std::function<bool(std::string const&, std::string&)> check) { _worldStartCheck = std::move(check); }
     bool Start(std::string const& serviceKey, std::string& error);
     bool Stop(std::string const& serviceKey, std::string& error);
     static bool IsWorldKey(std::string const& key);
@@ -125,6 +127,7 @@ private:
     static void CloseHandles(ManagedServiceRuntime& runtime);
     void ForceStop(std::string const& serviceKey, ManagedServiceRuntime& runtime);
 
+    std::function<bool(std::string const&, std::string&)> _worldStartCheck;
     std::unordered_map<std::string, ManagedServiceRuntime> _services;
     bool _shuttingDown = false;
     bool _backupInternalCommand = false;

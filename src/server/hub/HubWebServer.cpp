@@ -446,7 +446,7 @@ void HubWebServer::UpdateStatus(HubWebStatusSnapshot const& status)
     _status = status;
     bool stopped = std::all_of(status.Services.begin(),status.Services.end(),[](HubWebManagedServiceStatus const& service)
         { return service.State=="stopped" || service.State=="exited"; }) &&
-        std::none_of(status.ClusterNodes.begin(),status.ClusterNodes.end(),[](Skyfire::Cluster::Node const& node) { return node.Live; });
+        std::none_of(status.ClusterNodes.begin(),status.ClusterNodes.end(),[](Skyfire::Cluster::Node const& node) { return node.Live && node.Type != Skyfire::Cluster::Service::Map; });
     auto now = std::chrono::steady_clock::now();
     if (stopped != _backupServicesStopped || now - _backupHealthAt >= std::chrono::seconds(1))
     {
@@ -694,7 +694,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
         }
         json << ",{\"key\":\"cluster:" << JsonEscape(node.Key) << "\",\"name\":\"" << JsonEscape(node.Name)
              << "\",\"status\":\"" << (!node.Live ? "offline" : node.Ready && node.Admin == Skyfire::Cluster::Administration::Enabled ? "online" : "issue")
-             << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : "world")
+             << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : node.Type == Skyfire::Cluster::Service::Map ? "mapserver" : "world")
              << " | " << (!node.Live ? "offline" : node.Ready ? "ready" : "not ready")
              << " | policy " << Skyfire::Cluster::AdministrationName(node.Admin);
         if (!node.Address.empty()) json << " | " << JsonEscape(node.Address) << ':' << node.Port;

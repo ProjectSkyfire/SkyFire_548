@@ -289,3 +289,7 @@ Logger.root=3,Console
 # Bounded handoff audit files contain identities/results, never tokens or key fingerprints.
 Appender.Handoff=2,3,0,Handoff.log,a,10485760
 Logger.server.handoff=3,Handoff
+
+# Certificate common names allowed to discover map data providers during world startup.
+# Space-separated node keys; empty disables map discovery. Mapserver also has its own allowlist.
+Hub.MapData.Readers = ""

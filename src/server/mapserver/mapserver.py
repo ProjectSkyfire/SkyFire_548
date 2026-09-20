@@ -1,0 +1,156 @@
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See LICENSE.md file for Copyright information
+"""Read-only terrain/collision daemon; registration through the hub, bytes over mTLS HTTPS."""
+import argparse
+import asyncio
+import contextlib
+import ipaddress
+from pathlib import Path
+import signal
+import ssl
+import struct
+import tomllib
+from aiohttp import web
+from map_common import KEY, catalog, certificate_key, client_tls, frame, wire_string
+
+
+async def exchange(reader, writer, kind, body):
+    writer.write(frame(kind, body))
+    await writer.drain()
+    header = await asyncio.wait_for(reader.readexactly(12), 5)
+    magic, version, reply, size = struct.unpack('!4sHHI', header)
+    if magic != b'SFHC' or version != 1 or size > 4096:
+        raise RuntimeError('Invalid hub response')
+    data = await asyncio.wait_for(reader.readexactly(size), 5)
+    if reply != 0x8000 or len(data) != 6:
+        raise RuntimeError('Hub rejected mapserver registration/lifecycle')
+    request, lease = struct.unpack('!HI', data)
+    if request != kind or not 5 <= lease <= 300:
+        raise RuntimeError('Invalid hub acknowledgement')
+    return lease
+
+
+async def serve(config_path, stop=None):
+    config_path = Path(config_path).resolve()
+    config = tomllib.loads(config_path.read_text(encoding='utf-8-sig'))
+    def path(key):
+        value = Path(config[key])
+        return value if value.is_absolute() else config_path.parent / value
+    node = config['node_key']
+    if not KEY.fullmatch(node):
+        raise ValueError('Invalid node_key')
+    address = str(ipaddress.ip_address(config['advertise_address']))
+    if ipaddress.ip_address(address).is_unspecified or ipaddress.ip_address(address).is_multicast:
+        raise ValueError('Advertise a concrete reachable IP address')
+    port, hub_port = config.get('port', 54910), config.get('hub_port', 9100)
+    if not 1 <= port <= 65535 or not 1 <= hub_port <= 65535:
+        raise ValueError('Invalid port')
+    allowed = set(config['allowed_world_nodes'])
+    if not allowed or any(not KEY.fullmatch(key) for key in allowed):
+        raise ValueError('Configure allowed_world_nodes')
+    maps = config['maps']
+    if len(maps) != len(set(maps)):
+        raise ValueError('Duplicate map ID')
+    manifest, dataset, assets = await asyncio.to_thread(catalog, path('data_root'), set(maps))
+    limit = config.get('max_transfers', 4)
+    if not 1 <= limit <= 32:
+        raise ValueError('max_transfers must be 1..32')
+    state = {'active': 0}
+    @web.middleware
+    async def authorize(request, handler):
+        try:
+            peer = certificate_key(request.transport.get_extra_info('peercert') or {})
+        except ValueError:
+            raise web.HTTPForbidden()
+        if peer not in allowed:
+            raise web.HTTPForbidden()
+        if state['active'] >= limit:
+            raise web.HTTPServiceUnavailable()
+        state['active'] += 1
+        try:
+            return await handler(request)
+        finally:
+            state['active'] -= 1
+    async def get_manifest(request):
+        return web.Response(body=manifest, content_type='application/json', headers={'X-Map-Dataset':dataset})
+    async def get_asset(request):
+        if request.match_info['dataset'] != dataset:
+            raise web.HTTPNotFound()
+        entry = assets.get(request.match_info['asset'])
+        if entry is None:
+            raise web.HTTPNotFound()
+        asset, size, modified = entry
+        if asset.is_symlink() or asset.resolve() != asset or asset.stat().st_size != size or asset.stat().st_mtime_ns != modified:
+            raise web.HTTPConflict(text='Dataset changed; restart mapserver to publish a new snapshot.')
+        # Stream within the concurrency guard instead of scheduling a deferred FileResponse.
+        response = web.StreamResponse(headers={'Content-Length': str(size), 'Content-Type':'application/octet-stream'})
+        await response.prepare(request)
+        with asset.open('rb') as source:
+            while chunk := await asyncio.to_thread(source.read, 256 * 1024):
+                await asyncio.wait_for(response.write(chunk), 15)
+        await response.write_eof()
+        return response
+    app = web.Application(middlewares=[authorize], client_max_size=1024)
+    app.router.add_get('/v1/manifest', get_manifest)
+    app.router.add_get('/v1/assets/{dataset}/{asset:.+}', get_asset)
+    inbound = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=str(path('ca')))
+    inbound.minimum_version = ssl.TLSVersion.TLSv1_2
+    inbound.verify_mode = ssl.CERT_REQUIRED
+    inbound.load_cert_chain(str(path('certificate')), str(path('private_key')))
+    outbound = client_tls(path('ca'), path('certificate'), path('private_key'))
+    stop = stop or asyncio.Event()
+    runner = web.AppRunner(app, access_log=None, shutdown_timeout=5)
+    await runner.setup()
+    try:
+        await web.TCPSite(runner, config.get('bind_address','127.0.0.1'), port, ssl_context=inbound).start()
+        print(f'Mapserver {node}: {len(assets)} assets ready; dataset {dataset}.', flush=True)
+        backoff = 1
+        while not stop.is_set():
+            writer = None
+            try:
+                reader, writer = await asyncio.wait_for(asyncio.open_connection(config['hub_host'], hub_port,
+                    ssl=outbound, server_hostname=config['hub_host']), 5)
+                payload = wire_string(node) + wire_string(config.get('node_name', node)) + bytes([3]) + wire_string(address)
+                payload += struct.pack('!HIIII', port, 0, 18414, limit, 256)
+                lease = await exchange(reader, writer, 1, payload)
+                await exchange(reader, writer, 2, struct.pack('!BI', 1, state['active']))
+                backoff = 1
+                while not stop.is_set():
+                    try:
+                        await asyncio.wait_for(stop.wait(), min(5, max(1, lease // 3)))
+                    except asyncio.TimeoutError:
+                        await exchange(reader, writer, 3, struct.pack('!I', state['active']))
+                await exchange(reader, writer, 4, b'')
+            except (OSError, RuntimeError, asyncio.TimeoutError, asyncio.IncompleteReadError):
+                if not stop.is_set():
+                    print('Hub registration unavailable; mapserver will retry.', flush=True)
+                    try:
+                        await asyncio.wait_for(stop.wait(), backoff)
+                    except asyncio.TimeoutError:
+                        pass
+                    backoff = min(backoff * 2, 30)
+            finally:
+                if writer:
+                    writer.close()
+                    with contextlib.suppress(Exception):
+                        await asyncio.wait_for(writer.wait_closed(), 2)
+    finally:
+        await runner.cleanup()
+
+
+async def main(config):
+    stop = asyncio.Event()
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        try:
+            loop.add_signal_handler(sig, stop.set)
+        except NotImplementedError:
+            signal.signal(sig, lambda *_: loop.call_soon_threadsafe(stop.set))
+    await serve(config, stop)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default='mapserver.toml')
+    args = parser.parse_args()
+    asyncio.run(main(args.config))

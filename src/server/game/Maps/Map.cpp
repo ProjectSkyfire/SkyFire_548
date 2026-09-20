@@ -74,9 +74,9 @@ Map::~Map()
 
 bool Map::ExistMap(uint32 mapid, int gx, int gy)
 {
-    int len = sWorld->GetDataPath().length() + strlen("maps/%04u_%02u_%02u.map") + 1;
+    int len = sWorld->GetMapDataPath(mapid).length() + strlen("maps/%04u_%02u_%02u.map") + 1;
     char* fileName = new char[len];
-    snprintf(fileName, len, (char*)(sWorld->GetDataPath() + "maps/%04u_%02u_%02u.map").c_str(), mapid, gx, gy);
+    snprintf(fileName, len, (char*)(sWorld->GetMapDataPath(mapid) + "maps/%04u_%02u_%02u.map").c_str(), mapid, gx, gy);
 
     bool ret = false;
     FILE* pf = fopen(fileName, "rb");
@@ -107,11 +107,11 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
     {
         if (vmgr->isMapLoadingEnabled())
         {
-            bool exists = vmgr->existsMap((sWorld->GetDataPath() + "vmaps").c_str(), mapid, gx, gy);
+            bool exists = vmgr->existsMap((sWorld->GetMapDataPath(mapid) + "vmaps").c_str(), mapid, gx, gy);
             if (!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid, gx, gy);
-                SF_LOG_ERROR("maps", "VMap file '%s' is missing or points to wrong version of vmap file. Redo vmaps with latest version of vmap_assembler.exe.", (sWorld->GetDataPath() + "vmaps/" + name).c_str());
+                SF_LOG_ERROR("maps", "VMap file '%s' is missing or points to wrong version of vmap file. Redo vmaps with latest version of vmap_assembler.exe.", (sWorld->GetMapDataPath(mapid) + "vmaps/" + name).c_str());
                 return false;
             }
         }
@@ -122,7 +122,7 @@ bool Map::ExistVMap(uint32 mapid, int gx, int gy)
 
 void Map::LoadMMap(int gx, int gy)
 {
-    bool mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetDataPath() + "mmaps").c_str(), GetId(), gx, gy);
+    bool mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetMapDataPath(GetId()) + "mmaps").c_str(), GetId(), gx, gy);
 
     if (mmapLoadResult)
         SF_LOG_INFO("maps", "MMAP loaded name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
@@ -133,7 +133,7 @@ void Map::LoadMMap(int gx, int gy)
 void Map::LoadVMap(int gx, int gy)
 {
     // x and y are swapped !!
-    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetDataPath() + "vmaps").c_str(), GetId(), gx, gy);
+    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld->GetMapDataPath(GetId()) + "vmaps").c_str(), GetId(), gx, gy);
     switch (vmapLoadResult)
     {
         case VMAP::VMAP_LOAD_RESULT_OK:
@@ -179,9 +179,9 @@ void Map::LoadMap(int gx, int gy, bool reload)
 
     // map file name
     char* tmp = NULL;
-    int len = sWorld->GetDataPath().length() + strlen("maps/%04u_%02u_%02u.map") + 1;
+    int len = sWorld->GetMapDataPath(GetId()).length() + strlen("maps/%04u_%02u_%02u.map") + 1;
     tmp = new char[len];
-    snprintf(tmp, len, (char*)(sWorld->GetDataPath() + "maps/%04u_%02u_%02u.map").c_str(), GetId(), gx, gy);
+    snprintf(tmp, len, (char*)(sWorld->GetMapDataPath(GetId()) + "maps/%04u_%02u_%02u.map").c_str(), GetId(), gx, gy);
     SF_LOG_INFO("maps", "Loading map %s", tmp);
     // loading data
     GridMaps[gx][gy] = new GridMap();

@@ -632,6 +632,7 @@ public:
 
     /// Get the path where data (dbc, maps) are stored on disk
     std::string const& GetDataPath() const { return m_dataPath; }
+    std::string const& GetMapDataPath(uint32 mapId) const { return m_remoteMapIds.count(mapId) ? m_remoteMapPath : m_dataPath; }
 
     /// When server started?
     time_t const& GetStartTime() const { return m_startTime; }
@@ -864,6 +865,8 @@ private:
     bool m_allowMovement;
     std::string m_motd;
     std::string m_dataPath;
+    std::set<uint32> m_remoteMapIds;
+    std::string m_remoteMapPath;
 
     // for max speed access
     static float m_MaxVisibleDistanceOnContinents;

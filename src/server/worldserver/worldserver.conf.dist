@@ -3391,3 +3391,13 @@ Eluna.ScriptPath = "lua_scripts"
 
 #
 ###################################################################################################
+
+# Optional startup-only terrain/collision providers. Gameplay simulation stays in worldserver.
+# A map ID can belong to exactly one provider. Use matching extraction sets on every provider.
+MapData.Enable = 0
+MapData.Sources = "maps-eastern=0 maps-kalimdor=1"
+MapData.CachePath = "map-cache"
+# Python 3.11+. A bare executable is resolved through PATH; other paths are config-relative.
+MapData.Python = "python3"
+MapData.Bootstrap = "mapserver/fetch_maps.py"
+MapData.StartupTimeout = 1800

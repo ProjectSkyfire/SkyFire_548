@@ -77,6 +77,7 @@ void StartEluna(bool restart);
 #include "WaypointMovementGenerator.h"
 #include "WeatherMgr.h"
 #include "World.h"
+#include "MapDataBootstrap.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "WorldSocket.h"
@@ -1394,6 +1395,12 @@ void World::SetInitialWorldSettings()
 
     ///- Initialize config settings
     LoadConfigSettings();
+    std::string mapDataError;
+    if (!PrepareMapData(m_remoteMapIds, m_remoteMapPath, mapDataError))
+    {
+        SF_LOG_ERROR("maps", "%s", mapDataError.c_str());
+        exit(1);
+    }
 
     ///- Initialize Allowed Security Level
     LoadDBAllowedSecurityLevel();
@@ -1467,7 +1474,7 @@ void World::SetInitialWorldSettings()
     sSpellMgr->LoadSpellInfoCustomAttributes();
 
     SF_LOG_INFO("server.loading", "Loading GameObject models...");
-    LoadGameObjectModelList(m_dataPath);
+    LoadGameObjectModelList(m_remoteMapIds.empty() ? m_dataPath : m_remoteMapPath);
 
     SF_LOG_INFO("server.loading", "Loading Script Names...");
     sObjectMgr->LoadScriptNames();

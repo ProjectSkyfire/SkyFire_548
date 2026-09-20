@@ -1,0 +1,17 @@
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See LICENSE.md file for Copyright information
+# Paths are relative to this configuration. Keep the extraction set immutable while running.
+node_key = "maps-eastern"
+node_name = "Eastern Kingdoms terrain"
+maps = [0]
+data_root = "../Data"
+bind_address = "127.0.0.1"
+advertise_address = "127.0.0.1"
+port = 54910
+hub_host = "localhost"
+hub_port = 9100
+ca = "../certs/ca.crt"
+certificate = "../certs/maps-eastern.crt"
+private_key = "../certs/maps-eastern.key"
+allowed_world_nodes = ["world-1"]
+max_transfers = 4

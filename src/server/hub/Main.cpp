@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include <algorithm>
 #include <csignal>
 #include <chrono>
 #include <cstdio>
@@ -26,6 +27,8 @@
 #include "HubDatabaseSetup.h"
 #include "HubBackupGuard.h"
 #include "HubClusterServer.h"
+#include "Cluster/MapDataStartCheck.h"
+#include <fstream>
 #include "HubAuthProxy.h"
 #include "Auth/AccountAdministration.h"
 #include "HubProcessSupervisor.h"
@@ -312,6 +315,13 @@ int main(int argc, char** argv)
     }
 
     HubClusterServer clusterServer;
+    processSupervisor.SetWorldStartCheck([&clusterServer](std::string const& config, std::string& error)
+    {
+        std::ifstream input(config);
+        auto now = std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count());
+        return Skyfire::Cluster::MapData::CheckWorldStart(input, clusterServer.Snapshot(), now, error);
+    });
     bool const clusterEnabled = sConfigMgr->GetBoolDefault("Hub.Cluster.Enable", false);
     if (clusterEnabled)
     {
@@ -451,7 +461,8 @@ int main(int argc, char** argv)
         }
 
         auto const liveNodes = clusterServer.Snapshot();
-        processSupervisor.UpdateBackupCycle(liveNodes.empty());
+        processSupervisor.UpdateBackupCycle(std::none_of(liveNodes.begin(), liveNodes.end(),
+            [](Skyfire::Cluster::Node const& node) { return node.Type != Skyfire::Cluster::Service::Map; }));
         authnetProxy.Update(liveNodes);
         legacyProxy.Update(liveNodes);
 

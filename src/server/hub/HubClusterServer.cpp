@@ -6,6 +6,8 @@
 #include "Cluster/HandoffService.h"
 #include "Cluster/HandoffClient.h"
 #include "Cluster/RealmDirectory.h"
+#include "Cluster/MapDataDirectory.h"
+#include <sstream>
 #include "Log.h"
 #include "Configuration/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -85,7 +87,8 @@ private:
             if (self->_header.Version != ProtocolVersion) { self->Reject(Error::Version, "Incompatible cluster protocol; hub requires version 1."); return; }
             if (self->_header.Type != Message::Register && self->_header.Type != Message::Ready &&
                 self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms &&
-                self->_header.Type != Handoff::RequestType && self->_header.Type != Realms::RequestType)
+                self->_header.Type != Handoff::RequestType && self->_header.Type != Realms::RequestType &&
+                self->_header.Type != MapData::RequestType)
             { self->Reject(Error::Malformed, "Unsupported request type."); return; }
             self->_body.resize(self->_header.Length);
             if (self->_body.empty()) { self->Handle(); return; }
@@ -98,6 +101,18 @@ private:
     }
     void Handle()
     {
+        if (_header.Type == MapData::RequestType)
+        {
+            std::string key;
+            // Bootstrap precedes world readiness; use an explicit certificate-key allowlist.
+            std::istringstream readers(sConfigMgr->GetStringDefault("Hub.MapData.Readers", ""));
+            std::string reader; bool allowed = false;
+            while (readers >> reader) if (reader == _identity) allowed = true;
+            if (!_key.empty() || !allowed || !MapData::DecodeQuery(_body, key))
+            { Reject(Error::Identity, "Map discovery requires an allowed certificate identity and a separate connection."); return; }
+            Write(Frame(MapData::ReplyType, MapData::Resolve(key, _server._registry.Snapshot(), HubClusterServer::Now())), true);
+            return;
+        }
         if (_header.Type == Realms::RequestType)
         {
             std::vector<Realms::Query> queries;
@@ -141,10 +156,11 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(255)) ||
-                (node.Type == Service::Auth && (node.Capabilities & 8)) ||
-                (node.Type == Service::World && (node.Capabilities & 176)))
-            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities (mask 0..255)."); return; }
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(511)) ||
+                (node.Type == Service::Auth && (node.Capabilities & 264)) ||
+                (node.Type == Service::World && (node.Capabilities & 432)) ||
+                (node.Type == Service::Map && node.Capabilities != MapData::Capability))
+            { Reject(Error::Version, "Requires client build 18414 and supported service capabilities."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
             { Reject(Error::Conflict, "Node key is already leased or registry capacity is exhausted."); return; }
             _key = node.Key;
@@ -239,7 +255,7 @@ bool HubClusterServer::LoadAdministration(std::string& error)
         node.Capabilities = fields[2].GetUInt32(); node.Admin = Administration(fields[3].GetUInt8());
         node.Type = Service(fields[4].GetUInt8());
         node.Live = false; node.Ready = false;
-        if ((node.Type != Service::Auth && node.Type != Service::World) || !ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
+        if ((node.Type != Service::Auth && node.Type != Service::World && node.Type != Service::Map) || !ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
         { error = "Invalid persisted cluster policy; correct the hub_cluster_policy row before startup."; return false; }
         _policies[node.Key] = node;
         _registry.SetAdministration(node.Key,node.Admin);
