@@ -51,6 +51,23 @@ For further information on the SkyFire project, please visit our project website
   + On Ubuntu, install the distro client development package such as `default-libmysqlclient-dev`.
 + Ninja is recommended for Linux builds.
 
+## Clustering package requirements
+
+Clustering uses the C++ build requirements above. Deploy matching `hubserver`,
+`authserver` and `worldserver` binaries together. The Python services below are
+separate processes; install their dependencies on the hosts that run them.
+
+| Component | Additional packages and runtime requirements |
+| --- | --- |
+| Hub and cluster nodes | MySQL server for the hub database, plus the existing auth, characters and world databases. OpenSSL runtime libraries and a CA-signed certificate/private key for each cluster identity; cluster registration requires mutual TLS. |
+| Local hub web interface | A browser and the installed `web/` directory. No Python, PHP or Node.js runtime is required for this interface. |
+| Optional HTTPS/WebSocket control gateway | Python 3.11+, `pip`, a Python virtual environment, PHP 8.2+ CLI, and `aiohttp==3.14.3` from `control/requirements.txt`. Also requires an HTTPS certificate/private key and the shared hub control token. |
+| Backup and recovery worker | Python 3.11+, `pip`, a Python virtual environment, MySQL 8+ `mysql` and `mysqldump` executables, and `tzlocal>=5.2,<6` plus `tzdata>=2025.2` from `backup/requirements.txt`. Configure absolute paths to the MySQL tools and a writable backup volume. |
+| Isolated restore verification | A separate compatible MySQL server instance with binary logging disabled, configured through `verification_config`. The verification identity needs permission to create/drop temporary databases and users and grant database-local privileges; see the backup guide. |
+
+See [clustering setup notes](doc/ClusteringSetup.md) for package installation,
+configuration, database migrations and service startup references.
+
 ## Install
 Detailed installation guides are available in the wiki for
 
