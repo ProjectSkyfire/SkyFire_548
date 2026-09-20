@@ -32,7 +32,7 @@ namespace
         auto bytes = path.generic_u8string();
         return std::string(bytes.begin(), bytes.end());
     }
-    bool Run(std::vector<std::string> const& args, unsigned timeout)
+    bool Run(std::vector<std::string> const& args, unsigned timeout, std::function<bool()> const& cancelled)
     {
         auto started = std::chrono::steady_clock::now();
         auto deadline = started + std::chrono::seconds(timeout);
@@ -74,6 +74,7 @@ namespace
             DWORD result = WaitForSingleObject(process.hProcess, 1000);
             if (result == WAIT_OBJECT_0) { finished = true; break; }
             if (result == WAIT_FAILED) break;
+            if (cancelled && cancelled()) break;
             report();
         } while (std::chrono::steady_clock::now() < deadline);
         if (!finished) { TerminateProcess(process.hProcess, 1); WaitForSingleObject(process.hProcess, INFINITE); }
@@ -91,7 +92,7 @@ namespace
             pid_t result = waitpid(child, &status, WNOHANG);
             if (result == child) return WIFEXITED(status) && WEXITSTATUS(status) == 0;
             if (result < 0 && errno != EINTR) return false;
-            if (std::chrono::steady_clock::now() >= deadline)
+            if (std::chrono::steady_clock::now() >= deadline || (cancelled && cancelled()))
             {
                 kill(child, SIGKILL);
                 while (waitpid(child, &status, 0) < 0 && errno == EINTR) { }
@@ -104,7 +105,8 @@ namespace
     }
 }
 
-bool PrepareMapData(std::set<std::uint32_t>& maps, std::string& root, std::string& error)
+bool PrepareMapData(std::set<std::uint32_t>& maps, std::string& root, std::string& error,
+    std::function<bool()> const& cancelled)
 {
     if (!sConfigMgr->GetBoolDefault("MapData.Enable", false)) return true;
     try
@@ -138,7 +140,7 @@ bool PrepareMapData(std::set<std::uint32_t>& maps, std::string& root, std::strin
         for (unsigned i = 0; i < 4; ++i) receiptName << std::setw(8) << std::uint32_t(random());
         SF_LOG_INFO("server.loading", "Preparing map data cache; unchanged verified assets will be reused unless full verification is configured.");
         if (!Run({Utf8(python), Utf8(path("MapData.Bootstrap", "mapserver/fetch_maps.py")),
-            "--world-config", Utf8(config), "--receipt", receiptName.str()}, unsigned(timeout)))
+            "--world-config", Utf8(config), "--receipt", receiptName.str()}, unsigned(timeout), cancelled))
             throw std::runtime_error("Map bootstrap failed or timed out; run fetch_maps.py manually for details");
         auto cache = path("MapData.CachePath", "map-cache");
         auto receipt = cache / receiptName.str();

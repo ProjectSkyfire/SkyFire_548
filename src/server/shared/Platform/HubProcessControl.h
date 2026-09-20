@@ -25,6 +25,8 @@ namespace Skyfire::HubControl
     char constexpr HeartbeatMessage[] = "HEARTBEAT";
     char constexpr StoppingMessage[] = "STOPPING";
     char constexpr StopCommand[] = "STOP\n";
+    char constexpr StandbyMessage[] = "STANDBY_READY_1";
+    char constexpr ActivateCommand[] = "ACTIVATE_STANDBY_1\n";
 
     class ChildChannel
     {
@@ -39,7 +41,8 @@ namespace Skyfire::HubControl
         bool SendStatus(char const* status) const;
         // Percentage of total logical CPU capacity, in hundredths; -1 until sampled.
         int32 SampleCpuUsage();
-        bool StopRequested(std::vector<std::string>* commands = nullptr, std::vector<std::string>* accounts = nullptr);
+        bool StopRequested(std::vector<std::string>* commands = nullptr, std::vector<std::string>* accounts = nullptr,
+            bool* activateStandby = nullptr);
         void AppendCommandOutput(char const* text);
         void FinishCommand(bool success);
         void Close();

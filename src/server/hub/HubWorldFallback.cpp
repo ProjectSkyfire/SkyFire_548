@@ -8,8 +8,11 @@
 #include "Config.h"
 #include "Log.h"
 #include "Platform/WorldOwnershipLock.h"
+#include "Platform/HubProcessControl.h"
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <regex>
 
 namespace
@@ -41,6 +44,7 @@ void HubProcessSupervisor::ConfigureFallback()
     // Deliberately startup-only: reloading configuration cannot rebind an active pair.
     _fallbackEnabled = sConfigMgr->GetBoolDefault("Hub.Fallback.Enable", false);
     _fallbackAutomatic = sConfigMgr->GetBoolDefault("Hub.Fallback.Automatic", false);
+    _fallbackWarm = sConfigMgr->GetBoolDefault("Hub.Fallback.WarmStandby", false);
     _fallbackPrimary = sConfigMgr->GetStringDefault("Hub.Fallback.Primary", "world");
     _fallbackStandby = sConfigMgr->GetStringDefault("Hub.Fallback.Standby", "world-standby");
     _fallbackCountdown = std::clamp(sConfigMgr->GetIntDefault("Hub.Fallback.Countdown", 60), 0, 3600);
@@ -83,6 +87,28 @@ bool HubProcessSupervisor::ValidateFallbackPair(std::string& error)
             if (Value(primary, key).empty() || Value(primary, key) != Value(standby, key))
                 return reject("Fallback worlds must explicitly configure identical databases, realm ID and hub endpoint.");
         bool const remoteCharacters = Enabled(primary,"CharacterService.Enable");
+        if (_fallbackWarm)
+        {
+            for (auto const* runtime : {&first->second, &second->second})
+                if (IsActive(*runtime))
+                {
+                    std::ifstream input(file(runtime->Definition, runtime->Definition.ConfigPath), std::ios::binary);
+                    std::string current((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+                    if (runtime->LaunchConfigContents.empty() || current != runtime->LaunchConfigContents)
+                        return reject("A running fallback world's configuration changed; restore it and stop the process before editing.");
+                }
+            if (!remoteCharacters || !Enabled(primary, "MapData.Enable") || !Enabled(standby, "MapData.Enable"))
+                return reject("Warm standby requires character-service persistence and map providers on both worlds.");
+            for (char const* key : {"LogsDir", "MapData.CachePath"})
+            {
+                auto const left = Value(primary, key), right = Value(standby, key);
+                if (left.empty() || right.empty() || file(a, left) == file(b, right))
+                    return reject("Warm standby requires separate explicit log and map-cache directories.");
+            }
+            auto const pidA = Value(primary, "PidFile"), pidB = Value(standby, "PidFile");
+            if (!pidA.empty() && !pidB.empty() && file(a, pidA) == file(b, pidB))
+                return reject("Warm standby cannot share a PID file.");
+        }
         if (remoteCharacters != Enabled(standby,"CharacterService.Enable"))
             return reject("Both fallback worlds must use the same character persistence mode.");
         if (remoteCharacters)
@@ -123,8 +149,14 @@ bool HubProcessSupervisor::CheckFallbackStart(std::string const& key, std::strin
     if (!_fallbackEnabled || (key != _fallbackPrimary && key != _fallbackStandby)) return true;
     if (!ValidateFallbackPair(error)) return false;
     auto const& peer = _services.at(key == _fallbackPrimary ? _fallbackStandby : _fallbackPrimary);
-    if (IsActive(peer)) { error = "The other fallback world still has a live or unconfirmed process. Use Promote for a graceful switchover."; return false; }
     if (_fallbackActive && !_fallbackStarting) { error = "Fallback promotion owns this world pair."; return false; }
+    auto& runtime = _services.at(key);
+    bool const peerOwnsWorld = IsActive(peer) && !peer.WarmStandby;
+    bool const restoringRole = _backupLaunching || (_restartInternal && !_fallbackStarting);
+    runtime.WarmStandby = Skyfire::Fallback::StartInStandby({_fallbackWarm, _fallbackStarting, restoringRole,
+        runtime.WarmStandby, peerOwnsWorld, key == _fallbackStandby, runtime.EverReady});
+    if (runtime.WarmStandby) return true;
+    if (peerOwnsWorld) { error = "The other fallback world still has a live or unconfirmed process. Use Promote for a graceful switchover."; return false; }
     // Test the real OS lock, rather than trusting a stale heartbeat or an empty process cache.
     WorldOwnershipLock probe;
     return probe.Acquire(_fallbackLock, error);
@@ -141,7 +173,8 @@ bool HubProcessSupervisor::PromoteWorld(std::string const& target, std::string& 
     std::string const source = target == _fallbackPrimary ? _fallbackStandby : _fallbackPrimary;
     auto& old = _services.at(source);
     auto& next = _services.at(target);
-    if (IsActive(next)) { error = "Promotion target already has a process."; return false; }
+    if (IsActive(next) && (!next.WarmStandby || next.State != HubManagedProcessState::Standby || !next.Ready))
+    { error = "Promotion target must be stopped or healthy and ready in standby."; return false; }
     if (!old.EverReady || old.OwnershipPath.empty() ||
         (!IsActive(old) && old.State != HubManagedProcessState::Exited))
     { error = "Source ownership/exit has not been observed by this hub. Start a fenced world normally before using promotion."; return false; }
@@ -162,6 +195,7 @@ bool HubProcessSupervisor::PromoteWorld(std::string const& target, std::string& 
     { error = "Cannot reserve promotion maintenance. Check backup activity and the node-restart schema."; return false; }
     _fallbackSource = source; _fallbackTarget = target; _fallbackToken = owner;
     _fallbackGraceful = IsActive(old);
+    _fallbackPrepared = IsActive(next);
     _fallbackActive = true; HubNodeRestartActive = true;
     _fallbackState = "stopping";
     _fallbackMessage = "Waiting for " + source + " to save and exit before promoting " + target + ".";
@@ -252,7 +286,32 @@ void HubProcessSupervisor::UpdateFallback()
                 (node.Realm == _fallbackRealm || std::find(node.Realms.begin(), node.Realms.end(), _fallbackRealm) != node.Realms.end())) return;
         std::string error;
         InternalStart maintenance(_restartInternal), promotion(_fallbackStarting);
-        if (!Start(_fallbackTarget, error)) { FailFallback(error); return; }
+        auto& target = _services.at(_fallbackTarget);
+        if (_fallbackPrepared && !IsActive(target))
+        { FailFallback("Prepared standby exited during promotion; no cold restart was attempted."); return; }
+        if (IsActive(target))
+        {
+            if (!target.WarmStandby || target.State != HubManagedProcessState::Standby || !target.Ready)
+            { FailFallback("Prepared standby is no longer healthy."); return; }
+            auto config = std::filesystem::path(target.Definition.ConfigPath);
+            if (config.is_relative()) config = std::filesystem::path(target.Definition.WorkingDirectory) / config;
+            WorldOwnershipLock probe;
+            if (!ValidateFallbackPair(error) || !_worldStartCheck || !_worldStartCheck(config.string(), error) ||
+                !probe.Acquire(_fallbackLock, error))
+            { FailFallback(error.empty() ? "Standby activation preflight failed." : error); return; }
+            // The probe must release before the child independently acquires ownership.
+        }
+        if (IsActive(target))
+        {
+            if (!WriteControl(target, Skyfire::HubControl::ActivateCommand))
+            { FailFallback("Cannot activate prepared standby; control pipe was lost."); return; }
+            target.WarmStandby = false;
+            target.Ready = false;
+            target.State = HubManagedProcessState::Starting;
+            target.ReadinessStartedAt = now;
+            target.LastHeartbeat = now;
+        }
+        else if (!Start(_fallbackTarget, error)) { FailFallback(error); return; }
         _fallbackState = "starting";
         _fallbackMessage = "Starting " + _fallbackTarget + "; waiting for ownership, process readiness and the live realm route.";
         _fallbackDeadline = now + std::chrono::minutes(30);

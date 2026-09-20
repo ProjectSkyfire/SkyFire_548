@@ -297,7 +297,7 @@ Hub.MapData.Readers = ""
 # Player warning before Restart all stops worlds gracefully (0..3600 seconds).
 Hub.Restart.Countdown = 60
 
-# Same-host cold standby: one configured pair, no cross-machine fencing or session migration.
+# Same-host fallback: one configured pair, no cross-machine fencing or session migration.
 # Both managed worlds must use the SAME executable, databases, realm and absolute local
 # World.OwnershipLock file; use different node keys/certificates and config files.
 # Configure only after upgrading both binaries/configs and stopping any unfenced writers.
@@ -309,6 +309,11 @@ Hub.Fallback.Enable = 0
 Hub.Fallback.Primary = "world"
 Hub.Fallback.Standby = "world-standby"
 Hub.Fallback.Automatic = 0
+# Keep an explicitly started standby process resident with file-backed static data preloaded.
+# Requires matching hub/world binaries, character service, separate logs/cache and fenced ownership.
+# Promotion uses the existing process, then initializes mutable world state before admitting players.
+# No player-session migration or recovery of unsent state. Restart standby after static data changes.
+Hub.Fallback.WarmStandby = 0
 Hub.Fallback.Countdown = 60
 # Optional preventive switchover: fresh world update time at/above this threshold for
 # DegradedSeconds requests a normal graceful shutdown/save while the primary responds.

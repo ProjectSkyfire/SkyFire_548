@@ -59,7 +59,7 @@ window.HubStatus = (() => {
     }
     function updateCard(card, component, data) {
         card.data = component;
-        const active = ["starting", "running", "unresponsive", "stopping"].includes(component.state);
+        const active = ["starting", "running", "standby", "unresponsive", "stopping"].includes(component.state);
         card.article.className = `component ${component.status}`;
         text(card.title, component.name);
         text(card.state, component.clusterKey && component.live && component.adminState !== "enabled" ? component.adminState : component.status);
@@ -70,14 +70,14 @@ window.HubStatus = (() => {
         card.start.hidden = card.stop.hidden = !component.managed;
         const pairMember = data.fallback?.enabled && [data.fallback.primary, data.fallback.standby].includes(component.key);
         card.promote.hidden = !component.managed || !pairMember;
-        card.promote.disabled = active || pending.has(component.key) || !data.canOperateServices || data.restartActive;
-        card.promote.title = 'Gracefully stop the other world, confirm exclusive ownership, then start this world. Players must reconnect.';
+        card.promote.disabled = (active && component.state !== 'standby') || pending.has(component.key) || !data.canOperateServices || data.restartActive;
+        card.promote.title = 'Gracefully stop the active world, confirm exclusive ownership, then activate this world. Players must reconnect.';
         card.restart.hidden = !component.canRestart;
         card.restart.disabled = pending.has(component.key) || !(component.managed ? active && component.state !== 'stopping' : component.live) || !data.canOperateServices || data.restartActive;
         card.restart.title = 'Data-service restart requires graceful world shutdown first.';
         let metrics = `Uptime ${active ? formatUptime(component.uptimeSeconds) : "—"}`;
         if (isWorld(component)) {
-            metrics += component.state === "running" && component.metricsAvailable
+            metrics += component.state === 'standby' ? '\nStatic data loaded · Waiting for promotion' : component.state === "running" && component.metricsAvailable
                 ? ` · ${component.players} players\nCPU ${component.cpuPercent == null ? "—" : component.cpuPercent.toFixed(1) + "%"} · Update ${component.updateTimeMs} ms`
                 : "\nPlayers / load unavailable";
             card.metrics.title = "CPU: total logical CPU capacity. Update: world tick processing time, excluding sleep. Metrics expire after 15 seconds without a new tick.";

@@ -23,6 +23,7 @@ enum class HubManagedProcessState
     Stopped,
     Starting,
     Running,
+    Standby,
     Unresponsive,
     Stopping,
     Exited
@@ -116,6 +117,7 @@ private:
         uint64 StatusReadHandle = 0;
         int64 LastExitCode = 0;
         bool Ready = false;
+        bool WarmStandby = false;
         bool CanSendCommands = false;
         bool CanManageAccounts = false;
         std::function<void(std::string const&)> AccountCallback;
@@ -127,6 +129,7 @@ private:
         bool ExpectedExit = false;
         bool EverReady = false;
         std::string OwnershipPath;
+        std::string LaunchConfigContents;
         std::string CommandResult;
         bool MetricsAvailable = false;
         uint32 Players = 0;
@@ -135,6 +138,7 @@ private:
 
         std::string StatusBuffer;
         std::chrono::steady_clock::time_point StartedAt;
+        std::chrono::steady_clock::time_point ReadinessStartedAt;
         std::chrono::steady_clock::time_point LastHeartbeat;
         std::chrono::steady_clock::time_point LastMetrics;
         uint64 LastTick = 0;
@@ -164,6 +168,8 @@ private:
     bool _backupLaunching = false;
     bool _restartInternal = false;
     bool _fallbackEnabled = false, _fallbackAutomatic = false, _fallbackActive = false;
+    bool _fallbackWarm = false;
+    bool _fallbackPrepared = false;
     bool _fallbackCrashPending = false, _fallbackStarting = false;
     bool _fallbackGraceful = false;
     std::string _fallbackPrimary, _fallbackStandby, _fallbackSource, _fallbackTarget;

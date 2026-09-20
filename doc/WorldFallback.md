@@ -1,6 +1,6 @@
 # Same-host world fallback
 
-This phase provides a **cold standby**, controlled switchover and optional automatic
+This phase provides cold standby and optional **preloaded process standby**, controlled switchover and optional automatic
 promotion after a confirmed primary crash. It supports one local pair per hub on
 Windows or Linux. Players reconnect; unsaved state in a crashed world's memory
 cannot be recovered by starting the standby. It is not cross-host fencing or live
@@ -53,11 +53,14 @@ session migration. A missed heartbeat never authorizes takeover.
    Hub.Fallback.Primary = "world"
    Hub.Fallback.Standby = "world-standby"
    Hub.Fallback.Automatic = 0
+   Hub.Fallback.WarmStandby = 1
    Hub.Fallback.Countdown = 60
    ```
 
    These settings are startup-only. Start the primary through the hub and wait for
-   readiness. Leave standby stopped. Preflight rejects a pair with inconsistent
+   readiness. With warm standby enabled, start `world-standby` and wait for its
+   **Standby** status. With the option disabled (the default), leave it stopped.
+   Preflight rejects a pair with inconsistent
    databases, realm, hub endpoint, executable or lock path. Do not edit identity,
    database or ownership settings while either member runs.
 
@@ -68,7 +71,7 @@ Do not replay that ALTER on a fresh base which already contains the column.
 
 ## Planned promotion
 
-Click **Promote** on the stopped member's sidebar card, or use the local hub console:
+Click **Promote** on the stopped or ready standby member's sidebar card, or use the local hub console:
 
 ```
 fallback promote world-standby
@@ -79,7 +82,9 @@ The operation reserves maintenance against backups/recovery and Restart all,
 checks the target's map dependencies, sends `server shutdown <countdown>` to the
 source and suppresses its soft restart. It waits for OS-confirmed process exit
 and expiry/removal of all registrations owning the realm. It then probes the
-ownership lock and launches the target, which acquires the lock independently.
+ownership lock and activates the already prepared target through its inherited
+control pipe, retaining its PID. A stopped target is launched normally.
+The target acquires the lock independently before any database setup.
 Completion requires its ownership report, healthy process status and an enabled,
 ready, unique world registration. Hub/web and auth remain online.
 
@@ -88,9 +93,49 @@ to become ready. Neither timeout force-kills a world. A planned shutdown that ex
 abnormally stops the operation for review instead of claiming a successful save.
 
 To switch back, explicitly promote `world` after reviewing the pair. Ordinary
-Start cannot launch one member while the other process is active or its exit is
-unconfirmed. Promote requires a source this hub actually observed ready with
+Start in cold mode cannot launch one member while the other process is active or
+its exit is unconfirmed. Warm mode permits an additional process only in standby.
+Promote requires a source this hub actually observed ready with
 ownership; after a hub restart, inspect existing processes before normal Start.
+
+## Preloaded standby lifecycle
+
+Warm standby requires matching hub/world binaries, character-service persistence,
+map providers, separate explicit log/cache directories and the shared ownership
+lock. No new SQL migration is required. The hub supplies the private
+`--hub-standby` launch argument; it requires an authenticated inherited control pipe
+and cannot be used as an independently managed second writer.
+
+The waiting process verifies its map cache and loads DBC, DB2 and game-object model
+metadata into memory. It opens no database pools, allocates no character GUIDs,
+performs no startup cleanup, runs no gameplay updates and opens no player listener.
+It sends standby readiness and heartbeats only to its supervising hub. It does not
+advertise an active realm to authentication routing.
+
+Promotion rechecks dependencies and configuration, waits for source exit and realm
+lease removal, then sends the activation command. The child acquires the OS lock
+and connects to the character service using a new writer generation. Only then
+does it initialize mutable world state and publish a ready player endpoint.
+Static stores remain loaded; database-backed world objects and player/session
+state are **not** pre-initialized or replicated. This removes process launch and
+static-store preparation from takeover, but does not promise instantaneous gameplay
+readiness or seamless sessions. Players reconnect and unsent state remains lost.
+
+An unresponsive or still-preparing standby cannot be promoted. If the prepared
+target dies during the source countdown, promotion fails with maintenance retained;
+the hub does not silently launch another replacement. Stop or lost supervision
+exits the waiting process without acquiring ownership. Stop during map preparation
+cancels its cache helper; a static-store load already underway finishes before exit.
+
+Backup cycles and Restart all stop and restart prepared nodes in the same role.
+A promoted secondary remains active after these operations. The previous active
+world stays stopped after promotion; explicitly Start it to prepare the next
+standby. Starting the secondary before any active primary prepares it without
+implicitly granting realm ownership. Automatic crash promotion remains one-way.
+
+Do not change a running pair's configurations or static data. The hub rejects
+promotion if a launched configuration changed. Stop and recreate standby after
+data updates so its resident stores match the installed dataset.
 
 ## Automatic promotion
 
@@ -135,6 +180,13 @@ before starting the other member. Never remove the lock file to bypass ownership
   normal/crash release, independent realm locks and automatic-exit eligibility.
 - Run `tools/dev/tests/hub_status.test.cjs` with Playwright for promotion controls,
   permissions, stale status and independent polling.
+- Build/run `hub_standby_control_tests`: fragmented activation, ignored activation
+  outside standby, unknown versions, stop precedence and lost control pipes.
+- Start primary and standby together; verify standby keeps its PID through
+  promotion, holds no character sessions or realm route while idle, and cannot
+  acquire the shared lock before primary exit. Check both promotion directions.
+- Repeat a backup and Restart all with the secondary active and primary in standby;
+  verify roles and single-writer ownership survive both operations.
 - Test a planned promotion and failback with disposable character data; verify
   saved position/inventory and the new realm endpoint after reconnecting.
 - Attempt a second fenced world directly and verify rejection before DB startup.
@@ -152,10 +204,12 @@ The [character service](CharacterServer.md) now provides character database
 reads/writes, exclusive writer epochs and rejection of retired world writers.
 Both members use that same service; the target acquires a new writer generation
 after the source disconnects. The local ownership lock remains required.
-Explicit gameplay and session transfer rules are still needed for a running standby.
+Explicit gameplay and session transfer rules are still needed for a fully initialized
+gameplay standby beyond the preloaded process stage above.
 Centralizing queries alone does not transfer player objects, pending saves, combat
-or other unsaved simulation state. Keep this cold-standby mode until those guarantees
-are implemented and tested.
+or other unsaved simulation state. Keep mutable gameplay initialization behind
+exclusive ownership until those guarantees are implemented and tested. The preloaded mode above deliberately waits before
+opening any database sessions or initializing mutable gameplay objects.
 
 The character service must already hold character state when a world crashes; it
 cannot reconstruct unreplicated state from a dead process. Its implementation
@@ -180,4 +234,4 @@ contract should include:
 
 This is the next-phase design, not functionality provided by the current fallback
 implementation. World simulation/session restoration and character-service
-availability also need their own failure tests before enabling a running standby.
+availability also need their own failure tests before enabling replicated gameplay standby.

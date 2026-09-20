@@ -1381,6 +1381,29 @@ void World::LoadConfigSettings(bool reload)
 extern void LoadGameObjectModelList(std::string const& dataPath);
 
 /// Initialize the World
+bool World::PrepareStandbyData(std::string& error, std::function<bool()> const& cancelled)
+{
+    // File-backed static stores only. No database pools, scripts, simulation, GUID allocation or listeners.
+    if (m_standbyDataPrepared) return true;
+    m_defaultDbcLocale = LocaleConstant(sConfigMgr->GetIntDefault("DBC.Locale", 0));
+    if (m_defaultDbcLocale >= TOTAL_LOCALES) m_defaultDbcLocale = LOCALE_enUS;
+    m_dataPath = sConfigMgr->GetStringDefault("DataDir", "./");
+    if (m_dataPath.empty() || (m_dataPath.back() != '/' && m_dataPath.back() != '\\')) m_dataPath += '/';
+#if PLATFORM == PLATFORM_UNIX || PLATFORM == PLATFORM_APPLE
+    if (m_dataPath.front() == '~')
+        if (char const* home = getenv("HOME")) m_dataPath.replace(0, 1, home);
+#endif
+    if (!PrepareMapData(m_remoteMapIds, m_remoteMapPath, error, cancelled)) return false;
+    if (cancelled && cancelled()) return false;
+    if (sConfigMgr->GetBoolDefault("MapData.FullData", false)) m_dataPath = m_remoteMapPath;
+    LoadDBCStores(m_dataPath);
+    LoadDB2Stores(m_dataPath);
+    LoadGameObjectModelList(m_remoteMapIds.empty() ? m_dataPath : m_remoteMapPath);
+    m_standbyDataPath = m_dataPath;
+    m_standbyDataPrepared = true;
+    return true;
+}
+
 void World::SetInitialWorldSettings()
 {
     if (auto latest = LoginDatabase.Query(LoginDatabase.GetPreparedStatement(LOGIN_HUB_EVENT_LATEST)))
@@ -1399,11 +1422,12 @@ void World::SetInitialWorldSettings()
     m_mapPrefetchRadius = uint32(std::clamp(sConfigMgr->GetIntDefault("MapData.PrefetchRadius", 1), 0, 2));
     m_mapPrefetchBudget = uint32(std::clamp(sConfigMgr->GetIntDefault("MapData.PrefetchTilesPerSecond", 1), 1, 8));
     std::string mapDataError;
-    if (!PrepareMapData(m_remoteMapIds, m_remoteMapPath, mapDataError))
+    if (!m_standbyDataPrepared && !PrepareMapData(m_remoteMapIds, m_remoteMapPath, mapDataError))
     {
         SF_LOG_ERROR("maps", "%s", mapDataError.c_str());
         exit(1);
     }
+    if (m_standbyDataPrepared) m_dataPath = m_standbyDataPath;
     if (sConfigMgr->GetBoolDefault("MapData.Enable", false) && sConfigMgr->GetBoolDefault("MapData.FullData", false))
     {
         m_dataPath = m_remoteMapPath;
@@ -1466,8 +1490,11 @@ void World::SetInitialWorldSettings()
 
     ///- Load the DBC files
     SF_LOG_INFO("server.loading", "Initialize data stores...");
-    LoadDBCStores(m_dataPath);
-    LoadDB2Stores(m_dataPath);
+    if (!m_standbyDataPrepared)
+    {
+        LoadDBCStores(m_dataPath);
+        LoadDB2Stores(m_dataPath);
+    }
 
     SF_LOG_INFO("server.loading", "Loading SpellInfo store...");
     sSpellMgr->LoadSpellInfoStore();
@@ -1482,7 +1509,7 @@ void World::SetInitialWorldSettings()
     sSpellMgr->LoadSpellInfoCustomAttributes();
 
     SF_LOG_INFO("server.loading", "Loading GameObject models...");
-    LoadGameObjectModelList(m_remoteMapIds.empty() ? m_dataPath : m_remoteMapPath);
+    if (!m_standbyDataPrepared) LoadGameObjectModelList(m_remoteMapIds.empty() ? m_dataPath : m_remoteMapPath);
 
     SF_LOG_INFO("server.loading", "Loading Script Names...");
     sObjectMgr->LoadScriptNames();

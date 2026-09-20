@@ -7,6 +7,16 @@
 #include <cstdint>
 namespace Skyfire::Fallback
 {
+    struct StandbyLaunch
+    {
+        bool Enabled, Promotion, RestoreRole, PreviouslyStandby, PeerOwnsWorld, Secondary, PreviouslyActive;
+    };
+    inline bool StartInStandby(StandbyLaunch const& launch)
+    {
+        return launch.Enabled && !launch.Promotion && (launch.RestoreRole ? launch.PreviouslyStandby :
+            (launch.PeerOwnsWorld || launch.PreviouslyStandby || (launch.Secondary && !launch.PreviouslyActive)));
+    }
+
     struct ExitObservation
     {
         bool Confirmed = false;

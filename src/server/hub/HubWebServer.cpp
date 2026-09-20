@@ -674,7 +674,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
     for (HubWebManagedServiceStatus const& service : status.Services)
     {
         std::string health = "offline";
-        if (service.State == "running")
+        if (service.State == "running" || service.State == "standby")
             health = "online";
         else if (service.State == "starting" || service.State == "stopping" ||
             service.State == "unresponsive")

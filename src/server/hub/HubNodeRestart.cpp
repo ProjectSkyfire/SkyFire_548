@@ -35,8 +35,8 @@ bool HubProcessSupervisor::RestartNodes(std::string& error)
         auto const& runtime = entry.second;
         if (runtime.Definition.ServiceKind) continue; // Map refresh uses its cluster channel; persistence stays online.
         if (!IsActive(runtime)) continue;
-        if (!runtime.Definition.Enabled || runtime.State != HubManagedProcessState::Running || runtime.CommandPending || runtime.AccountCallback ||
-            (IsWorldKey(entry.first) && !runtime.CanSendCommands))
+        if (!runtime.Definition.Enabled || (runtime.State != HubManagedProcessState::Running && runtime.State != HubManagedProcessState::Standby) || runtime.CommandPending || runtime.AccountCallback ||
+            (IsWorldKey(entry.first) && !runtime.WarmStandby && !runtime.CanSendCommands))
         { error = "All running services must be ready and idle before restarting."; return false; }
         std::filesystem::path working(runtime.Definition.WorkingDirectory);
         auto config = std::filesystem::path(runtime.Definition.ConfigPath);
@@ -92,7 +92,7 @@ bool HubProcessSupervisor::RestartNodes(std::string& error)
     _nodeRestartDeadline = std::chrono::steady_clock::now() + std::chrono::seconds(countdown + 300);
     RestartScope scope(_restartInternal);
     for (auto const& key : _restartTargets)
-        if (IsWorldKey(key) && !SendWorldCommand("server shutdown " + std::to_string(countdown),error,key))
+        if (IsWorldKey(key) && !(_services.at(key).WarmStandby ? Stop(key, error) : SendWorldCommand("server shutdown " + std::to_string(countdown),error,key)))
         {
             _nodeRestartState = "failed"; _nodeRestartMessage = error + " Maintenance remains active; review any countdown already sent.";
             HubNodeRestartActive = false; return false;
@@ -161,7 +161,7 @@ void HubProcessSupervisor::UpdateNodeRestart()
             if (!_restartStarted.count(key))
             { std::string error; if (!Start(key,error)) { fail(error); return; } _restartStarted.insert(key); }
             if (!IsActive(runtime)) { fail("A restarted service exited before readiness."); return; }
-            ready = ready && runtime.Ready && runtime.State == HubManagedProcessState::Running;
+            ready = ready && runtime.Ready && (runtime.State == HubManagedProcessState::Running || runtime.State == HubManagedProcessState::Standby);
         }
         if (!ready) return;
         if (!worlds)

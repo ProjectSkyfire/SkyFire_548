@@ -10,7 +10,9 @@ The world still constructs gameplay objects and assembles existing load queries
 and save transactions. This stage is a database service boundary, not the complete
 extraction of player serialization or a replicated in-memory character model.
 It cannot recover updates that a world has not sent before crashing. Periodic
-state snapshots, semantic load/save requests, and warm standby are subsequent work.
+state snapshots, semantic load/save requests, and a fully initialized gameplay
+standby are subsequent work. [Preloaded process standby](WorldFallback.md) can wait
+alongside the active world without opening character sessions.
 
 ## Installation
 
@@ -108,7 +110,8 @@ operation, malformed reply, or transport failure terminates that world process
 instead of reporting a successful save or an empty successful load. **This is
 fail-closed experimental behavior, not graceful outage recovery:** unsent state
 can still be lost. The service blocks requests without a live hub lease. Keep
-the existing cold standby and world ownership lock; do not start two active
+the existing fallback ownership lock; preloaded standby waits before connecting.
+Do not start two active
 worlds against this realm. Restart dependent worlds after restarting the service.
 
 Requests are limited to 8 MiB, transactions to 16,384 statements, and responses

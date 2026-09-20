@@ -154,7 +154,8 @@ bool Skyfire::HubControl::ChildChannel::SendStatus(char const* status) const
     return WriteAll(_statusWriteHandle, message.data(), message.size());
 }
 
-bool Skyfire::HubControl::ChildChannel::StopRequested(std::vector<std::string>* commands, std::vector<std::string>* accounts)
+bool Skyfire::HubControl::ChildChannel::StopRequested(std::vector<std::string>* commands, std::vector<std::string>* accounts,
+    bool* activateStandby)
 {
     if (!_controlReadHandle)
         return true;
@@ -203,6 +204,8 @@ bool Skyfire::HubControl::ChildChannel::StopRequested(std::vector<std::string>* 
         _controlBuffer.erase(0, lineEnd + 1);
         if (command == "STOP")
             return true;
+        if (activateStandby && command == "ACTIVATE_STANDBY_1")
+            *activateStandby = true;
         if (commands && command.compare(0, 8, "COMMAND ") == 0 &&
             command.size() > 8 && command.size() <= MaxCommandLength + 8)
             commands->push_back(command.substr(8));

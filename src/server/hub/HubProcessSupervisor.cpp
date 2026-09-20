@@ -17,6 +17,8 @@
 #include <cerrno>
 #include <cstdio>
 #include <filesystem>
+#include <fstream>
+#include <iterator>
 #include <sstream>
 #include <utility>
 
@@ -241,6 +243,12 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
             return false;
         }
         if (!CheckFallbackStart(serviceKey, error)) return false;
+        if (_fallbackWarm && IsWorldKey(serviceKey))
+        {
+            std::ifstream configInput(configPath, std::ios::binary);
+            if (!configInput) { error = "Cannot snapshot the world configuration for standby validation."; return false; }
+            runtime.LaunchConfigContents.assign(std::istreambuf_iterator<char>(configInput), std::istreambuf_iterator<char>());
+        }
         if (!Launch(serviceKey, runtime, executablePath.string(), configPath.string(),
             workingDirectory.string(), error))
             return false;
@@ -269,6 +277,7 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
     runtime.StatusBuffer.clear();
     runtime.CommandResult.clear();
     runtime.StartedAt = std::chrono::steady_clock::now();
+    runtime.ReadinessStartedAt = runtime.StartedAt;
     runtime.LastHeartbeat = runtime.StartedAt;
     SF_LOG_INFO("server.hub", "Started managed service '%s' as process %llu.", serviceKey.c_str(),
         static_cast<unsigned long long>(runtime.ProcessId));
@@ -481,6 +490,7 @@ bool HubProcessSupervisor::Launch(std::string const& serviceKey, ManagedServiceR
     command
         << L"\" --hub-control-read " << reinterpret_cast<uintptr_t>(childControlRead)
         << L" --hub-status-write " << reinterpret_cast<uintptr_t>(childStatusWrite);
+    if (runtime.WarmStandby) command << L" --hub-standby";
     std::wstring commandText = command.str();
     std::vector<wchar_t> commandBuffer(commandText.begin(), commandText.end());
     commandBuffer.push_back(L'\0');
@@ -530,6 +540,9 @@ bool HubProcessSupervisor::Launch(std::string const& serviceKey, ManagedServiceR
             execl(executablePath.c_str(), executablePath.c_str(), "-B", script.c_str(), "--config", configPath.c_str(),
                 "--hub-node-key", runtime.Definition.ClusterKey.c_str(), "--hub-control-read", controlHandle.c_str(),
                 "--hub-status-write", statusHandle.c_str(), static_cast<char*>(nullptr));
+        else if (runtime.WarmStandby) execl(executablePath.c_str(), executablePath.c_str(), "-c", configPath.c_str(),
+            "--hub-control-read", controlHandle.c_str(), "--hub-status-write", statusHandle.c_str(),
+            "--hub-standby", static_cast<char*>(nullptr));
         else execl(executablePath.c_str(), executablePath.c_str(), "-c", configPath.c_str(),
             "--hub-control-read", controlHandle.c_str(), "--hub-status-write", statusHandle.c_str(),
             static_cast<char*>(nullptr));
@@ -605,7 +618,7 @@ void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime&
     auto const now = std::chrono::steady_clock::now();
     if (!IsWorldKey(key) && !runtime.Definition.ServiceKind && !runtime.BackupControlled && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
         ForceStop(key, runtime);
-    else if (runtime.State == HubManagedProcessState::Starting && now - runtime.StartedAt > (runtime.Definition.ServiceKind ? std::chrono::seconds(1800) : StartupTimeout))
+    else if (runtime.State == HubManagedProcessState::Starting && now - runtime.ReadinessStartedAt > (runtime.Definition.ServiceKind ? std::chrono::seconds(1800) : StartupTimeout))
         runtime.State = HubManagedProcessState::Unresponsive;
     else if (runtime.Ready && now - runtime.LastHeartbeat > HeartbeatTimeout &&
         runtime.State != HubManagedProcessState::Stopping)
@@ -653,6 +666,16 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
     std::string const& message)
 {
     auto const now = std::chrono::steady_clock::now();
+    if (runtime.WarmStandby && (message.compare(0, 17, "OWNERSHIP_LOCKED ") == 0 ||
+        message == Skyfire::HubControl::WorldReadyMessage || message == Skyfire::HubControl::AccountReadyMessage ||
+        message == Skyfire::HubControl::ReadyMessage))
+    {
+        runtime.CommandResult = "Standby entered active startup without promotion; update both hub and world binaries.";
+        runtime.SuppressRestart = true;
+        (void)WriteControl(runtime, Skyfire::HubControl::StopCommand);
+        runtime.State = HubManagedProcessState::Stopping;
+        return;
+    }
     if (runtime.Definition.ServiceKind && message == "STOP_REJECTED")
     {
         runtime.RequestedRestart = false;
@@ -667,7 +690,14 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
         if (runtime.State != HubManagedProcessState::Stopping) runtime.State = HubManagedProcessState::Unresponsive;
         return;
     }
-    if (message.compare(0, 17, "OWNERSHIP_LOCKED ") == 0)
+    if (runtime.WarmStandby && message == Skyfire::HubControl::StandbyMessage)
+    {
+        runtime.Ready = true;
+        runtime.LastHeartbeat = now;
+        if (runtime.State != HubManagedProcessState::Stopping) runtime.State = HubManagedProcessState::Standby;
+        SF_LOG_INFO("server.hub", "Managed world '%s' is preloaded and waiting in standby.", key.c_str());
+    }
+    else if (message.compare(0, 17, "OWNERSHIP_LOCKED ") == 0)
         runtime.OwnershipPath = message.substr(17);
     else if (message == Skyfire::HubControl::StartingMessage)
     {
@@ -688,7 +718,7 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
     {
         runtime.LastHeartbeat = now;
         if (runtime.Ready && runtime.State != HubManagedProcessState::Stopping)
-            runtime.State = HubManagedProcessState::Running;
+            runtime.State = runtime.WarmStandby ? HubManagedProcessState::Standby : HubManagedProcessState::Running;
     }
     else if (IsWorldKey(key) && message.compare(0, 8, "METRICS ") == 0)
     {
@@ -812,7 +842,7 @@ bool HubProcessSupervisor::WriteControl(ManagedServiceRuntime const& runtime, ch
 
 bool HubProcessSupervisor::IsActive(ManagedServiceRuntime const& runtime)
 {
-    return runtime.State == HubManagedProcessState::Starting || runtime.State == HubManagedProcessState::Running ||
+    return runtime.State == HubManagedProcessState::Starting || runtime.State == HubManagedProcessState::Running || runtime.State == HubManagedProcessState::Standby ||
         runtime.State == HubManagedProcessState::Unresponsive || runtime.State == HubManagedProcessState::Stopping;
 }
 
@@ -823,6 +853,7 @@ char const* HubProcessSupervisor::GetStateName(HubManagedProcessState state)
         case HubManagedProcessState::Stopped: return "stopped";
         case HubManagedProcessState::Starting: return "starting";
         case HubManagedProcessState::Running: return "running";
+        case HubManagedProcessState::Standby: return "standby";
         case HubManagedProcessState::Unresponsive: return "unresponsive";
         case HubManagedProcessState::Stopping: return "stopping";
         case HubManagedProcessState::Exited: return "exited";

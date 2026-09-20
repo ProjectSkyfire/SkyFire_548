@@ -49,6 +49,14 @@ int main(int argc, char** argv)
     int failed = 0;
     auto expect = [&](bool value, char const* message) { if (!value) { ++failed; std::cerr << message << '\n'; } };
     using namespace Skyfire::Fallback;
+    expect(StartInStandby({true,false,false,false,true,true,false}), "A secondary must prepare without taking the primary's writer ownership.");
+    expect(!StartInStandby({true,false,false,false,false,false,false}), "The initial primary must start active.");
+    expect(StartInStandby({true,false,false,false,false,true,false}), "Starting the secondary first must not implicitly promote it.");
+    expect(StartInStandby({true,false,false,false,true,false,true}), "The former primary must be able to return as standby.");
+    expect(!StartInStandby({true,false,true,false,false,true,true}), "Restart/backup must preserve the promoted secondary's active role.");
+    expect(StartInStandby({true,false,true,true,false,false,false}), "Restart/backup must preserve the primary's standby role.");
+    expect(!StartInStandby({true,true,false,true,false,true,false}), "Explicit cold promotion must activate, not wait for another promotion.");
+    expect(!StartInStandby({false,false,false,false,true,true,false}), "Cold mode must retain exclusive startup behavior.");
     ExitObservation good{true, true, true, false, false, false, 1};
     expect(MayAutomaticallyPromote(good), "Confirmed crash of a ready fenced owner should permit automatic promotion.");
     for (int scenario = 0; scenario < 8; ++scenario)

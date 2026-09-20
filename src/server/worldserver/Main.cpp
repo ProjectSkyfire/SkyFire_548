@@ -13,6 +13,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <limits>
+#include <thread>
 
 #include "Common.h"
 #include "Configuration/Config.h"
@@ -129,6 +130,7 @@ extern int main(int argc, char** argv)
     const char* charactersDB = _SKYFIRE_DATABASE_CHARACTERS;
     const char* worldDB = _SKYFIRE_DATABASE_WORLD;
     uint64 hubControlReadHandle = 0;
+    bool hubStandby = false;
     uint64 hubStatusWriteHandle = 0;
 
     ///- Command line parsing to get the configuration file name
@@ -136,6 +138,8 @@ extern int main(int argc, char** argv)
     int c = 1;
     while (c < argc)
     {
+        if (strcmp(argv[c], "--hub-standby") == 0)
+            hubStandby = true;
         if (strcmp(argv[c], "--help") == 0)
         {
             usage(argv[0]);
@@ -328,6 +332,63 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
+    if (!Skyfire::LoadOpenSSLProviders("server.worldserver"))
+        return 1;
+
+    if (hubStandby)
+    {
+        if (!hubControlChannel || noUseConfigDatabaseInfo ||
+            !sConfigMgr->GetBoolDefault("CharacterService.Enable", false) ||
+            !sConfigMgr->GetBoolDefault("Cluster.Enable", false) ||
+            !sConfigMgr->GetBoolDefault("Cluster.Handoff.Enable", false) ||
+            !sConfigMgr->GetBoolDefault("MapData.Enable", false) ||
+            sConfigMgr->GetIntDefault("RealmID", 0) <= 0 ||
+            sConfigMgr->GetStringDefault("World.OwnershipLock", "").empty())
+        {
+            printf("Standby requires hub supervision, character service, clustered realm, map providers and an ownership lock.\n");
+            return 1;
+        }
+        std::string error;
+        bool cancelled = false;
+        auto prepareHeartbeat = std::chrono::steady_clock::now();
+        auto cancelPreparation = [&]()
+        {
+            cancelled = cancelled || hubControl.StopRequested();
+            auto now = std::chrono::steady_clock::now();
+            if (!cancelled && now - prepareHeartbeat >= std::chrono::seconds(5))
+            {
+                cancelled = !hubControl.SendStatus(Skyfire::HubControl::HeartbeatMessage);
+                prepareHeartbeat = now;
+            }
+            return cancelled;
+        };
+        if (!sWorld->PrepareStandbyData(error, cancelPreparation))
+        {
+            if (cancelled) return 0;
+            printf("Standby data preparation failed: %s\n", error.c_str());
+            return 1;
+        }
+        bool activate = false;
+        if (hubControl.StopRequested(nullptr, nullptr, &activate) || activate)
+            return 0; // Activation is valid only after this child reports standby readiness.
+        if (!hubControl.SendStatus(Skyfire::HubControl::StandbyMessage)) return 1;
+        printf("Standby ready: static data loaded; no database sessions or player listener. Waiting for hub promotion.\n");
+        auto heartbeat = std::chrono::steady_clock::now();
+        while (!activate)
+        {
+            if (hubControl.StopRequested(nullptr, nullptr, &activate)) return 0;
+            auto now = std::chrono::steady_clock::now();
+            if (now - heartbeat >= std::chrono::seconds(5))
+            {
+                if (!hubControl.SendStatus(Skyfire::HubControl::HeartbeatMessage)) return 1;
+                heartbeat = now;
+            }
+            if (!activate) std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+        if (!hubControl.SendStatus(Skyfire::HubControl::StartingMessage)) return 1;
+        printf("Standby promotion requested: acquiring ownership before database initialization.\n");
+    }
+
     WorldOwnershipLock ownership;
     std::string const ownershipPath = sConfigMgr->GetStringDefault("World.OwnershipLock", "");
     if (!ownershipPath.empty())
@@ -346,9 +407,6 @@ extern int main(int argc, char** argv)
     SF_LOG_INFO("server.worldserver", "Using configuration file %s.", cfg_file);
 
     SF_LOG_INFO("server.worldserver", "Using SSL version: %s (library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
-
-    if (!Skyfire::LoadOpenSSLProviders("server.worldserver"))
-        return 1;
 
     if (noUseConfigDatabaseInfo == true)
     {

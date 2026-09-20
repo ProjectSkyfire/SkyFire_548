@@ -18,6 +18,7 @@
 #include "Timer.h"
 #include "Platform/Singleton.h"
 #include <atomic>
+#include <functional>
 
 #include <list>
 #include <map>
@@ -661,6 +662,7 @@ public:
     }
 
     void SetInitialWorldSettings();
+    bool PrepareStandbyData(std::string& error, std::function<bool()> const& cancelled);
     void LoadConfigSettings(bool reload = false);
 
     void SendWorldText(int32 string_id, ...);
@@ -869,6 +871,8 @@ private:
     bool m_allowMovement;
     std::string m_motd;
     std::string m_dataPath;
+    bool m_standbyDataPrepared = false;
+    std::string m_standbyDataPath;
     std::set<uint32> m_remoteMapIds;
     std::string m_remoteMapPath;
     uint32 m_mapPrefetchRadius = 1;

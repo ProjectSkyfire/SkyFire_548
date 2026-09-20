@@ -85,12 +85,12 @@ void HubProcessSupervisor::UpdateBackupCycle(bool clusterIdle)
             auto const& runtime = entry.second;
             if (runtime.Definition.ServiceKind) continue; // Dependencies remain available while world saves finish.
             if (!IsActive(runtime)) continue;
-            if (runtime.State != HubManagedProcessState::Running || runtime.CommandPending || runtime.AccountCallback ||
-                (IsWorldKey(entry.first) && !runtime.CanSendCommands))
+            if ((runtime.State != HubManagedProcessState::Running && runtime.State != HubManagedProcessState::Standby) || runtime.CommandPending || runtime.AccountCallback ||
+                (IsWorldKey(entry.first) && !runtime.WarmStandby && !runtime.CanSendCommands))
             { fail("A managed service is not ready for a graceful backup countdown; no backup was started."); return; }
             if (!services.empty()) services += ',';
             services += entry.first;
-            hasWorld = hasWorld || IsWorldKey(entry.first);
+            hasWorld = hasWorld || (IsWorldKey(entry.first) && !runtime.WarmStandby);
         }
         // Commit the restart set before sending any shutdown command.
         uint64 const deadline = std::max(scheduled, now + (hasWorld ? warning : 0));
@@ -115,6 +115,18 @@ void HubProcessSupervisor::UpdateBackupCycle(bool clusterIdle)
             if (!IsWorldKey(key)) continue;
             auto& runtime = _services.at(key);
             runtime.BackupControlled = true; runtime.SuppressRestart = true;
+            if (runtime.WarmStandby)
+            {
+                if (!_backupSent.count(key))
+                {
+                    std::string error; FlagScope commandScope(_backupInternalCommand);
+                    if (!Stop(key, error)) { fail("Could not stop the prepared standby for backup."); return; }
+                    _backupSent.insert(key);
+                }
+                if (IsActive(runtime)) worldsStopped = false;
+                else if (runtime.LastExitCode != 0) { fail("Standby exited abnormally before backup."); return; }
+                continue;
+            }
             if (!_backupSent.count(key))
             {
                 if (state != "countdown" || stopAt <= now || runtime.State != HubManagedProcessState::Running)
@@ -185,7 +197,7 @@ void HubProcessSupervisor::UpdateBackupCycle(bool clusterIdle)
             }
             if (runtime.State == HubManagedProcessState::Unresponsive || !IsActive(runtime))
             { fail("A restarted service failed its readiness check. Maintenance remains active."); return; }
-            ready = ready && runtime.State == HubManagedProcessState::Running;
+            ready = ready && (runtime.State == HubManagedProcessState::Running || runtime.State == HubManagedProcessState::Standby);
         }
         if (!ready) return;
         // Complete and release in one database transaction after the full restart set is ready.

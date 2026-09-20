@@ -955,6 +955,12 @@ target_include_directories(hub_control_protocol_tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src/server/hub ${CMAKE_SOURCE_DIR}/src/server/shared)
 add_test(NAME hub_control_protocol_tests COMMAND hub_control_protocol_tests)
 
+add_executable(hub_standby_control_tests HubStandbyControlTests.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Platform/HubProcessControl.cpp)
+target_include_directories(hub_standby_control_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+target_link_libraries(hub_standby_control_tests Threads::Threads)
+add_test(NAME hub_standby_control_tests COMMAND hub_standby_control_tests)
+
 add_executable(realm_directory_agent_probe
   RealmDirectoryAgentProbe.cpp RealmSocketLogStub.cpp
   ${CMAKE_SOURCE_DIR}/src/server/shared/Cluster/ClusterAgent.cpp
