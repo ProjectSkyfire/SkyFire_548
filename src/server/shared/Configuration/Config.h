@@ -11,6 +11,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <utility>
 
 typedef std::map<std::string, std::string> ConfigSection;
 typedef std::map<std::string, ConfigSection> Config;
@@ -59,6 +60,19 @@ private:
 
     ConfigMgr(ConfigMgr const&);
     ConfigMgr& operator=(ConfigMgr const&);
+};
+
+// Read another service's configuration using identical parsing without changing global settings.
+class ConfigLoader
+{
+public:
+    static bool Load(std::string const& filename, Config& result)
+    {
+        ConfigMgr local;
+        if (!local.LoadInitial(filename.c_str())) return false;
+        result = std::move(local._config);
+        return true;
+    }
 };
 
 #define sConfigMgr Skyfire::Singleton<ConfigMgr, Skyfire::NullMutex>::instance()

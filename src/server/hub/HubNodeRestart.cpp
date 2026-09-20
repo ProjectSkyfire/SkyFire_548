@@ -101,7 +101,7 @@ bool HubProcessSupervisor::RestartNodes(std::string& error)
 
 void HubProcessSupervisor::UpdateNodeRestart()
 {
-    if (!HubNodeRestartActive) return;
+    if (!HubNodeRestartActive || _fallbackActive) return;
     auto tick = std::chrono::steady_clock::now();
     if (tick - _nodeRestartUpdated < std::chrono::seconds(1)) return;
     _nodeRestartUpdated = tick;

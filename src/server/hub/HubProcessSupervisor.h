@@ -7,6 +7,7 @@
 #define SKYFIRE_HUB_PROCESS_SUPERVISOR_H
 
 #include "Define.h"
+#include "HubWorldFallbackPolicy.h"
 
 #include <chrono>
 #include <functional>
@@ -61,6 +62,15 @@ public:
     bool Start(std::string const& serviceKey, std::string& error);
     void SetClusterServer(HubClusterServer* server) { _clusterServer = server; }
     bool RestartNodes(std::string& error);
+    void ConfigureFallback();
+    bool PromoteWorld(std::string const& target, std::string& error);
+    void UpdateFallback();
+    bool FallbackEnabled() const { return _fallbackEnabled; }
+    bool FallbackAutomatic() const { return _fallbackAutomatic; }
+    std::string const& FallbackPrimary() const { return _fallbackPrimary; }
+    std::string const& FallbackStandby() const { return _fallbackStandby; }
+    std::string const& FallbackState() const { return _fallbackState; }
+    std::string const& FallbackMessage() const { return _fallbackMessage; }
     void UpdateNodeRestart();
     std::string const& NodeRestartState() const { return _nodeRestartState; }
     std::string const& NodeRestartMessage() const { return _nodeRestartMessage; }
@@ -107,6 +117,9 @@ private:
         bool RestartPending = false;
         bool SuppressRestart = false;
         bool BackupControlled = false;
+        bool ExpectedExit = false;
+        bool EverReady = false;
+        std::string OwnershipPath;
         std::string CommandResult;
         bool MetricsAvailable = false;
         uint32 Players = 0;
@@ -133,6 +146,9 @@ private:
     void MarkExited(std::string const& serviceKey, ManagedServiceRuntime& runtime, int64 exitCode);
     static void CloseHandles(ManagedServiceRuntime& runtime);
     void ForceStop(std::string const& serviceKey, ManagedServiceRuntime& runtime);
+    bool ValidateFallbackPair(std::string& error);
+    bool CheckFallbackStart(std::string const& key, std::string& error);
+    void FailFallback(std::string const& error);
 
     std::function<bool(std::string const&, std::string&)> _worldStartCheck;
     std::unordered_map<std::string, ManagedServiceRuntime> _services;
@@ -140,6 +156,18 @@ private:
     bool _backupInternalCommand = false;
     bool _backupLaunching = false;
     bool _restartInternal = false;
+    bool _fallbackEnabled = false, _fallbackAutomatic = false, _fallbackActive = false;
+    bool _fallbackCrashPending = false, _fallbackStarting = false;
+    bool _fallbackGraceful = false;
+    std::string _fallbackPrimary, _fallbackStandby, _fallbackSource, _fallbackTarget;
+    std::string _fallbackState = "disabled", _fallbackMessage, _fallbackToken, _fallbackLock;
+    std::string _fallbackPrimaryNode, _fallbackStandbyNode;
+    uint32 _fallbackRealm = 0;
+    int _fallbackCountdown = 60;
+    uint32 _fallbackDegradedMs = 0, _fallbackDegradedSeconds = 60;
+    uint64 _fallbackObservedTick = 0, _fallbackObservedProcess = 0;
+    Skyfire::Fallback::DegradationWatch _fallbackDegradation;
+    std::chrono::steady_clock::time_point _fallbackDeadline{}, _fallbackUpdated{};
     HubClusterServer* _clusterServer = nullptr;
     std::string _nodeRestartState = "idle", _nodeRestartMessage, _nodeRestartToken;
     std::vector<std::string> _restartTargets;

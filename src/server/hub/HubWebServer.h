@@ -50,6 +50,8 @@ struct HubWebStatusSnapshot
     uint64 UptimeSeconds = 0;
     std::string RestartState, RestartMessage;
     bool RestartActive = false;
+    bool FallbackEnabled = false, FallbackAutomatic = false;
+    std::string FallbackPrimary, FallbackStandby, FallbackState, FallbackMessage;
     std::vector<HubWebManagedServiceStatus> Services;
     std::vector<Skyfire::Cluster::Node> ClusterNodes;
     std::vector<HubAuthProxyStatus> AuthIngress;
@@ -60,6 +62,7 @@ struct HubWebServiceCommand
     std::string ServiceKey;
     bool Start = false;
     bool RestartAll = false;
+    bool Promote = false;
     bool Configure = false;
     std::string Name, ExecutablePath, ConfigPath, WorkingDirectory;
     std::string WorldCommand;

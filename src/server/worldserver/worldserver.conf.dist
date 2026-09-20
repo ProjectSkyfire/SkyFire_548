@@ -99,6 +99,15 @@ Cluster.Certificate = ""
 Cluster.PrivateKey = ""
 Cluster.CA = ""
 
+# Optional exclusive SAME-HOST character writer ownership, acquired BEFORE database setup.
+# Required for both members of a hub fallback pair. Use the identical absolute lock-file path
+# on a local disk with an existing parent directory, e.g. C:/SkyFire/locks/realm-1.lock.
+# All processes accessing this realm's character database must follow this convention.
+# The lock lasts through shutdown and DB cleanup. Never delete/replace an active lock file.
+# This does not fence another computer; a character service with writer epochs is future work.
+# Database command-line overrides are rejected when this setting is enabled.
+World.OwnershipLock = ""
+
 ###################################################################################################
 # CONNECTIONS AND DIRECTORIES
 #

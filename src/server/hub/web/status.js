@@ -9,6 +9,7 @@ window.HubStatus = (() => {
     const actionMessage = document.querySelector("#service-action-message");
     const restartAll = document.querySelector("#restart-all-nodes");
     const restartStatus = document.querySelector("#node-restart-status");
+    const fallbackStatus = document.querySelector("#world-fallback-status");
     let restartSending = false;
     let restartError = '';
     const online = document.createElement("strong");
@@ -44,7 +45,7 @@ window.HubStatus = (() => {
         card.metrics.className = "service-metrics";
         card.controls = document.createElement("div");
         card.controls.className = "service-controls";
-        for (const action of ["start", "stop", "restart", "edit", "drain", "disable", "enable"]) {
+        for (const action of ["start", "stop", "restart", "promote", "edit", "drain", "disable", "enable"]) {
             const button = document.createElement("button");
             button.type = "button";
             button.className = `service-button ${action}`;
@@ -67,6 +68,10 @@ window.HubStatus = (() => {
         const cluster = component.clusterCanAdmin === true;
         card.controls.hidden = !component.managed && !cluster;
         card.start.hidden = card.stop.hidden = !component.managed;
+        const pairMember = data.fallback?.enabled && [data.fallback.primary, data.fallback.standby].includes(component.key);
+        card.promote.hidden = !component.managed || !pairMember;
+        card.promote.disabled = active || pending.has(component.key) || !data.canOperateServices || data.restartActive;
+        card.promote.title = 'Gracefully stop the other world, confirm exclusive ownership, then start this world. Players must reconnect.';
         card.restart.hidden = !component.mapserver || !component.canRestart;
         card.restart.disabled = pending.has(component.key) || !component.live || !data.canOperateServices || data.restartActive;
         let metrics = `Uptime ${active ? formatUptime(component.uptimeSeconds) : "—"}`;
@@ -93,13 +98,13 @@ window.HubStatus = (() => {
             card[action].title = action === "enable" ? "Allow new authentication connections or world handoffs when the node is ready." :
                 "Stop new authentication connections or world handoffs. Existing sessions continue; the process remains running.";
         }
-        if (data.restartActive) for (const action of ["start","stop","restart","edit","drain","disable","enable"]) card[action].disabled = true;
+        if (data.restartActive) for (const action of ["start","stop","restart","promote","edit","drain","disable","enable"]) card[action].disabled = true;
         if (connectionLost) {
             card.article.className = 'component offline';
             text(card.state, component.key === 'hub' ? 'offline' : 'unknown');
             text(card.detail, component.key === 'hub' ? 'Hub is unreachable; waiting for a successful status response.' : 'Live status unavailable; last report is stale.');
             text(card.metrics, 'Live metrics unavailable');
-            for (const action of ['start','stop','restart','edit','drain','disable','enable']) card[action].disabled = true;
+            for (const action of ['start','stop','restart','promote','edit','drain','disable','enable']) card[action].disabled = true;
         } else card.edit.disabled = !!data.restartActive;
     }
     function markStale() {
@@ -112,6 +117,10 @@ window.HubStatus = (() => {
         callbacks.onStale?.();
     }
     function render(data) {
+        if (fallbackStatus) {
+            fallbackStatus.hidden = !data.fallback?.enabled;
+            text(fallbackStatus, data.fallback?.enabled ? `World fallback (${data.fallback.automatic ? 'automatic' : 'manual'}): ${data.fallback.message}` : '');
+        }
         if (restartAll) {
             restartAll.disabled = restartSending || data.restartActive || !data.canOperateServices;
             restartAll.title = 'Gracefully restart running worlds, authentication and mapserver nodes. Hub/web stays online.';
@@ -145,7 +154,7 @@ window.HubStatus = (() => {
         const component = cards.get(key).data;
         const cluster = ["drain", "disable", "enable", "restart"].includes(action);
         const label = action[0].toUpperCase() + action.slice(1);
-        const progress = { start: "Starting", stop: "Stopping", restart: "Restarting", drain: "Draining", disable: "Disabling", enable: "Enabling" }[action];
+        const progress = { start: "Starting", stop: "Stopping", restart: "Restarting", promote: "Promoting", drain: "Draining", disable: "Disabling", enable: "Enabling" }[action];
         text(actionMessage, `${progress} ${component.name}...`);
         try {
             const path = cluster ? `/api/v1/cluster/${encodeURIComponent(component.clusterKey)}/${action}` :

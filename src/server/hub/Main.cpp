@@ -259,6 +259,7 @@ int main(int argc, char** argv)
         return 1;
 
     HubProcessSupervisor processSupervisor;
+    processSupervisor.ConfigureFallback();
     std::string databaseRecordError;
     if (!processSupervisor.ReloadDatabaseRecords(databaseRecordError))
     {
@@ -395,6 +396,7 @@ int main(int argc, char** argv)
         clusterServer.Update();
         processSupervisor.Update();
         processSupervisor.UpdateNodeRestart();
+        processSupervisor.UpdateFallback();
 
         HubWebServiceCommand webCommand;
         while (webEnabled && webServer.PollServiceCommand(webCommand))
@@ -451,6 +453,8 @@ int main(int argc, char** argv)
             }
             bool const accepted = webCommand.RestartAll
                 ? processSupervisor.RestartNodes(error)
+                : webCommand.Promote
+                ? processSupervisor.PromoteWorld(webCommand.ServiceKey, error)
                 : webCommand.Configure
                 ? processSupervisor.SaveWorldNode(webCommand.ServiceKey, webCommand.Name, webCommand.ExecutablePath,
                     webCommand.ConfigPath, webCommand.WorkingDirectory, error)
@@ -460,12 +464,13 @@ int main(int argc, char** argv)
                 ? processSupervisor.Start(webCommand.ServiceKey, error)
                 : processSupervisor.Stop(webCommand.ServiceKey, error);
             if (webCommand.RestartAll) SF_LOG_INFO("server.hub", "Node restart requested by %s: %s",webCommand.Actor.c_str(),accepted ? "accepted" : error.c_str());
+            if (webCommand.Promote) SF_LOG_INFO("server.hub", "World promotion to %s requested by %s: %s", webCommand.ServiceKey.c_str(), webCommand.Actor.c_str(), accepted ? "accepted" : error.c_str());
             webServer.CompleteControlCommand(webCommand,accepted);
             if (webCommand.DispatchResult)
                 webCommand.DispatchResult->set_value(accepted ? "" : error);
             if (!accepted)
                 SF_LOG_WARN("server.hub", "Web console could not %s managed service '%s': %s.",
-                    webCommand.RestartAll ? "restart all" : webCommand.Configure ? "configure" : !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
+                    webCommand.RestartAll ? "restart all" : webCommand.Promote ? "promote" : webCommand.Configure ? "configure" : !webCommand.WorldCommand.empty() ? "send command to" : webCommand.Start ? "start" : "stop", webCommand.ServiceKey.c_str(), error.c_str());
         }
 
         auto const liveNodes = clusterServer.Snapshot();
@@ -480,6 +485,12 @@ int main(int argc, char** argv)
             status.RestartState = processSupervisor.NodeRestartState();
             status.RestartMessage = processSupervisor.NodeRestartMessage();
             status.RestartActive = HubNodeRestartActive;
+            status.FallbackEnabled = processSupervisor.FallbackEnabled();
+            status.FallbackAutomatic = processSupervisor.FallbackAutomatic();
+            status.FallbackPrimary = processSupervisor.FallbackPrimary();
+            status.FallbackStandby = processSupervisor.FallbackStandby();
+            status.FallbackState = processSupervisor.FallbackState();
+            status.FallbackMessage = processSupervisor.FallbackMessage();
             status.UptimeSeconds = uint64(std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::steady_clock::now() - hubStartedAt).count());
             for (HubManagedServiceStatus const& service : processSupervisor.GetStatuses())

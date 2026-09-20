@@ -202,6 +202,21 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         PrintStatus();
     else if (command == "registry")
         PrintRegistry();
+    else if (command == "fallback")
+    {
+        std::string action, target, extra, error;
+        input >> action;
+        if (action.empty() || action == "status")
+            std::printf("Fallback %s: %s\n", _processSupervisor.FallbackState().c_str(), _processSupervisor.FallbackMessage().c_str());
+        else if (origin != HubCommandOrigin::LocalConsole)
+            std::printf("Fallback promotion requires the local hub console.\n");
+        else if (action != "promote" || !(input >> target) || input >> extra)
+            std::printf("Usage: fallback status | fallback promote <world-service-key>\n");
+        else if (!_processSupervisor.PromoteWorld(target, error))
+            std::printf("Promotion rejected: %s\n", error.c_str());
+        else
+            std::printf("Promotion accepted. Use fallback status to follow progress.\n");
+    }
     else if (command == "routing")
         PrintRouting();
     else if (command == "realms")
@@ -433,6 +448,7 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  handoffs   Show shared handoff counters (no token material).\n");
     std::printf("  cluster <drain|disable|enable> <node-key>  Persist auth/world routing policy (does not stop gameplay).\n");
     std::printf("  start <service>\n");
+    std::printf("  fallback status | fallback promote <world-service-key>  Safe same-host world switchover.\n");
     std::printf("             Start and supervise a database-configured service.\n");
     std::printf("  stop <service>\n");
     std::printf("             Gracefully stop a managed service.\n");

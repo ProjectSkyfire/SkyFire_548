@@ -630,6 +630,10 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
          << ",\"accountsEnabled\":" << (Skyfire::Auth::AccountAdministration::IsEnabled() ? "true" : "false")
          << ",\"restartActive\":" << (status.RestartActive ? "true" : "false")
          << ",\"restartState\":\"" << JsonEscape(status.RestartState) << "\",\"restartMessage\":\"" << JsonEscape(status.RestartMessage) << "\""
+         << ",\"fallback\":{\"enabled\":" << (status.FallbackEnabled ? "true" : "false")
+         << ",\"automatic\":" << (status.FallbackAutomatic ? "true" : "false")
+         << ",\"primary\":\"" << JsonEscape(status.FallbackPrimary) << "\",\"standby\":\"" << JsonEscape(status.FallbackStandby)
+         << "\",\"state\":\"" << JsonEscape(status.FallbackState) << "\",\"message\":\"" << JsonEscape(status.FallbackMessage) << "\"}"
          << ",\"uptimeSeconds\":" << status.UptimeSeconds << ",\"components\":["
          << "{\"key\":\"hub\",\"name\":\"Hub Runtime\",\"status\":\"online\",\"detail\":\"Control process is running\"},"
          << "{\"key\":\"database\",\"name\":\"Hub Database\",\"status\":\"online\",\"detail\":\"Connection pool is active\"},"
@@ -791,7 +795,7 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     std::string const serviceKey = route.substr(0, slash);
     std::string const action = route.substr(slash + 1);
-    if (action != "start" && action != "stop" && action != "configure" && action != "command" && !(action == "restart" && serviceKey == "all"))
+    if (action != "start" && action != "stop" && action != "configure" && action != "command" && action != "promote" && !(action == "restart" && serviceKey == "all"))
         return MakeResponse(404, "application/json", "{\"error\":\"endpoint not found\"}");
     if (!std::all_of(serviceKey.begin(), serviceKey.end(), [](unsigned char character)
         { return std::isalnum(character) || character == '_' || character == '-'; }))
@@ -823,9 +827,10 @@ std::string HubWebServer::HandleServiceCommand(std::string const& path,
     command.ServiceKey = serviceKey;
     command.Start = action == "start";
     command.RestartAll = restartAll;
+    command.Promote = action == "promote";
     command.Actor = session.Username;
     std::future<std::string> dispatchResult;
-    if (restartAll)
+    if (restartAll || command.Promote)
     {
         command.DispatchResult = std::make_shared<std::promise<std::string>>();
         dispatchResult = command.DispatchResult->get_future();

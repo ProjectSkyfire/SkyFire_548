@@ -1,5 +1,10 @@
 # Clustering setup
 
+For same-host world standby, controlled promotion and optional crash/overload
+handling, see [World fallback](WorldFallback.md). This currently uses a stopped
+standby and process-lifetime local ownership; the character-service snapshot design
+in that guide is future work, not live-session failover.
+
 See the [root README](../README.md#clustering-package-requirements) for the package
 requirements for each component.
 

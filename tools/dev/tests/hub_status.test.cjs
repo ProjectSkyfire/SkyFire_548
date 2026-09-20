@@ -16,6 +16,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         let registryNodes = [];
         let restart = {}, restartRequests = 0, mapRestartRequests = 0;
         let rejectRestart = false;
+        let fallback = {enabled:false}, canOperate = true, promotionRequests = 0, rejectPromotion = false;
         const component = { key: "world", name: "SkyFire", managed: true, isWorld: true, enabled: true,
             status: "online", state: "running", canSendCommands: true, metricsAvailable: true, players: 4,
             cpuPercent: 1.5, updateTimeMs: 2, executablePath: "worldserver", configPath: "worldserver.conf", workingDirectory: "." };
@@ -25,7 +26,7 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
             if (url.pathname === "/api/v1/status") {
                 ++count; ++inFlight; maxInFlight = Math.max(inFlight, maxInFlight);
                 const requestCount = count;
-                const data = { username: "admin", csrfToken: "token", canSendWorldCommands: true, canOperateServices: true,
+                const data = { username: "admin", csrfToken: "token", canSendWorldCommands: true, canOperateServices: canOperate, fallback,
                     accountsEnabled: true, uptimeSeconds: 60 + requestCount, ...restart,
                     components: [{ ...component, uptimeSeconds: 60 + requestCount, players: requestCount }, ...registryNodes] };
                 try {
@@ -33,6 +34,14 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
                     if (fail) return await json({ error: "temporarily unavailable" }, 503);
                     return await json(data, authenticated ? 200 : 401);
                 } finally { --inFlight; }
+            }
+            if (url.pathname === '/api/v1/services/world-standby/promote') {
+                assert.equal(route.request().headers()['x-hub-csrf'],'token');
+                ++promotionRequests;
+                if (rejectPromotion) return json({error:'Source exit is not confirmed.'},409);
+                restart={restartActive:true};
+                fallback={...fallback,state:'stopping',message:'Waiting for primary to save and exit.'};
+                return json({accepted:true},202);
             }
             if (url.pathname === '/api/v1/services/all/restart') {
                 assert.equal(route.request().headers()['x-hub-csrf'],'token');
@@ -124,6 +133,23 @@ const web = path.resolve(__dirname, "../../../src/server/hub/web");
         await page.evaluate(() => loadStatus());
         assert.equal(await page.locator('#backup-view').isVisible(),true);
         assert.equal(await page.locator('.backup-schedule input[type=number]').inputValue(),'125');
+        fallback={enabled:true,automatic:false,primary:'world',standby:'world-standby',state:'idle',message:'Ready for controlled switchover.'};
+        registryNodes=[{...component,key:'world-standby',name:'Standby world',state:'stopped',status:'offline',isWorld:true}];
+        await page.evaluate(() => loadStatus());
+        const promote = page.locator('#component-grid article').filter({hasText:'Standby world'}).getByRole('button',{name:'Promote',exact:true});
+        assert.equal(await promote.isEnabled(),true);
+        assert.equal(await page.locator('#component-grid article').first().getByRole('button',{name:'Promote',exact:true}).isEnabled(),false);
+        canOperate=false; await page.evaluate(() => loadStatus());
+        assert.equal(await promote.isEnabled(),false,'viewers cannot promote a world');
+        canOperate=true; rejectPromotion=true; await page.evaluate(() => loadStatus());
+        await promote.click();
+        await page.waitForFunction(()=>document.querySelector('#service-action-message').textContent.includes('Source exit is not confirmed'));
+        rejectPromotion=false; await promote.click();
+        await page.waitForFunction(()=>document.querySelector('#world-fallback-status').textContent.includes('Waiting for primary'));
+        assert.equal(promotionRequests,2);
+        assert.equal(await promote.isEnabled(),false,'promotion blocks duplicate actions');
+        assert.equal(await page.locator('.backup-schedule input[type=number]').inputValue(),'125','promotion polling preserves page edits');
+        restart={}; fallback={enabled:false}; registryNodes=[]; await page.evaluate(() => loadStatus());
         await page.locator("#status-tab").click();
         await page.locator("#world-console").waitFor({ state: "visible" });
         await page.locator("#world-command").fill(".server restart 300");

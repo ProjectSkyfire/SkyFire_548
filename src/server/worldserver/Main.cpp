@@ -22,6 +22,7 @@
 #include "Master.h"
 #include "OpenSSLProviders.h"
 #include "Platform/HubProcessControl.h"
+#include "Platform/WorldOwnershipLock.h"
 #include "World.h"
 
 #ifndef _SKYFIRE_CORE_CONFIG
@@ -325,6 +326,21 @@ extern int main(int argc, char** argv)
         printf("Invalid or missing configuration file : %s\n", cfg_file);
         printf("Verify that the file exists and has \'[worldserver]' written in the top of the file!\n");
         return 1;
+    }
+
+    WorldOwnershipLock ownership;
+    std::string const ownershipPath = sConfigMgr->GetStringDefault("World.OwnershipLock", "");
+    if (!ownershipPath.empty())
+    {
+        std::string error;
+        if (noUseConfigDatabaseInfo || !ownership.Acquire(ownershipPath, error))
+        {
+            printf("World ownership denied before database setup: %s\n",
+                noUseConfigDatabaseInfo ? "Database command-line overrides are incompatible with ownership locking." : error.c_str());
+            return 1;
+        }
+        if (hubControlChannel && !hubControl.SendStatus(("OWNERSHIP_LOCKED " + ownership.Path()).c_str()))
+            return 1;
     }
 
     SF_LOG_INFO("server.worldserver", "Using configuration file %s.", cfg_file);

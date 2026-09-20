@@ -37,6 +37,13 @@ target_link_libraries(database_queue_tests Threads::Threads)
 
 add_test(NAME database_queue_tests COMMAND database_queue_tests)
 
+add_executable(world_fallback_tests WorldFallbackTests.cpp)
+target_include_directories(world_fallback_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/hub
+)
+add_test(NAME world_fallback_tests COMMAND world_fallback_tests)
+
 add_executable(database_setup_tests
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database/DatabaseSetup/DatabaseSetup.cpp
   DatabaseSetupTests.cpp

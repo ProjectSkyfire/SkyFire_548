@@ -5,6 +5,7 @@
 #include "HubBackupGuard.h"
 
 #include "HubProcessSupervisor.h"
+#include "HubWorldFallbackPolicy.h"
 
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -203,6 +204,7 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
             SF_LOG_ERROR("server.hub", "%s", error.c_str());
             return false;
         }
+        if (!CheckFallbackStart(serviceKey, error)) return false;
         if (!Launch(serviceKey, runtime, executablePath.string(), configPath.string(),
             workingDirectory.string(), error))
             return false;
@@ -221,6 +223,9 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
     runtime.SuppressRestart = false;
     runtime.BackupControlled = false;
     runtime.RestartPending = false;
+    runtime.ExpectedExit = false;
+    runtime.EverReady = false;
+    runtime.OwnershipPath.clear();
     runtime.LastExitCode = 0;
     runtime.MetricsAvailable = false;
     runtime.LastTick = 0;
@@ -299,6 +304,8 @@ bool HubProcessSupervisor::SendWorldCommand(std::string command, std::string& er
         return false;
     }
     runtime.CommandPending = true;
+    if (command.compare(0, 15, "server shutdown") == 0 || command.compare(0, 14, "server restart") == 0)
+        runtime.ExpectedExit = command.find("cancel") == std::string::npos;
     runtime.CommandResult = "Waiting for worldserver response...";
     return true;
 }
@@ -491,12 +498,15 @@ void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime&
     if (!IsActive(runtime))
         return;
 #ifdef _WIN32
-    DWORD exitCode = STILL_ACTIVE;
-    if (!GetExitCodeProcess(reinterpret_cast<HANDLE>(uintptr_t(runtime.ProcessHandle)), &exitCode) || exitCode != STILL_ACTIVE)
+    HANDLE const process = reinterpret_cast<HANDLE>(uintptr_t(runtime.ProcessHandle));
+    DWORD const wait = WaitForSingleObject(process, 0);
+    DWORD exitCode = 0;
+    if (wait == WAIT_OBJECT_0 && GetExitCodeProcess(process, &exitCode))
     {
-        MarkExited(key, runtime, exitCode == STILL_ACTIVE ? -1 : int64(exitCode));
+        MarkExited(key, runtime, int64(exitCode));
         return;
     }
+    if (wait == WAIT_FAILED) { runtime.State = HubManagedProcessState::Unresponsive; return; }
 #else
     int status = 0;
     pid_t const result = waitpid(pid_t(runtime.ProcessId), &status, WNOHANG);
@@ -558,7 +568,9 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
     std::string const& message)
 {
     auto const now = std::chrono::steady_clock::now();
-    if (message == Skyfire::HubControl::StartingMessage)
+    if (message.compare(0, 17, "OWNERSHIP_LOCKED ") == 0)
+        runtime.OwnershipPath = message.substr(17);
+    else if (message == Skyfire::HubControl::StartingMessage)
     {
         runtime.State = HubManagedProcessState::Starting;
         runtime.LastHeartbeat = now;
@@ -568,6 +580,7 @@ void HubProcessSupervisor::ProcessStatusMessage(std::string const& key, ManagedS
         runtime.CanSendCommands = IsWorldKey(key) && message != Skyfire::HubControl::ReadyMessage;
         runtime.CanManageAccounts = IsWorldKey(key) && message == Skyfire::HubControl::AccountReadyMessage;
         runtime.Ready = true;
+        runtime.EverReady = true;
         runtime.State = HubManagedProcessState::Running;
         runtime.LastHeartbeat = now;
         SF_LOG_INFO("server.hub", "Managed service '%s' reported ready.", key.c_str());
@@ -716,6 +729,11 @@ void HubProcessSupervisor::MarkExited(std::string const& key, ManagedServiceRunt
     SF_LOG_INFO("server.hub", "Managed service '%s' process %llu exited with code %lld.", key.c_str(),
         static_cast<unsigned long long>(runtime.ProcessId), static_cast<long long>(exitCode));
     ReadStatusMessages(key, runtime);
+    if (_fallbackEnabled && _fallbackAutomatic && key == _fallbackPrimary &&
+        Skyfire::Fallback::MayAutomaticallyPromote({true, runtime.EverReady, !runtime.OwnershipPath.empty(),
+            runtime.ExpectedExit || runtime.SuppressRestart || runtime.State == HubManagedProcessState::Stopping,
+            runtime.BackupControlled || HubNodeRestartActive, _shuttingDown, exitCode}))
+        _fallbackCrashPending = true;
     runtime.RestartPending = IsWorldKey(key) && exitCode == Skyfire::HubControl::WorldRestartExitCode &&
         !_shuttingDown && !runtime.SuppressRestart;
     if (runtime.CommandPending)
