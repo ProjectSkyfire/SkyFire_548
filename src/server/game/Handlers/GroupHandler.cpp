@@ -987,6 +987,11 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     if (mask == GROUP_UPDATE_FLAG_NONE)
         return;
 
+    // Both aura blocks below are commented out, so these flags must not be advertised - the client
+    // reads the bytes that follow as an aura array off a count that was never written. This has to
+    // stay below the return above: stripping first would leave the caller's packet uninitialised.
+    mask &= ~(GROUP_UPDATE_FLAG_AURAS | GROUP_UPDATE_FLAG_PET_AURAS);
+
     std::set<uint32> const& phases = player->GetPhases();
 
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)                // if update power type, update current/max power also
