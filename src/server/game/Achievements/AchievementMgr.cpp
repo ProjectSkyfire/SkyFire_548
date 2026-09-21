@@ -2905,6 +2905,14 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
 
         switch (AchievementCriteriaAdditionalCondition(reqType))
         {
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_ITEM_LEVEL: // 3
+            {
+                // miscValue1 is itemid
+                ItemTemplate const* const item = sObjectMgr->GetItemTemplate(uint32(miscValue1));
+                if (!item || item->ItemLevel < reqValue)
+                    return false;
+                break;
+            }
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_CREATURE_ENTRY: // 4
                 if (!unit || unit->GetEntry() != reqValue)
                     return false;
