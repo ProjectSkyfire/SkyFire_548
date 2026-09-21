@@ -102,6 +102,12 @@ void GroupMgr::LoadGroups()
         CharacterDatabase.DirectExecute("DELETE FROM parties WHERE leaderGuid NOT IN (SELECT guid FROM characters)");
         // Delete all groups with less than 2 members
         CharacterDatabase.DirectExecute("DELETE FROM parties WHERE guid NOT IN (SELECT guid FROM party_member GROUP BY guid HAVING COUNT(guid) > 1)");
+        // Delete all rows from party_member and party_instance with no group. This has to run
+        // before the early return below: with `parties` empty NextGroupDbStoreId starts at 1, so
+        // the first group formed after startup claims exactly the storage id the orphan rows point
+        // at and drags their characters into it.
+        CharacterDatabase.DirectExecute("DELETE FROM party_member WHERE guid NOT IN (SELECT guid FROM parties)");
+        CharacterDatabase.DirectExecute("DELETE FROM party_instance WHERE guid NOT IN (SELECT guid FROM parties)");
 
         //                                                        0              1           2             3                 4      5          6      7         8       9
         QueryResult result = CharacterDatabase.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6"
@@ -140,9 +146,6 @@ void GroupMgr::LoadGroups()
     {
         uint32 oldMSTime = getMSTime();
 
-        // Delete all rows from party_member and party_instance with no group
-        CharacterDatabase.DirectExecute("DELETE FROM party_member WHERE guid NOT IN (SELECT guid FROM parties)");
-        CharacterDatabase.DirectExecute("DELETE FROM party_instance WHERE guid NOT IN (SELECT guid FROM parties)");
         // Delete all members that does not exist
         CharacterDatabase.DirectExecute("DELETE FROM party_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
 

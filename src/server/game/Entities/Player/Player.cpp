@@ -13985,6 +13985,20 @@ void Player::_LoadGroup(PreparedQueryResult result)
     {
         if (Group* group = sGroupMgr->GetGroupByDbStoreId((*result)[0].GetUInt32()))
         {
+            // A leftover party_member row can point at a storage id a completely different group
+            // has since been handed. Joining it would put this character in a group that never
+            // invited them.
+            if (!group->IsMember(GetGUID()))
+            {
+                SF_LOG_ERROR("entities.player", "Player::_LoadGroup: %s (GUID: %u) has a party_member row for group storage id %u, which does not list them as a member. Dropping the row.",
+                    GetName().c_str(), GetGUIDLow(), (*result)[0].GetUInt32());
+
+                PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GROUP_MEMBER);
+                stmt->setUInt32(0, GetGUIDLow());
+                CharacterDatabase.Execute(stmt);
+                return;
+            }
+
             uint8 subgroup = group->GetMemberGroup(GetGUID());
             SetGroup(group, subgroup);
             if (getLevel() >= LEVELREQUIREMENT_HEROIC)
