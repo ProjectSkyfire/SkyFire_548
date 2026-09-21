@@ -2972,8 +2972,22 @@ namespace lfg
 
     void LFGMgr::SetupGroupMember(uint64 guid, uint64 gguid)
     {
-        LfgDungeonSet dungeons;
-        dungeons.insert(GetDungeon(gguid));
+        // Keep a random or seasonal selection: it is the only record that the player queued
+        // randomly at all, and FinishDungeon() reads it back to decide whether a reward is owed.
+        // Anything else still collapses to the dungeon the group is in.
+        LfgDungeonSet dungeons = GetSelectedDungeons(guid);
+
+        bool queuedRandom = false;
+        if (!dungeons.empty())
+            if (LFGDungeonData const* selected = GetLFGDungeon(*dungeons.begin()))
+                queuedRandom = selected->type == LFG_TYPE_RANDOM || selected->seasonal;
+
+        if (!queuedRandom)
+        {
+            dungeons.clear();
+            dungeons.insert(GetDungeon(gguid));
+        }
+
         SetActiveQueueId(guid, GetActiveQueueId(gguid));
         SetSelectedDungeons(guid, dungeons);
         SetState(guid, GetState(gguid));
