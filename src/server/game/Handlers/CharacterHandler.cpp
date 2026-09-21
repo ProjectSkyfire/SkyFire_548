@@ -9,6 +9,7 @@
 #include "Battleground.h"
 #include "CalendarMgr.h"
 #include "CharacterBoost.h"
+#include "CharacterServiceClient.h"
 #include "Chat.h"
 #include "Common.h"
 #include "Creature.h"
@@ -57,7 +58,14 @@ public:
 
 bool LoginQueryHolder::Initialize()
 {
+    static_assert(MAX_PLAYER_LOGIN_QUERY == CharacterServiceClient::LoginResultCount, "Update the character service login contract");
     SetSize(MAX_PLAYER_LOGIN_QUERY);
+
+    if (CharacterServiceClient::Enabled())
+    {
+        SetCharacterLoad(GUID_LOPART(m_guid), m_accountId, sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_DECLINED_NAMES_USED));
+        return true;
+    }
 
     bool res = true;
     uint32 lowGuid = GUID_LOPART(m_guid);

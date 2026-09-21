@@ -91,6 +91,11 @@ public:
     void Ping() { if (_characterService) _characterService->Query("SELECT 1"); else mysql_ping(m_Mysql); }
 
     bool IsRemote() const { return bool(_characterService); }
+    std::vector<CharacterServiceRows> LoadCharacter(uint32 guid, uint32 account, bool declinedNames)
+    {
+        ASSERT(_characterService);
+        return _characterService->LoadCharacter(guid, account, declinedNames);
+    }
     unsigned long Escape(char* to, char const* from, unsigned long length)
     { return _characterService ? CharacterServiceClient::Escape(to,from,length) : mysql_real_escape_string(m_Mysql,to,from,length); }
 

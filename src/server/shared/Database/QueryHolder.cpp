@@ -156,6 +156,19 @@ void SQLQueryHolder::SetSize(size_t size)
     m_queries.resize(size);
 }
 
+void SQLQueryHolder::SetCharacterLoad(uint32 guid, uint32 account, bool declinedNames)
+{
+    m_characterGuid = guid;
+    m_characterAccount = account;
+    m_declinedNames = declinedNames;
+    for (auto& query : m_queries)
+    {
+        query.first.type = SQL_ELEMENT_PREPARED;
+        query.first.element.stmt = nullptr;
+        query.second.presult = nullptr;
+    }
+}
+
 bool SQLQueryHolderTask::Execute()
 {
     //the result can't be ready as we are processing it right now
@@ -163,6 +176,17 @@ bool SQLQueryHolderTask::Execute()
 
     if (!m_holder)
         return false;
+
+    if (m_holder->m_characterGuid)
+    {
+        auto results = m_conn->LoadCharacter(m_holder->m_characterGuid, m_holder->m_characterAccount, m_holder->m_declinedNames);
+        ASSERT(results.size() == m_holder->m_queries.size());
+        for (size_t i = 0; i < results.size(); ++i)
+            if (!results[i].Types.empty())
+                m_holder->SetPreparedResult(i, new PreparedResultSet(std::move(results[i])));
+        m_result.set(m_holder);
+        return true;
+    }
 
     /// we can do this, we are friends
     std::vector<SQLQueryHolder::SQLResultPair>& queries = m_holder->m_queries;

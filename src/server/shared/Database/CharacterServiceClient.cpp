@@ -99,7 +99,7 @@ struct CharacterServiceClient::State
             std::string(reinterpret_cast<char*>(text),size)==sConfigMgr->GetStringDefault("CharacterService.NodeKey","characters-1");
         OPENSSL_free(text); X509_free(certificate);
         if (!identity) throw std::runtime_error("Character service certificate identity mismatch");
-        Bytes hello{0,1}; U32(hello,std::uint32_t(sConfigMgr->GetIntDefault("RealmID",0))); Blob(hello,Instance); Blob(hello,Catalog);
+        Bytes hello{0,2}; U32(hello,std::uint32_t(sConfigMgr->GetIntDefault("RealmID",0))); Blob(hello,Instance); Blob(hello,Catalog);
         Exchange(hello);
     }
 };
@@ -186,13 +186,48 @@ void CharacterServiceClient::Execute(char const* sql) { Request(1,Encode(sql)); 
 void CharacterServiceClient::Execute(PreparedStatement const* statement) { Request(1,Encode(statement)); }
 void CharacterServiceClient::Execute(Transaction const& transaction)
 {
-    Bytes body; U32(body,std::uint32_t(transaction.m_queries.size()));
+    Bytes body;
+    if (transaction.m_characterState)
+    {
+        U32(body,transaction.m_characterGuid);
+        U32(body,transaction.m_characterAccount);
+        body.push_back(transaction.m_characterCreate ? 1 : 0);
+        auto state = Encode(transaction.m_characterState);
+        // The snapshot contains typed values only. SQL selection belongs to the service.
+        body.insert(body.end(),state.begin()+5,state.end());
+    }
+    U32(body,std::uint32_t(transaction.m_queries.size()));
     for (auto const& entry:transaction.m_queries)
     {
         auto encoded=entry.type==SQL_ELEMENT_RAW ? Encode(entry.element.query) : Encode(entry.element.stmt);
         body.insert(body.end(),encoded.begin(),encoded.end());
     }
-    Request(3,std::move(body));
+    Request(transaction.m_characterState ? 5 : 3,std::move(body));
+}
+
+std::vector<CharacterServiceRows> CharacterServiceClient::LoadCharacter(std::uint32_t guid, std::uint32_t account, bool declinedNames)
+{
+    Bytes body; U32(body,guid); U32(body,account); body.push_back(declinedNames ? 1 : 0);
+    auto response = Request(4,std::move(body));
+    try
+    {
+        Reader input{response};
+        auto count = input.U32();
+        if (count != LoginResultCount) throw std::runtime_error("Invalid character login layout");
+        std::vector<CharacterServiceRows> results;
+        for (std::uint32_t i = 0; i < count; ++i)
+        {
+            auto packed = input.Blob();
+            results.push_back(packed.empty() ? CharacterServiceRows{} : Rows(Bytes(packed.begin(),packed.end())));
+        }
+        input.End();
+        return results;
+    }
+    catch (std::exception const&)
+    {
+        SF_LOG_ERROR("sql.driver","Invalid character login snapshot; stopping world.");
+        std::abort();
+    }
 }
 CharacterServiceRows CharacterServiceClient::Rows(Bytes const& bytes)
 {

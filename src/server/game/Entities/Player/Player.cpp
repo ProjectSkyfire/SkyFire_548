@@ -17,6 +17,7 @@
 #include "Channel.h"
 #include "ChannelMgr.h"
 #include "CharacterDatabaseCleaner.h"
+#include "CharacterServiceClient.h"
 #include "Chat.h"
 #include "Common.h"
 #include "ConditionMgr.h"
@@ -7892,7 +7893,7 @@ void Player::ModifyCurrency(uint32 id, int32 count, bool printLog/* = true*/, bo
 
         // First gain of a currency (e.g. archaeology fragments) must go through SETUP
         // or the archaeology journal never binds the amount to a race.
-        // Archaeology race totals on the journal main page come from the full SETUP list —
+        // Archaeology race totals on the journal main page come from the full SETUP list â€”
         // a single-currency SETUP replaces that list and zeros other races until relog.
         if (isNewCurrency)
         {
@@ -14517,27 +14518,31 @@ void Player::SaveToDB(bool create /*=false*/)
     SF_LOG_DEBUG("entities.unit", "The value of player %s at save: ", m_name.c_str());
     outDebugValues();
 
-    PreparedStatement* stmt = NULL;
+    bool const remote = CharacterServiceClient::Enabled();
+    // Capture live state once. Remote saves carry values, not a SQL statement ID.
+    PreparedStatement* stmt = remote ? new PreparedStatement(0) :
+        CharacterDatabase.GetPreparedStatement(create ? CHAR_INS_CHARACTER : CHAR_UPD_CHARACTER);
     uint8 index = 0;
-
-    if (create)
+    if (create && !remote)
     {
-        //! Insert query
-        /// @todo: Filter out more redundant fields that can take their default value at player create
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHARACTER);
         stmt->setUInt32(index++, GetGUIDLow());
         stmt->setUInt32(index++, GetSession()->GetVirtualRealmID());
         stmt->setUInt32(index++, GetSession()->GetAccountId());
-        stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, getRace());
-        stmt->setUInt8(index++, getClass());
-        stmt->setUInt8(index++, getGender());
-        stmt->setUInt8(index++, getLevel());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_XP));
-        stmt->setUInt64(index++, GetMoney());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_HAIR_COLOR_ID));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_REST_STATE));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_FLAGS));
+    }
+
+    stmt->setString(index++, GetName());
+    stmt->setUInt8(index++, getRace());
+    stmt->setUInt8(index++, getClass());
+    stmt->setUInt8(index++, getGender());
+    stmt->setUInt8(index++, getLevel());
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_XP));
+    stmt->setUInt64(index++, GetMoney());
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_HAIR_COLOR_ID));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_REST_STATE));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_FLAGS));
+
+    if (create || !IsBeingTeleported())
+    {
         stmt->setUInt16(index++, (uint16)GetMapId());
         stmt->setUInt32(index++, (uint32)GetInstanceId());
         stmt->setUInt8(index++, uint8(GetDungeonDifficulty()));
@@ -14546,224 +14551,117 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setFloat(index++, finiteAlways(GetPositionY()));
         stmt->setFloat(index++, finiteAlways(GetPositionZ()));
         stmt->setFloat(index++, finiteAlways(GetOrientation()));
-
-        std::ostringstream ss;
-        ss << m_taxi;
-        stmt->setString(index++, ss.str());
-        stmt->setUInt8(index++, m_cinematic);
-        stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_TOTAL]);
-        stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_LEVEL]);
-        stmt->setFloat(index++, finiteAlways(m_rest_bonus));
-        stmt->setUInt32(index++, uint32(time(NULL)));
-        stmt->setUInt8(index++, (HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0));
-        //save, far from tavern/city
-        //save, but in tavern/city
-        stmt->setUInt32(index++, GetTalentResetCost());
-        stmt->setUInt32(index++, GetTalentResetTime());
-
-        ss.str("");
-        for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
-            ss << GetTalentSpecialization(i) << " ";
-        stmt->setString(index++, ss.str());
-        stmt->setUInt16(index++, (uint16)m_ExtraFlags);
-        stmt->setUInt8(index++, m_stableSlots);
-        stmt->setUInt16(index++, (uint16)m_atLoginFlags);
-        stmt->setUInt16(index++, GetZoneId());
-        stmt->setUInt32(index++, uint32(m_deathExpireTime));
-
-        ss.str("");
-        ss << m_taxi.SaveTaxiDestinationsToString();
-
-        stmt->setString(index++, ss.str());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
-        stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));
-        stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID));
-        stmt->setUInt8(index++, GetDrunkValue());
-        stmt->setUInt32(index++, GetHealth());
-
-        uint32 storedPowers = 0;
-        for (uint32 i = 0; i < MAX_POWERS; ++i)
-        {
-            if (GetPowerIndex(i) != MAX_POWERS)
-            {
-                stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_POWER + storedPowers));
-                if (++storedPowers >= MAX_POWERS_PER_CLASS)
-                    break;
-            }
-        }
-
-        for (; storedPowers < MAX_POWERS_PER_CLASS; ++storedPowers)
-            stmt->setUInt32(index++, 0);
-
-        stmt->setUInt32(index++, GetSession()->GetLatency());
-
-        stmt->setUInt8(index++, GetSpecsCount());
-        stmt->setUInt8(index++, GetActiveSpec());
-
-        ss.str("");
-        for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
-            ss << GetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + i) << ' ';
-        stmt->setString(index++, ss.str());
-
-        ss.str("");
-        // cache equipment...
-        for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)
-            ss << GetUInt32Value(PLAYER_FIELD_VISIBLE_ITEMS + i) << ' ';
-
-        // ...and bags for enum opcode
-        for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-        {
-            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                ss << item->GetEntry();
-            else
-                ss << '0';
-            ss << " 0 ";
-        }
-        stmt->setString(index++, ss.str());
-
-        ss.str("");
-        for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)
-            ss << GetUInt32Value(PLAYER_FIELD_KNOWN_TITLES + i) << ' ';
-        stmt->setString(index++, ss.str());
-
-        stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_LIFETIME_MAX_RANK, 2));
-        stmt->setUInt32(index++, m_grantableLevels);
     }
     else
     {
-        // Update query
-        stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER);
-        stmt->setString(index++, GetName());
-        stmt->setUInt8(index++, getRace());
-        stmt->setUInt8(index++, getClass());
-        stmt->setUInt8(index++, getGender());
-        stmt->setUInt8(index++, getLevel());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_XP));
-        stmt->setUInt64(index++, GetMoney());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_HAIR_COLOR_ID));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_REST_STATE));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_FLAGS));
-
-        if (!IsBeingTeleported())
-        {
-            stmt->setUInt16(index++, (uint16)GetMapId());
-            stmt->setUInt32(index++, (uint32)GetInstanceId());
-            stmt->setUInt8(index++, uint8(GetDungeonDifficulty()));
-            stmt->setUInt8(index++, uint8(GetRaidDifficulty()));
-            stmt->setFloat(index++, finiteAlways(GetPositionX()));
-            stmt->setFloat(index++, finiteAlways(GetPositionY()));
-            stmt->setFloat(index++, finiteAlways(GetPositionZ()));
-            stmt->setFloat(index++, finiteAlways(GetOrientation()));
-        }
-        else
-        {
-            stmt->setUInt16(index++, (uint16)GetTeleportDest().GetMapId());
-            stmt->setUInt32(index++, (uint32)0);
-            stmt->setUInt8(index++, uint8(GetDungeonDifficulty()));
-            stmt->setUInt8(index++, uint8(GetRaidDifficulty()));
-            stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetPositionX()));
-            stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetPositionY()));
-            stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetPositionZ()));
-            stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetOrientation()));
-        }
-
-        std::ostringstream ss;
-        ss << m_taxi;
-        stmt->setString(index++, ss.str());
-        stmt->setUInt8(index++, m_cinematic);
-        stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_TOTAL]);
-        stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_LEVEL]);
-        stmt->setFloat(index++, finiteAlways(m_rest_bonus));
-        stmt->setUInt32(index++, uint32(time(NULL)));
-        stmt->setUInt8(index++, (HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0));
-        //save, far from tavern/city
-        //save, but in tavern/city
-        stmt->setUInt32(index++, GetTalentResetCost());
-        stmt->setUInt32(index++, GetTalentResetTime());
-
-        ss.str("");
-        for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
-            ss << GetTalentSpecialization(i) << " ";
-        stmt->setString(index++, ss.str());
-        stmt->setUInt16(index++, (uint16)m_ExtraFlags);
-        stmt->setUInt8(index++, m_stableSlots);
-        stmt->setUInt16(index++, (uint16)m_atLoginFlags);
-        stmt->setUInt16(index++, GetZoneId());
-        stmt->setUInt32(index++, uint32(m_deathExpireTime));
-
-        ss.str("");
-        ss << m_taxi.SaveTaxiDestinationsToString();
-
-        stmt->setString(index++, ss.str());
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
-        stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));
-        stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX));
-        stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID));
-        stmt->setUInt8(index++, GetDrunkValue());
-        stmt->setUInt32(index++, GetHealth());
-
-        uint32 storedPowers = 0;
-        for (uint32 i = 0; i < MAX_POWERS; ++i)
-        {
-            if (GetPowerIndex(i) != MAX_POWERS)
-            {
-                stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_POWER + storedPowers));
-                if (++storedPowers >= MAX_POWERS_PER_CLASS)
-                    break;
-            }
-        }
-
-        for (; storedPowers < MAX_POWERS_PER_CLASS; ++storedPowers)
-            stmt->setUInt32(index++, 0);
-
-        stmt->setUInt32(index++, GetSession()->GetLatency());
-
-        stmt->setUInt8(index++, GetSpecsCount());
-        stmt->setUInt8(index++, GetActiveSpec());
-
-        ss.str("");
-        for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
-            ss << GetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + i) << ' ';
-        stmt->setString(index++, ss.str());
-
-        ss.str("");
-        // cache equipment...
-        for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)
-            ss << GetUInt32Value(PLAYER_FIELD_VISIBLE_ITEMS + i) << ' ';
-
-        // ...and bags for enum opcode
-        for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-        {
-            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                ss << item->GetEntry();
-            else
-                ss << '0';
-            ss << " 0 ";
-        }
-
-        stmt->setString(index++, ss.str());
-
-        ss.str("");
-        for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)
-            ss << GetUInt32Value(PLAYER_FIELD_KNOWN_TITLES + i) << ' ';
-
-        stmt->setString(index++, ss.str());
-        stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_LIFETIME_MAX_RANK, 2));
-        stmt->setUInt32(index++, m_grantableLevels);
-
-        stmt->setUInt8(index++, IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);
-        // Index
-        stmt->setUInt32(index++, GetGUIDLow());
+        stmt->setUInt16(index++, (uint16)GetTeleportDest().GetMapId());
+        stmt->setUInt32(index++, (uint32)0);
+        stmt->setUInt8(index++, uint8(GetDungeonDifficulty()));
+        stmt->setUInt8(index++, uint8(GetRaidDifficulty()));
+        stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetPositionX()));
+        stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetPositionY()));
+        stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetPositionZ()));
+        stmt->setFloat(index++, finiteAlways(GetTeleportDest().GetOrientation()));
     }
+
+    std::ostringstream ss;
+    ss << m_taxi;
+    stmt->setString(index++, ss.str());
+    stmt->setUInt8(index++, m_cinematic);
+    stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_TOTAL]);
+    stmt->setUInt32(index++, m_Played_time[PLAYED_TIME_LEVEL]);
+    stmt->setFloat(index++, finiteAlways(m_rest_bonus));
+    stmt->setUInt32(index++, uint32(time(NULL)));
+    stmt->setUInt8(index++, (HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0));
+    //save, far from tavern/city
+    //save, but in tavern/city
+    stmt->setUInt32(index++, GetTalentResetCost());
+    stmt->setUInt32(index++, GetTalentResetTime());
+
+    ss.str("");
+    for (uint8 i = 0; i < MAX_TALENT_SPECS; ++i)
+        ss << GetTalentSpecialization(i) << " ";
+    stmt->setString(index++, ss.str());
+    stmt->setUInt16(index++, (uint16)m_ExtraFlags);
+    stmt->setUInt8(index++, m_stableSlots);
+    stmt->setUInt16(index++, (uint16)m_atLoginFlags);
+    stmt->setUInt16(index++, GetZoneId());
+    stmt->setUInt32(index++, uint32(m_deathExpireTime));
+
+    ss.str("");
+    ss << m_taxi.SaveTaxiDestinationsToString();
+
+    stmt->setString(index++, ss.str());
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS));
+    stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0));
+    stmt->setUInt16(index++, GetUInt16Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 1));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_PLAYER_TITLE));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX));
+    stmt->setUInt32(index++, GetUInt32Value(PLAYER_FIELD_LFG_BONUS_FACTION_ID));
+    stmt->setUInt8(index++, GetDrunkValue());
+    stmt->setUInt32(index++, GetHealth());
+
+    uint32 storedPowers = 0;
+    for (uint32 i = 0; i < MAX_POWERS; ++i)
+    {
+        if (GetPowerIndex(i) != MAX_POWERS)
+        {
+            stmt->setUInt32(index++, GetUInt32Value(UNIT_FIELD_POWER + storedPowers));
+            if (++storedPowers >= MAX_POWERS_PER_CLASS)
+                break;
+        }
+    }
+
+    for (; storedPowers < MAX_POWERS_PER_CLASS; ++storedPowers)
+        stmt->setUInt32(index++, 0);
+
+    stmt->setUInt32(index++, GetSession()->GetLatency());
+
+    stmt->setUInt8(index++, GetSpecsCount());
+    stmt->setUInt8(index++, GetActiveSpec());
+
+    ss.str("");
+    for (uint32 i = 0; i < PLAYER_EXPLORED_ZONES_SIZE; ++i)
+        ss << GetUInt32Value(PLAYER_FIELD_EXPLORED_ZONES + i) << ' ';
+    stmt->setString(index++, ss.str());
+
+    ss.str("");
+    // cache equipment...
+    for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)
+        ss << GetUInt32Value(PLAYER_FIELD_VISIBLE_ITEMS + i) << ' ';
+
+    // ...and bags for enum opcode
+    for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            ss << item->GetEntry();
+        else
+            ss << '0';
+        ss << " 0 ";
+    }
+
+    stmt->setString(index++, ss.str());
+
+    ss.str("");
+    for (uint32 i = 0; i < KNOWN_TITLES_SIZE * 2; ++i)
+        ss << GetUInt32Value(PLAYER_FIELD_KNOWN_TITLES + i) << ' ';
+
+    stmt->setString(index++, ss.str());
+    stmt->setUInt8(index++, GetByteValue(PLAYER_FIELD_LIFETIME_MAX_RANK, 2));
+    stmt->setUInt32(index++, m_grantableLevels);
+
+    if (remote || !create)
+        stmt->setUInt8(index++, !create && IsInWorld() && !GetSession()->PlayerLogout() ? 1 : 0);
+    if (!remote && !create)
+        stmt->setUInt32(index++, GetGUIDLow());
+    ASSERT(!remote || index == CharacterServiceClient::SaveFieldCount);
 
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
 
-    trans->Append(stmt);
+    if (remote)
+        trans->SetCharacterSave(GetGUIDLow(), GetSession()->GetAccountId(), create, stmt);
+    else
+        trans->Append(stmt);
 
     if (m_mailsUpdated)                                     //save mails only when needed
         _SaveMail(trans);
@@ -16484,7 +16382,7 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
         data << uint8(mod->op);
 
     // Update the list before computing the packet value. For PCT mods, applying
-    // AddPct(+100) then AddPct(-100) on remove yields 0 instead of 1.0 — that made
+    // AddPct(+100) then AddPct(-100) on remove yields 0 instead of 1.0 â€” that made
     // Enraged Regeneration tooltips drop to 0% after Enrage fell off.
     if (apply)
         m_spellMods[mod->op].push_back(mod);
@@ -19484,7 +19382,7 @@ void Player::SendAurasForTarget(Unit* target)
 
         data.WriteBit(1);                               // Not remove
 
-        // Client indexes $wN by effect index — count is highest index + 1 (pad gaps with 0).
+        // Client indexes $wN by effect index â€” count is highest index + 1 (pad gaps with 0).
         if (flags & AFLAG_ANY_EFFECT_AMOUNT_SENT)
         {
             uint8 effCount = 0;
@@ -23899,7 +23797,7 @@ ResearchDigsite* Player::GetResearchDigsiteForFind(GameObject const* go) const
     if (!go)
         return NULL;
 
-    // Prefer the digsite that actually spawned this node over polygon checks — players often
+    // Prefer the digsite that actually spawned this node over polygon checks â€” players often
     // loot from just outside the site border, which previously skipped fragment credit while
     // still allowing keystone chest loot.
     if (go->GetOwnerGUID() && go->GetOwnerGUID() != GetGUID())
@@ -24286,7 +24184,7 @@ void Player::SolveResearchProject(Spell* spell)
 
 bool Player::IsResearchBranchUnlocked(uint32 researchBranchId) const
 {
-    // Races only unlock after you dig that race (fragments) or finish one of its projects —
+    // Races only unlock after you dig that race (fragments) or finish one of its projects â€”
     // not simply by learning Archaeology.
     ResearchBranchEntry const* branch = sResearchBranchStore.LookupEntry(researchBranchId);
     if (!branch)

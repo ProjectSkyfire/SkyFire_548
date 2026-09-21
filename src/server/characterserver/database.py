@@ -6,8 +6,10 @@ import hashlib
 import json
 import re
 import threading
+import time
 from pathlib import Path
 from wire import Reader, blob, u32, prepared_sql, MAX_FRAME, MAX_STATEMENTS
+from character_state import LOGIN_PLAN
 
 IDENTITY = re.compile(r'[0-9a-f]{32}\Z')
 
@@ -30,7 +32,9 @@ class CharacterDatabase:
         self.sessions = {}
         self.realm = config['realm_id']
         self.failed = False
-        self.catalog = {entry['id']: entry['sql'] for entry in json.loads(Path(catalog_path).read_text())}
+        entries = json.loads(Path(catalog_path).read_text())
+        self.catalog = {entry['id']: entry['sql'] for entry in entries}
+        self.statement_ids = {entry['name']: entry['id'] for entry in entries}
         self.catalog_hash = hashlib.sha256(b''.join(u32(key) + blob(value) for key,value in sorted(self.catalog.items()))).hexdigest()
         self.db = connector(host=config['mysql_host'], port=config.get('mysql_port',3306),
                             user=config['mysql_user'], password=config['mysql_password'],
@@ -42,6 +46,7 @@ class CharacterDatabase:
                 if one(cursor)[0] != 1:
                     raise RuntimeError('Another character service owns this database')
                 cursor.execute("SET SESSION sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'")
+                cursor.execute('SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ')
                 cursor.execute("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND engine IS NOT NULL AND engine <> 'InnoDB'")
                 if one(cursor)[0]:
                     raise RuntimeError('Character service requires transactional InnoDB tables')
@@ -67,7 +72,7 @@ class CharacterDatabase:
 
     def attach(self, peer, request):
         reader = Reader(request)
-        if reader.u8() != 1 or reader.u32() != self.realm:
+        if reader.u8() != 2 or reader.u32() != self.realm:
             raise ValueError('Character protocol or realm mismatch')
         instance, catalog_hash = reader.text(32), reader.text(64)
         reader.end()
@@ -129,6 +134,10 @@ class CharacterDatabase:
             sql = 'DELETE FROM ' + truncate[1]
         if not re.match(r'\s*(SELECT|INSERT|REPLACE|UPDATE|DELETE)\b',sql,re.I):
             raise ValueError('Catalog operation is not transactional')
+        return prepared_sql(sql), self.parameters(reader)
+
+    @staticmethod
+    def parameters(reader):
         count = reader.u32()
         if count > 256:
             raise ValueError('Too many statement parameters')
@@ -148,18 +157,93 @@ class CharacterDatabase:
                 args.append(reader.blob())
             else:
                 raise ValueError('Invalid parameter type')
-        return prepared_sql(sql), tuple(args)
+        return tuple(args)
+
+    @staticmethod
+    def result(cursor, limit=MAX_FRAME - 8192):
+        if not cursor.description:
+            raise ValueError('Query must return rows')
+        fields = [field[1] for field in cursor.description]
+        if not 1 <= len(fields) <= 1024:
+            raise ValueError('Invalid result columns')
+        rows, size = [], 8 + 4 * len(fields)
+        while True:
+            row = cursor.fetchone()
+            if row is None:
+                break
+            values = []
+            for field_type, value in zip(fields, row):
+                if field_type == 16 and isinstance(value, bytes):
+                    value = int.from_bytes(value, 'big')
+                value = value if isinstance(value, bytes) or value is None else str(value).encode()
+                values.append(b'\0' if value is None else b'\1' + blob(value))
+            packed = b''.join(values)
+            size += len(packed)
+            if size > limit or len(rows) >= 1000000:
+                raise ValueError('Character result exceeds transport limit')
+            rows.append(packed)
+        if size > limit:
+            raise ValueError('Character result exceeds transport limit')
+        return u32(len(fields)) + b''.join(u32(field) for field in fields) + u32(len(rows)) + b''.join(rows)
+
+    def load_character(self, cursor, guid, account, declined):
+        # A missing/deleted character or wrong account is an ordinary rejected login.
+        # Return empty slots so worldserver follows its existing login failure path.
+        cursor.execute('SELECT account FROM characters WHERE guid=%s', (guid,))
+        owner = one(cursor)
+        if owner != (account,):
+            return u32(len(LOGIN_PLAN)) + blob(b'') * len(LOGIN_PLAN)
+        answer = bytearray(u32(len(LOGIN_PLAN)))
+        now = int(time.time())
+        for name, parameter in LOGIN_PLAN:
+            if name == 'CHAR_SEL_CHARACTER_DECLINEDNAMES' and not declined:
+                answer.extend(blob(b''))
+                continue
+            args = (account,) if parameter == 'account' else (guid, now) if parameter == 'mail' else (guid,)
+            cursor.execute(prepared_sql(self.catalog[self.statement_ids[name]]), args)
+            answer.extend(blob(self.result(cursor, MAX_FRAME - 8192 - len(answer) - 4)))
+        return bytes(answer)
+
+    def save_state(self, reader):
+        guid, account, create = reader.u32(), reader.u32(), reader.u8()
+        if not guid or not account or create not in (0, 1):
+            raise ValueError('Invalid character save identity')
+        args = self.parameters(reader)
+        name = 'CHAR_INS_CHARACTER' if create else 'CHAR_UPD_CHARACTER'
+        sql = self.catalog[self.statement_ids[name]]
+        # Both create and update carry the common character fields plus online.
+        # Identity columns and insert/update selection belong to this service.
+        if not args or args[-1] not in (0, 1) or (create and args[-1] != 0):
+            raise ValueError('Invalid character online state')
+        args = (guid, self.realm, account) + args[:-1] if create else args + (guid,)
+        if len(args) != sql.count('?'):
+            raise ValueError('Character snapshot layout mismatch')
+        return (guid, account, create), (prepared_sql(sql), args)
 
     def execute(self, peer, instance, epoch, payload):
         reader = Reader(payload)
         operation = reader.u8()
         request_id = reader.text(32)
-        if not IDENTITY.fullmatch(request_id) or operation not in (1,2,3):
+        if not IDENTITY.fullmatch(request_id) or operation not in (1,2,3,4,5):
             raise ValueError('Invalid character request')
-        count = reader.u32() if operation == 3 else 1
-        if not 1 <= count <= MAX_STATEMENTS:
-            raise ValueError('Invalid transaction size')
-        statements = [self.statement(reader) for _ in range(count)]
+        identity = None
+        if operation == 4:
+            identity = (reader.u32(), reader.u32(), reader.u8())
+            if not identity[0] or not identity[1] or identity[2] not in (0, 1):
+                raise ValueError('Invalid character load identity')
+            statements = []
+        else:
+            if operation == 5:
+                identity, state = self.save_state(reader)
+            count = reader.u32() if operation in (3, 5) else 1
+            if not (0 if operation == 5 else 1) <= count <= MAX_STATEMENTS - (operation == 5):
+                raise ValueError('Invalid transaction size')
+            statements = [self.statement(reader) for _ in range(count)]
+            if operation == 5:
+                primary = {prepared_sql(self.catalog[self.statement_ids[name]]) for name in ('CHAR_INS_CHARACTER', 'CHAR_UPD_CHARACTER')}
+                if any(sql in primary for sql, _ in statements):
+                    raise ValueError('Duplicate primary character snapshot')
+                statements.insert(0, state)
         reader.end()
         digest = hashlib.sha256(payload).hexdigest()
         with self.lock:
@@ -174,7 +258,7 @@ class CharacterDatabase:
                     cursor.execute('SELECT epoch,node,instance FROM character_service_owners WHERE realm=%s FOR UPDATE', (self.realm,))
                     if one(cursor) != (epoch,peer,instance):
                         raise ValueError('World writer generation was revoked')
-                    if operation != 2:
+                    if operation not in (2, 4):
                         cursor.execute('SELECT instance,digest FROM character_service_commits WHERE request_id=%s', (request_id,))
                         receipt = one(cursor)
                         if receipt:
@@ -183,33 +267,19 @@ class CharacterDatabase:
                             self.db.rollback()
                             return b''
                     answer = b''
+                    if operation == 4:
+                        answer = self.load_character(cursor, *identity)
+                    elif operation == 5:
+                        guid, account, create = identity
+                        cursor.execute('SELECT account FROM characters WHERE guid=%s FOR UPDATE', (guid,))
+                        owner = one(cursor)
+                        if (create and owner is not None) or (not create and owner != (account,)):
+                            raise ValueError('Character save owner mismatch')
                     for sql,args in statements:
                         cursor.execute(sql, args)
                         if operation == 2:
-                            if not cursor.description:
-                                raise ValueError('Query must return rows')
-                            fields = [field[1] for field in cursor.description]
-                            if len(fields) > 1024:
-                                raise ValueError('Too many result columns')
-                            rows, size = [], 0
-                            # Result size is bounded before serialization/return; no partial data.
-                            while True:
-                                row = cursor.fetchone()
-                                if row is None:
-                                    break
-                                values = []
-                                for field_type,value in zip(fields,row):
-                                    if field_type == 16 and isinstance(value,bytes):  # MYSQL_TYPE_BIT
-                                        value = int.from_bytes(value,'big')
-                                    value = value if isinstance(value, bytes) or value is None else str(value).encode()
-                                    values.append(b'\0' if value is None else b'\1' + blob(value))
-                                packed = b''.join(values)
-                                size += len(packed)
-                                if size > MAX_FRAME - 8192 or len(rows) >= 1000000:
-                                    raise ValueError('Character result exceeds transport limit')
-                                rows.append(packed)
-                            answer = u32(len(fields)) + b''.join(u32(field) for field in fields) + u32(len(rows)) + b''.join(rows)
-                    if operation != 2:
+                            answer = self.result(cursor)
+                    if operation not in (2, 4):
                         cursor.execute('INSERT INTO character_service_commits(request_id,instance,digest) VALUES(%s,%s,%s)', (request_id,instance,digest))
                 self.db.commit()  # Save and idempotency receipt commit together, before acknowledgement.
                 return answer

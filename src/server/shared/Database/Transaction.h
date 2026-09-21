@@ -29,8 +29,10 @@ public:
     void Append(PreparedStatement* statement);
     void Append(const char* sql);
     void PAppend(const char* sql, ...);
+    // Own a character-state value buffer; the service selects the persistence SQL.
+    void SetCharacterSave(uint32 guid, uint32 account, bool create, PreparedStatement* state);
 
-    size_t GetSize() const { return m_queries.size(); }
+    size_t GetSize() const { return m_queries.size() + (m_characterState ? 1 : 0); }
 
 protected:
     void Cleanup();
@@ -38,6 +40,10 @@ protected:
 
 private:
     bool _cleanedUp;
+    uint32 m_characterGuid = 0;
+    uint32 m_characterAccount = 0;
+    bool m_characterCreate = false;
+    PreparedStatement* m_characterState = nullptr;
 };
 
 typedef Skyfire::AutoPtr<Transaction, Skyfire::Mutex> SQLTransaction;

@@ -45,6 +45,34 @@ def rows(payload):
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_create_and_update_share_the_same_character_state_layout(self):
+        entries = {entry['name']:entry['sql'] for entry in catalog(ROOT)}
+        create = re.search(r'\((.*?)\) VALUES',entries['CHAR_INS_CHARACTER'])[1].replace(' ','').lower().split(',')
+        update = re.findall(r'(\w+)\s*=\s*\?',entries['CHAR_UPD_CHARACTER'].lower())
+        self.assertEqual(create[:3],['guid','realm','account'])
+        self.assertEqual(update[-2:],['online','guid'])
+        self.assertEqual(create[3:],update[:-2])
+        self.assertEqual(len(update)-1,56)
+
+    def test_service_login_plan_matches_native_legacy_layout(self):
+        from character_state import LOGIN_PLAN
+        header = (ROOT/'src/server/game/Entities/Player/Player.h').read_text()
+        indexes = {name:int(index) for name,index in re.findall(r'(PLAYER_LOGIN_QUERY_\w+) = (\d+)',header)}
+        source = (ROOT/'src/server/game/Handlers/CharacterHandler.cpp').read_text().split('bool LoginQueryHolder::Initialize()')[1].split('return res;')[0]
+        plan = {}
+        for name,body,slot in re.findall(r'stmt = CharacterDatabase.GetPreparedStatement\((CHAR_\w+)\);(.*?)SetPreparedQuery\((PLAYER_LOGIN_QUERY_\w+), stmt\)',source,re.S):
+            argument = 'account' if 'm_accountId' in body else 'mail' if 'setUInt64' in body else 'guid'
+            plan[indexes[slot]] = (name,argument)
+        self.assertEqual(tuple(plan[i] for i in range(len(indexes))),LOGIN_PLAN)
+
+    def test_semantic_operations_are_counted_as_reads_and_save_transactions(self):
+        from metrics import Metrics
+        metrics = Metrics()
+        metrics.finish(metrics.begin(),4,True)
+        metrics.finish(metrics.begin(),5,True)
+        metrics.finish(metrics.begin(),5,False)
+        self.assertEqual((metrics.reads,metrics.writes,metrics.transactions,metrics.failures),(1,1,1,1))
+
     def test_metrics_count_only_acknowledged_writes_and_include_failures(self):
         from metrics import Metrics
         metrics=Metrics()
@@ -96,7 +124,7 @@ class DatabaseTests(unittest.TestCase):
         with cls.admin.cursor() as cursor:
             cursor.execute('CREATE DATABASE `'+cls.schema+'` CHARACTER SET utf8mb4')
             cursor.execute('CREATE TABLE `'+cls.schema+'`.characters (guid INT UNSIGNED PRIMARY KEY,name VARCHAR(64),money BIGINT UNSIGNED NOT NULL DEFAULT 0) ENGINE=InnoDB')
-            cursor.execute('INSERT INTO `'+cls.schema+'`.characters VALUES(1,%s,0)',("Tester O'雪",))
+            cursor.execute('INSERT INTO `'+cls.schema+'`.characters VALUES(1,%s,0)',("Tester O'é›ª",))
             cursor.execute('CREATE TABLE `'+cls.schema+'`.gm_tickets (id INT PRIMARY KEY, flags BIT(8)) ENGINE=InnoDB')
             cursor.execute("INSERT INTO `"+cls.schema+"`.gm_tickets VALUES(1,b'10101010')")
             cursor.execute('CREATE TABLE `'+cls.schema+'`.binary_fixture (payload BLOB) ENGINE=InnoDB')
@@ -116,7 +144,7 @@ class DatabaseTests(unittest.TestCase):
         db=CharacterDatabase(self.config,SERVICE/'statements.json')
         first,second=secrets.token_hex(16),secrets.token_hex(16)
         def hello(instance):
-            return b'\1'+u32(1)+blob(instance)+blob(db.catalog_hash)
+            return b'\2'+u32(1)+blob(instance)+blob(db.catalog_hash)
         try:
             with self.assertRaises(RuntimeError):
                 duplicate=CharacterDatabase(self.config,SERVICE/'statements.json')
@@ -127,9 +155,9 @@ class DatabaseTests(unittest.TestCase):
                 db.attach('world-b',hello(second))
             query=lambda sql: rows(db.execute('world-a',first,epoch,request(2,[raw(sql)])))
             self.assertEqual(query("SELECT guid,name,money,NULL,UNHEX('610062') FROM characters WHERE guid=1"),
-                             [[b'1',"Tester O'雪".encode(),b'0',None,b'a\0b']])
+                             [[b'1',"Tester O'é›ª".encode(),b'0',None,b'a\0b']])
             ids={entry['name']:entry['id'] for entry in json.loads((SERVICE/'statements.json').read_text())}
-            query_name=prepared(ids['CHAR_SEL_CHECK_NAME'],[b'\2'+blob("Tester O'雪")])
+            query_name=prepared(ids['CHAR_SEL_CHECK_NAME'],[b'\2'+blob("Tester O'é›ª")])
             self.assertEqual(rows(db.execute('world-a',first,epoch,request(2,[query_name]))),[[b'1']])
             save=request(3,[raw('UPDATE characters SET money=money+1 WHERE guid=1')])
             db.execute('world-a',first,epoch,save)
@@ -169,11 +197,134 @@ class DatabaseTests(unittest.TestCase):
         recovered=CharacterDatabase(self.config,SERVICE/'statements.json')
         try:
             with self.assertRaises(ValueError):
-                recovered.attach('world-a',b'\1'+u32(1)+blob(first)+blob(recovered.catalog_hash))
-            _,epoch=recovered.attach('world-b',b'\1'+u32(1)+blob(second)+blob(recovered.catalog_hash))
+                recovered.attach('world-a',b'\2'+u32(1)+blob(first)+blob(recovered.catalog_hash))
+            _,epoch=recovered.attach('world-b',b'\2'+u32(1)+blob(second)+blob(recovered.catalog_hash))
             self.assertEqual(rows(recovered.execute('world-b',second,epoch,request(2,[raw('SELECT money FROM characters WHERE guid=1')]))),[[b'1']])
         finally:
             recovered.close()
+
+    def test_semantic_load_save_and_fenced_recovery(self):
+        import pymysql
+        from character_state import LOGIN_PLAN
+        schema = 'skyfire_character_test_' + secrets.token_hex(8)
+        db = fixture = None
+        try:
+            with self.admin.cursor() as cursor:
+                cursor.execute('CREATE DATABASE `' + schema + '` CHARACTER SET utf8mb4')
+            cfg = self.config | dict(mysql_database=schema)
+            fixture = pymysql.connect(host=cfg['mysql_host'],port=cfg['mysql_port'],user=cfg['mysql_user'],
+                                      password=cfg['mysql_password'],database=schema,autocommit=True)
+            # Only CREATE statements, always on the disposable connection. Never execute
+            # dump USE/DROP/LOCK directives or import any live character records.
+            base = (ROOT/'sql/base/characters_database.sql').read_text()
+            tables = re.findall(r'CREATE TABLE `\w+` \(.*?\) ENGINE=InnoDB[^;]*;',base,re.S)
+            self.assertGreater(len(tables),50)
+            with fixture.cursor() as cursor:
+                for table in tables:
+                    cursor.execute(table)
+            db = CharacterDatabase(cfg,SERVICE/'statements.json')
+            first = secrets.token_hex(16)
+            hello = lambda instance: b'\2'+u32(1)+blob(instance)+blob(db.catalog_hash)
+            with self.assertRaisesRegex(ValueError,'protocol'):
+                db.attach('world-a',b'\1'+hello(first)[1:])
+            _, epoch = db.attach('world-a',hello(first))
+            execute = lambda payload: db.execute('world-a',first,epoch,payload)
+            entries = {entry['name']:entry['sql'] for entry in json.loads((SERVICE/'statements.json').read_text())}
+            columns = re.search(r'\((.*?)\) VALUES',entries['CHAR_INS_CHARACTER'])[1].replace(' ','').split(',')
+            state = dict.fromkeys(columns,0)
+            state.update(guid=42,realm=1,account=7,name='SnapshotTest',race=1,**{'class':1},level=10,money=500)
+            def parameter(value):
+                return (b'\2'+blob(value)) if isinstance(value,str) else b'\1'+blob(str(value))
+            def save(create=False, account=7, changes=(), values=None, request_id=None):
+                fields = re.findall(r'(\w+)\s*=\s*\?',entries['CHAR_UPD_CHARACTER'])[:-1]
+                snapshot = state if values is None else values
+                params = [parameter(snapshot.get(field,0)) for field in fields]
+                return b'\5'+blob(request_id or secrets.token_hex(16))+u32(42)+u32(account)+bytes([create])+u32(len(params))+b''.join(params)+u32(len(changes))+b''.join(changes)
+            def load(account=7, declined=False):
+                response = execute(b'\4'+blob(secrets.token_hex(16))+u32(42)+u32(account)+bytes([declined]))
+                reader = Reader(response)
+                result = [reader.blob() for _ in range(reader.u32())]
+                reader.end()
+                return result
+            self.assertEqual(load(),[b'']*len(LOGIN_PLAN))
+            creation = save(create=True,changes=[raw('INSERT INTO character_spell(guid,spell,active,disabled) VALUES(42,133,1,0)')])
+            execute(creation)
+            execute(creation)  # A lost creation acknowledgement must not create twice.
+            snapshot = load()
+            self.assertEqual(len(snapshot),42)
+            self.assertEqual(rows(snapshot[0])[0][:3],[b'42',b'7',b'SnapshotTest'])
+            self.assertEqual(rows(snapshot[0])[0][8],b'500')
+            self.assertEqual(rows(snapshot[4])[0][0],b'133')
+            self.assertEqual(snapshot[15],b'')
+            self.assertEqual(rows(load(declined=True)[15]),[])
+            self.assertEqual(load(account=8),[b'']*42)
+            # Commit an external change between the primary and spell reads. All
+            # slots must still come from the original repeatable-read snapshot.
+            from unittest.mock import patch
+            original_result = db.result
+            calls = 0
+            def concurrent_result(cursor, limit):
+                nonlocal calls
+                result = original_result(cursor,limit)
+                calls += 1
+                if calls == 1:
+                    with fixture.cursor() as other:
+                        fixture.begin()
+                        other.execute('UPDATE characters SET money=600 WHERE guid=42')
+                        other.execute('UPDATE character_spell SET disabled=1 WHERE guid=42')
+                        fixture.commit()
+                return result
+            with patch.object(db,'result',side_effect=concurrent_result):
+                consistent = load()
+            self.assertEqual(rows(consistent[0])[0][8],b'500')
+            self.assertEqual(rows(consistent[4])[0][-1],b'0')
+            self.assertEqual(rows(load()[0])[0][8],b'600')
+            with self.assertRaisesRegex(ValueError,'owner'):
+                execute(save(account=8))
+            with self.assertRaisesRegex(ValueError,'online state'):
+                execute(save(values=state | dict(online=2)))
+            with self.assertRaisesRegex(ValueError,'online state'):
+                execute(save(create=True,values=state | dict(online=1)))
+            state['money'] = 900
+            broken = save(changes=[raw('UPDATE absent_snapshot_fixture SET value=1')])
+            with self.assertRaises(Exception):
+                execute(broken)
+            self.assertEqual(rows(load()[0])[0][8],b'600')
+            update = save(changes=[raw('UPDATE character_spell SET disabled=1 WHERE guid=42 AND spell=133')])
+            execute(update)
+            execute(update)
+            self.assertEqual(rows(load()[0])[0][8],b'900')
+            with self.assertRaisesRegex(ValueError,'different content'):
+                execute(update.replace(b'900',b'901'))
+            # Force one result to exceed the aggregate limit: no partial login response.
+            with patch('database.MAX_FRAME',8300):
+                with self.assertRaisesRegex(ValueError,'transport limit'):
+                    load()
+            self.assertEqual(rows(load()[0])[0][8],b'900')
+            db.detach(first)
+            second = secrets.token_hex(16)
+            _, new_epoch = db.attach('world-b',hello(second))
+            self.assertGreater(new_epoch,epoch)
+            with self.assertRaisesRegex(ValueError,'revoked'):
+                execute(save())
+            db.detach(second)
+            db.close()
+            db = CharacterDatabase(cfg,SERVICE/'statements.json')
+            _, new_epoch = db.attach('world-b',hello(second))
+            recovered = db.execute('world-b',second,new_epoch,b'\4'+blob(secrets.token_hex(16))+u32(42)+u32(7)+b'\0')
+            reader = Reader(recovered)
+            self.assertEqual(reader.u32(),42)
+            self.assertEqual(rows(reader.blob())[0][8],b'900')
+            db.detach(second)
+        finally:
+            if db:
+                db.close()
+            if fixture:
+                fixture.close()
+            if not re.fullmatch(r'skyfire_character_test_[0-9a-f]{16}',schema):
+                raise RuntimeError('Invalid disposable schema name')
+            with self.admin.cursor() as cursor:
+                cursor.execute('DROP DATABASE IF EXISTS `' + schema + '`')
 
     def test_managed_service_migration_preserves_existing_records(self):
         from pymysql.constants import CLIENT
@@ -270,7 +421,7 @@ class DatabaseTests(unittest.TestCase):
                     reply=await asyncio.wait_for(reader.readexactly(size),5)
                     self.assertEqual(reply[0],0)
                     return reply[1:]
-                await exchange(b'\0\1'+u32(1)+blob(secrets.token_hex(16))+blob(digest))
+                await exchange(b'\0\2'+u32(1)+blob(secrets.token_hex(16))+blob(digest))
                 self.assertEqual(rows(await exchange(request(2,[raw('SELECT guid FROM characters WHERE guid=1')]))),[[b'1']])
                 writer.close(); await writer.wait_closed()
                 outsider=ssl.create_default_context(cafile=str(root/'ca.pem')); outsider.load_cert_chain(root/'outsider.pem',root/'outsider.key')

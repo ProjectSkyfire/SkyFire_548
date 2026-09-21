@@ -375,6 +375,7 @@ bool MySQLConnection::ExecuteTransaction(SQLTransaction& transaction)
         if (!transaction->GetSize()) return false;
         _characterService->Execute(*transaction); return true;
     }
+    ASSERT(!transaction->m_characterState);
     std::list<SQLElementData> const& queries = transaction->m_queries;
     if (queries.empty())
         return false;

@@ -1,6 +1,6 @@
 # This file is part of Project SkyFire https://www.projectskyfire.org.
 # See LICENSE.md file for Copyright information
-"""Bounded character database RPC, version 1. Never deserializes executable objects."""
+"""Bounded character database RPC, version 2. Never deserializes executable objects."""
 import struct
 
 MAX_FRAME = 64 * 1024 * 1024

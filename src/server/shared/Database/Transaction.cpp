@@ -36,6 +36,15 @@ void Transaction::Append(PreparedStatement* stmt)
     m_queries.push_back(data);
 }
 
+void Transaction::SetCharacterSave(uint32 guid, uint32 account, bool create, PreparedStatement* state)
+{
+    ASSERT(!m_characterState && state && guid && account);
+    m_characterGuid = guid;
+    m_characterAccount = account;
+    m_characterCreate = create;
+    m_characterState = state;
+}
+
 void Transaction::Cleanup()
 {
     // This might be called by explicit calls to Cleanup or by the auto-destructor
@@ -58,6 +67,8 @@ void Transaction::Cleanup()
         m_queries.pop_front();
     }
 
+    delete m_characterState;
+    m_characterState = nullptr;
     _cleanedUp = true;
 }
 

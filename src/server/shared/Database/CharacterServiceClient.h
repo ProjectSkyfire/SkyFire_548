@@ -20,6 +20,8 @@ struct CharacterServiceRows
 class CharacterServiceClient
 {
 public:
+    static constexpr std::uint32_t LoginResultCount = 42;
+    static constexpr std::uint32_t SaveFieldCount = 56;
     CharacterServiceClient();
     ~CharacterServiceClient();
     bool Open(std::map<std::uint32_t, std::string> const& catalog);
@@ -28,6 +30,7 @@ public:
     void Execute(Transaction const& transaction);
     CharacterServiceRows Query(char const* sql);
     CharacterServiceRows Query(PreparedStatement const* statement);
+    std::vector<CharacterServiceRows> LoadCharacter(std::uint32_t guid, std::uint32_t account, bool declinedNames);
     static bool Enabled();
     static unsigned long Escape(char* to, char const* from, unsigned long length);
 private:

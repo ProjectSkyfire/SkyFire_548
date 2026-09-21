@@ -1,4 +1,4 @@
-# Character service: database ownership foundation
+# Character service: ownership, login loads, and character saves
 
 This experimental stage moves character database connections and SQL execution to
 a separate `characterserver` process. When enabled, every operation through the
@@ -6,19 +6,44 @@ world's `CharacterDatabase` pool uses the service, including login reads, player
 saves, inventory, pets, mail, guilds, and startup cleanup. The world does not open
 a character MySQL connection or fall back to direct SQL if the service fails.
 
-The world still constructs gameplay objects and assembles existing load queries
-and save transactions. This stage is a database service boundary, not the complete
-extraction of player serialization or a replicated in-memory character model.
-It cannot recover updates that a world has not sent before crashing. Periodic
-state snapshots, semantic load/save requests, and a fully initialized gameplay
-standby are subsequent work. [Preloaded process standby](WorldFallback.md) can wait
+The character login holder now sends one `LoadCharacter` request containing the
+character GUID, authenticated account ID, and declined-name option. The service
+checks account ownership and selects all 42 login result slots in one
+repeatable-read transaction. Missing characters and wrong-account requests return
+an empty login result; database and transport failures remain fatal to the world.
+Later gameplay-specific reads, such as pet loading, still use the SQL compatibility
+interface.
+
+`Player::SaveToDB` sends a dedicated `SaveCharacter` request. The world captures
+the common live character fields once for creation and subsequent saves; it does
+not send a primary SQL statement ID. The service chooses INSERT or UPDATE, adds
+the GUID/realm/account identity fields, checks existing account ownership, and
+commits the primary record, related component changes, and request receipt together.
+Existing inventory, quest, mail, achievement, and other component serializers
+still assemble their incremental statements in worldserver. Pet saves and other
+standalone operations retain their existing transaction boundaries.
+
+This is not yet a complete extraction of player serialization or a replicated
+in-memory character model. It cannot recover updates that a world has not sent
+before crashing. Periodic replicated state, semantic component deltas, and a fully
+initialized gameplay standby are subsequent work.
+[Preloaded process standby](WorldFallback.md) can wait
 alongside the active world without opening character sessions.
 
 ## Installation
 
 Build matching hub and world binaries. CMake build and INSTALL copy the Python
 service, configuration template, and statement catalog into `characterserver/`
-beside the installed server binaries. Python packages are installed separately:
+beside the installed server binaries.
+
+This release uses character RPC version **2**. Stop both active and standby worlds
+before deploying the matching world binary and Python assets, restart the character
+service, then start the worlds. Older clients/services fail the handshake instead
+of interpreting the new request layout. INSTALL includes `character_state.py`,
+which defines the service-owned login plan. No additional database migration or
+configuration setting is required for these load/save operations.
+
+Python packages are installed separately:
 
 ```text
 python -m venv character-venv
@@ -114,8 +139,11 @@ the existing fallback ownership lock; preloaded standby waits before connecting.
 Do not start two active
 worlds against this realm. Restart dependent worlds after restarting the service.
 
-Requests are limited to 8 MiB, transactions to 16,384 statements, and responses
-to 64 MiB / one million rows. Large realms may exceed startup query limits and
+Requests are limited to 8 MiB, transactions to 16,384 statements (including the
+primary record in a character save), and responses to 64 MiB / one million rows
+per result. The login response has one aggregate byte limit across all 42 slots;
+an oversized result fails the whole load rather than returning partial character
+data. Large realms may exceed startup query limits and
 will need pagination. Public gameplay clients must never access this RPC port.
 
 ## Backups and recovery
@@ -137,7 +165,12 @@ Other database domains retain their existing restore workflow.
 `--database-config <hubserver.conf>` integration fixture reads MySQL server
 credentials and creates/removes only a randomly named disposable schema. It tests
 atomic transactions, rollback, duplicate receipts, takeover fencing, service
-restart, typed results, TLS identities, and hub registration. Integration tests
+restart, typed results, TLS identities, and hub registration. It also creates an
+isolated schema from the character base table definitions to test real login loads
+and create/update saves, account rejection, snapshot consistency under concurrent
+external writes, aggregate response limits, and recovery after service restart.
+The service login plan is checked against the native legacy holder layout.
+Integration tests
 also require `cryptography`; it is not a daemon runtime dependency.
 
 When changing the native character statement definitions, regenerate the catalog:

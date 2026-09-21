@@ -42,11 +42,11 @@ class Metrics:
         self.latency_us += int((time.monotonic()-started)*1000000)
         if not success:
             self.failures += 1
-        elif operation == 2:
+        elif operation in (2, 4):
             self.reads += 1
         else:
             self.writes += 1
-            self.transactions += operation == 3
+            self.transactions += operation in (3, 5)
             self.last_commit = time.monotonic()
 
     def packet(self, connections, healthy):
