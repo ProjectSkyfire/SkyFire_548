@@ -273,7 +273,9 @@ namespace
 
     char const* GetDefaultPetActionBarData()
     {
-        return "7 2 7 1 7 4 1 0 1 0 1 0 1 0 6 2 6 3 6 0";
+        // Ten "type action" pairs: three commands, four spell slots, three stances. The stances
+        // must match CharmInfo::InitPetActionBar - they read "6 2 6 3 6 0", the pre-5.0.4 layout.
+        return "7 2 7 1 7 4 1 0 1 0 1 0 1 0 6 3 6 1 6 0";
     }
 
     bool SeedStarterHunterPetRecord(Player* player, PlayerInfo const* info)
