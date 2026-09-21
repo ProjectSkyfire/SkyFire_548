@@ -583,7 +583,9 @@ size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, Languag
     std::string const& addonPrefix /*= ""*/)
 {
     bool hasAchievementId = (chatType == ChatMsg::CHAT_MSG_ACHIEVEMENT || chatType == ChatMsg::CHAT_MSG_GUILD_ACHIEVEMENT) && achievementId;
-    bool hasLanguage = (language > Language::LANG_UNIVERSAL);
+    // Not "> LANG_UNIVERSAL": LANG_ADDON is -1, and that is the one language which must be on the
+    // wire, since it is how the client tells an addon message from ordinary chat.
+    bool hasLanguage = (language != Language::LANG_UNIVERSAL);
     bool hasSenderName = false;
     bool hasReceiverName = false;
     bool hasChannelName = false;
