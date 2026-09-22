@@ -7,6 +7,7 @@
     \ingroup world
 */
 
+#include "WorldOpcodeDispatch.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "AddonMgr.h"

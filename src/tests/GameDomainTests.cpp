@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "WorldOpcodeDispatch.h"
 #include "Cell.h"
 #include "CombatPackets.h"
 #include "CurrencyFormulas.h"

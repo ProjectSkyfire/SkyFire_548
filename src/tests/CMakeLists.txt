@@ -3,6 +3,26 @@
 # See COPYRIGHT file for Copyright information
 #
 
+add_executable(shared_protocol_data_tests SharedProtocolDataTests.cpp)
+target_include_directories(shared_protocol_data_tests PRIVATE
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Network
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Platform
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${Boost_INCLUDE_DIRS}
+)
+if(TARGET Boost::headers)
+  target_link_libraries(shared_protocol_data_tests Boost::headers)
+elseif(TARGET Boost::boost)
+  target_link_libraries(shared_protocol_data_tests Boost::boost)
+endif()
+target_link_libraries(shared_protocol_data_tests Threads::Threads)
+add_test(NAME shared_protocol_data_tests COMMAND shared_protocol_data_tests)
+
 add_executable(database_queue_tests
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database/DatabaseQueue.cpp
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database/DatabaseWorker.cpp

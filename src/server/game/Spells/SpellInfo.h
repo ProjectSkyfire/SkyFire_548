@@ -8,6 +8,7 @@
 
 #include "DB2Structure.h"
 #include "DBCStructure.h"
+#include "ItemPrototype.h"
 #include "Object.h"
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"

@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "WorldOpcodeDispatch.h"
 #include "AccountMgr.h"
 #include "AuthnetConnectTo.h"
 #include "Cluster/HandoffClient.h"

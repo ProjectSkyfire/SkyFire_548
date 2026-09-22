@@ -8,6 +8,7 @@
 
 #include "DB2Store.h"
 #include "DB2Structure.h"
+#include "ItemPrototype.h"
 #include <map>
 #include <string>
 

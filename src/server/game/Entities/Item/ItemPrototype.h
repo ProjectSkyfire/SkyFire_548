@@ -7,6 +7,7 @@
 #define SF_ITEMPROTOTYPE_H
 
 #include "Common.h"
+#include "ItemDataConstants.h"
 #include "DBCStores.h"
 #include "SharedDefines.h"
 
@@ -620,9 +621,6 @@ struct _Socket
 #endif
 
 #define MAX_ITEM_PROTO_DAMAGES 2                            // changed in 3.1.0
-#define MAX_ITEM_PROTO_SOCKETS 3
-#define MAX_ITEM_PROTO_SPELLS  5
-#define MAX_ITEM_PROTO_STATS  10
 
 struct ItemTemplate
 {

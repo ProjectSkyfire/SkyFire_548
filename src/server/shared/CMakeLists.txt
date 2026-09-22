@@ -22,6 +22,7 @@ file(GLOB_RECURSE sources_Dynamic Dynamic/*.cpp Dynamic/*.h)
 file(GLOB_RECURSE sources_Logging Logging/*.cpp Logging/*.h)
 file(GLOB_RECURSE sources_Network Network/*.cpp Network/*.h)
 file(GLOB_RECURSE sources_Packets Packets/*.cpp Packets/*.h)
+set(sources_Protocol Protocol/Opcodes.h Protocol/ClientOpcodeCatalog.inc Protocol/ServerOpcodeCatalog.inc)
 file(GLOB_RECURSE sources_Platform Platform/*.cpp Platform/*.h)
 list(APPEND sources_Platform Platform/HubProcessControl.cpp Platform/HubProcessControl.h Platform/MapDataBootstrap.cpp Platform/MapDataBootstrap.h)
 list(REMOVE_DUPLICATES sources_Platform)
@@ -40,6 +41,7 @@ source_group(Dynamic FILES ${sources_Dynamic})
 source_group(Logging FILES ${sources_Logging})
 source_group(Network FILES ${sources_Network})
 source_group(Packets FILES ${sources_Packets})
+source_group(Protocol FILES ${sources_Protocol})
 source_group(Platform FILES ${sources_Platform})
 source_group(Threading FILES ${sources_Threading})
 source_group(Utilities FILES ${sources_Utilities})
@@ -72,6 +74,7 @@ set(shared_STAT_SRCS
   ${sources_Logging}
   ${sources_Network}
   ${sources_Packets}
+  ${sources_Protocol}
   ${sources_Platform}
   ${sources_Threading}
   ${sources_Utilities}
@@ -110,7 +113,17 @@ add_library(shared STATIC
   ${shared_STAT_PCH_SRC}
 )
 
-target_link_libraries(shared SFMT)
+target_link_libraries(shared SFMT ${ZLIB_LIBRARIES})
+target_include_directories(shared PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/DataStores
+  ${CMAKE_CURRENT_SOURCE_DIR}/Debugging
+  ${CMAKE_CURRENT_SOURCE_DIR}/Network
+  ${CMAKE_CURRENT_SOURCE_DIR}/Packets
+  ${CMAKE_CURRENT_SOURCE_DIR}/Platform
+  ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
+)
+target_include_directories(shared PRIVATE ${ZLIB_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
 
 if(TARGET Boost::headers)
   target_link_libraries(shared Boost::headers)

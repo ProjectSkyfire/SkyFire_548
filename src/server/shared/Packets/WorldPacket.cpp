@@ -3,7 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
-#include "World.h"
+#include "Log.h"
 #include "WorldPacket.h"
 #include <zlib.h>
 

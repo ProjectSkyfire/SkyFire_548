@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "WorldOpcodeDispatch.h"
 #include "Opcodes.h"
 #include "PacketLog.h"
 #include "WorldPacket.h"

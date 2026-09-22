@@ -7,6 +7,7 @@
     \ingroup u2w
 */
 
+#include "WorldOpcodeDispatch.h"
 #include "AccountMgr.h"
 #include "AuthnetConnectTo.h"
 #include "BattlegroundMgr.h"
