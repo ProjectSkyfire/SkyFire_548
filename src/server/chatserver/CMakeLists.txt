@@ -2,7 +2,7 @@
 # See LICENSE.md file for Copyright information
 set(chatserver_sources Main.cpp ChatServer.cpp ChatServer.h)
 if(WIN32)
-  list(APPEND chatserver_sources ${sources_windows_Debugging})
+  list(APPEND chatserver_sources ${sources_windows_Debugging} chatserver.rc chatserver.ico)
 endif()
 add_executable(chatserver ${chatserver_sources})
 add_dependencies(chatserver revision.h)
