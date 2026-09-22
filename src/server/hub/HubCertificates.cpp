@@ -93,16 +93,17 @@ namespace Skyfire::HubCertificates
             auto serial = C::Random().substr(0, 32); BIGNUM* raw = nullptr; Require(BN_hex2bn(&raw, serial.c_str()) > 0);
             Owned<BIGNUM, BN_free> bn(raw, BN_free); Owned<ASN1_INTEGER, ASN1_INTEGER_free> number(BN_to_ASN1_INTEGER(bn.get(), nullptr), ASN1_INTEGER_free);
             Require(number && X509_set_serialNumber(cert.get(), number.get()) == 1 && X509_set_pubkey(cert.get(), key) == 1);
-            auto* subject = X509_get_subject_name(cert.get());
-            Require(X509_NAME_add_entry_by_NID(subject, NID_commonName, MBSTRING_ASC,
+            Owned<X509_NAME, X509_NAME_free> subject(X509_NAME_new(), X509_NAME_free); Require(bool(subject));
+            Require(X509_NAME_add_entry_by_NID(subject.get(), NID_commonName, MBSTRING_ASC,
                 reinterpret_cast<unsigned char const*>(node.c_str()), -1, -1, 0) == 1);
             if (!authority)
             {
                 auto value = "SkyFire-role-" + std::to_string(role);
-                Require(X509_NAME_add_entry_by_NID(subject, NID_organizationalUnitName, MBSTRING_ASC,
+                Require(X509_NAME_add_entry_by_NID(subject.get(), NID_organizationalUnitName, MBSTRING_ASC,
                     reinterpret_cast<unsigned char const*>(value.c_str()), -1, -1, 0) == 1);
             }
-            Require(X509_set_issuer_name(cert.get(), authority ? subject : X509_get_subject_name(Ca.get())) == 1);
+            Require(X509_set_subject_name(cert.get(), subject.get()) == 1);
+            Require(X509_set_issuer_name(cert.get(), authority ? subject.get() : X509_get_subject_name(Ca.get())) == 1);
             Require(X509_gmtime_adj(X509_getm_notBefore(cert.get()), -60) != nullptr);
             auto expires = std::time(nullptr) + std::time_t(authority ? 3650 : Days) * 86400;
             if (!authority) expires = (std::min)(expires, std::time_t(C::Expires(Ca.get())));

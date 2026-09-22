@@ -148,8 +148,10 @@ namespace Skyfire::Certificates
         Owned<EVP_PKEY, EVP_PKEY_free> key(Key(keyPath), EVP_PKEY_free);
         Owned<X509_REQ, X509_REQ_free> request(X509_REQ_new(), X509_REQ_free); Require(key && request);
         Require(X509_REQ_set_version(request.get(), 0) == 1 && X509_REQ_set_pubkey(request.get(), key.get()) == 1);
-        Require(X509_NAME_add_entry_by_NID(X509_REQ_get_subject_name(request.get()), NID_commonName, MBSTRING_ASC,
-            reinterpret_cast<unsigned char const*>(identity.c_str()), -1, -1, 0) == 1 && X509_REQ_sign(request.get(), key.get(), EVP_sha256()) > 0);
+        Owned<X509_NAME, X509_NAME_free> subject(X509_NAME_new(), X509_NAME_free); Require(bool(subject));
+        Require(X509_NAME_add_entry_by_NID(subject.get(), NID_commonName, MBSTRING_ASC,
+            reinterpret_cast<unsigned char const*>(identity.c_str()), -1, -1, 0) == 1 &&
+            X509_REQ_set_subject_name(request.get(), subject.get()) == 1 && X509_REQ_sign(request.get(), key.get(), EVP_sha256()) > 0);
         unsigned char* data = nullptr; int n = i2d_X509_REQ(request.get(), &data); Require(n > 0);
         auto out = Base64(data, std::size_t(n)); OPENSSL_free(data); return out;
     }
