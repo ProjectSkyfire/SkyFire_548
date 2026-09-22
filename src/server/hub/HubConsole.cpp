@@ -284,6 +284,18 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
         else
             std::printf("%s start requested; waiting for the child process to report ready.\n", service.c_str());
     }
+    else if (command == "restart")
+    {
+        std::string service, extra;
+        if (origin != HubCommandOrigin::LocalConsole)
+        { std::printf("Managed restarts require the local hub console.\n"); return true; }
+        if (!(input >> service) || input >> extra)
+        { std::printf("Usage: restart <managed-map-character-or-chat-service>\n"); return true; }
+        std::string error;
+        if (!_processSupervisor.RestartDataService(service, error))
+            std::printf("Restart rejected: %s.\n", error.c_str());
+        else std::printf("%s graceful restart requested.\n", service.c_str());
+    }
     else if (command == "world" || command == ".server" || command == "server" || HubProcessSupervisor::IsWorldKey(command))
     {
         if (origin != HubCommandOrigin::LocalConsole)
@@ -450,6 +462,7 @@ void HubCommandHandler::PrintHelp() const
     std::printf("  start <service>\n");
     std::printf("  fallback status | fallback promote <world-service-key>  Safe same-host world switchover.\n");
     std::printf("             Start and supervise a database-configured service.\n");
+    std::printf("  restart <service>  Gracefully restart a managed map, character or chat daemon.\n");
     std::printf("  stop <service>\n");
     std::printf("             Gracefully stop a managed service.\n");
     std::printf("  world <command>  Execute a command on the default world node (optional leading dot).\n");
@@ -523,7 +536,7 @@ void HubCommandHandler::PrintRegistry() const
     for (auto const& node : nodes)
     {
         std::printf("  %s (%s) %s %s:%u realm %u build %u load %u/%u %s\n", node.Key.c_str(), node.Name.c_str(),
-            node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : node.Type == Skyfire::Cluster::Service::Map ? "mapserver" : node.Type == Skyfire::Cluster::Service::Character ? "characterserver" : "world", node.Address.c_str(), unsigned(node.Port),
+            node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : node.Type == Skyfire::Cluster::Service::Map ? "mapserver" : node.Type == Skyfire::Cluster::Service::Character ? "characterserver" : node.Type == Skyfire::Cluster::Service::Chat ? "chatserver" : "world", node.Address.c_str(), unsigned(node.Port),
             node.Realm, node.Build, node.Load, node.Capacity, node.Ready ? "ready" : "not ready");
         std::printf("    %s | policy %s | hub connections %llu\n",node.Live ? "registered" : "offline",
             Skyfire::Cluster::AdministrationName(node.Admin),static_cast<unsigned long long>(counts[node.Key]));

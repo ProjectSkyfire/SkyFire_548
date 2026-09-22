@@ -446,7 +446,7 @@ void HubWebServer::UpdateStatus(HubWebStatusSnapshot const& status)
     _status = status;
     bool stopped = std::all_of(status.Services.begin(),status.Services.end(),[](HubWebManagedServiceStatus const& service)
         { return service.ServiceKind || service.State=="stopped" || service.State=="exited"; }) &&
-        std::none_of(status.ClusterNodes.begin(),status.ClusterNodes.end(),[](Skyfire::Cluster::Node const& node) { return node.Live && node.Type != Skyfire::Cluster::Service::Map &&
+        std::none_of(status.ClusterNodes.begin(),status.ClusterNodes.end(),[](Skyfire::Cluster::Node const& node) { return node.Live && node.Type != Skyfire::Cluster::Service::Map && node.Type != Skyfire::Cluster::Service::Chat &&
             (node.Type != Skyfire::Cluster::Service::Character || node.Load != 0); });
     auto now = std::chrono::steady_clock::now();
     if (stopped != _backupServicesStopped || now - _backupHealthAt >= std::chrono::seconds(1))
@@ -643,11 +643,21 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
     auto appendDataMetrics = [&](Skyfire::Cluster::Node const* node, uint8 kind)
     {
         auto const now = uint64(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
-        auto const received = node ? (kind == 3 ? node->Metrics.ReceivedAt : node->Character.ReceivedAt) : 0;
+        auto const received = node ? (kind == 3 ? node->Metrics.ReceivedAt : kind == 5 ? node->Chat.ReceivedAt : node->Character.ReceivedAt) : 0;
         bool const fresh = node && node->Live && node->ExpiresAt > now && received && now >= received && now-received <= 15000;
         auto number = [&](auto value) { return fresh ? std::to_string(value) : "null"; };
         json << ",\"metricsAvailable\":" << (fresh ? "true" : "false");
-        if (kind == 3)
+        if (kind == 5)
+        {
+            auto const metrics = node ? node->Chat : Skyfire::Cluster::ChatMetrics{};
+            json << ",\"chatserver\":true,\"uptimeSeconds\":" << number(metrics.Uptime)
+                 << ",\"connections\":" << number(metrics.Connections) << ",\"requests\":" << number(metrics.Requests)
+                 << ",\"failures\":" << number(metrics.Failures) << ",\"chatRealms\":[";
+            for (std::size_t i = 0; fresh && i < metrics.Realms.size(); ++i)
+            { if (i) json << ','; json << metrics.Realms[i]; }
+            json << ']';
+        }
+        else if (kind == 3)
         {
             auto const metrics = node ? node->Metrics : Skyfire::Cluster::MapMetrics{};
             json << ",\"mapserver\":true,\"uptimeSeconds\":" << number(metrics.Uptime)
@@ -742,7 +752,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
         }
         json << ",{\"key\":\"cluster:" << JsonEscape(node.Key) << "\",\"name\":\"" << JsonEscape(node.Name)
              << "\",\"status\":\"" << (!node.Live ? "offline" : node.Ready && node.Admin == Skyfire::Cluster::Administration::Enabled ? "online" : "issue")
-             << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : node.Type == Skyfire::Cluster::Service::Map ? "mapserver" : node.Type == Skyfire::Cluster::Service::Character ? "characterserver" : "world")
+             << "\",\"detail\":\"Cluster " << (node.Type == Skyfire::Cluster::Service::Auth ? ((node.Capabilities & 16) ? "authnet" : "auth") : node.Type == Skyfire::Cluster::Service::Map ? "mapserver" : node.Type == Skyfire::Cluster::Service::Character ? "characterserver" : node.Type == Skyfire::Cluster::Service::Chat ? "chatserver" : "world")
              << " | " << (!node.Live ? "offline" : node.Ready ? "ready" : "not ready")
              << " | policy " << Skyfire::Cluster::AdministrationName(node.Admin);
         if (!node.Address.empty()) json << " | " << JsonEscape(node.Address) << ':' << node.Port;
@@ -755,10 +765,10 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
             for (auto realm : node.Realms) json << ' ' << realm;
         }
         json << "\",\"managed\":false,\"clusterKey\":\"" << JsonEscape(node.Key)
-             << "\",\"clusterCanAdmin\":" << ((node.Type == Skyfire::Cluster::Service::Character || node.Type == Skyfire::Cluster::Service::Map) ? "false" : "true")
+             << "\",\"clusterCanAdmin\":" << ((node.Type == Skyfire::Cluster::Service::Character || node.Type == Skyfire::Cluster::Service::Map || node.Type == Skyfire::Cluster::Service::Chat) ? "false" : "true")
              << ",\"live\":" << (node.Live ? "true" : "false") << ",\"hubConnections\":" << connections
              << ",\"adminState\":\"" << Skyfire::Cluster::AdministrationName(node.Admin) << "\"";
-        if (node.Type == Skyfire::Cluster::Service::Map || node.Type == Skyfire::Cluster::Service::Character)
+        if (node.Type == Skyfire::Cluster::Service::Map || node.Type == Skyfire::Cluster::Service::Character || node.Type == Skyfire::Cluster::Service::Chat)
         {
             appendDataMetrics(&node,uint8(node.Type));
             json << ",\"canRestart\":" << (node.Type == Skyfire::Cluster::Service::Map && (node.Capabilities & 512) ? "true" : "false")

@@ -1,0 +1,30 @@
+# This file is part of Project SkyFire https://www.projectskyfire.org.
+# See LICENSE.md file for Copyright information
+# Native chat foundation: no player traffic or durable state yet.
+[chatserver]
+Chat.BindIP = "127.0.0.1"
+Chat.Port = 54940
+Chat.MaxConnections = 32
+Chat.RequestTimeout = 5
+# One daemon can serve multiple realms, e.g. "1 2 3". Zero and duplicates are invalid.
+Chat.Realms = "1"
+# Space-separated, exact world certificate common names. Empty fails startup.
+Chat.AllowedWorlds = "skyfire-world-primary skyfire-world-standby"
+
+Cluster.Enable = 1
+Cluster.NodeKey = "skyfire-chat-primary"
+Cluster.NodeName = "Chat Primary"
+Cluster.HubHost = "localhost"
+Cluster.HubPort = 9100
+Cluster.AdvertiseAddress = "127.0.0.1"
+# Paths relative to this configuration. Certificate needs clientAuth and serverAuth
+# usages and a SAN matching the endpoint clients will verify.
+Cluster.Certificate = "certs/chat-primary.crt"
+Cluster.PrivateKey = "certs/chat-primary.key"
+Cluster.CA = "certs/ca.crt"
+Cluster.Handoff.Enable = 0
+Cluster.RealmDirectory.Enable = 0
+
+LogsDir = ""
+Appender.Console = 1,2,0
+Logger.root = 2,Console

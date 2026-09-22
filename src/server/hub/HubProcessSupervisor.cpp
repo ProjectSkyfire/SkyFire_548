@@ -99,7 +99,7 @@ bool HubProcessSupervisor::RestartDataService(std::string const& key, std::strin
 {
     auto service = _services.find(key);
     if (service == _services.end() || !service->second.Definition.ServiceKind)
-    { error = "Per-service restart is supported for managed map and character servers."; return false; }
+    { error = "Per-service restart is supported for managed map, character and chat servers."; return false; }
     if (!Stop(key,error)) return false;
     service->second.RequestedRestart = true;
     service->second.CommandResult = "Waiting for clean exit before restarting.";
@@ -175,7 +175,7 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
     }
     if (IsWorldKey(serviceKey))
         for (auto const& entry : _services)
-            if (entry.second.Definition.ServiceKind && (entry.second.State == HubManagedProcessState::Stopping || entry.second.RequestedRestart || entry.second.RestartPending))
+            if ((entry.second.Definition.ServiceKind == 3 || entry.second.Definition.ServiceKind == 4) && (entry.second.State == HubManagedProcessState::Stopping || entry.second.RequestedRestart || entry.second.RestartPending))
             { error = "A data service is stopping or restarting; wait before starting a world."; return false; }
     if (IsActive(runtime))
     {
@@ -296,7 +296,7 @@ bool HubProcessSupervisor::Stop(std::string const& serviceKey, std::string& erro
         return false;
     }
     ManagedServiceRuntime& runtime = service->second;
-    if (runtime.Definition.ServiceKind && !CheckDataServiceStop(error)) return false;
+    if ((runtime.Definition.ServiceKind == 3 || runtime.Definition.ServiceKind == 4) && !CheckDataServiceStop(error)) return false;
     if (!IsActive(runtime))
     {
         error = "managed service '" + serviceKey + "' is not running";
@@ -418,8 +418,8 @@ bool HubProcessSupervisor::ReloadDatabaseRecords(std::string& error)
             definition.Enabled = fields[5].GetBool();
             definition.ServiceKind = fields[6].GetUInt8();
             definition.ClusterKey = fields[7].GetString();
-            if (definition.ServiceKind != 0 && definition.ServiceKind != 3 && definition.ServiceKind != 4)
-            { error = "Invalid managed service kind (expected 0, 3 or 4)."; return false; }
+            if (definition.ServiceKind != 0 && definition.ServiceKind != 3 && definition.ServiceKind != 4 && definition.ServiceKind != 5)
+            { error = "Invalid managed service kind (expected 0, 3, 4 or 5)."; return false; }
             if (definition.ServiceKind && (!Skyfire::Cluster::ValidKey(definition.ClusterKey) || !Skyfire::Cluster::ValidKey(key) ||
                 key.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_") != std::string::npos ||
                 IsWorldKey(key) || key == "authnet" || key == "all"))
@@ -455,7 +455,7 @@ bool HubProcessSupervisor::Launch(std::string const& serviceKey, ManagedServiceR
     std::string const& workingDirectory, std::string& error)
 {
     std::filesystem::path script;
-    if (runtime.Definition.ServiceKind)
+    if (runtime.Definition.ServiceKind == 3 || runtime.Definition.ServiceKind == 4)
     {
         script = std::filesystem::path(configPath).parent_path() /
             (runtime.Definition.ServiceKind == 3 ? "mapserver.py" : "characterserver.py");
@@ -490,6 +490,7 @@ bool HubProcessSupervisor::Launch(std::string const& serviceKey, ManagedServiceR
     command
         << L"\" --hub-control-read " << reinterpret_cast<uintptr_t>(childControlRead)
         << L" --hub-status-write " << reinterpret_cast<uintptr_t>(childStatusWrite);
+    if (runtime.Definition.ServiceKind == 5) command << L" --hub-node-key \"" << std::filesystem::path(runtime.Definition.ClusterKey).wstring() << L"\"";
     if (runtime.WarmStandby) command << L" --hub-standby";
     std::wstring commandText = command.str();
     std::vector<wchar_t> commandBuffer(commandText.begin(), commandText.end());
@@ -540,6 +541,9 @@ bool HubProcessSupervisor::Launch(std::string const& serviceKey, ManagedServiceR
             execl(executablePath.c_str(), executablePath.c_str(), "-B", script.c_str(), "--config", configPath.c_str(),
                 "--hub-node-key", runtime.Definition.ClusterKey.c_str(), "--hub-control-read", controlHandle.c_str(),
                 "--hub-status-write", statusHandle.c_str(), static_cast<char*>(nullptr));
+        else if (runtime.Definition.ServiceKind == 5) execl(executablePath.c_str(), executablePath.c_str(), "-c", configPath.c_str(),
+            "--hub-node-key", runtime.Definition.ClusterKey.c_str(), "--hub-control-read", controlHandle.c_str(),
+            "--hub-status-write", statusHandle.c_str(), static_cast<char*>(nullptr));
         else if (runtime.WarmStandby) execl(executablePath.c_str(), executablePath.c_str(), "-c", configPath.c_str(),
             "--hub-control-read", controlHandle.c_str(), "--hub-status-write", statusHandle.c_str(),
             "--hub-standby", static_cast<char*>(nullptr));
@@ -618,7 +622,7 @@ void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime&
     auto const now = std::chrono::steady_clock::now();
     if (!IsWorldKey(key) && !runtime.Definition.ServiceKind && !runtime.BackupControlled && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
         ForceStop(key, runtime);
-    else if (runtime.State == HubManagedProcessState::Starting && now - runtime.ReadinessStartedAt > (runtime.Definition.ServiceKind ? std::chrono::seconds(1800) : StartupTimeout))
+    else if (runtime.State == HubManagedProcessState::Starting && now - runtime.ReadinessStartedAt > ((runtime.Definition.ServiceKind == 3 || runtime.Definition.ServiceKind == 4) ? std::chrono::seconds(1800) : StartupTimeout))
         runtime.State = HubManagedProcessState::Unresponsive;
     else if (runtime.Ready && now - runtime.LastHeartbeat > HeartbeatTimeout &&
         runtime.State != HubManagedProcessState::Stopping)

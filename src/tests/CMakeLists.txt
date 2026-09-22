@@ -1023,3 +1023,7 @@ set_tests_properties(hub_handoff_store_tests PROPERTIES SKIP_RETURN_CODE 77)
 add_executable(map_data_directory_tests MapDataDirectoryTests.cpp)
 target_include_directories(map_data_directory_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
 add_test(NAME map_data_directory_tests COMMAND map_data_directory_tests)
+
+add_executable(chat_protocol_tests ChatProtocolTests.cpp)
+target_include_directories(chat_protocol_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+add_test(NAME chat_protocol_tests COMMAND chat_protocol_tests)

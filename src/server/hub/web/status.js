@@ -64,7 +64,7 @@ window.HubStatus = (() => {
         text(card.title, component.name);
         text(card.state, component.clusterKey && component.live && component.adminState !== "enabled" ? component.adminState : component.status);
         text(card.detail, component.detail || "");
-        card.metrics.hidden = !component.managed && !component.mapserver && !component.characterserver;
+        card.metrics.hidden = !component.managed && !component.mapserver && !component.characterserver && !component.chatserver;
         const cluster = component.clusterCanAdmin === true;
         card.controls.hidden = !component.managed && !cluster && !component.canRestart;
         card.start.hidden = card.stop.hidden = !component.managed;
@@ -74,7 +74,7 @@ window.HubStatus = (() => {
         card.promote.title = 'Gracefully stop the active world, confirm exclusive ownership, then activate this world. Players must reconnect.';
         card.restart.hidden = !component.canRestart;
         card.restart.disabled = pending.has(component.key) || !(component.managed ? active && component.state !== 'stopping' : component.live) || !data.canOperateServices || data.restartActive;
-        card.restart.title = 'Data-service restart requires graceful world shutdown first.';
+        card.restart.title = component.chatserver ? 'Restart the chat daemon independently.' : 'Data-service restart requires graceful world shutdown first.';
         let metrics = `Uptime ${active ? formatUptime(component.uptimeSeconds) : "—"}`;
         if (isWorld(component)) {
             metrics += component.state === 'standby' ? '\nStatic data loaded · Waiting for promotion' : component.state === "running" && component.metricsAvailable
@@ -93,6 +93,12 @@ window.HubStatus = (() => {
                 ? `Uptime ${formatUptime(component.uptimeSeconds)} · DB ${component.databaseReady ? 'ready' : 'unavailable'}\nCPU ${component.cpuPercent.toFixed(1)}% · Memory ${component.memoryMiB} MiB\nConnections ${component.connections} · Pending ${component.pendingRequests}\nReads ${component.reads} · Writes ${component.writes} · Batches ${component.transactions}\nAverage ${component.latencyMs.toFixed(2)} ms · Errors ${component.failures}\nLast commit ${component.lastCommitAgeSeconds == null ? '—' : component.lastCommitAgeSeconds + 's ago'}`
                 : 'Character-server metrics unavailable';
             card.metrics.title = 'Metrics expire after 15 seconds. Pending includes queued and executing requests; latency includes queue time. Write totals count acknowledged requests, not saved characters.';
+        }
+        if (component.chatserver) {
+            metrics = component.metricsAvailable
+                ? `Uptime ${formatUptime(component.uptimeSeconds)} � Realms ${(component.chatRealms || []).join(', ')}\nConnections ${component.connections} � Health probes ${component.requests} � Errors ${component.failures}\nFoundation � Gameplay routing pending`
+                : 'Chat-server metrics unavailable';
+            card.metrics.title = 'Authenticated service health probes; these are not player chat messages. Metrics expire after 15 seconds.';
         }
         text(card.metrics, metrics);
         card.start.disabled = pending.has(component.key) || !data.canOperateServices || !component.enabled || active;
@@ -130,7 +136,7 @@ window.HubStatus = (() => {
         }
         if (restartAll) {
             restartAll.disabled = restartSending || data.restartActive || !data.canOperateServices;
-            restartAll.title = 'Gracefully restart running worlds, authentication and mapserver nodes. Hub/web stays online.';
+            restartAll.title = 'Gracefully restart running worlds, authentication, mapserver and managed chat nodes. Hub/web stays online.';
             if (data.restartActive) restartError = '';
             text(restartStatus, restartError || data.restartMessage || 'Restart refreshes running server nodes; the hub stays online.');
         }

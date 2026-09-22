@@ -8,6 +8,7 @@
 #include "Cluster/RealmDirectory.h"
 #include "Cluster/MapDataDirectory.h"
 #include "Cluster/CharacterMetrics.h"
+#include "Cluster/ChatProtocol.h"
 #include <sstream>
 #include "Log.h"
 #include "Configuration/Config.h"
@@ -92,7 +93,7 @@ private:
                 self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms &&
                 self->_header.Type != Handoff::RequestType && self->_header.Type != Realms::RequestType &&
                 self->_header.Type != MapData::RequestType && self->_header.Type != MapData::MetricsType &&
-                self->_header.Type != CharacterMetricsType)
+                self->_header.Type != CharacterMetricsType && self->_header.Type != Skyfire::Chat::MetricsType)
             { self->Reject(Error::Malformed, "Unsupported request type."); return; }
             self->_body.resize(self->_header.Length);
             if (self->_body.empty()) { self->Handle(); return; }
@@ -105,6 +106,14 @@ private:
     }
     void Handle()
     {
+        if (_header.Type == Skyfire::Chat::MetricsType)
+        {
+            ChatMetrics metrics;
+            if (!Skyfire::Chat::DecodeMetrics(_body, metrics) ||
+                !_server._registry.SetChatMetrics(_key, _owner, HubClusterServer::Now(), metrics))
+            { Reject(Error::Malformed, "Chat metrics require a live chat service and valid payload."); return; }
+            Acknowledge(false); return;
+        }
         if (_header.Type == CharacterMetricsType)
         {
             CharacterMetrics metrics;
@@ -176,10 +185,11 @@ private:
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
-            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(2047)) ||
-                (node.Type == Service::Auth && (node.Capabilities & (776 | 1024))) ||
-                (node.Type == Service::World && (node.Capabilities & (944 | 1024))) ||
+            if (node.Build != 18414 || (node.Capabilities & ~std::uint32_t(4095)) ||
+                (node.Type == Service::Auth && (node.Capabilities & (776 | 1024 | 2048))) ||
+                (node.Type == Service::World && (node.Capabilities & (944 | 1024 | 2048))) ||
                 (node.Type == Service::Character && node.Capabilities != 1024) ||
+                (node.Type == Service::Chat && node.Capabilities != Skyfire::Chat::Capability) ||
                 (node.Type == Service::Map && (node.Capabilities != MapData::Capability && node.Capabilities != (MapData::Capability | MapData::RestartCapability))))
             { Reject(Error::Version, "Requires client build 18414 and supported service capabilities."); return; }
             if (!_server._registry.Register(node, _owner, HubClusterServer::Now(), _server._leaseSeconds * 1000ULL))
@@ -296,7 +306,7 @@ bool HubClusterServer::LoadAdministration(std::string& error)
         node.Capabilities = fields[2].GetUInt32(); node.Admin = Administration(fields[3].GetUInt8());
         node.Type = Service(fields[4].GetUInt8());
         node.Live = false; node.Ready = false;
-        if ((node.Type != Service::Auth && node.Type != Service::World && node.Type != Service::Map && node.Type != Service::Character) || !ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
+        if ((node.Type != Service::Auth && node.Type != Service::World && node.Type != Service::Map && node.Type != Service::Character && node.Type != Service::Chat) || !ValidKey(node.Key) || unsigned(node.Admin) > 2 || node.Name.empty() || !ValidUtf8(node.Name))
         { error = "Invalid persisted cluster policy; correct the hub_cluster_policy row before startup."; return false; }
         _policies[node.Key] = node;
         _registry.SetAdministration(node.Key,node.Admin);
@@ -317,6 +327,7 @@ bool HubClusterServer::SetAdministration(std::string const& key, std::string con
         node = policy->second;
     }
     if (!_policies.count(key) && _policies.size() >= 4096) { error = "Cluster policy limit reached."; return false; }
+    if (node.Type == Service::Chat) { error = "Chat routing is not enabled yet; use managed stop or restart."; return false; }
     if (node.Type == Service::Character) { error = "Stop worlds before operating the character service; routing drain is not database fencing."; return false; }
     auto const state = action == "drain" ? Administration::Draining : action == "disable" ? Administration::Disabled : Administration::Enabled;
     auto stmt = HubDatabase.GetPreparedStatement(HUB_UPSERT_CLUSTER_POLICY);

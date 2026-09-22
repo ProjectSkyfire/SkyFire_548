@@ -8,7 +8,7 @@ if( USE_COREPCH )
 endif()
 
 file(GLOB_RECURSE sources_Configuration Configuration/*.cpp Configuration/*.h)
-set(sources_Cluster Cluster/ClusterProtocol.h Cluster/ClusterRegistry.h Cluster/ClusterAgent.h Cluster/ClusterAgent.cpp Cluster/AuthRouting.h Cluster/RealmDirectory.h Cluster/MapDataDirectory.h Cluster/MapDataStartCheck.h)
+set(sources_Cluster Cluster/ClusterProtocol.h Cluster/ChatProtocol.h Cluster/ClusterRegistry.h Cluster/ClusterAgent.h Cluster/ClusterAgent.cpp Cluster/AuthRouting.h Cluster/RealmDirectory.h Cluster/MapDataDirectory.h Cluster/MapDataStartCheck.h)
 list(APPEND sources_Cluster Cluster/HandoffStore.h Cluster/HandoffProtocol.h Cluster/HandoffService.h Cluster/HandoffClient.h Cluster/HandoffClient.cpp)
 file(GLOB_RECURSE sources_Auth Auth/*.cpp Auth/*.h)
 list(APPEND sources_Auth Auth/AccountAdministration.cpp Auth/AccountAdministration.h)

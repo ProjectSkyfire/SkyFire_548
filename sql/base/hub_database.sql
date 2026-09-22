@@ -45,7 +45,7 @@ CREATE TABLE `hub_managed_services` (
   `config_path` varchar(1024) NOT NULL COMMENT 'Absolute path or path relative to working_directory',
   `working_directory` varchar(1024) NOT NULL DEFAULT '.',
   `enabled` tinyint unsigned NOT NULL DEFAULT '1',
-  `service_kind` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '0 native, 3 mapserver, 4 characterserver',
+  `service_kind` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '0 auth/world, 3 mapserver, 4 characterserver, 5 chatserver',
   `cluster_key` varchar(64) NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

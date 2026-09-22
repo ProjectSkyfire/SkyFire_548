@@ -10,7 +10,12 @@
 #include <thread>
 namespace Skyfire::Cluster
 {
-    struct AgentSample { bool Ready = false; std::uint32_t Load = 0; };
+    struct AgentSample
+    {
+        bool Ready = false;
+        std::uint32_t Load = 0;
+        ChatMetrics Chat{};
+    };
     struct AgentOptions
     {
         bool Enabled = false;
@@ -31,6 +36,7 @@ namespace Skyfire::Cluster
         Agent& operator=(Agent const&) = delete;
         bool Start(AgentOptions options, std::function<AgentSample()> sample, std::string& error);
         void Stop();
+        bool IsRegistered() const;
     private:
         struct State;
         std::shared_ptr<State> _state;

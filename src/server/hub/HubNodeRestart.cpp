@@ -33,7 +33,7 @@ bool HubProcessSupervisor::RestartNodes(std::string& error)
     for (auto const& entry : _services)
     {
         auto const& runtime = entry.second;
-        if (runtime.Definition.ServiceKind) continue; // Map refresh uses its cluster channel; persistence stays online.
+        if (runtime.Definition.ServiceKind == 3 || runtime.Definition.ServiceKind == 4) continue; // Map refresh uses its cluster channel; persistence stays online.
         if (!IsActive(runtime)) continue;
         if (!runtime.Definition.Enabled || (runtime.State != HubManagedProcessState::Running && runtime.State != HubManagedProcessState::Standby) || runtime.CommandPending || runtime.AccountCallback ||
             (IsWorldKey(entry.first) && !runtime.WarmStandby && !runtime.CanSendCommands))
@@ -129,7 +129,7 @@ void HubProcessSupervisor::UpdateNodeRestart()
             }
         for (auto const& key : _restartTargets)
             if (!IsWorldKey(key)) { std::string error; if (!Stop(key,error)) { fail(error); return; } }
-        _nodeRestartState = "stopping"; _nodeRestartMessage = "Worlds saved and stopped; waiting for authentication services to stop.";
+        _nodeRestartState = "stopping"; _nodeRestartMessage = "Worlds saved and stopped; waiting for authentication and chat services to stop.";
         return;
     }
     if (_nodeRestartState == "stopping")
@@ -148,7 +148,7 @@ void HubProcessSupervisor::UpdateNodeRestart()
         for (auto const& entry : _restartMapGenerations)
             if (std::none_of(nodes.begin(),nodes.end(),[&](auto const& node)
                 { return node.Key == entry.first && Skyfire::Cluster::MapData::RestartReady(node,entry.second,now); })) return;
-        _nodeRestartState = "auth"; _nodeRestartMessage = "Mapservers ready; starting authentication services.";
+        _nodeRestartState = "auth"; _nodeRestartMessage = "Mapservers ready; starting authentication and chat services.";
     }
     if (_nodeRestartState == "auth" || _nodeRestartState == "worlds")
     {

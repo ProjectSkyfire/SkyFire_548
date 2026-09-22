@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 #include "ClusterAgent.h"
+#include "ChatProtocol.h"
 #include "HandoffClient.h"
 #include "RealmDirectory.h"
 #include "Configuration/Config.h"
@@ -19,6 +20,7 @@
 #include <filesystem>
 #include <chrono>
 #include <algorithm>
+#include <atomic>
 
 namespace Skyfire::Cluster
 {
@@ -88,6 +90,7 @@ namespace Skyfire::Cluster
         AgentOptions Options;
         std::function<AgentSample()> Sample;
         std::shared_ptr<Session> Current;
+        std::atomic<bool> Registered{false};
         bool Stopping = false;
         unsigned Backoff = 1;
         void Connect();
@@ -114,6 +117,7 @@ namespace Skyfire::Cluster
         void Close()
         {
             if (Owner.Options.RealmDirectoryEnabled) Realms::Client.Clear();
+            Owner.Registered = false;
             Closed = true; Resolver.cancel(); Deadline.cancel(); Pulse.cancel();
             boost::system::error_code ec;
             Stream.next_layer().cancel(ec); Stream.next_layer().close(ec);
@@ -227,7 +231,11 @@ namespace Skyfire::Cluster
                 Send(Message::Realms, realms); return;
             }
             if (Pending == Message::Register || Pending == Message::Realms) { Publish(true); return; }
+            if (Pending == Message::Ready || Pending == Message::Heartbeat) Owner.Registered = true;
             Owner.Backoff = 1;
+            if (Owner.Options.Advertisement.Type == Service::Chat &&
+                (Pending == Message::Ready || Pending == Message::Heartbeat))
+            { Send(Chat::MetricsType, Chat::EncodeMetrics(Owner.Sample().Chat)); return; }
             if (Owner.Options.RealmDirectoryEnabled && Ready)
             {
                 DirectoryQueries = Realms::Client.Queries(); DirectoryOffset = 0;
@@ -303,6 +311,7 @@ namespace Skyfire::Cluster
         if (session) session->RequestStop(); else Finish();
     }
     Agent::~Agent() { Stop(); }
+    bool Agent::IsRegistered() const { return _state && _state->Registered.load(); }
     bool Agent::Start(AgentOptions options, std::function<AgentSample()> sample, std::string& error)
     {
         Handoff::ConfigureClient(options);
