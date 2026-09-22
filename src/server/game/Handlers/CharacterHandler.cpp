@@ -1813,7 +1813,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     if (pCurrChar->IsGameMaster())
         SendNotification(LANG_GM_ON);
 
-    if (!UsedEmailLogin())
+    // Authnet hands the world a token, not the email used to authenticate.
+    if (!UsedEmailLogin() && !UsesAuthnetWorldHandoff())
         chH.SendSysMessage("This session used legacy username login. Convert your login with .account convert email <email> <oldPassword> <newPassword> <newPasswordConfirm>.");
 
     std::string IP_str = GetRemoteAddress();
