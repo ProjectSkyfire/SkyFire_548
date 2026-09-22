@@ -16949,6 +16949,12 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     else
     {
         GetSession()->SendActivateTaxiReply(ActivateTaxiReply::ERR_TAXI_OK);
+
+        // Put the pet away for the flight: a taxi mount carries no SPELL_AURA_MOUNTED, so
+        // Unit::Mount leaves it behind stunned. CleanupAfterTaxiFlight calls Dismount, which
+        // resummons it on landing.
+        UnsummonPetTemporaryIfAny();
+
         GetSession()->SendDoFlight(mount_display_id, sourcepath);
     }
     return true;
