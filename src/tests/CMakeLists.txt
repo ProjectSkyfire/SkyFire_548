@@ -1031,3 +1031,34 @@ add_test(NAME chat_protocol_tests COMMAND chat_protocol_tests)
 add_executable(chat_presence_tests ChatPresenceTests.cpp)
 target_include_directories(chat_presence_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
 add_test(NAME chat_presence_tests COMMAND chat_presence_tests)
+
+add_executable(chat_whisper_tests ChatWhisperTests.cpp)
+target_include_directories(chat_whisper_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+add_test(NAME chat_whisper_tests COMMAND chat_whisper_tests)
+
+# Certificate utilities are also used by standalone transport fixtures.
+foreach(pki_fixture handoff_client_tests realm_directory_agent_probe hub_handoff_store_tests)
+  target_sources(${pki_fixture} PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared/Cluster/CertificateTools.cpp)
+  if(WIN32)
+    target_link_libraries(${pki_fixture} advapi32)
+  endif()
+endforeach()
+
+add_executable(hub_certificate_tests HubCertificateTests.cpp RealmSocketLogStub.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/hub/HubCertificates.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Cluster/CertificateTools.cpp)
+target_include_directories(hub_certificate_tests PRIVATE
+  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/src/server/hub ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Configuration ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Threading ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
+  ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+target_link_libraries(hub_certificate_tests Threads::Threads ${OPENSSL_LIBRARIES})
+if(TARGET Boost::headers)
+  target_link_libraries(hub_certificate_tests Boost::headers)
+elseif(TARGET Boost::boost)
+  target_link_libraries(hub_certificate_tests Boost::boost)
+endif()
+if(WIN32)
+  target_link_libraries(hub_certificate_tests advapi32 ws2_32 mswsock)
+endif()
+add_test(NAME hub_certificate_tests COMMAND hub_certificate_tests)

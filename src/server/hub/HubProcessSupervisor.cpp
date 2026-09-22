@@ -7,6 +7,7 @@
 #include "HubProcessSupervisor.h"
 #include "HubWorldFallbackPolicy.h"
 #include "HubClusterServer.h"
+#include "HubCertificates.h"
 
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -235,6 +236,8 @@ bool HubProcessSupervisor::Start(std::string const& serviceKey, std::string& err
                         return false;
                     }
                 }
+        unsigned const certificateRole = runtime.Definition.ServiceKind >= 3 ? runtime.Definition.ServiceKind : IsWorldKey(serviceKey) ? 2 : 1;
+        if (!Skyfire::HubCertificates::Prepare(configPath.string(), certificateRole, error)) return false;
         if (IsWorldKey(serviceKey) && (!_worldStartCheck || !_worldStartCheck(configPath.string(), error)))
         {
             if (error.empty()) error = "World start blocked: dependency checker is unavailable.";

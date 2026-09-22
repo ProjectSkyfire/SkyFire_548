@@ -16,9 +16,12 @@ import socket
 import stat
 import struct
 import time
+import sys
 from urllib.parse import quote
 from map_common import (KEY, MAX_FILE, MAX_FILES, MAX_MANIFEST, MAX_TOTAL, MAX_MAPS, asset_map,
                         certificate_key, client_tls, digest_file, encoded, frame, wire_string, valid_asset_size)
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'shared/Platform'))
+from cluster_certificates import Lifecycle
 
 
 def read_world_config(path):
@@ -54,9 +57,11 @@ def receive(sock, length):
     return bytes(out)
 
 
-def discover(host, port, context, node):
+def discover(host, port, context, node, certificates=None):
     with socket.create_connection((host, port), timeout=5) as plain:
         with context.wrap_socket(plain, server_hostname=host) as sock:
+            if certificates and not certificates.allowed(sock):
+                raise ValueError('Hub certificate revoked or CRL unavailable')
             sock.sendall(frame(8, bytes([1]) + wire_string(node)))
             magic, version, kind, size = struct.unpack('!4sHHI', receive(sock, 12))
             if magic != b'SFHC' or version != 1 or kind != 0x8003 or not 1 <= size <= 4096:
@@ -154,6 +159,7 @@ def fetch(config_path, receipt=None):
         raise ValueError("Invalid bootstrap receipt")
     config_path = Path(config_path).resolve(strict=True)
     config = read_world_config(config_path)
+    certificates = Lifecycle({'crl':config.get('Cluster.CRL', ''), 'ca':config.get('Cluster.CA', '')}, config_path.parent)
     def path(key, default=None):
         value = Path(config.get(key, default) or '')
         return Path(os.path.abspath(value if value.is_absolute() else config_path.parent / value))
@@ -193,6 +199,9 @@ def fetch(config_path, receipt=None):
                 if certificate_key(connection.sock.getpeercert()) != node:
                     connection.close()
                     raise ValueError('Mapserver TLS identity does not match hub route')
+            if not certificates.allowed(connection.sock):
+                connection.close()
+                raise ValueError('Mapserver certificate revoked or CRL unavailable')
             connection.request('GET', url, headers={'Accept-Encoding':'identity'})
             response = connection.getresponse()
             if response.status != 200 or response.getheader('Content-Encoding'):
@@ -201,7 +210,7 @@ def fetch(config_path, receipt=None):
             return response
         try:
             for node, maps in sorted(sources.items()):
-                host, port = discover(config.get('Cluster.HubHost', 'localhost'), int(config.get('Cluster.HubPort', '9100')), context, node)
+                host, port = discover(config.get('Cluster.HubHost', 'localhost'), int(config.get('Cluster.HubPort', '9100')), context, node, certificates)
                 connections[node] = http.client.HTTPSConnection(host, port, context=context, timeout=30)
                 response = request(node, '/v1/manifest')
                 payload = response.read(MAX_MANIFEST + 1)

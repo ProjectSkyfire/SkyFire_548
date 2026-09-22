@@ -8,8 +8,9 @@ if( USE_COREPCH )
 endif()
 
 file(GLOB_RECURSE sources_Configuration Configuration/*.cpp Configuration/*.h)
-set(sources_Cluster Cluster/ClusterProtocol.h Cluster/ChatProtocol.h Cluster/ChatPresence.h Cluster/ChatClient.h Cluster/ChatClient.cpp Cluster/ClusterRegistry.h Cluster/ClusterAgent.h Cluster/ClusterAgent.cpp Cluster/AuthRouting.h Cluster/RealmDirectory.h Cluster/MapDataDirectory.h Cluster/MapDataStartCheck.h)
+set(sources_Cluster Cluster/ClusterProtocol.h Cluster/ChatProtocol.h Cluster/ChatPresence.h Cluster/ChatWhisper.h Cluster/ChatClient.h Cluster/ChatClient.cpp Cluster/ClusterRegistry.h Cluster/ClusterAgent.h Cluster/ClusterAgent.cpp Cluster/AuthRouting.h Cluster/RealmDirectory.h Cluster/MapDataDirectory.h Cluster/MapDataStartCheck.h)
 list(APPEND sources_Cluster Cluster/HandoffStore.h Cluster/HandoffProtocol.h Cluster/HandoffService.h Cluster/HandoffClient.h Cluster/HandoffClient.cpp)
+list(APPEND sources_Cluster Cluster/CertificateTools.h Cluster/CertificateTools.cpp Cluster/CertificateConfiguration.cpp)
 file(GLOB_RECURSE sources_Auth Auth/*.cpp Auth/*.h)
 list(APPEND sources_Auth Auth/AccountAdministration.cpp Auth/AccountAdministration.h)
 list(REMOVE_DUPLICATES sources_Auth)
@@ -114,6 +115,9 @@ add_library(shared STATIC
 )
 
 target_link_libraries(shared SFMT ${ZLIB_LIBRARIES})
+if(WIN32)
+  target_link_libraries(shared advapi32)
+endif()
 target_include_directories(shared PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/DataStores

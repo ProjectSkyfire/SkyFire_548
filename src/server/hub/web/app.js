@@ -45,6 +45,7 @@ function showLogin(message = "") {
     worldOptionsSignature = "";
     window.HubAccounts?.reset();
     backupSchedules.reset();
+    window.HubCertificates?.reset();
     healthDashboard.reset();
     window.hubPages.reset();
     worldCommandAllowed = false;
@@ -77,6 +78,7 @@ function renderStatus(data) {
     document.querySelector("#status-tab").hidden = data.canSendWorldCommands !== true && data.canOperateServices !== true;
     window.HubAccounts?.update(data);
     csrfToken = data.csrfToken || "";
+    window.HubCertificates?.configure(data.canSendWorldCommands === true, csrfToken);
     backupSchedules.update(data.canOperateServices === true || data.canSendWorldCommands === true);
     const worlds = data.components.filter(isWorld);
     const selected = worldNode.value;

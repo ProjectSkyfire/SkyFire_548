@@ -2,7 +2,7 @@
 #   SkyFire Auth Server configuration file    #
 ###############################################
 [authserver]
-ConfVersion=2026091803
+ConfVersion = 2026092100
 
 ###################################################################################################
 # SECTION INDEX
@@ -526,3 +526,6 @@ Logger.root=3,Console Auth
 
 #
 ###################################################################################################
+
+# Signed revocation list populated by hub PKI/enrollment. Empty retains manual TLS.
+Cluster.CRL = ""

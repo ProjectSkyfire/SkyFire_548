@@ -21,7 +21,7 @@ namespace Skyfire::Cluster
         bool Enabled = false;
         bool HandoffEnabled = false;
         bool RealmDirectoryEnabled = false;
-        std::string Host, Certificate, PrivateKey, CA;
+        std::string Host, Certificate, PrivateKey, CA, CRL;
         std::uint16_t Port = 9100;
         Node Advertisement;
     };

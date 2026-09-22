@@ -22,6 +22,7 @@
 #include "World.h"
 #include "WorldPacket.h"
 
+namespace Skyfire::Chat { struct WhisperResult; }
 class Creature;
 class CharacterBooster;
 class GameObject;
@@ -826,6 +827,9 @@ public:                                                 // opcodes handlers
     void HandleQuestPushResult(WorldPacket& recvPacket);
 
     void HandleMessagechatOpcode(WorldPacket& recvPacket);
+    void HandlePlayerWhisper(std::string to, std::string const& text, Language language,
+        bool relayed = false, uint64 expectedReceiver = 0, uint64 expectedIncarnation = 0);
+    void CompleteChatWhisper(Skyfire::Chat::WhisperResult const& result);
     void HandleAddonMessagechatOpcode(WorldPacket& recvPacket);
     void SendPlayerNotFoundNotice(std::string const& name);
     void SendPlayerAmbiguousNotice(std::string const& name);

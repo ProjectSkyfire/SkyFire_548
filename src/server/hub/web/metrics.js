@@ -14,7 +14,7 @@ window.HubHealthDashboard = class {
         this.note = this.el('p','Last 10 minutes in this browser session. Samples every 5 seconds; gaps mean unavailable data.',root);
         this.note.className = 'muted'; this.charts = [];
         const grid = this.el('div','',root); grid.className = 'metric-grid';
-        for (const [key,title,unit] of [['players','Players online','players'],['cpu','CPU usage','%'],['update','World update time','ms'],['memoryMiB','Process memory','MiB'],['transfers','Active map transfers','transfers'],['traffic','Map data sent','MiB/s'],['connections','Service connections','connections'],['pendingRequests','Pending character requests','requests'],['latencyMs','Average character request latency','ms'],['failures','Service request failures','failures'],['requests','Chat service requests','requests'],['presencePlayers','Chat player presence','players']]) {
+        for (const [key,title,unit] of [['players','Players online','players'],['cpu','CPU usage','%'],['update','World update time','ms'],['memoryMiB','Process memory','MiB'],['transfers','Active map transfers','transfers'],['traffic','Map data sent','MiB/s'],['connections','Service connections','connections'],['pendingRequests','Pending character requests','requests'],['latencyMs','Average character request latency','ms'],['failures','Service request failures','failures'],['requests','Chat service requests','requests'],['presencePlayers','Chat player presence','players'],['whisperRelays','Accepted whisper relays','relays']]) {
             const panel = this.el('section','',grid); panel.className = 'metric-panel'; this.el('h2',title,panel);
             const current = this.el('p','Waiting for metrics',panel); current.className = 'metric-value';
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -87,7 +87,7 @@ window.HubHealthDashboard = class {
         const service=this.latest?.services.find(item=>item.key===this.select.value);
         const ns='http://www.w3.org/2000/svg';
         for (const chart of this.charts) {
-            const visible = service?.chatserver ? ['connections','requests','failures','presencePlayers'] : service?.characterserver ? ['cpu','memoryMiB','connections','pendingRequests','latencyMs','failures'] :
+            const visible = service?.chatserver ? ['connections','requests','failures','presencePlayers','whisperRelays'] : service?.characterserver ? ['cpu','memoryMiB','connections','pendingRequests','latencyMs','failures'] :
                 service?.mapserver ? ['cpu','memoryMiB','transfers','traffic'] : ['players','cpu','update'];
             chart.panel.hidden=!visible.includes(chart.key);
             const usable=service?.state==='running' && service.metricsAvailable && !this.isStale;

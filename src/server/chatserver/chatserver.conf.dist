@@ -3,7 +3,7 @@
 # Native chat presence: no gameplay messages or durable state yet.
 [chatserver]
 # YYYYMMDDRR. Compare updated defaults before raising this serial in a live config.
-ConfVersion = 2026092100
+ConfVersion = 2026092101
 Chat.BindIP = "127.0.0.1"
 Chat.Port = 54940
 Chat.MaxConnections = 32
@@ -32,3 +32,6 @@ Cluster.RealmDirectory.Enable = 0
 LogsDir = ""
 Appender.Console = 1,2,0
 Logger.root = 2,Console
+
+# Signed revocation list populated by hub PKI/enrollment. Empty retains manual TLS.
+Cluster.CRL = ""

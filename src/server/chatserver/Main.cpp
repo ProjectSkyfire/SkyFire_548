@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     {
         std::string argument = argv[i];
         if (argument == "--help")
-        { std::puts("chatserver -c chatserver.conf\nNative chat foundation; gameplay routing is not yet enabled."); return 0; }
+        { std::puts("chatserver -c chatserver.conf\nNative chat service; realm presence and same-world whisper relay."); return 0; }
         if (argument == "-c" && i + 1 < argc) config = argv[++i];
         else if (argument == "--hub-node-key" && i + 1 < argc) expectedKey = argv[++i];
         else if (argument == "--hub-control-read" && i + 1 < argc && Handle(argv[++i], control)) { }
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
 #endif
     bool registered = false;
     if (control) channel.SendStatus(Skyfire::HubControl::StartingMessage);
-    SF_LOG_INFO("server.chat", "Chat listening; authenticated health and scoped presence publication enabled. Gameplay routing is pending.");
+    SF_LOG_INFO("server.chat", "Chat listening; authenticated health, scoped presence and same-world whisper relay enabled.");
     auto heartbeat = std::chrono::steady_clock::now();
     int result = 0;
     try

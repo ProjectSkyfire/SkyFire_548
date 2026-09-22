@@ -18,3 +18,6 @@ certificate = "../certs/maps-eastern.crt"
 private_key = "../certs/maps-eastern.key"
 allowed_world_nodes = ["world-1"]
 max_transfers = 4
+
+# Signed revocation list; hub provisioning/enrollment fills this path.
+crl = ""

@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 #include "CharacterServiceClient.h"
+#include "Cluster/CertificateTools.h"
 #include "Config.h"
 #include "Log.h"
 #include "PreparedStatement.h"
@@ -71,6 +72,7 @@ struct CharacterServiceClient::State
     }
     Bytes Exchange(Bytes const& body)
     {
+        if (!Skyfire::Certificates::PeerAllowed(Socket->native_handle())) throw std::runtime_error("Character service certificate revoked or CRL unavailable");
         if (body.size() > 8 * 1024 * 1024) throw std::runtime_error("Character request too large");
         Bytes packet; U32(packet,std::uint32_t(body.size())); packet.insert(packet.end(),body.begin(),body.end());
         Wait([&](auto complete) { boost::asio::async_write(*Socket,boost::asio::buffer(packet),complete); });
@@ -83,6 +85,9 @@ struct CharacterServiceClient::State
     }
     void Connect()
     {
+        auto directory = std::filesystem::absolute(sConfigMgr->GetFilename()).parent_path();
+        Tls.use_certificate_chain_file((directory / sConfigMgr->GetStringDefault("Cluster.Certificate", "")).string());
+        Tls.use_private_key_file((directory / sConfigMgr->GetStringDefault("Cluster.PrivateKey", "")).string(), boost::asio::ssl::context::pem);
         Socket = std::make_unique<boost::asio::ssl::stream<boost::asio::ip::tcp::socket>>(Io,Tls);
         Socket->set_verify_mode(boost::asio::ssl::verify_peer);
         Socket->set_verify_callback(boost::asio::ssl::host_name_verification(Host));

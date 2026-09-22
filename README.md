@@ -63,7 +63,7 @@ separate processes; install their dependencies on the hosts that run them.
 | Local hub web interface | A browser and the installed `web/` directory. No Python, PHP or Node.js runtime is required for this interface. |
 | Optional HTTPS/WebSocket control gateway | Python 3.11+, `pip`, a Python virtual environment, PHP 8.2+ CLI, and `aiohttp==3.14.3` from `control/requirements.txt`. Also requires an HTTPS certificate/private key and the shared hub control token. |
 | Backup and recovery worker | Python 3.11+, `pip`, a Python virtual environment, MySQL 8+ `mysql` and `mysqldump` executables, and `tzlocal>=5.2,<6` plus `tzdata>=2025.2` from `backup/requirements.txt`. Configure absolute paths to the MySQL tools and a writable backup volume. |
-| Optional native chat foundation | Build/install `chatserver` with the core dependencies and a dedicated mutual-TLS certificate. Supports multiple configured realms; gameplay chat routing is pending. See [chat daemon setup](doc/ChatServer.md). |
+| Optional native chat foundation | Build/install `chatserver` with the core dependencies and a dedicated mutual-TLS certificate. Supports multiple configured realms and optional same-world whisper relay; other chat routing is pending. See [chat daemon setup](doc/ChatServer.md). |
 | Optional character service (experimental) | Python 3.11+, `pip`, and `PyMySQL[rsa]==1.1.2` from `characterserver/requirements.txt`; an initialized InnoDB character schema and a dedicated cluster certificate. See [character service setup and limitations](doc/CharacterServer.md). |
 | Isolated restore verification | A separate compatible MySQL server instance with binary logging disabled, configured through `verification_config`. The verification identity needs permission to create/drop temporary databases and users and grant database-local privileges; see the backup guide. |
 
@@ -105,4 +105,6 @@ Database Releases: [https://github.com/ProjectSkyfire/SkyFire_548/releases](http
 
 Wiki: [https://wiki.projectskyfire.org](https://wiki.projectskyfire.org)
 
-The optional terrain/collision mapserver proof of concept requires Python 3.11+ and `src/server/mapserver/requirements.txt` (aiohttp). Its world startup helper needs Python 3.11+ without third-party packages. See [mapserver setup and multi-continent assignments](doc/MapServer.md).
+The optional terrain/collision mapserver proof of concept requires Python 3.11+ and `src/server/mapserver/requirements.txt` (aiohttp and cryptography). Its world startup helper additionally uses cryptography when certificate revocation is enabled. See [mapserver setup and multi-continent assignments](doc/MapServer.md).
+
+The hub's optional [certificate authority and remote enrollment](doc/HubCertificates.md) provisions managed daemon credentials, renews expiring certificates and distributes signed revocation lists. Python services and the remote enrollment utility require `cryptography==50.0.1`. Existing clusters must import their matching CA/key and current public certificate inventory before enabling it.

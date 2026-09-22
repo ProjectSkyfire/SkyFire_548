@@ -134,6 +134,7 @@ private:
         bool remoteIsLoopback);
     std::string HandleLogout(std::map<std::string, std::string> const& headers);
     std::string HandleStatus(std::map<std::string, std::string> const& headers);
+    std::string HandleCertificates(std::string const& method, std::map<std::string, std::string> const& headers, std::string const& body);
     std::string HandleServiceCommand(std::string const& path,
         std::map<std::string, std::string> const& headers, std::string const& body);
     std::string HandleAccounts(std::string const& action,

@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 #include "HandoffClient.h"
+#include "CertificateTools.h"
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
@@ -85,7 +86,7 @@ namespace Skyfire::Cluster::Handoff
                     if (diagnostic) *diagnostic = "Deadline expired during TLS handshake";
                     stream.async_handshake(boost::asio::ssl::stream_base::client,[&](boost::system::error_code handshake)
                     {
-                        if (handshake) { fail("Hub TLS handshake or certificate verification failed"); return; }
+                        if (handshake || !Skyfire::Certificates::PeerAllowed(stream.native_handle(), options.CA, options.CRL)) { fail("Hub TLS handshake or certificate verification failed"); return; }
                         if (diagnostic) *diagnostic = "Deadline expired while sending request";
                         boost::asio::async_write(stream,boost::asio::buffer(out),[&](boost::system::error_code write, std::size_t)
                         {

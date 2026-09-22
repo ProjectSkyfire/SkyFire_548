@@ -27,6 +27,7 @@
 #include "HubDatabaseSetup.h"
 #include "HubBackupGuard.h"
 #include "HubClusterServer.h"
+#include "HubCertificates.h"
 #include "Cluster/MapDataStartCheck.h"
 #include <fstream>
 #include "HubAuthProxy.h"
@@ -341,10 +342,14 @@ int main(int argc, char** argv)
         return Skyfire::Cluster::MapData::CheckWorldStart(input, clusterServer.Snapshot(), now, error);
     });
     bool const clusterEnabled = sConfigMgr->GetBoolDefault("Hub.Cluster.Enable", false);
+    std::string certificateError;
+    if (!Skyfire::HubCertificates::Initialize(certificateError))
+    { SF_LOG_ERROR("server.hub", "%s", certificateError.c_str()); webServer.Close(); StopDatabase(); return 1; }
     if (clusterEnabled)
     {
         auto clusterPath = [&](char const* key)
         {
+            if (Skyfire::HubCertificates::Enabled()) return Skyfire::HubCertificates::ListenerPath(std::string(key).substr(12));
             std::filesystem::path path = sConfigMgr->GetStringDefault(key, "");
             if (path.empty()) return std::string();
             if (path.is_relative()) path = GetExecutableDirectory(argv[0]) / path;
@@ -411,6 +416,7 @@ int main(int argc, char** argv)
     {
         clusterServer.Update();
         processSupervisor.Update();
+        Skyfire::HubCertificates::Update();
         processSupervisor.UpdateNodeRestart();
         processSupervisor.UpdateFallback();
 
@@ -573,6 +579,7 @@ int main(int argc, char** argv)
     webServer.Close();
     processSupervisor.StopAll();
     clusterServer.Close();
+    Skyfire::HubCertificates::Shutdown();
     StopDatabase();
     SF_LOG_INFO("server.hub", "Hub server stopped.");
     return 0;

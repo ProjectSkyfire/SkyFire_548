@@ -7,6 +7,7 @@
 #include "CellImpl.h"
 #include "ChannelMgr.h"
 #include "Chat.h"
+#include "Cluster/ChatClient.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "GridNotifiersImpl.h"
@@ -26,6 +27,82 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+
+void WorldSession::HandlePlayerWhisper(std::string to, std::string const& msg, Language lang,
+    bool relayed, uint64 expectedReceiver, uint64 expectedIncarnation)
+{
+    Player* sender = GetPlayer();
+    if (!sender || !sender->IsInWorld()) return;
+    if (lang != Language::LANG_ADDON && !sender->CanSpeak())
+    { SendNotification("You cannot send whispers while muted."); return; }
+    if (!normalizePlayerName(to))
+    {
+        SendPlayerNotFoundNotice(to);
+        return;
+    }
+
+    Player* receiver = sObjectAccessor->FindPlayerByName(to);
+    if (relayed && (!receiver || receiver->GetGUID() != expectedReceiver || !receiver->GetSession() ||
+        receiver->GetSession()->GetChatIncarnation() != expectedIncarnation))
+    { SendPlayerNotFoundNotice(to); return; }
+    bool const senderBypassesWhisperFilter = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHAT_GM_WHISPER_FILTER_BYPASS) &&
+        GetSecurity() > AccountTypes::SEC_PLAYER;
+    bool const receiverFiltersWhispers = receiver && !receiver->isAcceptWhispers() &&
+        !senderBypassesWhisperFilter &&
+        !receiver->IsInWhisperWhiteList(sender->GetGUID());
+    if (!receiver || !receiver->GetSession() || receiverFiltersWhispers)
+    {
+        SendPlayerNotFoundNotice(to);
+        return;
+    }
+    if (!sender->IsGameMaster() && sender->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ) && !receiver->IsInWhisperWhiteList(sender->GetGUID()))
+    {
+        SendNotification(GetSkyFireString(LANG_WHISPER_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ));
+        return;
+    }
+
+    if (GetPlayer()->GetTeam() != receiver->GetTeam() && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT) && !receiver->IsInWhisperWhiteList(sender->GetGUID()))
+    {
+        SendWrongFactionNotice();
+        return;
+    }
+
+    if (GetPlayer()->HasAura(1852) && !receiver->IsGameMaster())
+    {
+        SendNotification(GetSkyFireString(LANG_GM_SILENCE), GetPlayer()->GetName().c_str());
+        return;
+    }
+
+    if (!relayed && lang != Language::LANG_ADDON && Skyfire::Chat::WhispersEnabled())
+    {
+        Skyfire::Chat::Whisper message;
+        message.Account = GetAccountId(); message.Sender = sender->GetGUID(); message.SenderIncarnation = GetChatIncarnation();
+        message.Receiver = receiver->GetGUID(); message.ReceiverIncarnation = receiver->GetSession()->GetChatIncarnation();
+        message.Text = msg; message.ReceiverName = to;
+        if (!Skyfire::Chat::QueueWhisper(std::move(message)))
+            SendNotification("Chat service unavailable or busy. Whisper was not sent.");
+        return;
+    }
+    // If player is a Gamemaster and doesn't accept whisper, we auto-whitelist every player that the Gamemaster is talking to
+    // We also do that if a player is under the required level for whispers.
+    if (receiver->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ) ||
+        (HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) && !sender->isAcceptWhispers() && !sender->IsInWhisperWhiteList(receiver->GetGUID())))
+        sender->AddWhisperWhiteList(receiver->GetGUID());
+
+    GetPlayer()->Whisper(msg, lang, receiver->GetGUID());
+}
+
+void WorldSession::CompleteChatWhisper(Skyfire::Chat::WhisperResult const& result)
+{
+    auto const& message = result.Message;
+    Player* sender = GetPlayer();
+    if (!sender || !sender->IsInWorld() || sender->GetGUID() != message.Sender ||
+        GetAccountId() != message.Account || GetChatIncarnation() != message.SenderIncarnation) return;
+    if (!result.Success)
+    { SendNotification("Chat service unavailable or request expired. Whisper was not sent."); return; }
+    HandlePlayerWhisper(message.ReceiverName, message.Text, Language::LANG_UNIVERSAL, true,
+        message.Receiver, message.ReceiverIncarnation);
+}
 
 void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 {
@@ -308,50 +385,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 sender->Yell(msg, lang);
         } break;
         case ChatMsg::CHAT_MSG_WHISPER:
-        {
-            if (!normalizePlayerName(to))
-            {
-                SendPlayerNotFoundNotice(to);
-                break;
-            }
-
-            Player* receiver = sObjectAccessor->FindPlayerByName(to);
-            bool const senderBypassesWhisperFilter = sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_CHAT_GM_WHISPER_FILTER_BYPASS) &&
-                GetSecurity() > AccountTypes::SEC_PLAYER;
-            bool const receiverFiltersWhispers = receiver && !receiver->isAcceptWhispers() &&
-                !senderBypassesWhisperFilter &&
-                !receiver->IsInWhisperWhiteList(sender->GetGUID());
-            if (!receiver || !receiver->GetSession() || receiverFiltersWhispers)
-            {
-                SendPlayerNotFoundNotice(to);
-                return;
-            }
-            if (!sender->IsGameMaster() && sender->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ) && !receiver->IsInWhisperWhiteList(sender->GetGUID()))
-            {
-                SendNotification(GetSkyFireString(LANG_WHISPER_REQ), sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ));
-                return;
-            }
-
-            if (GetPlayer()->GetTeam() != receiver->GetTeam() && !HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT) && !receiver->IsInWhisperWhiteList(sender->GetGUID()))
-            {
-                SendWrongFactionNotice();
-                return;
-            }
-
-            if (GetPlayer()->HasAura(1852) && !receiver->IsGameMaster())
-            {
-                SendNotification(GetSkyFireString(LANG_GM_SILENCE), GetPlayer()->GetName().c_str());
-                return;
-            }
-
-            // If player is a Gamemaster and doesn't accept whisper, we auto-whitelist every player that the Gamemaster is talking to
-            // We also do that if a player is under the required level for whispers.
-            if (receiver->getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_CHAT_WHISPER_LEVEL_REQ) ||
-                (HasPermission(rbac::RBAC_PERM_CAN_FILTER_WHISPERS) && !sender->isAcceptWhispers() && !sender->IsInWhisperWhiteList(receiver->GetGUID())))
-                sender->AddWhisperWhiteList(receiver->GetGUID());
-
-            GetPlayer()->Whisper(msg, lang, receiver->GetGUID());
-        } break;
+            HandlePlayerWhisper(to, msg, lang);
+            break;
         case ChatMsg::CHAT_MSG_PARTY:
         case ChatMsg::CHAT_MSG_PARTY_LEADER:
         {

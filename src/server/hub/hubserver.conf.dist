@@ -2,7 +2,7 @@
 #    SkyFire Hub Server configuration file    #
 ###############################################
 [hubserver]
-ConfVersion=2026091806
+ConfVersion = 2026092100
 
 ###################################################################################################
 # DATABASE SETTINGS
@@ -321,3 +321,15 @@ Hub.Fallback.Countdown = 60
 # This cannot predict abrupt crashes or solve a shared database bottleneck.
 Hub.Fallback.DegradedUpdateMs = 0
 Hub.Fallback.DegradedSeconds = 60
+
+# Built-in cluster certificate authority. Restart the hub after changing these settings.
+# Existing clusters MUST import their current CA/key and public certificate inventory.
+# See doc/HubCertificates.md. Never generate a replacement CA over a running cluster.
+Hub.PKI.Enable = 0
+Hub.PKI.Directory = "pki"
+Hub.PKI.CA = "pki/ca.pem"
+Hub.PKI.PrivateKey = "pki/ca-key.pem"
+Hub.PKI.ImportDirectory = ""
+Hub.PKI.HubNames = "localhost,127.0.0.1"
+Hub.PKI.ValidDays = 90
+Hub.PKI.RenewDays = 14

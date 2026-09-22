@@ -3,6 +3,8 @@
 * See LICENSE.md file for Copyright information
 */
 #include "ClusterAgent.h"
+#include "CertificateTools.h"
+#include <ctime>
 #include "ChatProtocol.h"
 #include "HandoffClient.h"
 #include "RealmDirectory.h"
@@ -66,7 +68,7 @@ namespace Skyfire::Cluster
                 return value.lexically_normal().string();
             };
             options.Certificate = path("Cluster.Certificate"); options.PrivateKey = path("Cluster.PrivateKey");
-            options.CA = path("Cluster.CA");
+            options.CA = path("Cluster.CA"); options.CRL = path("Cluster.CRL");
         }
         catch (std::filesystem::filesystem_error const&) { error = "Cannot resolve cluster certificate paths."; return false; }
         if (options.Certificate.empty() || options.PrivateKey.empty() || options.CA.empty())
@@ -93,6 +95,7 @@ namespace Skyfire::Cluster
         std::atomic<bool> Registered{false};
         bool Stopping = false;
         unsigned Backoff = 1;
+        std::time_t RenewalCheck = 0;
         void Connect();
         void Failed(Session* source, char const* reason, bool permanent = false);
         void Finish();
@@ -178,7 +181,9 @@ namespace Skyfire::Cluster
                     if (readError) { self->Fail("hub disconnected"); return; }
                     if (!DecodeHeader(self->HeaderBytes, self->Reply) || self->Reply.Version != ProtocolVersion ||
                         (self->Reply.Type != Message::Ack && self->Reply.Type != Message::Error &&
-                         !(self->Pending == Realms::RequestType && self->Reply.Type == Realms::ReplyType)))
+                         !(self->Pending == Realms::RequestType && self->Reply.Type == Realms::ReplyType) &&
+                         !(self->Pending == Message::Revocations && self->Reply.Type == Message::RevocationList) &&
+                         !(self->Pending == Message::Renew && self->Reply.Type == Message::Renewed)))
                     { self->Fail("incompatible or malformed hub protocol response", true); return; }
                     self->In.resize(self->Reply.Length);
                     boost::asio::async_read(self->Stream, boost::asio::buffer(self->In), [self](boost::system::error_code bodyError, std::size_t)
@@ -192,6 +197,36 @@ namespace Skyfire::Cluster
         void Complete()
         {
             Deadline.cancel(); Busy = false;
+            if (Reply.Type == Message::RevocationList || Reply.Type == Message::Renewed)
+            {
+                Reader reader(In); std::string value;
+                if (!reader.String(value, 60000) || !reader.End()) { Fail("invalid certificate response"); return; }
+                auto const& options = Owner.Options;
+                if (Reply.Type == Message::Renewed)
+                {
+                    if (!Certificates::InstallCertificate(value, options.Certificate, options.PrivateKey, options.CA, options.Advertisement.Key))
+                    { Fail("certificate renewal validation failed"); return; }
+                    Fail("certificate renewed; reconnecting"); return;
+                }
+                if (!Certificates::InstallRevocations(value, options.CRL, options.CA))
+                { Fail("revocation list validation failed"); return; }
+                if (!Certificates::PeerAllowed(Stream.native_handle(), options.CA, options.CRL))
+                { Fail("hub certificate revoked or expired"); return; }
+                if (Owner.Stopping) { RequestStop(); return; }
+                if (std::time(nullptr) >= Owner.RenewalCheck)
+                {
+                    Owner.RenewalCheck = std::time(nullptr) + 3600;
+                    try
+                    {
+                        std::unique_ptr<X509, decltype(&X509_free)> cert(Certificates::Certificate(options.Certificate), X509_free);
+                        // The hub controls renewal eligibility. Standard window is fourteen days.
+                        if (cert && Certificates::Expires(cert.get()) <= std::time(nullptr) + 86400 * 14)
+                        { Writer csr; csr.String(Certificates::Request(options.PrivateKey, options.Advertisement.Key)); Send(Message::Renew, csr); return; }
+                    }
+                    catch (...) { Fail("cannot read certificate for renewal"); return; }
+                }
+                AfterMetrics(); return;
+            }
             if (Reply.Type == Realms::ReplyType)
             {
                 std::vector<Realms::Route> routes;
@@ -216,7 +251,9 @@ namespace Skyfire::Cluster
                 { Fail("malformed hub error response", true); return; }
                 // Trusted peer error descriptions contain no credentials; bound by the decoder.
                 SF_LOG_ERROR("server.cluster", "Hub rejected node '%s': %s", Owner.Options.Advertisement.Key.c_str(), reason.c_str());
-                Fail("registration/lifecycle rejected", code != std::uint16_t(Error::Conflict) && code != std::uint16_t(Error::NotRegistered));
+                if (Pending == Message::Renew) { SchedulePulse(); return; }
+                Fail("registration/lifecycle rejected", code != std::uint16_t(Error::Conflict) && code != std::uint16_t(Error::NotRegistered) &&
+                    !(code == std::uint16_t(Error::Identity) && !Owner.Options.CRL.empty()));
                 return;
             }
             if (!reader.U16(code) || code != std::uint16_t(Pending) || !reader.U32(Lease) || Lease < 5 || Lease > 300 || !reader.End())
@@ -236,6 +273,11 @@ namespace Skyfire::Cluster
             if (Owner.Options.Advertisement.Type == Service::Chat &&
                 (Pending == Message::Ready || Pending == Message::Heartbeat))
             { Send(Chat::MetricsType, Chat::EncodeMetrics(Owner.Sample().Chat)); return; }
+            if (!Owner.Options.CRL.empty()) { Writer empty; Send(Message::Revocations, empty); return; }
+            AfterMetrics();
+        }
+        void AfterMetrics()
+        {
             if (Owner.Options.RealmDirectoryEnabled && Ready)
             {
                 DirectoryQueries = Realms::Client.Queries(); DirectoryOffset = 0;
@@ -278,6 +320,12 @@ namespace Skyfire::Cluster
     void Agent::State::Connect()
     {
         if (Stopping) { Finish(); return; }
+        try
+        {
+            Tls.use_certificate_chain_file(Options.Certificate);
+            Tls.use_private_key_file(Options.PrivateKey, boost::asio::ssl::context::pem);
+        }
+        catch (...) { RetryTimer.expires_after(std::chrono::seconds(5)); RetryTimer.async_wait([this](boost::system::error_code ec) { if (!ec) Connect(); }); return; }
         auto session = std::make_shared<Session>(*this);
         Current = session;
         session->Start();

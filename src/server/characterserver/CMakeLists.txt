@@ -6,6 +6,7 @@ foreach(asset IN LISTS character_files)
   list(APPEND character_sources "${CMAKE_CURRENT_SOURCE_DIR}/${asset}")
 endforeach()
 list(APPEND character_sources "${CMAKE_SOURCE_DIR}/src/server/shared/Platform/hub_service.py")
+list(APPEND character_sources "${CMAKE_SOURCE_DIR}/src/server/shared/Platform/cluster_certificates.py")
 add_custom_target(characterserver_assets
   COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:worldserver>/characterserver"
   COMMAND "${CMAKE_COMMAND}" -E copy_if_different ${character_sources} "$<TARGET_FILE_DIR:worldserver>/characterserver"

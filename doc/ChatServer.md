@@ -1,7 +1,10 @@
 # Native clustered chat daemon
 
-This implementation provides the daemon, hub integration and optional world presence publication. Player chat
-still runs in worldserver. It does **not** yet route messages, run GM commands,
+This implementation provides the daemon, hub integration and optional world
+presence publication. An optional relay carries ordinary client whispers through
+chatserver and back
+to their authoritative world. Other player chat still runs in worldserver. It does
+**not** yet deliver across world nodes, run GM commands,
 own guild state, or write a database. Its `ready` status means its authenticated
 health endpoint is available and the hub acknowledged its registration.
 
@@ -70,7 +73,7 @@ includes managed chat nodes. Unmanaged chat nodes must be operated by their own
 supervisor. Routing drain is not exposed yet because no gameplay routing exists.
 
 Independent server-health refresh shows uptime, configured realms, connections,
-service requests, published player presence and failures. Metrics expire after 15 seconds; an expired metric is
+service requests, published player presence, accepted whisper relays and failures. Metrics expire after 15 seconds; an expired metric is
 unavailable rather than zero. A lost hub registration withdraws managed readiness.
 The current volatile presence service stays online during scheduled database
 backups and does not prevent backup admission. This policy must change before
@@ -93,7 +96,7 @@ does not publish authentication realm routes or grant ownership of those realms.
 ## World presence publication
 
 Deploy matching hubserver, chatserver and worldserver builds for presence metrics
-(version 2). The new hub also accepts version 1 metrics from the foundation daemon.
+(version 3). The new hub also accepts versions 1 and 2 from earlier chat daemons.
 Enable `ChatService.Enable = 1` in each participating world configuration and set
 `ChatService.Host`, `ChatService.Port` and `ChatService.NodeKey`. The publisher
 reuses that world's cluster certificate and CA, verifying both endpoint hostname
@@ -104,7 +107,7 @@ Every five seconds, the world thread copies online character identities into a
 bounded snapshot. DNS, TLS and network waits run on a separate worker. Only one
 pending snapshot is retained; newer snapshots replace unsent older ones. There
 are no database writes. Transport failures do not stop world startup, gameplay,
-character saves or local chat. Publication success/failure transitions are logged.
+character saves or local chat. Whispers explicitly configured for relay fail closed. Publication success/failure transitions are logged.
 
 Presence operation 2 uses the same 16-byte header followed by a big-endian u32
 payload length (maximum 512 KiB). The payload is a length-prefixed 64-character
@@ -123,9 +126,49 @@ An empty next snapshot withdraws logged-out players; crash or network loss expir
 presence within 15 seconds of the last accepted snapshot. World restart may need
 to wait out that lease. Presence is not character writer fencing or GM authorization.
 
+## Ordinary whisper relay (opt-in)
+
+Set `ChatService.Whispers = 1` on a world with presence publication enabled and
+matching hub/chat/world builds. The default is zero. This first relay supports two
+players on the **same world node and realm**, matching the current single active
+world per realm. It is not cross-node or cross-realm delivery. Newly logged-in
+players need their next accepted presence snapshot before relayed whispers work.
+
+The normal world handler parses commands, applies flood/mute/language/link checks
+and validates the recipient before queuing. A bounded background worker sends
+operation 3 to chatserver. Chatserver verifies the publishing world's certificate
+scope and current sender/recipient generation, account and login incarnations,
+then returns the unchanged message. Worldserver accepts only an exact reply on
+that authenticated request and rechecks both login incarnations, mute status,
+recipient whisper filter, whitelist, level, faction and GM silence before delivery.
+The existing `Player::Whisper` path runs once, retaining chat hooks, sender informs,
+whitelist updates and AFK/DND replies. Addon whispers and GM command parsing retain
+their existing local paths.
+
+There are at most 128 queued/in-flight/completed requests per world and four per
+account. A request expires five seconds after admission, including queue, network
+and completion wait. Network work never blocks a world tick. Relay failure reports
+that the message was not sent; it never silently falls back to local delivery or
+retries. Logout/relogin invalidates queued delivery. No chat text is logged or
+persisted. The relay counter means the daemon returned a message, not that the
+recipient actually received it.
+
+Operation 3 uses the 16-byte header followed by a u32 payload length (maximum 512
+bytes). Payload: generation string, u32 sender account, u64 sender GUID and login
+incarnation, u64 recipient GUID and login incarnation, then a length-prefixed UTF-8
+message of 1–255 bytes. The reply is the header with operation `0x8003` followed by
+the identical payload (no length field); the caller already knows its exact size.
+Malformed, stale, unauthorized or unserved requests close without an accepted reply.
+
+`chat_whisper_tests` covers malformed text, account spoofing, realm/node isolation,
+lease expiry and sender/recipient relogin. Live acceptance should cover normal
+whispers, AFK/DND, mute/filter/faction restrictions, logout during a request, daemon
+loss and successful recovery after presence is republished. Native tests and live
+acceptance must be run after building; no test servers are modified by this change.
+
 ## Gameplay routing phases
 
-The following are required features, not implemented by the health endpoint:
+Whisper relay is the first delivery slice. These are the full routing requirements:
 
 | Feature | Required routing and authority |
 | --- | --- |
@@ -143,8 +186,8 @@ hosting two realms in one daemon. Worldserver initially owns membership and
 permission projections; stale projections fail closed. Durable guild/social
 ownership requires typed character-service APIs and scoped writer fencing.
 
-Next is whisper routing using the world-to-chat connection and realm/session presence,
-followed by group, guild/officer and private-channel delivery. Local spatial chat
+Next is cross-node whisper delivery, followed by group, guild/officer and
+private-channel delivery. Local spatial chat
 and emergency world commands remain available during a chat-service outage.
 
 ## Validation
@@ -157,4 +200,4 @@ both with CTest together with `cluster_foundation_tests`.
 Native compilation and live TLS/lifecycle validation remain required before
 deploying this phase. Test at least two realms, disallowed certificates, unknown
 realms, connection exhaustion, hub loss/recovery, managed restart and backup
-admission. There is no in-game chat acceptance claim for this foundation.
+admission. In-game whisper relay acceptance remains pending compilation and a two-player test.

@@ -2243,6 +2243,8 @@ void World::Update(uint32 diff)
     RecordTimeDiff(NULL);
     UpdateSessions(diff);
     RecordTimeDiff("UpdateSessions");
+    for (auto const& result : Skyfire::Chat::TakeWhisperResults())
+        if (auto* session = FindSession(result.Message.Account)) session->CompleteChatWhisper(result);
     if (Skyfire::Chat::ClientEnabled())
     {
         if (diff < _chatPresenceTimer) _chatPresenceTimer -= diff;

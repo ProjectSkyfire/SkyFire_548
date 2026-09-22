@@ -3,6 +3,8 @@
  * See LICENSE.md file for Copyright information.
  */
 #include "HubClusterServer.h"
+#include "HubCertificates.h"
+#include "Cluster/CertificateTools.h"
 #include "Cluster/HandoffService.h"
 #include "Cluster/HandoffClient.h"
 #include "Cluster/RealmDirectory.h"
@@ -41,7 +43,13 @@ public:
             if (self->_closed) return;
             if (error) { self->Stop(); return; }
             X509* certificate = SSL_get_peer_certificate(self->_stream.native_handle());
-            if (!certificate) { self->Stop(); return; }
+            if (!certificate)
+            {
+                if (Skyfire::HubCertificates::Enabled()) self->ReadHeader(); else self->Stop();
+                return;
+            }
+            if (!Skyfire::HubCertificates::Allowed(certificate)) { X509_free(certificate); self->Stop(); return; }
+            self->_certificateRole = Skyfire::Certificates::Role(certificate);
             auto* const subject = X509_get_subject_name(certificate);
             int const index = X509_NAME_get_index_by_NID(subject, NID_commonName, -1);
             bool const single = index >= 0 && X509_NAME_get_index_by_NID(subject, NID_commonName, index) < 0;
@@ -71,6 +79,12 @@ public:
         }
         _server._sessions.erase(_owner);
     }
+    bool Allowed()
+    {
+        if (_identity.empty()) return true; // Five-second enrollment-only deadline.
+        X509* peer = SSL_get_peer_certificate(_stream.native_handle());
+        bool allowed = Skyfire::HubCertificates::Allowed(peer); X509_free(peer); return allowed;
+    }
 private:
     void Deadline(std::uint32_t seconds)
     {
@@ -93,7 +107,8 @@ private:
                 self->_header.Type != Message::Heartbeat && self->_header.Type != Message::Deregister && self->_header.Type != Message::Realms &&
                 self->_header.Type != Handoff::RequestType && self->_header.Type != Realms::RequestType &&
                 self->_header.Type != MapData::RequestType && self->_header.Type != MapData::MetricsType &&
-                self->_header.Type != CharacterMetricsType && self->_header.Type != Skyfire::Chat::MetricsType)
+                self->_header.Type != CharacterMetricsType && self->_header.Type != Skyfire::Chat::MetricsType &&
+                self->_header.Type != Message::Enroll && self->_header.Type != Message::Revocations && self->_header.Type != Message::Renew)
             { self->Reject(Error::Malformed, "Unsupported request type."); return; }
             self->_body.resize(self->_header.Length);
             if (self->_body.empty()) { self->Handle(); return; }
@@ -106,6 +121,42 @@ private:
     }
     void Handle()
     {
+        if (_header.Type == Message::Enroll)
+        {
+            try
+            {
+                Reader reader(_body); std::string token, csr;
+                if (!_identity.empty() || !_key.empty() || !reader.String(token, 64) || !reader.String(csr, 11000) || !reader.End())
+                { Reject(Error::Identity, "Enrollment requires a one-time token and a separate connection."); return; }
+                Writer out; out.String(Skyfire::HubCertificates::Enroll(token, csr));
+                Write(Frame(Message::Enrolled, out), true);
+            }
+            catch (...) { Reject(Error::Identity, "Enrollment rejected; check the token, approved identity and CSR."); }
+            return;
+        }
+        if (_identity.empty() || !Allowed()) { Reject(Error::Identity, "A valid, unrevoked client certificate is required."); return; }
+        if (_header.Type == Message::Revocations || _header.Type == Message::Renew)
+        {
+            try
+            {
+                Writer out;
+                if (_header.Type == Message::Revocations)
+                {
+                    if (!_body.empty()) { Reject(Error::Malformed, "CRL request must be empty."); return; }
+                    out.String(Skyfire::HubCertificates::Revocations());
+                }
+                else
+                {
+                    Reader reader(_body); std::string csr;
+                    if (!reader.String(csr, 11000) || !reader.End()) { Reject(Error::Malformed, "Invalid renewal CSR."); return; }
+                    std::unique_ptr<X509, decltype(&X509_free)> peer(SSL_get_peer_certificate(_stream.native_handle()), X509_free);
+                    out.String(Skyfire::HubCertificates::Renew(peer.get(), csr));
+                }
+                Write(Frame(_header.Type == Message::Renew ? Message::Renewed : Message::RevocationList, out), _key.empty());
+            }
+            catch (...) { Reject(Error::Identity, "Certificate request rejected; check PKI enrollment and renewal window."); }
+            return;
+        }
         if (_header.Type == Skyfire::Chat::MetricsType)
         {
             ChatMetrics metrics;
@@ -182,6 +233,8 @@ private:
             if (!_key.empty()) { Reject(Error::Conflict, "This connection is already registered."); return; }
             if (!DecodeRegistration(_body, node)) { Reject(Error::Malformed, "Invalid node registration."); return; }
             if (node.Key != _identity) { Reject(Error::Identity, "Node key does not match certificate identity."); return; }
+            if (_certificateRole && unsigned(node.Type) != _certificateRole)
+            { Reject(Error::Identity, "Certificate role does not match the registered service."); return; }
             boost::system::error_code addressError;
             auto address = boost::asio::ip::make_address(node.Address, addressError);
             if (addressError || address.is_unspecified() || address.is_multicast()) { Reject(Error::Malformed, "Advertise a concrete numeric endpoint address."); return; }
@@ -269,6 +322,7 @@ private:
     bool _closed = false;
     bool _needsRealms = false, _realmsReceived = false;
     std::uint32_t _primaryRealm = 0;
+    unsigned _certificateRole = 0;
     std::string _identity, _key;
     std::array<std::uint8_t, HeaderSize> _headerBytes{};
     Header _header;
@@ -389,7 +443,8 @@ bool HubClusterServer::Open(std::string const& address, std::uint16_t port, std:
         _tls.use_private_key_file(key, boost::asio::ssl::context::pem);
         if (!SSL_CTX_check_private_key(_tls.native_handle())) return false;
         _tls.load_verify_file(ca);
-        _tls.set_verify_mode(boost::asio::ssl::verify_peer | boost::asio::ssl::verify_fail_if_no_peer_cert);
+        _tls.set_verify_mode(boost::asio::ssl::verify_peer |
+            (Skyfire::HubCertificates::Enabled() ? 0 : boost::asio::ssl::verify_fail_if_no_peer_cert));
         if (!Skyfire::Net::OpenTcpAcceptor(_io, _acceptor, port, address, "server.hub", "cluster listener")) return false;
         _databaseHandoffs = std::move(databaseHandoffs);
         _registry = Registry(maxConnections);
@@ -418,6 +473,15 @@ void HubClusterServer::Accept()
             if (_sessions.size() >= _maxConnections + 32) Skyfire::Net::CloseTcpSocket(socket);
             else
             {
+                try
+                {
+                    if (Skyfire::HubCertificates::Enabled())
+                    {
+                        _tls.use_certificate_chain_file(Skyfire::HubCertificates::ListenerPath("Certificate"));
+                        _tls.use_private_key_file(Skyfire::HubCertificates::ListenerPath("PrivateKey"), boost::asio::ssl::context::pem);
+                    }
+                }
+                catch (...) { Skyfire::Net::CloseTcpSocket(socket); Accept(); return; }
                 auto session = std::make_shared<HubClusterSession>(*this, std::move(socket), ++_nextOwner);
                 _sessions.emplace(_nextOwner, session);
                 session->Start();
@@ -432,6 +496,8 @@ void HubClusterServer::Update()
     _registry.Expire(Now());
     if (Now() >= _handoffCleanupAt)
     {
+        auto sessions = _sessions;
+        for (auto const& entry : sessions) if (!entry.second->Allowed()) entry.second->Stop();
         if (_databaseHandoffs) _databaseHandoffs->Cleanup(Now()); else _handoffs.Cleanup(Now());
         _handoffCleanupAt = Now() + 1000;
     }

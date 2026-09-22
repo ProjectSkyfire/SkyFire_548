@@ -99,6 +99,15 @@ namespace Skyfire::Chat
                 if (!guids.insert(player.Guid).second || !names.insert(player.Name).second) return false;
             _entries[key] = {std::move(snapshot), now + PresenceLeaseMs}; return true;
         }
+        PlayerPresence const* Find(std::uint32_t realm, std::string const& node, std::string const& generation,
+            std::uint64_t guid, std::uint64_t incarnation, std::uint64_t now) const
+        {
+            auto entry = _entries.find({realm, node});
+            if (entry == _entries.end() || now >= entry->second.Expires || entry->second.Snapshot.Generation != generation) return nullptr;
+            for (auto const& player : entry->second.Snapshot.Players)
+                if (player.Guid == guid && player.Incarnation == incarnation) return &player;
+            return nullptr;
+        }
         std::uint32_t Players() const
         {
             std::uint32_t count = 0;

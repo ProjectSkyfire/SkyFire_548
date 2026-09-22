@@ -544,3 +544,5 @@ input:focus {
 .manual-backups button { margin:8px 12px 8px 0; }
 .manual-backups li { margin:12px 0; overflow-wrap:anywhere; }
 .manual-backups small { display:block; }
+
+.certificate-token { overflow-wrap: anywhere; }

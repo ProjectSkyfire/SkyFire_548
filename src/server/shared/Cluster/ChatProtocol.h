@@ -13,7 +13,8 @@ namespace Skyfire::Chat
     constexpr Cluster::Message MetricsType = Cluster::Message(11);
     // A separate TLS endpoint. Operation 1 is a fixed-size health probe.
     // Operation 2 carries bounded presence snapshots; see ChatPresence.h.
-    // It does not accept client opcodes, commands, chat text or database mutations.
+    // Operation 3 relays bounded whispers; see ChatWhisper.h.
+    // Client opcodes, commands and database mutations are not accepted.
     constexpr std::size_t ProbeSize = 16;
     inline bool DecodeProbe(std::array<std::uint8_t, ProbeSize> const& bytes, std::uint32_t& id, std::uint32_t& realm)
     {
@@ -27,17 +28,17 @@ namespace Skyfire::Chat
     }
     inline Cluster::Writer EncodeMetrics(Cluster::ChatMetrics const& m)
     {
-        Cluster::Writer out; out.U8(2); out.U32(m.Uptime); out.U32(m.Connections);
+        Cluster::Writer out; out.U8(3); out.U32(m.Uptime); out.U32(m.Connections);
         out.U32(m.Requests); out.U32(m.Failures); out.U16(std::uint16_t(m.Realms.size()));
         for (auto realm : m.Realms) out.U32(realm);
-        out.U32(m.PresencePlayers);
+        out.U32(m.PresencePlayers); out.U32(m.WhisperRelays);
         return out;
     }
     inline bool DecodeMetrics(std::vector<std::uint8_t> const& bytes, Cluster::ChatMetrics& m)
     {
         Cluster::Reader in(bytes); std::uint8_t version;
         std::uint16_t count;
-        if (!in.U8(version) || (version != 1 && version != 2) || !in.U32(m.Uptime) || !in.U32(m.Connections) ||
+        if (!in.U8(version) || (version < 1 || version > 3) || !in.U32(m.Uptime) || !in.U32(m.Connections) ||
             m.Connections > 128 || !in.U32(m.Requests) || !in.U32(m.Failures) ||
             !in.U16(count) || count == 0 || count > 64) return false;
         m.Realms.clear();
@@ -48,7 +49,9 @@ namespace Skyfire::Chat
             m.Realms.push_back(realm);
         }
         m.PresencePlayers = 0;
-        if (version == 2 && (!in.U32(m.PresencePlayers) || m.PresencePlayers > 16384)) return false;
+        if (version >= 2 && (!in.U32(m.PresencePlayers) || m.PresencePlayers > 16384)) return false;
+        m.WhisperRelays = 0;
+        if (version >= 3 && !in.U32(m.WhisperRelays)) return false;
         return in.End();
     }
 }

@@ -5,6 +5,7 @@
 #include "HubBackupGuard.h"
 
 #include "HubWebServer.h"
+#include "HubCertificates.h"
 #include "HubProcessSupervisor.h"
 
 #include "Cryptography/CryptoRandom.h"
@@ -511,6 +512,8 @@ std::string HubWebServer::HandleRequest(std::string const& method, std::string c
         return HandleBackupJobs(method,headers,body);
     if (path == "/api/v1/backup/schedules")
         return HandleBackupSchedule(method,headers,body);
+    if (path == "/api/v1/certificates")
+        return HandleCertificates(method, headers, body);
     if (path == "/api/v1/status" && method == "GET")
         return HandleStatus(headers);
     if (path.compare(0,16,"/api/v1/cluster/") == 0 && method == "POST")
@@ -609,6 +612,34 @@ std::string HubWebServer::HandleLogout(std::map<std::string, std::string> const&
         "Set-Cookie: hub_session=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0\r\n");
 }
 
+std::string HubWebServer::HandleCertificates(std::string const& method, std::map<std::string, std::string> const& headers, std::string const& body)
+{
+    AuthenticatedSession session;
+    if (!FindSession(headers, session)) return MakeResponse(401, "application/json", "{\"error\":\"Authentication required.\"}");
+    if ((session.AccessFlags & HUB_ADMIN_ACCESS_ALL_LOCAL) != HUB_ADMIN_ACCESS_ALL_LOCAL)
+        return MakeResponse(403, "application/json", "{\"error\":\"Full administrator access required.\"}");
+    try
+    {
+        if (method == "GET") return MakeResponse(200, "application/json", Skyfire::HubCertificates::Status());
+        auto csrf = headers.find("x-hub-csrf");
+        if (method != "POST" || csrf == headers.end() || csrf->second != session.CsrfToken)
+            return MakeResponse(403, "application/json", "{\"error\":\"Invalid request token or method.\"}");
+        auto form = ParseForm(body); auto action = form["action"]; std::string error;
+        if (action == "token")
+        {
+            auto role = form["role"];
+            if (role.size() != 1 || role[0] < '1' || role[0] > '5') throw std::runtime_error("role");
+            auto token = Skyfire::HubCertificates::Token(form["node"], unsigned(role[0] - '0'), form["names"], session.Username);
+            return MakeResponse(200, "application/json", "{\"token\":\"" + token + "\",\"expiresIn\":600}");
+        }
+        bool ok = action == "revoke" ? Skyfire::HubCertificates::Revoke(form["node"], session.Username, error) :
+            action == "regenerate" && Skyfire::HubCertificates::Regenerate(form["node"], session.Username, error);
+        if (!ok) return MakeResponse(409, "application/json", "{\"error\":\"" + JsonEscape(error.empty() ? "Unknown certificate action." : error) + "\"}");
+        return MakeResponse(200, "application/json", Skyfire::HubCertificates::Status());
+    }
+    catch (...) { return MakeResponse(409, "application/json", "{\"error\":\"Certificate operation failed. Check PKI configuration, node identity and storage.\"}"); }
+}
+
 std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const& headers)
 {
     AuthenticatedSession session;
@@ -651,7 +682,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
         {
             auto const metrics = node ? node->Chat : Skyfire::Cluster::ChatMetrics{};
             json << ",\"chatserver\":true,\"uptimeSeconds\":" << number(metrics.Uptime)
-                 << ",\"presencePlayers\":" << number(metrics.PresencePlayers)
+                 << ",\"presencePlayers\":" << number(metrics.PresencePlayers) << ",\"whisperRelays\":" << number(metrics.WhisperRelays)
                  << ",\"connections\":" << number(metrics.Connections) << ",\"requests\":" << number(metrics.Requests)
                  << ",\"failures\":" << number(metrics.Failures) << ",\"chatRealms\":[";
             for (std::size_t i = 0; fresh && i < metrics.Realms.size(); ++i)
@@ -1001,6 +1032,8 @@ std::string HubWebServer::ServeAsset(std::string const& target) const
         relativePath = "app.css";
     else if (target == "/app.js")
         relativePath = "app.js";
+    else if (target == "/certificates.js")
+        relativePath = "certificates.js";
     else if (target == "/status.js")
         relativePath = "status.js";
     else if (target == "/metrics.js" || target == "/navigation.js")

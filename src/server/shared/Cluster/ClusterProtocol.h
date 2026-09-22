@@ -33,7 +33,15 @@ namespace Skyfire::Cluster
     constexpr std::uint16_t ProtocolVersion = 1;
     constexpr std::size_t HeaderSize = 12;
     constexpr std::uint32_t MaximumPayload = 4096;
-    enum class Message : std::uint16_t { Register = 1, Ready = 2, Heartbeat = 3, Deregister = 4, Realms = 5, Ack = 0x8000, Error = 0xffff };
+    enum class Message : std::uint16_t { Register = 1, Ready = 2, Heartbeat = 3, Deregister = 4, Realms = 5,
+        Enroll = 12, Revocations = 13, Renew = 14, Enrolled = 0x800c, RevocationList = 0x800d, Renewed = 0x800e,
+        Ack = 0x8000, Error = 0xffff };
+    inline std::size_t PayloadLimit(Message type)
+    {
+        if (type == Message::RevocationList) return 60002;
+        if (type == Message::Enroll || type == Message::Renew || type == Message::Enrolled || type == Message::Renewed) return 12000;
+        return MaximumPayload;
+    }
     // Character: capability 1024. Chat: capability 2048, realm coverage in metrics.
     // Both register with realm 0; only world nodes publish authentication realm routes.
     enum class Service : std::uint8_t { Auth = 1, World = 2, Map = 3, Character = 4, Chat = 5 };
@@ -64,7 +72,7 @@ namespace Skyfire::Cluster
     {
         std::uint32_t Uptime = 0, Connections = 0, Requests = 0, Failures = 0;
         std::vector<std::uint32_t> Realms;
-        std::uint32_t PresencePlayers = 0;
+        std::uint32_t PresencePlayers = 0, WhisperRelays = 0;
         std::uint64_t ReceivedAt = 0;
     };
     struct Node
@@ -145,11 +153,11 @@ namespace Skyfire::Cluster
         header.Type = Message((std::uint16_t(bytes[6]) << 8) | bytes[7]);
         header.Length = (std::uint32_t(bytes[8]) << 24) | (std::uint32_t(bytes[9]) << 16) |
             (std::uint32_t(bytes[10]) << 8) | bytes[11];
-        return header.Length <= MaximumPayload;
+        return header.Length <= PayloadLimit(header.Type);
     }
     inline std::vector<std::uint8_t> Frame(Message type, Writer const& payload)
     {
-        if (payload.Bytes.size() > MaximumPayload) return {};
+        if (payload.Bytes.size() > PayloadLimit(type)) return {};
         Writer frame;
         frame.Bytes = { 'S', 'F', 'H', 'C' };
         frame.U16(ProtocolVersion); frame.U16(std::uint16_t(type)); frame.U32(std::uint32_t(payload.Bytes.size()));

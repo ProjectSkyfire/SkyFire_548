@@ -22,3 +22,6 @@ mysql_port = 3306
 mysql_user = "skyfire_characters"
 mysql_password = "REPLACE_PASSWORD"
 mysql_database = "characters"
+
+# Signed revocation list; hub provisioning/enrollment fills this path.
+crl = ""

@@ -3,8 +3,10 @@
 * See LICENSE.md file for Copyright information
 */
 #include "ChatServer.h"
+#include "Cluster/CertificateTools.h"
 #include "Cluster/ChatProtocol.h"
 #include "Cluster/ChatPresence.h"
+#include "Cluster/ChatWhisper.h"
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <openssl/x509.h>
@@ -19,6 +21,7 @@ namespace Skyfire::Chat
         boost::asio::ssl::context Tls{boost::asio::ssl::context::tls_server};
         boost::asio::ip::tcp::acceptor Acceptor{Io};
         Options Config;
+        Cluster::AgentOptions Credentials;
         std::set<std::shared_ptr<Session>> Sessions;
         Cluster::ChatMetrics Counters;
         PresenceDirectory Presence;
@@ -67,12 +70,13 @@ namespace Skyfire::Chat
                 }
             }
             X509_free(cert);
-            return valid;
+            return valid && Certificates::PeerAllowed(Stream.native_handle());
         }
         void Reply()
         {
             ++Owner.Counters.Requests;
             Output.assign(Input.begin(), Input.end()); Output[6] = 0x80;
+            if (Input[7] == 3) { ++Owner.Counters.WhisperRelays; Output.insert(Output.end(), Body.begin(), Body.end()); }
             auto self = shared_from_this();
             boost::asio::async_write(Stream, boost::asio::buffer(Output),
                 [self](boost::system::error_code ec, std::size_t) { self->Close(bool(ec)); });
@@ -93,7 +97,7 @@ namespace Skyfire::Chat
                     if (self->Closed) return;
                     std::uint32_t id = 0, realm = 0;
                     auto probe = self->Input;
-                    bool const presence = probe[6] == 0 && probe[7] == 2;
+                    bool const presence = probe[6] == 0 && (probe[7] == 2 || probe[7] == 3);
                     if (presence) probe[7] = 1;
                     if (readError || !DecodeProbe(probe, id, realm) || !self->Owner.Config.Realms.count(realm))
                     { self->Close(true); return; }
@@ -108,7 +112,7 @@ namespace Skyfire::Chat
                         auto const& b = self->Length;
                         std::uint32_t length = (std::uint32_t(b[0]) << 24) | (std::uint32_t(b[1]) << 16) |
                             (std::uint32_t(b[2]) << 8) | b[3];
-                        if (lengthError || !length || length > MaxPresenceBytes) { self->Close(true); return; }
+                        if (lengthError || !length || length > (self->Input[7] == 3 ? MaxWhisperBytes : MaxPresenceBytes)) { self->Close(true); return; }
                         self->Body.resize(length);
                         boost::asio::async_read(self->Stream, boost::asio::buffer(self->Body),
                             [self, realm](boost::system::error_code bodyError, std::size_t)
@@ -117,6 +121,14 @@ namespace Skyfire::Chat
                             PresenceSnapshot snapshot;
                             auto now = std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::steady_clock::now().time_since_epoch()).count());
+                            if (self->Input[7] == 3)
+                            {
+                                Whisper message;
+                                if (bodyError || !DecodeWhisper(self->Body, message) ||
+                                    !AuthorizeWhisper(self->Owner.Presence, realm, self->Identity, message, now))
+                                { self->Close(true); return; }
+                                self->Reply(); return;
+                            }
                             if (bodyError || !DecodePresence(self->Body, snapshot) ||
                                 !self->Owner.Presence.Replace(realm, self->Identity, std::move(snapshot), now))
                             { self->Close(true); return; }
@@ -138,6 +150,12 @@ namespace Skyfire::Chat
                 if (Sessions.size() >= Config.MaxConnections) ++Counters.Failures;
                 else
                 {
+                    try
+                    {
+                        Tls.use_certificate_chain_file(Credentials.Certificate);
+                        Tls.use_private_key_file(Credentials.PrivateKey, boost::asio::ssl::context::pem);
+                    }
+                    catch (...) { ++Counters.Failures; Accept(); return; }
                     auto session = std::make_shared<Session>(*this, std::move(socket));
                     Sessions.insert(session); session->Start();
                 }
@@ -165,7 +183,7 @@ namespace Skyfire::Chat
         }
         try
         {
-            auto state = std::make_unique<State>(); state->Config = std::move(options);
+            auto state = std::make_unique<State>(); state->Config = std::move(options); state->Credentials = tls;
             state->Counters.Realms.assign(state->Config.Realms.begin(), state->Config.Realms.end());
             if (!SSL_CTX_set_min_proto_version(state->Tls.native_handle(), TLS1_2_VERSION))
             { error = "Cannot require TLS 1.2."; return false; }

@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 #include "ChatClient.h"
+#include "CertificateTools.h"
 #include "HandoffClient.h"
 #include "Config.h"
 #include "Log.h"
@@ -11,11 +12,13 @@
 #include <condition_variable>
 #include <mutex>
 #include <optional>
+#include <deque>
 
 namespace Skyfire::Chat
 {
     namespace
     {
+        bool RouteWhispers = false;
         struct Client
         {
             Cluster::AgentOptions Options;
@@ -24,6 +27,11 @@ namespace Skyfire::Chat
             std::mutex Lock;
             std::condition_variable Wake;
             std::optional<std::vector<PlayerPresence>> Pending;
+            struct Queued { Whisper Message; std::chrono::steady_clock::time_point Deadline; };
+            std::deque<Queued> Whispers;
+            std::deque<WhisperResult> Results;
+            std::map<std::uint32_t, unsigned> AccountPending;
+            unsigned TotalPending = 0;
             bool Stopping = false;
             std::thread Worker;
             ~Client() { Stop(); }
@@ -48,11 +56,10 @@ namespace Skyfire::Chat
                 }
                 X509_free(certificate); return valid;
             }
-            bool Send(PresenceSnapshot const& snapshot)
+            bool Send(std::uint16_t operation, Cluster::Writer const& payload)
             {
                 try
                 {
-                    auto payload = EncodePresence(snapshot);
                     if (payload.Bytes.size() > MaxPresenceBytes) return false;
                     boost::asio::io_context io;
                     boost::asio::ssl::context tls(boost::asio::ssl::context::tls_client);
@@ -67,10 +74,10 @@ namespace Skyfire::Chat
                     if (!SSL_set_tlsext_host_name(stream.native_handle(), Options.Host.c_str())) return false;
                     Cluster::Writer request;
                     request.U8('S'); request.U8('F'); request.U8('C'); request.U8('H');
-                    request.U16(1); request.U16(2); request.U32(1); request.U32(Realm);
+                    request.U16(1); request.U16(operation); request.U32(1); request.U32(Realm);
                     request.U32(std::uint32_t(payload.Bytes.size()));
                     request.Bytes.insert(request.Bytes.end(), payload.Bytes.begin(), payload.Bytes.end());
-                    std::array<std::uint8_t, ProbeSize> response{};
+                    std::vector<std::uint8_t> response(ProbeSize + (operation == 3 ? payload.Bytes.size() : 0));
                     bool success = false;
                     resolver.async_resolve(Options.Host, std::to_string(Options.Port),
                         [&](boost::system::error_code ec, auto endpoints)
@@ -81,13 +88,14 @@ namespace Skyfire::Chat
                             if (connected) { io.stop(); return; }
                             stream.async_handshake(boost::asio::ssl::stream_base::client, [&](boost::system::error_code handshake)
                             {
-                                if (handshake || !VerifyIdentity(stream.native_handle())) { io.stop(); return; }
+                                if (handshake || !VerifyIdentity(stream.native_handle()) || !Skyfire::Certificates::PeerAllowed(stream.native_handle())) { io.stop(); return; }
                                 boost::asio::async_write(stream, boost::asio::buffer(request.Bytes), [&](boost::system::error_code sent, std::size_t)
                                 {
                                     if (sent) { io.stop(); return; }
                                     boost::asio::async_read(stream, boost::asio::buffer(response), [&](boost::system::error_code received, std::size_t)
                                     {
                                         auto expected = request.Bytes; expected.resize(ProbeSize); expected[6] = 0x80;
+                                        if (operation == 3) expected.insert(expected.end(), payload.Bytes.begin(), payload.Bytes.end());
                                         success = !received && std::equal(response.begin(), response.end(), expected.begin()); io.stop();
                                     });
                                 });
@@ -108,16 +116,29 @@ namespace Skyfire::Chat
                 for (;;)
                 {
                     PresenceSnapshot snapshot;
+                    std::optional<Queued> whisper;
                     {
                         std::unique_lock<std::mutex> lock(Lock);
-                        Wake.wait(lock, [&] { return Stopping || Pending.has_value(); });
+                        Wake.wait(lock, [&] { return Stopping || Pending.has_value() || !Whispers.empty(); });
                         if (Stopping) return;
-                        snapshot.Players = std::move(*Pending); Pending.reset();
+                        auto now = std::chrono::steady_clock::now();
+                        while (!Whispers.empty() && now >= Whispers.front().Deadline)
+                        { Results.push_back({std::move(Whispers.front().Message), false, Whispers.front().Deadline}); Whispers.pop_front(); }
+                        if (Pending) { snapshot.Players = std::move(*Pending); Pending.reset(); }
+                        else if (!Whispers.empty()) { whisper = std::move(Whispers.front()); Whispers.pop_front(); }
+                        else continue;
+                    }
+                    if (whisper)
+                    {
+                        bool success = Send(3, EncodeWhisper(whisper->Message)) && std::chrono::steady_clock::now() < whisper->Deadline;
+                        std::lock_guard<std::mutex> lock(Lock);
+                        Results.push_back({std::move(whisper->Message), success, whisper->Deadline});
+                        continue;
                     }
                     snapshot.Generation = Generation; snapshot.Sequence = ++sequence;
-                    bool current = Send(snapshot);
+                    bool current = Send(2, EncodePresence(snapshot));
                     if (first || current != available)
-                        SF_LOG_INFO("server.chat", "Chat presence publication %s; gameplay chat still uses worldserver.", current ? "available" : "unavailable");
+                        SF_LOG_INFO("server.chat", "Chat presence publication %s.", current ? "available" : "unavailable");
                     first = false; available = current;
                 }
             }
@@ -126,7 +147,12 @@ namespace Skyfire::Chat
     }
     bool StartClient(Cluster::AgentOptions options, std::string& error)
     {
-        if (!sConfigMgr->GetBoolDefault("ChatService.Enable", false)) return true;
+        RouteWhispers = sConfigMgr->GetBoolDefault("ChatService.Whispers", false);
+        if (!sConfigMgr->GetBoolDefault("ChatService.Enable", false))
+        {
+            if (RouteWhispers) { error = "ChatService.Whispers requires ChatService.Enable; routed whispers will be unavailable."; return false; }
+            return true;
+        }
         int const port = sConfigMgr->GetIntDefault("ChatService.Port", 54940);
         int const realm = sConfigMgr->GetIntDefault("RealmID", 0);
         if (Active || !options.Enabled || realm <= 0 || port < 1 || port > 65535)
@@ -151,5 +177,36 @@ namespace Skyfire::Chat
         { std::lock_guard<std::mutex> lock(Active->Lock); Active->Pending = std::move(players); }
         Active->Wake.notify_one(); // Latest-only pending slot bounds memory during outages.
     }
-    void StopClient() { Active.reset(); }
+    bool WhispersEnabled() { return RouteWhispers; }
+    bool QueueWhisper(Whisper message)
+    {
+        if (!Active || !RouteWhispers) return false;
+        message.Generation = Active->Generation;
+        Whisper decoded;
+        if (!DecodeWhisper(EncodeWhisper(message).Bytes, decoded)) return false;
+        std::lock_guard<std::mutex> lock(Active->Lock);
+        if (Active->Stopping || Active->TotalPending >= 128) return false;
+        auto count = Active->AccountPending.find(message.Account);
+        if (count != Active->AccountPending.end() && count->second >= 4) return false;
+        ++Active->AccountPending[message.Account]; ++Active->TotalPending;
+        Active->Whispers.push_back({std::move(message), std::chrono::steady_clock::now() + std::chrono::seconds(5)});
+        Active->Wake.notify_one(); return true;
+    }
+    std::vector<WhisperResult> TakeWhisperResults()
+    {
+        std::vector<WhisperResult> results;
+        if (!Active) return results;
+        std::lock_guard<std::mutex> lock(Active->Lock);
+        while (!Active->Results.empty() && results.size() < 32)
+        {
+            if (std::chrono::steady_clock::now() >= Active->Results.front().Deadline) Active->Results.front().Success = false;
+            auto account = Active->Results.front().Message.Account;
+            auto found = Active->AccountPending.find(account);
+            if (found != Active->AccountPending.end() && !--found->second) Active->AccountPending.erase(found);
+            --Active->TotalPending;
+            results.push_back(std::move(Active->Results.front())); Active->Results.pop_front();
+        }
+        return results;
+    }
+    void StopClient() { Active.reset(); RouteWhispers = false; }
 }

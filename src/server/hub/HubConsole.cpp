@@ -4,6 +4,7 @@
 */
 
 #include "HubConsole.h"
+#include "HubCertificates.h"
 #include "HubClusterServer.h"
 #include "Cluster/RealmDirectory.h"
 #include "HubAuthProxy.h"
@@ -198,6 +199,24 @@ bool HubCommandHandler::Execute(std::string const& commandLine, HubCommandOrigin
 
     if (command == "help" || command == "?")
         PrintHelp();
+    else if (command == "certificates")
+    {
+        if (origin != HubCommandOrigin::LocalConsole) { std::printf("Certificate administration requires the local console.\n"); return true; }
+        std::string action, node, role, names, extra, error; input >> action;
+        try
+        {
+            if (action == "list" && !(input >> extra)) std::printf("%s\n", Skyfire::HubCertificates::Status().c_str());
+            else if (action == "token" && input >> node >> role >> names && !(input >> extra) && role.size() == 1 && role[0] >= '1' && role[0] <= '5')
+                std::printf("One-time enrollment token (10 minutes): %s\n", Skyfire::HubCertificates::Token(node, unsigned(role[0]-'0'), names, "local-console").c_str());
+            else if ((action == "revoke" || action == "regenerate") && input >> node && !(input >> extra))
+            {
+                bool ok = action == "revoke" ? Skyfire::HubCertificates::Revoke(node, "local-console", error) : Skyfire::HubCertificates::Regenerate(node, "local-console", error);
+                std::printf("%s\n", ok ? "Certificate action completed." : error.c_str());
+            }
+            else std::printf("Usage: certificates list | token <node> <role 1..5> <DNS/IP CSV> | revoke <node> | regenerate <node>\n");
+        }
+        catch (...) { std::printf("Certificate operation failed; check PKI configuration and storage.\n"); }
+    }
     else if (command == "status")
         PrintStatus();
     else if (command == "registry")
@@ -452,6 +471,7 @@ void HubCommandHandler::PrintHelp() const
 {
     std::printf("Available hub commands:\n");
     std::printf("  help       Show this command list.\n");
+    std::printf("  certificates list | token <node> <role 1..5> <DNS/IP CSV> | revoke <node> | regenerate <node>\n");
     std::printf("  status     Show hub uptime, endpoint, and database record counts.\n");
     std::printf("  nodes      List enabled routing nodes.\n");
     std::printf("  registry   List authenticated live cluster registrations.\n");

@@ -22,6 +22,10 @@ int main()
     auto encoded = Chat::EncodeMetrics(metrics);
     Cluster::ChatMetrics decoded;
     check(Chat::DecodeMetrics(encoded.Bytes, decoded) && decoded.Realms == metrics.Realms);
+    auto legacy = encoded.Bytes; legacy[0] = 2; legacy.resize(legacy.size() - 4);
+    check(Chat::DecodeMetrics(legacy, decoded) && decoded.WhisperRelays == 0);
+    legacy[0] = 1; legacy.resize(legacy.size() - 4);
+    check(Chat::DecodeMetrics(legacy, decoded) && decoded.PresencePlayers == 0);
     for (std::size_t size = 0; size < encoded.Bytes.size(); ++size)
         check(!Chat::DecodeMetrics(std::vector<std::uint8_t>(encoded.Bytes.begin(), encoded.Bytes.begin() + size), decoded));
     encoded.Bytes.push_back(0); check(!Chat::DecodeMetrics(encoded.Bytes, decoded));

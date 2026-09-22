@@ -19,6 +19,7 @@ from aiohttp import web
 from map_common import KEY, catalog, certificate_key, client_tls, frame, wire_string
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'shared/Platform'))
 import hub_service
+from cluster_certificates import Lifecycle
 
 
 def memory_mib():
@@ -77,6 +78,7 @@ async def serve(config_path, stop=None, channel=None):
     generation = uuid.uuid4().hex
     config_path = Path(config_path).resolve()
     config = tomllib.loads(config_path.read_text(encoding='utf-8-sig'))
+    certificates = Lifecycle(config, config_path.parent)
     def path(key):
         value = Path(config[key])
         return value if value.is_absolute() else config_path.parent / value
@@ -119,7 +121,7 @@ async def serve(config_path, stop=None, channel=None):
         except ValueError:
             state['failures'] += 1
             raise web.HTTPForbidden()
-        if peer not in allowed:
+        if peer not in allowed or not certificates.allowed(request.transport.get_extra_info('ssl_object')):
             state['failures'] += 1
             raise web.HTTPForbidden()
         if state['active'] >= limit:
@@ -173,6 +175,8 @@ async def serve(config_path, stop=None, channel=None):
         while not stop.is_set():
             writer = None
             try:
+                inbound.load_cert_chain(path('certificate'), path('private_key'))
+                outbound.load_cert_chain(path('certificate'), path('private_key'))
                 reader, writer = await asyncio.wait_for(asyncio.open_connection(config['hub_host'], hub_port,
                     ssl=outbound, server_hostname=config['hub_host']), 5)
                 payload = wire_string(node) + wire_string(config.get('node_name', node)) + bytes([3]) + wire_string(address)
@@ -180,6 +184,7 @@ async def serve(config_path, stop=None, channel=None):
                 lease = await exchange(reader, writer, 1, payload)
                 await exchange(reader, writer, 2, struct.pack('!BI', 1, state['active']))
                 await exchange(reader, writer, 9, metrics())
+                await certificates.sync(reader, writer, inbound, outbound)
                 if channel:
                     channel.set_ready(True)
                 backoff = 1
@@ -189,6 +194,7 @@ async def serve(config_path, stop=None, channel=None):
                     except asyncio.TimeoutError:
                         await exchange(reader, writer, 3, struct.pack('!I', state['active']))
                         await exchange(reader, writer, 9, metrics())
+                        await certificates.sync(reader, writer, inbound, outbound)
                 await exchange(reader, writer, 4, b'')
             except RestartRequested:
                 print('Hub requested restart; finishing active transfers and reloading the process.', flush=True)

@@ -19,6 +19,7 @@ from wire import MAX_FRAME, u32
 from metrics import Metrics
 sys.path.append(str(Path(__file__).resolve().parents[1] / 'shared/Platform'))
 import hub_service
+from cluster_certificates import Lifecycle
 
 
 def identity(certificate):
@@ -43,6 +44,7 @@ async def hub_exchange(reader, writer, kind, body):
 async def serve(config_file, stop=None, database_factory=CharacterDatabase, channel=None):
     config_file = Path(config_file).resolve()
     config = tomllib.loads(config_file.read_text(encoding='utf-8-sig'))
+    certificates = Lifecycle(config, config_file.parent)
     stop = stop or asyncio.Event()
     def path(name):
         return (config_file.parent / config[name]).resolve()
@@ -98,6 +100,8 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
                 if not 1 <= size <= 8 * 1024 * 1024:
                     raise ValueError('Invalid character RPC size')
                 payload = await asyncio.wait_for(reader.readexactly(size),30)
+                if not certificates.allowed(writer.get_extra_info('ssl_object')):
+                    raise RuntimeError('Client certificate revoked or CRL unavailable')
                 if time.monotonic() >= registered_until or db.failed:
                     raise RuntimeError('Character service has no live hub lease or database')
                 if instance is None:
@@ -142,6 +146,8 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
         while not stop.is_set():
             writer = None
             try:
+                incoming.load_cert_chain(path('certificate'),path('private_key'))
+                outgoing.load_cert_chain(path('certificate'),path('private_key'))
                 reader,writer = await asyncio.wait_for(asyncio.open_connection(config['hub_host'],config.get('hub_port',9100),
                     ssl=outgoing,server_hostname=config['hub_host']),5)
                 def text(value):
@@ -156,6 +162,7 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
                     lease=await asyncio.wait_for(hub_exchange(reader,writer,2,struct.pack('!BI',int(not db.failed),len(clients))),5)
                     registered_until=sent+lease if not db.failed else 0.0
                     await asyncio.wait_for(hub_exchange(reader,writer,10,metrics.packet(len(clients),not db.failed)),5)
+                    await certificates.sync(reader, writer, incoming, outgoing)
                     if channel:
                         channel.set_ready(not db.failed)
                     backoff=1
