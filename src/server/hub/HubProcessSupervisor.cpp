@@ -625,7 +625,11 @@ void HubProcessSupervisor::Update(std::string const& key, ManagedServiceRuntime&
     auto const now = std::chrono::steady_clock::now();
     if (!IsWorldKey(key) && !runtime.Definition.ServiceKind && !runtime.BackupControlled && runtime.State == HubManagedProcessState::Stopping && now - runtime.StopRequestedAt > ShutdownTimeout)
         ForceStop(key, runtime);
-    else if (runtime.State == HubManagedProcessState::Starting && now - runtime.ReadinessStartedAt > ((runtime.Definition.ServiceKind == 3 || runtime.Definition.ServiceKind == 4) ? std::chrono::seconds(1800) : StartupTimeout))
+    // Worlds load static data and initialize gameplay before sending READY. Give
+    // primary and warm-standby worlds the same startup budget as data services;
+    // the short auth/chat deadline can falsely fail a completed backup restart.
+    else if (runtime.State == HubManagedProcessState::Starting && now - runtime.ReadinessStartedAt >
+        ((IsWorldKey(key) || runtime.Definition.ServiceKind == 3 || runtime.Definition.ServiceKind == 4) ? std::chrono::seconds(1800) : StartupTimeout))
         runtime.State = HubManagedProcessState::Unresponsive;
     else if (runtime.Ready && now - runtime.LastHeartbeat > HeartbeatTimeout &&
         runtime.State != HubManagedProcessState::Stopping)

@@ -196,7 +196,7 @@ void HubProcessSupervisor::UpdateBackupCycle(bool clusterIdle)
                 _backupStarted.insert(key);
             }
             if (runtime.State == HubManagedProcessState::Unresponsive || !IsActive(runtime))
-            { fail("A restarted service failed its readiness check. Maintenance remains active."); return; }
+            { fail("Restarted service '" + key + "' failed its readiness check (" + GetStateName(runtime.State) + "). Maintenance remains active."); return; }
             ready = ready && (runtime.State == HubManagedProcessState::Running || runtime.State == HubManagedProcessState::Standby);
         }
         if (!ready) return;
