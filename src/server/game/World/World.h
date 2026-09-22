@@ -833,6 +833,7 @@ private:
     uint32 m_ShutdownTimer;
     uint64 _hubAccountEventId = 0;
     uint32 _hubAccountPollTimer = 0;
+    uint32 _chatPresenceTimer = 0;
     uint32 m_ShutdownMask;
 
     uint32 m_CleaningFlags;

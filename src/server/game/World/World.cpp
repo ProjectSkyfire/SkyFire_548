@@ -78,6 +78,7 @@ void StartEluna(bool restart);
 #include "WaypointMovementGenerator.h"
 #include "WeatherMgr.h"
 #include "World.h"
+#include "Cluster/ChatClient.h"
 #include "Platform/MapDataBootstrap.h"
 #include <algorithm>
 #include "WorldPacket.h"
@@ -2242,6 +2243,25 @@ void World::Update(uint32 diff)
     RecordTimeDiff(NULL);
     UpdateSessions(diff);
     RecordTimeDiff("UpdateSessions");
+    if (Skyfire::Chat::ClientEnabled())
+    {
+        if (diff < _chatPresenceTimer) _chatPresenceTimer -= diff;
+        else
+        {
+            _chatPresenceTimer = 5000;
+            std::vector<Skyfire::Chat::PlayerPresence> players;
+            for (auto const& entry : m_sessions)
+            {
+                auto* player = entry.second->GetPlayer();
+                if (player && player->IsInWorld())
+                {
+                    if (players.size() > Skyfire::Chat::MaxPresencePlayers) break;
+                    players.push_back({entry.second->GetAccountId(), player->GetGUID(), entry.second->GetChatIncarnation(), player->GetName()});
+                }
+            }
+            Skyfire::Chat::PublishPresence(std::move(players));
+        }
+    }
 
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())

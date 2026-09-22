@@ -1187,6 +1187,9 @@ void WorldSession::HandleAddonRegisteredPrefixesOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SetPlayer(Player* player)
 {
+    static std::atomic<uint64> nextIncarnation{0};
+    if (player && player != _player) _chatIncarnation = ++nextIncarnation;
+    if (!player) _chatIncarnation = 0;
     _player = player;
 
     // set m_GUID that can be used while player loggined and later until m_playerRecentlyLogout not reset

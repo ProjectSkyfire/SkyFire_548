@@ -7,6 +7,7 @@
 #include "Cluster/ClusterAgent.h"
 #include <memory>
 #include <set>
+#include <map>
 
 namespace Skyfire::Chat
 {
@@ -18,6 +19,7 @@ namespace Skyfire::Chat
         unsigned TimeoutSeconds = 5;
         std::set<std::string> WorldKeys;
         std::set<std::uint32_t> Realms;
+        std::map<std::string, std::set<std::uint32_t>> WorldRealms;
     };
     class Server
     {

@@ -1027,3 +1027,7 @@ add_test(NAME map_data_directory_tests COMMAND map_data_directory_tests)
 add_executable(chat_protocol_tests ChatProtocolTests.cpp)
 target_include_directories(chat_protocol_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
 add_test(NAME chat_protocol_tests COMMAND chat_protocol_tests)
+
+add_executable(chat_presence_tests ChatPresenceTests.cpp)
+target_include_directories(chat_presence_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+add_test(NAME chat_presence_tests COMMAND chat_presence_tests)

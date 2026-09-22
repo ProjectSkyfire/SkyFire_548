@@ -96,9 +96,9 @@ window.HubStatus = (() => {
         }
         if (component.chatserver) {
             metrics = component.metricsAvailable
-                ? `Uptime ${formatUptime(component.uptimeSeconds)} · Realms ${(component.chatRealms || []).join(', ')}\nConnections ${component.connections} · Health probes ${component.requests} · Errors ${component.failures}\nFoundation · Gameplay routing pending`
+                ? `Uptime ${formatUptime(component.uptimeSeconds)} · Realms ${(component.chatRealms || []).join(', ')}\nPresent ${component.presencePlayers ?? 0} · Connections ${component.connections} · Requests ${component.requests} · Errors ${component.failures}\nFoundation · Gameplay routing pending`
                 : 'Chat-server metrics unavailable';
-            card.metrics.title = 'Authenticated service health probes; these are not player chat messages. Metrics expire after 15 seconds.';
+            card.metrics.title = 'Authenticated health/presence requests; these are not player chat messages. Metrics expire after 15 seconds.';
         }
         text(card.metrics, metrics);
         card.start.disabled = pending.has(component.key) || !data.canOperateServices || !component.enabled || active;

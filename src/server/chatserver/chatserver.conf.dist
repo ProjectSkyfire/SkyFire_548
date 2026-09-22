@@ -1,13 +1,17 @@
 # This file is part of Project SkyFire https://www.projectskyfire.org.
 # See LICENSE.md file for Copyright information
-# Native chat foundation: no player traffic or durable state yet.
+# Native chat presence: no gameplay messages or durable state yet.
 [chatserver]
+# YYYYMMDDRR. Compare updated defaults before raising this serial in a live config.
+ConfVersion = 2026092100
 Chat.BindIP = "127.0.0.1"
 Chat.Port = 54940
 Chat.MaxConnections = 32
 Chat.RequestTimeout = 5
 # One daemon can serve multiple realms, e.g. "1 2 3". Zero and duplicates are invalid.
 Chat.Realms = "1"
+# Explicit certificate identity -> presence realm authorization. Blank disables publication.
+Chat.WorldRealms = "skyfire-world-primary=1 skyfire-world-standby=1"
 # Space-separated, exact world certificate common names. Empty fails startup.
 Chat.AllowedWorlds = "skyfire-world-primary skyfire-world-standby"
 

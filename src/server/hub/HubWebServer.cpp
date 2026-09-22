@@ -651,6 +651,7 @@ std::string HubWebServer::HandleStatus(std::map<std::string, std::string> const&
         {
             auto const metrics = node ? node->Chat : Skyfire::Cluster::ChatMetrics{};
             json << ",\"chatserver\":true,\"uptimeSeconds\":" << number(metrics.Uptime)
+                 << ",\"presencePlayers\":" << number(metrics.PresencePlayers)
                  << ",\"connections\":" << number(metrics.Connections) << ",\"requests\":" << number(metrics.Requests)
                  << ",\"failures\":" << number(metrics.Failures) << ",\"chatRealms\":[";
             for (std::size_t i = 0; fresh && i < metrics.Realms.size(); ++i)

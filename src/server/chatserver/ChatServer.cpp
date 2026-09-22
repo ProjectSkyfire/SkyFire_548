@@ -4,6 +4,7 @@
 */
 #include "ChatServer.h"
 #include "Cluster/ChatProtocol.h"
+#include "Cluster/ChatPresence.h"
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <openssl/x509.h>
@@ -20,6 +21,7 @@ namespace Skyfire::Chat
         Options Config;
         std::set<std::shared_ptr<Session>> Sessions;
         Cluster::ChatMetrics Counters;
+        PresenceDirectory Presence;
         std::chrono::steady_clock::time_point Started = std::chrono::steady_clock::now();
         bool Stopping = false;
         void Accept();
@@ -30,7 +32,9 @@ namespace Skyfire::Chat
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> Stream;
         boost::asio::steady_timer Deadline;
         std::array<std::uint8_t, ProbeSize> Input{};
-        std::vector<std::uint8_t> Output;
+        std::vector<std::uint8_t> Output, Body;
+        std::array<std::uint8_t, 4> Length{};
+        std::string Identity;
         bool Closed = false;
         Session(State& owner, boost::asio::ip::tcp::socket socket) :
             Owner(owner), Stream(std::move(socket), owner.Tls), Deadline(owner.Io) { }
@@ -59,10 +63,19 @@ namespace Skyfire::Chat
                 {
                     std::string key(reinterpret_cast<char const*>(ASN1_STRING_get0_data(value)), std::size_t(length));
                     valid = Cluster::ValidKey(key) && Owner.Config.WorldKeys.count(key) != 0;
+                    if (valid) Identity = key;
                 }
             }
             X509_free(cert);
             return valid;
+        }
+        void Reply()
+        {
+            ++Owner.Counters.Requests;
+            Output.assign(Input.begin(), Input.end()); Output[6] = 0x80;
+            auto self = shared_from_this();
+            boost::asio::async_write(Stream, boost::asio::buffer(Output),
+                [self](boost::system::error_code ec, std::size_t) { self->Close(bool(ec)); });
         }
         void Start()
         {
@@ -79,13 +92,37 @@ namespace Skyfire::Chat
                 {
                     if (self->Closed) return;
                     std::uint32_t id = 0, realm = 0;
-                    if (readError || !DecodeProbe(self->Input, id, realm) || !self->Owner.Config.Realms.count(realm)) { self->Close(true); return; }
-                    ++self->Owner.Counters.Requests;
-                    Cluster::Writer out;
-                    out.U8('S'); out.U8('F'); out.U8('C'); out.U8('H'); out.U16(1); out.U16(0x8001); out.U32(id); out.U32(realm);
-                    self->Output = std::move(out.Bytes);
-                    boost::asio::async_write(self->Stream, boost::asio::buffer(self->Output),
-                        [self](boost::system::error_code writeError, std::size_t) { self->Close(bool(writeError)); });
+                    auto probe = self->Input;
+                    bool const presence = probe[6] == 0 && probe[7] == 2;
+                    if (presence) probe[7] = 1;
+                    if (readError || !DecodeProbe(probe, id, realm) || !self->Owner.Config.Realms.count(realm))
+                    { self->Close(true); return; }
+                    if (!presence) { self->Reply(); return; }
+                    auto scope = self->Owner.Config.WorldRealms.find(self->Identity);
+                    if (scope == self->Owner.Config.WorldRealms.end() || !scope->second.count(realm))
+                    { self->Close(true); return; }
+                    boost::asio::async_read(self->Stream, boost::asio::buffer(self->Length),
+                        [self, realm](boost::system::error_code lengthError, std::size_t)
+                    {
+                        if (self->Closed) return;
+                        auto const& b = self->Length;
+                        std::uint32_t length = (std::uint32_t(b[0]) << 24) | (std::uint32_t(b[1]) << 16) |
+                            (std::uint32_t(b[2]) << 8) | b[3];
+                        if (lengthError || !length || length > MaxPresenceBytes) { self->Close(true); return; }
+                        self->Body.resize(length);
+                        boost::asio::async_read(self->Stream, boost::asio::buffer(self->Body),
+                            [self, realm](boost::system::error_code bodyError, std::size_t)
+                        {
+                            if (self->Closed) return;
+                            PresenceSnapshot snapshot;
+                            auto now = std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::steady_clock::now().time_since_epoch()).count());
+                            if (bodyError || !DecodePresence(self->Body, snapshot) ||
+                                !self->Owner.Presence.Replace(realm, self->Identity, std::move(snapshot), now))
+                            { self->Close(true); return; }
+                            self->Reply();
+                        });
+                    });
                 });
             });
         }
@@ -119,6 +156,13 @@ namespace Skyfire::Chat
         { error = "Invalid chat endpoint, connection limit, deadline or world allowlist."; return false; }
         for (auto const& key : options.WorldKeys)
             if (!Cluster::ValidKey(key)) { error = "Invalid chat world certificate identity."; return false; }
+        for (auto const& scope : options.WorldRealms)
+        {
+            if (!options.WorldKeys.count(scope.first) || scope.second.empty())
+            { error = "Presence scope requires an allowed world identity and realm list."; return false; }
+            for (auto realm : scope.second)
+                if (!options.Realms.count(realm)) { error = "Presence scope contains an unserved realm."; return false; }
+        }
         try
         {
             auto state = std::make_unique<State>(); state->Config = std::move(options);
@@ -141,6 +185,8 @@ namespace Skyfire::Chat
     }
     void Server::Update()
     {
+        if (_state) _state->Presence.Expire(std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count()));
         // Bound work per main-loop iteration so service-control heartbeats cannot starve.
         for (unsigned count = 0; _state && count < 64 && _state->Io.poll_one(); ++count) { }
     }
@@ -156,6 +202,7 @@ namespace Skyfire::Chat
     {
         if (!_state) return {};
         auto result = _state->Counters;
+        result.PresencePlayers = _state->Presence.Players();
         result.Connections = std::uint32_t(_state->Sessions.size());
         result.Uptime = std::uint32_t(std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::steady_clock::now() - _state->Started).count());

@@ -3435,3 +3435,9 @@ MapData.VerifyCache = 0
 # Per base map per second; loading stops after the current tile if 5 ms elapsed.
 MapData.PrefetchRadius = 1
 MapData.PrefetchTilesPerSecond = 1
+
+# Optional realm-scoped presence publisher. Chat gameplay routing is not enabled yet.
+ChatService.Enable = 0
+ChatService.Host = "localhost"
+ChatService.Port = 54940
+ChatService.NodeKey = "skyfire-chat-primary"

@@ -24,6 +24,7 @@
 #include "Database/DatabaseSetup/DatabaseSetupRuntime.h"
 #include "Database/DatabaseWorkerPool.h"
 #include "Configuration/ConfigVersion.h"
+#include "Cluster/ChatClient.h"
 #include "SystemConfig.h"
 #include "World.h"
 #include "WorldRunnable.h"
@@ -423,6 +424,9 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
         return 1;
     }
 
+    if (!Skyfire::Chat::StartClient(clusterOptions, clusterError))
+        SF_LOG_WARN("server.worldserver", "Chat presence disabled: %s", clusterError.c_str());
+
     ///- Register worldserver's signal handlers
     std::signal(SIGINT, WorldServerSignalHandler);
     std::signal(SIGTERM, WorldServerSignalHandler);
@@ -435,6 +439,7 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
     if (worldRunner.Start([] { WorldRunnable().Run(); }) == -1)
     {
         SF_LOG_ERROR("server.worldserver", "Failed to start world task");
+        Skyfire::Chat::StopClient();
         _StopDB();
         return 1;
     }
@@ -643,6 +648,7 @@ int Master::Run(Skyfire::HubControl::ChildChannel* hubControl)
     // since worldrunnable uses them, it will crash if unloaded after master
     worldRunner.Join();
 
+    Skyfire::Chat::StopClient();
     clusterAgent.Stop();
 
     if (hubControlThread.joinable())

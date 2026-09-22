@@ -5,6 +5,7 @@
 #include "ChatServer.h"
 #include "Cluster/ChatProtocol.h"
 #include "Configuration/Config.h"
+#include "Configuration/ConfigVersion.h"
 #include "Database/DatabaseEnv.h"
 #include "Platform/HubProcessControl.h"
 #include "Log.h"
@@ -55,6 +56,10 @@ int main(int argc, char** argv)
     if (!sConfigMgr->LoadInitial(config.c_str()))
     { std::fputs("Cannot read chatserver configuration.\n", stderr); return 1; }
     sLog->LoadFromConfig();
+    uint32 const confVersion = sConfigMgr->GetIntDefault("ConfVersion", 0);
+    if (confVersion < Skyfire::ConfigVersion::Chat)
+        SF_LOG_WARN("server.chat", "Your chatserver.conf is out of date (found %u, expected %u). Compare with chatserver.conf.dist.",
+            confVersion, Skyfire::ConfigVersion::Chat);
     Skyfire::Chat::Options options;
     int const port = sConfigMgr->GetIntDefault("Chat.Port", 54940);
     int const capacity = sConfigMgr->GetIntDefault("Chat.MaxConnections", 32);
@@ -72,6 +77,22 @@ int main(int argc, char** argv)
         uint64 realm = 0;
         if (!Handle(key, realm) || realm > 0xffffffffULL || !options.Realms.insert(std::uint32_t(realm)).second)
         { SF_LOG_ERROR("server.chat", "Chat.Realms must contain unique positive 32-bit realm IDs."); return 1; }
+    }
+    std::istringstream scopes(sConfigMgr->GetStringDefault("Chat.WorldRealms", ""));
+    while (scopes >> key)
+    {
+        auto split = key.find('=');
+        std::string identity = key.substr(0, split);
+        if (split == std::string::npos || !Skyfire::Cluster::ValidKey(identity) || options.WorldRealms.count(identity))
+        { SF_LOG_ERROR("server.chat", "Chat.WorldRealms requires unique node=realm,realm entries."); return 1; }
+        std::istringstream ids(key.substr(split + 1)); std::string value;
+        auto& allowed = options.WorldRealms[identity];
+        while (std::getline(ids, value, ','))
+        {
+            uint64 realm = 0;
+            if (!Handle(value, realm) || realm > 0xffffffffULL || !allowed.insert(std::uint32_t(realm)).second)
+            { SF_LOG_ERROR("server.chat", "Invalid realm in Chat.WorldRealms."); return 1; }
+        }
     }
     Skyfire::Cluster::Node node;
     node.Type = Skyfire::Cluster::Service::Chat; node.Port = options.Port;
@@ -101,7 +122,7 @@ int main(int argc, char** argv)
 #endif
     bool registered = false;
     if (control) channel.SendStatus(Skyfire::HubControl::StartingMessage);
-    SF_LOG_INFO("server.chat", "Chat foundation listening; authenticated health probes enabled. Gameplay routing is pending.");
+    SF_LOG_INFO("server.chat", "Chat listening; authenticated health and scoped presence publication enabled. Gameplay routing is pending.");
     auto heartbeat = std::chrono::steady_clock::now();
     int result = 0;
     try

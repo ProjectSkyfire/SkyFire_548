@@ -1,6 +1,6 @@
 # Native clustered chat daemon
 
-This first implementation provides the daemon and hub integration. Player chat
+This implementation provides the daemon, hub integration and optional world presence publication. Player chat
 still runs in worldserver. It does **not** yet route messages, run GM commands,
 own guild state, or write a database. Its `ready` status means its authenticated
 health endpoint is available and the hub acknowledged its registration.
@@ -26,9 +26,16 @@ the managed data-service columns from `003_managed_data_services.sql` are presen
 - Set `Chat.BindIP`, `Chat.Port`, and `Cluster.AdvertiseAddress` for the host.
 - Set `Chat.Realms = "1 2"` to serve multiple realms from one daemon. Up to 64
   distinct positive realm IDs are supported. Zero and duplicate IDs are rejected.
+- `ConfVersion` is checked at startup against the chat serial in `ConfigVersion.h`.
+  Missing or older serials log a warning with the expected version. Compare the
+  shipped defaults before updating the serial; existing configs are never overwritten.
 - Set `Chat.AllowedWorlds` to space-separated exact world certificate CNs, including
   standby identities as appropriate. An empty list fails startup. This allowlist
-  authorizes health probes only; it does not confer player or GM privileges.
+  authorizes health probes; it does not confer player or GM privileges.
+- Set `Chat.WorldRealms = "world-primary=1 world-other=2"` to authorize presence
+  publication for each certificate identity. Identities must also be in
+  `Chat.AllowedWorlds`, and realms must be in `Chat.Realms`. An empty scope list
+  permits health probes only.
 - `Chat.MaxConnections` bounds concurrent TLS sessions (1–128, default 32).
   `Chat.RequestTimeout` bounds the entire handshake/probe/reply (1–30 seconds).
 
@@ -63,16 +70,16 @@ includes managed chat nodes. Unmanaged chat nodes must be operated by their own
 supervisor. Routing drain is not exposed yet because no gameplay routing exists.
 
 Independent server-health refresh shows uptime, configured realms, connections,
-health probes and failures. Metrics expire after 15 seconds; an expired metric is
+service requests, published player presence and failures. Metrics expire after 15 seconds; an expired metric is
 unavailable rather than zero. A lost hub registration withdraws managed readiness.
-The current stateless health service stays online during scheduled database
+The current volatile presence service stays online during scheduled database
 backups and does not prevent backup admission. This policy must change before
 chat acquires durable mutations or an outbox.
 
 ## Service protocol and realm boundaries
 
 The direct endpoint requires mutual TLS and an allowed world certificate CN.
-It accepts one fixed 16-byte request per connection: ASCII `SFCH`, big-endian u16
+Health uses one fixed 16-byte request per connection: ASCII `SFCH`, big-endian u16
 version `1`, u16 operation `1` (health), u32 nonzero request ID, and u32 nonzero
 realm ID. A served realm receives the same fields with operation `0x8001`.
 Unknown realms, malformed requests, unsupported versions/operations and
@@ -82,6 +89,39 @@ work; the main loop processes at most 64 asynchronous completions per iteration.
 Hub registration uses realm zero because the daemon may serve multiple realms;
 the chat metrics packet (cluster message 11) reports its actual realm list. This
 does not publish authentication realm routes or grant ownership of those realms.
+
+## World presence publication
+
+Deploy matching hubserver, chatserver and worldserver builds for presence metrics
+(version 2). The new hub also accepts version 1 metrics from the foundation daemon.
+Enable `ChatService.Enable = 1` in each participating world configuration and set
+`ChatService.Host`, `ChatService.Port` and `ChatService.NodeKey`. The publisher
+reuses that world's cluster certificate and CA, verifying both endpoint hostname
+and the chat certificate CN. `RealmID` must be explicitly positive. Standby worlds
+start publishing only after active world startup; preloading alone sends no players.
+
+Every five seconds, the world thread copies online character identities into a
+bounded snapshot. DNS, TLS and network waits run on a separate worker. Only one
+pending snapshot is retained; newer snapshots replace unsent older ones. There
+are no database writes. Transport failures do not stop world startup, gameplay,
+character saves or local chat. Publication success/failure transitions are logged.
+
+Presence operation 2 uses the same 16-byte header followed by a big-endian u32
+payload length (maximum 512 KiB). The payload is a length-prefixed 64-character
+random generation, u64 sequence, u16 count and entries containing u32 account,
+u64 character GUID, u64 login incarnation and length-prefixed UTF-8 character name.
+All integers are big-endian. Success returns the header with operation `0x8002`.
+Each request owns a short TLS connection; presence persists under a 15-second
+lease. It is not tied to the lifetime of that one request socket.
+
+At most 4,096 players per world snapshot, 128 world/realm registrations and 16,384
+players globally are accepted. Duplicate names or GUIDs within a realm, stale
+sequences and competing unexpired generations are rejected atomically. Identical
+GUIDs/names in different realms are independent. A different world cannot replace
+an existing player's live presence until its old owner expires or withdraws it.
+An empty next snapshot withdraws logged-out players; crash or network loss expires
+presence within 15 seconds of the last accepted snapshot. World restart may need
+to wait out that lease. Presence is not character writer fencing or GM authorization.
 
 ## Gameplay routing phases
 
@@ -103,7 +143,7 @@ hosting two realms in one daemon. Worldserver initially owns membership and
 permission projections; stale projections fail closed. Durable guild/social
 ownership requires typed character-service APIs and scoped writer fencing.
 
-Next is the world-to-chat connection, realm/session presence and whisper routing,
+Next is whisper routing using the world-to-chat connection and realm/session presence,
 followed by group, guild/officer and private-channel delivery. Local spatial chat
 and emergency world commands remain available during a chat-service outage.
 
@@ -111,7 +151,9 @@ and emergency world commands remain available during a chat-service outage.
 
 `chat_protocol_tests` covers realm-qualified probes, malformed/truncated metrics,
 duplicate/zero/excessive realm lists, service-role checks and lease ownership.
-After compiling, run it with CTest together with `cluster_foundation_tests`.
+`chat_presence_tests` additionally covers cross-realm collisions, replay rejection,
+relogin, conflicting owners, logout snapshots and expiry. After compiling, run
+both with CTest together with `cluster_foundation_tests`.
 Native compilation and live TLS/lifecycle validation remain required before
 deploying this phase. Test at least two realms, disallowed certificates, unknown
 realms, connection exhaustion, hub loss/recovery, managed restart and backup

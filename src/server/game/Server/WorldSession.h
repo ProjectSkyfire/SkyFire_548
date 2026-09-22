@@ -308,6 +308,7 @@ public:
     void SetSecurity(AccountTypes security) { _security = security; }
     std::string const& GetRemoteAddress() { return m_Address; }
     void SetPlayer(Player* player);
+    uint64 GetChatIncarnation() const { return _chatIncarnation; }
     uint8 Expansion() const { return m_expansion; }
 
     void InitWarden(SessionKey const&, std::string const& os);
@@ -1198,6 +1199,7 @@ private:
 
     uint32 m_GUIDLow;                                   // set loggined or recently logout player (while m_playerRecentlyLogout set)
     Player* _player;
+    uint64 _chatIncarnation = 0;
     WorldSocket* m_Socket;
     WorldSocket* m_InstanceSocket;
     std::string m_Address;
