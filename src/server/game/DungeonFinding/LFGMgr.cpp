@@ -17,6 +17,7 @@
 #include "LFGQueue.h"
 #include "LFGScripts.h"
 #include "MapManager.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "RBAC.h"
@@ -1155,11 +1156,31 @@ namespace lfg
         LfgGuidList playersToTeleport;
         LfgGuidSet expectedPlayers;
 
+        // Prefer a real client as group leader so socketless sessions follow them
+        // after teleport. proposal.leader is usually already chosen that way.
+        uint64 preferredLeader = proposal.leader;
+        uint64 firstRealPlayer = 0;
+        for (LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
+        {
+            uint64 guid = it->first;
+            Player* player = ObjectAccessor::FindPlayer(guid);
+            bool const isBot = player && player->GetSession() && player->GetSession()->IsBot();
+            if (player && player->GetSession() && !isBot && !firstRealPlayer)
+                firstRealPlayer = guid;
+        }
+        if (firstRealPlayer)
+        {
+            Player* leaderPlayer = ObjectAccessor::FindPlayer(proposal.leader);
+            bool const leaderIsBot = leaderPlayer && leaderPlayer->GetSession() && leaderPlayer->GetSession()->IsBot();
+            if (leaderIsBot)
+                preferredLeader = firstRealPlayer;
+        }
+
         for (LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
         {
             uint64 guid = it->first;
             expectedPlayers.insert(guid);
-            if (guid == proposal.leader)
+            if (guid == preferredLeader)
                 players.push_front(guid);
             else
                 players.push_back(guid);
@@ -1306,6 +1327,33 @@ namespace lfg
         proposal.id = ++m_lfgProposalId;
         ProposalsStore[m_lfgProposalId] = proposal;
         return m_lfgProposalId;
+    }
+
+    uint32 LFGMgr::GetActiveProposalIdForPlayer(uint64 guid) const
+    {
+        for (LfgProposalContainer::const_iterator it = ProposalsStore.begin(); it != ProposalsStore.end(); ++it)
+        {
+            if (it->second.state != LFG_PROPOSAL_INITIATING)
+                continue;
+
+            LfgProposalPlayerContainer::const_iterator itPlayer = it->second.players.find(guid);
+            if (itPlayer != it->second.players.end() && itPlayer->second.accept == LFG_ANSWER_PENDING)
+                return it->first;
+        }
+        return 0;
+    }
+
+    uint8 LFGMgr::GetRoleCheckRoles(uint64 gguid, uint64 playerGuid) const
+    {
+        LfgRoleCheckContainer::const_iterator it = RoleChecksStore.find(gguid);
+        if (it == RoleChecksStore.end())
+            return PLAYER_ROLE_NONE;
+
+        LfgRolesMap::const_iterator itRoles = it->second.roles.find(playerGuid);
+        if (itRoles == it->second.roles.end())
+            return PLAYER_ROLE_NONE;
+
+        return itRoles->second;
     }
 
     /**
@@ -1781,6 +1829,9 @@ namespace lfg
                 {
                     if (player->TeleportTo(returnLocation.MapId, returnLocation.X, returnLocation.Y, returnLocation.Z, returnLocation.O))
                     {
+                        if (WorldSession* session = player->GetSession())
+                            if (session->IsBot() && player->IsBeingTeleported())
+                                session->FinalizeBotTeleport();
                         playerData.ClearReturnLocation();
                         return;
                     }
@@ -1791,6 +1842,9 @@ namespace lfg
 
                 playerData.ClearReturnLocation();
                 player->TeleportToBGEntryPoint();
+                if (WorldSession* session = player->GetSession())
+                    if (session->IsBot() && player->IsBeingTeleported())
+                        session->FinalizeBotTeleport();
             }
 
             return;
@@ -1866,6 +1920,12 @@ namespace lfg
                     if (forceChangeInstance)
                         player->SetSemaphoreTeleportForcedFar(false);
                 }
+                else if (WorldSession* session = player->GetSession())
+                {
+                    // Socketless sessions have no client to ack the worldport.
+                    if (session->IsBot() && player->IsBeingTeleported())
+                        session->FinalizeBotTeleport();
+                }
                 player->SetForcedTeleportFar(false);
             }
         }
@@ -1894,12 +1954,22 @@ namespace lfg
         if (!dungeon)
             return;
 
+        // Snapshot first: TeleportPlayer can finalize a socketless teleport, which
+        // may disband or remove members and invalidate GroupReference iteration.
+        std::vector<uint64> toTeleport;
         for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
         {
             Player* member = itr->GetSource();
             if (!member || member->GetMapId() != uint32(dungeon->map))
                 continue;
+            toTeleport.push_back(member->GetGUID());
+        }
 
+        for (uint64 guid : toTeleport)
+        {
+            Player* member = ObjectAccessor::FindPlayerInOrOutOfWorld(guid);
+            if (!member || member->GetMapId() != uint32(dungeon->map))
+                continue;
             TeleportPlayer(member, true);
         }
     }

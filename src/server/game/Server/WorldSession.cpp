@@ -110,6 +110,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_playerLogout(false),
     m_playerRecentlyLogout(false),
     m_playerSave(false),
+    m_isBot(false),
     m_pendingPlayerLoginGuid(0),
     m_sessionDbcLocale(sWorld->GetAvailableDbcLocale(locale)),
     m_sessionDbLocaleIndex(locale),
@@ -328,7 +329,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
 
     ///- Before we process anything:
     /// If necessary, kick the player from the character select screen
-    if (IsConnectionIdle())
+    if (m_Socket && IsConnectionIdle())
         m_Socket->CloseSocket();
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
@@ -653,8 +654,24 @@ void WorldSession::LogoutPlayer(bool save)
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
+        // Keep party membership when any member is a socketless module session — those
+        // characters stay online and the real player remains an offline slot.
         if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket)
-            _player->RemoveFromGroup();
+        {
+            bool groupHasModuleSession = false;
+            Group* group = _player->GetGroup();
+            for (GroupReference* itr = group->GetFirstMember(); itr; itr = itr->next())
+            {
+                Player* member = itr->GetSource();
+                if (member && member->GetSession() && member->GetSession()->IsBot())
+                {
+                    groupHasModuleSession = true;
+                    break;
+                }
+            }
+            if (!groupHasModuleSession)
+                _player->RemoveFromGroup();
+        }
 
         //! Send update to group and reset stored max enchanting level
         if (_player->GetGroup())

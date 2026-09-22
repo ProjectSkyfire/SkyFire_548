@@ -699,6 +699,12 @@ public:
 
     // Called when a player changes to a new map (after moving to new map)
     virtual void OnMapChanged(Player* /*player*/) { }
+
+    // Called on every world tick for an in-world player (keep this lightweight).
+    virtual void OnUpdate(Player* /*player*/, uint32 /*diff*/) { }
+
+    // Called after a quest is successfully added to the player's log.
+    virtual void OnQuestAdd(Player* /*player*/, Quest const* /*quest*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -947,6 +953,8 @@ public: /* Initialization */
     void OnPlayerSave(Player* player);
     void OnPlayerBindToInstance(Player* player, DifficultyID difficulty, uint32 mapid, bool permanent);
     void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea);
+    void OnPlayerUpdate(Player* player, uint32 diff);
+    void OnPlayerQuestAdd(Player* player, Quest const* quest);
 
     /* GuildScript */
     void OnGuildAddMember(Guild* guild, Player* player, uint8& plRank);

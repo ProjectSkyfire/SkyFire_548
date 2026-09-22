@@ -345,6 +345,8 @@ namespace lfg
         bool IsRaidFinderDungeon(uint32 dungeonId);
         /// Check whether the dungeon id belongs to a flexible raid queue entry
         bool IsFlexibleRaidDungeon(uint32 dungeonId);
+        /// Return Lfg dungeon data for given dungeon id (or entry)
+        LFGDungeonData const* GetLFGDungeon(uint32 id);
 
         // cs_lfg
         /// Get current player roles
@@ -417,6 +419,11 @@ namespace lfg
         void UpdateBoot(uint64 guid, bool accept);
         /// Updates proposal to join dungeon with player answer
         void UpdateProposal(uint32 proposalId, uint64 guid, bool accept);
+        /// Finds an initiating proposal awaiting this player's answer (0 if none).
+        uint32 GetActiveProposalIdForPlayer(uint64 guid) const;
+        /// Roles currently recorded for a player in an active group role check
+        /// (PLAYER_ROLE_NONE if no check / not listed).
+        uint8 GetRoleCheckRoles(uint64 gguid, uint64 playerGuid) const;
         /// Updates the role check with player answer
         void UpdateRoleCheck(uint64 gguid, uint64 guid = 0, uint8 roles = PLAYER_ROLE_NONE);
         /// Sets player lfg roles
@@ -472,7 +479,6 @@ namespace lfg
         void RemovePlayerData(uint64 guid);
         void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap, bool isContinue);
         void _SaveToDB(uint64 guid, uint32 db_guid);
-        LFGDungeonData const* GetLFGDungeon(uint32 id);
 
         // Proposals
         void RemoveProposal(LfgProposalContainer::iterator itProposal, LfgUpdateType type);

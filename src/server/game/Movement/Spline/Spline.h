@@ -173,9 +173,12 @@ namespace Movement
                 // length overflowed, assign to max positive value
                 if (new_length < 0)
                     new_length = std::numeric_limits<length_type>::max();
-                lengths[++i] = new_length;
+                // Bad path input (zero velocity, overlapping points, NaNs) can make
+                // lengths go backwards; clamp instead of ASSERT-crashing the server.
+                if (new_length < prev_length)
+                    new_length = prev_length;
 
-                ASSERT(prev_length <= new_length);
+                lengths[++i] = new_length;
                 prev_length = new_length;
             }
         }

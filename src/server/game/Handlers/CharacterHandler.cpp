@@ -42,6 +42,9 @@
 #include "WorldSession.h"
 #include "WorldSocket.h"
 
+#include <chrono>
+#include <thread>
+
 class LoginQueryHolder : public SQLQueryHolder
 {
 private:
@@ -1825,6 +1828,122 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     sScriptMgr->OnPlayerLogin(pCurrChar, firstLogin);
     delete holder;
 }
+
+bool WorldSession::BeginBotCharacterLogin(uint64 playerGuid)
+{
+    if (PlayerLoading() || GetPlayer())
+        return false;
+
+    m_playerLoading = true;
+
+    LoginQueryHolder* holder = new LoginQueryHolder(GetAccountId(), playerGuid);
+    if (!holder->Initialize())
+    {
+        delete holder;
+        m_playerLoading = false;
+        return false;
+    }
+
+    // Same async path as a real client login. Socketless sessions are not in
+    // World::UpdateSessions, so the owning module must PollBotCharacterLogin.
+    _charLoginCallback = CharacterDatabase.DelayQueryHolder((SQLQueryHolder*)holder);
+    return true;
+}
+
+WorldSession::BotLoginPollStatus WorldSession::PollBotCharacterLogin(bool discard /*= false*/)
+{
+    if (!discard && GetPlayer())
+        return BotLoginPollStatus::Success;
+
+    if (!_charLoginCallback.ready())
+        return m_playerLoading ? BotLoginPollStatus::Pending : BotLoginPollStatus::Failed;
+
+    SQLQueryHolder* param = nullptr;
+    _charLoginCallback.get(param);
+    _charLoginCallback.cancel();
+
+    if (discard || !param)
+    {
+        delete param;
+        m_playerLoading = false;
+        return BotLoginPollStatus::Failed;
+    }
+
+    HandlePlayerLogin((LoginQueryHolder*)param);            // clears m_playerLoading, deletes holder
+    return GetPlayer() ? BotLoginPollStatus::Success : BotLoginPollStatus::Failed;
+}
+
+bool WorldSession::LoginBotCharacter(uint64 playerGuid)
+{
+    if (!BeginBotCharacterLogin(playerGuid))
+        return false;
+
+    uint32 waitedMs = 0;
+    for (;;)
+    {
+        BotLoginPollStatus const status = PollBotCharacterLogin();
+        if (status == BotLoginPollStatus::Success)
+            return true;
+        if (status == BotLoginPollStatus::Failed)
+            return false;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        if (++waitedMs > 15000)
+        {
+            SF_LOG_ERROR("misc", "LoginBotCharacter: timed out loading character (GUID: %u) for account %u.",
+                GUID_LOPART(playerGuid), GetAccountId());
+            while (!_charLoginCallback.ready() && waitedMs < 20000)
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                ++waitedMs;
+            }
+            PollBotCharacterLogin(true);
+            return false;
+        }
+    }
+}
+
+uint32 WorldSession::CreateBotCharacter(std::string const& name, uint8 race, uint8 cls, uint8 gender,
+    uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 level,
+    uint32 specializationId)
+{
+    if (GetPlayer())
+        return 0;
+
+    WorldPacket dummy;
+    CharacterCreateInfo createInfo(name, race, cls, gender, skin, face, hairStyle, hairColor, facialHair, 0, dummy);
+
+    Player newChar(this);
+    newChar.GetMotionMaster()->Initialize();
+    if (!newChar.Create(sObjectMgr->GenerateLowGuid(HIGHGUID_PLAYER), &createInfo))
+    {
+        newChar.CleanupsBeforeDelete();
+        return 0;
+    }
+
+    newChar.SetAtLoginFlag(AT_LOGIN_FIRST);
+
+    if (level > newChar.getLevel())
+        newChar.GiveLevel(level);
+
+    // Specializations unlock at level 10.
+    if (specializationId && newChar.getLevel() >= 10)
+        newChar.LearnSpecialization(specializationId);
+
+    newChar.SaveToDB(true);
+
+    uint32 lowGuid = newChar.GetGUIDLow();
+
+    if (PlayerInfo const* info = sObjectMgr->GetPlayerInfo(newChar.getRace(), newChar.getClass()))
+        SeedStarterHunterPetRecord(&newChar, info);
+
+    sWorld->AddCharacterNameData(lowGuid, newChar.GetName(), newChar.getGender(), newChar.getRace(),
+        newChar.getClass(), newChar.getLevel(), newChar.getVirtualRealm());
+
+    newChar.CleanupsBeforeDelete();
+    return lowGuid;
+}
+
 void WorldSession::HandleSetLfgBonusFactionID(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Received CMSG_SET_LFG_BONUS_FACTION_ID");

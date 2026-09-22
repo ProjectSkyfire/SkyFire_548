@@ -1393,6 +1393,20 @@ void World::SetInitialWorldSettings()
     ///- Initialize config settings
     LoadConfigSettings();
 
+    // realmID starts as -1 in Main.cpp. Real clients set VirtualRealmID from the
+    // auth handshake; socketless sessions copy this global when creating characters.
+    {
+        uint32 configuredRealm = uint32(sConfigMgr->GetIntDefault("RealmID", 0));
+        if (configuredRealm && configuredRealm != uint32(-1))
+            realmID = configuredRealm;
+        else if (QueryResult result = LoginDatabase.Query("SELECT id FROM realmlist ORDER BY id ASC LIMIT 1"))
+            realmID = (*result)[0].GetUInt32();
+        else
+            realmID = 1;
+
+        sLog->SetRealmId(realmID);
+    }
+
     ///- Initialize Allowed Security Level
     LoadDBAllowedSecurityLevel();
 
@@ -2031,9 +2045,6 @@ void World::SetInitialWorldSettings()
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
     SF_LOG_INFO("server.worldserver", "World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
-
-    if (uint32 realmId = sConfigMgr->GetIntDefault("RealmID", 0)) // 0 reserved for auth
-        sLog->SetRealmId(realmId);
 }
 
 void World::RecordTimeDiff(const char* text, ...)

@@ -2107,6 +2107,9 @@ public:
     uint32 GetNextResetTalentsCost() const;
     uint32 GetNextResetSpecializationCost() const;
     void InitTalentForLevel();
+    // Assigns a specialization (ChrSpecialization id) to the active spec group
+    // and learns the spells granted for the character's level.
+    void LearnSpecialization(uint32 specializationId);
     void BuildPlayerTalentsInfoData(WorldPacket* data);
     void BuildPetTalentsInfoData(WorldPacket* data);
     void SendTalentsInfoData();

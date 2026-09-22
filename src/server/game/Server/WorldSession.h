@@ -310,6 +310,37 @@ public:
     void SetPlayer(Player* player);
     uint8 Expansion() const { return m_expansion; }
 
+    // Socketless sessions are owned and updated by a module. They are not
+    // tracked in World::m_sessions and have no network socket.
+    void SetBot(bool on) { m_isBot = on; }
+    bool IsBot() const { return m_isBot; }
+
+    // Async character login (DB on a worker thread). The owning module must
+    // poll; do not spin-wait on the world thread for a whole pool.
+    bool BeginBotCharacterLogin(uint64 playerGuid);
+    enum class BotLoginPollStatus : uint8
+    {
+        Pending = 0,
+        Success = 1,
+        Failed = 2
+    };
+    // When discard is true, frees a ready query holder without LoadFromDB.
+    BotLoginPollStatus PollBotCharacterLogin(bool discard = false);
+
+    // Synchronously loads a character (begin + wait + poll). Prefer this for a
+    // single character; pool logins should stay on the async path.
+    bool LoginBotCharacter(uint64 playerGuid);
+    // Completes a pending near/far teleport immediately. Socketless sessions
+    // have no client to ack the teleport.
+    // Returns true if a teleport was finalized.
+    bool FinalizeBotTeleport();
+    // Creates a character on this session's account and saves it. When
+    // specializationId is non-zero and the level allows it, that specialization
+    // and its spells are learned. Returns the new character's low GUID, or 0.
+    uint32 CreateBotCharacter(std::string const& name, uint8 race, uint8 cls, uint8 gender,
+        uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 level,
+        uint32 specializationId = 0);
+
     void InitWarden(SessionKey const&, std::string const& os);
 
     /// Session in auth.queue currently
@@ -1223,6 +1254,7 @@ private:
     bool m_playerLogout;                                // code processed in LogoutPlayer
     bool m_playerRecentlyLogout;
     bool m_playerSave;
+    bool m_isBot;                                       // socketless session owned by a module
     LocaleConstant m_sessionDbcLocale;
     LocaleConstant m_sessionDbLocaleIndex;
     uint32 m_latency;

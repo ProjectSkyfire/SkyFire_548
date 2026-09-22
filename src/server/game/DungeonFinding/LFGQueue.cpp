@@ -10,7 +10,10 @@
 #include "LFGMgr.h"
 #include "LFGQueue.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "ObjectDefines.h"
+#include "Player.h"
+#include "WorldSession.h"
 
 #include <algorithm>
 
@@ -763,6 +766,21 @@ namespace lfg
             }
             else if (!leader && (!proposal.leader || std::rand() % 2))
                 proposal.leader = itRoles->first;
+
+            // Prefer a real client over a socketless session so modules follow
+            // the human after the dungeon teleport.
+            if (proposal.leader)
+            {
+                Player* leaderPlayer = ObjectAccessor::FindPlayer(proposal.leader);
+                bool const leaderIsBot = leaderPlayer && leaderPlayer->GetSession() && leaderPlayer->GetSession()->IsBot();
+                if (leaderIsBot)
+                {
+                    Player* candidate = ObjectAccessor::FindPlayer(itRoles->first);
+                    bool const candidateIsBot = candidate && candidate->GetSession() && candidate->GetSession()->IsBot();
+                    if (candidate && !candidateIsBot)
+                        proposal.leader = itRoles->first;
+                }
+            }
 
             // Assing player data and roles
             LfgProposalPlayer& data = proposal.players[itRoles->first];

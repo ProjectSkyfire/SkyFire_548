@@ -126,7 +126,11 @@ namespace Movement {
         }
         else
         {
-            CommonInitializer init(args.velocity);
+            // velocity <= 0 produces Inf/NaN timestamps and length regressions.
+            float velocity = args.velocity;
+            if (!(velocity > 0.01f))
+                velocity = 0.01f;
+            CommonInitializer init(velocity);
             spline.initLengths(init);
         }
 

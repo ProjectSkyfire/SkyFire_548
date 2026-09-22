@@ -595,6 +595,9 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         }
     }
 
+    // Always notify PlayerScripts (questGiver may be NULL for share/confirm/sync).
+    sScriptMgr->OnPlayerQuestAdd(this, quest);
+
     uint32 zone = 0, area = 0;
 
     GetZoneAndAreaId(zone, area);

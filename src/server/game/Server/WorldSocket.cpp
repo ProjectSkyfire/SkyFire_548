@@ -303,7 +303,13 @@ int WorldSocket::SendPacket(WorldPacket const& pct)
         pkt = &buff;
     }*/
 
-    uint16 opcodeNumber = serverOpcodeTable[pkt->GetOpcode()]->OpcodeNumber;
+    OpcodeHandler const* opcodeHandler = serverOpcodeTable[pkt->GetOpcode()];
+    if (!opcodeHandler)
+    {
+        SF_LOG_ERROR("network.opcode", "WorldSocket::SendPacket: missing server opcode handler for %u", uint32(pkt->GetOpcode()));
+        return -1;
+    }
+    uint16 opcodeNumber = opcodeHandler->OpcodeNumber;
 
     m_SessionState.WithSession([pkt](WorldSession* session)
     {

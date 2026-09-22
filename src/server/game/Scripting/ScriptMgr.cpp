@@ -1243,6 +1243,16 @@ void ScriptMgr::OnPlayerLogout(Player* player)
     FOREACH_SCRIPT(PlayerScript)->OnLogout(player);
 }
 
+void ScriptMgr::OnPlayerUpdate(Player* player, uint32 diff)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnUpdate(player, diff);
+}
+
+void ScriptMgr::OnPlayerQuestAdd(Player* player, Quest const* quest)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnQuestAdd(player, quest);
+}
+
 void ScriptMgr::OnPlayerCreate(Player* player)
 {
     FOREACH_SCRIPT(PlayerScript)->OnCreate(player);

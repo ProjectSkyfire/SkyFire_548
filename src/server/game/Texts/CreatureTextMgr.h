@@ -147,7 +147,10 @@ public:
         {
             case ChatMsg::CHAT_MSG_MONSTER_WHISPER:
             case ChatMsg::CHAT_MSG_RAID_BOSS_WHISPER:
-                data.put<uint64>(whisperGUIDpos, player->GetGUID());
+                // MoP SMSG_MESSAGECHAT is bitpacked. The cached offset is only a
+                // writable receiver-GUID slot when it still falls inside the packet.
+                if (whisperGUIDpos + sizeof(uint64) <= data.size())
+                    data.put<uint64>(whisperGUIDpos, player->GetGUID());
                 break;
             default:
                 break;

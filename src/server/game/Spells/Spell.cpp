@@ -3268,8 +3268,15 @@ void Spell::cancel()
                 m_caster->ToPlayer()->RestoreSpellMods(this);
             // no break
         case SPELL_STATE_DELAYED:
-            SendInterrupted(0);
-            SendCastResult(SpellCastResult::SPELL_FAILED_INTERRUPTED);
+            // Auto Shot cancel is normal (target died / retarget). Don't spam
+            // SPELL_FAILED_INTERRUPTED on the player's screen.
+            if (!(IsAutoRepeat() && m_spellInfo->Id == 75))
+            {
+                SendInterrupted(0);
+                SendCastResult(SpellCastResult::SPELL_FAILED_INTERRUPTED);
+            }
+            else if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
+                m_caster->ToPlayer()->SendAutoRepeatCancel(m_caster);
             break;
 
         case SPELL_STATE_CASTING:

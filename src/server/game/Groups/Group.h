@@ -186,6 +186,7 @@ public:
     void   UpdateLooterGuid(WorldObject* pLootedObject, bool ifneed = false);
     void   SetLootThreshold(ItemQualities threshold);
     void   Disband(bool hideDestroy = false);
+    bool   IsDisbanding() const { return m_isDisbanding; }
     void   SetLfgRoles(uint64 guid, const uint8 roles);
 
     // properties accessories
@@ -240,6 +241,7 @@ public:
     void ChangeMembersGroup(uint64 guid, uint8 group);
     void ChangeMembersGroup(Player* player, uint8 group);
     void SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid, uint8 Index);
+    uint64 GetTargetIcon(uint8 id) const;
     void SetGroupMemberFlag(uint64 guid, bool apply, GroupMemberFlags flag);
     void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag);
 
@@ -277,6 +279,7 @@ public:
     /*********************************************************/
 
     bool isRollLootActive() const;
+    Rolls const& GetRolls() const { return RollId; }
     void SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll& r);
     void SendLootStartRollToPlayer(uint32 countDown, uint32 mapId, Player* p, bool canNeed, Roll const& r);
     void SendLootRoll(uint64 TargetGuid, uint8 RollNumber, RollType RollType, const Roll& r);
@@ -342,5 +345,6 @@ protected:
     uint32              m_maxEnchantingLevel;
     uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
     bool                _readyCheckInProgress;
+    bool                m_isDisbanding;
 };
 #endif
