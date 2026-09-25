@@ -1,0 +1,13 @@
+-- Quest 29422 "Huo, the Spirit of Fire": bind an ItemScript to the quest item
+-- "Huo's Offerings" (entry 72583) so that right-click-using it actually
+-- progresses the quest.
+--
+-- Root cause: the item's ON_USE spell is 102522 (spelltrigger_1 = 0 / ON_USE),
+-- but that spell has no entry in spell_script_names and no valid Spell.dbc record
+-- on this core, so using the item did nothing (no quest credit, no visual).
+--
+-- Fix: register ItemScript "item_huos_offerings" against item 72583. OnItemUse is
+-- dispatched from HandleUseItemOpcode (SpellHandler.cpp) before the default item-use
+-- spell is cast; returning true suppresses the broken spell 102522 and lets the
+-- script do the real work (see zone_wandering_island.cpp).
+INSERT IGNORE INTO item_script_names (Id, ScriptName) VALUES (72583, 'item_huos_offerings');
