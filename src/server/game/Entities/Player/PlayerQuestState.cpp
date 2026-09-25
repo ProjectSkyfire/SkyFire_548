@@ -1373,41 +1373,44 @@ bool Player::GiveQuestSourceItem(Quest const* quest)
     return true;
 }
 
+// True when itemId is one of the quest's own item objectives.
+static bool QuestSrcItemIsObjective(Quest const* quest, uint32 itemId)
+{
+    for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
+        if ((*citr)->Type == QUEST_OBJECTIVE_TYPE_ITEM && itemId == uint32((*citr)->ObjectId))
+            return true;
+
+    return false;
+}
+
 bool Player::TakeQuestSourceItem(uint32 questId, bool msg)
 {
     Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
-    if (quest)
+    if (!quest)
+        return true;
+
+    uint32 srcItemId = quest->GetSrcItemId();
+    if (!srcItemId)
+        return true;
+
+    // exist two cases when destroy source quest item not possible:
+    // a) non un-equippable item (equipped non-empty bag, for example)
+    // b) when quest is started from an item and item also is needed in the end as RequiredItemId
+    InventoryResult res = CanUnequipItems(srcItemId, QUEST_SOURCE_ITEM_COUNT);
+    if (res != EQUIP_ERR_OK)
     {
-        uint32 srcItemId = quest->GetSrcItemId();
-        ItemTemplate const* item = sObjectMgr->GetItemTemplate(srcItemId);
-
-        if (srcItemId > 0)
-        {
-            // exist two cases when destroy source quest item not possible:
-            // a) non un-equippable item (equipped non-empty bag, for example)
-            // b) when quest is started from an item and item also is needed in
-            // the end as RequiredItemId
-            InventoryResult res = CanUnequipItems(srcItemId, QUEST_SOURCE_ITEM_COUNT);
-            if (res != EQUIP_ERR_OK)
-            {
-                if (msg)
-                    SendEquipError(res, NULL, NULL, srcItemId);
-                return false;
-            }
-
-            if (!quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_ITEM))
-                return true;
-
-            bool destroyItem = true;
-            for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
-                if (item->StartQuest == questId && srcItemId == (*citr)->ObjectId)
-                    destroyItem = false;
-
-            if (destroyItem)
-                DestroyItemCount(srcItemId, QUEST_SOURCE_ITEM_COUNT, true, true);
-        }
+        if (msg)
+            SendEquipError(res, NULL, NULL, srcItemId);
+        return false;
     }
 
+    // case b): kept only when it starts this quest and is also one of its item objectives,
+    // because RewardQuest destroys it on turn-in instead
+    ItemTemplate const* item = sObjectMgr->GetItemTemplate(srcItemId);
+    if (item && item->StartQuest == questId && QuestSrcItemIsObjective(quest, srcItemId))
+        return true;
+
+    DestroyItemCount(srcItemId, QUEST_SOURCE_ITEM_COUNT, true, true);
     return true;
 }
 
