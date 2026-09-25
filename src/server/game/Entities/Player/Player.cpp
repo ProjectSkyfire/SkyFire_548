@@ -19,6 +19,7 @@
 #include "CharacterDatabaseCleaner.h"
 #include "CharacterServiceClient.h"
 #include "Chat.h"
+#include "ChatDelivery.h"
 #include "Common.h"
 #include "ConditionMgr.h"
 #include "CreatureAI.h"
@@ -15911,6 +15912,8 @@ void Player::Say(const std::string& text, const Language language)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_SAY, language, this, this, text);
+    if (Skyfire::Chat::Delivery::SpatialMessage(this, data, text, uint32(language),
+        sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY))) return;
     SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_SAY), true);
 }
 
@@ -15921,6 +15924,8 @@ void Player::Yell(const std::string& text, const Language language)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_YELL, language, this, this, text);
+    if (Skyfire::Chat::Delivery::SpatialMessage(this, data, text, uint32(language),
+        sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL))) return;
     SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_YELL), true);
 }
 
@@ -15931,6 +15936,8 @@ void Player::TextEmote(const std::string& text)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_EMOTE, Language::LANG_UNIVERSAL, this, this, text);
+    if (Skyfire::Chat::Delivery::SpatialMessage(this, data, text, uint32(Language::LANG_UNIVERSAL),
+        sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE), !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT))) return;
     SendMessageToSetInRange(&data, sWorld->GetFloatConfig(WorldFloatConfigs::CONFIG_LISTEN_RANGE_TEXTEMOTE), true, !GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHAT));
 }
 
@@ -15944,6 +15951,10 @@ void Player::WhisperAddon(const std::string& text, const std::string& prefix, Pl
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_WHISPER, Language::LANG_ADDON, this, this, text, 0, "", DEFAULT_LOCALE, prefix);
+    uint64 const receiverGuid = receiver->GetGUID();
+    if (Skyfire::Chat::Delivery::Submit(this, Skyfire::Chat::AudienceKind::Whisper, text, uint32(Language::LANG_ADDON), prefix,
+        data, {receiver}, [receiverGuid, prefix](Player*, Player* currentReceiver)
+    { return currentReceiver->GetGUID() == receiverGuid && currentReceiver->GetSession()->IsAddonRegistered(prefix); })) return;
     receiver->GetSession()->SendPacket(&data);
 }
 

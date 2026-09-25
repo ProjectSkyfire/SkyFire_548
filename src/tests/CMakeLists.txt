@@ -1062,3 +1062,7 @@ if(WIN32)
   target_link_libraries(hub_certificate_tests advapi32 ws2_32 mswsock)
 endif()
 add_test(NAME hub_certificate_tests COMMAND hub_certificate_tests)
+
+add_executable(chat_routing_tests ChatRoutingTests.cpp)
+target_include_directories(chat_routing_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/shared)
+add_test(NAME chat_routing_tests COMMAND chat_routing_tests)

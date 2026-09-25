@@ -5,6 +5,7 @@
 
 #ifndef SKYFIRE_GRIDNOTIFIERS_H
 #define SKYFIRE_GRIDNOTIFIERS_H
+#include <vector>
 
 #include "ObjectGridLoader.h"
 #include "UpdateData.h"
@@ -117,6 +118,7 @@ namespace Skyfire
         float i_distSq;
         uint32 team;
         Player const* skipped_receiver;
+        std::vector<Player*>* recipients = nullptr;
         MessageDistDeliverer(WorldObject* src, WorldPacket* msg, float dist, bool own_team_only = false, Player const* skipped = NULL)
             : i_source(src), i_message(msg), i_phaseMask(src->GetPhaseMask()), i_distSq(dist* dist),
             team(0), skipped_receiver(skipped)
@@ -141,7 +143,10 @@ namespace Skyfire
                 return;
 
             if (WorldSession* session = player->GetSession())
-                session->SendPacket(i_message);
+            {
+                if (recipients) recipients->push_back(player);
+                else session->SendPacket(i_message);
+            }
         }
     };
 

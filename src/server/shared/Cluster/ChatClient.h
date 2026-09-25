@@ -6,6 +6,7 @@
 #define SKYFIRE_CHAT_CLIENT_H
 #include "ChatPresence.h"
 #include "ChatWhisper.h"
+#include "ChatRouting.h"
 #include "ClusterAgent.h"
 #include <chrono>
 namespace Skyfire::Chat
@@ -17,6 +18,18 @@ namespace Skyfire::Chat
     bool QueueWhisper(Whisper message);
     struct WhisperResult { Whisper Message; bool Success = false; std::chrono::steady_clock::time_point Deadline; };
     std::vector<WhisperResult> TakeWhisperResults();
+    struct RouteResult
+    {
+        std::uint32_t Account = 0;
+        std::uint8_t Lane = 0;
+        std::uint64_t Sequence = 0;
+        bool Success = false;
+        std::vector<RouteMember> Recipients;
+        std::chrono::steady_clock::time_point Deadline;
+    };
+    bool RoutingEnabled();
+    std::uint64_t QueueRoute(AudienceProjection projection, RoutedMessage message);
+    std::vector<RouteResult> TakeRouteResults();
     bool ClientEnabled();
     void PublishPresence(std::vector<PlayerPresence> players);
 }

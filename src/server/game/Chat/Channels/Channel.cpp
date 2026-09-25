@@ -6,6 +6,8 @@
 #include "AccountMgr.h"
 #include "Channel.h"
 #include "Chat.h"
+#include "ChatDelivery.h"
+#include "ChannelMgr.h"
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -619,6 +621,22 @@ void Channel::Say(uint64 guid, std::string const& what, Language lang)
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_CHANNEL, lang, guid, guid, what, chatTag, "", "", 0, isGM, _name);
 
+    if (Player* sender = ObjectAccessor::FindPlayer(guid))
+    {
+        std::vector<Player*> recipients;
+        for (auto const& member : playersStore)
+            if (auto* player = ObjectAccessor::FindPlayer(member.first)) recipients.push_back(player);
+        std::string const channelName = _name;
+        if (Skyfire::Chat::Delivery::Submit(sender, Skyfire::Chat::AudienceKind::Channel, what, uint32(lang), "", data, recipients,
+            [channelName](Player* currentSender, Player* recipient)
+        {
+            ChannelMgr* manager = ChannelMgr::forTeam(currentSender->GetTeam());
+            Channel* channel = manager ? manager->GetChannel(channelName, currentSender, false) : nullptr;
+            if (!channel || !channel->IsOn(currentSender->GetGUID()) || !channel->IsOn(recipient->GetGUID())) return false;
+            auto const& member = channel->playersStore.at(currentSender->GetGUID());
+            return !member.IsMuted() && (member.IsModerator() || !recipient->GetSocial()->HasIgnore(currentSender->GetGUIDLow()));
+        })) return;
+    }
     SendToAll(&data, !playersStore[guid].IsModerator() ? guid : false);
 }
 

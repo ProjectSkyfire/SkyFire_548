@@ -6,6 +6,7 @@
 #include "AccountMgr.h"
 #include "CalendarMgr.h"
 #include "Chat.h"
+#include "ChatDelivery.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "Guild.h"
@@ -2732,6 +2733,20 @@ void Guild::BroadcastToGuild(WorldSession* session, bool officerOnly, std::strin
     {
         WorldPacket data;
         ChatHandler::BuildChatPacket(data, officerOnly ? ChatMsg::CHAT_MSG_OFFICER : ChatMsg::CHAT_MSG_GUILD, language, session->GetPlayer(), NULL, msg);
+        std::vector<Player*> recipients;
+        for (auto const& member : m_members) if (auto* player = member.second->FindPlayer()) recipients.push_back(player);
+        uint32 const guildId = m_id;
+        std::string const addonPrefix = std::string();
+        if (Skyfire::Chat::Delivery::Submit(session->GetPlayer(), officerOnly ? Skyfire::Chat::AudienceKind::Officer : Skyfire::Chat::AudienceKind::Guild,
+            msg, uint32(language), addonPrefix, data, recipients, [guildId, officerOnly, addonPrefix](Player* sender, Player* recipient)
+        {
+            Guild* guild = sGuildMgr->GetGuildById(guildId);
+            return guild && sender->GetGuildId() == guildId && recipient->GetGuildId() == guildId &&
+                guild->_HasRankRight(sender, officerOnly ? GR_RIGHT_OFFCHATSPEAK : GR_RIGHT_GCHATSPEAK) &&
+                guild->_HasRankRight(recipient, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&
+                !recipient->GetSocial()->HasIgnore(sender->GetGUIDLow()) &&
+                (addonPrefix.empty() || recipient->GetSession()->IsAddonRegistered(addonPrefix));
+        })) return;
         for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
             if (Player* player = itr->second->FindPlayer())
                 if (player->GetSession() && _HasRankRight(player, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&
@@ -2746,6 +2761,20 @@ void Guild::BroadcastAddonToGuild(WorldSession* session, bool officerOnly, std::
     {
         WorldPacket data;
         ChatHandler::BuildChatPacket(data, officerOnly ? ChatMsg::CHAT_MSG_OFFICER : ChatMsg::CHAT_MSG_GUILD, Language::LANG_ADDON, session->GetPlayer(), NULL, msg, 0, "", DEFAULT_LOCALE, prefix);
+        std::vector<Player*> recipients;
+        for (auto const& member : m_members) if (auto* player = member.second->FindPlayer()) recipients.push_back(player);
+        uint32 const guildId = m_id;
+        std::string const addonPrefix = prefix;
+        if (Skyfire::Chat::Delivery::Submit(session->GetPlayer(), officerOnly ? Skyfire::Chat::AudienceKind::Officer : Skyfire::Chat::AudienceKind::Guild,
+            msg, uint32(Language::LANG_ADDON), addonPrefix, data, recipients, [guildId, officerOnly, addonPrefix](Player* sender, Player* recipient)
+        {
+            Guild* guild = sGuildMgr->GetGuildById(guildId);
+            return guild && sender->GetGuildId() == guildId && recipient->GetGuildId() == guildId &&
+                guild->_HasRankRight(sender, officerOnly ? GR_RIGHT_OFFCHATSPEAK : GR_RIGHT_GCHATSPEAK) &&
+                guild->_HasRankRight(recipient, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&
+                !recipient->GetSocial()->HasIgnore(sender->GetGUIDLow()) &&
+                (addonPrefix.empty() || recipient->GetSession()->IsAddonRegistered(addonPrefix));
+        })) return;
         for (Members::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
             if (Player* player = itr->second->FindPlayer())
                 if (player->GetSession() && _HasRankRight(player, officerOnly ? GR_RIGHT_OFFCHATLISTEN : GR_RIGHT_GCHATLISTEN) &&

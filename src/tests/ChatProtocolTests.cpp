@@ -22,7 +22,9 @@ int main()
     auto encoded = Chat::EncodeMetrics(metrics);
     Cluster::ChatMetrics decoded;
     check(Chat::DecodeMetrics(encoded.Bytes, decoded) && decoded.Realms == metrics.Realms);
-    auto legacy = encoded.Bytes; legacy[0] = 2; legacy.resize(legacy.size() - 4);
+    auto legacy = encoded.Bytes; legacy[0] = 3; legacy.resize(legacy.size() - 12);
+    check(Chat::DecodeMetrics(legacy, decoded) && decoded.RoutedMessages == 0 && decoded.RoutedControls == 0);
+    legacy[0] = 2; legacy.resize(legacy.size() - 4);
     check(Chat::DecodeMetrics(legacy, decoded) && decoded.WhisperRelays == 0);
     legacy[0] = 1; legacy.resize(legacy.size() - 4);
     check(Chat::DecodeMetrics(legacy, decoded) && decoded.PresencePlayers == 0);

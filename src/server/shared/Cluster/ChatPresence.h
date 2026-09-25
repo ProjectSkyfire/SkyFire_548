@@ -66,7 +66,12 @@ namespace Skyfire::Chat
     // This is a presence lease, not authorization to write characters or execute commands.
     class PresenceDirectory
     {
-        struct Entry { PresenceSnapshot Snapshot; std::uint64_t Expires; };
+        struct Entry
+        {
+            PresenceSnapshot Snapshot;
+            std::uint64_t Expires;
+            std::map<std::uint64_t, std::size_t> PlayersByGuid;
+        };
         std::map<std::pair<std::uint32_t, std::string>, Entry> _entries;
     public:
         void Expire(std::uint64_t now)
@@ -97,16 +102,19 @@ namespace Skyfire::Chat
             if (total > 16384) return false;
             for (auto const& player : snapshot.Players)
                 if (!guids.insert(player.Guid).second || !names.insert(player.Name).second) return false;
-            _entries[key] = {std::move(snapshot), now + PresenceLeaseMs}; return true;
+            std::map<std::uint64_t, std::size_t> index;
+            for (std::size_t i = 0; i < snapshot.Players.size(); ++i) index.emplace(snapshot.Players[i].Guid, i);
+            _entries[key] = {std::move(snapshot), now + PresenceLeaseMs, std::move(index)}; return true;
         }
         PlayerPresence const* Find(std::uint32_t realm, std::string const& node, std::string const& generation,
             std::uint64_t guid, std::uint64_t incarnation, std::uint64_t now) const
         {
             auto entry = _entries.find({realm, node});
             if (entry == _entries.end() || now >= entry->second.Expires || entry->second.Snapshot.Generation != generation) return nullptr;
-            for (auto const& player : entry->second.Snapshot.Players)
-                if (player.Guid == guid && player.Incarnation == incarnation) return &player;
-            return nullptr;
+            auto found = entry->second.PlayersByGuid.find(guid);
+            if (found == entry->second.PlayersByGuid.end()) return nullptr;
+            auto const& player = entry->second.Snapshot.Players[found->second];
+            return player.Incarnation == incarnation ? &player : nullptr;
         }
         std::uint32_t Players() const
         {

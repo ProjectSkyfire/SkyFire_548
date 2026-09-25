@@ -7,6 +7,7 @@
 #include "Cluster/ChatProtocol.h"
 #include "Cluster/ChatPresence.h"
 #include "Cluster/ChatWhisper.h"
+#include "Cluster/ChatRouting.h"
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <openssl/x509.h>
@@ -25,6 +26,7 @@ namespace Skyfire::Chat
         std::set<std::shared_ptr<Session>> Sessions;
         Cluster::ChatMetrics Counters;
         PresenceDirectory Presence;
+        MessageRouter Router;
         std::chrono::steady_clock::time_point Started = std::chrono::steady_clock::now();
         bool Stopping = false;
         void Accept();
@@ -35,7 +37,7 @@ namespace Skyfire::Chat
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket> Stream;
         boost::asio::steady_timer Deadline;
         std::array<std::uint8_t, ProbeSize> Input{};
-        std::vector<std::uint8_t> Output, Body;
+        std::vector<std::uint8_t> Output, Body, Routed;
         std::array<std::uint8_t, 4> Length{};
         std::string Identity;
         bool Closed = false;
@@ -77,6 +79,12 @@ namespace Skyfire::Chat
             ++Owner.Counters.Requests;
             Output.assign(Input.begin(), Input.end()); Output[6] = 0x80;
             if (Input[7] == 3) { ++Owner.Counters.WhisperRelays; Output.insert(Output.end(), Body.begin(), Body.end()); }
+            if (Input[7] == 4)
+            {
+                Cluster::Writer length; length.U32(std::uint32_t(Routed.size()));
+                Output.insert(Output.end(), length.Bytes.begin(), length.Bytes.end());
+                Output.insert(Output.end(), Routed.begin(), Routed.end());
+            }
             auto self = shared_from_this();
             boost::asio::async_write(Stream, boost::asio::buffer(Output),
                 [self](boost::system::error_code ec, std::size_t) { self->Close(bool(ec)); });
@@ -97,7 +105,7 @@ namespace Skyfire::Chat
                     if (self->Closed) return;
                     std::uint32_t id = 0, realm = 0;
                     auto probe = self->Input;
-                    bool const presence = probe[6] == 0 && (probe[7] == 2 || probe[7] == 3);
+                    bool const presence = probe[6] == 0 && (probe[7] == 2 || probe[7] == 3 || probe[7] == 4);
                     if (presence) probe[7] = 1;
                     if (readError || !DecodeProbe(probe, id, realm) || !self->Owner.Config.Realms.count(realm))
                     { self->Close(true); return; }
@@ -112,7 +120,8 @@ namespace Skyfire::Chat
                         auto const& b = self->Length;
                         std::uint32_t length = (std::uint32_t(b[0]) << 24) | (std::uint32_t(b[1]) << 16) |
                             (std::uint32_t(b[2]) << 8) | b[3];
-                        if (lengthError || !length || length > (self->Input[7] == 3 ? MaxWhisperBytes : MaxPresenceBytes)) { self->Close(true); return; }
+                        if (lengthError || !length || length > (self->Input[7] == 3 ? MaxWhisperBytes :
+                            self->Input[7] == 4 ? MaxRoutingBytes : MaxPresenceBytes)) { self->Close(true); return; }
                         self->Body.resize(length);
                         boost::asio::async_read(self->Stream, boost::asio::buffer(self->Body),
                             [self, realm](boost::system::error_code bodyError, std::size_t)
@@ -121,6 +130,23 @@ namespace Skyfire::Chat
                             PresenceSnapshot snapshot;
                             auto now = std::uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(
                                 std::chrono::steady_clock::now().time_since_epoch()).count());
+                            if (self->Input[7] == 4)
+                            {
+                                AudienceProjection projection; RoutedMessage message;
+                                if (bodyError || !DecodeRoute(self->Body, projection, message)) { self->Close(true); return; }
+                                bool const control = projection.Kind >= AudienceKind::ChannelControl;
+                                if (!self->Owner.Router.Project(self->Owner.Presence, realm, self->Identity, std::move(projection), now) ||
+                                    !self->Owner.Router.Route(self->Owner.Presence, realm, self->Identity, message, now))
+                                { self->Close(true); return; }
+                                auto deliveries = self->Owner.Router.Take(realm, self->Identity, message.Generation, now);
+                                if (deliveries.size() != 1 || deliveries.front().Message.Sequence != message.Sequence)
+                                { self->Close(true); return; }
+                                self->Routed = EncodeRecipients(deliveries.front().Recipients).Bytes;
+                                if (control) ++self->Owner.Counters.RoutedControls;
+                                else ++self->Owner.Counters.RoutedMessages;
+                                self->Owner.Counters.RoutedRecipients += std::uint32_t(deliveries.front().Recipients.size());
+                                self->Reply(); return;
+                            }
                             if (self->Input[7] == 3)
                             {
                                 Whisper message;

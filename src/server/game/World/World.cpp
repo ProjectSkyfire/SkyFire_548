@@ -79,6 +79,7 @@ void StartEluna(bool restart);
 #include "WeatherMgr.h"
 #include "World.h"
 #include "Cluster/ChatClient.h"
+#include "ChatDelivery.h"
 #include "Platform/MapDataBootstrap.h"
 #include <algorithm>
 #include "WorldPacket.h"
@@ -2243,6 +2244,7 @@ void World::Update(uint32 diff)
     RecordTimeDiff(NULL);
     UpdateSessions(diff);
     RecordTimeDiff("UpdateSessions");
+    Skyfire::Chat::Delivery::Update();
     for (auto const& result : Skyfire::Chat::TakeWhisperResults())
         if (auto* session = FindSession(result.Message.Account)) session->CompleteChatWhisper(result);
     if (Skyfire::Chat::ClientEnabled())

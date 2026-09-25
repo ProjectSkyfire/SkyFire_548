@@ -13,6 +13,7 @@
 #include "AccountMgr.h"
 #include "CellImpl.h"
 #include "Chat.h"
+#include "ChatDelivery.h"
 #include "ChatLink.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -409,6 +410,8 @@ bool ChatHandler::ParseCommands(char const* text)
     /// ignore messages staring from many dots.
     if ((text[0] == '.' && text[1] == '.') || (text[0] == '!' && text[1] == '!'))
         return false;
+
+    if (Skyfire::Chat::Delivery::Command(m_session, fullcmd)) return true;
 
     /// skip first . or ! (in console allowed use command with . and ! and without its)
     if (text[0] == '!' || text[0] == '.')

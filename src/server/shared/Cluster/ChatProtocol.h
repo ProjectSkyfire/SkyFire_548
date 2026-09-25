@@ -14,6 +14,7 @@ namespace Skyfire::Chat
     // A separate TLS endpoint. Operation 1 is a fixed-size health probe.
     // Operation 2 carries bounded presence snapshots; see ChatPresence.h.
     // Operation 3 relays bounded whispers; see ChatWhisper.h.
+    // Operation 4 routes an authority-projected audience; see ChatRouting.h.
     // Client opcodes, commands and database mutations are not accepted.
     constexpr std::size_t ProbeSize = 16;
     inline bool DecodeProbe(std::array<std::uint8_t, ProbeSize> const& bytes, std::uint32_t& id, std::uint32_t& realm)
@@ -28,17 +29,18 @@ namespace Skyfire::Chat
     }
     inline Cluster::Writer EncodeMetrics(Cluster::ChatMetrics const& m)
     {
-        Cluster::Writer out; out.U8(3); out.U32(m.Uptime); out.U32(m.Connections);
+        Cluster::Writer out; out.U8(4); out.U32(m.Uptime); out.U32(m.Connections);
         out.U32(m.Requests); out.U32(m.Failures); out.U16(std::uint16_t(m.Realms.size()));
         for (auto realm : m.Realms) out.U32(realm);
         out.U32(m.PresencePlayers); out.U32(m.WhisperRelays);
+        out.U32(m.RoutedMessages); out.U32(m.RoutedRecipients); out.U32(m.RoutedControls);
         return out;
     }
     inline bool DecodeMetrics(std::vector<std::uint8_t> const& bytes, Cluster::ChatMetrics& m)
     {
         Cluster::Reader in(bytes); std::uint8_t version;
         std::uint16_t count;
-        if (!in.U8(version) || (version < 1 || version > 3) || !in.U32(m.Uptime) || !in.U32(m.Connections) ||
+        if (!in.U8(version) || (version < 1 || version > 4) || !in.U32(m.Uptime) || !in.U32(m.Connections) ||
             m.Connections > 128 || !in.U32(m.Requests) || !in.U32(m.Failures) ||
             !in.U16(count) || count == 0 || count > 64) return false;
         m.Realms.clear();
@@ -52,6 +54,8 @@ namespace Skyfire::Chat
         if (version >= 2 && (!in.U32(m.PresencePlayers) || m.PresencePlayers > 16384)) return false;
         m.WhisperRelays = 0;
         if (version >= 3 && !in.U32(m.WhisperRelays)) return false;
+        m.RoutedMessages = m.RoutedRecipients = m.RoutedControls = 0;
+        if (version >= 4 && (!in.U32(m.RoutedMessages) || !in.U32(m.RoutedRecipients) || !in.U32(m.RoutedControls))) return false;
         return in.End();
     }
 }

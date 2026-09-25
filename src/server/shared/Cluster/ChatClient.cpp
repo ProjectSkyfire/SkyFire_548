@@ -18,7 +18,7 @@ namespace Skyfire::Chat
 {
     namespace
     {
-        bool RouteWhispers = false;
+        bool RouteWhispers = false, RouteMessages = false;
         struct Client
         {
             Cluster::AgentOptions Options;
@@ -30,6 +30,13 @@ namespace Skyfire::Chat
             struct Queued { Whisper Message; std::chrono::steady_clock::time_point Deadline; };
             std::deque<Queued> Whispers;
             std::deque<WhisperResult> Results;
+            struct RouteQueued { AudienceProjection Projection; RoutedMessage Message; std::uint8_t Lane; std::chrono::steady_clock::time_point Deadline; };
+            std::deque<RouteQueued> Routes;
+            std::deque<RouteResult> RouteResults;
+            std::uint64_t RouteSequence = 0;
+            unsigned RoutesPending = 0;
+            std::array<unsigned, 3> LanePending{};
+            std::map<std::pair<std::uint32_t, std::uint8_t>, unsigned> RouteAccounts;
             std::map<std::uint32_t, unsigned> AccountPending;
             unsigned TotalPending = 0;
             bool Stopping = false;
@@ -56,7 +63,7 @@ namespace Skyfire::Chat
                 }
                 X509_free(certificate); return valid;
             }
-            bool Send(std::uint16_t operation, Cluster::Writer const& payload)
+            bool Send(std::uint16_t operation, Cluster::Writer const& payload, std::vector<std::uint8_t>* routed = nullptr)
             {
                 try
                 {
@@ -78,6 +85,7 @@ namespace Skyfire::Chat
                     request.U32(std::uint32_t(payload.Bytes.size()));
                     request.Bytes.insert(request.Bytes.end(), payload.Bytes.begin(), payload.Bytes.end());
                     std::vector<std::uint8_t> response(ProbeSize + (operation == 3 ? payload.Bytes.size() : 0));
+                    std::array<std::uint8_t, 4> responseLength{};
                     bool success = false;
                     resolver.async_resolve(Options.Host, std::to_string(Options.Port),
                         [&](boost::system::error_code ec, auto endpoints)
@@ -96,7 +104,17 @@ namespace Skyfire::Chat
                                     {
                                         auto expected = request.Bytes; expected.resize(ProbeSize); expected[6] = 0x80;
                                         if (operation == 3) expected.insert(expected.end(), payload.Bytes.begin(), payload.Bytes.end());
-                                        success = !received && std::equal(response.begin(), response.end(), expected.begin()); io.stop();
+                                        if (received || response != expected) { io.stop(); return; }
+                                        if (operation != 4 || !routed) { success = true; io.stop(); return; }
+                                        boost::asio::async_read(stream, boost::asio::buffer(responseLength), [&](boost::system::error_code lengthError, std::size_t)
+                                        {
+                                            std::uint32_t length = (std::uint32_t(responseLength[0]) << 24) | (std::uint32_t(responseLength[1]) << 16) |
+                                                (std::uint32_t(responseLength[2]) << 8) | responseLength[3];
+                                            if (lengthError || length < 2 || length > 65538) { io.stop(); return; }
+                                            routed->resize(length);
+                                            boost::asio::async_read(stream, boost::asio::buffer(*routed), [&](boost::system::error_code bodyError, std::size_t)
+                                            { success = !bodyError; io.stop(); });
+                                        });
                                     });
                                 });
                             });
@@ -112,21 +130,32 @@ namespace Skyfire::Chat
             void Run()
             {
                 std::uint64_t sequence = 0;
-                bool available = false, first = true;
+                bool available = false, first = true, lastRoute = false;
                 for (;;)
                 {
                     PresenceSnapshot snapshot;
                     std::optional<Queued> whisper;
+                    std::optional<RouteQueued> route;
                     {
                         std::unique_lock<std::mutex> lock(Lock);
-                        Wake.wait(lock, [&] { return Stopping || Pending.has_value() || !Whispers.empty(); });
+                        Wake.wait(lock, [&] { return Stopping || Pending.has_value() || !Whispers.empty() || !Routes.empty(); });
                         if (Stopping) return;
                         auto now = std::chrono::steady_clock::now();
                         while (!Whispers.empty() && now >= Whispers.front().Deadline)
                         { Results.push_back({std::move(Whispers.front().Message), false, Whispers.front().Deadline}); Whispers.pop_front(); }
                         if (Pending) { snapshot.Players = std::move(*Pending); Pending.reset(); }
-                        else if (!Whispers.empty()) { whisper = std::move(Whispers.front()); Whispers.pop_front(); }
+                        else if (!Routes.empty() && (Whispers.empty() || !lastRoute)) { route = std::move(Routes.front()); Routes.pop_front(); lastRoute = true; }
+                        else if (!Whispers.empty()) { whisper = std::move(Whispers.front()); Whispers.pop_front(); lastRoute = false; }
                         else continue;
+                    }
+                    if (route)
+                    {
+                        RouteResult result; result.Account = route->Message.Account; result.Lane = route->Lane; result.Sequence = route->Message.Sequence; result.Deadline = route->Deadline;
+                        std::vector<std::uint8_t> recipients;
+                        result.Success = std::chrono::steady_clock::now() < route->Deadline &&
+                            Send(4, EncodeRoute(route->Projection, route->Message), &recipients) &&
+                            std::chrono::steady_clock::now() < route->Deadline && DecodeRecipients(recipients, result.Recipients);
+                        std::lock_guard<std::mutex> lock(Lock); RouteResults.push_back(std::move(result)); continue;
                     }
                     if (whisper)
                     {
@@ -147,10 +176,11 @@ namespace Skyfire::Chat
     }
     bool StartClient(Cluster::AgentOptions options, std::string& error)
     {
-        RouteWhispers = sConfigMgr->GetBoolDefault("ChatService.Whispers", false);
+        RouteMessages = sConfigMgr->GetBoolDefault("ChatService.Messages", false);
+        RouteWhispers = RouteMessages || sConfigMgr->GetBoolDefault("ChatService.Whispers", false);
         if (!sConfigMgr->GetBoolDefault("ChatService.Enable", false))
         {
-            if (RouteWhispers) { error = "ChatService.Whispers requires ChatService.Enable; routed whispers will be unavailable."; return false; }
+            if (RouteWhispers || RouteMessages) { error = "ChatService message routing requires ChatService.Enable."; return false; }
             return true;
         }
         int const port = sConfigMgr->GetIntDefault("ChatService.Port", 54940);
@@ -208,5 +238,42 @@ namespace Skyfire::Chat
         }
         return results;
     }
-    void StopClient() { Active.reset(); RouteWhispers = false; }
+    bool RoutingEnabled() { return RouteMessages; }
+    std::uint64_t QueueRoute(AudienceProjection projection, RoutedMessage message)
+    {
+        if (!Active || !RouteMessages || projection.Members.size() > MessageRouter::MaxMembers) return 0;
+        std::lock_guard<std::mutex> lock(Active->Lock);
+        if (Active->Stopping || Active->RoutesPending >= 128) return 0;
+        std::uint8_t lane = projection.Kind >= AudienceKind::ChannelControl ? 2 : message.Language == 0xffffffffu ? 1 : 0;
+        auto account = std::make_pair(message.Account, lane);
+        auto count = Active->RouteAccounts.find(account);
+        if (Active->LanePending[lane] >= (lane == 2 ? 64u : 32u) ||
+            (count != Active->RouteAccounts.end() && count->second >= (lane == 2 ? 32u : lane == 1 ? 8u : 4u))) return 0;
+        projection.Generation = Active->Generation; projection.Revision = ++Active->RouteSequence;
+        message.Generation = Active->Generation; message.Sequence = projection.Revision;
+        message.Audience = projection.Key; message.Revision = projection.Revision;
+        AudienceProjection checkProjection; RoutedMessage checkMessage;
+        if (!DecodeRoute(EncodeRoute(projection, message).Bytes, checkProjection, checkMessage)) return 0;
+        auto sequence = message.Sequence;
+        ++Active->RouteAccounts[account]; ++Active->LanePending[lane]; ++Active->RoutesPending;
+        Active->Routes.push_back({std::move(projection), std::move(message), lane, std::chrono::steady_clock::now() + std::chrono::seconds(5)});
+        Active->Wake.notify_one(); return sequence;
+    }
+    std::vector<RouteResult> TakeRouteResults()
+    {
+        std::vector<RouteResult> results;
+        if (!Active) return results;
+        std::lock_guard<std::mutex> lock(Active->Lock);
+        while (!Active->RouteResults.empty() && results.size() < 32)
+        {
+            auto result = std::move(Active->RouteResults.front()); Active->RouteResults.pop_front();
+            if (std::chrono::steady_clock::now() >= result.Deadline) result.Success = false;
+            auto account = Active->RouteAccounts.find({result.Account, result.Lane});
+            if (account != Active->RouteAccounts.end() && !--account->second) Active->RouteAccounts.erase(account);
+            --Active->LanePending[result.Lane];
+            --Active->RoutesPending; results.push_back(std::move(result));
+        }
+        return results;
+    }
+    void StopClient() { Active.reset(); RouteWhispers = false; RouteMessages = false; }
 }

@@ -73,6 +73,7 @@ namespace Skyfire::Cluster
         std::uint32_t Uptime = 0, Connections = 0, Requests = 0, Failures = 0;
         std::vector<std::uint32_t> Realms;
         std::uint32_t PresencePlayers = 0, WhisperRelays = 0;
+        std::uint32_t RoutedMessages = 0, RoutedRecipients = 0, RoutedControls = 0;
         std::uint64_t ReceivedAt = 0;
     };
     struct Node

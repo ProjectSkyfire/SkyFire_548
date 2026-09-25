@@ -11,10 +11,10 @@
 // Format is YYYYMMDDRR where RR is the revision made to the configuration file that day.
 namespace Skyfire::ConfigVersion
 {
-    constexpr uint32 Chat = 2026092101;
+    constexpr uint32 Chat = 2026092400;
     constexpr uint32 Auth = 2026092100;
     constexpr uint32 Hub = 2026092100;
-    constexpr uint32 World = 2026272805;
+    constexpr uint32 World = 2026272806;
 }
 
 #endif

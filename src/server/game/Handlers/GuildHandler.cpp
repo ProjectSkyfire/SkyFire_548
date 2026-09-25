@@ -14,11 +14,14 @@
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "ChatDelivery.h"
 
 #include <vector>
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildQueryOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildQueryOpcode")) return;
     ObjectGuid guildGuid;
     ObjectGuid playerGuid;
 
@@ -66,6 +69,8 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildInviteOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildInviteOpcode")) return;
     uint32 nameLength = recvPacket.ReadBits(9);
     std::string invitedName = recvPacket.ReadString(nameLength);
 
@@ -77,6 +82,8 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildRemoveOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildRemoveOpcode")) return;
     ObjectGuid playerGuid;
 
     recvPacket.ReadGuidMask(playerGuid, 7, 3, 4, 2, 5, 6, 1, 0);
@@ -88,8 +95,10 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
         guild->HandleRemoveMember(this, playerGuid);
 }
 
-void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildAcceptOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildAcceptOpcode")) return;
     SF_LOG_DEBUG("guild", "CMSG_GUILD_ACCEPT [%s]", GetPlayerInfo().c_str());
 
     if (!GetPlayer()->GetGuildId())
@@ -97,8 +106,10 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
             guild->HandleAcceptMember(this);
 }
 
-void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildDeclineOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildDeclineOpcode")) return;
     SF_LOG_DEBUG("guild", "CMSG_GUILD_DECLINE [%s]", GetPlayerInfo().c_str());
 
     GetPlayer()->SetGuildIdInvited(0);
@@ -115,6 +126,8 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildRosterOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildRosterOpcode")) return;
     SF_LOG_DEBUG("guild", "CMSG_GUILD_ROSTER [%s]", GetPlayerInfo().c_str());
     recvPacket.rfinish();
 
@@ -126,6 +139,8 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildPromoteOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildPromoteOpcode")) return;
     ObjectGuid targetGuid;
 
     recvPacket.ReadGuidMask(targetGuid, 6, 0, 4, 3, 1, 7, 2, 5);
@@ -139,6 +154,8 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildDemoteOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildDemoteOpcode")) return;
     ObjectGuid targetGuid;
 
     recvPacket.ReadGuidMask(targetGuid, 3, 6, 0, 2, 7, 5, 4, 1);
@@ -152,6 +169,8 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildAssignRankOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildAssignRankOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildAssignRankOpcode")) return;
     ObjectGuid targetGuid;
 
     uint32 rankId;
@@ -167,16 +186,20 @@ void WorldSession::HandleGuildAssignRankOpcode(WorldPacket& recvPacket)
         guild->HandleSetMemberRank(this, targetGuid, _player->GetGUID(), rankId);
 }
 
-void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildLeaveOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildLeaveOpcode")) return;
     SF_LOG_DEBUG("guild", "CMSG_GUILD_LEAVE [%s]", GetPlayerInfo().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleLeaveMember(this);
 }
 
-void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleGuildDisbandOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildDisbandOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildDisbandOpcode")) return;
     SF_LOG_DEBUG("guild", "CMSG_GUILD_DISBAND [%s]", GetPlayerInfo().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
@@ -185,6 +208,8 @@ void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildMOTDOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildMOTDOpcode")) return;
     uint32 motdLength = recvPacket.ReadBits(10);
     std::string motd = recvPacket.ReadString(motdLength);
     SF_LOG_DEBUG("guild", "CMSG_GUILD_MOTD [%s]: MOTD: %s", GetPlayerInfo().c_str(), motd.c_str());
@@ -195,6 +220,8 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSetNoteOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildSetNoteOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildSetNoteOpcode")) return;
     ObjectGuid playerGuid;
 
     recvPacket.ReadGuidMask(playerGuid, 1);
@@ -242,6 +269,8 @@ void WorldSession::HandleGuildSetAchievementTracking(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildQueryRanksOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildQueryRanksOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildQueryRanksOpcode")) return;
     ObjectGuid guildGuid;
 
     recvPacket.ReadGuidMask(guildGuid, 0, 2, 5, 4, 3, 7, 6, 1);
@@ -257,6 +286,8 @@ void WorldSession::HandleGuildQueryRanksOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildAddRankOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildAddRankOpcode")) return;
     uint32 rankId;
     recvPacket >> rankId;
 
@@ -271,6 +302,8 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildDelRankOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildDelRankOpcode")) return;
     uint32 rankId;
     recvPacket >> rankId;
 
@@ -282,6 +315,8 @@ void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildChangeInfoTextOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildChangeInfoTextOpcode")) return;
     uint32 length = recvPacket.ReadBits(11);
     std::string info = recvPacket.ReadString(length);
 
@@ -318,8 +353,10 @@ void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
         Guild::SendSaveEmblemResult(this, ERR_GUILDEMBLEM_INVALIDVENDOR); // "That's not an emblem vendor!"
 }
 
-void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& /* recvPacket */)
+void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildEventLogQueryOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildEventLogQueryOpcode")) return;
     SF_LOG_DEBUG("guild", "MSG_GUILD_EVENT_LOG_QUERY [%s]", GetPlayerInfo().c_str());
 
     if (Guild* guild = GetPlayer()->GetGuild())
@@ -334,8 +371,10 @@ void WorldSession::HandleGuildBankMoneyWithdrawn(WorldPacket& /* recvPacket */)
         guild->SendMoneyInfo(this);
 }
 
-void WorldSession::HandleGuildPermissions(WorldPacket& /* recvPacket */)
+void WorldSession::HandleGuildPermissions(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildPermissions,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildPermissions")) return;
     // Null Packet
     SF_LOG_DEBUG("guild", "CMSG_GUILD_PERMISSIONS [%s]", GetPlayerInfo().c_str());
 
@@ -626,6 +665,8 @@ void WorldSession::HandleGuildQueryXPOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSetRankPermissionsOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildSetRankPermissionsOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildSetRankPermissionsOpcode")) return;
     Guild* guild = GetPlayer()->GetGuild();
     if (!guild)
     {
@@ -698,6 +739,8 @@ void WorldSession::HandleGuildRequestMaxDailyXP(WorldPacket& recvPacket)
 
 void WorldSession::HandleAutoDeclineGuildInvites(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleAutoDeclineGuildInvites,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleAutoDeclineGuildInvites")) return;
     uint8 enable = recvPacket.ReadBit();
     GetPlayer()->ApplyModFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_AUTO_DECLINE_GUILD, enable);
 }
@@ -737,6 +780,8 @@ void WorldSession::HandleGuildRewardsQueryOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildQueryNewsOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildQueryNewsOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildQueryNewsOpcode")) return;
     recvPacket.rfinish();
 
     SF_LOG_DEBUG("guild", "CMSG_GUILD_QUERY_NEWS [%s]", GetPlayerInfo().c_str());
@@ -746,6 +791,8 @@ void WorldSession::HandleGuildQueryNewsOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildNewsUpdateStickyOpcode(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildNewsUpdateStickyOpcode,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildNewsUpdateStickyOpcode")) return;
     uint32 newsId;
     bool sticky;
     ObjectGuid guid;
@@ -764,6 +811,8 @@ void WorldSession::HandleGuildNewsUpdateStickyOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildSetGuildMaster,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildSetGuildMaster")) return;
     uint8 nameLength = recvPacket.ReadBits(9);
     std::string playerName = recvPacket.ReadString(nameLength);
 
@@ -773,8 +822,10 @@ void WorldSession::HandleGuildSetGuildMaster(WorldPacket& recvPacket)
         guild->HandleSetNewGuildMaster(this, playerName);
 }
 
-void WorldSession::HandleGuildReplaceGuildMaster(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleGuildReplaceGuildMaster(WorldPacket& recvPacket)
 {
+    if (Skyfire::Chat::Delivery::Control(this, recvPacket, &WorldSession::HandleGuildReplaceGuildMaster,
+        Skyfire::Chat::AudienceKind::GuildControl, "HandleGuildReplaceGuildMaster")) return;
     if (Guild* guild = GetPlayer()->GetGuild())
         guild->HandleReplaceGuildMaster(this);
 }

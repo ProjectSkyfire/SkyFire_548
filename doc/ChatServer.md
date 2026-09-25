@@ -1,12 +1,12 @@
 # Native clustered chat daemon
 
-This implementation provides the daemon, hub integration and optional world
-presence publication. An optional relay carries ordinary client whispers through
-chatserver and back
-to their authoritative world. Other player chat still runs in worldserver. It does
-**not** yet deliver across world nodes, run GM commands,
-own guild state, or write a database. Its `ready` status means its authenticated
-health endpoint is available and the hub acknowledged its registration.
+The daemon provides realm-scoped presence, message routing and admission of
+channel/guild administration and in-game GM requests. `ChatService.Messages`
+opts worlds into the broader route; the legacy whisper-only option remains.
+World adapters retain client packets, final gameplay/RBAC checks and durable
+social/guild/channel state. Cross-world fanout and durable ownership extraction
+are not implemented yet. See the September 24 routing section below for activation,
+limits and the acceptance matrix. Native compilation and live validation are pending.
 
 ## Build and installation
 
@@ -43,7 +43,7 @@ the managed data-service columns from `003_managed_data_services.sql` are presen
   `Chat.RequestTimeout` bounds the entire handshake/probe/reply (1–30 seconds).
 
 No DBC/DB2 data files are required for this phase. Region/channel eligibility will
-use the shared client-data foundation when gameplay routing is implemented.
+remain validated by the world adapter using its client-data stores.
 
 ## Hub management
 
@@ -70,7 +70,7 @@ its configuration before starting.
 
 Managed chat can restart while worlds are online. Coordinated Restart all also
 includes managed chat nodes. Unmanaged chat nodes must be operated by their own
-supervisor. Routing drain is not exposed yet because no gameplay routing exists.
+supervisor. Routing drain is not exposed yet; stop/restart interrupts pending requests with bounded failure.
 
 Independent server-health refresh shows uptime, configured realms, connections,
 service requests, published player presence, accepted whisper relays and failures. Metrics expire after 15 seconds; an expired metric is
@@ -201,3 +201,80 @@ Native compilation and live TLS/lifecycle validation remain required before
 deploying this phase. Test at least two realms, disallowed certificates, unknown
 realms, connection exhaustion, hub loss/recovery, managed restart and backup
 admission. In-game whisper relay acceptance remains pending compilation and a two-player test.
+
+## Player routing and administrative admission (September 24)
+
+`ChatService.Messages = 1` opts a world into the new routing path. It requires
+`ChatService.Enable = 1` and includes the existing whisper relay even when the
+older `ChatService.Whispers` option is zero. Standalone defaults remain disabled.
+Rebuild/install **hubserver, worldserver and chatserver together**, then restart
+chat and the worlds. The hub must accept version 4 chat metrics. No SQL migration
+or new database credentials are needed for this routing stage.
+
+The world publishes an authenticated, per-message audience projection. Chatserver
+checks realm, certificate identity, world generation, audience revision, account,
+player incarnation and speaking rights, then selects current listening members.
+The reply contains recipient IDs and session incarnations, not client packets.
+World applies current permissions again and encodes/delivers the existing client
+packet. A lost reply or timeout does not fall back to an uncontrolled local send.
+No request is retried as a new message. A rejected request reports failure.
+
+Covered player-message paths:
+
+- Say, yell and text chat emotes, preserving spatial visibility, phase, shared
+  vision, vehicle/farsight and faction selection in the gameplay authority.
+- Party/subgroup, raid, raid warning and instance/battleground group paths.
+- Guild/officer speech and listening rights, ignores and addon-prefix filtering.
+- Public/private channel messages with current membership, mute and ignore checks.
+- Existing ordinary whispers and addon whisper/group/guild paths. Binary addon
+  text stays byte-exact and has a separate admission budget.
+
+Channel handlers and non-economic guild administration now request chat admission
+before invoking their authoritative world adapter. This includes channel joins,
+passwords, ownership/moderation, mute/kick/ban operations and lists; guild roster,
+invites, membership, ranks, notes, MOTD/info, leadership and news operations.
+In-game GM commands follow the same route and retain the player's identity and
+RBAC checks. Console/hub commands remain on the existing operator control path.
+Sensitive command arguments, passwords and raw client packets stay in a bounded
+world-local pending request; chat receives the operation category/name. Nothing
+executes after the actor's session has changed. A guild membership/invitation
+change requires the operator to retry instead of applying an old request.
+
+Human messages, addon messages and administration have separate pending limits;
+requests expire after five seconds. All network I/O stays on the client worker.
+The world consumes at most 32 fanout/control replies per tick. Spatial recipients
+are collected with the existing grid visitor and rechecked before delivery.
+Server health exposes routed messages, selected recipients and admitted controls.
+These count service decisions, not confirmed client delivery or committed mutations.
+
+### Ownership and remaining extraction
+
+This stage routes same-world audiences within each served realm; it is **not**
+cross-world fanout. Channel ownership/moderation state, guild/social state and
+persistence still reside in worldserver's adapters. Moving that state into the
+daemon requires typed character-service persistence, durable receipts/outbox,
+restart recovery and fenced domain ownership. It must not be implemented by giving
+chatserver unrestricted character-database credentials or by allowing two writers.
+Guild bank, inventory, progression, gameplay effects, scripted NPC dialogue and
+animation emotes remain with their existing authoritative services.
+
+The complete chat-service extraction is therefore not finished by enabling this
+switch. Cross-world delivery, service-owned channel/guild state, friends/ignore
+projections and chat standby remain explicit follow-up gates.
+
+### Build and live acceptance
+
+Native compilation is performed by the operator. Run `chat_protocol_tests`,
+`chat_presence_tests`, `chat_whisper_tests` and `chat_routing_tests` after rebuilding.
+The routing suite exercises realm/session isolation, officer confidentiality,
+revision invalidation, duplicate rejection, deadlines, binary addon text and
+administrative recipient constraints.
+
+With routing enabled, verify counters increase for each message/admin surface,
+then stop chat: new routed operations must fail without local execution. Repeat
+with a rank change, mute, kick, guild leave, logout/relogin and world fallback while
+a reply is pending. Check raid subgroups, officer-only listeners, addon prefixes,
+channel password secrecy and two distinct realms. Test authorized and unauthorized
+GM commands and confirm console/hub maintenance commands remain usable. Finally
+repeat with routing disabled to validate standalone behavior. A successful prior
+local-chat test does not establish this new path's acceptance.

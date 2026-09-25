@@ -2,7 +2,7 @@
 #   SkyFire World Server configuration file    #
 ################################################
 [worldserver]
-ConfVersion = 2026272805
+ConfVersion = 2026272806
 
 ###################################################################################################
 # SECTION INDEX
@@ -3447,3 +3447,9 @@ ChatService.Whispers = 0
 
 # Signed revocation list populated by hub PKI/enrollment. Empty retains manual TLS.
 Cluster.CRL = ""
+
+# Route player messages and channel/guild administration through chatserver.
+# Requires ChatService.Enable and matching world/chat/hub binaries. Includes whispers.
+# World retains final spatial/rank/RBAC checks and current persistence ownership.
+# Failed/expired requests are not retried locally. Restart world after changing.
+ChatService.Messages = 0

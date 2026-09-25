@@ -7,6 +7,7 @@
 #include "CellImpl.h"
 #include "ChannelMgr.h"
 #include "Chat.h"
+#include "ChatDelivery.h"
 #include "Cluster/ChatClient.h"
 #include "Common.h"
 #include "DatabaseEnv.h"
@@ -406,7 +407,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, ChatMsg(type), Language(lang), _player, NULL, msg);
-            group->BroadcastPacket(&data, false, group->GetMemberGroup(GetPlayer()->GetGUID()));
+            if (!Skyfire::Chat::Delivery::GroupMessage(sender, group, data, msg, uint32(lang), "",
+                Skyfire::Chat::AudienceKind::Party, group->GetMemberGroup(sender->GetGUID())))
+                group->BroadcastPacket(&data, false, group->GetMemberGroup(sender->GetGUID()));
         } break;
         case ChatMsg::CHAT_MSG_GUILD:
         {
@@ -451,7 +454,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, ChatMsg(type), lang, _player, NULL, msg);
-            group->BroadcastPacket(&data, false);
+            if (!Skyfire::Chat::Delivery::GroupMessage(sender, group, data, msg, uint32(lang), "", Skyfire::Chat::AudienceKind::Raid))
+                group->BroadcastPacket(&data, false);
         } break;
         case ChatMsg::CHAT_MSG_RAID_WARNING:
         {
@@ -464,7 +468,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             WorldPacket data;
             //in battleground, raid warning is sent only to players in battleground - code is ok
             ChatHandler::BuildChatPacket(data, ChatMsg::CHAT_MSG_RAID_WARNING, lang, _player, NULL, msg);
-            group->BroadcastPacket(&data, false);
+            if (!Skyfire::Chat::Delivery::GroupMessage(sender, group, data, msg, uint32(lang), "", Skyfire::Chat::AudienceKind::RaidWarning))
+                group->BroadcastPacket(&data, false);
         } break;
         case ChatMsg::CHAT_MSG_INSTANCE:
         case ChatMsg::CHAT_MSG_INSTANCE_LEADER:
@@ -481,7 +486,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, (ChatMsg)type, Language(lang), _player, NULL, msg);
-            group->BroadcastPacket(&data, false);
+            if (!Skyfire::Chat::Delivery::GroupMessage(sender, group, data, msg, uint32(lang), "", Skyfire::Chat::AudienceKind::Instance))
+                group->BroadcastPacket(&data, false);
         } break;
         case ChatMsg::CHAT_MSG_CHANNEL:
         {
@@ -653,7 +659,8 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, type, Language::LANG_ADDON, sender, NULL, message, 0U, "", DEFAULT_LOCALE, prefix);
-            group->BroadcastAddonMessagePacket(&data, prefix, false);
+            if (!Skyfire::Chat::Delivery::GroupMessage(sender, group, data, message, uint32(Language::LANG_ADDON), prefix,
+                Skyfire::Chat::AudienceKind::Instance)) group->BroadcastAddonMessagePacket(&data, prefix, false);
             break;
         }
         case ChatMsg::CHAT_MSG_GUILD:
@@ -685,7 +692,10 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
 
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, type, Language::LANG_ADDON, sender, NULL, message, 0U, "", DEFAULT_LOCALE, prefix);
-            group->BroadcastAddonMessagePacket(&data, prefix, true, -1, group->GetMemberGroup(sender->GetGUID()));
+            int const subgroup = type == ChatMsg::CHAT_MSG_PARTY ? group->GetMemberGroup(sender->GetGUID()) : -1;
+            if (!Skyfire::Chat::Delivery::GroupMessage(sender, group, data, message, uint32(Language::LANG_ADDON), prefix,
+                type == ChatMsg::CHAT_MSG_PARTY ? Skyfire::Chat::AudienceKind::Party : Skyfire::Chat::AudienceKind::Raid,
+                subgroup, true)) group->BroadcastAddonMessagePacket(&data, prefix, true, subgroup);
             break;
         }
         default:

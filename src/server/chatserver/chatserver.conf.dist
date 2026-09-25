@@ -1,9 +1,9 @@
 # This file is part of Project SkyFire https://www.projectskyfire.org.
 # See LICENSE.md file for Copyright information
-# Native chat presence: no gameplay messages or durable state yet.
+# Native chat routing and presence. Durable social/guild state remains world-owned.
 [chatserver]
 # YYYYMMDDRR. Compare updated defaults before raising this serial in a live config.
-ConfVersion = 2026092101
+ConfVersion = 2026092400
 Chat.BindIP = "127.0.0.1"
 Chat.Port = 54940
 Chat.MaxConnections = 32
