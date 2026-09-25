@@ -140,7 +140,7 @@ public:
             {
                 uint8 gender = target->getGender();
                 uint32 spellId = SPELL_TRICK_BUFF;
-                switch (std::rand() % 5)
+                switch (std::rand() % 6)
                 {
                 case 1:
                     spellId = gender ? SPELL_LEPER_GNOME_COSTUME_FEMALE : SPELL_LEPER_GNOME_COSTUME_MALE;
@@ -357,7 +357,7 @@ public:
                     if (target->HasAura(spells[i]))
                         return;
 
-                target->CastSpell(target, spells[std::rand() % 3], true);
+                target->CastSpell(target, spells[std::rand() % 4], true);
             }
         }
 
