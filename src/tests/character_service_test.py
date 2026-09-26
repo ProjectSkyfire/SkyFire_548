@@ -144,7 +144,13 @@ class DatabaseTests(unittest.TestCase):
             cursor.execute('CREATE TABLE `'+cls.schema+'`.binary_fixture (payload BLOB) ENGINE=InnoDB')
         with cls.admin.cursor() as cursor:
             cursor.execute('USE `'+cls.schema+'`')
-            migration = (ROOT/'sql/pending_updates/characters/001_social_domain_store.sql').read_text()
+            # CI may promote the pending migration to a dated release filename.
+            migrations = [path.read_text() for folder in ('pending_updates', 'updates')
+                          for path in (ROOT/'sql'/folder/'characters').glob('*.sql')
+                          if 'CREATE TABLE character_social_owners (' in path.read_text()]
+            if len(migrations) != 1:
+                raise RuntimeError('Expected one social-domain schema migration')
+            migration = migrations[0]
             for statement in migration.split(';'):
                 if statement.strip(): cursor.execute(statement)
         cls.config=dict(realm_id=1,mysql_host=host,mysql_port=int(port),mysql_user=user,
