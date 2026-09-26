@@ -1676,6 +1676,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     sObjectAccessor->AddObject(pCurrChar);
+    // Queue presence before the client's initial channel/guild requests. The chat
+    // worker publishes this snapshot before processing queued routing requests.
+    sWorld->PublishChatPresence();
     //SF_LOG_DEBUG("Player %s added to Map.", pCurrChar->GetName().c_str());
 
     if (pCurrChar->GetGuildId() != 0)

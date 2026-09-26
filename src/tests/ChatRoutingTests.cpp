@@ -10,6 +10,25 @@ int main()
     using namespace Skyfire::Chat;
     auto check = [](bool ok) { if (!ok) throw std::runtime_error("Chat routing invariant failed"); };
     std::string generation(64, 'a');
+    // Login channel requests require the new session's presence first; accepting
+    // unknown sessions would bypass the service's identity checks.
+    {
+        PresenceDirectory loginPresence;
+        MessageRouter loginRouter;
+        PresenceSnapshot login{generation, 1, {{10, 100, 1, "Sender"}}};
+        AudienceProjection join{generation, "channel-control", AudienceKind::ChannelControl, 1,
+            {{100, 1, true, true}}};
+        RoutedMessage request;
+        request.Generation = generation; request.Audience = join.Key;
+        request.Sequence = request.Revision = 1;
+        request.Sender = 100; request.Incarnation = 1; request.Account = 10;
+        request.Text = "HandleJoinChannel";
+        check(!loginRouter.Project(loginPresence, 1, "world-a", join, 100));
+        check(loginPresence.Replace(1, "world-a", login, 101));
+        check(loginRouter.Project(loginPresence, 1, "world-a", join, 102));
+        check(loginRouter.Route(loginPresence, 1, "world-a", request, 103));
+        check(loginRouter.Take(1, "world-a", generation, 104).size() == 1);
+    }
     PresenceDirectory presence;
     PresenceSnapshot players{generation, 1, {{10, 100, 1, "Sender"}, {20, 200, 2, "Officer"}, {30, 300, 3, "Member"}}};
     check(presence.Replace(1, "world-a", players, 100));

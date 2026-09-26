@@ -187,7 +187,7 @@ namespace Skyfire::Chat
         int const realm = sConfigMgr->GetIntDefault("RealmID", 0);
         if (Active || !options.Enabled || realm <= 0 || port < 1 || port > 65535)
         { error = "Chat presence requires cluster TLS, a positive explicit RealmID and a valid endpoint."; return false; }
-        options.Host = sConfigMgr->GetStringDefault("ChatService.Host", "localhost"); options.Port = std::uint16_t(port);
+        options.Host = sConfigMgr->GetStringDefault("ChatService.Host", "127.0.0.1"); options.Port = std::uint16_t(port);
         if (options.Host.empty() || options.Host.size() > 255 || !Cluster::ValidUtf8(options.Host))
         { error = "Invalid ChatService.Host."; return false; }
         auto client = std::make_unique<Client>(); client->Options = std::move(options); client->Realm = std::uint32_t(realm);

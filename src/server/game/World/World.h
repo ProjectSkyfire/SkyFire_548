@@ -687,6 +687,7 @@ public:
     void Update(uint32 diff);
 
     void UpdateSessions(uint32 diff);
+    void PublishChatPresence();
     /// Set a server rate (see #Rates)
     void setRate(Rates rate, float value) { rate_values[uint8(rate)] = value; }
     /// Get a server rate (see #Rates)

@@ -2146,6 +2146,23 @@ void World::LoadAutobroadcasts()
     }
 }
 
+void World::PublishChatPresence()
+{
+    if (!Skyfire::Chat::ClientEnabled()) return;
+    _chatPresenceTimer = 5000;
+    std::vector<Skyfire::Chat::PlayerPresence> players;
+    for (auto const& entry : m_sessions)
+    {
+        auto* player = entry.second->GetPlayer();
+        if (player && player->IsInWorld())
+        {
+            if (players.size() > Skyfire::Chat::MaxPresencePlayers) break;
+            players.push_back({entry.second->GetAccountId(), player->GetGUID(), entry.second->GetChatIncarnation(), player->GetName()});
+        }
+    }
+    Skyfire::Chat::PublishPresence(std::move(players));
+}
+
 /// Update the World !
 void World::Update(uint32 diff)
 {
@@ -2252,18 +2269,7 @@ void World::Update(uint32 diff)
         if (diff < _chatPresenceTimer) _chatPresenceTimer -= diff;
         else
         {
-            _chatPresenceTimer = 5000;
-            std::vector<Skyfire::Chat::PlayerPresence> players;
-            for (auto const& entry : m_sessions)
-            {
-                auto* player = entry.second->GetPlayer();
-                if (player && player->IsInWorld())
-                {
-                    if (players.size() > Skyfire::Chat::MaxPresencePlayers) break;
-                    players.push_back({entry.second->GetAccountId(), player->GetGUID(), entry.second->GetChatIncarnation(), player->GetName()});
-                }
-            }
-            Skyfire::Chat::PublishPresence(std::move(players));
+            PublishChatPresence();
         }
     }
 

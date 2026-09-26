@@ -3438,7 +3438,9 @@ MapData.PrefetchTilesPerSecond = 1
 
 # Optional realm-scoped presence publisher. Chat gameplay routing is not enabled yet.
 ChatService.Enable = 0
-ChatService.Host = "localhost"
+# Match chatserver's default IPv4 listener; localhost may try IPv6 first and delay every request.
+# Remote endpoints must also match the chat certificate's subject alternative names.
+ChatService.Host = "127.0.0.1"
 ChatService.Port = 54940
 ChatService.NodeKey = "skyfire-chat-primary"
 # Relay ordinary client whispers through chatserver. Requires matching world/chat builds
