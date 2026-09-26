@@ -181,3 +181,31 @@ python src/server/characterserver/export_catalog.py --source . --output src/serv
 
 Ship the generated catalog and matching world binary together. Native compilation,
 live login/save/logout, and fallback validation are still required before deployment.
+
+
+## Database connection health and recovery
+
+The daemon checks its MySQL connection and advisory ownership lock every five
+seconds on the same serialized database worker used by character operations.
+This also keeps idle connections active while worlds are stopped. No concurrent
+health query can run inside a character transaction.
+
+A lost connection or ownership lock marks the service unavailable and closes
+existing world RPC connections. Recovery waits for their session accounting to
+drain, opens a new database connection, reacquires the exclusive advisory lock,
+and reapplies the session settings and schema checks before becoming ready. A
+second character daemon holding that lock prevents recovery. World connections
+must perform fresh authenticated handshakes and pass the existing epoch checks.
+
+A failed BEGIN is handled like a failed query or COMMIT. The service never
+automatically replays a failed write. Save receipts remain committed atomically
+with their writes, so a matching request ID can establish that an uncertain
+commit already occurred without applying it twice. This does not provide seamless
+world survival: the existing native world client stops on an uncertain character
+operation to prevent gameplay continuing on unsaved state.
+
+Validation includes disposable MySQL tests for idle timeout, killed connections,
+active-session draining, competing ownership, and lost commit acknowledgements.
+The test runner accepts --database-config pointing to a private config containing
+VerificationDatabaseInfo (or HubDatabaseInfo); tests create and remove only their
+randomly named skyfire_character_test_* fixture schema.

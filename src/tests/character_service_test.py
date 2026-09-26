@@ -14,6 +14,7 @@ import ssl
 import struct
 import sys
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -115,9 +116,9 @@ class DatabaseTests(unittest.TestCase):
             raise unittest.SkipTest('Pass --database-config for disposable MySQL tests')
         import pymysql
         text=Path(cls.config_path).read_text(encoding='utf-8-sig')
-        value=re.search(r'^\s*HubDatabaseInfo\s*=\s*"([^"\r\n]+)"',text,re.M)
+        value=re.search(r'^\s*(?:Hub|Verification)DatabaseInfo\s*=\s*"([^"\r\n]+)"',text,re.M)
         if not value:
-            raise RuntimeError('Expected HubDatabaseInfo for fixture server credentials')
+            raise RuntimeError('Expected HubDatabaseInfo or VerificationDatabaseInfo for fixture server credentials')
         host,port,user,password,_=value[1].split(';')
         cls.schema='skyfire_character_test_'+secrets.token_hex(8)
         cls.admin=pymysql.connect(host=host,port=int(port),user=user,password=password,autocommit=True)
@@ -139,6 +140,71 @@ class DatabaseTests(unittest.TestCase):
             with cls.admin.cursor() as cursor:
                 cursor.execute('DROP DATABASE `'+cls.schema+'`')
             cls.admin.close()
+
+    def test_idle_timeout_recovers_with_fresh_ownership(self):
+        db = CharacterDatabase(self.config, SERVICE/'statements.json')
+        try:
+            self.assertTrue(db.health())
+            with db.db.cursor() as cursor:
+                cursor.execute('SET SESSION wait_timeout=1')
+            time.sleep(2)
+            self.assertFalse(db.health())
+            self.assertTrue(db.failed)
+            self.assertTrue(db.health())
+            self.assertFalse(db.failed)
+        finally:
+            db.close()
+
+    def test_lost_connection_drains_sessions_and_respects_other_owner(self):
+        db = CharacterDatabase(self.config, SERVICE/'statements.json')
+        other = None
+        instance = secrets.token_hex(16)
+        hello = b'\2'+u32(1)+blob(instance)+blob(db.catalog_hash)
+        try:
+            _, epoch = db.attach('world-a', hello)
+            with self.admin.cursor() as cursor:
+                cursor.execute('KILL CONNECTION %s', (db.db.thread_id(),))
+            with self.assertRaises(Exception):
+                db.execute('world-a', instance, epoch, request(2, [raw('SELECT 1')]))
+            self.assertTrue(db.failed)  # Failed BEGIN is covered too.
+            self.assertFalse(db.health())  # Attached session prevents recovery.
+            db.detach(instance)
+            other = CharacterDatabase(self.config, SERVICE/'statements.json')
+            self.assertFalse(db.health())  # Another service owns the advisory lock.
+            other.close(); other = None
+            self.assertTrue(db.health())
+            _, epoch = db.attach('world-a', hello)
+            self.assertEqual(rows(db.execute('world-a', instance, epoch, request(2, [raw('SELECT 1')]))), [[b'1']])
+            db.detach(instance)
+        finally:
+            if other: other.close()
+            db.close()
+
+    def test_uncertain_commit_receipt_prevents_double_write(self):
+        import pymysql
+        db = CharacterDatabase(self.config, SERVICE/'statements.json')
+        instance = secrets.token_hex(16)
+        hello = b'\2'+u32(1)+blob(instance)+blob(db.catalog_hash)
+        try:
+            _, epoch = db.attach('world-a', hello)
+            db.execute('world-a', instance, epoch, request(1, [raw('UPDATE characters SET money=0 WHERE guid=1')]))
+            save = request(1, [raw('UPDATE characters SET money=money+1 WHERE guid=1')])
+            original = db.db.commit
+            def lost_ack():
+                original()
+                raise pymysql.OperationalError(2013, 'simulated lost commit acknowledgement')
+            db.db.commit = lost_ack
+            with self.assertRaises(pymysql.OperationalError):
+                db.execute('world-a', instance, epoch, save)
+            self.assertTrue(db.failed)
+            db.detach(instance)
+            self.assertTrue(db.health())
+            _, epoch = db.attach('world-a', hello)
+            db.execute('world-a', instance, epoch, save)
+            self.assertEqual(rows(db.execute('world-a', instance, epoch, request(2, [raw('SELECT money FROM characters WHERE guid=1')]))), [[b'1']])
+            db.detach(instance)
+        finally:
+            db.close()
 
     def test_transactions_fencing_and_recovery(self):
         db=CharacterDatabase(self.config,SERVICE/'statements.json')

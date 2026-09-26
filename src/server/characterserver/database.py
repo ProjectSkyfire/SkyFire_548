@@ -36,12 +36,20 @@ class CharacterDatabase:
         self.catalog = {entry['id']: entry['sql'] for entry in entries}
         self.statement_ids = {entry['name']: entry['id'] for entry in entries}
         self.catalog_hash = hashlib.sha256(b''.join(u32(key) + blob(value) for key,value in sorted(self.catalog.items()))).hexdigest()
-        self.db = connector(host=config['mysql_host'], port=config.get('mysql_port',3306),
+        self.connector = connector
+        self.cursor_options = cursor_options
+        self.config = dict(config)
+        self.ownership_lock = 'skyfire-character:' + hashlib.sha256(config['mysql_database'].encode()).hexdigest()[:40]
+        self.db = self._open()
+
+    def _open(self):
+        config = self.config
+        db = self.connector(host=config['mysql_host'], port=config.get('mysql_port',3306),
                             user=config['mysql_user'], password=config['mysql_password'],
                             database=config['mysql_database'], charset='utf8mb4', binary_prefix=True, autocommit=True,
-                            connect_timeout=5, read_timeout=30, write_timeout=30, **cursor_options)
+                            connect_timeout=5, read_timeout=30, write_timeout=30, **self.cursor_options)
         try:
-            with self.db.cursor() as cursor:
+            with db.cursor() as cursor:
                 cursor.execute("SELECT GET_LOCK(%s,0)", ('skyfire-character:' + hashlib.sha256(config['mysql_database'].encode()).hexdigest()[:40],))
                 if one(cursor)[0] != 1:
                     raise RuntimeError('Another character service owns this database')
@@ -64,11 +72,52 @@ class CharacterDatabase:
                     digest CHAR(64) CHARACTER SET ascii NOT NULL,
                     committed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB''')
         except BaseException:
-            self.db.close()
+            db.close()
             raise
+
+        return db
 
     def close(self):
         self.db.close()
+
+    def health(self):
+        """Keep the ownership connection alive. Never reconnect inside a transaction."""
+        with self.lock:
+            if self.failed:
+                # Old RPC sessions must drain before a new ownership connection exists.
+                if self.sessions:
+                    return False
+                try:
+                    self.db = self._open()
+                except Exception:
+                    return False
+                self.failed = False
+            try:
+                with self.db.cursor() as cursor:
+                    cursor.execute('SELECT IS_USED_LOCK(%s) = CONNECTION_ID()', (self.ownership_lock,))
+                    if one(cursor) != (1,):
+                        raise RuntimeError('Character database ownership lost')
+                return True
+            except Exception:
+                self._disconnect()
+                return False
+
+    def _disconnect(self):
+        self.failed = True
+        try:
+            self.db.close()
+        except Exception:
+            pass
+
+    def _rollback(self, error):
+        # A failed BEGIN/COMMIT can leave the outcome unknown. Never replay writes.
+        if error.args and error.args[0] in (0, 2006, 2013, 2055):
+            self._disconnect()
+            return
+        try:
+            self.db.rollback()
+        except Exception:
+            self._disconnect()
 
     def attach(self, peer, request):
         reader = Reader(request)
@@ -81,8 +130,8 @@ class CharacterDatabase:
         with self.lock:
             if self.failed:
                 raise RuntimeError('Character database unavailable')
-            self.db.begin()
             try:
+                self.db.begin()
                 with self.db.cursor() as cursor:
                     cursor.execute('SELECT instance FROM character_service_retired WHERE instance=%s', (instance,))
                     if one(cursor):
@@ -100,8 +149,8 @@ class CharacterDatabase:
                 self.db.commit()
                 self.sessions[instance] = self.sessions.get(instance,0) + 1
                 return instance, epoch
-            except BaseException:
-                self.db.rollback()
+            except BaseException as error:
+                self._rollback(error)
                 raise
 
     def detach(self, instance):
@@ -249,8 +298,8 @@ class CharacterDatabase:
         with self.lock:
             if self.failed:
                 raise RuntimeError('Character database unavailable')
-            self.db.begin()
             try:
+                self.db.begin()
                 with self.db.cursor() as cursor:
                     # Read-only calls must not execute a write hidden behind the query opcode.
                     if operation == 2 and any(not re.match(r'\s*SELECT\b', sql, re.I) for sql,_ in statements):
@@ -283,9 +332,6 @@ class CharacterDatabase:
                         cursor.execute('INSERT INTO character_service_commits(request_id,instance,digest) VALUES(%s,%s,%s)', (request_id,instance,digest))
                 self.db.commit()  # Save and idempotency receipt commit together, before acknowledgement.
                 return answer
-            except BaseException:
-                try:
-                    self.db.rollback()
-                except Exception:
-                    self.failed = True
+            except BaseException as error:
+                self._rollback(error)
                 raise

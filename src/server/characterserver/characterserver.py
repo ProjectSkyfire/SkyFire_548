@@ -84,6 +84,26 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
     registered_until = 0.0
     clients, tasks = set(), set()
     metrics = Metrics()
+    async def database_health():
+        previous = True
+        while not stop.is_set():
+            healthy = await sql(db.health)
+            if not healthy:
+                # Force fresh handshakes after ownership is reacquired; existing
+                # world epochs must never survive an unobserved database loss.
+                for writer in list(clients):
+                    writer.close()
+                if channel:
+                    channel.set_ready(False)
+            if healthy != previous:
+                print('Character database recovered; fresh world handshakes required.' if healthy else
+                      'Character database unavailable; closing clients before ownership recovery.', flush=True)
+            previous = healthy
+            try:
+                await asyncio.wait_for(stop.wait(), 5)
+            except asyncio.TimeoutError:
+                pass
+    health_task = asyncio.create_task(database_health())
     supervision = asyncio.create_task(channel.run(stop,lambda: not clients and not metrics.pending)) if channel else None
     async def client(reader,writer):
         task = asyncio.current_task()
@@ -187,6 +207,7 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
                     with contextlib.suppress(Exception):
                         await asyncio.wait_for(writer.wait_closed(),2)
     finally:
+        stop.set()
         registered_until=0.0
         if server:
             server.close()
@@ -195,6 +216,7 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
             writer.close()
         if tasks:
             await asyncio.gather(*list(tasks),return_exceptions=True)
+        await health_task
         executor.shutdown(wait=True)
         db.close()
         if supervision:
