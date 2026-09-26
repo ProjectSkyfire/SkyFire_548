@@ -3,7 +3,7 @@
 # Native chat routing and presence. Durable social/guild state remains world-owned.
 [chatserver]
 # YYYYMMDDRR. Compare updated defaults before raising this serial in a live config.
-ConfVersion = 2026092400
+ConfVersion = 2026092600
 Chat.BindIP = "127.0.0.1"
 Chat.Port = 54940
 Chat.MaxConnections = 32
@@ -35,3 +35,12 @@ Logger.root = 2,Console
 
 # Signed revocation list populated by hub PKI/enrollment. Empty retains manual TLS.
 Cluster.CRL = ""
+
+# Native persistence/recovery foundation. This does not enable channel/guild cutover.
+# Leave disabled until legacy writers and client adapters are migrated.
+# Requires the social schema and this chat identity in allowed_chat_nodes at each
+# realm's character service. Configure one numeric TLS endpoint for EVERY Chat.Realms entry.
+Chat.Persistence.Enable = 0
+Chat.Persistence.Realm.1.Host = "127.0.0.1"
+Chat.Persistence.Realm.1.Port = 54930
+Chat.Persistence.Realm.1.NodeKey = "characters-1"

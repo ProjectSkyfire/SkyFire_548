@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 #include "ChatServer.h"
+#include "SocialPersistence.h"
 #include "Cluster/CertificateTools.h"
 #include "Cluster/ChatProtocol.h"
 #include "Cluster/ChatPresence.h"
@@ -27,6 +28,7 @@ namespace Skyfire::Chat
         Cluster::ChatMetrics Counters;
         PresenceDirectory Presence;
         MessageRouter Router;
+        SocialPersistence Persistence;
         std::chrono::steady_clock::time_point Started = std::chrono::steady_clock::now();
         bool Stopping = false;
         void Accept();
@@ -110,6 +112,7 @@ namespace Skyfire::Chat
                     if (readError || !DecodeProbe(probe, id, realm) || !self->Owner.Config.Realms.count(realm))
                     { self->Close(true); return; }
                     if (!presence) { self->Reply(); return; }
+                    if (!self->Owner.Persistence.Ready(realm)) { self->Close(true); return; }
                     auto scope = self->Owner.Config.WorldRealms.find(self->Identity);
                     if (scope == self->Owner.Config.WorldRealms.end() || !scope->second.count(realm))
                     { self->Close(true); return; }
@@ -210,6 +213,7 @@ namespace Skyfire::Chat
         try
         {
             auto state = std::make_unique<State>(); state->Config = std::move(options); state->Credentials = tls;
+            if (!state->Persistence.Start(state->Config.Realms, tls, error)) return false;
             state->Counters.Realms.assign(state->Config.Realms.begin(), state->Config.Realms.end());
             if (!SSL_CTX_set_min_proto_version(state->Tls.native_handle(), TLS1_2_VERSION))
             { error = "Cannot require TLS 1.2."; return false; }
@@ -242,6 +246,7 @@ namespace Skyfire::Chat
         while (!_state->Sessions.empty()) (*_state->Sessions.begin())->Close();
         _state->Io.poll(); _state.reset();
     }
+    bool Server::Ready() const { return _state && _state->Persistence.Ready(); }
     Cluster::ChatMetrics Server::Metrics() const
     {
         if (!_state) return {};

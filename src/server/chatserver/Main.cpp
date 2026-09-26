@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     { SF_LOG_ERROR("server.chat", "%s", error.c_str()); return 1; }
     std::mutex sampleMutex;
     Skyfire::Cluster::AgentSample sample;
-    sample.Ready = true;
+    sample.Ready = server.Ready();
     sample.Chat = server.Metrics();
     Skyfire::Cluster::Agent agent;
     if (!agent.Start(agentOptions, [&]() { std::lock_guard<std::mutex> lock(sampleMutex); return sample; }, error))
@@ -132,9 +132,9 @@ int main(int argc, char** argv)
             server.Update();
             {
                 std::lock_guard<std::mutex> lock(sampleMutex);
-                sample.Chat = server.Metrics(); sample.Load = sample.Chat.Connections;
+                sample.Chat = server.Metrics(); sample.Load = sample.Chat.Connections; sample.Ready = server.Ready();
             }
-            bool const current = agent.IsRegistered();
+            bool const current = agent.IsRegistered() && server.Ready();
             if (control && current != registered)
             { channel.SendStatus(current ? Skyfire::HubControl::ReadyMessage : "NOT_READY"); registered = current; }
             auto now = std::chrono::steady_clock::now();

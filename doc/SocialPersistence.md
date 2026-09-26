@@ -93,6 +93,38 @@ a new ownership connection. The service does not automatically replay writes.
 Outbox and receipt pruning is not enabled; introduce an acknowledged consumer
 watermark and a documented retry window before adding retention.
 
+## Native connection and recovery
+
+The native chat daemon now contains a background persistence worker for each
+configured realm. `Chat.Persistence.Enable = 0` preserves the current behavior.
+When enabled, configure `Chat.Persistence.Realm.<id>.Host`, `.Port` and `.NodeKey`
+for every `Chat.Realms` entry. Host is a numeric IP with a matching certificate
+SAN; NodeKey must match the character service certificate identity. Client
+credentials are the chat daemon's cluster certificate and key. No MySQL
+credentials are added to chatserver.
+
+Each worker attaches separately to channels and guilds, reads paginated snapshots,
+and replays events from the initial head before marking its realm ready. Missing
+events, regressing revisions and malformed records fail recovery. Each domain
+cache is bounded to 8192 records and 4 MiB of serialized keys/documents. A ready
+realm can continue handling requests while another realm recovers; the overall
+hub readiness flag is false until all configured realms are ready.
+
+The internal mutation API admits at most 32 outstanding requests per realm and
+128 overall, including unconsumed results. Queued work expires before transmission
+after ten seconds. Each network phase has a five-second deadline; SQL/TLS work
+never runs on the chat event loop. Results distinguish committed, rejected,
+unknown and not-sent outcomes. Connections and snapshots rebuild after failure;
+unknown writes are not automatically resubmitted. Readiness and cache access are
+synchronized with the worker; a stale revision still fails at the database.
+
+Boost.JSON is compiled from the existing Boost headers in the native target; no
+additional JSON binary package is required. Build chatserver and the
+`social_snapshot_tests` target to validate the native implementation. The native
+test covers paginated reconstruction, stale-event suppression, tombstones, gaps,
+regressing heads, invalid revisions and cache bounds. Native compilation remains
+pending; Python database/TLS tests do not substitute for this check.
+
 ## Validation and remaining cutover
 
 The disposable MySQL/TLS tests cover separate role admission, world SQL rejection,
@@ -100,7 +132,7 @@ realm mismatch, CAS conflicts, tombstones, takeover fencing, continued world rea
 lost commit acknowledgement, and rollback when receipt insertion fails. Run
 `src/tests/character_service_test.py --database-config <private fixture config>`.
 
-Native chat integration, invitations, legacy data import, disabling every old
+Channel/guild command integration, invitations, legacy data import, disabling every old
 writer, notification parity and cross-world fan-out remain required before this
 can replace the working routing/admission path. Do not enable it as a substitute
 for those changes.

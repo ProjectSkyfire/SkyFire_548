@@ -29,6 +29,7 @@ namespace Skyfire::Chat
         bool Open(Options options, Cluster::AgentOptions const& tls, std::string& error);
         void Update();
         void Stop();
+        bool Ready() const;
         Cluster::ChatMetrics Metrics() const;
     private:
         struct State;
