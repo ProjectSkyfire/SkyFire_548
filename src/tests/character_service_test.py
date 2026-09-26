@@ -97,6 +97,19 @@ class ProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'offline recovery'):
             worker.restore({'target':'characters'})
 
+    def test_social_document_limits_and_secret_validation(self):
+        from social_store import document
+        channel = dict(name='Test', team=0, channel_id=0, announce=True, ownership=True, password_verifier='', bans=[])
+        self.assertIsInstance(document('channels', channel), bytes)
+        for change in ({'password_verifier':'plaintext'}, {'bans':[1,1]}, {'team':True}, {'sql':'DELETE FROM characters'}, {'name':'x'*129}):
+            with self.assertRaises(ValueError): document('channels', channel | change)
+        guild = dict(id=1,name='Guild',leader=1,motd='',info='',ranks=[dict(name='Leader',rights=0)],
+                     members=[dict(guid=1,rank=0,public_note='',officer_note='private')])
+        self.assertIsInstance(document('guilds',guild),bytes)
+        for change in ({'leader':2}, {'bank_money':10}, {'ranks':[]}, {'members':guild['members']*2}):
+            with self.assertRaises(ValueError): document('guilds', guild | change)
+        with self.assertRaises(ValueError): document('inventory', {})
+
     def test_catalog_matches_native_statements(self):
         self.assertEqual(catalog(ROOT),json.loads((SERVICE/'statements.json').read_text()))
 
@@ -129,6 +142,11 @@ class DatabaseTests(unittest.TestCase):
             cursor.execute('CREATE TABLE `'+cls.schema+'`.gm_tickets (id INT PRIMARY KEY, flags BIT(8)) ENGINE=InnoDB')
             cursor.execute("INSERT INTO `"+cls.schema+"`.gm_tickets VALUES(1,b'10101010')")
             cursor.execute('CREATE TABLE `'+cls.schema+'`.binary_fixture (payload BLOB) ENGINE=InnoDB')
+        with cls.admin.cursor() as cursor:
+            cursor.execute('USE `'+cls.schema+'`')
+            migration = (ROOT/'sql/pending_updates/characters/001_social_domain_store.sql').read_text()
+            for statement in migration.split(';'):
+                if statement.strip(): cursor.execute(statement)
         cls.config=dict(realm_id=1,mysql_host=host,mysql_port=int(port),mysql_user=user,
                         mysql_password=password,mysql_database=cls.schema)
 
@@ -203,6 +221,76 @@ class DatabaseTests(unittest.TestCase):
             db.execute('world-a', instance, epoch, save)
             self.assertEqual(rows(db.execute('world-a', instance, epoch, request(2, [raw('SELECT money FROM characters WHERE guid=1')]))), [[b'1']])
             db.detach(instance)
+        finally:
+            db.close()
+
+    def test_social_ownership_receipts_outbox_and_world_isolation(self):
+        import pymysql
+        from social_store import canonical
+        cfg = self.config | {'allowed_chat_nodes': ['chat-a', 'chat-b']}
+        db = CharacterDatabase(cfg, SERVICE/'statements.json')
+        first, second, world = (secrets.token_hex(16) for _ in range(3))
+        hello = lambda instance, realm=1, domain='channels': b'\1'+u32(realm)+blob(instance)+blob(domain)
+        channel = dict(name='Test', team=0, channel_id=0, announce=True, ownership=True, password_verifier='', bans=[])
+        key = 'test-'+secrets.token_hex(8)
+        message = dict(id=secrets.token_hex(16),key=key,expected=0,actor=1,document=channel)
+        rpc = lambda op, data: bytes([op])+blob(canonical(data))
+        try:
+            _, world_epoch = db.attach('world-a', b'\2'+u32(1)+blob(world)+blob(db.catalog_hash))
+            with self.assertRaises(ValueError): db.social.attach('world-a', hello(first))
+            with self.assertRaises(ValueError): db.social.attach('chat-a', hello(first, 2))
+            session, epoch = db.social.attach('chat-a', hello(first))
+            execute = lambda op, data: json.loads(db.social.execute('chat-a', session, epoch, rpc(op, data)))
+            revision = execute(18, message)['revision']
+            self.assertEqual(execute(18, message)['revision'], revision)
+            # Failure to persist a receipt must roll back both state and outbox.
+            with self.admin.cursor() as cursor:
+                cursor.execute("CREATE TRIGGER reject_social_receipt BEFORE INSERT ON character_social_receipts FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='fixture receipt failure'")
+            try:
+                with self.assertRaises(Exception):
+                    execute(18, message | {'id':secrets.token_hex(16),'expected':revision,'document':channel | {'announce':False}})
+            finally:
+                with self.admin.cursor() as cursor:
+                    cursor.execute('DROP TRIGGER reject_social_receipt')
+            snapshot = execute(17, {'after':'','limit':32})
+            record = next(item for item in snapshot['records'] if item['key']==key)
+            self.assertEqual(record['revision'], revision)
+            self.assertTrue(record['document']['announce'])
+            self.assertEqual(execute(19, {'after':revision,'limit':32})['events'], [])
+
+            with self.assertRaises(ValueError): execute(18, message | {'actor': 2})
+            with self.assertRaises(ValueError): execute(18, message | {'id': secrets.token_hex(16)})
+            with self.assertRaises(ValueError): db.social.attach('chat-b', hello(second))
+            with self.assertRaises(ValueError): db.execute('world-a',world,world_epoch,request(2,[raw('SELECT * FROM character_social_records')]))
+            self.assertEqual(rows(db.execute('world-a',world,world_epoch,request(2,[raw('SELECT 1')]))), [[b'1']])
+            # A committed mutation whose acknowledgement is lost must have exactly
+            # one outbox event and one receipt, even after ownership reconnects.
+            original = db.db.commit
+            def lost_ack():
+                original()
+                raise pymysql.OperationalError(2013, 'fixture lost acknowledgement')
+            db.db.commit = lost_ack
+            update = message | {'id': secrets.token_hex(16), 'expected': revision, 'document': channel | {'announce': False}}
+            with self.assertRaises(pymysql.OperationalError): execute(18, update)
+            self.assertTrue(db.failed)
+            db.detach(world)
+            self.assertFalse(db.health())  # Social sessions also block reconnect.
+            db.social.detach(session)
+            self.assertTrue(db.health())
+            session, epoch = db.social.attach('chat-a', hello(first))
+            revision = execute(18, update)['revision']
+            events = execute(19, {'after': revision-1, 'limit': 32})['events']
+            self.assertEqual(len(events), 1)
+            self.assertEqual(events[0]['document']['announce'], False)
+            deleted = execute(18, message | {'id': secrets.token_hex(16), 'expected': revision, 'document': None})['revision']
+            with self.assertRaises(ValueError): execute(18, message | {'id': secrets.token_hex(16)})
+            self.assertIsNone(execute(19, {'after': deleted-1, 'limit': 1})['events'][0]['document'])
+            db.social.detach(session)
+            successor, next_epoch = db.social.attach('chat-b', hello(second))
+            self.assertGreater(next_epoch, epoch)
+            with self.assertRaises(ValueError): db.social.attach('chat-a', hello(first))
+            with self.assertRaises(RuntimeError): execute(17, {'after': '', 'limit': 1})
+            db.social.detach(successor)
         finally:
             db.close()
 
@@ -430,7 +518,7 @@ class DatabaseTests(unittest.TestCase):
                 .serial_number(x509.random_serial_number()).not_valid_before(now-datetime.timedelta(minutes=1)).not_valid_after(now+datetime.timedelta(days=1))
                 .add_extension(x509.BasicConstraints(ca=True,path_length=None),critical=True).sign(ca_key,hashes.SHA256()))
             (root/'ca.pem').write_bytes(ca.public_bytes(serialization.Encoding.PEM))
-            for name in ('hub','characters-1','world-a','outsider'):
+            for name in ('hub','characters-1','world-a','chat-a','outsider'):
                 key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
                 certificate=(x509.CertificateBuilder().subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME,name)]))
                     .issuer_name(ca_name).public_key(key.public_key()).serial_number(x509.random_serial_number())
@@ -470,7 +558,7 @@ class DatabaseTests(unittest.TestCase):
             config=self.config | dict(node_key='characters-1',node_name='Fixture character service',bind_address='127.0.0.1',
                 advertise_address='127.0.0.1',port=port,hub_host='localhost',hub_port=hub_server.sockets[0].getsockname()[1],
                 ca=str(root/'ca.pem'),certificate=str(root/'characters-1.pem'),private_key=str(root/'characters-1.key'),
-                catalog=str(SERVICE/'statements.json'),allowed_world_nodes=['world-a'])
+                catalog=str(SERVICE/'statements.json'),allowed_world_nodes=['world-a'],allowed_chat_nodes=['chat-a'])
             config_path=root/'character.toml'
             config_path.write_text('\n'.join(key+' = '+json.dumps(value) for key,value in config.items()))
             stop=asyncio.Event(); daemon=asyncio.create_task(serve(config_path,stop))
@@ -489,6 +577,17 @@ class DatabaseTests(unittest.TestCase):
                     return reply[1:]
                 await exchange(b'\0\2'+u32(1)+blob(secrets.token_hex(16))+blob(digest))
                 self.assertEqual(rows(await exchange(request(2,[raw('SELECT guid FROM characters WHERE guid=1')]))),[[b'1']])
+                writer.close(); await writer.wait_closed()
+                chat_tls=ssl.create_default_context(cafile=str(root/'ca.pem')); chat_tls.load_cert_chain(root/'chat-a.pem',root/'chat-a.key')
+                reader,writer=await asyncio.open_connection('127.0.0.1',port,ssl=chat_tls)
+                await exchange(b'\x10\1'+u32(1)+blob(secrets.token_hex(16))+blob('guilds'))
+                snapshot=json.loads(await exchange(b'\x11'+blob(json.dumps({'after':'','limit':1}))))
+                self.assertIn('records',snapshot)
+                # A chat identity cannot switch to the world SQL protocol.
+                payload=request(2,[raw('SELECT 1')])
+                writer.write(u32(len(payload))+payload); await writer.drain()
+                size=struct.unpack('!I',await asyncio.wait_for(reader.readexactly(4),5))[0]
+                self.assertEqual(await reader.readexactly(size),b'\1')
                 writer.close(); await writer.wait_closed()
                 outsider=ssl.create_default_context(cafile=str(root/'ca.pem')); outsider.load_cert_chain(root/'outsider.pem',root/'outsider.key')
                 denied,connection=await asyncio.open_connection('127.0.0.1',port,ssl=outsider)

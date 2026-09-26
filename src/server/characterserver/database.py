@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 from wire import Reader, blob, u32, prepared_sql, MAX_FRAME, MAX_STATEMENTS
 from character_state import LOGIN_PLAN
+from social_store import SocialStore
 
 IDENTITY = re.compile(r'[0-9a-f]{32}\Z')
 
@@ -30,6 +31,7 @@ class CharacterDatabase:
             cursor_options['cursorclass'] = pymysql.cursors.SSCursor
         self.lock = threading.Lock()
         self.sessions = {}
+        self.social = SocialStore(self)
         self.realm = config['realm_id']
         self.failed = False
         entries = json.loads(Path(catalog_path).read_text())
@@ -71,6 +73,12 @@ class CharacterDatabase:
                     instance CHAR(32) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
                     digest CHAR(64) CHARACTER SET ascii NOT NULL,
                     committed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP) ENGINE=InnoDB''')
+                if config.get('allowed_chat_nodes'):
+                    # Opt-in requires the pending schema update. Never silently
+                    # provision a partially migrated social domain at startup.
+                    for table in ('owners', 'retired', 'records', 'receipts', 'outbox'):
+                        cursor.execute('SELECT * FROM character_social_' + table + ' LIMIT 0')
+                        cursor.fetchall()
         except BaseException:
             db.close()
             raise
@@ -85,7 +93,7 @@ class CharacterDatabase:
         with self.lock:
             if self.failed:
                 # Old RPC sessions must drain before a new ownership connection exists.
-                if self.sessions:
+                if self.sessions or self.social.sessions:
                     return False
                 try:
                     self.db = self._open()
@@ -168,7 +176,7 @@ class CharacterDatabase:
             # have access ONLY to this character schema. No DDL/transaction/session escape.
             if not re.match(r'\s*(SELECT|INSERT|REPLACE|UPDATE|DELETE)\b', sql, re.I):
                 raise ValueError('Unsupported raw character operation')
-            if re.search(r'character_service_|GET_LOCK|RELEASE_LOCK|INTO\s+(?:OUTFILE|DUMPFILE)|FOR\s+UPDATE', sql, re.I):
+            if re.search(r'character_(?:service|social)_|GET_LOCK|RELEASE_LOCK|INTO\s+(?:OUTFILE|DUMPFILE)|FOR\s+UPDATE', sql, re.I):
                 raise ValueError('Reserved character operation')
             return sql, None
         if kind != 1:

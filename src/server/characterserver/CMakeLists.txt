@@ -1,6 +1,6 @@
 # This file is part of Project SkyFire https://www.projectskyfire.org.
 # See LICENSE.md file for Copyright information
-set(character_files characterserver.py database.py character_state.py wire.py metrics.py statements.json characterserver.toml.dist requirements.txt)
+set(character_files characterserver.py database.py social_store.py character_state.py wire.py metrics.py statements.json characterserver.toml.dist requirements.txt)
 set(character_sources)
 foreach(asset IN LISTS character_files)
   list(APPEND character_sources "${CMAKE_CURRENT_SOURCE_DIR}/${asset}")

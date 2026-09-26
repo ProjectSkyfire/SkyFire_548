@@ -63,6 +63,11 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
     allowed = set(config['allowed_world_nodes'])
     if not allowed or any(not isinstance(key,str) or not re.fullmatch(r'[A-Za-z0-9_.-]{1,64}',key) for key in allowed):
         raise ValueError('Configure allowed world identities')
+    if not isinstance(config.get('allowed_chat_nodes', []), list):
+        raise ValueError('allowed_chat_nodes must be a list')
+    social_allowed = set(config.get('allowed_chat_nodes', []))
+    if social_allowed & allowed or any(not isinstance(key, str) or not re.fullmatch(r'[A-Za-z0-9_.-]{1,64}', key) for key in social_allowed):
+        raise ValueError('Chat and world identities must be distinct valid node keys')
     incoming = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=str(path('ca')))
     incoming.minimum_version = ssl.TLSVersion.TLSv1_2
     incoming.verify_mode = ssl.CERT_REQUIRED
@@ -109,9 +114,10 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
         task = asyncio.current_task()
         tasks.add(task)
         instance = None
+        social = False
         try:
             peer = identity(writer.get_extra_info('peercert') or {})
-            if peer not in allowed or len(clients) >= maximum:
+            if peer not in allowed | social_allowed or len(clients) >= maximum:
                 return
             clients.add(writer)
             while not stop.is_set():
@@ -125,15 +131,16 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
                 if time.monotonic() >= registered_until or db.failed:
                     raise RuntimeError('Character service has no live hub lease or database')
                 if instance is None:
-                    if payload[0] != 0:
+                    social = peer in social_allowed
+                    if payload[0] != (16 if social else 0):
                         raise ValueError('Character handshake required')
-                    instance,epoch = await sql(db.attach,peer,payload[1:])
+                    instance,epoch = await sql(db.social.attach if social else db.attach,peer,payload[1:])
                     reply = b'\0'
                 else:
                     started = metrics.begin()
                     success = False
                     try:
-                        reply = b'\0' + await sql(db.execute,peer,instance,epoch,payload)
+                        reply = b'\0' + await sql(db.social.execute if social else db.execute,peer,instance,epoch,payload)
                         success = True
                     finally:
                         metrics.finish(started,payload[0],success)
@@ -152,7 +159,7 @@ async def serve(config_file, stop=None, database_factory=CharacterDatabase, chan
                 await asyncio.wait_for(writer.drain(),2)
         finally:
             if instance is not None:
-                await sql(db.detach,instance)
+                await sql(db.social.detach if social else db.detach,instance)
             clients.discard(writer)
             writer.close()
             with contextlib.suppress(Exception):

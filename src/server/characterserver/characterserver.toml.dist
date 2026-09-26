@@ -12,6 +12,10 @@ ca = "../cluster-tls/ca.pem"
 certificate = "../cluster-tls/characters-1.pem"
 private_key = "../cluster-tls/characters-1-key.pem"
 allowed_world_nodes = ["world-1", "world-standby"]
+# Persistence foundation only; leave empty until channel/guild cutover is implemented.
+# Requires sql/pending_updates/characters/001_social_domain_store.sql.
+# Identities must not also appear in allowed_world_nodes. No raw SQL is admitted.
+allowed_chat_nodes = []
 max_connections = 32
 catalog = "statements.json"
 
