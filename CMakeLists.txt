@@ -37,7 +37,14 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # Set RPATH-handing (CMake parameters)
 set(CMAKE_SKIP_BUILD_RPATH 0)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH 0)
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "Unknown")
+  # CMake 4.2 can leave the executable format unknown for GNU AArch64 even
+  # though the compiler ABI is ELF. Ninja cannot perform install-time RPATH
+  # relinking in that state, so emit the install RPATH during the initial link.
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH 1)
+else()
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH 0)
+endif()
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH 1)
 
@@ -107,7 +114,8 @@ if( UNIX )
   find_package(BZip2)
   find_package(Jemalloc)
 
-  if (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch")
+  string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SKYFIRE_SYSTEM_PROCESSOR)
+  if (SKYFIRE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64|arm)")
     find_package(sse2neon)
   endif()
 endif()
