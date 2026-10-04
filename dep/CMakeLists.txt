@@ -20,10 +20,6 @@ add_subdirectory(zlib)
 add_subdirectory(g3dlite)
 add_subdirectory(recastnavigation)
 
-if(ELUNA)
-  add_subdirectory(lualib)
-endif()
-
 if(SERVERS)
   add_subdirectory(gsoap)
 endif()

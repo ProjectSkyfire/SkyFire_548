@@ -23,8 +23,6 @@ env:
   BOOST_ROOT: ${{ github.workspace }}/.deps/boost_1_91_0
   OPENSSL_ROOT_DIR: ${{ github.workspace }}/.deps/openssl-4.0.0
   BUILD_DIR: ${{ github.workspace }}/build/ubuntu
-  ELUNA_BUILD_DIR: ${{ github.workspace }}/build/ubuntu-eluna
-  ELUNA_INSTALL_DIR: ${{ github.workspace }}/build/ubuntu-eluna-install
   CCACHE_DIR: ${{ github.workspace }}/.ccache
   CC: gcc-14
   CXX: g++-14
@@ -154,40 +152,9 @@ jobs:
         set -euo pipefail
         cmake --build "$BUILD_DIR" --parallel "$(nproc)"
 
-    - name: Configure Eluna smoke
+    - name: Check module discovery and installation
       shell: bash
-      run: |
-        set -euo pipefail
-        cmake -S "$GITHUB_WORKSPACE" -B "$ELUNA_BUILD_DIR" -G Ninja \
-          -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-          -DCMAKE_C_COMPILER="$CC" \
-          -DCMAKE_CXX_COMPILER="$CXX" \
-          -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-          -DCMAKE_INSTALL_PREFIX="$ELUNA_INSTALL_DIR" \
-          -DCONF_DIR="$ELUNA_INSTALL_DIR/etc" \
-          -DTOOLS=OFF \
-          -DPACKET_LOG_SERVER=OFF \
-          -DUSE_COREPCH=ON \
-          -DUSE_SCRIPTPCH=ON \
-          -DSKYFIRE_BUILD_TESTS=OFF \
-          -DELUNA=ON \
-          -DBOOST_ROOT="$BOOST_ROOT" \
-          -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR"
-
-    - name: Build Eluna smoke
-      shell: bash
-      run: |
-        set -euo pipefail
-        cmake --build "$ELUNA_BUILD_DIR" --target authserver worldserver --parallel "$(nproc)"
-
-    - name: Install Eluna smoke
-      shell: bash
-      run: |
-        set -euo pipefail
-        cmake --install "$ELUNA_BUILD_DIR"
-        test -f "$ELUNA_INSTALL_DIR/etc/lua_scripts/startup_smoke.lua"
-        test -d "$ELUNA_INSTALL_DIR/etc/lua_scripts/extensions"
+      run: python3 tools/dev/test_module_configuration.py
 
     - name: ccache stats
       if: always()
@@ -202,5 +169,3 @@ jobs:
         path: |
           ${{ env.BUILD_DIR }}/CMakeCache.txt
           ${{ env.BUILD_DIR }}/CMakeFiles/CMake*.log
-          ${{ env.ELUNA_BUILD_DIR }}/CMakeCache.txt
-          ${{ env.ELUNA_BUILD_DIR }}/CMakeFiles/CMake*.log

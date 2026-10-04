@@ -3323,25 +3323,3 @@ Boost.StartLevel = 90
 
 #
 ###################################################################################################
-
-###################################################################################################
-# LUA ENGINE SETTINGS
-#
-#    Eluna.Enabled
-#        Description: Enables Lua script loading when the core is built with CMake option ELUNA.
-#        Important:   This option has no effect unless the server was configured with -DELUNA=ON.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-#
-#
-#    Eluna.ScriptPath
-#        Description: Directory containing Lua scripts loaded by Eluna at worldserver startup.
-#        Important:   Relative paths are resolved from the worldserver working directory.
-#        Default:     lua_scripts
-#
-
-Eluna.Enabled = 0
-Eluna.ScriptPath = "lua_scripts"
-
-#
-###################################################################################################

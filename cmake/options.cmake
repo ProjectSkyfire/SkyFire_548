@@ -8,7 +8,6 @@ option(SCRIPTS            "Build core with scripts included"                    
 option(MODULES            "Build modules from the top-level modules/ directory"         1)
 option(TOOLS              "Build map/vmap/mmap extraction/assembler tools"              0)
 option(PACKET_LOG_SERVER  "Build packetlogserver companion packet logging tool"          1)
-option(ELUNA              "Build Eluna Lua Engine support"                              0)
 option(USE_SCRIPTPCH      "Use precompiled headers when compiling scripts"              1)
 option(USE_COREPCH        "Use precompiled headers when compiling servers"              1)
 option(WITH_WARNINGS      "Show all warnings during compile"                            0)

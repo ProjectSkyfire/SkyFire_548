@@ -47,13 +47,6 @@ else()
   message("* Build with modules     : No")
 endif()
 
-if( ELUNA )
-  message("* Build Eluna LuaEngine  : Yes")
-  add_definitions(-DELUNA)
-else()
-  message("* Build Eluna LuaEngine  : No  (default)")
-endif()
-
 if( TOOLS )
   message("* Build map/vmap tools   : Yes")
   add_definitions(-DNO_CORE_FUNCS)

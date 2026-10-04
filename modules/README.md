@@ -56,3 +56,25 @@ Scripts register with the core exactly like built-in scripts (subclass
 Any `conf/*.conf.dist` file is copied next to the worldserver binary on build and
 installed alongside `worldserver.conf`. Load values with the standard
 `sConfigMgr->GetXOption(...)` API.
+
+## External Eluna module
+
+Eluna is maintained in the separate [Eluna project](https://github.com/ProjectSkyFire-Modules/Eluna).
+The core does not bundle, fetch, or build it by default. To install it yourself:
+
+    git clone https://github.com/ProjectSkyFire-Modules/Eluna.git modules/mod-eluna
+
+Then configure with -DMODULES=ON -DMOD_ELUNA=ON and follow that project's
+configuration instructions. Module versions and updates are managed separately.
+
+## Optional module build customization
+
+A module may provide module.cmake to declare its build options and set
+MODULE_ENABLED to FALSE to skip discovery. The default is TRUE for modules
+without that file. This selection file is evaluated before collecting sources,
+headers, configuration files, or loader registration.
+
+An enabled module may also provide CMakeLists.txt. It is processed after the
+aggregate modules target exists, allowing the module to link dependencies,
+stage assets, and add install rules. Keep all module-specific build logic inside
+the module folder so removing it requires no core changes.

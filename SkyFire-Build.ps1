@@ -83,7 +83,6 @@ function Get-DefaultSkyFireBuildConfig {
         BuildConfig       = 'Release'
         CMakeOptions      = @{
             TOOLS               = 'ON'
-            ELUNA               = 'OFF'
             USE_COREPCH         = 'ON'
             USE_SCRIPTPCH       = 'ON'
             SKYFIRE_BUILD_TESTS = 'OFF'

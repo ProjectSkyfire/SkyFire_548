@@ -27,6 +27,7 @@ set(MODULES_FORWARD_DECL "")
 set(MODULES_INVOKE "")
 set(MODULE_NAME_LIST "")
 set(MODULE_CONF_ALL "")
+set(MODULE_BUILD_DIRS "")
 
 file(GLOB MODULE_CANDIDATES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*)
 
@@ -34,6 +35,16 @@ foreach(MODULE_DIR_NAME ${MODULE_CANDIDATES})
   set(MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_DIR_NAME})
 
   if(IS_DIRECTORY ${MODULE_PATH} AND EXISTS ${MODULE_PATH}/src)
+    # Optional module-owned selection; ordinary modules remain enabled.
+    set(MODULE_ENABLED TRUE)
+    if(EXISTS "${MODULE_PATH}/module.cmake")
+      include("${MODULE_PATH}/module.cmake")
+    endif()
+    if(NOT MODULE_ENABLED)
+      message(STATUS "  - module: ${MODULE_DIR_NAME} (disabled)")
+      continue()
+    endif()
+
     file(GLOB_RECURSE MODULE_SRC_FILES
       ${MODULE_PATH}/src/*.cpp
       ${MODULE_PATH}/src/*.c
@@ -44,6 +55,9 @@ foreach(MODULE_DIR_NAME ${MODULE_CANDIDATES})
     if(MODULE_SRC_FILES)
       list(APPEND MODULE_SOURCES ${MODULE_SRC_FILES})
       list(APPEND MODULE_NAME_LIST ${MODULE_DIR_NAME})
+      if(EXISTS "${MODULE_PATH}/CMakeLists.txt")
+        list(APPEND MODULE_BUILD_DIRS ${MODULE_DIR_NAME})
+      endif()
 
       # Add every directory containing a header as an include directory so that
       # modules with nested folder layouts resolve headers.
@@ -102,6 +116,11 @@ target_include_directories(modules
 target_link_libraries(modules game)
 
 add_dependencies(modules game revision.h)
+
+# Let enabled modules attach their own dependencies and install rules.
+foreach(MODULE_BUILD_DIR ${MODULE_BUILD_DIRS})
+  add_subdirectory("${MODULE_BUILD_DIR}")
+endforeach()
 
 # Stage module *.conf.dist files next to the worldserver binary after build,
 # mirroring how worldserver stages its own configuration file.

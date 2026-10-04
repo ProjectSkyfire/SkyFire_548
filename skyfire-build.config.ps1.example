@@ -23,7 +23,6 @@
     # Extra -D options passed to cmake configure (ON/OFF or other CMake values)
     CMakeOptions      = @{
         TOOLS                 = 'ON'
-        ELUNA                 = 'OFF'
         USE_COREPCH           = 'ON'
         USE_SCRIPTPCH         = 'ON'
         SKYFIRE_BUILD_TESTS   = 'OFF'

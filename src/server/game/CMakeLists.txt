@@ -30,9 +30,6 @@ file(GLOB_RECURSE sources_Guilds Guilds/*.cpp Guilds/*.h)
 file(GLOB_RECURSE sources_Handlers Handlers/*.cpp Handlers/*.h)
 file(GLOB_RECURSE sources_Instances Instances/*.cpp Instances/*.h)
 file(GLOB_RECURSE sources_Loot Loot/*.cpp Loot/*.h)
-if(ELUNA)
-  file(GLOB_RECURSE sources_LuaEngine LuaEngine/*.cpp LuaEngine/*.h)
-endif()
 file(GLOB_RECURSE sources_Mails Mails/*.cpp Mails/*.h)
 file(GLOB_RECURSE sources_Maps Maps/*.cpp Maps/*.h)
 list(APPEND sources_Maps
@@ -86,9 +83,6 @@ source_group(Guilds FILES ${sources_Guilds})
 source_group(Handlers FILES ${sources_Handlers})
 source_group(Instances FILES ${sources_Instances})
 source_group(Loot FILES ${sources_Loot})
-if(ELUNA)
-  source_group(LuaEngine FILES ${sources_LuaEngine})
-endif()
 source_group(Mails FILES ${sources_Mails})
 source_group(Maps FILES ${sources_Maps})
 source_group(Miscellaneous FILES ${sources_Miscellaneous})
@@ -143,7 +137,6 @@ set(game_STAT_SRCS
   ${sources_Handlers}
   ${sources_Instances}
   ${sources_Loot}
-  ${sources_LuaEngine}
   ${sources_Mails}
   ${sources_Maps}
   ${sources_Miscellaneous}
@@ -239,7 +232,6 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/Handlers
   ${CMAKE_CURRENT_SOURCE_DIR}/Instances
   ${CMAKE_CURRENT_SOURCE_DIR}/Loot
-  ${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine
   ${CMAKE_CURRENT_SOURCE_DIR}/Mails
   ${CMAKE_CURRENT_SOURCE_DIR}/Maps
   ${CMAKE_CURRENT_SOURCE_DIR}/Miscellaneous
@@ -279,36 +271,6 @@ if(TARGET Boost::headers)
   target_link_libraries(game Boost::headers)
 elseif(TARGET Boost::boost)
   target_link_libraries(game Boost::boost)
-endif()
-
-if(ELUNA)
-  target_link_libraries(game lua)
-
-  if(WIN32)
-    if(MSVC)
-      add_custom_command(TARGET game
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/lua_scripts/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/scripts" "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/lua_scripts/"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/lua_scripts/extensions/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/extensions" "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/lua_scripts/extensions/"
-      )
-    elseif(MINGW OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-      add_custom_command(TARGET game
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/lua_scripts/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/scripts" "${CMAKE_BINARY_DIR}/bin/lua_scripts/"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/lua_scripts/extensions/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/LuaEngine/extensions" "${CMAKE_BINARY_DIR}/bin/lua_scripts/extensions/"
-      )
-    endif()
-
-    install(DIRECTORY LuaEngine/scripts/ DESTINATION lua_scripts)
-    install(DIRECTORY LuaEngine/extensions DESTINATION lua_scripts)
-  elseif(UNIX)
-    install(DIRECTORY LuaEngine/scripts/ DESTINATION ${CONF_DIR}/lua_scripts)
-    install(DIRECTORY LuaEngine/extensions DESTINATION ${CONF_DIR}/lua_scripts)
-  endif()
 endif()
 
 add_dependencies(game revision.h)
