@@ -599,7 +599,6 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
                 }
             }
 
-            _player->TakeQuestSourceItem(questId, true); // remove quest src item from player
             if (questId == QUEST_DEATH_COMES_FROM_ON_HIGH)
                 CancelEyeOfAcherusQuest(_player);
 
