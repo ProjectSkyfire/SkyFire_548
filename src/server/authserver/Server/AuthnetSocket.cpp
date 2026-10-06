@@ -1147,7 +1147,11 @@ namespace
 
     char const* GetMode2Command8ResponseMode()
     {
-        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_RESPONSE", "structured");
+        // RealmJoin replies require a client-selected realm. Sending one during
+        // realm-list subscription can reach the client before that selection
+        // exists, fail its pending connection, and open the realm list instead.
+        // Actual RealmJoin requests use GetMode2Command8RequestResponseMode().
+        return GetEnvOrDefault("AUTHNET_MODE2_COMMAND8_RESPONSE", "none");
     }
 
     bool ShouldSendMode2Command8StructuredProbe(char const* mode)
