@@ -1917,15 +1917,27 @@ public:
     }
 };
 
+enum HuoSpiritOfFire
+{
+    QUEST_HUO_THE_SPIRIT_OF_FIRE = 29422,
+    QUEST_THE_PASSION_OF_SHEN_ZIN_SU = 29423,
+    NPC_HUO_UNLIT = 54787,
+    SPELL_BLESSING_OF_HUO = 102630,
+    SPELL_SUMMON_HUO = 128700
+};
+
 class npc_huo : public CreatureScript
 {
 public:
     npc_huo() : CreatureScript("npc_huo") { }
 
-    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* /*quest*/ ) OVERRIDE
+    bool OnQuestAccept(Player* player, Creature* /*creature*/, Quest const* quest) OVERRIDE
     {
-        player->CastSpell(player, 102630); // blessing of huo
-        player->CastSpell(player, 128700);
+        if (quest->GetQuestId() != QUEST_THE_PASSION_OF_SHEN_ZIN_SU)
+            return true;
+
+        player->CastSpell(player, SPELL_BLESSING_OF_HUO);
+        player->CastSpell(player, SPELL_SUMMON_HUO);
         return true;
     }
 
@@ -1949,21 +1961,16 @@ public:
     {
         PrepareSpellScript(spell_item_huo_offering_SpellScript);
 
-        enum HuoOffering
-        {
-            NPC_HUO = 54787
-        };
-
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            Unit* caster = GetCaster();
+            Player* player = GetCaster()->ToPlayer();
             Unit* target = GetHitUnit();
 
-            if (!caster || !target || target->GetEntry() != NPC_HUO)
+            if (!player || player->GetQuestStatus(QUEST_HUO_THE_SPIRIT_OF_FIRE) != QUEST_STATUS_INCOMPLETE ||
+                !target || target->GetEntry() != NPC_HUO_UNLIT)
                 return;
 
-            if (Player* player = caster->ToPlayer())
-                player->KilledMonsterCredit(NPC_HUO, target->GetGUID());
+            player->KilledMonsterCredit(NPC_HUO_UNLIT, target->GetGUID());
         }
 
         void Register() OVERRIDE
