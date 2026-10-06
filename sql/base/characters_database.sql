@@ -457,6 +457,24 @@ LOCK TABLES `character_currency` WRITE;
 /*!40000 ALTER TABLE `character_currency` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_currency` ENABLE KEYS */;
 UNLOCK TABLES;
+DROP TABLE IF EXISTS `character_death_gate_return`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `character_death_gate_return` (
+  `guid` int unsigned NOT NULL,
+  `map` int unsigned NOT NULL,
+  `posX` float NOT NULL,
+  `posY` float NOT NULL,
+  `posZ` float NOT NULL,
+  `o` float NOT NULL,
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `character_death_gate_return` WRITE;
+/*!40000 ALTER TABLE `character_death_gate_return` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_death_gate_return` ENABLE KEYS */;
+UNLOCK TABLES;
 DROP TABLE IF EXISTS `character_declinedname`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
