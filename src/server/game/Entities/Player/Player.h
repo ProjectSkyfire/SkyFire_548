@@ -922,6 +922,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_RESEARCH_DIGSITES = 39,
     PLAYER_LOGIN_QUERY_LOAD_RESEARCH_HISTORY = 40,
     PLAYER_LOGIN_QUERY_LOAD_RESEARCH_PROJECTS = 41,
+    PLAYER_LOGIN_QUERY_LOAD_DEATH_GATE_RETURN,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -2877,6 +2878,7 @@ public:
     float  m_recallZ;
     float  m_recallO;
     void   SaveRecallPosition();
+    bool TeleportThroughDeathGate(WorldLocation const& ebonHold);
 
     void SetHomebind(WorldLocation const& loc, uint32 areaId);
 
@@ -3368,6 +3370,8 @@ protected:
     void _SaveSpells(SQLTransaction& trans);
     void _SaveEquipmentSets(SQLTransaction& trans);
     void _SaveBGData(SQLTransaction& trans);
+    WorldLocation m_deathGateReturn;
+    void _SaveDeathGateReturn(SQLTransaction& trans);
     void _SaveGlyphs(SQLTransaction& trans);
     void _SaveTalents(SQLTransaction& trans);
     void _SaveStats(SQLTransaction& trans);

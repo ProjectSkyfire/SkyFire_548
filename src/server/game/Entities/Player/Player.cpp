@@ -5186,6 +5186,10 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
 
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_DEATH_GATE_RETURN);
+            stmt->setUInt32(0, guid);
+            trans->Append(stmt);
+
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PLAYER_BGDATA);
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
@@ -12528,6 +12532,12 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
     _LoadBoundInstances(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BOUND_INSTANCES));
     _LoadInstanceTimeRestrictions(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_INSTANCE_LOCK_TIMES));
     _LoadBGData(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_BG_DATA));
+    if (PreparedQueryResult result = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_DEATH_GATE_RETURN))
+    {
+        Field* fields = result->Fetch();
+        m_deathGateReturn = WorldLocation(fields[0].GetUInt32(), fields[1].GetFloat(),
+            fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+    }
 
     GetSession()->SetPlayer(this);
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
@@ -14801,6 +14811,7 @@ void Player::SaveToDB(bool create /*=false*/)
         _SaveMail(trans);
 
     _SaveBGData(trans);
+    _SaveDeathGateReturn(trans);
     _SaveInventory(trans);
     _SaveVoidStorage(trans);
     _SaveQuestStatus(trans);
@@ -22057,6 +22068,74 @@ void Player::_SaveEquipmentSets(SQLTransaction& trans)
                 break;
         }
     }
+}
+
+void Player::_SaveDeathGateReturn(SQLTransaction& trans)
+{
+    if (m_deathGateReturn.GetMapId() == MAPID_INVALID)
+        return;
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_DEATH_GATE_RETURN);
+    stmt->setUInt32(0, GetGUIDLow());
+    stmt->setUInt32(1, m_deathGateReturn.GetMapId());
+    stmt->setFloat(2, m_deathGateReturn.GetPositionX());
+    stmt->setFloat(3, m_deathGateReturn.GetPositionY());
+    stmt->setFloat(4, m_deathGateReturn.GetPositionZ());
+    stmt->setFloat(5, m_deathGateReturn.GetOrientation());
+    trans->Append(stmt);
+}
+
+bool Player::TeleportThroughDeathGate(WorldLocation const& ebonHold)
+{
+    auto validReturn = [](WorldLocation const& location)
+    {
+        MapEntry const* map = sMapStore.LookupEntry(location.GetMapId());
+        return map && !map->Instanceable() &&
+            MapManager::IsValidMapCoord(location.GetMapId(), location.GetPositionX(),
+                location.GetPositionY(), location.GetPositionZ(), location.GetOrientation());
+    };
+
+    // Area 4281 is Acherus on map 0. Map 609 also includes the entire starter zone.
+    bool inEbonHold = GetAreaId() == 4281 || GetZoneId() == 4281;
+    if (inEbonHold && validReturn(m_deathGateReturn))
+    {
+        // Keep the checkpoint until the next outbound journey. TeleportTo accepting a
+        // transfer does not guarantee arrival (the destination map may fail to load).
+        bool accepted = TeleportTo(m_deathGateReturn, TELE_TO_SPELL);
+        if (accepted)
+            SaveToDB();
+        return accepted;
+    }
+
+    WorldLocation departure(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+    if (!inEbonHold)
+    {
+        // Never persist an instance or a moving transport position as a return point.
+        if (GetMap()->Instanceable())
+        {
+            if (AreaTriggerStruct const* entrance = sObjectMgr->GetGoBackTrigger(GetMapId()))
+                departure = WorldLocation(entrance->target_mapId, entrance->target_X,
+                    entrance->target_Y, entrance->target_Z, entrance->target_Orientation);
+        }
+        if (GetTransport() || !validReturn(departure))
+            departure = WorldLocation(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, 0.0f);
+        if (!validReturn(departure))
+            return false;
+    }
+
+    WorldLocation previous = m_deathGateReturn;
+    if (!inEbonHold)
+        m_deathGateReturn = departure;
+    if (!TeleportTo(ebonHold, TELE_TO_SPELL))
+    {
+        m_deathGateReturn = previous;
+        return false;
+    }
+
+    // Far teleports defer this save until arrival, keeping position and checkpoint
+    // together in the character save transaction. No synchronous DB read on use.
+    SaveToDB();
+    return true;
 }
 
 void Player::_SaveBGData(SQLTransaction& trans)

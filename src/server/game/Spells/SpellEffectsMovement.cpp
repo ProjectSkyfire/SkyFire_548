@@ -187,7 +187,10 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     {
         if (unitTarget == m_caster)
             options |= TELE_TO_SPELL;
-        unitTarget->ToPlayer()->TeleportTo(mapid, x, y, z, orientation, options);
+        if (m_spellInfo->Id == 53822 && unitTarget->getClass() == CLASS_DEATH_KNIGHT)
+            unitTarget->ToPlayer()->TeleportThroughDeathGate(WorldLocation(mapid, x, y, z, orientation));
+        else
+            unitTarget->ToPlayer()->TeleportTo(mapid, x, y, z, orientation, options);
     }
     else if (mapid == unitTarget->GetMapId())
         unitTarget->NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
