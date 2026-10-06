@@ -18893,9 +18893,15 @@ bool Player::HasEnoughMoney(int64 amount) const
 
 void Player::SetMoney(uint64 value)
 {
+    bool const reachedGoldLimit = GetMoney() < MAX_MONEY_AMOUNT && value == MAX_MONEY_AMOUNT;
+
     SetUInt64Value(PLAYER_FIELD_COINAGE, value);
     MoneyChanged(value);
     UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
+
+    // Notify on reaching the cap, not on login or repeated updates at the cap.
+    if (reachedGoldLimit && IsInWorld() && GetSession())
+        ChatHandler(GetSession()).SendSysMessage("You have reached the gold limit of 999,999 gold, 99 silver, and 99 copper.");
 }
 
 bool Player::IsQuestRewarded(uint32 quest_id) const
