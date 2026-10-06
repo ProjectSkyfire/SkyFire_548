@@ -17,6 +17,8 @@ EndScriptData */
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
+#include <cerrno>
+#include <cctype>
 #include <stdlib.h>
 
 
@@ -940,7 +942,18 @@ public:
         if (strchr(args, 'g') || strchr(args, 's') || strchr(args, 'c'))
             moneyToAdd = MoneyStringToMoney(std::string(args));
         else
-            moneyToAdd = atol(args);
+        {
+            // Copper amounts can exceed the 32-bit range of long on Windows.
+            char* end = nullptr;
+            errno = 0;
+            moneyToAdd = strtoll(args, &end, 10);
+            if (end == args || errno == ERANGE)
+                return false;
+            while (std::isspace(static_cast<unsigned char>(*end)))
+                ++end;
+            if (*end)
+                return false;
+        }
 
         uint64 targetMoney = target->GetMoney();
 
@@ -979,7 +992,7 @@ public:
                 moneyToAdd = MAX_MONEY_AMOUNT;
 
             if (targetMoney >= uint64(MAX_MONEY_AMOUNT) - moneyToAdd)
-                moneyToAdd -= targetMoney;
+                moneyToAdd = targetMoney < MAX_MONEY_AMOUNT ? MAX_MONEY_AMOUNT - targetMoney : 0;
 
             target->ModifyMoney(moneyToAdd);
         }
