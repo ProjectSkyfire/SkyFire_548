@@ -7,6 +7,7 @@
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
 #include "Opcodes.h"
+#include "ScriptMgr.h"
 #include "Transport.h"
 #include "Unit.h"
 #include "Vehicle.h"
@@ -96,6 +97,8 @@ namespace Movement
 
         unit->m_movementInfo.SetMovementFlags(moveFlags);
         move_spline.Initialize(args);
+        if (Player* player = unit->ToPlayer())
+            sScriptMgr->OnPlayerMovementChanged(player, unit, PlayerMovementChange::Spline);
 
         WorldPacket data(SMSG_ON_MONSTER_MOVE, 64);
         PacketBuilder::WriteMonsterMove(move_spline, data, unit);

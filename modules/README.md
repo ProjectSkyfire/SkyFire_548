@@ -51,6 +51,10 @@ void Addmod_exampleScripts()      // discovered + invoked automatically
 Scripts register with the core exactly like built-in scripts (subclass
 `PlayerScript`, `CommandScript`, `CreatureScript`, ... from `ScriptMgr.h`).
 
+Movement-validation modules can use the [movement hooks](../doc/ModuleMovementHooks.md)
+to inspect or reject client movement and track server-authorized movement changes.
+Detection rules, reports and database tables remain owned by the external module.
+
 ## Config files
 
 Any `conf/*.conf.dist` file is copied next to the worldserver binary on build and

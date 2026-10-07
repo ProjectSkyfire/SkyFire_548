@@ -9,6 +9,7 @@
 #include "CellImpl.h"
 #include "CombatPackets.h"
 #include "Common.h"
+#include "ScriptMgr.h"
 #include "ConditionMgr.h"
 #include "Creature.h"
 #include "CreatureAI.h"
@@ -4463,6 +4464,8 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
         return;
 
     m_speed_rate[mtype] = rate;
+    if (Player* player = ToPlayer())
+        sScriptMgr->OnPlayerMovementChanged(player, this, PlayerMovementChange::Speed);
 
     propagateSpeedChange();
 
@@ -7748,6 +7751,7 @@ void Unit::UpdateObjectVisibility(bool forced)
 
 void Unit::SendMoveKnockBack(Player* player, float speedXY, float speedZ, float vcos, float vsin)
 {
+    sScriptMgr->OnPlayerKnockback(player, this, speedXY, speedZ);
     ObjectGuid guid = GetGUID();
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, (1 + 8 + 4 + 4 + 4 + 4 + 4));
 

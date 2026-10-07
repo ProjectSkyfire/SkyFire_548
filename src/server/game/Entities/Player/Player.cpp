@@ -55,6 +55,7 @@
 #include "ReputationMgr.h"
 #include "PlayerPackets.h"
 #include "PlayerRestState.h"
+#include "ScriptMgr.h"
 #include "SkillDiscovery.h"
 #include "SocialMgr.h"
 #include "Spell.h"
@@ -2182,6 +2183,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             //lets save teleport destination for player
             m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
             m_teleport_options = options;
+            sScriptMgr->OnPlayerMovementChanged(this, this, PlayerMovementChange::Teleport);
             return true;
         }
 
@@ -2255,6 +2257,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 //lets save teleport destination for player
                 m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
                 m_teleport_options = options;
+                sScriptMgr->OnPlayerMovementChanged(this, this, PlayerMovementChange::Teleport);
                 return true;
             }
 
@@ -2349,6 +2352,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         //else
         //    return false;
     }
+    sScriptMgr->OnPlayerMovementChanged(this, this, PlayerMovementChange::Teleport);
     return true;
 }
 

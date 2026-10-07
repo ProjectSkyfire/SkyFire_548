@@ -51,6 +51,14 @@ struct AuctionEntry;
 struct ConditionSourceInfo;
 struct Condition;
 struct ItemTemplate;
+struct MovementInfo;
+
+enum class PlayerMovementChange
+{
+    Teleport,
+    Speed,
+    Spline
+};
 struct OutdoorPvPData;
 
 #define VISIBLE_RANGE       166.0f                          //MAX visible range (size of grid)
@@ -621,6 +629,19 @@ protected:
     PlayerScript(const char* name);
 
 public:
+    // Client data is untrusted. False discards the packet before movement side effects.
+    // Do not mutate state here; schedule corrections for OnUpdate instead.
+    virtual bool OnValidateMovement(Player* /*player*/, Unit* /*mover*/, MovementInfo const& /*movement*/, uint16 /*opcode*/) { return true; }
+
+    // Accepted client data, with its original timestamp. Query mover for applied state.
+    virtual void OnMovementApplied(Player* /*player*/, Unit* /*mover*/, MovementInfo const& /*movement*/, uint16 /*opcode*/) { }
+
+    // Trusted server impulse. speedZ follows SMSG_MOVE_KNOCK_BACK's sign convention.
+    virtual void OnKnockback(Player* /*player*/, Unit* /*mover*/, float /*speedXY*/, float /*speedZ*/) { }
+
+    // Server-authorized change; never an exemption requested by a client.
+    virtual void OnMovementChanged(Player* /*player*/, Unit* /*mover*/, PlayerMovementChange /*change*/) { }
+
     // Called when a player kills another player
     virtual void OnPVPKill(Player* /*killer*/, Player* /*killed*/) { }
 
@@ -946,6 +967,10 @@ public: /* Initialization */
     void OnPlayerEmote(Player* player, uint32 emote);
     void OnPlayerTextEmote(Player* player, uint32 textEmote, uint32 emoteNum, uint64 guid);
     void OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck);
+    bool OnPlayerValidateMovement(Player* player, Unit* mover, MovementInfo const& movement, uint16 opcode);
+    void OnPlayerMovementApplied(Player* player, Unit* mover, MovementInfo const& movement, uint16 opcode);
+    void OnPlayerKnockback(Player* player, Unit* mover, float speedXY, float speedZ);
+    void OnPlayerMovementChanged(Player* player, Unit* mover, PlayerMovementChange change);
     void OnPlayerLogin(Player* player, bool firstLogin);
     void OnPlayerLogout(Player* player);
     void OnPlayerCreate(Player* player);

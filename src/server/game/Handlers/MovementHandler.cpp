@@ -16,6 +16,7 @@
 #include "PetTransportController.h"
 #include "PetTransportSupport.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "Transport.h"
 #include "WaypointMovementGenerator.h"
@@ -553,14 +554,18 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     if (!ValidateMovementInfo(mover, movementInfo))
         return;
 
+    if (!ValidateTransportMovementInfo(recvPacket, movementInfo))
+        return;
+
+    if (!sScriptMgr->OnPlayerValidateMovement(_player, mover, movementInfo, opcode))
+        return;
+
+    MovementInfo const clientMovement = movementInfo;
     Transport* pendingPetTransportRemoval = NULL;
 
     /* handle special cases */
     if (movementInfo.transport.guid)
     {
-        if (!ValidateTransportMovementInfo(recvPacket, movementInfo))
-            return;
-
         // if we boarded a transport, add us to it
         if (plrMover)
         {
@@ -638,6 +643,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     if (mover->GetVehicle())
     {
         mover->SetOrientation(movementInfo.pos.GetOrientation());
+        sScriptMgr->OnPlayerMovementApplied(_player, mover, clientMovement, opcode);
         return;
     }
 
@@ -652,6 +658,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
     }
 
     mover->UpdatePosition(movementInfo.pos);
+    sScriptMgr->OnPlayerMovementApplied(_player, mover, clientMovement, opcode);
 
     if (plrMover && pendingPetTransportRemoval)
         Skyfire::PetTransport::RemoveOwnerHunterPet(plrMover, pendingPetTransportRemoval);
@@ -782,8 +789,15 @@ void WorldSession::HandleMoveNotActiveMover(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "WORLD: Recvd CMSG_MOVE_NOT_ACTIVE_MOVER");
 
+    if (ShouldIgnoreMovementWhileTeleporting(_player, recvData))
+        return;
+
     MovementInfo mi = ReadMovementInfoRequest(GetPlayer(), recvData);
+    if (!ValidateMovementInfo(_player, mi) || !ValidateTransportMovementInfo(recvData, mi) ||
+        !sScriptMgr->OnPlayerValidateMovement(_player, _player, mi, recvData.GetOpcode()))
+        return;
     _player->m_movementInfo = mi;
+    sScriptMgr->OnPlayerMovementApplied(_player, _player, mi, recvData.GetOpcode());
 }
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvData*/)
@@ -802,16 +816,24 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
 {
     SF_LOG_DEBUG("network", "CMSG_MOVE_KNOCK_BACK_ACK");
 
+    if (ShouldIgnoreMovementWhileTeleporting(_player->m_mover->ToPlayer(), recvData))
+        return;
+
     MovementInfo movementInfo = ReadMovementInfoRequest(GetPlayer(), recvData);
 
     if (!ValidateKnockBackAck(_player->m_mover, movementInfo))
         return;
 
-    _player->m_movementInfo = movementInfo;
+    Unit* mover = _player->m_mover;
+    if (!ValidateMovementInfo(mover, movementInfo) || !ValidateTransportMovementInfo(recvData, movementInfo) ||
+        !sScriptMgr->OnPlayerValidateMovement(_player, mover, movementInfo, recvData.GetOpcode()))
+        return;
+    mover->m_movementInfo = movementInfo;
+    sScriptMgr->OnPlayerMovementApplied(_player, mover, movementInfo, recvData.GetOpcode());
 
     WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, 66);
-    _player->WriteMovementInfo(data);
-    _player->SendMessageToSet(&data, false);
+    mover->WriteMovementInfo(data);
+    mover->SendMessageToSet(&data, false);
 }
 
 void WorldSession::HandleMoveHoverAck(WorldPacket& recvData)

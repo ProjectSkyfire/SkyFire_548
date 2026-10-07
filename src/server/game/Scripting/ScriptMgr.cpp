@@ -1233,6 +1233,29 @@ void ScriptMgr::OnPlayerSpellCast(Player* player, Spell* spell, bool skipCheck)
     FOREACH_SCRIPT(PlayerScript)->OnSpellCast(player, spell, skipCheck);
 }
 
+bool ScriptMgr::OnPlayerValidateMovement(Player* player, Unit* mover, MovementInfo const& movement, uint16 opcode)
+{
+    FOR_SCRIPTS_RET(PlayerScript, itr, end, true)
+        if (!itr->second->OnValidateMovement(player, mover, movement, opcode))
+            return false;
+    return true;
+}
+
+void ScriptMgr::OnPlayerMovementApplied(Player* player, Unit* mover, MovementInfo const& movement, uint16 opcode)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnMovementApplied(player, mover, movement, opcode);
+}
+
+void ScriptMgr::OnPlayerKnockback(Player* player, Unit* mover, float speedXY, float speedZ)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnKnockback(player, mover, speedXY, speedZ);
+}
+
+void ScriptMgr::OnPlayerMovementChanged(Player* player, Unit* mover, PlayerMovementChange change)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnMovementChanged(player, mover, change);
+}
+
 void ScriptMgr::OnPlayerLogin(Player* player, bool firstLogin)
 {
     FOREACH_SCRIPT(PlayerScript)->OnLogin(player, firstLogin);
