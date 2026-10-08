@@ -593,6 +593,32 @@ GuidRequest ReadObjectUpdateFailedRequest(WorldPacket& recvPacket)
     return request;
 }
 
+GuidRequest ReadObjectUpdateRescuedRequest(WorldPacket& recvPacket)
+{
+    GuidRequest request;
+
+    // 5.4.8 build 18414: one packed GUID, with a different layout from UPDATE_FAILED.
+    request.guid[5] = recvPacket.ReadBit();
+    request.guid[3] = recvPacket.ReadBit();
+    request.guid[2] = recvPacket.ReadBit();
+    request.guid[0] = recvPacket.ReadBit();
+    request.guid[6] = recvPacket.ReadBit();
+    request.guid[4] = recvPacket.ReadBit();
+    request.guid[1] = recvPacket.ReadBit();
+    request.guid[7] = recvPacket.ReadBit();
+
+    recvPacket.ReadByteSeq(request.guid[2]);
+    recvPacket.ReadByteSeq(request.guid[6]);
+    recvPacket.ReadByteSeq(request.guid[3]);
+    recvPacket.ReadByteSeq(request.guid[0]);
+    recvPacket.ReadByteSeq(request.guid[4]);
+    recvPacket.ReadByteSeq(request.guid[7]);
+    recvPacket.ReadByteSeq(request.guid[5]);
+    recvPacket.ReadByteSeq(request.guid[1]);
+
+    return request;
+}
+
 DiscardedTimeSyncAcksRequest ReadDiscardedTimeSyncAcksRequest(WorldPacket& recvData)
 {
     DiscardedTimeSyncAcksRequest request;
@@ -2800,6 +2826,17 @@ void WorldSession::HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket)
 
     // Pretend we've never seen this object
     //_player->m_clientGUIDs.erase(guid);
+}
+
+void WorldSession::HandleObjectUpdateRescuedOpcode(WorldPacket& recvPacket)
+{
+    GuidRequest request = ReadObjectUpdateRescuedRequest(recvPacket);
+
+    // The client has already recovered this object. A delayed notification must
+    // not change visibility membership or cause another create-object update.
+    WorldObject* obj = ObjectAccessor::GetWorldObject(*GetPlayer(), request.guid);
+    SF_LOG_DEBUG("network", "Object update rescued for object " UI64FMTD " (%s) for player %s (%u)",
+        uint64(request.guid), obj ? obj->GetName().c_str() : "object-not-found", GetPlayerName().c_str(), GetGuidLow());
 }
 
 void WorldSession::HandleSaveCUFProfiles(WorldPacket& recvPacket)

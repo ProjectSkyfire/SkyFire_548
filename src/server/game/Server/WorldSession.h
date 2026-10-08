@@ -1112,6 +1112,7 @@ public:                                                 // opcodes handlers
     void HandleUpdateMissileTrajectory(WorldPacket& recvPacket);
     void HandleViolenceLevel(WorldPacket& recvPacket);
     void HandleObjectUpdateFailedOpcode(WorldPacket& recvPacket);
+    void HandleObjectUpdateRescuedOpcode(WorldPacket& recvPacket);
     void HandleSelectFactionOpcode(WorldPacket& recvPacket);
     void HandleDiscardedTimeSyncAcks(WorldPacket& recvData);
     void HandleRequestCategoryCooldowns(WorldPacket& recvPacket);

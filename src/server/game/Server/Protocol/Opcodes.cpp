@@ -342,7 +342,8 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MOVE_WATER_WALK_ACK,                     0x10F2, STATUS_LOGGEDIN,                     PROCESS_THREADSAFE,   &WorldSession::HandleMoveWaterWalkAck                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_NAME_QUERY,                              0x0328, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_NPC_TEXT_QUERY,                          0x0287, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleNpcTextQueryOpcode              ); // 5.4.8 18414
-    DEFINE_OPCODE_HANDLER(CMSG_OBJECT_UPDATE_FAILED,                    0x1061, STATUS_LOGGEDIN,                     PROCESS_INPLACE,      &WorldSession::HandleObjectUpdateFailedOpcode        ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_OBJECT_UPDATE_FAILED,                    0x1061, STATUS_LOGGEDIN,                     PROCESS_THREADSAFE,   &WorldSession::HandleObjectUpdateFailedOpcode        ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_OBJECT_UPDATE_RESCUED,                   0x19E3, STATUS_LOGGEDIN,                     PROCESS_THREADSAFE,   &WorldSession::HandleObjectUpdateRescuedOpcode       ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OFFER_PETITION,                          0x15BE, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleOfferPetitionOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OPENING_CINEMATIC,                       0x0130, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleOpeningCinematic                ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_OPEN_ITEM,                               0x1D10, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleOpenItemOpcode                  ); // 5.4.8 18414
