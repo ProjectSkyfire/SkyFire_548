@@ -441,8 +441,24 @@ void PathGenerator::BuildPointPath(const float* startPoint, const float* endPoin
 
     NormalizePath();
 
+    // Validate the final path (NormalizePath/DensifyGroundPath add points). A single invalid
+    // vertex makes MoveSpline produce a garbage spline (total time INT32_MAX, invalid positions)
+    // that desyncs the unit between server and clients; treat it like any other Detour failure.
+    for (uint32 i = 0; i < _pathPoints.size(); ++i)
+    {
+        if (!Skyfire::IsValidMapCoord(_pathPoints[i].x, _pathPoints[i].y, _pathPoints[i].z))
+        {
+            SF_LOG_ERROR("maps", "PathGenerator::BuildPointPath: invalid point %u/%u (%f, %f, %f) for entry %u guid %u, using shortcut",
+                i, uint32(_pathPoints.size()), _pathPoints[i].x, _pathPoints[i].y, _pathPoints[i].z, _sourceUnit->GetEntry(), _sourceUnit->GetGUIDLow());
+            BuildShortcut();
+            _type = PATHFIND_NOPATH;
+            return;
+        }
+    }
+
     // first point is always our current location - we need the next one
-    SetActualEndPosition(_pathPoints[pointCount - 1]);
+    // DensifyGroundPath (in NormalizePath) adds points, so pointCount - 1 is no longer the end.
+    SetActualEndPosition(_pathPoints.back());
 
     // force the given destination, if needed
     if (_forceDestination &&
@@ -512,7 +528,9 @@ void PathGenerator::DensifyGroundPath()
             continue;
         }
 
-        G3D::Vector3 const& prev = densified.back();
+        // Copy, don't reference: emplace_back below can reallocate 'densified' when a long, sparse
+        // leg needs more than the reserved points, which would leave a dangling reference.
+        G3D::Vector3 const prev = densified.back();
         G3D::Vector3 const& next = _pathPoints[i];
         float const dx = next.x - prev.x;
         float const dy = next.y - prev.y;
@@ -779,10 +797,14 @@ dtStatus PathGenerator::FindSmoothPath(float const* startPos, float const* endPo
         dtPolyRef visited[MAX_VISIT_POLY];
 
         uint32 nvisited = 0;
-        _navMeshQuery->moveAlongSurface(polys[0], iterPos, moveTgt, &_filter, result, visited, (int*)&nvisited, MAX_VISIT_POLY);
+        // 'result' is not written when moveAlongSurface fails (ported from TrinityCore c602220).
+        if (dtStatusFailed(_navMeshQuery->moveAlongSurface(polys[0], iterPos, moveTgt, &_filter, result, visited, (int*)&nvisited, MAX_VISIT_POLY)))
+            return DT_FAILURE;
         npolys = FixupCorridor(polys, npolys, MAX_PATH_LENGTH, visited, nvisited);
 
-        _navMeshQuery->getPolyHeight(polys[0], result, &result[1]);
+        // keep moveAlongSurface's height if the poly height can't be resolved
+        if (dtStatusFailed(_navMeshQuery->getPolyHeight(polys[0], result, &result[1])))
+            SF_LOG_DEBUG("maps", "++ PathGenerator::FindSmoothPath: cannot find height at (%f, %f, %f)", result[2], result[0], result[1]);
         result[1] += 0.5f;
         dtVcopy(iterPos, result);
 
@@ -827,7 +849,8 @@ dtStatus PathGenerator::FindSmoothPath(float const* startPos, float const* endPo
                 }
                 // Move position at the other side of the off-mesh link.
                 dtVcopy(iterPos, endPos);
-                _navMeshQuery->getPolyHeight(polys[0], iterPos, &iterPos[1]);
+                if (dtStatusFailed(_navMeshQuery->getPolyHeight(polys[0], iterPos, &iterPos[1])))
+                    return DT_FAILURE;
                 iterPos[1] += 0.5f;
             }
         }
