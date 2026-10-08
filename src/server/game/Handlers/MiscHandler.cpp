@@ -572,23 +572,8 @@ GuidRequest ReadObjectUpdateFailedRequest(WorldPacket& recvPacket)
 {
     GuidRequest request;
 
-    request.guid[3] = recvPacket.ReadBit();
-    request.guid[5] = recvPacket.ReadBit();
-    request.guid[6] = recvPacket.ReadBit();
-    request.guid[0] = recvPacket.ReadBit();
-    request.guid[1] = recvPacket.ReadBit();
-    request.guid[2] = recvPacket.ReadBit();
-    request.guid[7] = recvPacket.ReadBit();
-    request.guid[4] = recvPacket.ReadBit();
-
-    recvPacket.ReadByteSeq(request.guid[0]);
-    recvPacket.ReadByteSeq(request.guid[6]);
-    recvPacket.ReadByteSeq(request.guid[5]);
-    recvPacket.ReadByteSeq(request.guid[7]);
-    recvPacket.ReadByteSeq(request.guid[2]);
-    recvPacket.ReadByteSeq(request.guid[1]);
-    recvPacket.ReadByteSeq(request.guid[3]);
-    recvPacket.ReadByteSeq(request.guid[4]);
+    recvPacket.ReadGuidMask(request.guid, 3, 5, 6, 0, 1, 2, 7, 4);
+    recvPacket.ReadGuidBytes(request.guid, 0, 6, 5, 7, 2, 1, 3, 4);
 
     return request;
 }
@@ -598,23 +583,8 @@ GuidRequest ReadObjectUpdateRescuedRequest(WorldPacket& recvPacket)
     GuidRequest request;
 
     // 5.4.8 build 18414: one packed GUID, with a different layout from UPDATE_FAILED.
-    request.guid[5] = recvPacket.ReadBit();
-    request.guid[3] = recvPacket.ReadBit();
-    request.guid[2] = recvPacket.ReadBit();
-    request.guid[0] = recvPacket.ReadBit();
-    request.guid[6] = recvPacket.ReadBit();
-    request.guid[4] = recvPacket.ReadBit();
-    request.guid[1] = recvPacket.ReadBit();
-    request.guid[7] = recvPacket.ReadBit();
-
-    recvPacket.ReadByteSeq(request.guid[2]);
-    recvPacket.ReadByteSeq(request.guid[6]);
-    recvPacket.ReadByteSeq(request.guid[3]);
-    recvPacket.ReadByteSeq(request.guid[0]);
-    recvPacket.ReadByteSeq(request.guid[4]);
-    recvPacket.ReadByteSeq(request.guid[7]);
-    recvPacket.ReadByteSeq(request.guid[5]);
-    recvPacket.ReadByteSeq(request.guid[1]);
+    recvPacket.ReadGuidMask(request.guid, 5, 3, 2, 0, 6, 4, 1, 7);
+    recvPacket.ReadGuidBytes(request.guid, 2, 6, 3, 0, 4, 7, 5, 1);
 
     return request;
 }
