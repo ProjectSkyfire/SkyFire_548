@@ -32,8 +32,6 @@ class instance_sethekk_halls : public InstanceMapScript
                 {
                     if (GetBossState(DATA_ANZU) == DONE)
                         creature->DisappearAndDie();
-                    else
-                        SetBossState(DATA_ANZU, IN_PROGRESS);
                 }
             }
 
