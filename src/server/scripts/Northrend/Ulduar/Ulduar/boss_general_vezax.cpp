@@ -217,7 +217,7 @@ class boss_general_vezax : public CreatureScript
             void CheckShamanisticRage()
             {
                 Map* map = me->GetMap();
-                if (map && map->IsDungeon())
+                if (map && map->IsInstance())
                 {
                     // If Shaman has Shamanistic Rage and use it during the fight, it will cast Corrupted Rage on him
                     Map::PlayerList const& Players = map->GetPlayers();
@@ -263,7 +263,7 @@ class boss_general_vezax : public CreatureScript
             Unit* CheckPlayersInRange(uint8 playersMin, float rangeMin, float rangeMax)
             {
                 Map* map = me->GetMap();
-                if (map && map->IsDungeon())
+                if (map && map->IsInstance())
                 {
                     std::list<Player*> PlayerList;
                     Map::PlayerList const& Players = map->GetPlayers();
