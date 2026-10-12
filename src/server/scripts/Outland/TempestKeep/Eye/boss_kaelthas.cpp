@@ -405,7 +405,7 @@ class boss_kaelthas : public CreatureScript
                             who->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                             AttackStart(who);
                         }
-                        else if (me->GetMap()->IsDungeon())
+                        else if (me->GetMap()->IsInstance())
                         {
                             if (instance && !instance->GetData(DATA_KAELTHASEVENT) && !Phase)
                                 StartEvent();
