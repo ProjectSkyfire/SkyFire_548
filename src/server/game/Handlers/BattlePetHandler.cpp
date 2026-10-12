@@ -1321,7 +1321,7 @@ void WorldSession::HandleBattlePetSetFlags(WorldPacket& recvData)
 
     recvData >> flag;
 
-    recvData.ReadGuidMask(petEntry, 5, 4);
+    recvData.ReadGuidMask(petEntry, 5, 2);
     uint8 mode = recvData.ReadBits(2);
     recvData.ReadGuidMask(petEntry, 1, 4, 6, 3, 7, 0);
 
