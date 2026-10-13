@@ -503,21 +503,21 @@ public:
     virtual bool SelectBGGroups(BattlegroundQueue*, Battleground*, uint8, uint32, uint32, bool) { return false; }
     virtual bool CanJoinBG(Player*, Group*) { return true; }
     virtual bool HandleBGQueueAnnounce(BattlegroundQueue*, Battleground*, Player*, uint8, uint32, uint32) { return false; }
-    virtual void BeforeBGAddPlayer(Battleground*, Player*) { }
-    virtual void AfterBGAddPlayer(Battleground*, Player*) { }
-    virtual void AfterBGRemovePlayer(Battleground*, Player*) { }
-    virtual void BeforeBGStart(Battleground*) { }
-    virtual void OnFactionUpdate(Player*) { }
-    virtual void OnResurrect(Player*) { }
-    virtual void BeforeTeamChat(Player*, ChatMsg, Language&) { }
-    virtual void BeforeReputation(Player*, uint32&, int32&, bool) { }
-    virtual void BeforeBFEnter(Battlefield*, Player*) { }
-    virtual void BeforeBFJoin(Battlefield*, Player*, TeamId&) { }
-    virtual void AfterBFJoin(Battlefield*, Player*, bool) { }
-    virtual void AfterBFLeave(Battlefield*, Player*) { }
-    virtual void BeforeBFEnd(Battlefield*) { }
-    virtual void AfterBFEnd(Battlefield*) { }
-    virtual void OnBFKill(Battlefield*, Player*, Unit*) { }
+    virtual void BeforeBGAddPlayer(Battleground*, Player*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void AfterBGAddPlayer(Battleground*, Player*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void AfterBGRemovePlayer(Battleground*, Player*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void BeforeBGStart(Battleground*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void OnFactionUpdate(Player*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void OnResurrect(Player*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void BeforeTeamChat(Player*, ChatMsg, Language&) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void BeforeReputation(Player*, uint32&, int32&, bool) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void BeforeBFEnter(Battlefield*, Player*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void BeforeBFJoin(Battlefield*, Player*, TeamId&) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void AfterBFJoin(Battlefield*, Player*, bool) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void AfterBFLeave(Battlefield*, Player*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void BeforeBFEnd(Battlefield*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void AfterBFEnd(Battlefield*) { /* Optional notification; the default leaves core behavior unchanged. */ }
+    virtual void OnBFKill(Battlefield*, Player*, Unit*) { /* Optional notification; the default leaves core behavior unchanged. */ }
 };
 
 class OutdoorPvPScript : public ScriptObject
@@ -539,7 +539,7 @@ protected:
 
 public:
     // Optional additions to an existing command tree after all scripts register.
-    virtual void ModifyCommands(std::vector<ChatCommand>&) const { }
+    virtual void ModifyCommands(std::vector<ChatCommand>&) const { /* No command additions by default. */ }
     // Should return a pointer to a valid command table (ChatCommand array) to be used by ChatHandler.
     virtual std::vector<ChatCommand> GetCommands() const = 0;
 };
@@ -936,24 +936,24 @@ public: /* Initialization */
     /* BattlegroundScript */
     Battleground* CreateBattleground(BattlegroundTypeId typeId);
 
-    bool SelectBGGroups(BattlegroundQueue*, Battleground*, uint8, uint32, uint32, bool);
-    bool CanJoinBG(Player*, Group*);
-    bool HandleBGQueueAnnounce(BattlegroundQueue*, Battleground*, Player*, uint8, uint32, uint32);
-    void BeforeBGAddPlayer(Battleground*, Player*);
-    void AfterBGAddPlayer(Battleground*, Player*);
-    void AfterBGRemovePlayer(Battleground*, Player*);
-    void BeforeBGStart(Battleground*);
-    void OnFactionUpdate(Player*);
-    void OnResurrect(Player*);
-    void BeforeTeamChat(Player*, ChatMsg, Language&);
-    void BeforeReputation(Player*, uint32&, int32&, bool);
-    void BeforeBFEnter(Battlefield*, Player*);
-    void BeforeBFJoin(Battlefield*, Player*, TeamId&);
-    void AfterBFJoin(Battlefield*, Player*, bool);
-    void AfterBFLeave(Battlefield*, Player*);
-    void BeforeBFEnd(Battlefield*);
-    void AfterBFEnd(Battlefield*);
-    void OnBFKill(Battlefield*, Player*, Unit*);
+    bool SelectBGGroups(BattlegroundQueue*, Battleground*, uint8, uint32, uint32, bool) const;
+    bool CanJoinBG(Player*, Group*) const;
+    bool HandleBGQueueAnnounce(BattlegroundQueue*, Battleground*, Player*, uint8, uint32, uint32) const;
+    void BeforeBGAddPlayer(Battleground*, Player*) const;
+    void AfterBGAddPlayer(Battleground*, Player*) const;
+    void AfterBGRemovePlayer(Battleground*, Player*) const;
+    void BeforeBGStart(Battleground*) const;
+    void OnFactionUpdate(Player*) const;
+    void OnResurrect(Player*) const;
+    void BeforeTeamChat(Player*, ChatMsg, Language&) const;
+    void BeforeReputation(Player*, uint32&, int32&, bool) const;
+    void BeforeBFEnter(Battlefield*, Player*) const;
+    void BeforeBFJoin(Battlefield*, Player*, TeamId&) const;
+    void AfterBFJoin(Battlefield*, Player*, bool) const;
+    void AfterBFLeave(Battlefield*, Player*) const;
+    void BeforeBFEnd(Battlefield*) const;
+    void AfterBFEnd(Battlefield*) const;
+    void OnBFKill(Battlefield*, Player*, Unit*) const;
 
     /* OutdoorPvPScript */
     OutdoorPvP* CreateOutdoorPvP(OutdoorPvPData const* data);

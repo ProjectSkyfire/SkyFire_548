@@ -20,6 +20,7 @@
 #include "WorldPacket.h"
 #include "ScriptMgr.h"
 #include "PvpTeamState.h"
+#include <array>
 
 Battlefield::~Battlefield()
 {
@@ -180,10 +181,10 @@ void Battlefield::InvitePlayerToQueue(Player* player)
 void Battlefield::InvitePlayersInQueueToWar()
 {
     // A team-selection extension may transfer entries during invitation.
-    GuidSet players[BG_TEAMS_COUNT] = {m_PlayersInQueue[0], m_PlayersInQueue[1]};
+    std::array<GuidSet, BG_TEAMS_COUNT> players = {m_PlayersInQueue[0], m_PlayersInQueue[1]};
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
     {
-        for (GuidSet::const_iterator itr = players[team].begin(); itr != players[team].end(); ++itr)
+        for (auto itr = players[team].begin(); itr != players[team].end(); ++itr)
         {
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
             {
@@ -202,9 +203,9 @@ void Battlefield::InvitePlayersInQueueToWar()
 
 void Battlefield::InvitePlayersInZoneToWar()
 {
-    GuidSet players[BG_TEAMS_COUNT] = {m_players[0], m_players[1]};
+    std::array<GuidSet, BG_TEAMS_COUNT> players = {m_players[0], m_players[1]};
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
-        for (GuidSet::const_iterator itr = players[team].begin(); itr != players[team].end(); ++itr)
+        for (auto itr = players[team].begin(); itr != players[team].end(); ++itr)
         {
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
             {
@@ -340,7 +341,7 @@ bool Battlefield::HasWarVacancy(TeamId team, uint64 candidate) const
     if (team != TEAM_ALLIANCE && team != TEAM_HORDE)
         return false;
     return Skyfire::HasTeamVacancy(m_PlayersInWar[team].size(), m_InvitedPlayers[team].size(), m_MaxPlayer,
-        candidate && (m_PlayersInWar[team].count(candidate) || m_InvitedPlayers[team].count(candidate)));
+        candidate && (m_PlayersInWar[team].contains(candidate) || m_InvitedPlayers[team].contains(candidate)));
 }
 
 bool Battlefield::TransferPlayerTeam(Player* player, TeamId team)
@@ -351,12 +352,12 @@ bool Battlefield::TransferPlayerTeam(Player* player, TeamId team)
     if (old == team)
         return true;
     uint64 guid = player->GetGUID();
-    bool inWar = m_PlayersInWar[old].count(guid) != 0;
+    bool inWar = m_PlayersInWar[old].contains(guid);
     Group* battlefieldGroup = GetGroupPlayer(guid, old);
     bool regroup = inWar || battlefieldGroup;
     if (regroup && !player->IsInWorld())
         return false;
-    if (IsWarTime() && (inWar || m_InvitedPlayers[old].count(guid)) && !HasWarVacancy(team, guid))
+    if (IsWarTime() && (inWar || m_InvitedPlayers[old].contains(guid)) && !HasWarVacancy(team, guid))
         return false;
     if (battlefieldGroup)
     {

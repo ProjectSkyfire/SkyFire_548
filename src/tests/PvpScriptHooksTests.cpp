@@ -1,5 +1,6 @@
 #include "ScriptMgr.h"
 #include "DatabaseEnv.h"
+#include <memory>
 #ifdef CFBG_TEST_MODULE
 #include "Battleground.h"
 #include "BattlegroundQueue.h"
@@ -27,6 +28,16 @@ public:
     bool CanJoinBG(Player*, Group*) override { return false; }
     void BeforeTeamChat(Player*, ChatMsg, Language& language) override { language = Language::LANG_UNIVERSAL; }
 };
+struct ScriptRegistryCleanup
+{
+    void operator()(Probe*) const
+    {
+        // Probe registers itself on construction. The registry owns its lifetime
+        // and Unload deletes it, so deleting the pointer here would free it twice.
+        sScriptMgr->Unload();
+    }
+};
+
 int main()
 {
     Check(!sScriptMgr->SelectBGGroups(nullptr,nullptr,0,1,10,false),"Empty registry must use native queue formation");
@@ -45,12 +56,12 @@ int main()
     sScriptMgr->AfterBGRemovePlayer(nullptr,nullptr);
     sScriptMgr->BeforeBFEnd(nullptr);
     sScriptMgr->AfterBFEnd(nullptr);
-    new Probe();
+    std::unique_ptr<Probe, ScriptRegistryCleanup> probe(std::make_unique<Probe>().release());
     Check(sScriptMgr->SelectBGGroups(nullptr,nullptr,0,1,10,false),"Registered queue owner was not dispatched");
     Check(!sScriptMgr->CanJoinBG(nullptr,nullptr),"Registered group rejection was ignored");
     sScriptMgr->BeforeTeamChat(nullptr,ChatMsg::CHAT_MSG_RAID,lang);
     Check(lang==Language::LANG_UNIVERSAL,"Language reference was not dispatched");
-    sScriptMgr->Unload();
+    probe.reset();
     Check(!sScriptMgr->SelectBGGroups(nullptr,nullptr,0,1,10,false),"Unload left a PvP handler registered");
 #ifdef CFBG_TEST_MODULE
     AddSC_CFBG();
