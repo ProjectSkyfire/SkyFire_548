@@ -18,6 +18,8 @@
 class AuctionHouseObject;
 class AuraScript;
 class Battleground;
+class BattlegroundQueue;
+class Battlefield;
 class BattlegroundMap;
 class Channel;
 class ChatCommand;
@@ -491,6 +493,33 @@ public:
     virtual Battleground* GetBattleground() const = 0;
 };
 
+// Optional PvP extensions. Unhandled selection always uses the native queue logic.
+class PvPScript : public ScriptObject
+{
+protected:
+    explicit PvPScript(char const* name);
+public:
+    bool IsDatabaseBound() const override { return false; }
+    virtual bool SelectBGGroups(BattlegroundQueue*, Battleground*, uint8, uint32, uint32, bool) { return false; }
+    virtual bool CanJoinBG(Player*, Group*) { return true; }
+    virtual bool HandleBGQueueAnnounce(BattlegroundQueue*, Battleground*, Player*, uint8, uint32, uint32) { return false; }
+    virtual void BeforeBGAddPlayer(Battleground*, Player*) { }
+    virtual void AfterBGAddPlayer(Battleground*, Player*) { }
+    virtual void AfterBGRemovePlayer(Battleground*, Player*) { }
+    virtual void BeforeBGStart(Battleground*) { }
+    virtual void OnFactionUpdate(Player*) { }
+    virtual void OnResurrect(Player*) { }
+    virtual void BeforeTeamChat(Player*, ChatMsg, Language&) { }
+    virtual void BeforeReputation(Player*, uint32&, int32&, bool) { }
+    virtual void BeforeBFEnter(Battlefield*, Player*) { }
+    virtual void BeforeBFJoin(Battlefield*, Player*, TeamId&) { }
+    virtual void AfterBFJoin(Battlefield*, Player*, bool) { }
+    virtual void AfterBFLeave(Battlefield*, Player*) { }
+    virtual void BeforeBFEnd(Battlefield*) { }
+    virtual void AfterBFEnd(Battlefield*) { }
+    virtual void OnBFKill(Battlefield*, Player*, Unit*) { }
+};
+
 class OutdoorPvPScript : public ScriptObject
 {
 protected:
@@ -509,6 +538,8 @@ protected:
     CommandScript(const char* name);
 
 public:
+    // Optional additions to an existing command tree after all scripts register.
+    virtual void ModifyCommands(std::vector<ChatCommand>&) const { }
     // Should return a pointer to a valid command table (ChatCommand array) to be used by ChatHandler.
     virtual std::vector<ChatCommand> GetCommands() const = 0;
 };
@@ -904,6 +935,25 @@ public: /* Initialization */
 
     /* BattlegroundScript */
     Battleground* CreateBattleground(BattlegroundTypeId typeId);
+
+    bool SelectBGGroups(BattlegroundQueue*, Battleground*, uint8, uint32, uint32, bool);
+    bool CanJoinBG(Player*, Group*);
+    bool HandleBGQueueAnnounce(BattlegroundQueue*, Battleground*, Player*, uint8, uint32, uint32);
+    void BeforeBGAddPlayer(Battleground*, Player*);
+    void AfterBGAddPlayer(Battleground*, Player*);
+    void AfterBGRemovePlayer(Battleground*, Player*);
+    void BeforeBGStart(Battleground*);
+    void OnFactionUpdate(Player*);
+    void OnResurrect(Player*);
+    void BeforeTeamChat(Player*, ChatMsg, Language&);
+    void BeforeReputation(Player*, uint32&, int32&, bool);
+    void BeforeBFEnter(Battlefield*, Player*);
+    void BeforeBFJoin(Battlefield*, Player*, TeamId&);
+    void AfterBFJoin(Battlefield*, Player*, bool);
+    void AfterBFLeave(Battlefield*, Player*);
+    void BeforeBFEnd(Battlefield*);
+    void AfterBFEnd(Battlefield*);
+    void OnBFKill(Battlefield*, Player*, Unit*);
 
     /* OutdoorPvPScript */
     OutdoorPvP* CreateOutdoorPvP(OutdoorPvPData const* data);

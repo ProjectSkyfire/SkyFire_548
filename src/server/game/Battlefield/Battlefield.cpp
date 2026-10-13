@@ -18,6 +18,8 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
+#include "ScriptMgr.h"
+#include "PvpTeamState.h"
 
 Battlefield::~Battlefield()
 {
@@ -31,6 +33,7 @@ Battlefield::~Battlefield()
 // Called when a player enters the zone
 void Battlefield::HandlePlayerEnterZone(Player* player, uint32 /*zone*/)
 {
+    sScriptMgr->BeforeBFEnter(this, player);
     // If battle is started,
     // If not full of players > invite player to join the war
     // If full of players > announce to player that BF is full and kick him after a few second if he desn't leave
@@ -83,6 +86,7 @@ void Battlefield::HandlePlayerLeaveZone(Player* player, uint32 /*zone*/)
     SendRemoveWorldStates(player);
     RemovePlayerFromResurrectQueue(player->GetGUID());
     OnPlayerLeaveZone(player);
+    sScriptMgr->AfterBFLeave(this, player);
 }
 
 bool Battlefield::Update(uint32 diff)
@@ -175,12 +179,15 @@ void Battlefield::InvitePlayerToQueue(Player* player)
 
 void Battlefield::InvitePlayersInQueueToWar()
 {
+    // A team-selection extension may transfer entries during invitation.
+    GuidSet players[BG_TEAMS_COUNT] = {m_PlayersInQueue[0], m_PlayersInQueue[1]};
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
     {
-        for (GuidSet::const_iterator itr = m_PlayersInQueue[team].begin(); itr != m_PlayersInQueue[team].end(); ++itr)
+        for (GuidSet::const_iterator itr = players[team].begin(); itr != players[team].end(); ++itr)
         {
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
             {
+                sScriptMgr->BeforeBFEnter(this, player);
                 if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
                     InvitePlayerToWar(player);
                 else
@@ -195,13 +202,15 @@ void Battlefield::InvitePlayersInQueueToWar()
 
 void Battlefield::InvitePlayersInZoneToWar()
 {
+    GuidSet players[BG_TEAMS_COUNT] = {m_players[0], m_players[1]};
     for (uint8 team = 0; team < BG_TEAMS_COUNT; ++team)
-        for (GuidSet::const_iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
+        for (GuidSet::const_iterator itr = players[team].begin(); itr != players[team].end(); ++itr)
         {
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
             {
                 if (m_PlayersInWar[player->GetTeamId()].count(player->GetGUID()) || m_InvitedPlayers[player->GetTeamId()].count(player->GetGUID()))
                     continue;
+                sScriptMgr->BeforeBFEnter(this, player);
                 if (m_PlayersInWar[player->GetTeamId()].size() + m_InvitedPlayers[player->GetTeamId()].size() < m_MaxPlayer)
                     InvitePlayerToWar(player);
                 else // Battlefield is full of players
@@ -305,7 +314,9 @@ void Battlefield::EndBattle(bool endByTimer)
     else
         DoPlaySoundToAll(BF_HORDE_WINS);
 
+    sScriptMgr->BeforeBFEnd(this);
     OnBattleEnd(endByTimer);
+    sScriptMgr->AfterBFEnd(this);
 
     // Reset battlefield timer
     m_Timer = m_NoWarBattleTime;
@@ -322,6 +333,41 @@ void Battlefield::DoPlaySoundToAll(uint32 SoundID)
         for (GuidSet::const_iterator itr = m_PlayersInWar[team].begin(); itr != m_PlayersInWar[team].end(); ++itr)
             if (Player* player = sObjectAccessor->FindPlayer(*itr))
                 player->GetSession()->SendPacket(&data);
+}
+
+bool Battlefield::HasWarVacancy(TeamId team, uint64 candidate) const
+{
+    if (team != TEAM_ALLIANCE && team != TEAM_HORDE)
+        return false;
+    return Skyfire::HasTeamVacancy(m_PlayersInWar[team].size(), m_InvitedPlayers[team].size(), m_MaxPlayer,
+        candidate && (m_PlayersInWar[team].count(candidate) || m_InvitedPlayers[team].count(candidate)));
+}
+
+bool Battlefield::TransferPlayerTeam(Player* player, TeamId team)
+{
+    if (!player || (team != TEAM_ALLIANCE && team != TEAM_HORDE))
+        return false;
+    TeamId old = player->GetTeamId();
+    if (old == team)
+        return true;
+    uint64 guid = player->GetGUID();
+    bool inWar = m_PlayersInWar[old].count(guid) != 0;
+    Group* battlefieldGroup = GetGroupPlayer(guid, old);
+    bool regroup = inWar || battlefieldGroup;
+    if (regroup && !player->IsInWorld())
+        return false;
+    if (IsWarTime() && (inWar || m_InvitedPlayers[old].count(guid)) && !HasWarVacancy(team, guid))
+        return false;
+    if (battlefieldGroup)
+    {
+        battlefieldGroup->RemoveMember(guid);
+    }
+    Skyfire::TransferTeamRecords(m_players, m_PlayersInQueue, m_PlayersInWar,
+        m_InvitedPlayers, m_PlayersWillBeKick, guid, old, team);
+    player->SetTemporaryTeam(team);
+    if (regroup)
+        AddOrSetPlayerToCorrectBfGroup(player);
+    return true;
 }
 
 bool Battlefield::HasPlayer(Player* player) const
@@ -351,6 +397,14 @@ void Battlefield::PlayerAcceptInviteToWar(Player* player)
     if (!IsWarTime())
         return;
 
+    TeamId const oldTeam = player->GetTeamId();
+    TeamId team = oldTeam;
+    sScriptMgr->BeforeBFJoin(this, player, team);
+    if (team != oldTeam && !TransferPlayerTeam(player, team))
+    {
+        sScriptMgr->AfterBFJoin(this, player, false);
+        return;
+    }
     if (AddOrSetPlayerToCorrectBfGroup(player))
     {
         player->GetSession()->SendBfEntered(m_Guid);
@@ -361,6 +415,13 @@ void Battlefield::PlayerAcceptInviteToWar(Player* player)
             player->ToggleAFK();
 
         OnPlayerJoinWar(player);                               //for scripting
+        sScriptMgr->AfterBFJoin(this, player, true);
+    }
+    else
+    {
+        if (team != oldTeam)
+            TransferPlayerTeam(player, oldTeam);
+        sScriptMgr->AfterBFJoin(this, player, false);
     }
 }
 
