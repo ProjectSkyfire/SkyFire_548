@@ -3,6 +3,22 @@
 # See COPYRIGHT file for Copyright information
 #
 
+add_executable(pvp_team_state_tests PvpTeamStateTests.cpp)
+target_include_directories(pvp_team_state_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/game/Battlefield)
+add_test(NAME pvp_team_state_tests COMMAND pvp_team_state_tests)
+
+if(TARGET worldserver)
+  add_executable(pvp_script_hooks_tests PvpScriptHooksTests.cpp)
+  target_include_directories(pvp_script_hooks_tests PRIVATE $<TARGET_PROPERTY:game,INCLUDE_DIRECTORIES>)
+  get_target_property(PVP_TEST_LIBRARIES worldserver LINK_LIBRARIES)
+  target_link_libraries(pvp_script_hooks_tests ${PVP_TEST_LIBRARIES})
+  add_test(NAME pvp_script_hooks_tests COMMAND pvp_script_hooks_tests)
+  set_tests_properties(pvp_script_hooks_tests PROPERTIES WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  if(MSVC)
+    skyfire_copy_windows_runtime_dependencies(pvp_script_hooks_tests)
+  endif()
+endif()
+
 add_executable(database_queue_tests
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database/DatabaseQueue.cpp
   ${CMAKE_SOURCE_DIR}/src/server/shared/Database/DatabaseWorker.cpp
