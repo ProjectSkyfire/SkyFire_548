@@ -16,6 +16,7 @@
 #include "WorldSession.h"
 
 #include <algorithm>
+#include <vector>
 
 namespace lfg
 {
@@ -758,33 +759,12 @@ namespace lfg
         proposal.leader = 0;
         proposal.dungeonId = Skyfire::Containers::SelectRandomContainerElement(proposalDungeons);
 
-        bool leader = false;
+        std::vector<uint64> realPlayers;
         for (LfgRolesMap::const_iterator itRoles = proposalRoles.begin(); itRoles != proposalRoles.end(); ++itRoles)
         {
-            // Assing new leader
-            if (itRoles->second & PLAYER_ROLE_LEADER)
-            {
-                if (!leader || !proposal.leader || std::rand() % 2)
-                    proposal.leader = itRoles->first;
-                leader = true;
-            }
-            else if (!leader && (!proposal.leader || std::rand() % 2))
-                proposal.leader = itRoles->first;
-
-            // Prefer a real client over a socketless session so modules follow
-            // the human after the dungeon teleport.
-            if (proposal.leader)
-            {
-                Player* leaderPlayer = ObjectAccessor::FindPlayer(proposal.leader);
-                bool const leaderIsBot = leaderPlayer && leaderPlayer->GetSession() && leaderPlayer->GetSession()->IsBot();
-                if (leaderIsBot)
-                {
-                    Player* candidate = ObjectAccessor::FindPlayer(itRoles->first);
-                    bool const candidateIsBot = candidate && candidate->GetSession() && candidate->GetSession()->IsBot();
-                    if (candidate && !candidateIsBot)
-                        proposal.leader = itRoles->first;
-                }
-            }
+            Player* candidate = ObjectAccessor::FindPlayer(itRoles->first);
+            if (candidate && candidate->GetSession() && !candidate->GetSession()->IsBot())
+                realPlayers.push_back(itRoles->first);
 
             // Assing player data and roles
             LfgProposalPlayer& data = proposal.players[itRoles->first];
@@ -793,6 +773,17 @@ namespace lfg
             if (!proposal.isNew && data.group && data.group == proposal.group) // Player from existing group, autoaccept
                 data.accept = LFG_ANSWER_AGREE;
         }
+
+        // A bot must not lead. With more than one real player, rotate so the
+        // same player is not the leader of every dungeon.
+        if (!realPlayers.empty())
+        {
+            static uint32 nextRealLeader = 0;
+            proposal.leader = realPlayers[nextRealLeader % realPlayers.size()];
+            ++nextRealLeader;
+        }
+        else if (!proposalRoles.empty())
+            proposal.leader = proposalRoles.begin()->first;
 
         // Mark proposal members as not queued (but not remove queue data)
         for (LfgGuidList::const_iterator itQueue = proposal.queues.begin(); itQueue != proposal.queues.end(); ++itQueue)

@@ -680,6 +680,15 @@ namespace lfg
             }
         }
 
+        // A full group already inside its dungeon has nothing to queue for.
+        // Joining again starts a role check that greys out Leave Queue, then a
+        // proposal someone declines.
+        if (joinData.result == LFG_JOIN_OK && isContinue && grp && !hasFlexibleRaid && grp->GetMembersCount() >= MAXGROUPSIZE)
+        {
+            grp->SendUpdate();
+            joinData.result = LFG_JOIN_GROUP_FULL;
+        }
+
         // Can't join. Send result
         if (joinData.result != LFG_JOIN_OK)
         {
@@ -1269,6 +1278,10 @@ namespace lfg
             {
                 grp = new Group();
                 grp->ConvertToLFG();
+                // The first group list is what the client keeps. It has to name
+                // the dungeon before anyone is added, or the eye has no dungeon
+                // to offer teleport and leave once the solo queue ticket ends.
+                grp->PrepareLfgDungeon(dungeon->Entry(), GetActiveQueueId(proposal.leader));
                 if (!grp->Create(player))
                 {
                     delete grp;
@@ -1344,7 +1357,7 @@ namespace lfg
         if (!grp->isLFGGroup())
             grp->ConvertToLFG();
 
-        uint64 leader = proposal.leader && grp->IsMember(proposal.leader) ? proposal.leader : grp->GetLeaderGUID();
+        uint64 leader = preferredLeader && grp->IsMember(preferredLeader) ? preferredLeader : grp->GetLeaderGUID();
         if (leader && grp->GetLeaderGUID() != leader)
             grp->ChangeLeader(leader);
 
@@ -1364,6 +1377,10 @@ namespace lfg
         }
 
         bool const forceChangeInstance = !proposal.isNew && groupAlreadyExisted;
+
+        // Zone-in is when the client decides this is an LFG dungeon. The
+        // instance party list, dungeon included, has to be in hand first.
+        grp->SendUpdate();
 
         // Teleport Player
         for (LfgGuidList::const_iterator it = playersToTeleport.begin(); it != playersToTeleport.end(); ++it)
@@ -2584,6 +2601,13 @@ namespace lfg
             SF_LOG_TRACE("lfg.data.player.queue.active.set", "Player: %u, QueueId: %u", GUID_LOPART(guid), queueId);
             PlayersStore[guid].SetActiveQueueId(queueId);
         }
+    }
+
+    void LFGMgr::PrepareNewGroupDungeon(uint64 groupGuid, uint32 dungeonEntry, uint8 queueId)
+    {
+        SetActiveQueueId(groupGuid, queueId);
+        SetDungeon(groupGuid, dungeonEntry);
+        SetState(groupGuid, LFG_STATE_DUNGEON);
     }
 
     void LFGMgr::SetDungeon(uint64 guid, uint32 dungeon)

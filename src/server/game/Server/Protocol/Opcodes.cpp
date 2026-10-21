@@ -304,6 +304,7 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_DND,                         0x002E, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_EMOTE,                       0x103E, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_GUILD,                       0x0CAE, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode               ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_INSTANCE,                    0x162A, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_OFFICER,                     0x0ABF, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_PARTY,                       0x109A, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_MESSAGECHAT_RAID,                        0x083E, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleMessagechatOpcode               ); // 5.4.8 18414

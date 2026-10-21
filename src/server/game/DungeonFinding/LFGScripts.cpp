@@ -251,7 +251,10 @@ namespace lfg
 
         if (Player* player = ObjectAccessor::FindPlayer(guid))
         {
-            if (method == GROUP_REMOVEMETHOD_LEAVE && state == LFG_STATE_DUNGEON &&
+            bool const isBot = player->GetSession() && player->GetSession()->IsBot();
+            if (isBot)
+                player->RemoveAura(LFG_SPELL_DUNGEON_DESERTER);
+            else if (method == GROUP_REMOVEMETHOD_LEAVE && state == LFG_STATE_DUNGEON &&
                 players >= LFG_GROUP_KICK_VOTES_NEEDED)
                 player->CastSpell(player, LFG_SPELL_DUNGEON_DESERTER, true);
             //else if (state == LFG_STATE_BOOT)
@@ -276,12 +279,21 @@ namespace lfg
                 if (liveLeader && liveLeader != guid && group->IsMember(liveLeader))
                     offerTo = liveLeader;
             }
+            auto isRealPlayer = [](uint64 memberGuid) -> bool
+            {
+                Player* member = ObjectAccessor::FindPlayer(memberGuid);
+                return member && member->GetSession() && !member->GetSession()->IsBot();
+            };
+
+            if (offerTo && !isRealPlayer(offerTo))
+                offerTo = 0;
+
             if (!offerTo)
             {
                 for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* member = itr->GetSource();
-                    if (member && member->GetGUID() != guid)
+                    if (member && member->GetGUID() != guid && isRealPlayer(member->GetGUID()))
                     {
                         offerTo = member->GetGUID();
                         break;

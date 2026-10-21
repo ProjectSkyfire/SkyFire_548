@@ -230,6 +230,10 @@ public:
     uint8 GetMemberGroup(uint64 guid) const;
 
     void ChangeFlagEveryoneAssistant(bool apply);
+    // Stored until Create() assigns the group guid, so the first group list
+    // already names the dungeon. The client latches "in an LFG dungeon" from
+    // that list at the moment of the teleport.
+    void PrepareLfgDungeon(uint32 dungeonEntry, uint8 queueId);
     void ConvertToLFG();
     void ConvertToRaid();
     void ConvertToGroup();
@@ -346,5 +350,7 @@ protected:
     uint32              m_dbStoreId;                    // Represents the ID used in database (Can be reused by other groups if group was disbanded)
     bool                _readyCheckInProgress;
     bool                m_isDisbanding;
+    uint32              m_pendingLfgDungeon;
+    uint8               m_pendingLfgQueueId;
 };
 #endif

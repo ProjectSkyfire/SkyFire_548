@@ -411,6 +411,11 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recvData)
     if (!group->IsLeader(GetPlayer()->GetGUID()) || player->GetGroup() != group)
         return;
 
+    // Dungeon groups are led by players. Promoting a bot leaves the party with
+    // nobody the bots will follow.
+    if (group->isLFGGroup() && player->GetSession() && player->GetSession()->IsBot())
+        return;
+
     // Everything's fine, accepted.
     group->ChangeLeader(guid);
     group->SendUpdate();

@@ -104,6 +104,13 @@ public:
             return false;
         }
 
+        if (isInstance && player->GetSession() && player->GetSession()->IsBot())
+        {
+            handler->SendSysMessage("Bots cannot receive dungeon deserter.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
         Aura* aura = player->AddAura(isInstance ? LFG_SPELL_DUNGEON_DESERTER : BG_SPELL_DESERTER, player);
 
         if (!aura)

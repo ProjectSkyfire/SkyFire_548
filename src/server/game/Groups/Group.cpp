@@ -60,7 +60,7 @@ Group::Group() : m_leaderGuid(0), m_leaderName(""), m_groupType(GROUPTYPE_NORMAL
 m_dungeonDifficulty(DIFFICULTY_NORMAL), m_raidDifficulty(DIFFICULTY_10MAN_NORMAL),
 m_bgGroup(NULL), m_bfGroup(NULL), m_lootMethod(LootMethod::FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON), m_looterGuid(0),
 m_subGroupsCounts(NULL), m_guid(0), m_counter(0), m_maxEnchantingLevel(0), m_dbStoreId(0), _readyCheckInProgress(false),
-m_isDisbanding(false)
+m_isDisbanding(false), m_pendingLfgDungeon(0), m_pendingLfgQueueId(0)
 {
     for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
         m_targetIcons[i] = 0;
@@ -152,6 +152,14 @@ bool Group::Create(Player* leader)
 
         CharacterDatabase.Execute(stmt);
 
+        // Publish the dungeon before the first member list. A list that goes
+        // out with no dungeon makes the client drop the eye once the queue
+        // ticket is cleared, and a later list does not bring it back.
+        if (isLFGGroup() && m_pendingLfgDungeon)
+        {
+            sLFGMgr->PrepareNewGroupDungeon(m_guid, m_pendingLfgDungeon, m_pendingLfgQueueId);
+            m_pendingLfgDungeon = 0;
+        }
 
         ASSERT(AddMember(leader)); // If the leader can't be added to a new group because it appears full, something is clearly wrong.
 
@@ -224,6 +232,12 @@ void Group::ChangeFlagEveryoneAssistant(bool apply)
         m_groupType = GroupType(m_groupType & ~GROUPTYPE_EVERYONE_IS_ASSISTANT);
 
     this->SendUpdate();
+}
+
+void Group::PrepareLfgDungeon(uint32 dungeonEntry, uint8 queueId)
+{
+    m_pendingLfgDungeon = dungeonEntry;
+    m_pendingLfgQueueId = queueId;
 }
 
 void Group::ConvertToLFG()
@@ -615,17 +629,59 @@ bool Group::RemoveMember(uint64 guid, const RemoveMethod& method /*= GROUP_REMOV
             m_memberSlots.erase(slot);
         }
 
-        // Pick new leader if necessary
-        if (m_leaderGuid == guid)
+        // Bots do not stay grouped once every real player has gone. An offline
+        // member still counts, since a logged-out player can remain in the party.
+        if (!isBGGroup() && !isBFGroup())
         {
-            for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+            bool hasRealPlayer = false;
+            for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
             {
-                if (ObjectAccessor::FindPlayer(itr->guid))
+                Player* member = ObjectAccessor::FindPlayerInOrOutOfWorld(itr->guid);
+                if (!member || !member->GetSession() || !member->GetSession()->IsBot())
                 {
-                    ChangeLeader(itr->guid);
+                    hasRealPlayer = true;
                     break;
                 }
             }
+
+            if (!hasRealPlayer)
+            {
+                for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+                    if (Player* member = ObjectAccessor::FindPlayerInOrOutOfWorld(itr->guid))
+                        member->RemoveAura(lfg::LFG_SPELL_DUNGEON_DESERTER);
+
+                Disband();
+                return false;
+            }
+        }
+
+        // Pick new leader if necessary. An LFG group stays with a real player
+        // when one is still in the party, so a bot is never left in charge.
+        if (m_leaderGuid == guid)
+        {
+            uint64 nextLeader = 0;
+            uint64 fallback = 0;
+            for (member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
+            {
+                Player* member = ObjectAccessor::FindPlayer(itr->guid);
+                if (!member)
+                    continue;
+
+                if (!fallback)
+                    fallback = itr->guid;
+
+                bool const memberIsBot = member->GetSession() && member->GetSession()->IsBot();
+                if (isLFGGroup() && memberIsBot)
+                    continue;
+
+                nextLeader = itr->guid;
+                break;
+            }
+
+            if (!nextLeader)
+                nextLeader = fallback;
+            if (nextLeader)
+                ChangeLeader(nextLeader);
         }
 
         SendUpdate();

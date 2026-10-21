@@ -52,6 +52,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case CMSG_MESSAGECHAT_GUILD:
             type = ChatMsg::CHAT_MSG_GUILD;
             break;
+        case CMSG_MESSAGECHAT_INSTANCE:
+            type = ChatMsg::CHAT_MSG_INSTANCE;
+            break;
         case CMSG_MESSAGECHAT_OFFICER:
             type = ChatMsg::CHAT_MSG_OFFICER;
             break;
@@ -178,6 +181,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                     {
                         case ChatMsg::CHAT_MSG_PARTY:
                         case ChatMsg::CHAT_MSG_PARTY_LEADER:
+                        case ChatMsg::CHAT_MSG_INSTANCE:
+                        case ChatMsg::CHAT_MSG_INSTANCE_LEADER:
                         case ChatMsg::CHAT_MSG_RAID:
                         case ChatMsg::CHAT_MSG_RAID_LEADER:
                         case ChatMsg::CHAT_MSG_RAID_WARNING:
@@ -435,9 +440,9 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
         case ChatMsg::CHAT_MSG_INSTANCE:
         case ChatMsg::CHAT_MSG_INSTANCE_LEADER:
         {
-            // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
+            // Dungeon finder and battleground parties use instance chat, not party chat.
             Group* group = GetPlayer()->GetGroup();
-            if (!group || !group->isBGGroup())
+            if (!group || (!group->isLFGGroup() && !group->isBGGroup()))
                 return;
 
             if (group->IsLeader(GetPlayer()->GetGUID()))
@@ -618,7 +623,7 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recvData)
         case ChatMsg::CHAT_MSG_INSTANCE:
         {
             Group* group = sender->GetGroup();
-            if (!group || !group->isBGGroup())
+            if (!group || (!group->isLFGGroup() && !group->isBGGroup()))
                 return;
 
             WorldPacket data;
