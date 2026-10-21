@@ -1957,7 +1957,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Concussive Barrage
         case 35102:
         {
-            if (!victim)
+            if (!victim || !procSpell)
                 return false;
 
             // Proc only with Chimera Shot or Multi-Shot
@@ -2130,14 +2130,16 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         // Body and Soul
         case 65081:
         {
-            // Proc only from PW:S cast
-            if (!(procSpell->SpellFamilyFlags[0] & 0x00000001))
+            // Proc only from PW:S cast. Melee has no proc spell.
+            if (!procSpell || !(procSpell->SpellFamilyFlags[0] & 0x00000001))
                 return false;
             break;
         }
         // Culling the Herd
         case 70893:
         {
+            if (!procSpell)
+                return false;
             // check if we're doing a critical hit
             if (!(procSpell->SpellFamilyFlags[1] & 0x10000000) && (procEx != PROC_EX_CRITICAL_HIT))
                 return false;
@@ -2148,7 +2150,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         }
         case 91021:
         {
-            if (!(procSpell->SpellFamilyName == SPELLFAMILY_ROGUE))
+            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_ROGUE))
                 return false;
             if (!(procSpell->SpellIconID == 856 || procSpell->SpellIconID == 498 || procSpell->SpellIconID == 244))
                 return false;
@@ -2156,7 +2158,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         }
         case 55021:
         {
-            if (!(procSpell->SpellFamilyName == SPELLFAMILY_MAGE))
+            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_MAGE))
                 return false;
             if (!(procSpell->SpellIconID == 17))
                 return false;
@@ -2164,7 +2166,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         }
         case 12880: // Enrage
         {
-            if (!(procSpell->SpellFamilyName == SPELLFAMILY_WARRIOR))
+            // Auto-attacks proc this aura with a null spell. Those are not Enrage builders.
+            if (!procSpell || !(procSpell->SpellFamilyName == SPELLFAMILY_WARRIOR))
                 return false;
 
             // check if we're doing a critical hit
