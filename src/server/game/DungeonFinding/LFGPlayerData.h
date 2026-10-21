@@ -59,6 +59,7 @@ namespace lfg
         void SetSelectedDungeons(const LfgDungeonSet& dungeons);
         void SetReturnLocation(uint32 mapId, float x, float y, float z, float o);
         void ClearReturnLocation();
+        void SetTicketTime(time_t ticketTime);
 
         // General
         LfgState GetState() const;
@@ -73,6 +74,7 @@ namespace lfg
         std::string const& GetComment() const;
         LfgDungeonSet const& GetSelectedDungeons() const;
         LfgReturnLocation const& GetReturnLocation() const;
+        time_t GetTicketTime() const;
 
     private:
         LfgPlayerQueueData& GetActiveQueueData();
@@ -84,6 +86,7 @@ namespace lfg
 
         // Queue
         uint8 m_ActiveQueueId;                             ///< Active queue data owner
+        time_t m_TicketTime;                               ///< Join time sent to the client queue ticket
         LfgPlayerQueueDataContainer m_Queues;              ///< Queue-scoped player data
     };
 

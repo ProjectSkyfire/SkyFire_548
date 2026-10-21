@@ -23,7 +23,7 @@ namespace lfg
         Roles(0), Comment("")
     { }
 
-    LfgPlayerData::LfgPlayerData() : m_Team(0), m_Group(0), m_ActiveQueueId(0)
+    LfgPlayerData::LfgPlayerData() : m_Team(0), m_Group(0), m_ActiveQueueId(0), m_TicketTime(0)
     { }
 
     LfgPlayerData::~LfgPlayerData() { }
@@ -39,6 +39,7 @@ namespace lfg
                 data.OldState = LFG_STATE_NONE;
                 m_Queues.erase(m_ActiveQueueId);
                 m_ActiveQueueId = 0;
+                m_TicketTime = 0;
                 return;
             case LFG_STATE_FINISHED_DUNGEON:
                 data.Roles = 0;
@@ -115,6 +116,11 @@ namespace lfg
             itr->second.ReturnLocation = LfgReturnLocation();
     }
 
+    void LfgPlayerData::SetTicketTime(time_t ticketTime)
+    {
+        m_TicketTime = ticketTime;
+    }
+
     LfgState LfgPlayerData::GetState() const
     {
         return GetActiveQueueData().State;
@@ -163,6 +169,11 @@ namespace lfg
     LfgReturnLocation const& LfgPlayerData::GetReturnLocation() const
     {
         return GetActiveQueueData().ReturnLocation;
+    }
+
+    time_t LfgPlayerData::GetTicketTime() const
+    {
+        return m_TicketTime;
     }
 
     LfgPlayerQueueData& LfgPlayerData::GetActiveQueueData()

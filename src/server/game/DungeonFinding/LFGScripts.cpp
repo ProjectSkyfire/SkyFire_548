@@ -264,15 +264,36 @@ namespace lfg
 
         if (isLFG && state != LFG_STATE_FINISHED_DUNGEON) // Need more players to finish the dungeon
         {
-            uint64 leaderGuid = sLFGMgr->GetLeader(gguid);
-            Player* leader = ObjectAccessor::FindPlayer(leaderGuid);
-            if (!leader)
+            // The stored leader is often the player who already left. Only someone
+            // still standing in this group may be asked to queue a replacement.
+            uint64 offerTo = 0;
+            uint64 const storedLeader = sLFGMgr->GetLeader(gguid);
+            if (storedLeader && storedLeader != guid && group->IsMember(storedLeader))
+                offerTo = storedLeader;
+            if (!offerTo)
             {
-                leaderGuid = group->GetLeaderGUID();
-                leader = ObjectAccessor::FindPlayer(leaderGuid);
+                uint64 const liveLeader = group->GetLeaderGUID();
+                if (liveLeader && liveLeader != guid && group->IsMember(liveLeader))
+                    offerTo = liveLeader;
+            }
+            if (!offerTo)
+            {
+                for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player* member = itr->GetSource();
+                    if (member && member->GetGUID() != guid)
+                    {
+                        offerTo = member->GetGUID();
+                        break;
+                    }
+                }
             }
 
-            if (leader)
+            if (storedLeader == guid && offerTo)
+                sLFGMgr->SetLeader(gguid, offerTo);
+
+            Player* leader = offerTo ? ObjectAccessor::FindPlayer(offerTo) : NULL;
+            if (leader && leader->GetGUID() != guid && leader->GetGroup() == group)
                 leader->GetSession()->SendLfgOfferContinue(sLFGMgr->GetDungeon(gguid, false));
         }
     }

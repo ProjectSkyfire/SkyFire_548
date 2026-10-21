@@ -20,7 +20,7 @@ namespace lfg
     LfgGroupQueueData::LfgGroupQueueData() : State(LFG_STATE_NONE), OldState(LFG_STATE_NONE), Dungeon(0)
     { }
 
-    LfgGroupData::LfgGroupData() : m_Leader(0), m_ActiveQueueId(0), m_KicksLeft(LFG_GROUP_MAX_KICKS),
+    LfgGroupData::LfgGroupData() : m_Leader(0), m_ActiveQueueId(0), m_TicketTime(0), m_KicksLeft(LFG_GROUP_MAX_KICKS),
         m_VoteKickActive(false)
     { }
 
@@ -44,6 +44,7 @@ namespace lfg
                 data.Dungeon = 0;
                 m_Queues.erase(m_ActiveQueueId);
                 m_ActiveQueueId = 0;
+                m_TicketTime = 0;
                 m_KicksLeft = LFG_GROUP_MAX_KICKS;
                 return;
             case LFG_STATE_FINISHED_DUNGEON:
@@ -129,6 +130,16 @@ namespace lfg
     uint8 LfgGroupData::GetActiveQueueId() const
     {
         return m_ActiveQueueId;
+    }
+
+    void LfgGroupData::SetTicketTime(time_t ticketTime)
+    {
+        m_TicketTime = ticketTime;
+    }
+
+    time_t LfgGroupData::GetTicketTime() const
+    {
+        return m_TicketTime;
     }
 
     LfgGroupQueueDataContainer const& LfgGroupData::GetQueues() const

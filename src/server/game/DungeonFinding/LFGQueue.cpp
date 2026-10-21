@@ -740,6 +740,10 @@ namespace lfg
         uint64 gguid = *check.begin();
         proposal.queues = check;
         proposal.isNew = numLfgGroups != 1 || sLFGMgr->GetOldState(gguid) != LFG_STATE_DUNGEON;
+        // A full premade is one party guid. Keep that party so the dungeon uses
+        // the same group the client already queued, instead of building a new one.
+        if (!proposal.group && check.size() == 1 && IS_GROUP_GUID(gguid))
+            proposal.group = gguid;
 
         if (!sLFGMgr->AllQueued(check))
         {

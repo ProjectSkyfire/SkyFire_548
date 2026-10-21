@@ -47,6 +47,7 @@ namespace lfg
         void RemoveAllPlayers();
         void SetLeader(uint64 guid);
         void SetActiveQueueId(uint8 queueId);
+        void SetTicketTime(time_t ticketTime);
 
         // Dungeon
         void SetDungeon(uint32 dungeon);
@@ -61,6 +62,7 @@ namespace lfg
         uint8 GetPlayerCount() const;
         uint64 GetLeader() const;
         uint8 GetActiveQueueId() const;
+        time_t GetTicketTime() const;
         LfgGroupQueueDataContainer const& GetQueues() const;
 
         // Dungeon
@@ -79,6 +81,7 @@ namespace lfg
         uint64 m_Leader;                                   ///< Leader GUID
         LfgGuidSet m_Players;                              ///< Players in group
         uint8 m_ActiveQueueId;                             ///< Active queue data owner
+        time_t m_TicketTime;                               ///< Join time sent to the client queue ticket
         LfgGroupQueueDataContainer m_Queues;               ///< Queue-scoped group data
         // Vote Kick
         uint8 m_KicksLeft;                                 ///< Number of kicks left

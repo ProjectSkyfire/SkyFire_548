@@ -452,6 +452,8 @@ namespace lfg
         bool AllQueued(LfgGuidList const& check);
         /// Gets queue join time
         time_t GetQueueJoinTime(uint64 guid);
+        void SetQueueTicketTime(uint64 guid, time_t ticketTime);
+        time_t GetQueueTicketTime(uint64 guid);
         /// Checks if given roles match, modifies given roles map with new roles
         static bool CheckGroupRoles(LfgRolesMap& groles);
         /// Assigns queued players to damage roles for role-neutral scenario queues
@@ -505,7 +507,7 @@ namespace lfg
         void SendLfgJoinResult(uint64 guid, LfgJoinResultData const& data);
         void SendLfgRoleChosen(uint64 guid, uint64 pguid, uint8 roles);
         void SendLfgRoleCheckUpdate(uint64 guid, LfgRoleCheck const& roleCheck);
-        void SendLfgUpdateStatus(uint64 guid, LfgUpdateData const& data, bool party);
+        void SendLfgUpdateStatus(uint64 guid, LfgUpdateData const& data, bool party, uint64 queueGuidOverride = 0, uint8 queueIdOverride = 0, uint32 joinTimeOverride = 0);
         void SendLfgUpdateProposal(uint64 guid, LfgProposal const& proposal);
 
         LfgGuidSet const& GetPlayers(uint64 guid);

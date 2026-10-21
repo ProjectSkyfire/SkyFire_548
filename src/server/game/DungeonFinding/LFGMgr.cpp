@@ -721,6 +721,10 @@ namespace lfg
             }
 
             SetState(gguid, LFG_STATE_ROLECHECK);
+            // One ticket time for the whole party. Later "added" and "removed"
+            // packets have to repeat it or the client keeps the queue eye.
+            time_t const ticketTime = time(NULL);
+            SetQueueTicketTime(gguid, ticketTime);
             // Send update to player
             LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment);
             for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -728,6 +732,7 @@ namespace lfg
                 if (Player* plrg = itr->GetSource())
                 {
                     uint64 pguid = plrg->GetGUID();
+                    SetQueueTicketTime(pguid, ticketTime);
                     plrg->GetSession()->SendLfgUpdateStatus(updateData, false);
                     SetActiveQueueId(pguid, queueId);
                     SetState(pguid, LFG_STATE_ROLECHECK);
@@ -746,8 +751,10 @@ namespace lfg
         {
             LfgRolesMap rolesMap;
             rolesMap[guid] = roles;
+            time_t const ticketTime = time(NULL);
+            SetQueueTicketTime(guid, ticketTime);
             LFGQueue& queue = GetQueue(guid);
-            queue.AddQueueData(guid, time(NULL), dungeons, rolesMap);
+            queue.AddQueueData(guid, ticketTime, dungeons, rolesMap);
 
             if (!isContinue)
             {
@@ -889,6 +896,9 @@ namespace lfg
                     RemoveProposal(it, LFG_UPDATETYPE_PROPOSAL_DECLINED);
                 break;
             }
+            case LFG_STATE_ROLECHECK:
+                ClearQueueState(guid, "Leave rolecheck solo player");
+                break;
             case LFG_STATE_NONE:
             case LFG_STATE_RAIDBROWSER:
             {
@@ -999,6 +1009,24 @@ namespace lfg
         }
 
         LfgJoinResultData joinData = LfgJoinResultData(joinResult, roleCheck.state);
+        if (roleCheck.state == LFG_ROLECHECK_FINISHED)
+        {
+            SetState(gguid, LFG_STATE_QUEUED);
+            // The proposal accept path compares this link to the party that queued.
+            // A premade never got one, so the first answer was stored as a decline.
+            SetLeader(gguid, roleCheck.leader);
+            for (LfgRolesMap::const_iterator it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
+            {
+                SetGroup(it->first, gguid);
+                AddPlayerToGroup(gguid, it->first);
+            }
+            time_t ticketTime = GetQueueTicketTime(gguid);
+            if (!ticketTime)
+                ticketTime = time(NULL);
+            LFGQueue& queue = GetQueue(gguid);
+            queue.AddQueueData(gguid, ticketTime, roleCheck.dungeons, roleCheck.roles);
+        }
+
         for (LfgRolesMap::const_iterator it = roleCheck.roles.begin(); it != roleCheck.roles.end(); ++it)
         {
             uint64 pguid = it->first;
@@ -1026,12 +1054,7 @@ namespace lfg
         }
 
         if (roleCheck.state == LFG_ROLECHECK_FINISHED)
-        {
-            SetState(gguid, LFG_STATE_QUEUED);
-            LFGQueue& queue = GetQueue(gguid);
-            queue.AddQueueData(gguid, time_t(time(NULL)), roleCheck.dungeons, roleCheck.roles);
             RoleChecksStore.erase(itRoleCheck);
-        }
         else if (roleCheck.state != LFG_ROLECHECK_INITIALITING)
         {
             RestoreOrClearState(gguid, "Rolecheck Failed");
@@ -1316,6 +1339,10 @@ namespace lfg
         SetActiveQueueId(gguid, GetActiveQueueId(proposal.leader));
         SetDungeon(gguid, dungeon->Entry());
         SetState(gguid, LFG_STATE_DUNGEON);
+        // A premade stays the same party. Mark it LFG so the eye can teleport
+        // and leave instead of treating the group as a fresh queue.
+        if (!grp->isLFGGroup())
+            grp->ConvertToLFG();
 
         uint64 leader = proposal.leader && grp->IsMember(proposal.leader) ? proposal.leader : grp->GetLeaderGUID();
         if (leader && grp->GetLeaderGUID() != leader)
@@ -1412,7 +1439,21 @@ namespace lfg
             return;
         }
 
-        if (player.group && GetGroup(guid) != player.group)
+        // Premade members queue on the party guid. The stored LFG link can still
+        // be empty; the live party is the same group the proposal recorded.
+        auto stillInProposalGroup = [&](uint64 playerGuid, uint64 proposalGroup) -> bool
+        {
+            if (!proposalGroup)
+                return true;
+
+            if (GetGroup(playerGuid) == proposalGroup)
+                return true;
+
+            Player* member = ObjectAccessor::FindPlayer(playerGuid);
+            return member && member->GetGroup() && member->GetGroup()->GetGUID() == proposalGroup;
+        };
+
+        if (!stillInProposalGroup(guid, player.group))
         {
             SF_LOG_DEBUG("lfg.proposal.update", "Player %u is no longer in proposal group %u. Removing stale proposal %u.",
                 GUID_LOPART(guid), GUID_LOPART(player.group), proposalId);
@@ -1476,7 +1517,7 @@ namespace lfg
                 return;
             }
 
-            if (it->second.group && GetGroup(pguid) != it->second.group)
+            if (!stillInProposalGroup(pguid, it->second.group))
             {
                 SF_LOG_DEBUG("lfg.proposal.update", "Proposal %u accepted but player %u left proposal group %u.",
                     proposalId, GUID_LOPART(pguid), GUID_LOPART(it->second.group));
@@ -1492,8 +1533,17 @@ namespace lfg
 
         uint64 queueOwner = proposal.queues.empty() ? guid : proposal.queues.front();
         LFGQueue& queue = GetQueue(queueOwner);
-        LfgUpdateData groupFoundData = LfgUpdateData(LFG_UPDATETYPE_GROUP_FOUND);
+        LfgDungeonSet foundDungeon;
+        foundDungeon.insert(proposal.dungeonId);
+        LfgUpdateData groupFoundData = LfgUpdateData(LFG_UPDATETYPE_GROUP_FOUND, foundDungeon, "");
         LfgUpdateData removedFromQueueData = LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
+        struct LfgClientTicket
+        {
+            uint64 queueGuid;
+            uint8 queueId;
+            uint32 joinTime;
+        };
+        std::map<uint64, LfgClientTicket> clientTickets;
         for (LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
         {
             uint64 pguid = it->first;
@@ -1505,6 +1555,18 @@ namespace lfg
             time_t queueJoinTime = queue.GetJoinTime(queuedGuid);
             if (!queueJoinTime && queuedGuid != pguid)
                 queueJoinTime = queue.GetJoinTime(pguid);
+            if (!queueJoinTime)
+                queueJoinTime = GetQueueTicketTime(queuedGuid);
+            if (!queueJoinTime)
+                queueJoinTime = GetQueueTicketTime(pguid);
+
+            LfgClientTicket ticket;
+            ticket.queueGuid = queuedGuid;
+            ticket.queueId = GetActiveQueueId(queuedGuid);
+            if (!ticket.queueId)
+                ticket.queueId = GetQueueId(queuedGuid);
+            ticket.joinTime = queueJoinTime ? uint32(queueJoinTime) : 0;
+            clientTickets[pguid] = ticket;
 
             if (queueJoinTime)
                 waitTime = int32(joinTime - queueJoinTime);
@@ -1551,11 +1613,17 @@ namespace lfg
         for (LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
         {
             uint64 pguid = it->first;
-            uint64 gguid = it->second.group;
+            LfgClientTicket const& ticket = clientTickets[pguid];
 
-            SendLfgUpdateStatus(pguid, groupFoundData, gguid != 0);
-            SendLfgUpdateStatus(pguid, removedFromQueueData, true);
-            SendLfgUpdateStatus(pguid, removedFromQueueData, false);
+            // Same guid and join time the client stored when it entered the queue.
+            // Group found switches the eye to the dungeon group; removed then drops
+            // the queue. A new party guid or a new timestamp leaves the eye queued.
+            SendLfgUpdateStatus(pguid, groupFoundData, false, 0, ticket.queueId, ticket.joinTime);
+            if (ticket.queueGuid && ticket.queueGuid != pguid)
+                SendLfgUpdateStatus(pguid, groupFoundData, true, ticket.queueGuid, ticket.queueId, ticket.joinTime);
+            SendLfgUpdateStatus(pguid, removedFromQueueData, false, 0, ticket.queueId, ticket.joinTime);
+            if (ticket.queueGuid && ticket.queueGuid != pguid)
+                SendLfgUpdateStatus(pguid, removedFromQueueData, true, ticket.queueGuid, ticket.queueId, ticket.joinTime);
             SetState(pguid, LFG_STATE_DUNGEON);
         }
 
@@ -1832,6 +1900,11 @@ namespace lfg
         {
             SF_LOG_DEBUG("lfg.teleport", "Player %s not in group/lfggroup or dungeon not found!",
                 player->GetName().c_str());
+            if (out && player->GetMap() && player->GetMap()->IsDungeon())
+            {
+                player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY, player->m_homebindZ, 0.0f);
+                return;
+            }
             player->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
             return;
         }
@@ -1845,13 +1918,26 @@ namespace lfg
 
         if (out)
         {
-            SF_LOG_DEBUG("lfg.teleport", "Player %s is being teleported out. Current Map %u - Expected Map %u",
-                player->GetName().c_str(), player->GetMapId(), uint32(dungeon->map));
-            if (player->GetMapId() == uint32(dungeon->map))
+            bool const inside = player->GetMapId() == uint32(dungeon->map) ||
+                (player->GetMap() && player->GetMap()->IsDungeon());
+            SF_LOG_DEBUG("lfg.teleport", "Player %s is being teleported out. Current Map %u - Expected Map %u inside: %u",
+                player->GetName().c_str(), player->GetMapId(), uint32(dungeon->map), inside ? 1 : 0);
+            if (inside)
             {
                 uint64 const guid = player->GetGUID();
                 LfgPlayerData& playerData = PlayersStore[guid];
-                LfgReturnLocation const& returnLocation = playerData.GetReturnLocation();
+                LfgReturnLocation returnLocation = playerData.GetReturnLocation();
+                if (!returnLocation.IsSet)
+                {
+                    for (LfgPlayerQueueDataContainer::const_iterator it = playerData.GetQueues().begin(); it != playerData.GetQueues().end(); ++it)
+                    {
+                        if (it->second.ReturnLocation.IsSet)
+                        {
+                            returnLocation = it->second.ReturnLocation;
+                            break;
+                        }
+                    }
+                }
                 if (returnLocation.IsSet && MapManager::IsValidMapCoord(returnLocation.MapId, returnLocation.X, returnLocation.Y, returnLocation.Z, returnLocation.O))
                 {
                     if (player->TeleportTo(returnLocation.MapId, returnLocation.X, returnLocation.Y, returnLocation.Z, returnLocation.O))
@@ -1868,7 +1954,8 @@ namespace lfg
                 }
 
                 playerData.ClearReturnLocation();
-                player->TeleportToBGEntryPoint();
+                if (!player->TeleportToBGEntryPoint())
+                    player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY, player->m_homebindZ, 0.0f);
                 if (WorldSession* session = player->GetSession())
                     if (session->IsBot() && player->IsBeingTeleported())
                         session->FinalizeBotTeleport();
@@ -2447,6 +2534,10 @@ namespace lfg
 
         LfgGuidSet const players = itr->second.GetPlayers();
         LfgUpdateData removedFromQueueData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE);
+        // Read the ticket before the queue row is deleted. A status packet
+        // whose join time is zero does not match the client's queue and is dropped.
+        time_t const joinTime = GetQueueJoinTime(guid);
+        uint8 const queueId = GetQueueId(guid);
 
         RoleChecksStore.erase(guid);
         BootsStore.erase(guid);
@@ -2459,7 +2550,7 @@ namespace lfg
             if (sendUpdate)
             {
                 if (Player* player = ObjectAccessor::FindPlayer(*it))
-                    player->GetSession()->SendLfgClearStatus();
+                    player->GetSession()->SendLfgClearStatus(guid, queueId, true, uint32(joinTime));
                 else
                 {
                     SendLfgUpdateStatus(*it, removedFromQueueData, true);
@@ -2675,10 +2766,10 @@ namespace lfg
             player->GetSession()->SendLfgRoleCheckUpdate(roleCheck);
     }
 
-    void LFGMgr::SendLfgUpdateStatus(uint64 guid, LfgUpdateData const& data, bool party)
+    void LFGMgr::SendLfgUpdateStatus(uint64 guid, LfgUpdateData const& data, bool party, uint64 queueGuidOverride, uint8 queueIdOverride, uint32 joinTimeOverride)
     {
         if (Player const* player = ObjectAccessor::FindPlayerInOrOutOfWorld(guid))
-            player->GetSession()->SendLfgUpdateStatus(data, party);
+            player->GetSession()->SendLfgUpdateStatus(data, party, queueGuidOverride, queueIdOverride, joinTimeOverride);
     }
 
     void LFGMgr::SendLfgJoinResult(uint64 guid, LfgJoinResultData const& data)
@@ -2769,9 +2860,29 @@ namespace lfg
             }
 
         if (itr != QueuesStore.end())
-            return itr->second.GetJoinTime(queueGuid);
+        {
+            time_t joinTime = itr->second.GetJoinTime(queueGuid);
+            if (joinTime)
+                return joinTime;
+        }
 
-        return 0;
+        return GetQueueTicketTime(queueGuid);
+    }
+
+    void LFGMgr::SetQueueTicketTime(uint64 guid, time_t ticketTime)
+    {
+        if (IS_GROUP_GUID(guid))
+            GroupsStore[guid].SetTicketTime(ticketTime);
+        else
+            PlayersStore[guid].SetTicketTime(ticketTime);
+    }
+
+    time_t LFGMgr::GetQueueTicketTime(uint64 guid)
+    {
+        if (IS_GROUP_GUID(guid))
+            return GroupsStore[guid].GetTicketTime();
+
+        return PlayersStore[guid].GetTicketTime();
     }
 
     // Only for debugging purposes

@@ -228,6 +228,15 @@ void Group::ChangeFlagEveryoneAssistant(bool apply)
 
 void Group::ConvertToLFG()
 {
+    // The client already has this party in the normal (home) slot. Leave Instance
+    // Group only runs when the party is in the instance slot, so drop the home
+    // copy before the update that files it there.
+    if (!isLFGGroup())
+    {
+        for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+            SendUpdateToPlayer(citr->guid, NULL);
+    }
+
     m_groupType = GroupType(m_groupType | GROUPTYPE_LFG | GROUPTYPE_UNK1);
     m_lootMethod = LootMethod::NEED_BEFORE_GREED;
     if (!isBGGroup() && !isBFGroup())
@@ -1804,7 +1813,9 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
         data.WriteByteSeq(groupGuid[6]);
         data.WriteByteSeq(groupGuid[4]);
         data << uint8(0x10);
-        data << uint8(0);
+        // 0 is a normal party. 1 is the instance party, which is the only slot
+        // the eye's Leave Instance Group button will leave.
+        data << uint8(isLFGGroup() ? 1 : 0);
         data << int32(-1);
         data.WriteByteSeq(groupGuid[7]);
         data.WriteByteSeq(leaderGuid[3]);
@@ -1913,13 +1924,16 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data.WriteBit(groupGuid[2]);
     data.WriteBit(groupGuid[4]);
     data.WriteBit(groupGuid[1]);
-    data.WriteBit(0);                                   // is LFG
+    bool const isLfg = isLFGGroup();
+    data.WriteBit(isLfg);                               // is LFG
     data.WriteBit(leaderGuid[2]);
     data.WriteBit(groupGuid[6]);
 
-    /*if (isLFGGroup())
+    if (isLfg)
     {
-    }*/
+        data.WriteBit(false);                           // LFG aborted
+        data.WriteBit(false);                           // First reward
+    }
 
     data.WriteBit(leaderGuid[4]);
     data.WriteBit(groupGuid[3]);
@@ -1936,9 +1950,22 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data.append(memberData);
     data.WriteByteSeq(groupGuid[1]);
 
-    /*if (isLFGGroup())
+    uint32 lfgDungeonEntry = 0;
+    uint8 lfgRoles = 0;
+    if (isLfg)
     {
-    }*/
+        lfgDungeonEntry = sLFGMgr->GetDungeon(m_guid, false);
+        lfgRoles = slot ? uint8(slot->roles) : 0;
+        uint8 lfgComplete = sLFGMgr->GetState(m_guid) == lfg::LFG_STATE_FINISHED_DUNGEON ? 2 : 0;
+        data << float(0.0f);                            // Gear difference
+        data << uint8(0);                               // Stranger count
+        data << uint8(lfgComplete);                     // 0 in progress, 2 complete
+        data << uint32(lfgDungeonEntry);                // Dungeon the eye teleports to
+        data << uint8(0);                               // Boot count
+        data << uint8(0);                               // Kick votes
+        data << uint8(lfgRoles);                        // This player's role
+        data << uint32(0);                              // Random slot
+    }
 
     data.WriteByteSeq(leaderGuid[4]);
     data.WriteByteSeq(leaderGuid[2]);
@@ -1960,7 +1987,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data.WriteByteSeq(groupGuid[6]);
     data.WriteByteSeq(groupGuid[4]);
     data << uint8(m_groupType);
-    data << uint8(0);
+    data << uint8(isLfg ? 1 : 0);                   // 0 home party, 1 instance party
     data << uint32(groupPosition);
     data.WriteByteSeq(groupGuid[7]);
     data.WriteByteSeq(leaderGuid[3]);
@@ -1971,7 +1998,7 @@ void Group::SendUpdateToPlayer(uint64 playerGUID, MemberSlot* slot)
     data.WriteByteSeq(groupGuid[5]);
     data.WriteByteSeq(groupGuid[3]);
     data.WriteByteSeq(leaderGuid[7]);
-    data << uint8(0);
+    data << uint8(isLfg ? lfgRoles : 0);
     data.WriteByteSeq(leaderGuid[5]);
     data.WriteByteSeq(leaderGuid[6]);
 

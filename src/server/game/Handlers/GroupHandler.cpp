@@ -493,9 +493,10 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recvData*/)
     if (grp->isLFGGroup())
     {
         lfg::LfgState const state = sLFGMgr->GetState(grp->GetGUID());
-        if (state == lfg::LFG_STATE_DUNGEON || state == lfg::LFG_STATE_FINISHED_DUNGEON)
+        if (state == lfg::LFG_STATE_DUNGEON || state == lfg::LFG_STATE_FINISHED_DUNGEON || state == lfg::LFG_STATE_BOOT)
         {
-            grp->Disband();
+            // One player leaving an instance group. The remaining members stay.
+            GetPlayer()->RemoveFromGroup(GROUP_REMOVEMETHOD_LEAVE);
             return;
         }
     }

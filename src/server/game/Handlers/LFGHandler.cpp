@@ -143,90 +143,127 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLfgLeaveOpcode(WorldPacket& recvData)
 {
-    ObjectGuid RequesterGUID;
-    Group* group = GetPlayer()->GetGroup();
-    if (!HasPacketBytes(recvData, sizeof(uint32) * 4))
+    Player* player = GetPlayer();
+    if (!player)
     {
-        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s malformed packet size: %u",
-            GetPlayerInfo().c_str(), uint32(recvData.size()));
-        SendLfgClearStatus();
+        recvData.rfinish();
         return;
     }
 
-    uint32 ticketType = recvData.read<uint32>();
-    uint32 ticketId = recvData.read<uint32>();
-    uint32 ticketTime = recvData.read<uint32>();
-    uint32 slotOrQueueId = recvData.read<uint32>();
-    uint8 queueID = uint8(slotOrQueueId);
-    bool const clientTicketLeave = ticketType == 3 && ticketId <= 0xFF;
+    Group* group = player->GetGroup();
+    uint64 const guid = player->GetGUID();
 
-    if (clientTicketLeave)
-        queueID = uint8(ticketId);
+    // 5.4.8 CMSG_LFD_LEAVE is roles, join time, ticket type (3), queue id, then
+    // the requester guid. The eye and the dungeon-finder window both send it.
+    // Treating the third field as the join time echoed "3" back at a queued
+    // client, which does not match the ticket it stored, so the button looked dead.
+    uint32 fields[4] = { 0, 0, 0, 0 };
+    bool const haveTicket = HasPacketBytes(recvData, sizeof(fields));
+    if (haveTicket)
+    {
+        for (uint32& field : fields)
+            field = recvData.read<uint32>();
+    }
+    else
+    {
+        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s short packet size: %u",
+            GetPlayerInfo().c_str(), uint32(recvData.size()));
+        recvData.rfinish();
+    }
 
-    recvData.ReadGuidMask(RequesterGUID, 6, 0, 2, 3, 1, 5, 4, 7);
-    recvData.ReadGuidBytes(RequesterGUID, 2, 0, 4, 6, 3, 1, 5, 7);
+    uint32 packetJoinTime = 0;
+    for (uint32 field : fields)
+        if (field > 100000000u)
+            packetJoinTime = field;
+
+    if (haveTicket && recvData.rpos() < recvData.size())
+    {
+        ObjectGuid requester;
+        recvData.ReadGuidMask(requester, 6, 0, 2, 3, 1, 5, 4, 7);
+        size_t guidBytes = 0;
+        for (uint8 i = 0; i < 8; ++i)
+            if (requester[i])
+                ++guidBytes;
+        if (recvData.rpos() + guidBytes <= recvData.size())
+            recvData.ReadGuidBytes(requester, 2, 0, 4, 6, 3, 1, 5, 7);
+    }
+    recvData.rfinish();
+
+    uint64 const queueOwner = group ? group->GetGUID() : guid;
+    time_t serverJoin = sLFGMgr->GetQueueJoinTime(queueOwner);
+    if (!serverJoin)
+        serverJoin = sLFGMgr->GetQueueJoinTime(guid);
+    uint8 queueId = sLFGMgr->GetQueueId(queueOwner);
+    if (!queueId)
+        queueId = sLFGMgr->GetQueueId(guid);
+    if (!queueId)
+    {
+        for (uint32 field : fields)
+        {
+            if (field && field <= 0xFF && field != 3 && field != packetJoinTime)
+            {
+                queueId = uint8(field);
+                break;
+            }
+        }
+    }
+
+    uint32 const joinTime = packetJoinTime ? packetJoinTime : uint32(serverJoin);
+
+    auto notify = [&](Player* member, uint64 lfgGroupGuid)
+    {
+        if (!member || !member->GetSession())
+            return;
+        member->GetSession()->SendLfgClearStatus(lfgGroupGuid, queueId, lfgGroupGuid != 0, joinTime);
+    };
+
+    auto clearPlayer = [&](uint64 playerGuid)
+    {
+        uint8 const playerQueueId = sLFGMgr->GetQueueId(playerGuid);
+        sLFGMgr->LeaveSoloLfg(playerGuid, playerQueueId ? playerQueueId : queueId);
+        if (sLFGMgr->GetState(playerGuid) != lfg::LFG_STATE_NONE)
+            sLFGMgr->LeaveLfg(playerGuid);
+    };
 
     if (!group)
     {
-        uint64 guid = GetPlayer()->GetGUID();
-        uint8 activeQueueId = sLFGMgr->GetQueueId(guid);
-        if (uint64(RequesterGUID) && uint64(RequesterGUID) != guid)
-            SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s ignored requester guid %lu for solo queue leave.",
-                GetPlayerInfo().c_str(), uint64(RequesterGUID));
-        if (queueID != activeQueueId)
-            SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s requested queue %u but active queue is %u.",
-                GetPlayerInfo().c_str(), queueID, activeQueueId);
-
-        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE Player: %lu left solo queue ticket type %u id %u time %u slot %u.",
-            guid, ticketType, ticketId, ticketTime, slotOrQueueId);
-        sLFGMgr->LeaveSoloLfg(guid, activeQueueId);
-        SendLfgClearStatus(0, queueID, clientTicketLeave, ticketTime);
+        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s left solo queue %u at %u.",
+            GetPlayerInfo().c_str(), queueId, joinTime);
+        clearPlayer(guid);
+        notify(player, 0);
         return;
     }
 
-    uint64 guid = GetPlayer()->GetGUID();
-    uint64 leaderGuid = group->GetLeaderGUID();
-    uint64 groupGuid = group->GetGUID();
-
-    if (uint64(RequesterGUID) && uint64(RequesterGUID) != guid && uint64(RequesterGUID) != leaderGuid)
-        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s ignored requester guid %lu for group queue leave.",
-            GetPlayerInfo().c_str(), uint64(RequesterGUID));
-    if (queueID != sLFGMgr->GetQueueId(groupGuid))
-        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s requested queue %u but active group queue is %u.",
-            GetPlayerInfo().c_str(), queueID, sLFGMgr->GetQueueId(groupGuid));
-
+    uint64 const groupGuid = group->GetGUID();
     lfg::LfgState const groupState = sLFGMgr->GetState(groupGuid);
-    bool const disbandDungeonGroup = group->isLFGGroup() &&
-        (groupState == lfg::LFG_STATE_DUNGEON || groupState == lfg::LFG_STATE_FINISHED_DUNGEON);
+    bool const inLfgDungeon = group->isLFGGroup() &&
+        (groupState == lfg::LFG_STATE_DUNGEON || groupState == lfg::LFG_STATE_FINISHED_DUNGEON ||
+            groupState == lfg::LFG_STATE_BOOT || (player->GetMap() && player->GetMap()->IsDungeon()));
 
-    if (disbandDungeonGroup)
+    std::vector<Player*> members;
+    for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+        if (Player* member = itr->GetSource())
+            members.push_back(member);
+
+    if (inLfgDungeon)
     {
-        uint8 const groupQueueId = sLFGMgr->GetQueueId(groupGuid);
-
-        group->Disband();
-
-        // The cleanup sent while disbanding walks the player list the dungeon
-        // finder keeps for the group, and that list is already being torn down,
-        // so whoever asked to leave may get nothing. Answering here costs one
-        // packet and closes the gap. The ticket echoed back is the one the
-        // request carried: inside the dungeon the queue entry no longer exists
-        // on this side, so anything looked up here would go out as zero and be
-        // discarded by the client.
-        SendLfgClearStatus(0, groupQueueId ? groupQueueId : queueID, clientTicketLeave, ticketTime);
+        // Leave Instance Group removes this player. The rest of the party stays,
+        // and only someone still in the group is offered a replacement queue.
+        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s left dungeon group %u.",
+            GetPlayerInfo().c_str(), GUID_LOPART(groupGuid));
+        player->RemoveFromGroup(GROUP_REMOVEMETHOD_LEAVE);
         return;
     }
 
-    // Check cheating - only leader can leave the queue
-    if (leaderGuid != guid)
-    {
-        SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s ignored non-leader group queue leave.",
-            GetPlayerInfo().c_str());
-        return;
-    }
-
-    SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE GroupLeader: %lu left group queue.", guid);
+    // Premade or still forming: drop the whole party, not only the clicker.
+    // A member's button used to be ignored, which is the same as a dead click.
+    SF_LOG_DEBUG("lfg.leave", "CMSG_LFD_LEAVE %s left group queue %u (%u member(s)) at %u.",
+        GetPlayerInfo().c_str(), GUID_LOPART(groupGuid), uint32(members.size()), joinTime);
     sLFGMgr->LeaveLfg(groupGuid);
-    SendLfgClearStatus(0, queueID, clientTicketLeave, ticketTime);
+    for (Player* member : members)
+        clearPlayer(member->GetGUID());
+    for (Player* member : members)
+        notify(member, groupGuid);
 }
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recvData)
@@ -309,11 +346,24 @@ void WorldSession::HandleLFDSetBootVoteOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleLFDTeleportOpcode(WorldPacket& recvData)
 {
-    bool out;
-    recvData >> out;
+    // 5.4.8 sends the direction as one bit. Some clicks also prefix a party index.
+    // Reading the first byte as the direction turned "teleport out" into "teleport in"
+    // while already inside, which the client shows as nothing happening.
+    bool out = false;
+    if (recvData.size() >= 2)
+    {
+        recvData.read_skip<uint8>();
+        if (recvData.rpos() < recvData.size())
+            out = recvData.ReadBit();
+    }
+    else if (recvData.size() == 1)
+    {
+        uint8 raw = recvData.read<uint8>();
+        out = raw != 0;
+    }
 
-    SF_LOG_DEBUG("lfg", "CMSG_LFD_TELEPORT %s out: %u",
-        GetPlayerInfo().c_str(), out ? 1 : 0);
+    SF_LOG_DEBUG("lfg", "CMSG_LFD_TELEPORT %s out: %u size: %u",
+        GetPlayerInfo().c_str(), out ? 1 : 0, uint32(recvData.size()));
     sLFGMgr->TeleportPlayer(GetPlayer(), out, true);
 }
 
@@ -662,6 +712,11 @@ void WorldSession::SendLfgUpdateStatus(lfg::LfgUpdateData const& updateData, boo
             queued = true;
             break;
         case lfg::LFG_UPDATETYPE_PROPOSAL_BEGIN:
+            join = true;
+            break;
+        case lfg::LFG_UPDATETYPE_GROUP_FOUND:
+            // Dungeon group is formed. Joined without queued is what switches the
+            // minimap eye from "leave queue" to teleport and leave group.
             join = true;
             break;
         case lfg::LFG_UPDATETYPE_UPDATE_STATUS:
