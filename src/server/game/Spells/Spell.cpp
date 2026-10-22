@@ -3793,11 +3793,14 @@ void Spell::update(uint32 difftime)
                         {
                             // Check power amount
                             Powers powerType = Powers(m_powerType);
-                            if (int32(m_caster->GetPower(powerType)) < (m_periodicPowerCost))
+                            if (int32(m_caster->GetPower(powerType)) < m_periodicPowerCost)
                             {
-                                SF_LOG_ERROR("spells", "Channeled spell %d is removed due to lack of power", m_spellInfo->Id);
+                                // Running out of power ends the channel. Drain Life (689) does
+                                // this whenever the caster is low on mana, so it is not an error.
+                                SF_LOG_DEBUG("spells", "Channeled spell %d is removed due to lack of power", m_spellInfo->Id);
                                 SendChannelUpdate(0);
                                 finish();
+                                return;
                             }
                             m_caster->ModifyPower(Powers(m_powerType), -int32(m_periodicPowerCost));
                             m_periodicPowerTimer = 0;
