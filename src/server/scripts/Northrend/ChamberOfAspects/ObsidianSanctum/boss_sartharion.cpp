@@ -800,7 +800,7 @@ struct dummy_dragonAI : public ScriptedAI
     {
         Map* map = me->GetMap();
 
-        if (map && map->IsDungeon())
+        if (map && map->IsInstance())
         {
             Map::PlayerList const &PlayerList = map->GetPlayers();
 
@@ -1313,7 +1313,7 @@ public:
 
                 Creature* pDebuffTarget = NULL;
                 Map* map = me->GetMap();
-                if (map->IsDungeon())
+                if (map->IsInstance())
                 {
                     Map::PlayerList const &PlayerList = map->GetPlayers();
 
@@ -1409,7 +1409,7 @@ public:
                     pVesperon->RemoveAurasDueToSpell(SPELL_TWILIGHT_TORMENT_VESP);
 
                 Map* map = me->GetMap();
-                if (map->IsDungeon())
+                if (map->IsInstance())
                 {
                     Map::PlayerList const &PlayerList = map->GetPlayers();
 
