@@ -922,26 +922,37 @@ void WorldSession::SendLfgQueueStatus(lfg::LfgQueueStatusData const& queueData)
         queueData.waitTimeTank, queueData.waitTimeHealer, queueData.waitTimeDps,
         queueData.queuedTime, queueData.tanks, queueData.healers, queueData.dps);
 
-    ObjectGuid guid = _player->GetGUID();
-    WorldPacket data(SMSG_LFD_QUEUE_STATUS, 8 + (10 * 4) + (3 * 1));
+    // The client only applies the status when the guid, id, type and join time
+    // match the ticket the eye was opened with; otherwise it is dropped and the
+    // tooltip stays on "< 1 minute" with no role icons.
+    uint32 const rawDungeonId = (queueData.dungeonId & 0xFF000000) ? (queueData.dungeonId & 0x00FFFFFF) : queueData.dungeonId;
+    uint32 dungeonEntry = sLFGMgr->GetLFGDungeonEntry(rawDungeonId);
+    if (!dungeonEntry)
+        dungeonEntry = queueData.dungeonId;
+
+    ObjectGuid guid = queueData.requesterGuid ? queueData.requesterGuid : _player->GetGUID();
+    uint8 const needs[3] = { queueData.tanks, queueData.healers, queueData.dps };
+    int32 const waits[3] = { queueData.waitTimeTank, queueData.waitTimeHealer, queueData.waitTimeDps };
+
+    WorldPacket data(SMSG_LFD_QUEUE_STATUS, 1 + 8 + 4 * 11 + 3);
     data.WriteGuidMask(guid, 4, 3, 5, 1, 2, 0, 6, 7);
-    data << uint32(queueData.dungeonId);                   // Dungeon
+    data.FlushBits();
+    data << uint32(3);                                     // TicketType
     data.WriteGuidBytes(guid, 0);
-    data << uint32(queueData.queuedTime);                  // Player wait time in queue
+    data << uint32(queueData.queuedTime);                  // QueuedTime, seconds
     data.WriteGuidBytes(guid, 4);
-    data << uint32(queueData.joinTime);                    // Join time
-    data << int32(queueData.waitTimeTank);                 // Wait Tanks
-    data << uint8(queueData.tanks);                        // Tanks needed
-    data << int32(queueData.waitTimeHealer);               // Wait Healers
-    data << uint8(queueData.healers);                      // Healers needed
-    data << int32(queueData.waitTimeDps);                  // Wait Dps
-    data << uint8(queueData.dps);                          // Dps needed
-    data << int32(queueData.waitTime);                     // Wait Time
-    data << int32(queueData.waitTimeAvg);                  // Average Wait time
+    data << int32(queueData.waitTime);                     // AvgWaitTimeMe
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        data << int32(waits[i]);                           // AvgWaitTimeByRole
+        data << uint8(needs[i]);                           // LastNeeded
+    }
+    data << uint32(queueData.joinTime);                    // TicketTime
+    data << uint32(queueData.queueId);                     // TicketId
     data.WriteGuidBytes(guid, 1);
-    data << uint32(queueData.queueId);                     // Queue Id
+    data << int32(queueData.waitTimeAvg);                  // AvgWaitTime
     data.WriteGuidBytes(guid, 7, 2);
-    data << uint32(3);
+    data << uint32(dungeonEntry);                          // Slot
     data.WriteGuidBytes(guid, 5, 3, 6);
     SendPacket(&data);
 }

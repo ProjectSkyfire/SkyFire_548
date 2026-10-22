@@ -837,11 +837,25 @@ namespace lfg
                 waitTime = SelectWaitTime(tanks, healers, dps, wtTank, wtHealer, wtDps, wtAvg);
             }
 
-            LfgQueueStatusData queueData(queueId, dungeonId, queueinfo.joinTime, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, tanks, healers, dps);
+            // The eye looks up stats by the dungeon it was shown. A random queue
+            // stores the expanded list here, while the client only knows the
+            // random dungeon, so prefer that selection when a member has one.
+            LfgDungeonSet slots = queueinfo.dungeons;
             for (LfgRolesMap::const_iterator itPlayer = queueinfo.roles.begin(); itPlayer != queueinfo.roles.end(); ++itPlayer)
             {
-                uint64 pguid = itPlayer->first;
-                LFGMgr::SendLfgQueueStatus(pguid, queueData);
+                LfgDungeonSet const& selected = sLFGMgr->GetSelectedDungeons(itPlayer->first);
+                if (!selected.empty())
+                {
+                    slots = selected;
+                    break;
+                }
+            }
+
+            for (LfgDungeonSet::const_iterator itDungeon = slots.begin(); itDungeon != slots.end(); ++itDungeon)
+            {
+                LfgQueueStatusData queueData(queueId, *itDungeon, queueinfo.joinTime, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, tanks, healers, dps, itQueue->first);
+                for (LfgRolesMap::const_iterator itPlayer = queueinfo.roles.begin(); itPlayer != queueinfo.roles.end(); ++itPlayer)
+                    LFGMgr::SendLfgQueueStatus(itPlayer->first, queueData);
             }
         }
     }

@@ -174,9 +174,9 @@ namespace lfg
     struct LfgQueueStatusData
     {
         LfgQueueStatusData(uint8 _queueId = 0, uint32 _dungeonId = 0, time_t _joinTime = 0, int32 _waitTime = -1, int32 _waitTimeAvg = -1, int32 _waitTimeTank = -1, int32 _waitTimeHealer = -1,
-            int32 _waitTimeDps = -1, uint32 _queuedTime = 0, uint8 _tanks = 0, uint8 _healers = 0, uint8 _dps = 0) :
+            int32 _waitTimeDps = -1, uint32 _queuedTime = 0, uint8 _tanks = 0, uint8 _healers = 0, uint8 _dps = 0, uint64 _requesterGuid = 0) :
             queueId(_queueId), dungeonId(_dungeonId), joinTime(_joinTime), waitTime(_waitTime), waitTimeAvg(_waitTimeAvg), waitTimeTank(_waitTimeTank),
-            waitTimeHealer(_waitTimeHealer), waitTimeDps(_waitTimeDps), queuedTime(_queuedTime), tanks(_tanks), healers(_healers), dps(_dps) { }
+            waitTimeHealer(_waitTimeHealer), waitTimeDps(_waitTimeDps), queuedTime(_queuedTime), tanks(_tanks), healers(_healers), dps(_dps), requesterGuid(_requesterGuid) { }
 
         uint8 queueId;
         uint32 dungeonId;
@@ -190,6 +190,7 @@ namespace lfg
         uint8 tanks;
         uint8 healers;
         uint8 dps;
+        uint64 requesterGuid;                              ///< Ticket owner. 0 uses the player the packet is sent to.
     };
 
     struct LfgPlayerRewardData

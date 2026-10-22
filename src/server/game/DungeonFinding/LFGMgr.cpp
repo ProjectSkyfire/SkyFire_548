@@ -777,6 +777,9 @@ namespace lfg
             // Send update to player
             player->GetSession()->SendLfgJoinResult(joinData);
             player->GetSession()->SendLfgUpdateStatus(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment), false);
+            // The eye has the ticket now. Send the role counts with it so the
+            // tooltip is not stuck on "< 1 minute" until the next queue tick.
+            queue.UpdateQueueTimers(queueId, ticketTime);
             SetState(gguid, LFG_STATE_QUEUED);
             SetRoles(guid, roles);
             debugNames.append(player->GetName());
@@ -1063,7 +1066,10 @@ namespace lfg
         }
 
         if (roleCheck.state == LFG_ROLECHECK_FINISHED)
+        {
+            GetQueue(gguid).UpdateQueueTimers(GetQueueId(gguid), time(NULL));
             RoleChecksStore.erase(itRoleCheck);
+        }
         else if (roleCheck.state != LFG_ROLECHECK_INITIALITING)
         {
             RestoreOrClearState(gguid, "Rolecheck Failed");
@@ -1703,6 +1709,17 @@ namespace lfg
             }
         }
 
+        // Read every ticket before any queue row is cleared. An update whose join
+        // time is zero does not match the client's queue, so the eye stays stuck
+        // in the queue instead of being removed.
+        std::map<uint64, std::pair<time_t, uint8> > tickets;
+        for (LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
+        {
+            uint64 gguid = it->second.group ? it->second.group : it->first;
+            if (tickets.find(gguid) == tickets.end())
+                tickets[gguid] = std::make_pair(GetQueueJoinTime(gguid), GetQueueId(gguid));
+        }
+
         // Notify players
         for (LfgProposalPlayerContainer::const_iterator it = proposal.players.begin(); it != proposal.players.end(); ++it)
         {
@@ -1731,14 +1748,18 @@ namespace lfg
                     SF_LOG_DEBUG("lfg.proposal.remove", "%u cannot be requeued. Removing from queue and compatible cache", GUID_LOPART(guid));
                 }
 
+                std::pair<time_t, uint8> const& ticket = tickets[gguid];
+                time_t const joinTime = ticket.first;
+                uint8 const queueId = ticket.second;
+
                 RestoreOrClearState(guid, "Proposal Fail (didn't accept or in group with someone that didn't accept)");
                 if (gguid != guid)
                 {
                     RestoreOrClearState(it->second.group, "Proposal Fail (someone in group didn't accept)");
-                    SendLfgUpdateStatus(guid, updateData, true);
+                    SendLfgUpdateStatus(guid, updateData, true, gguid, queueId, uint32(joinTime));
                 }
                 else
-                    SendLfgUpdateStatus(guid, updateData, false);
+                    SendLfgUpdateStatus(guid, updateData, false, guid, queueId, uint32(joinTime));
             }
             else
             {
