@@ -2148,6 +2148,11 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (m_vehicle)
         ExitVehicle();
 
+    // A first-login cinematic would otherwise snap the player back to its
+    // start coordinates when it ends, even after a map change.
+    if (cinematicSequence)
+        StopCinematic(false);
+
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     SetUnitMovementFlags(GetUnitMovementFlags() & MOVEMENTFLAG_MASK_HAS_PLAYER_STATUS_OPCODE);
     m_movementInfo.ResetJump();
@@ -7040,17 +7045,20 @@ void Player::SendDirectMessage(WorldPacket* data)
     m_session->SendPacket(data);
 }
 
-void Player::StopCinematic()
+void Player::StopCinematic(bool restorePosition)
 {
-    if (cinematicSequence && IsInWorld())
+    if (cinematicSequence && (IsInWorld() || !restorePosition))
     {
         cinematicSequence = NULL;
         inCinematic = false;
         cinematicClientStartTime = 0;
         cinematicVisibilityTimer = 0;
 
-        Unit::UpdatePosition(cinematicStartX, cinematicStartY, cinematicStartZ, cinematicStartO, true);
-        UpdateObjectVisibility(true);
+        if (restorePosition)
+        {
+            Unit::UpdatePosition(cinematicStartX, cinematicStartY, cinematicStartZ, cinematicStartO, true);
+            UpdateObjectVisibility(true);
+        }
 
         getHostileRefManager().setOnlineOfflineState(true);
 
@@ -7058,7 +7066,7 @@ void Player::StopCinematic()
 
         RemoveAura(60190);
 
-        if (GetSession())
+        if (GetSession() && IsInWorld())
             GetSession()->SendQuestgiverStatusMultiple();
     }
 }

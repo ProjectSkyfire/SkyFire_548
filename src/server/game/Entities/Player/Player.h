@@ -2942,7 +2942,9 @@ public:
     void ResummonPetTemporaryUnSummonedIfAny();
     bool IsPetNeedBeTemporaryUnsummoned() const;
 
-    void StopCinematic();
+    // restorePosition=false ends the cinematic in place (used by TeleportTo so the
+    // pre-cinematic coordinates are not reapplied on the destination map).
+    void StopCinematic(bool restorePosition = true);
     void SendCinematicStart(uint32 CinematicSequenceId);
     bool IsInCinematic() const { return inCinematic && cinematicSequence; }
     bool GetCinematicPosition(float& x, float& y, float& z) const;
