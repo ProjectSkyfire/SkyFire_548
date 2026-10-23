@@ -33,6 +33,7 @@ public:
     void Populate();
     void OnCreatureAdded(Creature* creature);
     void OnCreatureRemoved(Creature* creature);
+    void OnCreatureUnloaded(Creature* creature);
     bool RemoveReplacement(Creature* replacement);
     bool IsReplacement(uint64 guid) const;
 
@@ -52,6 +53,7 @@ public:
     void Update(uint32 diff);
     void OnCreatureAdded(Creature* creature);
     void OnCreatureRemoved(Creature* creature);
+    void OnCreatureUnloaded(Creature* creature);
     bool ResolveWildBattle(Creature* creature);
     bool IsWildBattlePetReplacement(Creature const* creature) const;
 
