@@ -1253,10 +1253,11 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_PHASE)
     {
-        databuff << uint32(phases.empty() ? 8 : 0);
-        databuff << uint32(phases.size());
+        databuff << uint32(phases.empty() ? 0x8 : 0x10);
+        databuff.WriteBits(phases.size(), 23);
+        databuff.FlushBits();
         for (std::set<uint32>::const_iterator itr = phases.begin(); itr != phases.end(); ++itr)
-            *data << uint16(*itr);
+            databuff << uint16(*itr);
     }
 
     *data << uint32(databuff.size());
