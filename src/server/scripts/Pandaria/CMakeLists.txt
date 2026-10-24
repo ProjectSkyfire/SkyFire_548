@@ -12,6 +12,11 @@ set(scripts_STAT_SRCS
   Pandaria/GateOfTheSettingSun/gate_of_the_setting_sun.cpp
   Pandaria/GateOfTheSettingSun/gate_of_the_setting_sun.h
   Pandaria/GateOfTheSettingSun/instance_gate_of_the_setting_sun.cpp
+  Pandaria/MogushanPalace/boss_gekkan.cpp
+  Pandaria/MogushanPalace/boss_trial_of_the_king.cpp
+  Pandaria/MogushanPalace/boss_xin_the_weaponmaster.cpp
+  Pandaria/MogushanPalace/instance_mogu_shan_palace.cpp
+  Pandaria/MogushanPalace/mogu_shan_palace.h
   Pandaria/StormstoutBrewery/boss_hoptallus.cpp
   Pandaria/StormstoutBrewery/boss_ook_ook.cpp
   Pandaria/StormstoutBrewery/boss_yanzhu_the_uncasked.cpp

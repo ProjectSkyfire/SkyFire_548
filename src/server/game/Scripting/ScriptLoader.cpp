@@ -644,6 +644,10 @@ void AddSC_boss_saboteur_kiptilak();
 void AddSC_boss_striker_gadok();
 void AddSC_gate_of_the_setting_sun();
 void AddSC_instance_gate_of_the_setting_sun();
+void AddSC_boss_gekkan();
+void AddSC_boss_trial_of_the_king();
+void AddSC_boss_xin_the_weaponmaster();
+void AddSC_instance_mogu_shan_palace();
 // Valley of the four Winds
 void AddSC_valley_of_the_four_winds();
 
@@ -1374,6 +1378,10 @@ void AddPandariaScripts()
     AddSC_boss_striker_gadok();
     AddSC_gate_of_the_setting_sun();
     AddSC_instance_gate_of_the_setting_sun();
+    AddSC_boss_gekkan();
+    AddSC_boss_trial_of_the_king();
+    AddSC_boss_xin_the_weaponmaster();
+    AddSC_instance_mogu_shan_palace();
     // Valley of the four Winds
     AddSC_valley_of_the_four_winds();
 #endif
