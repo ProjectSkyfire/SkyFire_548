@@ -2656,7 +2656,10 @@ void SpellMgr::LoadSpellInfoStore()
         if (!effect)
             continue;
 
-        effectsBySpell[effect->EffectSpellId].effects[effect->EffectIndex] = effect;
+        // SpellInfo is not per difficulty: the default row wins, difficulty rows only fill slots without one
+        SpellEffectEntry const*& slot = effectsBySpell[effect->EffectSpellId].effects[effect->EffectIndex];
+        if (!slot || (!effect->EffectDifficulty && slot->EffectDifficulty))
+            slot = effect;
     }
 
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); ++i)
