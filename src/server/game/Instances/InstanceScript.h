@@ -168,6 +168,9 @@ public:
     // Update Achievement Criteria for all players in instance
     void DoUpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, Unit* unit = NULL);
 
+    // Reset Achievement Criteria for all players in instance
+    void DoResetAchievementCriteria(AchievementCriteriaTypes type, uint64 miscValue1 = 0, uint64 miscValue2 = 0, bool evenIfCriteriaComplete = false);
+
     // Start/Stop Timed Achievement Criteria for all players in instance
     void DoStartTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);
     void DoStopTimedAchievement(AchievementCriteriaTimedTypes type, uint32 entry);

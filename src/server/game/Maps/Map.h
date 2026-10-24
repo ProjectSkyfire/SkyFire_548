@@ -484,6 +484,13 @@ public:
     void SendRemoveTransports(Player* player);
     void PreserveTransportVisibility(std::set<uint64>& guids) const;
 
+    void SetWorldState(uint32 id, uint64 value) { m_worldStates[id] = value; }
+    uint64 GetWorldState(uint32 id) const
+    {
+        auto itr = m_worldStates.find(id);
+        return itr != m_worldStates.end() ? itr->second : uint64(0);
+    }
+
 private:
     void LoadMapAndVMap(int gx, int gy);
     void LoadVMap(int gx, int gy);
@@ -544,6 +551,7 @@ protected:
     uint32 m_unloadTimer;
     float m_VisibleDistance;
     DynamicMapTree _dynamicTree;
+    std::map<uint32, uint64> m_worldStates;
 
     MapRefManager m_mapRefManager;
     MapRefManager::iterator m_mapRefIter;

@@ -1077,4 +1077,11 @@ public:
 };
 #define RegisterGameObjectAI(ai_name) new GenericGameObjectScript<ai_name>(#ai_name)
 
+template <class T>
+struct creature_script : public CreatureScript
+{
+    creature_script(char const* name) : CreatureScript(name) { }
+    CreatureAI* GetAI(Creature* creature) const override { return new T(creature); }
+};
+
 #endif
