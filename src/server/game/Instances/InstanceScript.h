@@ -179,6 +179,9 @@ public:
     // Remove Auras due to Spell on all players in instance
     void DoRemoveAurasDueToSpellOnPlayers(uint32 spell);
 
+    // Complete an LFG dungeon for the group in the instance (for encounters that have no creature credit)
+    void DoFinishLFGDungeon(uint32 dungeonId);
+
     // Cast spell on all players in instance
     void DoCastSpellOnPlayers(uint32 spell);
 

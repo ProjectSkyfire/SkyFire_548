@@ -188,8 +188,13 @@ void AddSC_the_scarlet_enclave_c5();
 //void AddSC_instance_scarlet_monastery();
 //void AddSC_boss_mograine_and_whitemane();
 
-//void AddSC_shadowfang_keep();                //Shadowfang keep
-//void AddSC_instance_shadowfang_keep();
+void AddSC_shadowfang_keep();                //Shadowfang keep
+void AddSC_instance_shadowfang_keep();
+void AddSC_boss_baron_ashbury();
+void AddSC_boss_baron_silverlaine();
+void AddSC_boss_commander_springvale();
+void AddSC_boss_lord_valden();
+void AddSC_boss_lord_godfrey();
 void AddSC_boss_magistrate_barthilas();      //Stratholme
 void AddSC_boss_maleki_the_pallid();
 void AddSC_boss_nerubenkan();
@@ -896,8 +901,13 @@ void AddEasternKingdomsScripts()
     //AddSC_instance_scarlet_monastery();
     //AddSC_boss_mograine_and_whitemane();
 
-    //AddSC_shadowfang_keep();                //Shadowfang keep
-    //AddSC_instance_shadowfang_keep();
+    AddSC_shadowfang_keep();                //Shadowfang keep
+    AddSC_instance_shadowfang_keep();
+    AddSC_boss_baron_ashbury();
+    AddSC_boss_baron_silverlaine();
+    AddSC_boss_commander_springvale();
+    AddSC_boss_lord_valden();
+    AddSC_boss_lord_godfrey();
     AddSC_boss_magistrate_barthilas();      //Stratholme
     AddSC_boss_maleki_the_pallid();
     AddSC_boss_nerubenkan();

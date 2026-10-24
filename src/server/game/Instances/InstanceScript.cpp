@@ -376,6 +376,16 @@ void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
     }
 }
 
+void InstanceScript::DoFinishLFGDungeon(uint32 dungeonId)
+{
+    Map::PlayerList const& PlayerList = instance->GetPlayers();
+
+    if (!PlayerList.isEmpty())
+        if (Player* player = PlayerList.begin()->GetSource())
+            if (Group* group = player->GetGroup())
+                sLFGMgr->FinishDungeon(group->GetGUID(), dungeonId);
+}
+
 // Cast spell on all players in instance
 void InstanceScript::DoCastSpellOnPlayers(uint32 spell)
 {
