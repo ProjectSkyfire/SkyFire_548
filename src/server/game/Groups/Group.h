@@ -196,6 +196,7 @@ public:
     bool isBGGroup()   const;
     bool isBFGroup()   const;
     bool IsCreated()   const;
+    bool IsGuildGroup(uint32 guildId, Player* refPlayer, float* outXpMultiplier = NULL, uint32* outCurrentCount = NULL, uint32* outRequiredCount = NULL) const;
     uint64 GetLeaderGUID() const;
     uint64 GetGUID() const;
     uint32 GetLowGUID() const;

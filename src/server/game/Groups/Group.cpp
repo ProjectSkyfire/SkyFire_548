@@ -2791,6 +2791,75 @@ bool Group::isLFGGroup() const
     return m_groupType & GROUPTYPE_LFG;
 }
 
+bool Group::IsGuildGroup(uint32 guildId, Player* refPlayer, float* outXpMultiplier, uint32* outCurrentCount, uint32* outRequiredCount) const
+{
+    if (!guildId)
+        return false;
+    if (!refPlayer || !refPlayer->FindMap() || !refPlayer->GetGuildId())
+        return false;
+
+    Map* map = refPlayer->GetMap();
+    uint32 mapId = map->GetId();
+    uint32 instanceId = map->GetInstanceId();
+    uint32 count = 0;
+    uint32 reqCount = 0;
+    float xpMul = 1.0f;
+
+    for (GroupReference const* itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* member = itr->GetSource();
+        if (!member || member->GetGuildId() != guildId)
+            continue;
+
+        if (member->FindMap() && member->GetMap()->GetId() == mapId && member->GetMap()->GetInstanceId() == instanceId)
+            ++count;
+        else if (Corpse* corpse = member->GetCorpse())
+            if (corpse->GetMapId() == mapId && corpse->GetInstanceId() == instanceId)
+                ++count;
+    }
+
+    if (map->IsRaid())
+    {
+        uint32 maxPlayers = 0;
+        if (InstanceMap const* instance = map->ToInstanceMap())
+            maxPlayers = instance->GetMaxPlayers();
+
+        if (maxPlayers == 40)
+            reqCount = 10;
+        else if (maxPlayers)
+            reqCount = maxPlayers * 4 / 5;
+    }
+    else if (map->IsDungeon() || map->IsScenario())
+    {
+        reqCount = 3;
+        if (map->IsDungeon() && count >= reqCount)
+        {
+            if (count == 3)
+                xpMul = 0.5f;
+            else if (count == 5)
+                xpMul = 1.25f;
+            if (map->IsHeroic())
+                xpMul *= 1.5f;
+        }
+    }
+    else if (map->IsBattleArena())
+        reqCount = GetMembersCount();
+    else if (map->IsBattleground())
+    {
+        if (Battleground* bg = refPlayer->GetBattleground())
+            reqCount = uint32(bg->GetMaxPlayersPerTeam() * 0.8f);
+    }
+
+    if (outXpMultiplier)
+        *outXpMultiplier = xpMul;
+    if (outCurrentCount)
+        *outCurrentCount = count;
+    if (outRequiredCount)
+        *outRequiredCount = reqCount;
+
+    return reqCount && count >= reqCount;
+}
+
 bool Group::isRaidGroup() const
 {
     return m_groupType & GROUPTYPE_RAID;

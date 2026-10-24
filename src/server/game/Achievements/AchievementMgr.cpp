@@ -1466,6 +1466,10 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
             if (!achievement)
                 continue;
 
+            // guild achievements share criteria with personal ones but belong to the guild only
+            if (bool(achievement->flags & ACHIEVEMENT_FLAG_GUILD) != IsGuild<T>())
+                continue;
+
             if (IsCompletedCriteriaForAchievement(achievementCriteria, achievement))
                 CompletedCriteriaFor(achievement, referencePlayer);
 
@@ -1477,7 +1481,7 @@ void AchievementMgr<T>::UpdateAchievementCriteria(AchievementCriteriaTypes type,
 
             if (AchievementEntryList const* achRefList = sAchievementMgr->GetAchievementByReferencedId(achievement->ID))
                 for (AchievementEntryList::const_iterator itr = achRefList->begin(); itr != achRefList->end(); ++itr)
-                    if (IsCompletedAchievement(*itr))
+                    if (bool((*itr)->flags & ACHIEVEMENT_FLAG_GUILD) == IsGuild<T>() && IsCompletedAchievement(*itr))
                         CompletedAchievement(*itr, referencePlayer);
         }
     }
@@ -3031,6 +3035,10 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
                 break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_TARGET_HEALTH_PERCENT_BELOW: // 46
                 if (!unit || unit->GetHealthPct() >= reqValue)
+                    return false;
+                break;
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_REQUIRES_GUILD_GROUP: // 61
+                if (!referencePlayer->GetGroup() || !referencePlayer->GetGroup()->IsGuildGroup(referencePlayer->GetGuildId(), referencePlayer))
                     return false;
                 break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_BATTLE_PET_FAMILY: // 78

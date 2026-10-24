@@ -396,6 +396,10 @@ inline void KillRewarder::_RewardKillCredit(Player* player)
         {
             player->KilledMonster(target->GetCreatureTemplate(), target->GetGUID());
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, target->GetCreatureType(), 1, 0, target);
+
+            if (Guild* guild = sGuildMgr->GetGuildById(player->GetGuildId()))
+                if (_rewardedGuilds.insert(guild->GetId()).second)
+                    guild->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, target->GetEntry(), 1, 0, target, player);
         }
 }
 
