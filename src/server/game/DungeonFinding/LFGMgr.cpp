@@ -467,17 +467,7 @@ namespace lfg
                     continue;
                 }
 
-                boot.inProgress = false;
-                for (LfgAnswerContainer::const_iterator itVotes = boot.votes.begin(); itVotes != boot.votes.end(); ++itVotes)
-                {
-                    uint64 pguid = itVotes->first;
-                    if (pguid != boot.victim)
-                        SendLfgBootProposalUpdate(pguid, boot);
-                    SetState(pguid, LFG_STATE_DUNGEON);
-                }
-                SetState(itBoot->first, LFG_STATE_DUNGEON);
-                SetVoteKick(itBoot->first, false);
-                BootsStore.erase(itBoot);
+                EndBoot(itBoot);
             }
         }
 
@@ -1917,6 +1907,36 @@ namespace lfg
             DecreaseKicksLeft(gguid);
         }
         BootsStore.erase(itBoot);
+    }
+
+    /**
+       Ends a boot vote without kicking anyone and puts the group back in its dungeon.
+       The group stays in LFG_STATE_BOOT until then, which blocks queueing for a replacement.
+    */
+    void LFGMgr::EndBoot(LfgPlayerBootContainer::iterator itBoot)
+    {
+        LfgPlayerBoot& boot = itBoot->second;
+        boot.inProgress = false;
+        for (LfgAnswerContainer::const_iterator itVotes = boot.votes.begin(); itVotes != boot.votes.end(); ++itVotes)
+        {
+            uint64 pguid = itVotes->first;
+            if (pguid != boot.victim)
+                SendLfgBootProposalUpdate(pguid, boot);
+            SetState(pguid, LFG_STATE_DUNGEON);
+        }
+        SetState(itBoot->first, LFG_STATE_DUNGEON);
+        SetVoteKick(itBoot->first, false);
+        BootsStore.erase(itBoot);
+    }
+
+    void LFGMgr::CancelBootForVictim(uint64 gguid, uint64 victim)
+    {
+        LfgPlayerBootContainer::iterator itBoot = BootsStore.find(gguid);
+        if (itBoot == BootsStore.end() || itBoot->second.victim != victim)
+            return;
+
+        itBoot->second.votes.erase(victim);
+        EndBoot(itBoot);
     }
 
     /**

@@ -220,6 +220,12 @@ namespace lfg
         bool isLFG = group->isLFGGroup();
         LfgState state = sLFGMgr->GetState(gguid);
 
+        if (isLFG && state == LFG_STATE_BOOT)
+        {
+            sLFGMgr->CancelBootForVictim(gguid, guid);
+            state = sLFGMgr->GetState(gguid);
+        }
+
         if (isLFG && method == GROUP_REMOVEMETHOD_KICK && IsLfgDungeonState(state))        // Player have been kicked
         {
             /// @todo - Update internal kick cooldown of kicker

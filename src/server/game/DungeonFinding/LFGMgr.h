@@ -420,6 +420,8 @@ namespace lfg
         void InitBoot(uint64 gguid, uint64 kguid, uint64 vguid, std::string const& reason);
         /// Updates player boot proposal with new player answer
         void UpdateBoot(uint64 guid, bool accept);
+        /// Ends a boot vote whose victim left the group on their own
+        void CancelBootForVictim(uint64 gguid, uint64 victim);
         /// Updates proposal to join dungeon with player answer
         void UpdateProposal(uint32 proposalId, uint64 guid, bool accept);
         /// Finds an initiating proposal awaiting this player's answer (0 if none).
@@ -481,6 +483,7 @@ namespace lfg
         void DecreaseKicksLeft(uint64 guid);
         void SetState(uint64 guid, LfgState state);
         void SetVoteKick(uint64 guid, bool active);
+        void EndBoot(LfgPlayerBootContainer::iterator itBoot);
         void RemovePlayerData(uint64 guid);
         /// Drops a queue entry left behind without a matching player state.
         /// Without it the queue keeps sending status updates to someone who
