@@ -627,6 +627,10 @@ void AddSC_event_darkmoon_faire();
 void AddSC_wandering_island();
 // Temple of Jade Serpent
 void AddSC_instance_jade_serpent();
+void AddSC_boss_wise_mari();
+void AddSC_boss_lorewalker_stonestep();
+void AddSC_boss_liu_flameheart();
+void AddSC_boss_sha_of_doubt();
 // Stormstout Brewery
 void AddSC_boss_hoptallus();
 void AddSC_boss_ook_ook();
@@ -1345,6 +1349,10 @@ void AddPandariaScripts()
     AddSC_wandering_island();
     // Temple of Jade Serpent - Temple of Jade Serpent
     AddSC_instance_jade_serpent();
+    AddSC_boss_wise_mari();
+    AddSC_boss_lorewalker_stonestep();
+    AddSC_boss_liu_flameheart();
+    AddSC_boss_sha_of_doubt();
     // Stormstout Brewery
     AddSC_boss_hoptallus();
     AddSC_boss_ook_ook();
