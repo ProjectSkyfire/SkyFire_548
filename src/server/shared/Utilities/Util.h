@@ -61,6 +61,12 @@ std::string secsToTimeString(uint64 timeInSecs, bool shortText = false, bool hou
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);
 
+/* Return a random number in the range min..max. */
+int32 irand(int32 min, int32 max);
+
+/* Return a random number in the range min..max (inclusive). */
+uint32 urand(uint32 min, uint32 max);
+
 /* Return a random number in the range 0 .. RAND32_MAX. */
 int32 rand32();
 

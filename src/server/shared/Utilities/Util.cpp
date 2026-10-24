@@ -36,6 +36,18 @@ static CRandomSFMT& SfmtRand()
     return sfmtRand;
 }
 
+int32 irand(int32 min, int32 max)
+{
+    ASSERT(max >= min);
+    return int32(SfmtRand().IRandom(min, max));
+}
+
+uint32 urand(uint32 min, uint32 max)
+{
+    ASSERT(max >= min);
+    return SfmtRand().URandom(min, max);
+}
+
 float frand(float min, float max)
 {
     ASSERT(max >= min);

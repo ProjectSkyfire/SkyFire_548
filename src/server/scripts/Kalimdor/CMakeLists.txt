@@ -104,8 +104,12 @@ set(scripts_STAT_SRCS
   Kalimdor/OnyxiasLair/boss_onyxia.cpp
   Kalimdor/OnyxiasLair/onyxias_lair.h
   Kalimdor/OnyxiasLair/instance_onyxias_lair.cpp
-  #REWORKED IN PANDARIA
-  #Kalimdor/RagefireChasm/instance_ragefire_chasm.cpp
+  Kalimdor/RagefireChasm/ragefire_chasm.h
+  Kalimdor/RagefireChasm/instance_ragefire_chasm.cpp
+  Kalimdor/RagefireChasm/boss_adarogg.cpp
+  Kalimdor/RagefireChasm/boss_dark_shaman_koranthal.cpp
+  Kalimdor/RagefireChasm/boss_lava_guard_gordoth.cpp
+  Kalimdor/RagefireChasm/boss_slagmaw.cpp
   Kalimdor/DireMaul/instance_dire_maul.cpp
   Kalimdor/HallsOfOrigination/halls_of_origination.h
   Kalimdor/HallsOfOrigination/instance_halls_of_origination.cpp
