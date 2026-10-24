@@ -637,6 +637,13 @@ void AddSC_boss_ook_ook();
 void AddSC_boss_yanzhu();
 void AddSC_instance_stormstout_brewery();
 void AddSC_stormstout_brewery();
+// Gate of the Setting Sun
+void AddSC_boss_commander_rimok();
+void AddSC_boss_raigonn();
+void AddSC_boss_saboteur_kiptilak();
+void AddSC_boss_striker_gadok();
+void AddSC_gate_of_the_setting_sun();
+void AddSC_instance_gate_of_the_setting_sun();
 // Valley of the four Winds
 void AddSC_valley_of_the_four_winds();
 
@@ -1360,6 +1367,13 @@ void AddPandariaScripts()
     AddSC_boss_yanzhu();
     AddSC_instance_stormstout_brewery();
     AddSC_stormstout_brewery();
+    // Gate of the Setting Sun
+    AddSC_boss_commander_rimok();
+    AddSC_boss_raigonn();
+    AddSC_boss_saboteur_kiptilak();
+    AddSC_boss_striker_gadok();
+    AddSC_gate_of_the_setting_sun();
+    AddSC_instance_gate_of_the_setting_sun();
     // Valley of the four Winds
     AddSC_valley_of_the_four_winds();
 #endif

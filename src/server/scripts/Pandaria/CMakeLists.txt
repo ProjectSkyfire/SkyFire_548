@@ -5,6 +5,13 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+  Pandaria/GateOfTheSettingSun/boss_commander_rimok.cpp
+  Pandaria/GateOfTheSettingSun/boss_raigonn.cpp
+  Pandaria/GateOfTheSettingSun/boss_saboteur_kiptilak.cpp
+  Pandaria/GateOfTheSettingSun/boss_striker_gadok.cpp
+  Pandaria/GateOfTheSettingSun/gate_of_the_setting_sun.cpp
+  Pandaria/GateOfTheSettingSun/gate_of_the_setting_sun.h
+  Pandaria/GateOfTheSettingSun/instance_gate_of_the_setting_sun.cpp
   Pandaria/StormstoutBrewery/boss_hoptallus.cpp
   Pandaria/StormstoutBrewery/boss_ook_ook.cpp
   Pandaria/StormstoutBrewery/boss_yanzhu_the_uncasked.cpp
