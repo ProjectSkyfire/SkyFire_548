@@ -1092,13 +1092,31 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
     //damage
     //float damagemod = _GetDamageMod(rank);      // Set during loading templates into dmg_multiplier field
 
-    SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, cinfo->mindmg);
-    SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, cinfo->maxdmg);
+    float mindmg = cinfo->mindmg;
+    float maxdmg = cinfo->maxdmg;
+    uint32 attackpower = cinfo->attackpower;
+
+    // Templates without melee damage use the class/level base stats
+    if (!maxdmg)
+    {
+        float basedamage = stats->BaseDamage[cinfo->expansion < MAX_CREATURE_BASE_DAMAGE ? cinfo->expansion : 0];
+        if (!basedamage)
+            basedamage = stats->BaseDamage[0];
+
+        mindmg = basedamage;
+        maxdmg = basedamage * 1.5f;
+
+        if (!attackpower)
+            attackpower = stats->AttackPower;
+    }
+
+    SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, mindmg);
+    SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, maxdmg);
 
     SetFloatValue(UNIT_FIELD_MIN_RANGED_DAMAGE, cinfo->minrangedmg);
     SetFloatValue(UNIT_FIELD_MAX_RANGED_DAMAGE, cinfo->maxrangedmg);
 
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->attackpower);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(attackpower));
 }
 
 float Creature::_GetHealthMod(int32 Rank)
