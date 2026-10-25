@@ -555,6 +555,7 @@ public:
     void SetReferencedFromCurrent(bool yes) { m_referencedFromCurrentSpell = yes; }
     bool IsInterruptable() const { return !m_executedCurrently; }
     void SetExecutedCurrently(bool yes) { m_executedCurrently = yes; }
+    bool IsSuccessfulInterrupt() const { return m_successfulInterrupt; }
     uint64 GetDelayStart() const { return m_delayStart; }
     void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
     uint64 GetDelayMoment() const { return m_delayMoment; }
@@ -633,6 +634,7 @@ protected:
     WorldLocation* destTarget;
     int32 damage;
     int32 m_dispelCount = 0;
+    bool m_successfulInterrupt = false;
     SpellEffectHandleMode effectHandleMode;
     // used in effects handlers
     Aura* m_spellAura;
