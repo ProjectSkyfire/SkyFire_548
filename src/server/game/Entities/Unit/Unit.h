@@ -2269,6 +2269,12 @@ public:
         return m_scAuras;
     }
 
+    // Auras a script tracks per spell id, in the order they were bound; unbound when removed
+    void BindAura(Aura* aura);
+    void UnbindAura(Aura* aura);
+    void UnbindAllAuras();
+    AuraList const* GetBoundAurasBySpellId(uint32 spellId) const;
+
     AuraEffect* GetAuraEffect(uint32 spellId, uint8 effIndex, uint64 casterGUID = 0) const;
     AuraEffect* GetAuraEffectOfRankedSpell(uint32 spellId, uint8 effIndex, uint64 casterGUID = 0) const;
     AuraEffect* GetAuraEffect(AuraType type, SpellFamilyNames name, uint32 iconId, uint8 effIndex) const; // spell mustn't have familyflags
@@ -2942,6 +2948,7 @@ protected:
 
     AuraEffectList m_modAuras[TOTAL_AURAS];
     AuraList m_scAuras;                        // casted singlecast auras
+    std::map<uint32, AuraList> m_boundAuras;
     AuraApplicationList m_interruptableAuras;             // auras which have interrupt mask applied on unit
     AuraStateAurasMap m_auraStateAuras;        // Used for improve performance of aura state checks on aura apply/remove
     uint32 m_interruptMask;

@@ -297,6 +297,7 @@ Unit::~Unit()
         }
 
     _DeleteRemovedAuras();
+    UnbindAllAuras();
 
     delete m_charmInfo;
     movespline.reset();
@@ -5650,6 +5651,7 @@ void Unit::RemoveFromWorld()
         RemoveCharmAuras();
         RemoveBindSightAuras();
         RemoveNotOwnSingleTargetAuras();
+        UnbindAllAuras();
 
         RemoveAllGameObjects();
         RemoveAllDynObjects();

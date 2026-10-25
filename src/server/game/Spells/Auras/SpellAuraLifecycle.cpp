@@ -124,6 +124,8 @@ void Aura::_Remove(AuraRemoveMode removeMode)
 {
     ASSERT(!m_isRemoved);
     m_isRemoved = true;
+    if (m_boundCaster)
+        m_boundCaster->UnbindAura(this);
     ApplicationMap::iterator appItr = m_applications.begin();
     for (appItr = m_applications.begin(); appItr != m_applications.end();)
     {

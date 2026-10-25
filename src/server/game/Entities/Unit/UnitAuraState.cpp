@@ -758,6 +758,43 @@ void Unit::RemoveNotOwnSingleTargetAuras(uint32 newPhase, bool phaseid)
     }
 }
 
+void Unit::BindAura(Aura* aura)
+{
+    if (aura->IsRemoved() || aura->IsBoundToCaster())
+        return;
+
+    m_boundAuras[aura->GetId()].push_back(aura);
+    aura->BindToCaster(this);
+}
+
+void Unit::UnbindAura(Aura* aura)
+{
+    std::map<uint32, AuraList>::iterator itr = m_boundAuras.find(aura->GetId());
+    if (itr != m_boundAuras.end())
+    {
+        itr->second.remove(aura);
+        if (itr->second.empty())
+            m_boundAuras.erase(itr);
+    }
+    aura->UnbindFromCaster();
+}
+
+void Unit::UnbindAllAuras()
+{
+    for (std::map<uint32, AuraList>::iterator itr = m_boundAuras.begin(); itr != m_boundAuras.end(); ++itr)
+        for (AuraList::iterator auraItr = itr->second.begin(); auraItr != itr->second.end(); ++auraItr)
+            (*auraItr)->UnbindFromCaster();
+    m_boundAuras.clear();
+}
+
+Unit::AuraList const* Unit::GetBoundAurasBySpellId(uint32 spellId) const
+{
+    std::map<uint32, AuraList>::const_iterator itr = m_boundAuras.find(spellId);
+    if (itr == m_boundAuras.end() || itr->second.empty())
+        return NULL;
+    return &itr->second;
+}
+
 void Unit::RemoveAurasWithInterruptFlags(uint32 flag, uint32 except, Unit const* attacker)
 {
     if (!(m_interruptMask & flag))

@@ -157,7 +157,7 @@ Aura::Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, Item* 
     m_castItemGuid(castItem ? castItem->GetGUID() : 0), m_applyTime(time(NULL)),
     m_owner(owner), m_updateTargetMapInterval(0),
     m_casterLevel(caster ? caster->getLevel() : m_spellInfo->SpellLevel), m_procCharges(0), m_stackAmount(1),
-    m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false)
+    m_isRemoved(false), m_isSingleTarget(false), m_isUsingCharges(false), m_boundCaster(NULL)
 {
     m_maxDuration = CalcMaxDuration(caster);
     m_duration = m_maxDuration;
@@ -176,6 +176,9 @@ AuraScript* Aura::GetScriptByName(std::string const& scriptName) const
 
 Aura::~Aura()
 {
+    if (m_boundCaster)
+        m_boundCaster->UnbindAura(this);
+
     // unload scripts
     while (!m_loadedScripts.empty())
     {

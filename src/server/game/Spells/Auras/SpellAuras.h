@@ -158,6 +158,11 @@ public:
     bool IsSingleTargetWith(Aura const* aura) const;
     void SetIsSingleTarget(bool val) { m_isSingleTarget = val; }
     void UnregisterSingleTarget();
+    // Script-managed binding to the caster, see Unit::BindAura
+    bool IsBoundToCaster() const { return m_boundCaster != NULL; }
+    Unit* GetBoundCaster() const { return m_boundCaster; }
+    void BindToCaster(Unit* caster) { m_boundCaster = caster; }
+    void UnbindFromCaster() { m_boundCaster = NULL; }
     int32 CalcDispelChance(Unit* auraTarget, bool offensive) const;
 
     void SetLoadedState(int32 maxduration, int32 duration, int32 charges, uint8 stackamount, uint32 recalculateMask, int32* amount);
@@ -252,6 +257,8 @@ protected:
     bool m_isRemoved : 1;
     bool m_isSingleTarget : 1;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
     bool m_isUsingCharges : 1;
+
+    Unit* m_boundCaster;
 
 private:
     Unit::AuraApplicationList m_removedApplications;
