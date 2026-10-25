@@ -78,6 +78,7 @@ enum Stages
 // Over the firewall platter, which the fire wall turns around
 Position const GlubtokCenterPos = { -193.29f, -441.95f, 53.76f, 4.88f };
 float const GlubtokHoverHeight = 3.0f; // low enough for melee to keep hitting him
+float const GlubtokHoverReachBonus = 2.0f; // melee range is 3D, so the hover eats most of his reach
 float const GlubtokBlinkMaxDist = 30.0f;
 
 enum Adds
@@ -115,9 +116,11 @@ class boss_glubtok : public CreatureScript
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
                 me->setActive(true);
                 stage = STAGE_FISTS;
+                groundCombatReach = 0.0f;
             }
 
             uint8 stage;
+            float groundCombatReach;
 
             void Reset() OVERRIDE
             {
@@ -285,6 +288,11 @@ class boss_glubtok : public CreatureScript
                     DoCast(me, SPELL_HOVERING_ANIM, true);
                     me->SetFloatValue(UNIT_FIELD_HOVER_HEIGHT, GlubtokHoverHeight);
                     me->SetHover(true);
+                    if (groundCombatReach <= 0.0f)
+                    {
+                        groundCombatReach = me->GetCombatReach();
+                        me->SetFloatValue(UNIT_FIELD_COMBAT_REACH, groundCombatReach + GlubtokHoverReachBonus);
+                    }
                 }
 
                 void Land()
@@ -292,6 +300,11 @@ class boss_glubtok : public CreatureScript
                     me->RemoveAurasDueToSpell(SPELL_HOVERING_ANIM);
                     me->SetHover(false);
                     me->SetFloatValue(UNIT_FIELD_HOVER_HEIGHT, me->GetCreatureTemplate()->HoverHeight);
+                    if (groundCombatReach > 0.0f)
+                    {
+                        me->SetFloatValue(UNIT_FIELD_COMBAT_REACH, groundCombatReach);
+                        groundCombatReach = 0.0f;
+                    }
                 }
 
                 void StartArcaneBeams()
