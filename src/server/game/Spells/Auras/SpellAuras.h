@@ -204,6 +204,10 @@ public:
     // AuraScript
     void LoadScripts();
     void CallScriptInitEffectsHandlers(uint32& effMask);
+    void CallScriptRefreshChargesHandlers(uint8& charges);
+    bool CallScriptDropModChargeHandlers(Spell* bySpell);
+    void CallScriptEffectUpdateHandlers(uint32 diff, AuraEffect* aurEff);
+    void CallScriptEffectAfterCalcAmountHandlers(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated);
     bool CallScriptCheckAreaTargetHandlers(Unit* target);
     void CallScriptDispel(DispelInfo* dispelInfo);
     void CallScriptAfterDispel(DispelInfo* dispelInfo);

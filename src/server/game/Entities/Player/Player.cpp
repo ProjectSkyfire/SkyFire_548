@@ -16696,8 +16696,21 @@ void Player::RemoveSpellMods(Spell* spell)
             if (iterMod == spell->m_appliedMods.end())
                 continue;
 
+            bool prevented = mod->ownerAura->CallScriptDropModChargeHandlers(spell);
+
             // remove from list
             spell->m_appliedMods.erase(iterMod);
+
+            if (prevented)
+            {
+                // The aura keeps its charge, so its mods must not stay marked as spent
+                Aura* aura = mod->ownerAura;
+                for (uint32 e = 0; e < MAX_SPELL_EFFECTS; ++e)
+                    if (AuraEffect* aurEff = aura->GetEffect(e))
+                        if (SpellModifier* spellMod = aurEff->GetSpellModifier())
+                            spellMod->charges = aura->GetCharges();
+                continue;
+            }
 
             if (mod->ownerAura->DropCharge(AURA_REMOVE_BY_EXPIRE))
                 itr = m_spellMods[i].begin();

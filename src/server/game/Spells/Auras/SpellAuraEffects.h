@@ -35,6 +35,7 @@ public:
     uint32 GetEffIndex() const { return m_effIndex; }
     int32 GetBaseAmount() const { return m_baseAmount; }
     int32 GetAmplitude() const { return m_amplitude; }
+    void SetAmplitude(int32 amplitude) { m_amplitude = amplitude; }
 
     int32 GetMiscValueB() const { return m_spellInfo->Effects[m_effIndex].MiscValueB; }
     int32 GetMiscValue() const { return m_spellInfo->Effects[m_effIndex].MiscValue; }

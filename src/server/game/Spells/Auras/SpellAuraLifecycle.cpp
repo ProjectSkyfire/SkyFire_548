@@ -510,7 +510,9 @@ bool Aura::ModStackAmount(int32 num, AuraRemoveMode removeMode)
         RefreshTimers();
 
         // reset charges
-        SetCharges(CalcMaxCharges());
+        uint8 charges = CalcMaxCharges();
+        CallScriptRefreshChargesHandlers(charges);
+        SetCharges(charges);
         // FIXME: not a best way to synchronize charges, but works
         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (AuraEffect* aurEff = GetEffect(i))

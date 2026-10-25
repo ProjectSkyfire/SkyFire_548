@@ -671,9 +671,17 @@ bool AuraScript::_Validate(SpellInfo const* entry)
         if (!(*itr).GetAffectedEffectsMask(entry))
             SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `OnEffectUpdatePeriodic` of AuraScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
 
+    for (std::list<EffectUpdateHandler>::iterator itr = OnEffectUpdate.begin(); itr != OnEffectUpdate.end(); ++itr)
+        if (!(*itr).GetAffectedEffectsMask(entry))
+            SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `OnEffectUpdate` of AuraScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
+
     for (std::list<EffectCalcAmountHandler>::iterator itr = DoEffectCalcAmount.begin(); itr != DoEffectCalcAmount.end(); ++itr)
         if (!(*itr).GetAffectedEffectsMask(entry))
             SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `DoEffectCalcAmount` of AuraScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
+
+    for (std::list<EffectCalcAmountHandler>::iterator itr = AfterEffectCalcAmount.begin(); itr != AfterEffectCalcAmount.end(); ++itr)
+        if (!(*itr).GetAffectedEffectsMask(entry))
+            SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `AfterEffectCalcAmount` of AuraScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
 
     for (std::list<EffectCalcPeriodicHandler>::iterator itr = DoEffectCalcPeriodic.begin(); itr != DoEffectCalcPeriodic.end(); ++itr)
         if (!(*itr).GetAffectedEffectsMask(entry))
@@ -807,6 +815,37 @@ AuraScript::EffectUpdatePeriodicHandler::EffectUpdatePeriodicHandler(AuraEffectU
 void AuraScript::EffectUpdatePeriodicHandler::Call(AuraScript* auraScript, AuraEffect* aurEff)
 {
     (auraScript->*pEffectHandlerScript)(aurEff);
+}
+
+AuraScript::EffectUpdateHandler::EffectUpdateHandler(AuraEffectUpdateFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName)
+    : AuraScript::EffectBase(_effIndex, _effName)
+{
+    pEffectHandlerScript = _pEffectHandlerScript;
+}
+
+void AuraScript::EffectUpdateHandler::Call(AuraScript* auraScript, uint32 diff, AuraEffect* aurEff)
+{
+    (auraScript->*pEffectHandlerScript)(diff, aurEff);
+}
+
+AuraScript::RefreshChargesHandler::RefreshChargesHandler(AuraRefreshChargesFnType _pHandlerScript)
+{
+    pHandlerScript = _pHandlerScript;
+}
+
+void AuraScript::RefreshChargesHandler::Call(AuraScript* auraScript, uint8& charges)
+{
+    (auraScript->*pHandlerScript)(charges);
+}
+
+AuraScript::AuraDropModChargeHandler::AuraDropModChargeHandler(AuraDropModChargeFnType _pHandlerScript)
+{
+    pHandlerScript = _pHandlerScript;
+}
+
+void AuraScript::AuraDropModChargeHandler::Call(AuraScript* auraScript, Spell* bySpell)
+{
+    (auraScript->*pHandlerScript)(bySpell);
 }
 
 AuraScript::EffectCalcAmountHandler::EffectCalcAmountHandler(AuraEffectCalcAmountFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName)
@@ -968,6 +1007,7 @@ bool AuraScript::_IsDefaultActionPrevented()
         case AURA_SCRIPT_HOOK_PREPARE_PROC:
         case AURA_SCRIPT_HOOK_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_PROC:
+        case AURA_SCRIPT_HOOK_EFFECT_DROP_MOD_CHARGE:
             return m_defaultActionPrevented;
         default:
             ASSERT(false && "AuraScript::_IsDefaultActionPrevented is called in a wrong place");
@@ -987,6 +1027,7 @@ void AuraScript::PreventDefaultAction()
         case AURA_SCRIPT_HOOK_PREPARE_PROC:
         case AURA_SCRIPT_HOOK_PROC:
         case AURA_SCRIPT_HOOK_EFFECT_PROC:
+        case AURA_SCRIPT_HOOK_EFFECT_DROP_MOD_CHARGE:
             m_defaultActionPrevented = true;
             break;
         default:

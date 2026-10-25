@@ -55,6 +55,66 @@ void Aura::CallScriptInitEffectsHandlers(uint32& effMask)
     }
 }
 
+void Aura::CallScriptRefreshChargesHandlers(uint8& charges)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_REFRESH_CHARGES);
+        std::list<AuraScript::RefreshChargesHandler>::iterator hookItrEnd = (*scritr)->OnRefreshCharges.end(), hookItr = (*scritr)->OnRefreshCharges.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+            hookItr->Call(*scritr, charges);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
+bool Aura::CallScriptDropModChargeHandlers(Spell* bySpell)
+{
+    bool prevented = false;
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_DROP_MOD_CHARGE);
+        std::list<AuraScript::AuraDropModChargeHandler>::iterator hookItrEnd = (*scritr)->OnDropModCharge.end(), hookItr = (*scritr)->OnDropModCharge.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+        {
+            hookItr->Call(*scritr, bySpell);
+            if (!prevented)
+                prevented = (*scritr)->_IsDefaultActionPrevented();
+        }
+
+        (*scritr)->_FinishScriptCall();
+    }
+    return prevented;
+}
+
+void Aura::CallScriptEffectUpdateHandlers(uint32 diff, AuraEffect* aurEff)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_UPDATE);
+        std::list<AuraScript::EffectUpdateHandler>::iterator effEndItr = (*scritr)->OnEffectUpdate.end(), effItr = (*scritr)->OnEffectUpdate.begin();
+        for (; effItr != effEndItr; ++effItr)
+            if (effItr->IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                effItr->Call(*scritr, diff, aurEff);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
+void Aura::CallScriptEffectAfterCalcAmountHandlers(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_CALC_AMOUNT);
+        std::list<AuraScript::EffectCalcAmountHandler>::iterator effEndItr = (*scritr)->AfterEffectCalcAmount.end(), effItr = (*scritr)->AfterEffectCalcAmount.begin();
+        for (; effItr != effEndItr; ++effItr)
+            if (effItr->IsEffectAffected(m_spellInfo, aurEff->GetEffIndex()))
+                effItr->Call(*scritr, aurEff, amount, canBeRecalculated);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
 bool Aura::CallScriptCheckAreaTargetHandlers(Unit* target)
 {
     bool result = true;
