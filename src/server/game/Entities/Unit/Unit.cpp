@@ -6119,8 +6119,12 @@ void Unit::StopMoving()
     if (!IsInWorld() || movespline->Finalized())
         return;
 
+    // Update position now since Stop does not start a new movement that can be updated later
+    UpdateSplinePosition();
     Movement::MoveSplineInit init(this);
     init.Stop();
+    // Finish the stopped spline now, otherwise it stays active until the next update and interferes with spells and facing
+    UpdateSplineMovement(1);
 }
 
 bool Unit::IsSitState() const
@@ -8706,6 +8710,9 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
         SendTeleportPacket(pos);
         UpdatePosition(x, y, z, orientation, true);
         UpdateObjectVisibility();
+
+        // Relaunch the current movement from the new position
+        GetMotionMaster()->propagateSpeedChange();
     }
 }
 
@@ -8985,7 +8992,7 @@ void Unit::SendTeleportPacket(Position& pos)
         Relocate(&pos); // Build packets at the destination for creatures.
 
     WorldPacket data(SMSG_MOVE_UPDATE_TELEPORT, 38);
-    WriteMovementInfo(data);
+    BuildTeleportUpdateData(&data);
 
     if (GetTypeId() == TypeID::TYPEID_PLAYER)
     {
@@ -9013,6 +9020,151 @@ void Unit::SendTeleportPacket(Position& pos)
         SendMessageToSet(&data, false);
         // Creature callers (NearTeleportTo) UpdatePosition to the destination next.
     }
+}
+
+// SMSG_MOVE_UPDATE_TELEPORT does not use the common movement status layout: it also carries the unit's speeds
+void Unit::BuildTeleportUpdateData(WorldPacket* data)
+{
+    MovementInfo const& mi = m_movementInfo;
+
+    bool hasTransportData = GetTransGUID() != 0;
+    bool hasSplineElevation = HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+    bool hasFallDirection = HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
+    bool hasFallData = hasFallDirection || mi.jump.fallTime != 0;
+    bool hasTransportTime2 = hasTransportData && mi.transport.time2 != 0;
+    bool hasTransportTime3 = false;
+    bool hasSwimSpeed = GetSpeed(MOVE_SWIM) != 0;
+    bool hasRunBackSpeed = GetSpeed(MOVE_RUN_BACK) != 0;
+    bool hasFlightSpeed = GetSpeed(MOVE_FLIGHT) != 0;
+    bool hasRunSpeed = GetSpeed(MOVE_RUN) != 0;
+    bool hasMovementFlags = GetUnitMovementFlags() != 0;
+    bool hasMovementFlags2 = GetExtraUnitMovementFlags() != 0;
+    bool hasOrientation = !G3D::fuzzyEq(GetOrientation(), 0.0f);
+
+    ObjectGuid guid = GetGUID();
+    ObjectGuid tguid = hasTransportData ? GetTransGUID() : 0;
+
+    data->WriteBit(hasTransportData);
+    data->WriteBit(0);                      // !hasTimestamp
+    data->WriteBit(hasFallData);
+    data->WriteBit(0);
+    data->WriteBit(1);
+
+    if (hasTransportData)
+    {
+        data->WriteBit(tguid[7]);
+        data->WriteBit(tguid[3]);
+        data->WriteBit(tguid[0]);
+        data->WriteBit(tguid[2]);
+        data->WriteBit(tguid[6]);
+        data->WriteBit(hasTransportTime3);
+        data->WriteBit(tguid[5]);
+        data->WriteBit(tguid[4]);
+        data->WriteBit(hasTransportTime2);
+        data->WriteBit(tguid[1]);
+    }
+
+    data->WriteBit(guid[0]);
+    data->WriteBit(hasSwimSpeed);
+    data->WriteBit(0);
+    data->WriteBit(!hasMovementFlags);
+    data->WriteBit(guid[1]);
+    data->WriteBit(0);
+    data->WriteBit(hasRunBackSpeed);
+    data->WriteBit(0);
+    data->WriteBits(0, 19);
+    data->WriteBit(!hasSplineElevation);
+    data->WriteBit(guid[6]);
+    data->WriteBit(!hasOrientation);
+    data->WriteBit(0);
+    if (hasFallData)
+        data->WriteBit(hasFallDirection);
+    data->WriteBit(hasFlightSpeed);
+    data->WriteBit(0);
+    data->WriteBit(guid[3]);
+    data->WriteBit(guid[4]);
+    data->WriteBit(hasRunSpeed);
+    data->WriteBit(1);
+    data->WriteBit(0);
+    data->WriteBit(guid[5]);
+    data->WriteBit(0);
+    data->WriteBit(guid[2]);
+    data->WriteBits(0, 22);                 // forces count
+    data->WriteBit(!hasMovementFlags2);
+    if (hasMovementFlags)
+        data->WriteBits(GetUnitMovementFlags(), 30);
+    data->WriteBit(guid[7]);
+    if (hasMovementFlags2)
+        data->WriteBits(GetExtraUnitMovementFlags(), 13);
+
+    if (hasFlightSpeed)
+        *data << float(GetSpeed(MOVE_FLIGHT));
+
+    if (hasTransportData)
+    {
+        data->WriteByteSeq(tguid[3]);
+        data->WriteByteSeq(tguid[5]);
+        *data << uint32(GetTransTime());
+        *data << float(GetTransOffsetZ());
+        *data << float(GetTransOffsetO());
+        data->WriteByteSeq(tguid[4]);
+        data->WriteByteSeq(tguid[1]);
+        data->WriteByteSeq(tguid[7]);
+        *data << float(GetTransOffsetY());
+        if (hasTransportTime2)
+            *data << uint32(mi.transport.time2);
+        data->WriteByteSeq(tguid[0]);
+        data->WriteByteSeq(tguid[2]);
+        *data << int8(GetTransSeat());
+        *data << float(GetTransOffsetX());
+        data->WriteByteSeq(tguid[6]);
+    }
+
+    data->WriteByteSeq(guid[3]);
+
+    if (hasFallData)
+    {
+        if (hasFallDirection)
+        {
+            *data << float(mi.jump.sinAngle);
+            *data << float(mi.jump.xyspeed);
+            *data << float(mi.jump.cosAngle);
+        }
+        *data << uint32(mi.jump.fallTime);
+        *data << float(mi.jump.zspeed);
+    }
+
+    data->WriteByteSeq(guid[4]);
+    *data << float(GetPositionY());
+
+    if (hasRunBackSpeed)
+        *data << float(GetSpeed(MOVE_RUN_BACK));
+
+    data->WriteByteSeq(guid[2]);
+    data->WriteByteSeq(guid[7]);
+
+    if (hasSwimSpeed)
+        *data << float(GetSpeed(MOVE_SWIM));
+
+    *data << float(GetPositionX());
+
+    if (hasRunSpeed)
+        *data << float(GetSpeed(MOVE_RUN));
+
+    *data << float(GetPositionZ());
+    *data << uint32(getMSTime());
+
+    if (hasSplineElevation)
+        *data << float(mi.splineElevation);
+
+    data->WriteByteSeq(guid[6]);
+    data->WriteByteSeq(guid[5]);
+    data->WriteByteSeq(guid[1]);
+
+    if (hasOrientation)
+        *data << float(GetOrientation());
+
+    data->WriteByteSeq(guid[0]);
 }
 
 bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool teleport)

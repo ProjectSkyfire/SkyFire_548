@@ -1994,6 +1994,7 @@ public:
 
     void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
     void SendTeleportPacket(Position& pos);
+    void BuildTeleportUpdateData(WorldPacket* data);
     virtual bool UpdatePosition(float x, float y, float z, float ang, bool teleport = false);
     // returns true if unit's position really changed
     bool UpdatePosition(const Position& pos, bool teleport = false);
