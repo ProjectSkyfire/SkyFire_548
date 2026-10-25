@@ -467,7 +467,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNULL,                                      //415 SPELL_AURA_415 (used in spell 123316) (5.4.2)
     &AuraEffect::HandleNULL,                                      //416 SPELL_AURA_416
     &AuraEffect::HandleNULL,                                      //417 SPELL_AURA_417 (used in spell 25956) (5.4.2)
-    &AuraEffect::HandleNULL,                                      //418 SPELL_AURA_418
+    &AuraEffect::HandleAuraModIncreaseMaxPowerFlat,               //418 SPELL_AURA_MOD_MAX_POWER
     &AuraEffect::HandleNULL,                                      //419 SPELL_AURA_419
     &AuraEffect::HandleNULL,                                      //420 SPELL_AURA_MOD_PET_XP_PCT / NYI
     &AuraEffect::HandleNULL,                                      //421 SPELL_AURA_421
