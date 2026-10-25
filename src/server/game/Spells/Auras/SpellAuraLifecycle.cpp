@@ -54,6 +54,8 @@ uint32 Aura::BuildEffectMaskForOwner(SpellInfo const* spellProto, uint32 avalibl
 
 void Aura::_InitEffects(uint32 effMask, Unit* caster, int32* baseAmount)
 {
+    CallScriptInitEffectsHandlers(effMask);
+
     // shouldn't be in constructor - functions in AuraEffect::AuraEffect use polymorphism
     for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {

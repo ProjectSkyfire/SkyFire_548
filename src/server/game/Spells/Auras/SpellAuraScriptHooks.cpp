@@ -42,6 +42,19 @@ void Aura::LoadScripts()
     }
 }
 
+void Aura::CallScriptInitEffectsHandlers(uint32& effMask)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_INIT_EFFECTS);
+        std::list<AuraScript::InitEffectsHandler>::iterator hookItrEnd = (*scritr)->OnInitEffects.end(), hookItr = (*scritr)->OnInitEffects.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+            hookItr->Call(*scritr, effMask);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
 bool Aura::CallScriptCheckAreaTargetHandlers(Unit* target)
 {
     bool result = true;

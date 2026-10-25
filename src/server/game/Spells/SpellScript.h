@@ -451,6 +451,7 @@ enum AuraScriptHookType
     AURA_SCRIPT_HOOK_EFFECT_PROC,
     AURA_SCRIPT_HOOK_EFFECT_AFTER_PROC,
     AURA_SCRIPT_HOOK_AFTER_PROC,
+    AURA_SCRIPT_HOOK_INIT_EFFECTS,
     /*AURA_SCRIPT_HOOK_APPLY,
     AURA_SCRIPT_HOOK_REMOVE, */
 };
@@ -465,6 +466,7 @@ class AuraScript : public _SpellScript
     // DO NOT OVERRIDE THESE IN SCRIPTS
 public:
 #define AURASCRIPT_FUNCTION_TYPE_DEFINES(CLASSNAME) \
+        typedef void(CLASSNAME::*AuraInitEffectsFnType)(uint32&); \
         typedef bool(CLASSNAME::*AuraCheckAreaTargetFnType)(Unit* target); \
         typedef void(CLASSNAME::*AuraDispelFnType)(DispelInfo* dispelInfo); \
         typedef void(CLASSNAME::*AuraEffectApplicationModeFnType)(AuraEffect const*, AuraEffectHandleModes); \
@@ -483,7 +485,15 @@ public:
 
     AURASCRIPT_FUNCTION_TYPE_DEFINES(AuraScript)
 
-        class CheckAreaTargetHandler
+        class InitEffectsHandler
+    {
+    public:
+        InitEffectsHandler(AuraInitEffectsFnType pHandlerScript);
+        void Call(AuraScript* auraScript, uint32& effMask);
+    private:
+        AuraInitEffectsFnType pHandlerScript;
+    };
+    class CheckAreaTargetHandler
     {
     public:
         CheckAreaTargetHandler(AuraCheckAreaTargetFnType pHandlerScript);
@@ -621,6 +631,7 @@ public:
     };
 
 #define AURASCRIPT_FUNCTION_CAST_DEFINES(CLASSNAME) \
+        class InitEffectsFunction : public AuraScript::InitEffectsHandler { public: InitEffectsFunction(AuraInitEffectsFnType _pHandlerScript) : AuraScript::InitEffectsHandler((AuraScript::AuraInitEffectsFnType)_pHandlerScript) { } }; \
         class CheckAreaTargetFunction : public AuraScript::CheckAreaTargetHandler { public: CheckAreaTargetFunction(AuraCheckAreaTargetFnType _pHandlerScript) : AuraScript::CheckAreaTargetHandler((AuraScript::AuraCheckAreaTargetFnType)_pHandlerScript) { } }; \
         class AuraDispelFunction : public AuraScript::AuraDispelHandler { public: AuraDispelFunction(AuraDispelFnType _pHandlerScript) : AuraScript::AuraDispelHandler((AuraScript::AuraDispelFnType)_pHandlerScript) { } }; \
         class EffectPeriodicHandlerFunction : public AuraScript::EffectPeriodicHandler { public: EffectPeriodicHandlerFunction(AuraEffectPeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectPeriodicHandler((AuraScript::AuraEffectPeriodicFnType)_pEffectHandlerScript, _effIndex, _effName) { } }; \
@@ -671,6 +682,12 @@ public:
     // AuraScript interface
     // hooks to which you can attach your functions
     //
+    // executed when the aura is created, before its effects are built; clear bits to skip effects
+    // example: OnInitEffects += AuraInitEffectsFn(class::function);
+    // where function is: void function (uint32& effMask);
+    HookList<InitEffectsHandler> OnInitEffects;
+#define AuraInitEffectsFn(F) InitEffectsFunction(&F)
+
     // executed when area aura checks if it can be applied on target
     // example: OnEffectApply += AuraEffectApplyFn(class::function);
     // where function is: bool function (Unit* target);
