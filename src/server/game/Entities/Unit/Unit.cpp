@@ -3442,6 +3442,19 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                         }
                         break;
                     }
+                    case SPELLFAMILY_WARLOCK:
+                    {
+                        switch (spellProto->Id)
+                        {
+                            case 6353:   // Soul Fire
+                            case 104027: // Soul Fire (Metamorphosis)
+                            case 116858: // Chaos Bolt
+                                return true;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
                     case SPELLFAMILY_SHAMAN:
                     {
                         // Lava Burst
