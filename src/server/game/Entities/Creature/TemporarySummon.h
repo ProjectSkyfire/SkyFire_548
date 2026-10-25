@@ -40,6 +40,7 @@ public:
     uint64 GetSummonerGUID() const { return m_summonerGUID; }
     TempSummonType const& GetSummonType() const { return m_type; }
     uint32 GetTimer() const { return m_timer; }
+    bool IsMinorGuardian() const;
 
     const SummonPropertiesEntry* const m_Properties;
 private:

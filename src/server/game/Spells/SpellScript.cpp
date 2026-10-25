@@ -576,6 +576,21 @@ int32 SpellScript::GetEffectValue()
     return m_spell->damage;
 }
 
+void SpellScript::SetEffectValue(int32 value)
+{
+    if (!IsInEffectHook())
+    {
+        SF_LOG_ERROR("scripts", "Script: `%s` Spell: `%u`: function SpellScript::SetEffectValue was called, but function has no effect in current hook!", m_scriptName->c_str(), m_scriptSpellId);
+        return;
+    }
+    m_spell->damage = value;
+}
+
+int32 SpellScript::GetDispelCount() const
+{
+    return m_spell->m_dispelCount;
+}
+
 Item* SpellScript::GetCastItem()
 {
     return m_spell->m_CastItem;

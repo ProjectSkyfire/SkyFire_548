@@ -631,6 +631,7 @@ protected:
     GameObject* gameObjTarget;
     WorldLocation* destTarget;
     int32 damage;
+    int32 m_dispelCount = 0;
     SpellEffectHandleMode effectHandleMode;
     // used in effects handlers
     Aura* m_spellAura;

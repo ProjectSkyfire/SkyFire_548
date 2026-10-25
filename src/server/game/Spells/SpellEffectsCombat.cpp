@@ -895,6 +895,8 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
     if (success_list.empty())
         return;
 
+    m_dispelCount += int32(success_list.size());
+
     WorldPacket dataSuccess(SMSG_SPELLDISPELLOG, 8 + 8 + 1 + 1 + 4 + success_list.size() * (3 + 1 + 1 + 4));
     // Send packet header
     dataSuccess.WriteGuidMask(m_caster->GetObjectGUID(), 2);

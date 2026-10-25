@@ -401,6 +401,10 @@ public:
 
     // method avalible only in EffectHandler method
     int32 GetEffectValue();
+    void SetEffectValue(int32 value);
+
+    // number of auras removed by the dispel effects handled so far
+    int32 GetDispelCount() const;
 
     // returns: cast item if present.
     Item* GetCastItem();

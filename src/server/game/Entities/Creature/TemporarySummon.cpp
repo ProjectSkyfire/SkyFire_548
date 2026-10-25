@@ -218,6 +218,24 @@ void TempSummon::SetTempSummonType(TempSummonType type)
     m_type = type;
 }
 
+bool TempSummon::IsMinorGuardian() const
+{
+    if (!IS_PLAYER_GUID(GetCreatorGUID()))
+        return false;
+
+    if (IsPet())
+        return false;
+    if (HasAura(138130)) // Storm, Earth and Fire
+        return false;
+    if (!m_Properties)
+        return true;
+    if (m_Properties->Category == SUMMON_CATEGORY_PET || m_Properties->Type == SUMMON_TYPE_PET)
+        return false;
+    if (m_Properties->Type != SUMMON_TYPE_GUARDIAN && m_Properties->Type != SUMMON_TYPE_GUARDIAN2)
+        return true;
+    return GetEntry() != 28524; // Bloodworm
+}
+
 void TempSummon::UnSummon(uint32 msTime)
 {
     if (msTime)
