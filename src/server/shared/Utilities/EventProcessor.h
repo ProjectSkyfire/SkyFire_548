@@ -71,6 +71,8 @@ public:
     ~EventProcessor() { KillAllEvents(true); }
 
     void Update(uint32 p_time);
+    template<class EventFilter>
+    BasicEvent* FindEvent(EventFilter const& filter);
     void KillAllEvents(bool force);
     void AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime = true);
     uint64 CalculateTime(uint64 t_offset) const;
@@ -83,4 +85,14 @@ protected:
     EventList m_events;
     bool m_aborting;
 };
+
+template<class EventFilter>
+BasicEvent* EventProcessor::FindEvent(EventFilter const& filter)
+{
+    for (auto&& event : m_events)
+        if (filter(event.second))
+            return event.second;
+
+    return NULL;
+}
 #endif
