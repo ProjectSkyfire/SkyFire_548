@@ -1994,6 +1994,7 @@ public:
     void SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo);
     void SendSpellDamageResist(Unit* target, uint32 spellId);
     void SendSpellDamageImmune(Unit* target, uint32 spellId);
+    void SendMissileCancel(uint32 spellId, bool cancel = true);
 
     void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
     void SendTeleportPacket(Position& pos);
@@ -2964,8 +2965,6 @@ protected:
 
     CharmInfo* m_charmInfo;
     SharedVisionList m_sharedVision;
-
-    void SendMissileCancel(uint32 spellId, bool cancel = true);
 
     virtual SpellSchoolMask GetMeleeDamageSchoolMask() const;
 

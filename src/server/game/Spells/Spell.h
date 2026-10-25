@@ -14,6 +14,7 @@
 #include "SpellInfo.h"
 #include <list>
 #include <map>
+#include <set>
 
 class Unit;
 class Player;
@@ -21,6 +22,7 @@ class GameObject;
 class DynamicObject;
 class WorldObject;
 class Aura;
+class AuraEffect;
 class SpellScript;
 class ByteBuffer;
 
@@ -570,6 +572,7 @@ public:
     int32 GetPowerCost() const { return m_powerCost; }
     int32 GetPowerType() const { return m_powerType; }
     DiminishingLevels GetDiminishingLevel() const { return m_diminishLevel; }
+    uint32 GetSpellGoTime() const { return m_spellGoTime; }
     static void ApplySmartHeal(Unit const* caster, std::list<WorldObject*>& targets, uint32 count, bool ignoreLos = false, Position const* losPos = nullptr);
 
     void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
@@ -602,6 +605,7 @@ protected:
     int32 m_periodicPowerCost;
     int32 m_powerCost;                                  // Calculated spell cost initialized only in Spell::prepare
     int32 m_casttime;                                   // Calculated spell cast time initialized only in Spell::prepare
+    uint32 m_spellGoTime = 0;
     bool m_canReflect;                                  // can reflect this spell?
     bool m_autoRepeat;
     bool m_darkSimulacrum = false;
@@ -848,7 +852,37 @@ public:
     virtual bool Execute(uint64 e_time, uint32 p_time);
     virtual void Abort(uint64 e_time);
     virtual bool IsDeletable() const;
+    Spell* GetSpell() const { return m_Spell; }
 protected:
     Spell* m_Spell;
+};
+
+class MissileData
+{
+public:
+    bool Initialized() { return m_spellId != 0; }
+
+    void Initialize(Spell const* spell, float dist);
+
+    void Update(uint32 currentTime, Unit* caster, AuraEffect const* eff);
+
+    bool CheckTarget(WorldObject const* target, float dist);
+
+private:
+    uint32 m_spellId = 0;
+    uint32 m_timer = 0;
+    uint32 m_currentTime = 0;
+    uint32 m_prevTime = 0;
+    Position m_srcPos;
+    Position m_destPos;
+    Position m_currentPos;
+    Position m_prevPos;
+    float m_calculatedDist = 0.0f;
+    float m_totalDist = 0.0f;
+    float m_currentDist = 0.0f;
+    float m_speed = 0.0f;
+    bool m_reversed = false;
+    bool m_done = false;
+    std::set<uint64> m_affectedTargets;
 };
 #endif

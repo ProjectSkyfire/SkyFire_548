@@ -4812,7 +4812,8 @@ void Spell::SendSpellGo()
     if (hasDelayTime)
         data << uint32(m_delayMoment);
 
-    data << uint32(getMSTime());
+    m_spellGoTime = getMSTime();
+    data << uint32(m_spellGoTime);
 
     for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
@@ -8515,3 +8516,93 @@ namespace Skyfire
     }
 
 } //namespace Skyfire
+
+void MissileData::Initialize(Spell const* spell, float dist)
+{
+    m_spellId = spell->GetSpellInfo()->Id;
+    m_currentTime = spell->GetSpellGoTime();
+    m_srcPos = *spell->GetCaster();
+    m_destPos = *spell->m_targets.GetDstPos();
+    m_calculatedDist = m_destPos.GetExactDist(&m_srcPos);
+    m_currentDist = 0.0f;
+    m_totalDist = dist;
+    m_timer = spell->GetDelayMoment();
+    m_speed = spell->GetSpellInfo()->Speed;
+    m_currentPos = m_srcPos;
+}
+
+void MissileData::Update(uint32 /*currentTime*/, Unit* caster, AuraEffect const* eff)
+{
+    m_prevPos = m_currentPos;
+    m_prevTime = m_currentTime;
+
+    m_currentTime = getMSTime();
+
+    // The returning missile follows the caster
+    if (m_reversed)
+    {
+        m_destPos = *caster;
+        m_timer = uint32(m_currentPos.GetExactDist(&m_destPos) / m_speed * 1000.0f);
+    }
+
+    if (m_done && !m_reversed)
+    {
+        m_srcPos = m_currentPos;
+        m_destPos = *caster;
+        m_calculatedDist = m_destPos.GetExactDist(&m_srcPos);
+        // Must be set before the diff is subtracted: SMSG_MISSILE_CANCEL was already sent on the previous tick
+        m_timer = uint32(m_calculatedDist / m_speed * 1000.0f);
+        m_currentDist = 0.0f;
+        m_affectedTargets.clear();
+        m_reversed = true;
+        m_done = false;
+    }
+
+    uint32 diff = getMSTimeDiff(m_prevTime, m_currentTime);
+    if (m_timer > diff)
+        m_timer -= diff;
+    else
+        m_timer = 0;
+
+    float angle = m_currentPos.GetAngle(&m_destPos);
+    float dist = diff * m_speed / 1000.0f;
+    m_currentDist += dist;
+    m_currentPos.m_positionX += dist * std::cos(angle);
+    m_currentPos.m_positionY += dist * std::sin(angle);
+    if (m_calculatedDist > 0.0f)
+        m_currentPos.m_positionZ += dist / m_calculatedDist * (m_destPos.GetPositionZ() - m_srcPos.GetPositionZ());
+
+    if (m_reversed)
+    {
+        if (!m_timer)
+        {
+            caster->SendMissileCancel(m_spellId, false);
+            eff->GetBase()->SetDuration(0);
+        }
+    }
+    else
+    {
+        // The client only turns the missile around if it has not reached its destination yet, so the
+        // destination lies slightly beyond m_totalDist and the turn has to be sent before the next tick
+        if (m_currentDist >= m_totalDist || m_timer < uint32(eff->GetAmplitude()))
+        {
+            m_done = true;
+            caster->SendMissileCancel(m_spellId, true);
+        }
+    }
+}
+
+bool MissileData::CheckTarget(WorldObject const* target, float dist)
+{
+    if (m_affectedTargets.find(target->GetGUID()) != m_affectedTargets.end())
+        return false;
+
+    if (!target->IsInBetween(&m_prevPos, &m_currentPos, dist))
+        return false;
+
+    if (std::abs(target->GetPositionZ() - m_currentPos.GetPositionZ()) > dist)
+        return false;
+
+    m_affectedTargets.insert(target->GetGUID());
+    return true;
+}
