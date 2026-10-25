@@ -288,23 +288,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, u
         }
     }
 
-    if (getClass() == CLASS_WARLOCK)
-    {
-        float mult = 1.0f;
-        if (procSpell && procSpell->SpellFamilyName == SPELLFAMILY_WARLOCK)
-        {
-            if (procExtra & PROC_EX_CRITICAL_HIT)
-                mult = 2.0f;
-
-            if ((procSpell->SpellIconID == 2128 && procSpell->SpellFamilyFlags[1] == 0x00000040) ||
-                (procSpell->SpellIconID == 12 && procSpell->SpellFamilyFlags[1] == 0x00800000) ||
-                (procSpell->SpellIconID == 31 && procSpell->SpellFamilyFlags[0] == 0x00000004))
-            {
-                SetPower(POWER_BURNING_EMBERS, GetPower(POWER_BURNING_EMBERS) + (mult * 2));
-            }
-        }
-    }
-
     Unit* actor = isVictim ? target : this;
     Unit* actionTarget = !isVictim ? target : this;
 
