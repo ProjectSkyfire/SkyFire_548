@@ -261,6 +261,9 @@ public:
     // SpellScript interface
     // hooks to which you can attach your functions
     //
+    // executed before SMSG_SPELL_START is sent; not called for spells cast directly (TRIGGERED_CAST_DIRECTLY)
+    // example: OnSpellStart += SpellCastFn(class::function);
+    HookList<CastHandler> OnSpellStart;
     // example: BeforeCast += SpellCastFn(class::function);
     HookList<CastHandler> BeforeCast;
     // example: OnCast += SpellCastFn(class::function);

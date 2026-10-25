@@ -3252,6 +3252,9 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         }
 
         m_caster->SetCurrentCastedSpell(this);
+
+        CallScriptOnSpellStartHandlers();
+
         SendSpellStart();
 
         // set target for proper facing
@@ -7971,6 +7974,19 @@ void Spell::LoadScripts()
         SF_LOG_DEBUG("spells", "Spell::LoadScripts: Script `%s` for spell `%u` is loaded now", (*itr)->_GetScriptName()->c_str(), m_spellInfo->Id);
         (*itr)->Register();
         ++itr;
+    }
+}
+
+void Spell::CallScriptOnSpellStartHandlers()
+{
+    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_BEFORE_CAST);
+        std::list<SpellScript::CastHandler>::iterator hookItrEnd = (*scritr)->OnSpellStart.end(), hookItr = (*scritr)->OnSpellStart.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+            (*hookItr).Call(*scritr);
+
+        (*scritr)->_FinishScriptCall();
     }
 }
 

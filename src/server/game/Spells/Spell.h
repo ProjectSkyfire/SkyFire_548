@@ -717,6 +717,7 @@ protected:
 
     // Scripting system
     void LoadScripts();
+    void CallScriptOnSpellStartHandlers();
     void CallScriptBeforeCastHandlers();
     void CallScriptOnCastHandlers();
     void CallScriptAfterCastHandlers();
