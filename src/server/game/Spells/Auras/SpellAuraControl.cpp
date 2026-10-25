@@ -305,6 +305,15 @@ void AuraEffect::HandlePreventFleeing(AuraApplication const* aurApp, uint8 mode,
         target->SetControlled(!(apply), UNIT_STATE_FLEEING);
 }
 
+void AuraEffect::HandleStrangulate(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    if (GetSpellInfo()->Mechanic == MECHANIC_STUN)
+        HandleAuraModStun(aurApp, mode, apply);
+}
+
 /***************************/
 /***        CHARM        ***/
 /***************************/

@@ -153,6 +153,7 @@ public:
     void HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandlePreventFleeing(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleStrangulate(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     //  charm
     void HandleModPossess(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModPossessPet(AuraApplication const* aurApp, uint8 mode, bool apply) const;
