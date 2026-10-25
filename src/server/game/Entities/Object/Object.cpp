@@ -1964,7 +1964,7 @@ bool Position::HasInArc(float arc, const Position* obj, float border) const
     return ((angle >= lborder) && (angle <= rborder));
 }
 
-bool WorldObject::IsInBetween(const WorldObject* obj1, const WorldObject* obj2, float size) const
+bool WorldObject::IsInBetween(const Position* obj1, const Position* obj2, float size) const
 {
     if (!obj1 || !obj2)
         return false;
