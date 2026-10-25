@@ -721,6 +721,7 @@ protected:
     void CallScriptOnCastHandlers();
     void CallScriptAfterCastHandlers();
     SpellCastResult CallScriptCheckCastHandlers();
+    SpellCastResult CallScriptCheckAutoCastHandlers();
     void PrepareScriptHitHandlers();
     bool CallScriptEffectHandlers(SpellEffIndex effIndex, SpellEffectHandleMode mode);
     void CallScriptBeforeHitHandlers();

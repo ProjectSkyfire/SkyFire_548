@@ -6744,10 +6744,15 @@ bool Spell::CanAutoCast(Unit* target)
         }
     }
 
+    LoadScripts();
+
     SpellCastResult result = CheckPetCast(target);
 
     if (result == SpellCastResult::SPELL_CAST_OK || result == SpellCastResult::SPELL_FAILED_UNIT_NOT_INFRONT)
     {
+        if (CallScriptCheckAutoCastHandlers() != SpellCastResult::SPELL_CAST_OK)
+            return false;
+
         SelectSpellTargets();
         //check if among target units, our WANTED target is as well (->only self cast spells return false)
         for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -7948,6 +7953,10 @@ void Spell::CheckEffectExecuteData() const
 
 void Spell::LoadScripts()
 {
+    // CanAutoCast loads them before prepare does
+    if (!m_loadedScripts.empty())
+        return;
+
     sScriptMgr->CreateSpellScripts(m_spellInfo->Id, m_loadedScripts);
     for (std::list<SpellScript*>::iterator itr = m_loadedScripts.begin(); itr != m_loadedScripts.end();)
     {
@@ -8021,6 +8030,27 @@ SpellCastResult Spell::CallScriptCheckCastHandlers()
         (*scritr)->_FinishScriptCall();
     }
     return retVal;
+}
+
+SpellCastResult Spell::CallScriptCheckAutoCastHandlers()
+{
+    for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_CHECK_CAST);
+        std::list<SpellScript::CheckCastHandler>::iterator hookItrEnd = (*scritr)->OnCheckAutoCast.end(), hookItr = (*scritr)->OnCheckAutoCast.begin();
+        for (; hookItr != hookItrEnd; ++hookItr)
+        {
+            SpellCastResult result = (*hookItr).Call(*scritr);
+            if (result != SpellCastResult::SPELL_CAST_OK)
+            {
+                (*scritr)->_FinishScriptCall();
+                return result;
+            }
+        }
+
+        (*scritr)->_FinishScriptCall();
+    }
+    return SpellCastResult::SPELL_CAST_OK;
 }
 
 void Spell::PrepareScriptHitHandlers()

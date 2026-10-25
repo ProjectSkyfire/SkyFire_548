@@ -274,6 +274,11 @@ public:
     HookList<CheckCastHandler> OnCheckCast;
 #define SpellCheckCastFn(F) CheckCastHandlerFunction(&F)
 
+    // executed when a pet or guardian AI considers autocasting the spell; anything but SPELL_CAST_OK skips it
+    // example: OnCheckAutoCast += SpellCheckCastFn();
+    // where function is SpellCastResult function()
+    HookList<CheckCastHandler> OnCheckAutoCast;
+
     // example: OnEffect**** += SpellEffectFn(class::function, EffectIndexSpecifier, EffectNameSpecifier);
     // where function is void function(SpellEffIndex effIndex)
     HookList<EffectHandler> OnEffectLaunch;
