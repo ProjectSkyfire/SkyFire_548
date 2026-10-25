@@ -621,6 +621,10 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         m_destTargets[i] = SpellDestination(*m_caster);
+
+    if (m_caster->getClass() == CLASS_DEATH_KNIGHT)
+        if (AuraEffect const* effect = m_caster->GetAuraEffect(77616, EFFECT_0))
+            m_darkSimulacrum = effect->GetAmount() == int32(m_spellInfo->Id);
 }
 
 Spell::~Spell()
@@ -3163,8 +3167,8 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         m_powerType = m_caster->getPowerType();
 
     // Fill cost data (not use power for item casts)
-    m_powerCost = m_CastItem ? 0 : tmpPowerCost;
-    m_periodicPowerCost = tmpPeriodicPowerCost;
+    m_powerCost = (m_CastItem || m_darkSimulacrum) ? 0 : tmpPowerCost;
+    m_periodicPowerCost = m_darkSimulacrum ? 0 : tmpPeriodicPowerCost;
 
 
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
@@ -3214,6 +3218,9 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     }
     else
         m_casttime = m_spellInfo->CalcCastTime(m_caster->getLevel(), this);
+
+    if (m_darkSimulacrum)
+        m_casttime = 0;
 
     // don't allow channeled spells / spells with cast time to be casted while moving
     // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
@@ -3519,6 +3526,9 @@ void Spell::cast(bool skipCheck)
     }
 
     CallScriptAfterCastHandlers();
+
+    if (m_darkSimulacrum)
+        m_caster->RemoveAurasDueToSpell(77616);
 
     if (const std::vector<int32>* spell_triggered = sSpellMgr->GetSpellLinked(m_spellInfo->Id))
     {
@@ -5711,7 +5721,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // only check at first call, Stealth auras are already removed at second call
     // for now, ignore triggered spells
-    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_SHAPESHIFT))
+    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_SHAPESHIFT) && !m_darkSimulacrum)
     {
         bool checkForm = true;
         // Ignore form req aura

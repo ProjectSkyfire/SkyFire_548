@@ -604,6 +604,7 @@ protected:
     int32 m_casttime;                                   // Calculated spell cast time initialized only in Spell::prepare
     bool m_canReflect;                                  // can reflect this spell?
     bool m_autoRepeat;
+    bool m_darkSimulacrum = false;
     uint8 m_runesState;
 
     uint8 m_delayAtDamageCount;
