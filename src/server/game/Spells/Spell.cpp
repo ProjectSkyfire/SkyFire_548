@@ -3747,7 +3747,23 @@ void Spell::_handle_finish_phase()
     {
         // Take for real after all targets are processed
         if (m_needComboPoints)
-            m_caster->m_movedPlayer->ClearComboPoints();
+        {
+            Player* player = m_caster->m_movedPlayer;
+            uint64 comboTarget = player->GetComboTarget();
+            player->ClearComboPoints();
+
+            // Anticipation charges become combo points once the finisher has spent the old ones
+            if (Aura* anticipation = player->GetAura(115189))
+            {
+                Unit* target = ObjectAccessor::GetUnit(*player, comboTarget);
+                if (target && target->IsAlive())
+                {
+                    int8 charges = int8(anticipation->GetStackAmount());
+                    anticipation->Remove();
+                    player->AddComboPoints(target, charges);
+                }
+            }
+        }
 
         // Real add combo points from effects
         if (m_comboPointGain)

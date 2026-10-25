@@ -19077,7 +19077,13 @@ void Player::AddComboPoints(Unit* target, int8 count, Spell* spell)
     }
 
     if (comboPoints > 5)
+    {
+        // Anticipation
+        if (count > 0 && HasAura(114015))
+            for (int8 i = std::min<int8>(count, comboPoints - 5); i > 0; --i)
+                CastSpell(this, 115189, true);
         comboPoints = 5;
+    }
     else if (comboPoints < 0)
         comboPoints = 0;
 
