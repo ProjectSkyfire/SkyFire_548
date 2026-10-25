@@ -2209,6 +2209,8 @@ public:
     void UpdateSpellCharges();
     void ClearSpellCharges(uint32 categoryId);
     void ClearAllSpellCharges();
+    uint32 GetChargeCooldown(uint32 spellId) const; // ms until the next charge of the spell's charge category restores
+    void AddCustomCooldown(uint32 spellId, uint32 cooldown);
 
     GlobalCooldownMgr& GetGlobalCooldownMgr()
     {

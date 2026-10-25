@@ -18244,6 +18244,43 @@ void Player::ClearAllSpellCharges()
     m_spellCharges.clear();
 }
 
+uint32 Player::GetChargeCooldown(uint32 spellId) const
+{
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+        return 0;
+
+    SpellCategoriesEntry const* categories = spellInfo->GetSpellCategories();
+    if (!categories || !categories->ChargesCategory)
+        return 0;
+
+    SpellChargeMap::const_iterator itr = m_spellCharges.find(categories->ChargesCategory);
+    if (itr == m_spellCharges.end())
+        return 0;
+
+    uint32 now = getMSTime();
+    uint8 usedCharges = itr->second.ConsumedCharges;
+    uint32 resetTime = itr->second.CurrentResetTime;
+    while (usedCharges)
+    {
+        if ((int32)(now - resetTime) < 0)
+            break;
+        --usedCharges;
+        resetTime += itr->second.BaseRegenTime;
+    }
+
+    if (!usedCharges)
+        return 0;
+
+    return resetTime - now;
+}
+
+void Player::AddCustomCooldown(uint32 spellId, uint32 cooldown)
+{
+    AddSpellCooldown(spellId, 0, time(NULL) + cooldown / IN_MILLISECONDS);
+    SendSpellCooldown(spellId, cooldown);
+}
+
 void Player::SendSpellCharges()
 {
     WorldPacket data(SMSG_SEND_SPELL_CHARGES);
