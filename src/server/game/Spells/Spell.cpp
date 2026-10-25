@@ -5858,7 +5858,11 @@ SpellCastResult Spell::CheckCast(bool strict)
 
             // Target must be facing you
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
-                return SpellCastResult::SPELL_FAILED_NOT_INFRONT;
+            {
+                bool const glyphOfGouge = m_spellInfo->Id == 1776 && m_caster->HasAura(56809);
+                if (!glyphOfGouge)
+                    return SpellCastResult::SPELL_FAILED_NOT_INFRONT;
+            }
 
             if (m_caster->GetEntry() != WORLD_TRIGGER) // Ignore LOS for gameobjects casts (wrongly casted by a trigger)
                 if (!(m_spellInfo->AttributesEx2 & SPELL_ATTR2_CAN_TARGET_NOT_IN_LOS) && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, NULL, SPELL_DISABLE_LOS) && !m_caster->IsWithinLOSInMap(target))
