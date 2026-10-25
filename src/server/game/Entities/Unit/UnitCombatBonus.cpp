@@ -113,6 +113,15 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
                     AddPct(DoneTotalMod, (*i)->GetAmount());
             }
         }
+
+        if (uint32 maxMana = GetMaxPower(POWER_MANA))
+        {
+            float const manaPct = float(GetPower(POWER_MANA)) / float(maxMana);
+            AuraEffectList const& manaScaled = GetAuraEffectsByType(SPELL_AURA_MOD_DAMAGE_DONE_BY_MANA_PCT);
+            for (AuraEffectList::const_iterator i = manaScaled.begin(); i != manaScaled.end(); ++i)
+                if ((*i)->GetMiscValue() & spellProto->GetSchoolMask())
+                    AddPct(DoneTotalMod, (*i)->GetAmount() * manaPct);
+        }
     }
 
     uint32 creatureTypeMask = victim->GetCreatureTypeMask();
