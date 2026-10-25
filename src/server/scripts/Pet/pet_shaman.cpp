@@ -16,7 +16,8 @@ enum ShamanSpells
     SPELL_SHAMAN_ANGEREDEARTH   = 36213,
     SPELL_SHAMAN_FIREBLAST      = 57984,
     SPELL_SHAMAN_FIRENOVA       = 12470,
-    SPELL_SHAMAN_FIRESHIELD     = 13376
+    SPELL_SHAMAN_FIRESHIELD     = 13376,
+    SPELL_SHAMAN_STATIC_CHARGE  = 118905
 };
 
 enum ShamanEvents
@@ -134,8 +135,46 @@ class npc_pet_shaman_fire_elemental : public CreatureScript
         }
 };
 
+// 61245 - Capacitor Totem
+class npc_capacitor_totem : public CreatureScript
+{
+    public:
+        npc_capacitor_totem() : CreatureScript("npc_capacitor_totem") { }
+
+        struct npc_capacitor_totemAI : public ScriptedAI
+        {
+            npc_capacitor_totemAI(Creature* creature) : ScriptedAI(creature), _chargeStarted(false)
+            {
+                me->SetReactState(REACT_PASSIVE);
+            }
+
+            void UpdateAI(uint32 /*diff*/) OVERRIDE
+            {
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (!_chargeStarted)
+                {
+                    me->CastSpell(me, SPELL_SHAMAN_STATIC_CHARGE, false);
+                    _chargeStarted = true;
+                }
+                else
+                    me->DespawnOrUnsummon();
+            }
+
+        private:
+            bool _chargeStarted;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_capacitor_totemAI(creature);
+        }
+};
+
 void AddSC_shaman_pet_scripts()
 {
     new npc_pet_shaman_earth_elemental();
     new npc_pet_shaman_fire_elemental();
+    new npc_capacitor_totem();
 }
