@@ -623,6 +623,11 @@ void SpellScript::SetCustomCastResultMessage(SpellCustomErrors result)
     m_spell->m_customError = result;
 }
 
+void SpellScript::AddTriggerFlag(TriggerCastFlags flags)
+{
+    m_spell->_triggeredCastFlags = TriggerCastFlags(m_spell->_triggeredCastFlags | flags);
+}
+
 SpellValue const* SpellScript::GetSpellValue()
 {
     return m_spell->m_spellValue;

@@ -419,6 +419,8 @@ public:
     void FinishCast(SpellCastResult result);
 
     void SetCustomCastResultMessage(SpellCustomErrors result);
+
+    void AddTriggerFlag(TriggerCastFlags flags);
 };
 
 // AuraScript interface - enum used for runtime checks of script function calls

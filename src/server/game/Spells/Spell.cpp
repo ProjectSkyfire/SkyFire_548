@@ -7832,6 +7832,80 @@ SpellCastResult Spell::CanOpenLock(uint32 effIndex, uint32 lockId, SkillType& sk
     return SpellCastResult::SPELL_CAST_OK;
 }
 
+void Spell::ApplySmartHeal(Unit const* caster, std::list<WorldObject*>& targets, uint32 count, bool ignoreLos, Position const* losPos)
+{
+    if (!losPos)
+        losPos = caster;
+
+    targets.remove_if([](WorldObject const* target)
+    {
+        return !target->ToUnit() || target->ToUnit()->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION);
+    });
+
+    targets.remove_if([](WorldObject const* target)
+    {
+        return target->ToUnit()->IsSummon() && target->ToUnit()->ToTempSummon()->IsMinorGuardian();
+    });
+
+    // Don't heal targets out of raid if they have different pvp state
+    targets.remove_if([=](WorldObject const* target)
+    {
+        Unit const* unit = target->ToUnit();
+        if (!ignoreLos && !unit->IsWithinLOS(losPos->GetPositionX(), losPos->GetPositionY(), losPos->GetPositionZ()))
+            return true;
+
+        if (unit->GetMap()->IsDungeon())
+            return false;
+
+        if (unit->IsInRaidWith(caster))
+            return false;
+
+        if (unit->IsPvP() != caster->IsPvP())
+            return true;
+        if (unit->IsInCombat() != caster->IsInCombat())
+            return true;
+        return false;
+    });
+
+    targets.sort([](WorldObject const* lhs, WorldObject const* rhs)
+    {
+        return lhs->ToUnit()->GetHealthPct() < rhs->ToUnit()->GetHealthPct();
+    });
+
+    if (targets.size() <= count)
+        return;
+
+    std::list<WorldObject*> selected;
+
+    std::function<bool(Unit*)> playersUnder50 = [](Unit* target) { return target->GetTypeId() == TypeID::TYPEID_PLAYER && target->GetHealthPct() < 50.0f; };
+    std::function<bool(Unit*)> playersUnder75 = [](Unit* target) { return target->GetTypeId() == TypeID::TYPEID_PLAYER && target->GetHealthPct() < 75.0f; };
+    std::function<bool(Unit*)> injuredPlayers = [](Unit* target) { return target->GetTypeId() == TypeID::TYPEID_PLAYER && !target->IsFullHealth(); };
+    std::function<bool(Unit*)> allUnder25 = [](Unit* target) { return target->GetHealthPct() < 25.0f; };
+    std::function<bool(Unit*)> allUnder50 = [](Unit* target) { return target->GetHealthPct() < 50.0f; };
+    std::function<bool(Unit*)> anyInjured = [](Unit* target) { return !target->IsFullHealth(); };
+
+    for (auto&& fn : { playersUnder50, allUnder25, playersUnder75, allUnder50, injuredPlayers, anyInjured })
+    {
+        for (auto itr = targets.begin(); itr != targets.end() && selected.size() < count;)
+        {
+            Unit* unit = (*itr)->ToUnit();
+            if (fn(unit))
+            {
+                selected.push_back(unit);
+                itr = targets.erase(itr);
+            }
+            else
+                ++itr;
+        }
+    }
+
+    // Full hp targets just to fit number
+    for (auto itr = targets.begin(); itr != targets.end() && selected.size() < count; ++itr)
+        selected.push_back(*itr);
+
+    targets.swap(selected);
+}
+
 void Spell::SetSpellValue(SpellValueMod mod, int32 value)
 {
     switch (mod)
