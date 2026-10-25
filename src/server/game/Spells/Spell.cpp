@@ -6787,8 +6787,13 @@ bool Spell::CanAutoCast(Unit* target)
 
     if (result == SpellCastResult::SPELL_CAST_OK || result == SpellCastResult::SPELL_FAILED_UNIT_NOT_INFRONT)
     {
+        uint64 explicitTargetGuid = m_targets.GetObjectTargetGUID();
         if (CallScriptCheckAutoCastHandlers() != SpellCastResult::SPELL_CAST_OK)
             return false;
+
+        // OnCheckAutoCast handlers may pick another target than the one asked for
+        if (m_targets.GetObjectTargetGUID() != explicitTargetGuid)
+            targetguid = m_targets.GetObjectTargetGUID();
 
         SelectSpellTargets();
         //check if among target units, our WANTED target is as well (->only self cast spells return false)

@@ -17,6 +17,14 @@
 #include "Util.h"
 #include "World.h"
 
+// Spell::CanAutoCast leaves the target an OnCheckAutoCast handler picked in the spell's explicit targets
+static Unit* GetAutoCastTarget(Spell const* spell, Unit* checkedTarget)
+{
+    if (Unit* target = spell->m_targets.GetUnitTarget())
+        return target;
+    return checkedTarget;
+}
+
 int PetAI::Permissible(const Creature* creature)
 {
     if (creature->IsPet())
@@ -178,7 +186,7 @@ void PetAI::UpdateAI(uint32 diff)
                 {
                     if (CanAttack(target) && spell->CanAutoCast(target))
                     {
-                        targetSpellStore.push_back(std::make_pair(target, spell));
+                        targetSpellStore.push_back(std::make_pair(GetAutoCastTarget(spell, target), spell));
                         spellUsed = true;
                     }
                 }
@@ -223,7 +231,7 @@ void PetAI::UpdateAI(uint32 diff)
 
                 Spell* spell = new Spell(me, spellInfo, TRIGGERED_NONE, 0);
                 if (spell->CanAutoCast(victim))
-                    targetSpellStore.push_back(std::make_pair(victim, spell));
+                    targetSpellStore.push_back(std::make_pair(GetAutoCastTarget(spell, victim), spell));
                 else
                     delete spell;
             }
