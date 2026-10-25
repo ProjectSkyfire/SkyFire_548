@@ -3536,7 +3536,23 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
         case SPELL_DAMAGE_CLASS_RANGED:
         {
             if (victim)
+            {
                 crit_chance += GetUnitCriticalChance(attackType, victim);
+
+                switch (spellProto->Id)
+                {
+                    case 56641: // Steady Shot
+                    case 19434: // Aimed Shot
+                    case 82928: // Aimed Shot (Master Marksman)
+                        // Careful Aim
+                        if (AuraEffect const* carefulAim = GetAuraEffect(34483, EFFECT_0))
+                            if (victim->GetHealthPct() > float(carefulAim->GetSpellInfo()->Effects[EFFECT_1].CalcValue(this)))
+                                crit_chance += carefulAim->GetAmount();
+                        break;
+                    default:
+                        break;
+                }
+            }
             break;
         }
         default:
