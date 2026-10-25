@@ -187,6 +187,11 @@ void AddSC_the_scarlet_enclave_c5();
 //void AddSC_boss_scorn();
 //void AddSC_instance_scarlet_monastery();
 //void AddSC_boss_mograine_and_whitemane();
+void AddSC_scarlet_halls();                  //Scarlet Halls
+void AddSC_instance_scarlet_halls();
+void AddSC_boss_houndmaster_braun();
+void AddSC_boss_armsmaster_harlan();
+void AddSC_boss_flameweaver_koegler();
 
 void AddSC_shadowfang_keep();                //Shadowfang keep
 void AddSC_instance_shadowfang_keep();
@@ -900,6 +905,11 @@ void AddEasternKingdomsScripts()
     //AddSC_boss_scorn();
     //AddSC_instance_scarlet_monastery();
     //AddSC_boss_mograine_and_whitemane();
+    AddSC_scarlet_halls();                  //Scarlet Halls
+    AddSC_instance_scarlet_halls();
+    AddSC_boss_houndmaster_braun();
+    AddSC_boss_armsmaster_harlan();
+    AddSC_boss_flameweaver_koegler();
 
     AddSC_shadowfang_keep();                //Shadowfang keep
     AddSC_instance_shadowfang_keep();

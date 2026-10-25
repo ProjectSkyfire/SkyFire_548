@@ -141,6 +141,12 @@ set(scripts_STAT_SRCS
   #EasternKingdoms/ScarletMonastery/boss_arcanist_doan.cpp
   #EasternKingdoms/ScarletMonastery/boss_herod.cpp
   #EasternKingdoms/ScarletMonastery/boss_scorn.cpp
+  EasternKingdoms/ScarletHalls/scarlet_halls.h
+  EasternKingdoms/ScarletHalls/scarlet_halls.cpp
+  EasternKingdoms/ScarletHalls/instance_scarlet_halls.cpp
+  EasternKingdoms/ScarletHalls/boss_houndmaster_braun.cpp
+  EasternKingdoms/ScarletHalls/boss_armsmaster_harlan.cpp
+  EasternKingdoms/ScarletHalls/boss_flameweaver_koegler.cpp
   EasternKingdoms/ShadowfangKeep/shadowfang_keep.cpp
   EasternKingdoms/ShadowfangKeep/instance_shadowfang_keep.cpp
   EasternKingdoms/ShadowfangKeep/shadowfang_keep.h
