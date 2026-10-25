@@ -36,9 +36,14 @@ enum MonkSpells
 
     SPELL_MONK_SOOTHING_MIST_VISUAL = 125955,
     SPELL_MONK_SOOTHING_MIST_ENERGIZE = 116335,
+    SPELL_MONK_STAGGER = 124255,
     SPELL_MONK_LIGHT_STAGGER = 124275,
     SPELL_MONK_MODERATE_STAGGER = 124274,
     SPELL_MONK_HEAVY_STAGGER = 124273,
+    SPELL_MONK_MASTERY_ELUSIVE_BRAWLER = 117906,
+    SPELL_MONK_SHUFFLE = 115307,
+    SPELL_MONK_STAGGERING = 138233,
+    SPELL_MONK_T15_BREWMASTER_4P_BONUS = 138236,
     SPELL_MONK_CHI_TORPEDO_HEAL = 124040,
     SPELL_MONK_CHI_TORPEDO_DAMAGE = 117993,
     SPELL_MONK_TIGEREYE_BREW = 116740,
@@ -2883,6 +2888,187 @@ class spell_monk_chi_torpedo : public SpellScriptLoader
     }
 };
 
+static uint32 GetStaggerLevelSpell(Unit const* monk, int32 tickAmount)
+{
+    if (tickAmount < int32(monk->CountPctFromMaxHealth(3)))
+        return SPELL_MONK_LIGHT_STAGGER;
+    if (tickAmount < int32(monk->CountPctFromMaxHealth(6)))
+        return SPELL_MONK_MODERATE_STAGGER;
+    return SPELL_MONK_HEAVY_STAGGER;
+}
+
+// 124255 - Stagger
+class spell_monk_stagger : public SpellScriptLoader
+{
+public:
+    spell_monk_stagger() : SpellScriptLoader("spell_monk_stagger") { }
+
+    class spell_monk_stagger_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_monk_stagger_AuraScript);
+
+        int32 tick = 0;
+        float addAmount = 0.0f;
+
+        // Changing the amount here only affects the following ticks
+        void HandleTick(AuraEffect const* aurEff, int32& /*amount*/)
+        {
+            ++tick;
+
+            AuraEffect* stagger = const_cast<AuraEffect*>(aurEff);
+            if (uint32 damage = uint32(addAmount))
+            {
+                addAmount -= float(damage);
+
+                Unit* monk = GetUnitOwner();
+
+                int32 remain = (10 - tick) * stagger->GetAmount();
+                int32 total = remain + int32(damage);
+                int32 amount = total / 10;
+
+                stagger->SetAmount(amount);
+                if (AuraEffect* totalEff = GetEffect(EFFECT_1))
+                    totalEff->SetAmount(total);
+
+                uint32 spellId = GetStaggerLevelSpell(monk, amount);
+                if (Aura* dummy = monk->GetAura(spellId))
+                {
+                    dummy->RefreshDuration();
+                    if (AuraEffect* eff = dummy->GetEffect(EFFECT_0))
+                        eff->SetAmount(amount);
+                    if (AuraEffect* eff = dummy->GetEffect(EFFECT_1))
+                        eff->SetAmount(total);
+                }
+                else
+                {
+                    for (uint32 id : { SPELL_MONK_LIGHT_STAGGER, SPELL_MONK_MODERATE_STAGGER, SPELL_MONK_HEAVY_STAGGER })
+                        monk->RemoveAurasDueToSpell(id);
+                    monk->CastCustomSpell(monk, spellId, &amount, &total, NULL, true);
+                }
+
+                tick = 0;
+
+                if (AuraEffect const* bonus = monk->GetAuraEffect(SPELL_MONK_T15_BREWMASTER_4P_BONUS, EFFECT_0))
+                    if (roll_chance_i(bonus->GetSpellInfo()->ProcChance))
+                        monk->CastSpell(monk, bonus->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, true);
+            }
+            else if (tick == 9)
+                Remove();
+        }
+
+    public:
+        void AddAmount(float amount)
+        {
+            addAmount += amount;
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcTickAmount += AuraEffectCalcTickAmountFn(spell_monk_stagger_AuraScript::HandleTick, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_monk_stagger_AuraScript();
+    }
+};
+
+// 115069 - Stance of the Sturdy Ox
+class spell_monk_stance_of_the_sturdy_ox : public SpellScriptLoader
+{
+public:
+    spell_monk_stance_of_the_sturdy_ox() : SpellScriptLoader("spell_monk_stance_of_the_sturdy_ox") { }
+
+    class spell_monk_stance_of_the_sturdy_ox_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_monk_stance_of_the_sturdy_ox_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        {
+            amount = -1;
+        }
+
+        void HandleStagger(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
+        {
+            if (!dmgInfo.GetDamage() || (dmgInfo.GetSpellInfo() && dmgInfo.GetSpellInfo()->Id == SPELL_MONK_STAGGER))
+                return;
+
+            Unit* monk = GetUnitOwner();
+
+            float pct = 20.0f;
+            if (Aura* mastery = monk->GetAura(SPELL_MONK_MASTERY_ELUSIVE_BRAWLER))
+                if (monk->GetTypeId() == TypeID::TYPEID_PLAYER)
+                    pct += monk->GetFloatValue(PLAYER_FIELD_MASTERY) * mastery->GetSpellInfo()->Effects[EFFECT_0].CalcBonusMultiplier(monk);
+            if (monk->HasAura(SPELL_MONK_FORTIFYING_BREW_AURA))
+                pct += 20.0f;
+            if (monk->HasAura(SPELL_MONK_SHUFFLE))
+                pct += 20.0f;
+            if (AuraEffect const* staggering = monk->GetAuraEffect(SPELL_MONK_STAGGERING, EFFECT_0))
+                pct += staggering->GetAmount();
+
+            if (pct > 100.0f)
+                pct = 100.0f;
+
+            float staggerAmount = CalculatePct(float(dmgInfo.GetDamage()), pct);
+            absorbAmount = uint32(staggerAmount);
+
+            if (Aura* stagger = monk->GetAura(SPELL_MONK_STAGGER))
+            {
+                if (spell_monk_stagger::spell_monk_stagger_AuraScript* script = dynamic_cast<spell_monk_stagger::spell_monk_stagger_AuraScript*>(stagger->GetScriptByName("spell_monk_stagger")))
+                    script->AddAmount(staggerAmount);
+            }
+            else
+            {
+                int32 bp0 = int32(staggerAmount / 10);
+                int32 bp1 = int32(staggerAmount);
+
+                monk->CastCustomSpell(monk, GetStaggerLevelSpell(monk, bp0), &bp0, &bp1, NULL, true);
+                monk->CastCustomSpell(monk, SPELL_MONK_STAGGER, &bp0, &bp1, NULL, true);
+            }
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_monk_stance_of_the_sturdy_ox_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_SCHOOL_ABSORB);
+            OnEffectAbsorb += AuraEffectAbsorbFn(spell_monk_stance_of_the_sturdy_ox_AuraScript::HandleStagger, EFFECT_2);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_monk_stance_of_the_sturdy_ox_AuraScript();
+    }
+};
+
+// 124275 - Light Stagger, 124274 - Moderate Stagger, 124273 - Heavy Stagger
+class spell_monk_stagger_dummy : public SpellScriptLoader
+{
+public:
+    spell_monk_stagger_dummy() : SpellScriptLoader("spell_monk_stagger_dummy") { }
+
+    class spell_monk_stagger_dummy_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_monk_stagger_dummy_AuraScript);
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                GetUnitOwner()->RemoveAurasDueToSpell(SPELL_MONK_STAGGER);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_monk_stagger_dummy_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_monk_stagger_dummy_AuraScript();
+    }
+};
+
 // Purifying Brew - 119582
 class spell_monk_purifying_brew : public SpellScriptLoader
 {
@@ -2894,28 +3080,16 @@ class spell_monk_purifying_brew : public SpellScriptLoader
     {
         PrepareSpellScript(spell_monk_purifying_brew_SpellScript);
 
-        void HandleOnHit()
+        void HandleHit()
         {
-            if (Unit* caster = GetCaster())
-            {
-                if (Player* _player = caster->ToPlayer())
-                {
-                    AuraApplication* staggerAmount = _player->GetAuraApplication(SPELL_MONK_LIGHT_STAGGER);
-
-                    if (!staggerAmount)
-                        staggerAmount = _player->GetAuraApplication(SPELL_MONK_MODERATE_STAGGER);
-                    if (!staggerAmount)
-                        staggerAmount = _player->GetAuraApplication(SPELL_MONK_HEAVY_STAGGER);
-
-                    if (staggerAmount)
-                        _player->RemoveAura(staggerAmount->GetBase()->GetId());
-                }
-            }
+            if (Unit* monk = GetHitUnit())
+                for (uint32 id : { SPELL_MONK_STAGGER, SPELL_MONK_LIGHT_STAGGER, SPELL_MONK_MODERATE_STAGGER, SPELL_MONK_HEAVY_STAGGER })
+                    monk->RemoveAurasDueToSpell(id);
         }
 
         void Register()
         {
-            OnHit += SpellHitFn(spell_monk_purifying_brew_SpellScript::HandleOnHit);
+            AfterHit += SpellHitFn(spell_monk_purifying_brew_SpellScript::HandleHit);
         }
     };
 
@@ -3161,7 +3335,6 @@ enum Blackout
     SPELL_MONK_BLACKOUT_KICK_DOT = 128531,
     SPELL_MONK_GLYPH_OF_BLACKOUT_KICK = 132005,
     SPELL_MONK_BLACKOUT_KICK_HEAL = 128591,
-    SPELL_MONK_SHUFFLE = 115307
 };
 
 // Blackout Kick - 100784
@@ -3311,6 +3484,9 @@ void AddSC_monk_spell_scripts()
     new spell_monk_tigereye_brew();
     new spell_monk_tigers_lust();
     new spell_monk_chi_torpedo();
+    new spell_monk_stagger();
+    new spell_monk_stance_of_the_sturdy_ox();
+    new spell_monk_stagger_dummy();
     new spell_monk_purifying_brew();
     new spell_monk_clash();
     new spell_monk_keg_smash();

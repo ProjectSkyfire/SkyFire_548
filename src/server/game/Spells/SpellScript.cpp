@@ -663,6 +663,10 @@ bool AuraScript::_Validate(SpellInfo const* entry)
         if (!(*itr).GetAffectedEffectsMask(entry))
             SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `DoEffectCalcSpellMod` of AuraScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
 
+    for (std::list<EffectCalcTickAmountHandler>::iterator itr = DoEffectCalcTickAmount.begin(); itr != DoEffectCalcTickAmount.end(); ++itr)
+        if (!(*itr).GetAffectedEffectsMask(entry))
+            SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `DoEffectCalcTickAmount` of AuraScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
+
     for (std::list<EffectAbsorbHandler>::iterator itr = OnEffectAbsorb.begin(); itr != OnEffectAbsorb.end(); ++itr)
         if (!(*itr).GetAffectedEffectsMask(entry))
             SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `OnEffectAbsorb` of AuraScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
@@ -806,6 +810,17 @@ AuraScript::EffectCalcSpellModHandler::EffectCalcSpellModHandler(AuraEffectCalcS
 void AuraScript::EffectCalcSpellModHandler::Call(AuraScript* auraScript, AuraEffect const* aurEff, SpellModifier*& spellMod)
 {
     (auraScript->*pEffectHandlerScript)(aurEff, spellMod);
+}
+
+AuraScript::EffectCalcTickAmountHandler::EffectCalcTickAmountHandler(AuraEffectCalcTickAmountFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName)
+    : AuraScript::EffectBase(_effIndex, _effName)
+{
+    pEffectHandlerScript = _pEffectHandlerScript;
+}
+
+void AuraScript::EffectCalcTickAmountHandler::Call(AuraScript* auraScript, AuraEffect const* aurEff, int32& amount)
+{
+    (auraScript->*pEffectHandlerScript)(aurEff, amount);
 }
 
 AuraScript::EffectApplyHandler::EffectApplyHandler(AuraEffectApplicationModeFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName, AuraEffectHandleModes _mode)
@@ -1119,6 +1134,7 @@ Unit* AuraScript::GetTarget() const
         case AURA_SCRIPT_HOOK_EFFECT_AFTER_APPLY:
         case AURA_SCRIPT_HOOK_EFFECT_AFTER_REMOVE:
         case AURA_SCRIPT_HOOK_EFFECT_PERIODIC:
+        case AURA_SCRIPT_HOOK_EFFECT_CALC_TICK_AMOUNT:
         case AURA_SCRIPT_HOOK_EFFECT_ABSORB:
         case AURA_SCRIPT_HOOK_EFFECT_AFTER_ABSORB:
         case AURA_SCRIPT_HOOK_EFFECT_MANASHIELD:

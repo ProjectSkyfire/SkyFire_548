@@ -296,6 +296,12 @@ namespace Skyfire
             SpellInfo const* spellProtoA = aurEffA->GetSpellInfo();
             SpellInfo const* spellProtoB = aurEffB->GetSpellInfo();
 
+            // Stance of the Sturdy Ox staggers a share of the full hit
+            if (spellProtoA->Id == 115069)
+                return true;
+            if (spellProtoB->Id == 115069)
+                return false;
+
             // Wards
             if ((spellProtoA->SpellFamilyName == SPELLFAMILY_MAGE) ||
                 (spellProtoA->SpellFamilyName == SPELLFAMILY_WARLOCK))

@@ -429,6 +429,7 @@ enum AuraScriptHookType
     AURA_SCRIPT_HOOK_EFFECT_CALC_AMOUNT,
     AURA_SCRIPT_HOOK_EFFECT_CALC_PERIODIC,
     AURA_SCRIPT_HOOK_EFFECT_CALC_SPELLMOD,
+    AURA_SCRIPT_HOOK_EFFECT_CALC_TICK_AMOUNT,
     AURA_SCRIPT_HOOK_EFFECT_ABSORB,
     AURA_SCRIPT_HOOK_EFFECT_AFTER_ABSORB,
     AURA_SCRIPT_HOOK_EFFECT_MANASHIELD,
@@ -467,6 +468,7 @@ public:
         typedef void(CLASSNAME::*AuraEffectCalcAmountFnType)(AuraEffect const*, int32 &, bool &); \
         typedef void(CLASSNAME::*AuraEffectCalcPeriodicFnType)(AuraEffect const*, bool &, int32 &); \
         typedef void(CLASSNAME::*AuraEffectCalcSpellModFnType)(AuraEffect const*, SpellModifier* &); \
+        typedef void(CLASSNAME::*AuraEffectCalcTickAmountFnType)(AuraEffect const*, int32 &); \
         typedef void(CLASSNAME::*AuraEffectAbsorbFnType)(AuraEffect*, DamageInfo &, uint32 &); \
         typedef void(CLASSNAME::*AuraEffectSplitFnType)(AuraEffect*, DamageInfo &, uint32 &); \
         typedef bool(CLASSNAME::*AuraCheckProcFnType)(ProcEventInfo&); \
@@ -546,6 +548,14 @@ public:
     private:
         AuraEffectCalcSpellModFnType pEffectHandlerScript;
     };
+    class EffectCalcTickAmountHandler : public EffectBase
+    {
+    public:
+        EffectCalcTickAmountHandler(AuraEffectCalcTickAmountFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName);
+        void Call(AuraScript* auraScript, AuraEffect const* aurEff, int32& amount);
+    private:
+        AuraEffectCalcTickAmountFnType pEffectHandlerScript;
+    };
     class EffectApplyHandler : public EffectBase
     {
     public:
@@ -613,6 +623,7 @@ public:
         class EffectCalcAmountHandlerFunction : public AuraScript::EffectCalcAmountHandler { public: EffectCalcAmountHandlerFunction(AuraEffectCalcAmountFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcAmountHandler((AuraScript::AuraEffectCalcAmountFnType)_pEffectHandlerScript, _effIndex, _effName) { } }; \
         class EffectCalcPeriodicHandlerFunction : public AuraScript::EffectCalcPeriodicHandler { public: EffectCalcPeriodicHandlerFunction(AuraEffectCalcPeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcPeriodicHandler((AuraScript::AuraEffectCalcPeriodicFnType)_pEffectHandlerScript, _effIndex, _effName) { } }; \
         class EffectCalcSpellModHandlerFunction : public AuraScript::EffectCalcSpellModHandler { public: EffectCalcSpellModHandlerFunction(AuraEffectCalcSpellModFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcSpellModHandler((AuraScript::AuraEffectCalcSpellModFnType)_pEffectHandlerScript, _effIndex, _effName) { } }; \
+        class EffectCalcTickAmountHandlerFunction : public AuraScript::EffectCalcTickAmountHandler { public: EffectCalcTickAmountHandlerFunction(AuraEffectCalcTickAmountFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName) : AuraScript::EffectCalcTickAmountHandler((AuraScript::AuraEffectCalcTickAmountFnType)_pEffectHandlerScript, _effIndex, _effName) { } }; \
         class EffectApplyHandlerFunction : public AuraScript::EffectApplyHandler { public: EffectApplyHandlerFunction(AuraEffectApplicationModeFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName, AuraEffectHandleModes _mode) : AuraScript::EffectApplyHandler((AuraScript::AuraEffectApplicationModeFnType)_pEffectHandlerScript, _effIndex, _effName, _mode) { } }; \
         class EffectAbsorbFunction : public AuraScript::EffectAbsorbHandler { public: EffectAbsorbFunction(AuraEffectAbsorbFnType _pEffectHandlerScript, uint8 _effIndex) : AuraScript::EffectAbsorbHandler((AuraScript::AuraEffectAbsorbFnType)_pEffectHandlerScript, _effIndex) { } }; \
         class EffectManaShieldFunction : public AuraScript::EffectManaShieldHandler { public: EffectManaShieldFunction(AuraEffectAbsorbFnType _pEffectHandlerScript, uint8 _effIndex) : AuraScript::EffectManaShieldHandler((AuraScript::AuraEffectAbsorbFnType)_pEffectHandlerScript, _effIndex) { } }; \
@@ -727,6 +738,12 @@ public:
     // where function is: void function (AuraEffect const* aurEff, SpellModifier*& spellMod);
     HookList<EffectCalcSpellModHandler> DoEffectCalcSpellMod;
 #define AuraEffectCalcSpellModFn(F, I, N) EffectCalcSpellModHandlerFunction(&F, I, N)
+
+    // executed when a periodic damage effect calculates the amount of its current tick
+    // example: DoEffectCalcTickAmount += AuraEffectCalcTickAmountFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
+    // where function is: void function (AuraEffect const* aurEff, int32& amount);
+    HookList<EffectCalcTickAmountHandler> DoEffectCalcTickAmount;
+#define AuraEffectCalcTickAmountFn(F, I, N) EffectCalcTickAmountHandlerFunction(&F, I, N)
 
     // executed when absorb aura effect is going to reduce damage
     // example: OnEffectAbsorb += AuraEffectAbsorbFn(class::function, EffectIndexSpecifier);

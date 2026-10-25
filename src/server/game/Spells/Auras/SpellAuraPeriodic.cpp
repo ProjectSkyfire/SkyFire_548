@@ -581,6 +581,10 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     else
         damage = uint32(target->CountPctFromMaxHealth(damage));
 
+    int32 tickAmount = int32(damage);
+    GetBase()->CallScriptEffectCalcTickAmountHandlers(this, GetBase()->GetApplicationOfTarget(target->GetGUID()), tickAmount);
+    damage = uint32(std::max(tickAmount, 0));
+
     bool crit = IsPeriodicTickCrit(target, caster);
     if (crit)
         damage = caster->SpellCriticalDamageBonus(m_spellInfo, damage, target);

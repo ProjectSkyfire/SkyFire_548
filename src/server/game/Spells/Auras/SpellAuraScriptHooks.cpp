@@ -225,6 +225,20 @@ void Aura::CallScriptEffectCalcPeriodicHandlers(AuraEffect const* aurEff, bool& 
     }
 }
 
+void Aura::CallScriptEffectCalcTickAmountHandlers(AuraEffect const* eff, AuraApplication const* app, int32& amount)
+{
+    for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
+    {
+        (*scritr)->_PrepareScriptCall(AURA_SCRIPT_HOOK_EFFECT_CALC_TICK_AMOUNT, app);
+        std::list<AuraScript::EffectCalcTickAmountHandler>::iterator effEndItr = (*scritr)->DoEffectCalcTickAmount.end(), effItr = (*scritr)->DoEffectCalcTickAmount.begin();
+        for (; effItr != effEndItr; ++effItr)
+            if (effItr->IsEffectAffected(m_spellInfo, eff->GetEffIndex()))
+                effItr->Call(*scritr, eff, amount);
+
+        (*scritr)->_FinishScriptCall();
+    }
+}
+
 void Aura::CallScriptEffectCalcSpellModHandlers(AuraEffect const* aurEff, SpellModifier*& spellMod)
 {
     for (std::list<AuraScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
