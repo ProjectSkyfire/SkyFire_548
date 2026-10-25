@@ -7,7 +7,9 @@
 #include "ScriptedCreature.h"
 #include "InstanceScript.h"
 #include "Containers.h"
+#include "MoveSpline.h"
 #include "MoveSplineInit.h"
+#include "PassiveAI.h"
 #include "deadmines.h"
 #include <unordered_map>
 
@@ -345,6 +347,8 @@ static uint32 const FireWallMarkerTime = 3000;
 static uint32 const FireWallHitInterval = 900;
 // Damaging fires are 3 yards apart, so this still leaves no gap along the wall
 static float const FireWallHitRadius = 2.5f;
+static uint32 const FireWallResyncInterval = 1000;
+static float const FireWallResyncDist = 2.0f;
 
 class npc_glubtok_firewall_platter : public CreatureScript
 {
@@ -353,7 +357,7 @@ class npc_glubtok_firewall_platter : public CreatureScript
 
         struct npc_glubtok_firewall_platterAI : public ScriptedAI
         {
-            npc_glubtok_firewall_platterAI(Creature* creature) : ScriptedAI(creature), summons(creature), orbitTimer(0), orbitStart(0)
+            npc_glubtok_firewall_platterAI(Creature* creature) : ScriptedAI(creature), summons(creature), orbitTimer(0), orbitStart(0), resyncTimer(0)
             {
                 me->SetReactState(REACT_PASSIVE);
             }
@@ -367,15 +371,19 @@ class npc_glubtok_firewall_platter : public CreatureScript
             SummonList summons;
             uint32 orbitTimer;
             uint32 orbitStart;
+            uint32 resyncTimer;
             std::unordered_map<uint64, WallFire> wallFires;
             std::unordered_map<uint64, uint32> lastWallHit;
 
             void Reset() OVERRIDE { }
 
+            // A fire whose pulse hits someone enters combat; the default AI then evades it,
+            // which strips Fire Wall and sends it home, so that stretch of the wall goes out.
             void JustSummoned(Creature* summon) OVERRIDE
             {
                 summons.Summon(summon);
                 summon->SetReactState(REACT_PASSIVE);
+                summon->AIM_Initialize(new NullCreatureAI(summon));
             }
 
             void DoAction(int32 action) OVERRIDE
@@ -406,13 +414,7 @@ class npc_glubtok_firewall_platter : public CreatureScript
                 if (itr == wallFires.end())
                     return false;
 
-                float angle = itr->second.startAngle;
-                if (orbitStart)
-                {
-                    uint32 const lapTime = uint32(FireWallTurnTime * IN_MILLISECONDS);
-                    angle -= 2.0f * float(M_PI) * float(GetMSTimeDiffToNow(orbitStart) % lapTime) / float(lapTime);
-                }
-
+                float const angle = GetFireAngle(itr->second);
                 Position const& center = me->GetHomePosition();
                 pos.Relocate(center.GetPositionX() + itr->second.radius * std::cos(angle),
                     center.GetPositionY() + itr->second.radius * std::sin(angle), center.GetPositionZ());
@@ -431,6 +433,17 @@ class npc_glubtok_firewall_platter : public CreatureScript
 
             void UpdateAI(uint32 diff) OVERRIDE
             {
+                if (orbitStart)
+                {
+                    if (resyncTimer <= diff)
+                    {
+                        ResyncWall();
+                        resyncTimer = FireWallResyncInterval;
+                    }
+                    else
+                        resyncTimer -= diff;
+                }
+
                 if (!orbitTimer)
                     return;
 
@@ -442,6 +455,7 @@ class npc_glubtok_firewall_platter : public CreatureScript
 
                 orbitTimer = 0;
                 orbitStart = getMSTime();
+                resyncTimer = FireWallResyncInterval;
                 Position const& center = me->GetHomePosition();
                 for (uint64 guid : summons)
                 {
@@ -459,6 +473,50 @@ class npc_glubtok_firewall_platter : public CreatureScript
             }
 
         private:
+            float GetFireAngle(WallFire const& wallFire) const
+            {
+                if (!orbitStart)
+                    return wallFire.startAngle;
+
+                uint32 const lapTime = uint32(FireWallTurnTime * float(IN_MILLISECONDS));
+                return wallFire.startAngle - 2.0f * float(M_PI) * float(GetMSTimeDiffToNow(orbitStart) % lapTime) / float(lapTime);
+            }
+
+            // Fires get knocked off their orbit or lose Fire Wall mid-fight; put them back on the wall's line
+            void ResyncWall()
+            {
+                Position const& center = me->GetHomePosition();
+                for (uint64 guid : summons)
+                {
+                    Creature* fire = ObjectAccessor::GetCreature(*me, guid);
+                    if (!fire || !fire->IsAlive())
+                        continue;
+
+                    auto itr = wallFires.find(guid);
+                    if (itr == wallFires.end())
+                        continue;
+
+                    if (!fire->HasAura(SPELL_FIRE_WALL))
+                        fire->CastSpell(fire, SPELL_FIRE_WALL, true);
+
+                    float const angle = GetFireAngle(itr->second);
+                    float const x = center.GetPositionX() + itr->second.radius * std::cos(angle);
+                    float const y = center.GetPositionY() + itr->second.radius * std::sin(angle);
+                    if (!fire->movespline->Finalized() && fire->movespline->isCyclic())
+                    {
+                        Movement::Location const at = fire->movespline->ComputePosition();
+                        if (std::hypot(at.x - x, at.y - y) <= FireWallResyncDist)
+                            continue;
+                    }
+
+                    if (fire->IsInCombat())
+                        fire->CombatStop(true);
+                    fire->GetMotionMaster()->Clear(false);
+                    fire->UpdatePosition(x, y, center.GetPositionZ() + FireWallHeight, angle, true);
+                    StartOrbit(fire, center, itr->second.radius, angle);
+                }
+            }
+
             void InstallWall()
             {
                 Position const& center = me->GetHomePosition();
@@ -587,6 +645,9 @@ class spell_glubtok_fire_wall_periodic : public SpellScriptLoader
                     platterAI->GetFirePosition(fire->GetGUID(), pos);
 
                 fire->CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SPELL_FIRE_WALL_DAMAGE, true, NULL, aurEff);
+                // Fires pulled into combat by their own hits drift off the wall's line
+                if (fire->IsInCombat())
+                    fire->CombatStop(true);
             }
 
             void Register() OVERRIDE
