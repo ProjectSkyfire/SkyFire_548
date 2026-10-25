@@ -1482,8 +1482,32 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
     else if (targetType.GetTarget() == TARGET_DEST_CASTER_RANDOM)
         dist = objSize + (dist - objSize) * (float)rand_norm();
 
+    if (targetType.GetTarget() == TARGET_DEST_CASTER_MOVEMENT_DIR)
+    {
+        if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT))
+        {
+            if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD))
+                angle = static_cast<float>(-M_PI / 4);
+            else if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_BACKWARD))
+                angle = static_cast<float>(-3 * M_PI / 4);
+            else
+                angle = static_cast<float>(-M_PI / 2);
+        }
+        else if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_LEFT))
+        {
+            if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD))
+                angle = static_cast<float>(M_PI / 4);
+            else if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_BACKWARD))
+                angle = static_cast<float>(3 * M_PI / 4);
+            else
+                angle = static_cast<float>(M_PI / 2);
+        }
+        else if (m_caster->HasUnitMovementFlag(MOVEMENTFLAG_BACKWARD))
+            angle = static_cast<float>(M_PI);
+    }
+
     Position pos;
-    if (targetType.GetTarget() == TARGET_DEST_CASTER_FRONT_LEAP)
+    if (targetType.GetTarget() == TARGET_DEST_CASTER_FRONT_LEAP || targetType.GetTarget() == TARGET_DEST_CASTER_MOVEMENT_DIR)
         m_caster->GetFirstCollisionPosition(pos, dist, angle);
     else
         m_caster->GetNearPosition(pos, dist, angle);

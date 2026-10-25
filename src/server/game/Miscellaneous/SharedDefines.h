@@ -1739,7 +1739,7 @@ enum Targets
     //TARGET_UNK_134                     = 134, // Placeholder
     //TARGET_UNK_135                     = 135, // Placeholder
     TARGET_UNK_136 = 136,
-    //TARGET_UNK_137                     = 137, // Placeholder
+    TARGET_DEST_CASTER_MOVEMENT_DIR = 137,
     TARGET_UNK_138 = 138,
     TARGET_UNK_139 = 139,
     TARGET_UNK_140 = 140,
