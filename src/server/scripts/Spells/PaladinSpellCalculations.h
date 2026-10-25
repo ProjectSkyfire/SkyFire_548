@@ -8,6 +8,7 @@
 
 #include "Define.h"
 #include "Util.h"
+#include <algorithm>
 
 namespace Skyfire
 {
@@ -15,6 +16,17 @@ namespace Spells
 {
 namespace Paladin
 {
+    int32 const MaxSpentHolyPower = 3;
+
+    // availablePower must include the point the spell's own cost already took.
+    inline int32 CalculateSpentHolyPower(int32 availablePower, bool freeCast)
+    {
+        if (freeCast)
+            return MaxSpentHolyPower;
+
+        return std::max(1, std::min(MaxSpentHolyPower, availablePower));
+    }
+
     struct ArdentDefenderAbsorbResult
     {
         uint32 AbsorbAmount = 0;
