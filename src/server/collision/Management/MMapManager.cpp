@@ -278,15 +278,14 @@ namespace MMAP
         }
 
         dtTileRef tileRef = mmap->loadedTileRefs[packedGridPos];
+        mmap->DropSwapsOnTile(packedGridPos);
 
         // unload, and mark as non loaded
         if (dtStatusFailed(mmap->navMesh->removeTile(tileRef, NULL, NULL)))
         {
-            // this is technically a memory leak
-            // if the grid is later reloaded, dtNavMesh::addTile will return error but no extra memory is used
-            // we cannot recover from this error - assert out
+            // A stale ref can no longer be removed; forget it so the tile can load again.
             SF_LOG_ERROR("maps", "MMAP:unloadMap: Could not unload %04u_%02i_%02i.mmtile from navmesh", mapId, x, y);
-            ASSERT(false);
+            mmap->loadedTileRefs.erase(packedGridPos);
         }
         else
         {
@@ -418,20 +417,28 @@ namespace MMAP
         }
         dtMeshHeader* header = (dtMeshHeader*)ptile->data;
 
+        MMapTileSet::iterator tileRef = loadedTileRefs.find(packedXY);
+        if (tileRef == loadedTileRefs.end())
+        {
+            SF_LOG_DEBUG("phase", "MMapData::RemoveSwap: mmtile %04u[%02i, %02i] base tile not loaded, dropping swap", swap, x, y);
+        }
         // remove old tile
-        if (dtStatusFailed(navMesh->removeTile(loadedTileRefs[packedXY], NULL, NULL)))
+        else if (dtStatusFailed(navMesh->removeTile(tileRef->second, NULL, NULL)))
             SF_LOG_ERROR("phase", "MMapData::RemoveSwap: Could not unload phased %04u_%02i_%02i.mmtile from navmesh", swap, x, y);
         else
         {
             SF_LOG_DEBUG("phase", "MMapData::RemoveSwap: Unloaded phased %04u_%02i_%02i.mmtile from navmesh", swap, x, y);
 
             // restore base tile
-            if (dtStatusSucceed(navMesh->addTile(_baseTiles[packedXY]->data, _baseTiles[packedXY]->dataSize, 0, 0, &loadedTileRefs[packedXY])))
+            if (dtStatusSucceed(navMesh->addTile(_baseTiles[packedXY]->data, _baseTiles[packedXY]->dataSize, 0, 0, &tileRef->second)))
             {
                 SF_LOG_DEBUG("phase", "MMapData::RemoveSwap: Loaded base mmtile %04u[%02i, %02i] into %04i[%02i, %02i]", _mapId, x, y, _mapId, header->x, header->y);
             }
             else
+            {
                 SF_LOG_ERROR("phase", "MMapData::RemoveSwap: Could not load base %04u_%02i_%02i.mmtile to navmesh", _mapId, x, y);
+                loadedTileRefs.erase(tileRef);
+            }
         }
 
         loadedPhasedTiles[swap].erase(packedXY);
@@ -440,6 +447,17 @@ namespace MMAP
         {
             _activeSwaps.erase(swap);
             SF_LOG_DEBUG("phase", "MMapData::RemoveSwap: Fully removed swap %u from map %u", swap, _mapId);
+        }
+    }
+
+    void MMapData::DropSwapsOnTile(uint32 packedXY)
+    {
+        for (TerrainSetMap::iterator itr = loadedPhasedTiles.begin(); itr != loadedPhasedTiles.end(); ++itr)
+        {
+            if (!itr->second.erase(packedXY))
+                continue;
+            if (itr->second.empty())
+                _activeSwaps.erase(itr->first);
         }
     }
 
@@ -498,7 +516,13 @@ namespace MMAP
                 SF_LOG_DEBUG("phase", "MMapData::AddSwap: Loaded phased mmtile %04u[%02i, %02i] into %04i[%02i, %02i]", swap, x, y, _mapId, header->x, header->y);
             }
             else
+            {
                 SF_LOG_ERROR("phase", "MMapData::AddSwap: Could not load %04u_%02i_%02i.mmtile to navmesh", swap, x, y);
+                loadedTileRefs.erase(packedXY);
+                loadedPhasedTiles[swap].erase(packedXY);
+                if (loadedPhasedTiles[swap].empty())
+                    _activeSwaps.erase(swap);
+            }
         }
     }
 

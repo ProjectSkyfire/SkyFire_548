@@ -56,6 +56,8 @@ namespace MMAP
         ~MMapData();
 
         dtNavMesh* GetNavMesh(TerrainSet swaps);
+        // Forget terrain swaps applied to a tile that is being unloaded.
+        void DropSwapsOnTile(uint32 packedXY);
 
         // we have to use single dtNavMeshQuery for every instance, since those are not thread safe
         NavMeshQuerySet navMeshQueries;     // instanceId to query
