@@ -569,6 +569,7 @@ public:
     SpellInfo const* GetSpellInfo() const { return m_spellInfo; }
     int32 GetPowerCost() const { return m_powerCost; }
     int32 GetPowerType() const { return m_powerType; }
+    DiminishingLevels GetDiminishingLevel() const { return m_diminishLevel; }
     static void ApplySmartHeal(Unit const* caster, std::list<WorldObject*>& targets, uint32 count, bool ignoreLos = false, Position const* losPos = nullptr);
 
     void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
