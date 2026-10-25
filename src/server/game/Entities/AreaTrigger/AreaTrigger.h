@@ -100,7 +100,18 @@ private:
     uint32 m_updateNumber = 0;
 };
 
-class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>
+namespace G3D
+{
+    class Vector3;
+}
+
+namespace Movement
+{
+    template<typename length_type>
+    class Spline;
+}
+
+class AreaTrigger : public WorldObject, public GridObject<AreaTrigger>, public MapObject
 {
 public:
     AreaTrigger();
@@ -129,7 +140,15 @@ public:
     float GetScaleX() const { return _scaleX; }
     float GetScaleY() const { return _scaleY; }
     void SetVisualRadius(float radius) { _scaleX = radius; _scaleY = radius; }
-    uint32 GetMovementTime() const { return 0; }
+
+    std::vector<G3D::Vector3> const& GetPath() const;
+    uint32 GetMovementTime() const { return _movementTime; }
+    void InitSpline(std::vector<Position> const& path, int32 duration);
+    bool HasSpline() const { return _spline.get() != nullptr; }
+    int32 GetCurrentSplineIndex() const { return _lastSplineIndex; }
+
+private:
+    void UpdateSplinePosition(uint32 diff);
 
 protected:
     int32 _duration;
@@ -142,5 +161,10 @@ protected:
     float _scaleX;
     float _scaleY;
     std::unique_ptr<IAreaTrigger> _script;
+
+    std::unique_ptr<Movement::Spline<int32>> _spline;
+    bool _reachedDestination;
+    uint32 _movementTime;
+    int32 _lastSplineIndex;
 };
 #endif

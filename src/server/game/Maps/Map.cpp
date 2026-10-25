@@ -220,7 +220,7 @@ void Map::DeleteStateMachine()
 }
 
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _parent) :
-    _creatureToMoveLock(false), _gameObjectsToMoveLock(false),
+    _creatureToMoveLock(false), _gameObjectsToMoveLock(false), _areaTriggersToMoveLock(false),
     i_mapEntry(sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode), i_InstanceId(InstanceId),
     m_unloadTimer(0), m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
     m_VisibilityNotifyPeriod(DEFAULT_VISIBILITY_NOTIFY_PERIOD),
@@ -277,6 +277,15 @@ void Map::AddToGrid(Creature* obj, Cell const& cell)
 
 template<>
 void Map::AddToGrid(GameObject* obj, Cell const& cell)
+{
+    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
+    grid->GetGridType(cell.CellX(), cell.CellY()).AddGridObject(obj);
+
+    obj->SetCurrentCell(cell);
+}
+
+template<>
+void Map::AddToGrid(AreaTrigger* obj, Cell const& cell)
 {
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     grid->GetGridType(cell.CellX(), cell.CellY()).AddGridObject(obj);
@@ -500,6 +509,12 @@ void Map::InitializeObject(GameObject* obj)
     obj->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
 }
 
+template<>
+void Map::InitializeObject(AreaTrigger* obj)
+{
+    obj->_moveState = MapObjectCellMoveState::MAP_OBJECT_CELL_MOVE_NONE;
+}
+
 template<class T>
 bool Map::AddToMap(T* obj)
 {
@@ -709,6 +724,7 @@ void Map::Update(const uint32 t_diff)
 
     MoveAllCreaturesInMoveList();
     MoveAllGameObjectsInMoveList();
+    MoveAllAreaTriggersInMoveList();
 
     if (!m_mapRefManager.isEmpty() || !m_activeNonPlayers.empty())
         ProcessRelocationNotifies(t_diff);
@@ -976,6 +992,25 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
     ASSERT(integrity_check == old_cell);
 }
 
+void Map::AreaTriggerRelocation(AreaTrigger* areaTrigger, float x, float y, float z, float orientation)
+{
+    Cell old_cell = areaTrigger->GetCurrentCell();
+    Cell new_cell(x, y);
+
+    if (!getNGrid(new_cell.GridX(), new_cell.GridY()))
+        return;
+
+    // delay area trigger move for grid/cell to grid/cell moves
+    if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
+        AddAreaTriggerToMoveList(areaTrigger, x, y, z, orientation);
+    else
+    {
+        areaTrigger->Relocate(x, y, z, orientation);
+        areaTrigger->UpdateObjectVisibility(false);
+        RemoveAreaTriggerFromMoveList(areaTrigger);
+    }
+}
+
 void Map::AddCreatureToMoveList(Creature* c, float x, float y, float z, float ang)
 {
     Skyfire::Maps::MapMoveQueueAddAction const action =
@@ -1010,6 +1045,24 @@ void Map::AddGameObjectToMoveList(GameObject* go, float x, float y, float z, flo
 void Map::RemoveGameObjectFromMoveList(GameObject* go)
 {
     Skyfire::Maps::MarkMoveQueueEntryInactive(go->_moveState, _gameObjectsToMoveLock);
+}
+
+void Map::AddAreaTriggerToMoveList(AreaTrigger* areaTrigger, float x, float y, float z, float ang)
+{
+    Skyfire::Maps::MapMoveQueueAddAction const action =
+        Skyfire::Maps::GetMoveQueueAddAction(areaTrigger->_moveState, _areaTriggersToMoveLock);
+    if (action == Skyfire::Maps::MAP_MOVE_QUEUE_ADD_SKIPPED_LOCKED)
+        return;
+
+    if (action == Skyfire::Maps::MAP_MOVE_QUEUE_ADD_APPEND)
+        _areaTriggersToMove.push_back(areaTrigger);
+
+    areaTrigger->SetNewCellPosition(x, y, z, ang);
+}
+
+void Map::RemoveAreaTriggerFromMoveList(AreaTrigger* areaTrigger)
+{
+    Skyfire::Maps::MarkMoveQueueEntryInactive(areaTrigger->_moveState, _areaTriggersToMoveLock);
 }
 
 void Map::MoveAllCreaturesInMoveList()
@@ -1103,6 +1156,32 @@ void Map::MoveAllGameObjectsInMoveList()
     }
     _gameObjectsToMove.clear();
     _gameObjectsToMoveLock = false;
+}
+
+void Map::MoveAllAreaTriggersInMoveList()
+{
+    _areaTriggersToMoveLock = true;
+    for (std::vector<AreaTrigger*>::iterator itr = _areaTriggersToMove.begin(); itr != _areaTriggersToMove.end(); ++itr)
+    {
+        AreaTrigger* areaTrigger = *itr;
+        if (areaTrigger->FindMap() != this)
+            continue;
+
+        if (!Skyfire::Maps::ConsumeMoveQueueEntry(areaTrigger->_moveState))
+            continue;
+
+        if (!areaTrigger->IsInWorld())
+            continue;
+
+        // area triggers that would move into an unloaded grid stay where they are
+        if (AreaTriggerCellRelocation(areaTrigger, Cell(areaTrigger->_newPosition.m_positionX, areaTrigger->_newPosition.m_positionY)))
+        {
+            areaTrigger->Relocate(areaTrigger->_newPosition);
+            areaTrigger->UpdateObjectVisibility(false);
+        }
+    }
+    _areaTriggersToMove.clear();
+    _areaTriggersToMoveLock = false;
 }
 
 bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
@@ -1227,6 +1306,42 @@ bool Map::GameObjectCellRelocation(GameObject* go, Cell new_cell)
     return false;
 }
 
+bool Map::AreaTriggerCellRelocation(AreaTrigger* areaTrigger, Cell newCell)
+{
+    Cell const& oldCell = areaTrigger->GetCurrentCell();
+    if (!oldCell.DiffGrid(newCell))
+    {
+        if (oldCell.DiffCell(newCell))
+        {
+            areaTrigger->RemoveFromGrid();
+            AddToGrid(areaTrigger, newCell);
+        }
+
+        return true;
+    }
+
+    if (areaTrigger->isActiveObject())
+    {
+        EnsureGridLoadedForActiveObject(newCell, areaTrigger);
+
+        areaTrigger->RemoveFromGrid();
+        AddToGrid(areaTrigger, newCell);
+
+        return true;
+    }
+
+    if (IsGridLoaded(GridCoord(newCell.GridX(), newCell.GridY())))
+    {
+        areaTrigger->RemoveFromGrid();
+        EnsureGridCreated(GridCoord(newCell.GridX(), newCell.GridY()));
+        AddToGrid(areaTrigger, newCell);
+
+        return true;
+    }
+
+    return false;
+}
+
 bool Map::CreatureRespawnRelocation(Creature* c, bool diffGridOnly)
 {
     float resp_x, resp_y, resp_z, resp_o;
@@ -1306,6 +1421,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
             // Must know real mob position before move
             MoveAllCreaturesInMoveList();
             MoveAllGameObjectsInMoveList();
+            MoveAllAreaTriggersInMoveList();
 
             // move creatures to respawn grids if this is diff.grid or to remove list
             ObjectGridEvacuator worker;
@@ -1315,6 +1431,7 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
             // Finish creature moves, remove and delete all creatures with delayed remove before unload
             MoveAllCreaturesInMoveList();
             MoveAllGameObjectsInMoveList();
+            MoveAllAreaTriggersInMoveList();
         }
 
         {
@@ -1383,6 +1500,7 @@ void Map::UnloadAll()
     // clear all delayed moves, useless anyway do this moves before map unload.
     _creaturesToMove.clear();
     _gameObjectsToMove.clear();
+    _areaTriggersToMove.clear();
 
     for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
     {

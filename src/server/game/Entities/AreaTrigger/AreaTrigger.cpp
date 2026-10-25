@@ -15,6 +15,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include "Spline.h"
 #include "Unit.h"
 
 class IAreaTriggerOnceChecker
@@ -158,7 +159,8 @@ void IAreaTriggerAura::OnRemoveFromWorld()
 AreaTrigger::AreaTrigger() : AreaTrigger(nullptr) { }
 
 AreaTrigger::AreaTrigger(AuraEffect const* eff) : WorldObject(false), _duration(0), _caster(nullptr), _effectTarget(nullptr), _effectTargetGuid(0),
-    _auraOwner(eff ? eff->GetBase()->GetOwner()->GetGUID() : 0), _effectIndex(eff ? eff->GetEffIndex() : 0), _scaleX(0.0f), _scaleY(0.0f)
+    _auraOwner(eff ? eff->GetBase()->GetOwner()->GetGUID() : 0), _effectIndex(eff ? eff->GetEffIndex() : 0), _scaleX(0.0f), _scaleY(0.0f),
+    _reachedDestination(false), _movementTime(0), _lastSplineIndex(0)
 {
     m_objectType |= TYPEMASK_AREATRIGGER;
     m_objectTypeId = TypeID::TYPEID_AREATRIGGER;
@@ -258,6 +260,8 @@ void AreaTrigger::SetRadius(float radius)
 
 void AreaTrigger::Update(uint32 p_time)
 {
+    UpdateSplinePosition(p_time);
+
     if (_effectTargetGuid)
     {
         Unit* target = ObjectAccessor::GetUnit(*this, _effectTargetGuid);
@@ -320,4 +324,68 @@ void AreaTrigger::UnbindFromCaster()
 
     _caster->UnregisterAreaTrigger(this);
     _caster = nullptr;
+}
+
+std::vector<G3D::Vector3> const& AreaTrigger::GetPath() const
+{
+    return _spline->getPoints();
+}
+
+void AreaTrigger::InitSpline(std::vector<Position> const& path, int32 duration)
+{
+    if (path.size() < 2)
+    {
+        SF_LOG_ERROR("entities.areatrigger", "AreaTrigger::InitSpline - Size of path < 2 (entry: %u)", GetEntry());
+        return;
+    }
+
+    if (duration < 0)
+    {
+        SF_LOG_ERROR("entities.areatrigger", "AreaTrigger::InitSpline - duration < 0 (entry: %u)", GetEntry());
+        return;
+    }
+
+    std::vector<G3D::Vector3> splinePoints;
+    splinePoints.reserve(path.size());
+    for (Position const& pos : path)
+        splinePoints.push_back(G3D::Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()));
+
+    _spline.reset(new Movement::Spline<int32>());
+    _spline->init_spline(splinePoints.data(), splinePoints.size(), Movement::SplineBase::ModeLinear);
+    _spline->initLengths();
+    SetInt32Value(AREATRIGGER_FIELD_DURATION, duration);
+    SetDuration(duration);
+}
+
+void AreaTrigger::UpdateSplinePosition(uint32 diff)
+{
+    if (_reachedDestination || !_spline)
+        return;
+
+    _movementTime += diff;
+
+    if (int32(_movementTime) >= GetMaxDuration())
+    {
+        _reachedDestination = true;
+        _lastSplineIndex = int32(_spline->last());
+
+        G3D::Vector3 const& lastSplinePosition = _spline->getPoint(_lastSplineIndex);
+        GetMap()->AreaTriggerRelocation(this, lastSplinePosition.x, lastSplinePosition.y, lastSplinePosition.z, GetOrientation());
+        return;
+    }
+
+    float currentTimePercent = float(_movementTime) / float(GetMaxDuration());
+    if (currentTimePercent <= 0.0f)
+        return;
+
+    int32 lastPositionIndex = 0;
+    float percentFromLastPoint = 0.0f;
+    _spline->computeIndex(currentTimePercent, lastPositionIndex, percentFromLastPoint);
+
+    G3D::Vector3 currentPosition;
+    _spline->evaluate_percent(lastPositionIndex, percentFromLastPoint, currentPosition);
+
+    GetMap()->AreaTriggerRelocation(this, currentPosition.x, currentPosition.y, currentPosition.z, GetOrientation());
+
+    _lastSplineIndex = lastPositionIndex;
 }

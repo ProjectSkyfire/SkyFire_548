@@ -380,6 +380,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     AreaTrigger const* atrigger = ToAreaTrigger();
     bool hasAreaTriggerData = atrigger != NULL;
     bool hasAreaTriggerScale = atrigger && (atrigger->GetScaleX() != 0.0f || atrigger->GetScaleY() != 0.0f);
+    bool hasAreaTriggerSpline = atrigger && atrigger->HasSpline();
 
     data->WriteBit(0);                                        // 676  UPDATEFLAG_HAS_GAMEOBJECT          // NEW
     data->WriteBit(false /*flags & UPDATEFLAG_ANIMKITS*/);    // 498  UPDATEFLAG_ANIMKITS                // OLD
@@ -505,8 +506,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(0);
         data->WriteBit(hasAreaTriggerScale);
         data->WriteBit(0);
-        data->WriteBit(0);                                    // has spline
+        data->WriteBit(hasAreaTriggerSpline);
         data->WriteBit(0);
+        if (hasAreaTriggerSpline)
+            data->WriteBits(atrigger->GetPath().size(), 20);
         data->WriteBit(0);
         data->WriteBit(0);
         data->WriteBit(0);                                    // has move curve
@@ -672,6 +675,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
 
     if (hasAreaTriggerData)
     {
+        if (hasAreaTriggerSpline)
+            for (G3D::Vector3 const& point : atrigger->GetPath())
+                *data << float(point.y) << float(point.x) << float(point.z);
+
         *data << uint32(atrigger->GetMovementTime());
         if (hasAreaTriggerScale)
         {

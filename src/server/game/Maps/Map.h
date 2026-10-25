@@ -271,6 +271,7 @@ public:
     void PlayerRelocation(Player*, float x, float y, float z, float orientation);
     void CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail = true);
     void GameObjectRelocation(GameObject* go, float x, float y, float z, float orientation, bool respawnRelocationOnFail = true);
+    void AreaTriggerRelocation(AreaTrigger* areaTrigger, float x, float y, float z, float orientation);
 
     template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
 
@@ -344,6 +345,7 @@ public:
 
     void MoveAllCreaturesInMoveList();
     void MoveAllGameObjectsInMoveList();
+    void MoveAllAreaTriggersInMoveList();
     void RemoveAllObjectsInRemoveList();
     virtual void RemoveAllPlayers();
 
@@ -504,18 +506,24 @@ private:
 
     bool CreatureCellRelocation(Creature* creature, Cell new_cell);
     bool GameObjectCellRelocation(GameObject* go, Cell new_cell);
+    bool AreaTriggerCellRelocation(AreaTrigger* areaTrigger, Cell newCell);
 
     template<class T> void InitializeObject(T* obj);
     void AddCreatureToMoveList(Creature* c, float x, float y, float z, float ang);
     void RemoveCreatureFromMoveList(Creature* c);
     void AddGameObjectToMoveList(GameObject* go, float x, float y, float z, float ang);
     void RemoveGameObjectFromMoveList(GameObject* go);
+    void AddAreaTriggerToMoveList(AreaTrigger* areaTrigger, float x, float y, float z, float ang);
+    void RemoveAreaTriggerFromMoveList(AreaTrigger* areaTrigger);
 
     bool _creatureToMoveLock;
     std::vector<Creature*> _creaturesToMove;
 
     bool _gameObjectsToMoveLock;
     std::vector<GameObject*> _gameObjectsToMove;
+
+    bool _areaTriggersToMoveLock;
+    std::vector<AreaTrigger*> _areaTriggersToMove;
 
     bool IsGridLoaded(const GridCoord&) const;
     void EnsureGridCreated(const GridCoord&);
