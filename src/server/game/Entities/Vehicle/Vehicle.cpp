@@ -807,7 +807,13 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
         Passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
     VehicleSeatEntry const* veSeat = Seat->second.SeatInfo;
-    Passenger->m_movementInfo.transport.pos.Relocate(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ);
+    Position attachmentPos = { veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ, 0.0f };
+
+    if (Creature* creature = Target->GetBase()->ToCreature())
+        if (creature->IsAIEnabled)
+            creature->AI()->GetPassengerEnterPosition(Passenger, Seat->first, attachmentPos);
+
+    Passenger->m_movementInfo.transport.pos.Relocate(attachmentPos);
     Passenger->m_movementInfo.transport.time = 0;
     Passenger->m_movementInfo.transport.seat = Seat->first;
     Passenger->m_movementInfo.transport.guid = Target->GetBase()->GetGUID();
@@ -823,7 +829,7 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
 
     Movement::MoveSplineInit init(Passenger);
     init.DisableTransportPathTransformations();
-    init.MoveTo(veSeat->m_attachmentOffsetX, veSeat->m_attachmentOffsetY, veSeat->m_attachmentOffsetZ, false, true);
+    init.MoveTo(attachmentPos.GetPositionX(), attachmentPos.GetPositionY(), attachmentPos.GetPositionZ(), false, true);
     init.SetFacing(0.0f);
     init.SetTransportEnter();
     init.Launch();

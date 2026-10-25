@@ -587,6 +587,10 @@ public:
     Unit* SelectNearestTarget(float dist = 0, bool playerOnly = false) const;
     Unit* SelectNearestTargetInAttackDistance(float dist = 0) const;
     Player* SelectNearestPlayer(float distance = 0) const;
+
+    // Stop attacking, face a direction and optionally start a channel; RemoveChanneledCast resumes the fight
+    void PrepareChanneledCast(float facing, uint32 spellId = 0, bool triggered = false);
+    void RemoveChanneledCast(uint64 targetGUID = 0);
     Unit* SelectNearestHostileUnitInAggroRange(bool useLOS = false) const;
 
     void DoFleeToGetAssistance();

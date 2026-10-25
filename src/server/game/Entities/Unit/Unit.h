@@ -1781,6 +1781,7 @@ public:
     void TriggerAurasProcOnEvent(ProcEventInfo& eventInfo, AuraApplicationList& procAuras);
 
     void HandleEmoteCommand(uint32 anim_id);
+    void HandleEmoteStateCommand(uint32 anim_id);
     void AttackerStateUpdate(Unit* victim, WeaponAttackType attType = WeaponAttackType::BASE_ATTACK, bool extra = false);
 
     void CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = WeaponAttackType::BASE_ATTACK);
@@ -2670,6 +2671,7 @@ public:
         m_movementInfo.SetExtraMovementFlags(f);
     }
     bool IsSplineEnabled() const;
+    int32 GetSplineDuration() const;
 
     float GetPositionZMinusOffset() const;
 

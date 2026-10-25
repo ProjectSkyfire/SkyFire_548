@@ -754,6 +754,7 @@ public:
     void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);
 
     Creature* FindNearestCreature(uint32 entry, float range, bool alive = true) const;
+    Player* FindNearestPlayer(float range) const;
     GameObject* FindNearestGameObject(uint32 entry, float range) const;
     GameObject* FindNearestGameObjectOfType(GameobjectTypes type, float range) const;
 

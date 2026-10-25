@@ -1828,6 +1828,31 @@ Player* Creature::SelectNearestPlayer(float distance) const
     return target;
 }
 
+void Creature::PrepareChanneledCast(float facing, uint32 spellId, bool triggered)
+{
+    AttackStop();
+    SetReactState(REACT_PASSIVE);
+    SetFacingTo(facing);
+
+    if (spellId)
+        CastSpell(this, spellId, triggered);
+}
+
+void Creature::RemoveChanneledCast(uint64 targetGUID)
+{
+    SetReactState(REACT_AGGRESSIVE);
+
+    Unit* target = targetGUID ? ObjectAccessor::GetUnit(*this, targetGUID) : NULL;
+    if (!target)
+        target = FindNearestPlayer(100.0f);
+
+    if (target)
+    {
+        GetMotionMaster()->MoveChase(target);
+        Attack(target, true);
+    }
+}
+
 void Creature::SendAIReaction(AiReaction reactionType)
 {
     WorldPacket data(SMSG_AI_REACTION, 12);

@@ -147,6 +147,7 @@ public:
 
     //Called when a player successfully enters the instance.
     virtual void OnPlayerEnter(Player* /*player*/) { }
+    virtual void OnPlayerLeave(Player* /*player*/) { }
 
     //Handle open / close objects
     //use HandleGameObject(0, boolen, GO); in OnObjectCreate in instance scripts
@@ -180,6 +181,12 @@ public:
 
     // Cast spell on all players in instance
     void DoCastSpellOnPlayers(uint32 spell);
+
+    // Add aura on all players in instance
+    void DoAddAuraOnPlayers(uint32 spell);
+
+    // True when no living, non-GM player is left (within range of source, if given)
+    virtual bool IsWipe(float range = 0.0f, Unit* source = NULL);
 
     // Return wether server allow two side groups or not
     bool ServerAllowsTwoSideGroups() { return sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP); }

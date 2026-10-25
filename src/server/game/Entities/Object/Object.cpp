@@ -2830,6 +2830,15 @@ Creature* WorldObject::FindNearestCreature(uint32 entry, float range, bool alive
     return creature;
 }
 
+Player* WorldObject::FindNearestPlayer(float range) const
+{
+    Player* player = NULL;
+    Skyfire::NearestPlayerInObjectRangeCheck checker(this, range);
+    Skyfire::PlayerLastSearcher<Skyfire::NearestPlayerInObjectRangeCheck> searcher(this, player, checker);
+    VisitNearbyObject(range, searcher);
+    return player;
+}
+
 GameObject* WorldObject::FindNearestGameObject(uint32 entry, float range) const
 {
     GameObject* go = NULL;

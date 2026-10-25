@@ -952,6 +952,12 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
     }
 }
 
+void Unit::HandleEmoteStateCommand(uint32 anim_id)
+{
+    if (EmotesEntry const* emote = sEmotesStore.LookupEntry(anim_id))
+        SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, emote->Id);
+}
+
 void Unit::HandleEmoteCommand(uint32 anim_id)
 {
     if (anim_id == 10)

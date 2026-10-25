@@ -8551,6 +8551,8 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     if (!m_vehicle)
         return;
 
+    int8 seatId = m_movementInfo.transport.seat;
+
     // This should be done before dismiss, because there may be some aura removal
     Vehicle* vehicle = m_vehicle->RemovePassenger(this);
 
@@ -8564,10 +8566,14 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     SetControlled(false, UNIT_STATE_ROOT);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
 
     Position pos;
-    if (!exitPosition)                          // Exit position not specified
-        vehicle->GetBase()->GetPosition(&pos);  // This should use passenger's current position, leaving it as it is now
+    vehicle->GetBase()->GetPosition(&pos);      // This should use passenger's current position, leaving it as it is now
     // because we calculate positions incorrect (sometimes under map)
-    else
+
+    if (Creature* base = vehicle->GetBase()->ToCreature())
+        if (base->IsAIEnabled)
+            base->AI()->GetPassengerExitPosition(this, seatId, pos);
+
+    if (exitPosition)
         pos = *exitPosition;
 
     AddUnitState(UNIT_STATE_MOVE);
@@ -9593,6 +9599,11 @@ void Unit::SendMovementSetSplineAnim(Movement::AnimType anim)
 bool Unit::IsSplineEnabled() const
 {
     return movespline->Initialized() && !movespline->Finalized();
+}
+
+int32 Unit::GetSplineDuration() const
+{
+    return IsSplineEnabled() ? movespline->Duration() : 0;
 }
 
 

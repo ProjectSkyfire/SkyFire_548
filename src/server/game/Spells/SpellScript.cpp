@@ -191,8 +191,8 @@ void SpellScript::HitHandler::Call(SpellScript* spellScript)
     (spellScript->*pHitHandlerScript)();
 }
 
-SpellScript::TargetHook::TargetHook(uint8 _effectIndex, uint16 _targetType, bool _area)
-    : _SpellScript::EffectHook(_effectIndex), targetType(_targetType), area(_area) { }
+SpellScript::TargetHook::TargetHook(uint8 _effectIndex, uint16 _targetType, bool _area, bool _dest)
+    : _SpellScript::EffectHook(_effectIndex), targetType(_targetType), area(_area), dest(_dest) { }
 
 std::string SpellScript::TargetHook::ToString()
 {
@@ -211,6 +211,9 @@ bool SpellScript::TargetHook::CheckEffect(SpellInfo const* spellEntry, uint8 eff
         return false;
 
     SpellImplicitTargetInfo targetInfo(targetType);
+    if (dest)
+        return targetInfo.GetSelectionCategory() == TARGET_SELECT_CATEGORY_DEFAULT && targetInfo.GetObjectType() == TARGET_OBJECT_TYPE_DEST;
+
     switch (targetInfo.GetSelectionCategory())
     {
         case TARGET_SELECT_CATEGORY_CHANNEL: // SINGLE
@@ -268,6 +271,17 @@ void SpellScript::ObjectTargetSelectHandler::Call(SpellScript* spellScript, Worl
     (spellScript->*pObjectTargetSelectHandlerScript)(target);
 }
 
+SpellScript::DestinationTargetSelectHandler::DestinationTargetSelectHandler(SpellDestinationTargetSelectFnType _pDestinationTargetSelectHandlerScript, uint8 _effIndex, uint16 _targetType)
+    : TargetHook(_effIndex, _targetType, false, true)
+{
+    pDestinationTargetSelectHandlerScript = _pDestinationTargetSelectHandlerScript;
+}
+
+void SpellScript::DestinationTargetSelectHandler::Call(SpellScript* spellScript, SpellDestination& target)
+{
+    (spellScript->*pDestinationTargetSelectHandlerScript)(target);
+}
+
 bool SpellScript::_Validate(SpellInfo const* entry)
 {
     for (std::list<EffectHandler>::iterator itr = OnEffectLaunch.begin(); itr != OnEffectLaunch.end(); ++itr)
@@ -293,6 +307,10 @@ bool SpellScript::_Validate(SpellInfo const* entry)
     for (std::list<ObjectTargetSelectHandler>::iterator itr = OnObjectTargetSelect.begin(); itr != OnObjectTargetSelect.end(); ++itr)
         if (!(*itr).GetAffectedEffectsMask(entry))
             SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `OnObjectTargetSelect` of SpellScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
+
+    for (std::list<DestinationTargetSelectHandler>::iterator itr = OnDestinationTargetSelect.begin(); itr != OnDestinationTargetSelect.end(); ++itr)
+        if (!(*itr).GetAffectedEffectsMask(entry))
+            SF_LOG_ERROR("scripts", "Spell `%u` Effect `%s` of script `%s` did not match dbc effect data - handler bound to hook `OnDestinationTargetSelect` of SpellScript won't be executed", entry->Id, (*itr).ToString().c_str(), m_scriptName->c_str());
 
     return _SpellScript::_Validate(entry);
 }
@@ -734,6 +752,16 @@ AuraScript::EffectPeriodicHandler::EffectPeriodicHandler(AuraEffectPeriodicFnTyp
 void AuraScript::EffectPeriodicHandler::Call(AuraScript* auraScript, AuraEffect const* _aurEff)
 {
     (auraScript->*pEffectHandlerScript)(_aurEff);
+}
+
+AuraScript::AuraUpdateHandler::AuraUpdateHandler(AuraUpdateFnType _pEffectHandlerScript)
+{
+    pEffectHandlerScript = _pEffectHandlerScript;
+}
+
+void AuraScript::AuraUpdateHandler::Call(AuraScript* auraScript, uint32 diff)
+{
+    (auraScript->*pEffectHandlerScript)(diff);
 }
 
 AuraScript::EffectUpdatePeriodicHandler::EffectUpdatePeriodicHandler(AuraEffectUpdatePeriodicFnType _pEffectHandlerScript, uint8 _effIndex, uint16 _effName)
