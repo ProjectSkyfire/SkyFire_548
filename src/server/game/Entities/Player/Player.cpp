@@ -3326,6 +3326,7 @@ void Player::LearnSpecialization(uint32 specializationId)
     SetTalentSpecialization(GetActiveSpec(), specializationId);
     SetUInt32Value(PLAYER_FIELD_CURRENT_SPEC_ID, specializationId);
     UpdateTalentSpecializationManaBonus();
+    RemoveSpecializationSpells();
 
     // Learn every spell this spec grants up to the current level.
     std::list<uint32> learnList = GetSpellsForLevels(0, getRaceMask(), specializationId, 0, getLevel());
@@ -3360,21 +3361,37 @@ void Player::InitTalentForLevel()
     if (!GetSession()->PlayerLoading())
         SendTalentsInfoData();                         // update at client
 }
-/*
+
 void Player::RemoveSpecializationSpells()
 {
-    std::list<uint32> spellToRemove;
+    uint32 const* specs = GetClassSpecializations(getClass());
+    if (!specs)
+        return;
 
-    for (auto itr : GetSpellMap())
+    uint32 const activeSpecialization = GetTalentSpecialization(GetActiveSpec());
+    std::set<uint32> keep;
+    if (std::vector<uint32> const* activeSpells = GetSpecializationSpells(activeSpecialization))
+        keep.insert(activeSpells->begin(), activeSpells->end());
+
+    // Some spec spells are also part of the class's baseline kit
+    std::list<uint32> const baseline = GetSpellsForLevels(getClass(), getRaceMask(), 0, 0, STRONG_MAX_LEVEL);
+    keep.insert(baseline.begin(), baseline.end());
+
+    std::set<uint32> spellsToRemove;
+    for (uint8 i = 0; i < MAX_TALENT_TABS; ++i)
     {
-        SpellInfo const* spell = sSpellMgr->GetSpellInfo(itr.first);
-        if (spell && !spell->SpecializationIdList.empty())
-            spellToRemove.push_back(itr.first);
+        if (!specs[i] || specs[i] == activeSpecialization)
+            continue;
+
+        if (std::vector<uint32> const* specSpells = GetSpecializationSpells(specs[i]))
+            for (uint32 spellId : *specSpells)
+                if (!keep.count(spellId) && HasSpell(spellId))
+                    spellsToRemove.insert(spellId);
     }
 
-    for (auto itr : spellToRemove)
-        removeSpell(itr);
-}*/
+    for (uint32 spellId : spellsToRemove)
+        removeSpell(spellId, false, false);
+}
 
 void Player::InitStatsForLevel(bool reapplyMods)
 {
@@ -12920,6 +12937,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
     // after spell and quest load
     InitTalentForLevel();
     learnDefaultSpells();
+    RemoveSpecializationSpells();
 
     // must be before inventory (some items required reputation check)
     m_reputationMgr->LoadFromDB(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_REPUTATION));

@@ -1417,7 +1417,8 @@ public:
     void GiveLevel(uint8 level);
 
     void InitStatsForLevel(bool reapplyMods = false);
-    //void RemoveSpecializationSpells();
+    // Drops spells of the class's other specializations
+    void RemoveSpecializationSpells();
 
     // .cheat command related
     bool GetCommandStatus(uint32 command) const
