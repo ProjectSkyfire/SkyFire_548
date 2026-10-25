@@ -1205,6 +1205,25 @@ void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
         return;
 
     Unit* caster = m_caster->GetEntry() == WORLD_TRIGGER ? m_originalCaster : m_caster;
+    if (!caster)
+        return;
+
+    // trigger entry/miscvalue relation is currently unknown, for now use MiscValue as trigger entry
+    uint32 triggerEntry = m_spellInfo->Effects[effIndex].MiscValue;
+    if (sObjectMgr->GetAreaTriggerTemplate(triggerEntry))
+    {
+        Position pos;
+        if (m_targets.HasDst())
+            destTarget->GetPosition(&pos);
+        else
+            caster->GetPosition(&pos);
+
+        AreaTrigger* areaTrigger = new AreaTrigger();
+        if (!areaTrigger->CreateAreaTrigger(sObjectMgr->GenerateLowGuid(HIGHGUID_AREATRIGGER), triggerEntry, caster, m_spellInfo, pos))
+            delete areaTrigger;
+        return;
+    }
+
     float radius = m_spellInfo->Effects[effIndex].CalcRadius(caster);
 
     DynamicObject* dynObj = new DynamicObject(false);
@@ -1213,15 +1232,6 @@ void Spell::EffectCreateAreaTrigger(SpellEffIndex effIndex)
         delete dynObj;
         return;
     }
-
-    /*
-    // trigger entry/miscvalue relation is currently unknown, for now use MiscValue as trigger entry
-    uint32 triggerEntry = GetSpellInfo()->Effects[effIndex].MiscValue;
-
-    AreaTrigger * areaTrigger = new AreaTrigger;
-    if (!areaTrigger->CreateAreaTrigger(sObjectMgr->GenerateLowGuid(HIGHGUID_AREATRIGGER), triggerEntry, GetCaster(), GetSpellInfo(), pos))
-        delete areaTrigger;
-    */
 }
 
 void Spell::EffectBattlePetsUnlock(SpellEffIndex /*effIndex*/)

@@ -5522,6 +5522,39 @@ void ObjectMgr::LoadAreaTriggerScripts()
     SF_LOG_INFO("server.loading", ">> Loaded %u areatrigger scripts in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadSpellAreaTriggerTemplates()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _areaTriggerTemplateStore.clear();                          // need for reload case
+    QueryResult result = WorldDatabase.Query("SELECT Entry, Flags, CollisionType, Radius, ScaleX, ScaleY, ScriptName FROM spell_areatrigger_template");
+
+    if (!result)
+    {
+        SF_LOG_INFO("server.loading", ">> Loaded 0 spell area trigger templates. DB table `spell_areatrigger_template` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        AreaTriggerTemplate& atTemplate = _areaTriggerTemplateStore[fields[0].GetUInt32()];
+        atTemplate.Entry = fields[0].GetUInt32();
+        atTemplate.Flags = fields[1].GetUInt32();
+        atTemplate.CollisionType = fields[2].GetUInt32();
+        atTemplate.Radius = fields[3].GetFloat();
+        atTemplate.ScaleX = fields[4].GetFloat();
+        atTemplate.ScaleY = fields[5].GetFloat();
+        atTemplate.ScriptId = GetScriptId(fields[6].GetCString());
+        ++count;
+    } while (result->NextRow());
+
+    SF_LOG_INFO("server.loading", ">> Loaded %u spell area trigger templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
 uint32 ObjectMgr::GetNearestTaxiNode(float x, float y, float z, uint32 mapid, uint32 team)
 {
     bool found = false;
@@ -7750,6 +7783,14 @@ uint32 ObjectMgr::GetAreaTriggerScriptId(uint32 trigger_id)
     return 0;
 }
 
+AreaTriggerTemplate const* ObjectMgr::GetAreaTriggerTemplate(uint32 entry) const
+{
+    AreaTriggerTemplateContainer::const_iterator i = _areaTriggerTemplateStore.find(entry);
+    if (i != _areaTriggerTemplateStore.end())
+        return &i->second;
+    return NULL;
+}
+
 SpellScriptsBounds ObjectMgr::GetSpellScriptsBounds(uint32 spellId)
 {
     return SpellScriptsBounds(_spellScriptsStore.equal_range(spellId));
@@ -8480,6 +8521,8 @@ void ObjectMgr::LoadScriptNames()
         "SELECT DISTINCT(ScriptName) FROM item_script_names WHERE ScriptName <> '' "
         "UNION "
         "SELECT DISTINCT(ScriptName) FROM areatrigger_scripts WHERE ScriptName <> '' "
+        "UNION "
+        "SELECT DISTINCT(ScriptName) FROM spell_areatrigger_template WHERE ScriptName <> '' "
         "UNION "
         "SELECT DISTINCT(ScriptName) FROM spell_script_names WHERE ScriptName <> '' "
         "UNION "

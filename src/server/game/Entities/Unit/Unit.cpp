@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "AreaTrigger.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -1772,6 +1773,81 @@ void Unit::RemoveAllDynObjects()
 {
     while (!m_dynObj.empty())
         m_dynObj.front()->Remove();
+}
+
+void Unit::RegisterAreaTrigger(AreaTrigger* areaTrigger)
+{
+    m_areaTrigger.push_back(areaTrigger);
+}
+
+void Unit::UnregisterAreaTrigger(AreaTrigger* areaTrigger)
+{
+    m_areaTrigger.remove(areaTrigger);
+}
+
+AreaTrigger* Unit::GetAreaTrigger(uint32 spellId)
+{
+    for (AreaTriggerList::const_iterator i = m_areaTrigger.begin(); i != m_areaTrigger.end(); ++i)
+        if ((*i)->GetSpellId() == spellId)
+            return *i;
+    return NULL;
+}
+
+int32 Unit::CountAreaTrigger(uint32 spellId)
+{
+    int32 count = 0;
+    for (AreaTriggerList::const_iterator i = m_areaTrigger.begin(); i != m_areaTrigger.end(); ++i)
+        if ((*i)->GetSpellId() == spellId)
+            ++count;
+    return count;
+}
+
+void Unit::GetAreaTriggerList(std::list<AreaTrigger*>& list, uint32 spellId)
+{
+    for (AreaTriggerList::const_iterator i = m_areaTrigger.begin(); i != m_areaTrigger.end(); ++i)
+        if ((*i)->GetSpellId() == spellId)
+            list.push_back(*i);
+}
+
+void Unit::RemoveAreaTrigger(uint32 spellId)
+{
+    for (AreaTriggerList::iterator i = m_areaTrigger.begin(); i != m_areaTrigger.end();)
+    {
+        AreaTrigger* areaTrigger = *i;
+        if (areaTrigger->GetSpellId() == spellId)
+        {
+            areaTrigger->Remove();
+            i = m_areaTrigger.begin();
+        }
+        else
+            ++i;
+    }
+}
+
+void Unit::RemoveAreaTrigger(AuraEffect const* eff)
+{
+    for (AreaTriggerList::iterator i = m_areaTrigger.begin(); i != m_areaTrigger.end(); ++i)
+    {
+        AreaTrigger* areaTrigger = *i;
+        if (areaTrigger->GetSpellId() == eff->GetSpellInfo()->Id && areaTrigger->GetEffectIndex() == eff->GetEffIndex())
+        {
+            areaTrigger->Remove();
+            return;
+        }
+    }
+}
+
+void Unit::RemoveAllAreasTrigger()
+{
+    while (!m_areaTrigger.empty())
+        m_areaTrigger.front()->Remove();
+}
+
+void Unit::GetSummons(std::list<TempSummon*>& list, uint32 entry)
+{
+    for (std::list<TempSummon*>::const_iterator itr = m_summons.begin(); itr != m_summons.end(); ++itr)
+        if ((*itr)->GetEntry() == entry)
+            list.push_back(*itr);
 }
 
 GameObject* Unit::GetGameObject(uint32 spellId) const
@@ -5564,6 +5640,8 @@ void Unit::RemoveFromWorld()
 
         RemoveAllGameObjects();
         RemoveAllDynObjects();
+        RemoveAllAreasTrigger();
+        m_summons.clear();
 
         ExitVehicle();  // Remove applied auras with SPELL_AURA_CONTROL_VEHICLE
         UnsummonAllTotems();

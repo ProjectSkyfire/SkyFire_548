@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "AreaTrigger.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "CellImpl.h"
@@ -376,6 +377,10 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     if (GameObject const* go = ToGameObject())
         pauseTimes = go->GetPauseTimes();
 
+    AreaTrigger const* atrigger = ToAreaTrigger();
+    bool hasAreaTriggerData = atrigger != NULL;
+    bool hasAreaTriggerScale = atrigger && (atrigger->GetScaleX() != 0.0f || atrigger->GetScaleY() != 0.0f);
+
     data->WriteBit(0);                                        // 676  UPDATEFLAG_HAS_GAMEOBJECT          // NEW
     data->WriteBit(false /*flags & UPDATEFLAG_ANIMKITS*/);    // 498  UPDATEFLAG_ANIMKITS                // OLD
     data->WriteBit(flags & UPDATEFLAG_LIVING);                // 368  UPDATEFLAG_LIVING                  // OLD
@@ -393,7 +398,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     data->WriteBit(0);                                        // 1032 UPDATEFLAG_SCENE_OBJECT            // NEW
     data->WriteBit(0);                                        // 1064 UPDATEFLAG_SCENE_PENDING_INSTANCES // NEW
     data->WriteBit(0);
-    data->WriteBit(0);                                        // 668  UPDATEFLAG_HAS_AREATRIGGER         // NEW
+    data->WriteBit(hasAreaTriggerData);                       // 668  UPDATEFLAG_HAS_AREATRIGGER         // NEW
     data->WriteBit(flags & UPDATEFLAG_GO_TRANSPORT_POSITION); // 424  UPDATEFLAG_GO_TRANSPORT_POSITION   // OLD
     data->WriteBit(0);                                        // 681  UPDATEFLAG_REPLACE_YOU             // NEW
     data->WriteBit(flags & UPDATEFLAG_STATIONARY_POSITION);   // 448  UPDATEFLAG_STATIONARY_POSITION     // OLD
@@ -488,6 +493,23 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         data->WriteBit(transGuid[2]);
         data->WriteBit(transGuid[7]);
         data->WriteBit(self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid);
+    }
+
+    if (hasAreaTriggerData)
+    {
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(hasAreaTriggerScale);
+        data->WriteBit(0);
+        data->WriteBit(0);                                    // has spline
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);
+        data->WriteBit(0);                                    // has move curve
     }
 
     /*
@@ -646,6 +668,16 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetSpeed(MOVE_RUN));
         *data << float(self->GetSpeed(MOVE_SWIM));
         *data << float(self->GetPositionZMinusOffset());
+    }
+
+    if (hasAreaTriggerData)
+    {
+        *data << uint32(atrigger->GetMovementTime());
+        if (hasAreaTriggerScale)
+        {
+            *data << float(atrigger->GetScaleX());
+            *data << float(atrigger->GetScaleY());
+        }
     }
 
     if (flags & UPDATEFLAG_GO_TRANSPORT_POSITION)
@@ -2682,6 +2714,9 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     summon->InitStats(duration);
     AddToMap(summon->ToCreature());
     summon->InitSummon();
+
+    if (summoner && summon->IsInWorld() && summon->IsInMap(summoner))
+        summoner->AddSummon(summon);
 
     //ObjectAccessor::UpdateObjectVisibility(summon);
 

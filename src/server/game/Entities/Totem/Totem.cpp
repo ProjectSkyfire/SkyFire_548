@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "CreatureAI.h"
 #include "Group.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -115,6 +116,9 @@ void Totem::UnSummon(uint32 msTime)
             }
         }
     }
+
+    if (IsAIEnabled)
+        AI()->Unsummoned();
 
     AddObjectToRemoveList();
 }

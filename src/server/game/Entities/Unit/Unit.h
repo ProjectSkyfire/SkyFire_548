@@ -348,6 +348,8 @@ class Creature;
 class Spell;
 class SpellInfo;
 class DynamicObject;
+class AreaTrigger;
+class TempSummon;
 class GameObject;
 class Item;
 class Pet;
@@ -2529,6 +2531,22 @@ public:
     void RemoveDynObject(uint32 spellId);
     void RemoveAllDynObjects();
 
+    // AreaTrigger management
+    void RegisterAreaTrigger(AreaTrigger* areaTrigger);
+    void UnregisterAreaTrigger(AreaTrigger* areaTrigger);
+    AreaTrigger* GetAreaTrigger(uint32 spellId);
+    int32 CountAreaTrigger(uint32 spellId);
+    void GetAreaTriggerList(std::list<AreaTrigger*>& list, uint32 spellId);
+    void RemoveAreaTrigger(uint32 spellId);
+    void RemoveAreaTrigger(AuraEffect const* eff);
+    void RemoveAllAreasTrigger();
+
+    // Summons created through Map::SummonCreature with this unit as summoner
+    void AddSummon(TempSummon* summon) { m_summons.push_back(summon); }
+    void RemoveSummon(TempSummon* summon) { m_summons.remove(summon); }
+    void GetSummons(std::list<TempSummon*>& list, uint32 entry);
+    std::list<TempSummon*> const& GetSummons() const { return m_summons; }
+
     GameObject* GetGameObject(uint32 spellId) const;
     void AddGameObject(GameObject* gameObj);
     void TrackGameObject(GameObject* gameObj);
@@ -2899,6 +2917,11 @@ protected:
 
     typedef std::list<DynamicObject*> DynObjectList;
     DynObjectList m_dynObj;
+
+    typedef std::list<AreaTrigger*> AreaTriggerList;
+    AreaTriggerList m_areaTrigger;
+
+    std::list<TempSummon*> m_summons;
 
     typedef std::list<GameObject*> GameObjectList;
     GameObjectList m_gameObj;

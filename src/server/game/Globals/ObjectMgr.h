@@ -410,6 +410,18 @@ struct AreaTriggerStruct
     float  target_Orientation;
 };
 
+// Spell-created area triggers (SPELL_EFFECT_CREATE_AREATRIGGER / SPELL_AURA_AREA_TRIGGER)
+struct AreaTriggerTemplate
+{
+    uint32 Entry;
+    uint32 Flags;
+    uint32 CollisionType;
+    float Radius;
+    float ScaleX;
+    float ScaleY;
+    uint32 ScriptId;
+};
+
 typedef std::set<uint32> CellGuidSet;
 typedef std::map<uint32/*player guid*/, uint32/*instance*/> CellCorpseSet;
 struct CellObjectGuids
@@ -725,6 +737,8 @@ public:
 
     typedef UNORDERED_MAP<uint32, uint32> AreaTriggerScriptContainer;
 
+    typedef UNORDERED_MAP<uint32, AreaTriggerTemplate> AreaTriggerTemplateContainer;
+
     typedef UNORDERED_MAP<uint32, AccessRequirement*> AccessRequirementContainer;
 
     typedef UNORDERED_MAP<uint32, RepRewardRate > RepRewardRateContainer;
@@ -849,6 +863,7 @@ public:
     AreaTriggerStruct const* GetMapEntranceTrigger(uint32 Map) const;
 
     uint32 GetAreaTriggerScriptId(uint32 trigger_id);
+    AreaTriggerTemplate const* GetAreaTriggerTemplate(uint32 entry) const;
     SpellScriptsBounds GetSpellScriptsBounds(uint32 spellId);
 
     RepRewardRate const* GetRepRewardRate(uint32 factionId) const
@@ -1011,6 +1026,7 @@ public:
     void LoadAccessRequirements();
     void LoadQuestAreaTriggers();
     void LoadAreaTriggerScripts();
+    void LoadSpellAreaTriggerTemplates();
     void LoadTavernAreaTriggers();
     void LoadGameObjectForQuests();
 
@@ -1482,6 +1498,7 @@ private:
     GossipTextContainer _gossipTextStore;
     AreaTriggerContainer _areaTriggerStore;
     AreaTriggerScriptContainer _areaTriggerScriptStore;
+    AreaTriggerTemplateContainer _areaTriggerTemplateStore;
     AccessRequirementContainer _accessRequirementStore;
     DungeonEncounterContainer _dungeonEncounterStore;
 

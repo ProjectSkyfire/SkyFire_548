@@ -258,6 +258,9 @@ void TempSummon::UnSummon(uint32 msTime)
     if (owner && owner->GetTypeId() == TypeID::TYPEID_UNIT && owner->ToCreature()->IsAIEnabled)
         owner->ToCreature()->AI()->SummonedCreatureDespawn(this);
 
+    if (IsAIEnabled)
+        AI()->Unsummoned();
+
     AddObjectToRemoveList();
 }
 
@@ -280,6 +283,9 @@ void TempSummon::RemoveFromWorld()
                 if (owner->m_SummonSlot[slot] == GetGUID())
                     owner->m_SummonSlot[slot] = 0;
     }
+
+    if (Unit* owner = GetSummoner())
+        owner->RemoveSummon(this);
 
     //if (GetOwnerGUID())
     //    SF_LOG_ERROR("entities.unit", "Unit %u has owner guid when removed from world", GetEntry());

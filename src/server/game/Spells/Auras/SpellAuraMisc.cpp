@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "AreaTrigger.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -726,6 +727,30 @@ void AuraEffect::HandleAuraForceWeather(AuraApplication const* aurApp, uint8 mod
             }
         }
     }
+}
+
+void AuraEffect::HandleAreaTrigger(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Unit* target = aurApp->GetTarget();
+
+    if (apply)
+    {
+        Unit* caster = GetCaster();
+        if (!caster || !sObjectMgr->GetAreaTriggerTemplate(GetMiscValue()))
+            return;
+
+        Position pos;
+        target->GetPosition(&pos);
+
+        AreaTrigger* areaTrigger = new AreaTrigger(this);
+        if (!areaTrigger->CreateAreaTrigger(sObjectMgr->GenerateLowGuid(HIGHGUID_AREATRIGGER), GetMiscValue(), caster, GetSpellInfo(), pos, target))
+            delete areaTrigger;
+    }
+    else if (Unit* caster = GetCaster())
+        caster->RemoveAreaTrigger(this);
 }
 
 void AuraEffect::HandleEnableAltPower(AuraApplication const* aurApp, uint8 mode, bool apply) const

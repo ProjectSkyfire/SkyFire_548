@@ -1673,6 +1673,9 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading AreaTrigger script names...");
     sObjectMgr->LoadAreaTriggerScripts();
 
+    SF_LOG_INFO("server.loading", "Loading Spell AreaTrigger templates...");
+    sObjectMgr->LoadSpellAreaTriggerTemplates();
+
     SF_LOG_INFO("server.loading", "Loading LFG entrance positions..."); // Must be after areatriggers
     sLFGMgr->LoadLFGDungeons();
 

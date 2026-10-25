@@ -195,6 +195,7 @@ void ScriptMgr::Unload()
     SCR_CLEAR(CreatureScript);
     SCR_CLEAR(GameObjectScript);
     SCR_CLEAR(AreaTriggerScript);
+    SCR_CLEAR(SpellAreaTriggerScript);
     SCR_CLEAR(BattlegroundScript);
     SCR_CLEAR(OutdoorPvPScript);
     SCR_CLEAR(CommandScript);
@@ -915,6 +916,16 @@ bool ScriptMgr::OnAreaTrigger(Player* player, AreaTriggerEntry const* trigger)
     return tmpscript->OnTrigger(player, trigger);
 }
 
+IAreaTrigger* ScriptMgr::CreateAreaTriggerInterface(uint32 entry)
+{
+    AreaTriggerTemplate const* atTemplate = sObjectMgr->GetAreaTriggerTemplate(entry);
+    if (!atTemplate)
+        return NULL;
+
+    GET_SCRIPT_RET(SpellAreaTriggerScript, atTemplate->ScriptId, tmpscript, NULL);
+    return tmpscript->GetInterface();
+}
+
 Battleground* ScriptMgr::CreateBattleground(BattlegroundTypeId /*typeId*/)
 {
     /// @todo Implement script-side battlegrounds.
@@ -1497,6 +1508,12 @@ AreaTriggerScript::AreaTriggerScript(const char* name)
     ScriptRegistry<AreaTriggerScript>::AddScript(this);
 }
 
+SpellAreaTriggerScript::SpellAreaTriggerScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<SpellAreaTriggerScript>::AddScript(this);
+}
+
 BattlegroundScript::BattlegroundScript(const char* name)
     : ScriptObject(name)
 {
@@ -1591,6 +1608,7 @@ template class ScriptRegistry<ItemScript>;
 template class ScriptRegistry<CreatureScript>;
 template class ScriptRegistry<GameObjectScript>;
 template class ScriptRegistry<AreaTriggerScript>;
+template class ScriptRegistry<SpellAreaTriggerScript>;
 template class ScriptRegistry<BattlegroundScript>;
 template class ScriptRegistry<OutdoorPvPScript>;
 template class ScriptRegistry<CommandScript>;

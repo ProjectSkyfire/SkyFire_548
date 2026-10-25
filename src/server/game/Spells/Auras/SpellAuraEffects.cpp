@@ -444,7 +444,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleUnused,                                    //392 unused (5.4.2)
     &AuraEffect::HandleNULL,                                      //393 SPELL_AURA_393
     &AuraEffect::HandleNULL,                                      //394 SPELL_AURA_394
-    &AuraEffect::HandleNULL,                                      //395 SPELL_AURA_395
+    &AuraEffect::HandleAreaTrigger,                               //395 SPELL_AURA_AREA_TRIGGER
     &AuraEffect::HandleNULL,                                      //396 SPELL_AURA_396
     &AuraEffect::HandleNULL,                                      //397 SPELL_AURA_397
     &AuraEffect::HandleNULL,                                      //398 SPELL_AURA_398

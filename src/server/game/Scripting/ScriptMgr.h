@@ -29,6 +29,7 @@ class GameObjectAI;
 class Guild;
 class GridMap;
 class Group;
+class IAreaTrigger;
 class InstanceMap;
 class InstanceScript;
 class Item;
@@ -479,6 +480,18 @@ public:
     virtual bool OnTrigger(Player* /*player*/, AreaTriggerEntry const* /*trigger*/) { return false; }
 };
 
+class SpellAreaTriggerScript : public ScriptObject
+{
+protected:
+    SpellAreaTriggerScript(const char* name);
+
+public:
+    bool IsDatabaseBound() const FINAL { return true; }
+
+    // Called when a spell area trigger with this script is added to the world
+    virtual IAreaTrigger* GetInterface() const { return NULL; }
+};
+
 class BattlegroundScript : public ScriptObject
 {
 protected:
@@ -902,6 +915,9 @@ public: /* Initialization */
     /* AreaTriggerScript */
     bool OnAreaTrigger(Player* player, AreaTriggerEntry const* trigger);
 
+    /* SpellAreaTriggerScript */
+    IAreaTrigger* CreateAreaTriggerInterface(uint32 entry);
+
     /* BattlegroundScript */
     Battleground* CreateBattleground(BattlegroundTypeId typeId);
 
@@ -1082,6 +1098,13 @@ struct creature_script : public CreatureScript
 {
     creature_script(char const* name) : CreatureScript(name) { }
     CreatureAI* GetAI(Creature* creature) const override { return new T(creature); }
+};
+
+template <class T>
+struct atrigger_script : public SpellAreaTriggerScript
+{
+    atrigger_script(char const* name) : SpellAreaTriggerScript(name) { }
+    IAreaTrigger* GetInterface() const override { return new T(); }
 };
 
 #endif

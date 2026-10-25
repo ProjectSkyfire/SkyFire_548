@@ -101,6 +101,9 @@ public:
     virtual void SummonedCreatureDespawn(Creature* /*summon*/) { }
     virtual void SummonedCreatureDies(Creature* /*summon*/, Unit* /*killer*/) { }
 
+    // Called on a temporary summon when it is unsummoned
+    virtual void Unsummoned() { }
+
     // Called when hit by a spell
     virtual void SpellHit(Unit* /*caster*/, SpellInfo const* /*spell*/) { }
 

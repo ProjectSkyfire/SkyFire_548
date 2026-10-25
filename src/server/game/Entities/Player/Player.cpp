@@ -2303,6 +2303,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // remove all dyn objects
             RemoveAllDynObjects();
+            RemoveAllAreasTrigger();
 
             // stop spellcasting
             // not attempt interrupt teleportation spell at caster teleport
