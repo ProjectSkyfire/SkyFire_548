@@ -320,6 +320,7 @@ struct Position
         m_positionX = pos->m_positionX; m_positionY = pos->m_positionY; m_positionZ = pos->m_positionZ; SetOrientation(pos->m_orientation);
     }
     void RelocateOffset(Position const& offset);
+    void RelocateOffset(float angle, float distance, float offsetZ = 0.0f);
     void SetOrientation(float orientation)
     {
         m_orientation = NormalizeOrientation(orientation);
@@ -624,6 +625,7 @@ public:
     void MovePosition(Position& pos, float dist, float angle);
     void GetNearPosition(Position& pos, float dist, float angle);
     void MovePositionToFirstCollision(Position& pos, float dist, float angle);
+    void MovePositionToFirstCollosionBySteps(Position& pos, float dist, float angle, float heightCheckInterval = 2.0f, bool allowInAir = false);
     void GetFirstCollisionPosition(Position& pos, float dist, float angle);
     void GetRandomNearPosition(Position& pos, float radius);
     void GetContactPoint(WorldObject const* obj, float& x, float& y, float& z, float distance2d = CONTACT_DISTANCE) const;

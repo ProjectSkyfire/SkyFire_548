@@ -1893,6 +1893,14 @@ void Position::RelocateOffset(const Position& offset)
     SetOrientation(GetOrientation() + offset.GetOrientation());
 }
 
+void Position::RelocateOffset(float angle, float distance, float offsetZ)
+{
+    angle += GetOrientation();
+    m_positionX += std::cos(angle) * distance;
+    m_positionY += std::sin(angle) * distance;
+    m_positionZ += offsetZ;
+}
+
 void Position::GetPositionOffsetTo(const Position& endPos, Position& retOffset) const
 {
     float dx = endPos.GetPositionX() - GetPositionX();
@@ -3288,6 +3296,132 @@ void WorldObject::MovePositionToFirstCollision(Position& pos, float dist, float 
     Skyfire::NormalizeMapCoord(pos.m_positionY);
     UpdateAllowedPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
     pos.SetOrientation(GetOrientation());
+}
+
+static float NormalizeZforCollision(WorldObject* obj, float x, float y, float z)
+{
+    float ground = obj->GetMap()->GetHeight(obj->GetPhaseMask(), x, y, MAX_HEIGHT, true, MAX_HEIGHT * 2);
+    float floor = obj->GetMap()->GetHeight(obj->GetPhaseMask(), x, y, z, true, MAX_HEIGHT * 2);
+    float helper = fabs(ground - z) <= fabs(floor - z) ? ground : floor;
+    if (z > helper) // must be above ground
+    {
+        if (Unit* unit = obj->ToUnit())
+        {
+            if (unit->CanFly())
+                return z;
+        }
+        LiquidData liquid_status;
+        ZLiquidStatus res = obj->GetMap()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &liquid_status);
+        if (res && liquid_status.level > helper) // water must be above ground
+        {
+            if (liquid_status.level > z) // z is underwater
+                return z;
+            else
+                return fabs(liquid_status.level - z) <= fabs(helper - z) ? liquid_status.level : helper;
+        }
+    }
+    return helper;
+}
+
+void WorldObject::MovePositionToFirstCollosionBySteps(Position& pos, float dist, float angle, float heightCheckInterval, bool allowInAir)
+{
+    static float const HeightCheckThresholdMultiplier = 2.0f; // Making this larger will allow for steeper slopes
+    static float const CollisionCheckOffsetZ = 1.0f;
+
+    Map* map = GetMap();
+    float destx, desty, destz;
+
+    angle += GetOrientation();
+    pos.GetPosition(destx, desty, destz);
+    Position lastGroundPos = pos;
+
+    // Snap to ground...
+    destz = NormalizeZforCollision(this, destx, desty, destz);
+    // ...unless underwater
+    bool swimming = m_movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) && map->IsInWater(destx, desty, lastGroundPos.m_positionZ);
+    if (allowInAir)
+        swimming = true;
+    if (swimming && destz < lastGroundPos.m_positionZ)
+        destz = lastGroundPos.m_positionZ;
+
+    // Adopt ground position as origin, unless there was no ground (example: The Frozen Throne in Icecrown Citadel)
+    if (destz != VMAP_INVALID_HEIGHT_VALUE)
+        pos.m_positionZ = destz;
+
+    float distanceMoved = 0;
+    bool skippingAir = swimming;
+    float distanceDifference;
+    while ((distanceDifference = std::min(heightCheckInterval, dist - distanceMoved)) > 0.05f)
+    {
+        destx += distanceDifference * std::cos(angle);
+        desty += distanceDifference * std::sin(angle);
+        destz = NormalizeZforCollision(this, destx, desty, skippingAir ? lastGroundPos.m_positionZ : destz);
+
+        float heightDifference = destz - (skippingAir ? lastGroundPos.m_positionZ : pos.m_positionZ);
+        // We encountered a wall and we stop here
+        if (heightDifference > distanceDifference * HeightCheckThresholdMultiplier)
+            break;
+        // Maintain at least the initial height when underwater
+        swimming = m_movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) && map->IsInWater(destx, desty, lastGroundPos.m_positionZ);
+        if (!swimming && allowInAir)
+            swimming = true;
+        if (swimming)
+        {
+            if (destz < lastGroundPos.m_positionZ)
+                destz = lastGroundPos.m_positionZ;
+        }
+        // We're near a drop - mark current location and try to find a ground of the other side
+        else if (heightDifference < -distanceDifference * HeightCheckThresholdMultiplier)
+        {
+            if (!skippingAir)
+            {
+                skippingAir = true;
+                lastGroundPos.Relocate(pos);
+                destz = pos.m_positionZ;
+            }
+        }
+        // We found a ground after the drop - temporarily restore pos to last ground position to check LOS properly
+        else if (skippingAir)
+        {
+            skippingAir = false;
+            pos.Relocate(lastGroundPos);
+        }
+
+        float outz;
+        if (VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetMapId(),
+            pos.m_positionX, pos.m_positionY, pos.m_positionZ + CollisionCheckOffsetZ,
+            destx, desty, destz + CollisionCheckOffsetZ,
+            destx, desty, outz, -0.5f)
+            || map->getObjectHitPos(GetPhaseMask(),
+                pos.m_positionX, pos.m_positionY, pos.m_positionZ + CollisionCheckOffsetZ,
+                destx, desty, destz + CollisionCheckOffsetZ,
+                destx, desty, outz, -0.5f))
+        {
+            // move forward a bit to preserve relativity
+            destx += 0.01f * std::cos(angle);
+            desty += 0.01f * std::sin(angle);
+            destz = outz;
+        }
+
+        distanceMoved += distanceDifference;
+
+        Skyfire::NormalizeMapCoord(destx);
+        Skyfire::NormalizeMapCoord(desty);
+        if (!skippingAir)
+            destz = NormalizeZforCollision(this, destx, desty, destz);
+
+        pos.Relocate(destx, desty, destz, GetOrientation());
+    }
+
+    // If we've encountered a drop before - restore last grounded position
+    if (skippingAir && !swimming)
+    {
+        pos.Relocate(lastGroundPos);
+        Skyfire::NormalizeMapCoord(pos.m_positionX);
+        Skyfire::NormalizeMapCoord(pos.m_positionY);
+        UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+        pos.SetOrientation(GetOrientation());
+    }
 }
 
 void WorldObject::SetPhaseMask(uint32 newPhaseMask, bool update)
