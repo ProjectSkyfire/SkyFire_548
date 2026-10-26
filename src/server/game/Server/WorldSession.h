@@ -315,6 +315,31 @@ public:
     void SetBot(bool on) { m_isBot = on; }
     bool IsBot() const { return m_isBot; }
 
+    // How much of the map update a socket bot should pay for. The playerbots
+    // module sets this; Map::Update skips creature-cell visits (and, when
+    // dormant, Player::Update) so empty zones do not tick.
+    enum class BotActivity : uint8
+    {
+        Full = 0,
+        Slow = 1,
+        Dormant = 2
+    };
+    void SetBotActivity(BotActivity activity) { m_botActivity = activity; }
+    BotActivity GetBotActivity() const { return m_botActivity; }
+    void SetBotSlowInterval(uint32 ms)
+    {
+        m_botSlowInterval = ms < 1 ? 1 : ms;
+    }
+    // True once per slow interval. Only call for Slow bots.
+    bool ConsumeBotSlowTick(uint32 diff)
+    {
+        m_botSlowAccumulator += diff;
+        if (m_botSlowAccumulator < m_botSlowInterval)
+            return false;
+        m_botSlowAccumulator = 0;
+        return true;
+    }
+
     // Async character login (DB on a worker thread). The owning module must
     // poll; do not spin-wait on the world thread for a whole pool.
     bool BeginBotCharacterLogin(uint64 playerGuid);
@@ -1256,6 +1281,9 @@ private:
     bool m_playerRecentlyLogout;
     bool m_playerSave;
     bool m_isBot;                                       // socketless session owned by a module
+    BotActivity m_botActivity;
+    uint32 m_botSlowAccumulator;
+    uint32 m_botSlowInterval;
     LocaleConstant m_sessionDbcLocale;
     LocaleConstant m_sessionDbLocaleIndex;
     uint32 m_latency;

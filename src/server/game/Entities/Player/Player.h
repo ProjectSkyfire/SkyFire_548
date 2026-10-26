@@ -2544,6 +2544,8 @@ public:
     {
         return mSemaphoreTeleport_Far;
     }
+    // True while TeleportTo deferred the port until Player::Update finishes.
+    bool HasDelayedTeleport() const { return IsHasDelayedTeleport(); }
     void SetSemaphoreTeleportNear(bool semphsetting)
     {
         mSemaphoreTeleport_Near = semphsetting;

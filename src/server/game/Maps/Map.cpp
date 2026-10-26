@@ -24,6 +24,7 @@
 #include "Transport.h"
 #include "Vehicle.h"
 #include "VMapFactory.h"
+#include "WorldSession.h"
 
 u_map_magic MapMagic = { {'M', 'A', 'P', 'S'} };
 u_map_magic MapVersionMagic = { {'v', '1', '.', '4'} };
@@ -676,8 +677,25 @@ void Map::Update(const uint32 t_diff)
         if (!player || !player->IsInWorld())
             continue;
 
+        // Socket bots outside player range must not keep creature grids ticking.
+        // Dormant: skip the player update entirely. Slow: player update on a
+        // long interval only. Full (and real players): unchanged.
+        WorldSession* session = player->GetSession();
+        WorldSession::BotActivity const activity = (session && session->IsBot())
+            ? session->GetBotActivity()
+            : WorldSession::BotActivity::Full;
+
+        if (activity == WorldSession::BotActivity::Dormant)
+            continue;
+
+        if (activity == WorldSession::BotActivity::Slow && !session->ConsumeBotSlowTick(t_diff))
+            continue;
+
         // update players at tick
         player->Update(t_diff);
+
+        if (activity != WorldSession::BotActivity::Full)
+            continue;
 
         VisitNearbyCellsOf(player, grid_object_update, world_object_update);
 
@@ -699,6 +717,22 @@ void Map::Update(const uint32 t_diff)
 
         if (!obj || !obj->IsInWorld())
             continue;
+
+        // Pets and guardians of a throttled bot would otherwise keep the cells
+        // around that bot active after the owner update was skipped.
+        if (Unit* unit = obj->ToUnit())
+        {
+            if (Unit* owner = unit->GetCharmerOrOwner())
+            {
+                if (Player* ownerPlayer = owner->ToPlayer())
+                {
+                    WorldSession* ownerSession = ownerPlayer->GetSession();
+                    if (ownerSession && ownerSession->IsBot()
+                        && ownerSession->GetBotActivity() != WorldSession::BotActivity::Full)
+                        continue;
+                }
+            }
+        }
 
         VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
     }
