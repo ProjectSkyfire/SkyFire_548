@@ -303,7 +303,7 @@ class boss_gothik : public CreatureScript
             bool CheckGroupSplitted()
             {
                 Map* map = me->GetMap();
-                if (map && map->IsDungeon())
+                if (map && map->IsInstance())
                 {
                     Map::PlayerList const &PlayerList = map->GetPlayers();
                     if (!PlayerList.isEmpty())
@@ -542,7 +542,7 @@ class npc_gothik_minion : public CreatureScript
                     return;
 
                 Map* map = me->GetMap();
-                if (map->IsDungeon())
+                if (map->IsInstance())
                 {
                     Map::PlayerList const &PlayerList = map->GetPlayers();
                     if (!PlayerList.isEmpty())

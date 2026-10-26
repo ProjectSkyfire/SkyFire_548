@@ -262,7 +262,7 @@ public:
                 if (RotTimer)
                 {
                     Map* map = me->GetMap();
-                    if (map->IsDungeon())
+                    if (map->IsInstance())
                     {
                         Map::PlayerList const &PlayerList = map->GetPlayers();
                         for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
