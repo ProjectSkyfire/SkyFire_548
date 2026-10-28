@@ -335,6 +335,7 @@ void AddSC_instance_firelands();               //Firelands
 void AddSC_boss_alysrazor();
 void AddSC_mount_hyjal();
 void AddSC_feralas();
+void AddSC_felwood();
 
 void AddSC_ashenvale();
 void AddSC_darkshore();
@@ -1088,6 +1089,7 @@ void AddKalimdorScripts()
     AddSC_boss_alysrazor();
     AddSC_mount_hyjal();
     AddSC_feralas();
+    AddSC_felwood();
 #endif
 }
 
