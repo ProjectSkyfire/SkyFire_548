@@ -595,6 +595,707 @@ class npc_scarlet_master_archer : public CreatureScript
         }
 };
 
+enum TrashSpells
+{
+    SPELL_INQUISITION = 111341,
+    SPELL_SEAL_OF_BLOOD = 111351,
+    SPELL_RAZOR_EDGE = 84146,
+    SPELL_UNFLINCHING_RESOLVE = 111418,
+    SPELL_HOLY_SMITE_N = 9734,
+    SPELL_HOLY_SMITE_H = 128233,
+    SPELL_HOLY_FIRE_N = 17140,
+    SPELL_HOLY_FIRE_H = 128232,
+    SPELL_FANATICISM = 111376,
+    SPELL_COMMANDING_SHOUT = 80983,
+    SPELL_DISARM = 6713,
+    SPELL_SHIELD_BARRIER = 111324,
+    SPELL_FIREBALL = 128249,
+    SPELL_FLAMESTRIKE = 111667,
+    SPELL_JOLT = 114000,
+    SPELL_SLASH_ARMOR = 114011,
+    SPELL_TOSS_STATUE = 114022,
+    SPELL_SCARLET_PROTECTION = 114185,
+    SPELL_FIREBALL_VALLEY = 114182,
+    SPELL_SUMMON_CANNONEER = 113933,
+    SPELL_FIRE_CANNON_DUMMY = 113932,
+    SPELL_CANNON_BLAST = 113719,
+    SPELL_BEATDOWN = 114184,
+};
+enum TrashEvents
+{
+    EVENT_RAZOR_EDGE = 2,
+    EVENT_HOLY_SMITE = 3,
+    EVENT_HOLY_FIRE = 4,
+    EVENT_DISARM = 5,
+    EVENT_FIREBALL = 6,
+    EVENT_FLAMESTRIKE = 7,
+    EVENT_JOLT = 8,
+    EVENT_SLASH_ARMOR = 9,
+    EVENT_TOSS_STATUE = 10,
+    EVENT_SCARLET_PROTECTION = 11,
+    EVENT_FIREBALL_VALLEY = 12,
+    EVENT_CANNON_READY = 13,
+    EVENT_BEATDOWN = 17,
+};
+enum TrashWeapons
+{
+    W_DRAGON_REACH = 19353, W_REMORSE = 45142,
+    W_MOULDERING_CORPSE = 49793, W_MAGIC_SHIELD = 45682
+};
+const uint32 GO_GOLD_COINS = 210894;
+
+// Scarlet Scourge Hewer 58684
+class npc_scarlet_scourge_hewer : public CreatureScript
+{
+    public:
+        npc_scarlet_scourge_hewer() : CreatureScript("npc_scarlet_scourge_hewer") { }
+
+        struct npc_scarlet_scourge_hewerAI : public ScriptedAI
+        {
+            npc_scarlet_scourge_hewerAI(Creature* creature) : ScriptedAI(creature) { }
+
+            bool triggered;
+
+            void Reset() OVERRIDE
+            {
+                triggered = false;
+                SetEquipmentSlots(false, W_DRAGON_REACH, 0, EQUIP_NO_CHANGE);
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                me->CastSpell(me, SPELL_SEAL_OF_BLOOD, false);
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+            {
+                if (HealthBelowPct(50) && !triggered)
+                {
+                    triggered = true;
+                    me->CastSpell(me, SPELL_INQUISITION, false);
+                }
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_scourge_hewerAI(creature);
+        }
+};
+
+// Scarlet Myrmidon 58683
+class npc_scarlet_myrmidon : public CreatureScript
+{
+    public:
+        npc_scarlet_myrmidon() : CreatureScript("npc_scarlet_myrmidon") { }
+
+        struct npc_scarlet_myrmidonAI : public ScriptedAI
+        {
+            npc_scarlet_myrmidonAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+            bool triggered;
+
+            void Reset() OVERRIDE
+            {
+                triggered = false;
+                events.Reset();
+                SetEquipmentSlots(false, W_REMORSE, 0, EQUIP_NO_CHANGE);
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_RAZOR_EDGE, urand(10000, 19000));
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+            {
+                if (HealthBelowPct(60) && !triggered)
+                {
+                    triggered = true;
+                    me->CastSpell(me, SPELL_UNFLINCHING_RESOLVE, false);
+                }
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (uint32 eventId = events.ExecuteEvent())
+                    if (eventId == EVENT_RAZOR_EDGE)
+                    {
+                        me->CastSpell(me, SPELL_RAZOR_EDGE, false);
+                        events.ScheduleEvent(EVENT_RAZOR_EDGE, urand(10000, 19000));
+                    }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_myrmidonAI(creature);
+        }
+};
+
+// Scarlet Evangelist 58685
+class npc_scarlet_evangelist : public CreatureScript
+{
+    public:
+        npc_scarlet_evangelist() : CreatureScript("npc_scarlet_evangelist") { }
+
+        struct npc_scarlet_evangelistAI : public ScriptedAI
+        {
+            npc_scarlet_evangelistAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+            bool triggered;
+
+            void Reset() OVERRIDE
+            {
+                triggered = false;
+                events.Reset();
+                SetEquipmentSlots(false, W_MOULDERING_CORPSE, 0, EQUIP_NO_CHANGE);
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_HOLY_FIRE, urand(5000, 7000));
+                events.ScheduleEvent(EVENT_HOLY_SMITE, urand(1500, 2500));
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+            {
+                if (HealthBelowPct(60) && !triggered)
+                {
+                    triggered = true;
+                    me->CastSpell(me, SPELL_FANATICISM, false);
+                }
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_HOLY_FIRE:
+                            if (Unit* vict = me->GetVictim())
+                                IsHeroic() ? me->CastSpell(vict, SPELL_HOLY_FIRE_H, false) : me->CastSpell(vict, SPELL_HOLY_FIRE_N, false);
+                            events.ScheduleEvent(EVENT_HOLY_FIRE, urand(5000, 7000));
+                            break;
+                        case EVENT_HOLY_SMITE:
+                            if (Unit* vict = me->GetVictim())
+                                IsHeroic() ? me->CastSpell(vict, SPELL_HOLY_SMITE_H, false) : me->CastSpell(vict, SPELL_HOLY_SMITE_N, false);
+                            events.ScheduleEvent(EVENT_HOLY_SMITE, urand(1500, 2500));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_evangelistAI(creature);
+        }
+};
+
+// Scarlet Cannoneer 59293
+class npc_scarlet_cannoneer : public CreatureScript
+{
+    public:
+        npc_scarlet_cannoneer() : CreatureScript("npc_scarlet_cannoneer") { }
+
+        struct npc_scarlet_cannoneerAI : public ScriptedAI
+        {
+            npc_scarlet_cannoneerAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+            bool triggered;
+            uint64 CannonGuid = 0;
+
+            void IsSummonedBy(Unit* summoner) OVERRIDE
+            {
+                if (!IsHeroic())
+                {
+                    me->SetLevel(28);
+                    me->SetMaxHealth(1890);
+                    me->SetHealth(1890);
+                }
+
+                if (summoner)
+                    CannonGuid = summoner->GetGUID();
+
+                triggered = false;
+            }
+
+            void Reset() OVERRIDE
+            {
+                me->SetReactState(REACT_PASSIVE);
+                events.Reset();
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!triggered)
+                    if (Player* itr = me->FindNearestPlayer(20.0f))
+                    {
+                        triggered = true;
+                        events.ScheduleEvent(EVENT_CANNON_READY, urand(1500, 4000));
+                        me->Attack(itr, false);
+                    }
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (!UpdateVictim())
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    if (eventId == EVENT_CANNON_READY)
+                    {
+                        me->CastSpell(me, SPELL_FIRE_CANNON_DUMMY, true);
+
+                        if (Creature* CannonStalker = ObjectAccessor::GetCreature(*me, CannonGuid))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 30.0f, true))
+                                CannonStalker->CastSpell(target, SPELL_CANNON_BLAST, true);
+
+                        events.ScheduleEvent(EVENT_CANNON_READY, urand(1500, 4000));
+                    }
+                }
+
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_cannoneerAI(creature);
+        }
+};
+
+// Scarlet Cannon stalker 58726
+class npc_cannon_stalker : public CreatureScript
+{
+    public:
+        npc_cannon_stalker() : CreatureScript("npc_cannon_stalker") { }
+
+        struct npc_cannon_stalkerAI : public ScriptedAI
+        {
+            npc_cannon_stalkerAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void InitializeAI() OVERRIDE
+            {
+                me->CastSpell(me, SPELL_SUMMON_CANNONEER, false);
+            }
+
+            void UpdateAI(uint32 /*diff*/) OVERRIDE { }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_cannon_stalkerAI(creature);
+        }
+};
+
+// Scarlet Defender 58676
+class npc_scarlet_halls_defender : public CreatureScript
+{
+    public:
+        npc_scarlet_halls_defender() : CreatureScript("npc_scarlet_halls_defender") { }
+
+        struct npc_scarlet_halls_defenderAI : public ScriptedAI
+        {
+            npc_scarlet_halls_defenderAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+            bool triggered;
+
+            void InitializeAI() OVERRIDE
+            {
+                triggered = false;
+                SetEquipmentSlots(false, W_MOULDERING_CORPSE, 0, EQUIP_NO_CHANGE);
+            }
+
+            void Reset() OVERRIDE
+            {
+                triggered = false;
+                events.Reset();
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_DISARM, urand(9000, 18000));
+                me->CastSpell(me, SPELL_COMMANDING_SHOUT, false);
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+            {
+                if (HealthBelowPct(60) && !triggered)
+                {
+                    triggered = true;
+                    me->CastSpell(me, SPELL_SHIELD_BARRIER, false);
+                }
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (uint32 eventId = events.ExecuteEvent())
+                    if (eventId == EVENT_DISARM)
+                        if (Unit* vict = me->GetVictim())
+                            me->CastSpell(vict, SPELL_DISARM, false);
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_halls_defenderAI(creature);
+        }
+};
+
+// Scarlet Evoker 58756
+class npc_scarlet_evoker : public CreatureScript
+{
+    public:
+        npc_scarlet_evoker() : CreatureScript("npc_scarlet_evoker") { }
+
+        struct npc_scarlet_evokerAI : public ScriptedAI
+        {
+            npc_scarlet_evokerAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset() OVERRIDE
+            {
+                SetEquipmentSlots(false, W_MOULDERING_CORPSE, 0, EQUIP_NO_CHANGE);
+                events.Reset();
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_FIREBALL, urand(3000, 5000));
+                events.ScheduleEvent(EVENT_FLAMESTRIKE, urand(7000, 15500));
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_FLAMESTRIKE:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                                me->CastSpell(target, SPELL_FLAMESTRIKE, false);
+                            events.ScheduleEvent(EVENT_FLAMESTRIKE, urand(7000, 15500));
+                            break;
+                        case EVENT_FIREBALL:
+                            if (Unit* vict = me->GetVictim())
+                                me->CastSpell(vict, SPELL_FIREBALL, false);
+                            events.ScheduleEvent(EVENT_FIREBALL, urand(3000, 5000));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_evokerAI(creature);
+        }
+};
+
+// Scarlet Hall Guardian 59240
+class npc_scarlet_hall_guardian : public CreatureScript
+{
+    public:
+        npc_scarlet_hall_guardian() : CreatureScript("npc_scarlet_hall_guardian") { }
+
+        struct npc_scarlet_hall_guardianAI : public ScriptedAI
+        {
+            npc_scarlet_hall_guardianAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset() OVERRIDE
+            {
+                events.Reset();
+                SetEquipmentSlots(false, W_REMORSE, W_MAGIC_SHIELD, EQUIP_NO_CHANGE);
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_JOLT, urand(1500, 3000));
+                events.ScheduleEvent(EVENT_SLASH_ARMOR, urand(7000, 14000));
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                if (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_JOLT:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                                me->CastSpell(target, SPELL_JOLT, false);
+                            events.ScheduleEvent(EVENT_JOLT, urand(11000, 17000));
+                            break;
+                        case EVENT_SLASH_ARMOR:
+                            if (Unit* vict = me->GetVictim())
+                                me->CastSpell(vict, SPELL_SLASH_ARMOR, false);
+                            events.ScheduleEvent(EVENT_SLASH_ARMOR, urand(7000, 14000));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_hall_guardianAI(creature);
+        }
+};
+
+// Scarlet Treasurer 59241
+class npc_scarlet_treasurer : public CreatureScript
+{
+    public:
+        npc_scarlet_treasurer() : CreatureScript("npc_scarlet_treasurer") { }
+
+        struct npc_scarlet_treasurerAI : public ScriptedAI
+        {
+            npc_scarlet_treasurerAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset() OVERRIDE
+            {
+                events.Reset();
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_TOSS_STATUE, urand(3 * IN_MILLISECONDS, 12 * IN_MILLISECONDS));
+            }
+
+            void JustDied(Unit* /*killer*/) OVERRIDE
+            {
+                if (GameObject* gCoins = me->SummonGameObject(GO_GOLD_COINS, me->GetPositionX() + frand(-3.0f, 3.0f), me->GetPositionY() + frand(-1.9f, 1.9f), me->GetPositionZ(), me->GetOrientation(), 0, 0, 0, 1, 0))
+                    gCoins->SetUInt32Value(GAMEOBJECT_FIELD_FACTION_TEMPLATE, 0);
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                if (!UpdateVictim())
+                    return;
+
+                events.Update(diff);
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    if (eventId == EVENT_TOSS_STATUE)
+                    {
+                        if (Unit* target = me->GetVictim())
+                            DoCast(target, SPELL_TOSS_STATUE);
+
+                        events.ScheduleEvent(EVENT_TOSS_STATUE, urand(5 * IN_MILLISECONDS, 12 * IN_MILLISECONDS));
+                    }
+                    break;
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_treasurerAI(creature);
+        }
+};
+
+// Scarlet Scholar 59372
+class npc_scarlet_scholar : public CreatureScript
+{
+    public:
+        npc_scarlet_scholar() : CreatureScript("npc_scarlet_scholar") { }
+
+        struct npc_scarlet_scholarAI : public ScriptedAI
+        {
+            npc_scarlet_scholarAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset() OVERRIDE
+            {
+                events.Reset();
+                SetEquipmentSlots(false, W_MOULDERING_CORPSE, 0, EQUIP_NO_CHANGE);
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_SCARLET_PROTECTION, urand(3000, 8000));
+                events.ScheduleEvent(EVENT_FIREBALL_VALLEY, urand(9000, 18000));
+                events.ScheduleEvent(EVENT_FIREBALL, 1000);
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_SCARLET_PROTECTION:
+                            me->InterruptNonMeleeSpells(true);
+                            DoCast(me, SPELL_SCARLET_PROTECTION);
+                            events.ScheduleEvent(EVENT_SCARLET_PROTECTION, urand(34 * IN_MILLISECONDS, 65 * IN_MILLISECONDS));
+                            break;
+                        case EVENT_FIREBALL:
+                            if (Unit* target = me->GetVictim())
+                                me->CastSpell(target, SPELL_FIREBALL, false);
+
+                            events.ScheduleEvent(EVENT_FIREBALL, urand(3000, 6500));
+                            break;
+                        case EVENT_FIREBALL_VALLEY:
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                                me->CastSpell(target, SPELL_FIREBALL_VALLEY, false);
+
+                            events.ScheduleEvent(EVENT_FIREBALL_VALLEY, urand(9000, 18000));
+                            break;
+                    }
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_scholarAI(creature);
+        }
+};
+
+// Scarlet Pupil 59373
+class npc_scarlet_pupil : public CreatureScript
+{
+    public:
+        npc_scarlet_pupil() : CreatureScript("npc_scarlet_pupil") { }
+
+        struct npc_scarlet_pupilAI : public ScriptedAI
+        {
+            npc_scarlet_pupilAI(Creature* creature) : ScriptedAI(creature) { }
+
+            EventMap events;
+
+            void Reset() OVERRIDE
+            {
+                events.Reset();
+            }
+
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_BEATDOWN, urand(2500, 6000));
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+
+                if (!UpdateVictim())
+                    return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    if (eventId == EVENT_BEATDOWN)
+                    {
+                        if (Unit* vict = me->GetVictim())
+                            me->CastSpell(vict, SPELL_BEATDOWN, false);
+
+                        events.ScheduleEvent(EVENT_BEATDOWN, urand(5000, 6500));
+                    }
+                    break;
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_scarlet_pupilAI(creature);
+        }
+};
+
 // Throw bucket meaty dog 113029
 class spell_throw_bucket_meaty_dog : public SpellScriptLoader
 {
@@ -765,6 +1466,17 @@ void AddSC_scarlet_halls()
     new npc_reinforced_archery_target();
     new npc_commander_lindon();
     new npc_scarlet_master_archer();
+    new npc_scarlet_scourge_hewer();
+    new npc_scarlet_myrmidon();
+    new npc_scarlet_evangelist();
+    new npc_scarlet_cannoneer();
+    new npc_cannon_stalker();
+    new npc_scarlet_halls_defender();
+    new npc_scarlet_evoker();
+    new npc_scarlet_hall_guardian();
+    new npc_scarlet_treasurer();
+    new npc_scarlet_scholar();
+    new npc_scarlet_pupil();
     new spell_throw_bucket_meaty_dog();
     new spell_scarlet_halls_dog_food();
     RegisterAuraScript(spell_scarlet_halls_archery_target_vehicle_override);
