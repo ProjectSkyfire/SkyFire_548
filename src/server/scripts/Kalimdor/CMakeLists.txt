@@ -90,9 +90,9 @@ set(scripts_STAT_SRCS
   Kalimdor/RazorfenKraul/razorfen_kraul.cpp
   Kalimdor/zone_the_barrens.cpp
   #REWORKED IN CATACLYSM
-  #Kalimdor/WailingCaverns/wailing_caverns.h
-  #Kalimdor/WailingCaverns/instance_wailing_caverns.cpp
-  #Kalimdor/WailingCaverns/wailing_caverns.cpp
+  Kalimdor/WailingCaverns/wailing_caverns.h
+  Kalimdor/WailingCaverns/instance_wailing_caverns.cpp
+  Kalimdor/WailingCaverns/wailing_caverns.cpp
   Kalimdor/zone_durotar.cpp
   #Kalimdor/boss_azuregos.cpp
   Kalimdor/zone_tanaris.cpp
