@@ -20749,6 +20749,30 @@ bool Player::IsUsingLfg(bool inProgressOnly)
     return state != lfg::LFG_STATE_NONE;
 }
 
+Roles Player::GetRoleForGroup(uint32 specializationId)
+{
+    switch (specializationId)
+    {
+        case SPEC_MONK_MISTWEAVER:
+        case SPEC_PALADIN_HOLY:
+        case SPEC_PRIEST_DISCIPLINE:
+        case SPEC_PRIEST_HOLY:
+        case SPEC_SHAMAN_RESTORATION:
+        case SPEC_DRUID_RESTORATION:
+            return ROLES_HEALER;
+        case SPEC_MONK_BREWMASTER:
+        case SPEC_DEATH_KNIGHT_BLOOD:
+        case SPEC_WARRIOR_PROTECTION:
+        case SPEC_DRUID_GUARDIAN:
+        case SPEC_PALADIN_PROTECTION:
+            return ROLES_TANK;
+        case SPEC_NONE:
+            return ROLES_DEFAULT;
+        default:
+            return ROLES_DPS;
+    }
+}
+
 void Player::SetBattlegroundOrBattlefieldRaid(Group* group, int8 subgroup)
 {
     //we must move references from m_group to m_originalGroup

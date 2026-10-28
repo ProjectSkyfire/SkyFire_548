@@ -665,6 +665,8 @@ void AddSC_scenario_isle_of_thunder();
 void AddSC_thunder_king_citadel();
 void AddSC_boss_nalak();
 void AddSC_isle_of_thunder();
+void AddSC_instance_isle_of_thunder();
+void AddSC_instance_thunder_king_citadel();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1414,6 +1416,8 @@ void AddPandariaScripts()
     AddSC_thunder_king_citadel();
     AddSC_boss_nalak();
     AddSC_isle_of_thunder();
+    AddSC_instance_isle_of_thunder();
+    AddSC_instance_thunder_king_citadel();
 #endif
 }
 

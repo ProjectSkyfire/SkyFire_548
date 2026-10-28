@@ -3303,6 +3303,18 @@ uint32 InstanceMap::GetMaxResetDelay() const
     return mapDiff ? mapDiff->resetTime : 0;
 }
 
+bool InstanceMap::IsLFGMap() const
+{
+    PlayerList const& playerList = GetPlayers();
+    for (PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+        if (Player* player = itr->GetSource())
+            if (Group* group = player->GetGroup())
+                if (group->isLFGGroup())
+                    return true;
+
+    return false;
+}
+
 /* ******* Battleground Instance Maps ******* */
 
 BattlegroundMap::BattlegroundMap(uint32 id, time_t expiry, uint32 InstanceId, Map* _parent, uint8 spawnMode)

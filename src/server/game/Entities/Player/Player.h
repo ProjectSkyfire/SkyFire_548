@@ -2102,6 +2102,8 @@ public:
     void SetTalentResetTime(time_t time_) { _talentMgr->ResetTalentsTime = time_; }
     uint32 GetTalentSpecialization(uint8 spec) const { return _talentMgr->SpecInfo[spec].TalentTree; }
     uint32 GetTalentSpecialization() const { return GetTalentSpecialization(GetActiveSpec()); }
+    static Roles GetRoleForGroup(uint32 specializationId);
+    Roles GetRoleForGroup() const { return GetRoleForGroup(GetTalentSpecialization()); }
     void SetTalentSpecialization(uint8 spec, uint32 tree) { _talentMgr->SpecInfo[spec].TalentTree = tree; }
     uint8 GetActiveSpec() const { return _talentMgr->ActiveSpec; }
     void SetActiveSpec(uint8 spec) { _talentMgr->ActiveSpec = spec; }
@@ -2786,6 +2788,10 @@ public:
         return m_bgData.joinPos;
     }
     void SetBattlegroundEntryPoint();
+    void SetJoinPos(WorldLocation pos)
+    {
+        m_bgData.joinPos = pos;
+    }
 
     void SetBGTeam(uint32 team);
     uint32 GetBGTeam() const;

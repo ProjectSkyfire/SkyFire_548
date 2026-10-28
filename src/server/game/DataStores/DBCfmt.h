@@ -41,6 +41,7 @@ char const CreatureSpellDatafmt[] = "diiiixxxx";
 char const CreatureTypefmt[] = "nxx";
 char const Criteriafmt[] = "niiiiiiiiiii";
 char const CriteriaTreefmt[] = "niixxixx";
+char const ScenarioStepfmt[] = "niiixxi";
 char const CurrencyTypesfmt[] = "nixxxxxiiixx";
 char const DestructibleModelDatafmt[] = "dixxxixxxxixxxxxxxxxxxXX";
 char const Difficultyfmt[] = "niixxxixxxxx";

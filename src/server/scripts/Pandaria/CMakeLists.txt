@@ -37,6 +37,8 @@ set(scripts_STAT_SRCS
   Pandaria/Scenarios/IsleOfThunder/thunder_king_citadel.cpp
   Pandaria/boss_nalak.cpp
   Pandaria/zone_isle_of_thunder.cpp
+  Pandaria/Scenarios/IsleOfThunder/instance_isle_of_thunder.cpp
+  Pandaria/Scenarios/IsleOfThunder/instance_thunder_king_citadel.cpp
 )
 
 message("  -> Prepared: Pandaria")

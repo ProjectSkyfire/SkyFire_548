@@ -1349,6 +1349,17 @@ struct CriteriaTreeEntry
     //char* name;                                           // 7
 };
 
+struct ScenarioStepEntry
+{
+    uint32 ID;                                              // 0
+    uint32 CriteriaTreeID;                                  // 1
+    uint32 ScenarioID;                                      // 2
+    uint32 Step;                                            // 3
+    //char* Description;                                    // 4
+    //char* Name;                                           // 5
+    uint32 Flags;                                           // 6
+};
+
 struct CurrencyTypesEntry
 {
     uint32 ID;                                              // 0        not used

@@ -107,6 +107,7 @@ extern DBCStorage <CreatureTypeEntry>            sCreatureTypeStore;
 extern DBCStorage <CurrencyTypesEntry>           sCurrencyTypesStore;
 extern DBCStorage <CriteriaEntry>                sCriteriaStore;
 extern DBCStorage <CriteriaTreeEntry>            sCriteriaTreeStore;
+extern DBCStorage <ScenarioStepEntry>            sScenarioStepStore;
 extern DBCStorage <DestructibleModelDataEntry>   sDestructibleModelDataStore;
 extern DBCStorage <DifficultyEntry>              sDifficultyStore;
 extern DBCStorage <DungeonEncounterEntry>        sDungeonEncounterStore;

@@ -677,6 +677,7 @@ public:
 
     uint32 GetMaxPlayers() const;
     uint32 GetMaxResetDelay() const;
+    bool IsLFGMap() const;
 
     virtual void InitVisibilityDistance() OVERRIDE;
 private:

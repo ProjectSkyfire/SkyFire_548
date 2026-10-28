@@ -73,6 +73,7 @@ DBCStorage <CreatureTypeEntry> sCreatureTypeStore(CreatureTypefmt);
 DBCStorage <CurrencyTypesEntry> sCurrencyTypesStore(CurrencyTypesfmt);
 DBCStorage <CriteriaEntry> sCriteriaStore(Criteriafmt);
 DBCStorage <CriteriaTreeEntry> sCriteriaTreeStore(CriteriaTreefmt);
+DBCStorage <ScenarioStepEntry> sScenarioStepStore(ScenarioStepfmt);
 uint32 PowersByClass[MAX_CLASSES][MAX_POWERS];
 
 DBCStorage <DestructibleModelDataEntry> sDestructibleModelDataStore(DestructibleModelDatafmt);
@@ -389,6 +390,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sCurrencyTypesStore, dbcPath, "CurrencyTypes.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sCriteriaStore, dbcPath, "Criteria.dbc");//18414
     LoadDBC(availableDbcLocales, bad_dbc_files, sCriteriaTreeStore, dbcPath, "CriteriaTree.dbc");//18414
+    LoadDBC(availableDbcLocales, bad_dbc_files, sScenarioStepStore, dbcPath, "ScenarioStep.dbc");//18414
     LoadDBC(availableDbcLocales, bad_dbc_files, sDestructibleModelDataStore, dbcPath, "DestructibleModelData.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sDifficultyStore, dbcPath, "Difficulty.dbc"); // 18414
     LoadDBC(availableDbcLocales, bad_dbc_files, sDungeonEncounterStore, dbcPath, "DungeonEncounter.dbc");//15595

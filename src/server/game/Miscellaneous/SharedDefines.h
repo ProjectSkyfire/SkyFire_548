@@ -730,6 +730,14 @@ enum SpellAttr10
     SPELL_ATTR10_UNK31                            = 0x80000000  // 31
 };
 */
+enum Roles
+{
+    ROLES_DEFAULT   = 0,
+    ROLES_HEALER    = 1,
+    ROLES_DPS       = 2,
+    ROLES_TANK      = 3,
+};
+
 enum Specializations
 {
     SPEC_NONE = 0,
