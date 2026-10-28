@@ -174,6 +174,7 @@ void AddSC_boss_lava_guard_gordoth();
 void AddSC_boss_slagmaw();
 void AddSC_instance_scarlet_halls();
 void AddSC_boss_houndmaster_braun();
+void AddSC_scarlet_halls();
 void AddSC_the_scarlet_enclave();            //Scarlet Enclave
 void AddSC_the_scarlet_enclave_c1();
 void AddSC_the_scarlet_enclave_c2();
@@ -868,6 +869,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_slagmaw();
     AddSC_instance_scarlet_halls();
     AddSC_boss_houndmaster_braun();
+    AddSC_scarlet_halls();
     AddSC_the_scarlet_enclave();            //Scarlet Enclave
     AddSC_the_scarlet_enclave_c1();
     AddSC_the_scarlet_enclave_c2();

@@ -115,7 +115,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 type) const override { return type == DATA_COMANDER_LINDON ? lindonState : 0; }
+        uint32 GetData(uint32 type) const OVERRIDE { return type == DATA_COMANDER_LINDON ? lindonState : 0; }
         uint64 GetData64(uint32 type) const OVERRIDE
         {
             if (type < ENCOUNTER_COUNT)
