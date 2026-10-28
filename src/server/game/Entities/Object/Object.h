@@ -631,6 +631,7 @@ public:
     void GetClosePoint(float& x, float& y, float& z, float size, float distance2d = 0, float angle = 0) const;
     void MovePosition(Position& pos, float dist, float angle);
     void GetNearPosition(Position& pos, float dist, float angle);
+    Position GetNearPosition(float dist, float angle);
     void MovePositionToFirstCollision(Position& pos, float dist, float angle);
     void MovePositionToFirstCollosionBySteps(Position& pos, float dist, float angle, float heightCheckInterval = 2.0f, bool allowInAir = false);
     void GetFirstCollisionPosition(Position& pos, float dist, float angle);

@@ -3194,6 +3194,13 @@ void WorldObject::GetNearPosition(Position& pos, float dist, float angle)
     MovePosition(pos, dist, angle);
 }
 
+Position WorldObject::GetNearPosition(float dist, float angle)
+{
+    Position pos;
+    GetNearPosition(pos, dist, angle);
+    return pos;
+}
+
 void WorldObject::GetFirstCollisionPosition(Position& pos, float dist, float angle)
 {
     GetPosition(&pos);
