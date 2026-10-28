@@ -39,6 +39,7 @@ public:
     float getThreat() const { return iThreat; }
 
     Unit* GetVictim() const { return getTarget(); }
+    Unit* GetOwner() const;
 
     bool isOnline() const { return iOnline; }
 
@@ -242,6 +243,7 @@ public:
     // I hope they are used as little as possible.
     ThreatContainer::StorageType const& getThreatList() const { return iThreatContainer.getThreatList(); }
     ThreatContainer::StorageType const& GetUnsortedThreatList() const { return getThreatList(); }
+    std::map<uint64, HostileReference*> GetThreatenedByMeList() const;
     ThreatContainer::StorageType const& getOfflineThreatList() const { return iThreatOfflineContainer.getThreatList(); }
     ThreatContainer& getOnlineContainer() { return iThreatContainer; }
     ThreatContainer& getOfflineContainer() { return iThreatOfflineContainer; }

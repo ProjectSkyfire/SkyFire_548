@@ -119,6 +119,7 @@ set(scripts_STAT_SRCS
   Kalimdor/Firelands/instance_firelands.cpp
   Kalimdor/Firelands/firelands.h
   Kalimdor/Firelands/boss_alysrazor.cpp
+  Kalimdor/zone_mount_hyjal.cpp
 )
 
 message("  -> Prepared: Kalimdor")

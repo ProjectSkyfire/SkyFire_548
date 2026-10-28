@@ -624,6 +624,10 @@ public:
 
     void GetNearPoint2D(float& x, float& y, float distance, float absAngle) const;
     void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_size, float distance2d, float absAngle) const;
+    void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float distance2d, float absAngle) const
+    {
+        GetNearPoint(searcher, x, y, z, searcher ? searcher->GetObjectSize() : 0.0f, distance2d, absAngle);
+    }
     void GetClosePoint(float& x, float& y, float& z, float size, float distance2d = 0, float angle = 0) const;
     void MovePosition(Position& pos, float dist, float angle);
     void GetNearPosition(Position& pos, float dist, float angle);
@@ -780,6 +784,7 @@ public:
 
     void GetGameObjectListWithEntryInGrid(std::list<GameObject*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
     void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
+    void GetCreatureListWithEntryInGridAppend(std::list<Creature*>& lList, uint32 uiEntry, float fMaxSearchRange) const;
     void GetPlayerListInGrid(std::list<Player*>& lList, float fMaxSearchRange) const;
 
     void DestroyForNearbyPlayers();

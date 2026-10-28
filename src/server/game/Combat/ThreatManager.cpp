@@ -392,6 +392,20 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* attacker, HostileR
 
 ThreatManager::ThreatManager(Unit* owner) : iCurrentVictim(NULL), iOwner(owner), iUpdateTimer(THREAT_UPDATE_INTERVAL) { }
 
+Unit* HostileReference::GetOwner() const
+{
+    return GetSource()->GetOwner();
+}
+
+std::map<uint64, HostileReference*> ThreatManager::GetThreatenedByMeList() const
+{
+    std::map<uint64, HostileReference*> threatenedByMe;
+    for (HostileReference* ref = iOwner->getHostileRefManager().getFirst(); ref; ref = ref->next())
+        if (Unit* owner = ref->GetOwner())
+            threatenedByMe[owner->GetGUID()] = ref;
+    return threatenedByMe;
+}
+
 //============================================================
 
 void ThreatManager::clearReferences()
