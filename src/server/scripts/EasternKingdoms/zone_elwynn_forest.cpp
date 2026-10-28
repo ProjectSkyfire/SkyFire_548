@@ -19,6 +19,8 @@ EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "CombatAI.h"
 #include "Vehicle.h"
 #include "Player.h"
 

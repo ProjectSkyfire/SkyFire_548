@@ -5,6 +5,7 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "CombatAI.h"
 #include "Player.h"
 #include "Vehicle.h"
 #include "VehicleDefines.h"

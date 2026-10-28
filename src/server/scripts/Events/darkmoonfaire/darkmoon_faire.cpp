@@ -12,6 +12,7 @@
 #include "Player.h"
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
+#include "SpellAuras.h"
 #include "SpellScript.h"
 #include "Transport.h"
 #include "Vehicle.h"

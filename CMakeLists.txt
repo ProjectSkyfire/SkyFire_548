@@ -67,12 +67,6 @@ if(SKYFIRE_BUILD_TESTS)
   enable_testing()
 endif()
 
-# turn off PCH totally if enabled (hidden setting, mainly for devs)
-if( NOPCH )
-  set(USE_COREPCH 0)
-  set(USE_SCRIPTPCH 0)
-endif()
-
 include(CheckPlatform)
 
 set(OPENSSL_EXPECTED_VERSION 4.0.0)

@@ -232,4 +232,8 @@ endif()
 # Generate precompiled header
 if( USE_COREPCH )
   add_cxx_pch(worldserver ${worldserver_PCH_HDR} ${worldserver_PCH_SRC})
+else()
+  target_compile_options(worldserver PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:-include${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/worldPCH.h>"
+  )
 endif()

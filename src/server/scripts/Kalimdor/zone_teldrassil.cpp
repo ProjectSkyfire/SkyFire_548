@@ -17,6 +17,7 @@ EndContentData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedFollowerAI.h"
+#include "SpellInfo.h"
 #include "Player.h"
 
 /*####

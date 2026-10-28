@@ -124,4 +124,8 @@ endif()
 # Generate precompiled header
 if (USE_COREPCH)
   add_cxx_pch(authserver ${authserver_PCH_HDR} ${authserver_PCH_SRC})
+else()
+  target_compile_options(authserver PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:-include${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/authPCH.h>"
+  )
 endif()

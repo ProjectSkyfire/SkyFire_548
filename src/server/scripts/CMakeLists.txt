@@ -184,4 +184,9 @@ add_dependencies(scripts revision.h)
 # Generate precompiled header
 if (USE_SCRIPTPCH)
   add_cxx_pch(scripts ${scripts_STAT_PCH_HDR} ${scripts_STAT_PCH_SRC})
+else()
+  # Without PCH, still inject the script common header so grid/cell templates link.
+  target_compile_options(scripts PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:-include${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/ScriptPCH.h>"
+  )
 endif()

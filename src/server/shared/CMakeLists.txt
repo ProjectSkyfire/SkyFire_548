@@ -111,4 +111,8 @@ endif()
 # Generate precompiled header
 if (USE_COREPCH)
   add_cxx_pch(shared ${shared_STAT_PCH_HDR} ${shared_STAT_PCH_SRC})
+else()
+  target_compile_options(shared PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:-include${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/sharedPCH.h>"
+  )
 endif ()

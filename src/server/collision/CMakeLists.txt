@@ -84,4 +84,8 @@ target_link_libraries(collision
 # Generate precompiled header
 if (USE_COREPCH)
   add_cxx_pch(collision ${collision_STAT_PCH_HDR} ${collision_STAT_PCH_SRC})
+else()
+  target_compile_options(collision PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:-include${CMAKE_CURRENT_SOURCE_DIR}/PrecompiledHeaders/collisionPCH.h>"
+  )
 endif ()
