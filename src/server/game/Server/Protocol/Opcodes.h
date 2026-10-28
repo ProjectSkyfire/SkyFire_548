@@ -11,6 +11,7 @@
 #define SF_OPCODES_H
 
 #include "Common.h"
+#include <iomanip>
 
 #define MAX_OPCODE             0x1FFF
 #define NUM_OPCODE_HANDLERS    0x7FFF

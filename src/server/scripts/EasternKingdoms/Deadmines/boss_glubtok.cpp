@@ -10,6 +10,7 @@
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
 #include "PassiveAI.h"
+#include "SpellScript.h"
 #include "deadmines.h"
 #include <unordered_map>
 

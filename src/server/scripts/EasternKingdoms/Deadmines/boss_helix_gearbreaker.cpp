@@ -8,6 +8,8 @@
 #include "InstanceScript.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "Player.h"
+#include "Map.h"
 #include "Vehicle.h"
 #include "deadmines.h"
 
