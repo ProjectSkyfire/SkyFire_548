@@ -420,6 +420,11 @@ public:
         _eventMap.insert(EventStore::value_type(_time + time, eventId));
     }
 
+    void ScheduleEvent(uint32 eventId, Milliseconds time, uint32 group = 0, uint8 phase = 0)
+    {
+        ScheduleEvent(eventId, uint32(time.count()), group, phase);
+    }
+
     /**
     * @name RescheduleEvent
     * @brief Cancels the given event and reschedules it.
@@ -432,6 +437,11 @@ public:
     {
         CancelEvent(eventId);
         ScheduleEvent(eventId, time, group, phase);
+    }
+
+    void RescheduleEvent(uint32 eventId, Milliseconds time, uint32 group = 0, uint8 phase = 0)
+    {
+        RescheduleEvent(eventId, uint32(time.count()), group, phase);
     }
 
     /**
@@ -447,6 +457,11 @@ public:
         uint32 eventId = _eventMap.begin()->second;
         _eventMap.erase(_eventMap.begin());
         ScheduleEvent(eventId, time);
+    }
+
+    void RepeatEvent(Milliseconds time)
+    {
+        RepeatEvent(uint32(time.count()));
     }
 
     /**

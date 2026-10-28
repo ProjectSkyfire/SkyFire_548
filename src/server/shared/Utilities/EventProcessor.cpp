@@ -61,6 +61,23 @@ void EventProcessor::KillAllEvents(bool force)
         m_events.clear();
 }
 
+void EventProcessor::KillEventsByGroup(GroupedEvent::group_type group)
+{
+    for (EventList::iterator i = m_events.begin(); i != m_events.end();)
+    {
+        GroupedEvent* event = dynamic_cast<GroupedEvent*>(i->second);
+        if (event && event->GetGroup() == group && event->IsDeletable())
+        {
+            event->to_Abort = true;
+            event->Abort(m_time);
+            delete event;
+            i = m_events.erase(i);
+        }
+        else
+            ++i;
+    }
+}
+
 void EventProcessor::AddEvent(BasicEvent* Event, uint64 e_time, bool set_addtime)
 {
     if (set_addtime) Event->m_addTime = m_time;

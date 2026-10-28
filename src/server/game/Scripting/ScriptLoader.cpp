@@ -660,6 +660,11 @@ void AddSC_boss_xin_the_weaponmaster();
 void AddSC_instance_mogu_shan_palace();
 // Valley of the four Winds
 void AddSC_valley_of_the_four_winds();
+// Isle of Thunder
+void AddSC_scenario_isle_of_thunder();
+void AddSC_thunder_king_citadel();
+void AddSC_boss_nalak();
+void AddSC_isle_of_thunder();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1404,6 +1409,11 @@ void AddPandariaScripts()
     AddSC_instance_mogu_shan_palace();
     // Valley of the four Winds
     AddSC_valley_of_the_four_winds();
+    // Isle of Thunder
+    AddSC_scenario_isle_of_thunder();
+    AddSC_thunder_king_citadel();
+    AddSC_boss_nalak();
+    AddSC_isle_of_thunder();
 #endif
 }
 

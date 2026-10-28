@@ -117,6 +117,12 @@ public:
     // Called when creature is spawned or respawned (for reseting variables)
     virtual void JustRespawned() { Reset(); }
 
+    // Called on the first update after the creature is added to the map or respawns
+    virtual void JustAppeared() { }
+
+    // Called when a spell cast by the creature is interrupted
+    virtual void CastInterrupted(SpellInfo const* /*spell*/) { }
+
     // Called at waypoint reached or point movement finished
     virtual void MovementInform(uint32 /*type*/, uint32 /*id*/) { }
 

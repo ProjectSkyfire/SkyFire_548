@@ -311,63 +311,45 @@ bool Player::CanCompleteQuest(uint32 questId)
                 return false;
 
             for (QuestObjectiveSet::const_iterator citr = qInfo->m_questObjectives.begin(); citr != qInfo->m_questObjectives.end(); ++citr)
-            {
-                QuestObjective const* questObjective = *citr;
-                switch (questObjective->Type)
-                {
-                    case QUEST_OBJECTIVE_TYPE_DUMMY:
-                    case QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER:
-                    case QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE:
-                    case QUEST_OBJECTIVE_TYPE_PET_BATTLE_PVP:
-                    {
-                        // These are event/state objectives — never treat as done by default.
-                        // DB Amount is often 0; retail still requires the event (areatrigger etc.).
-                        uint32 required = questObjective->Amount > 0 ? uint32(questObjective->Amount) : 1;
-                        if (GetQuestObjectiveCounter(questObjective->Id) >= required)
-                            break;
-
-                        // 18414 also tracks progress in quest-log state bits (0x100 << index).
-                        uint16 slot = FindQuestSlot(questId);
-                        if (slot < MAX_QUEST_LOG_SIZE && questObjective->Index < 24 &&
-                            (GetQuestSlotState(slot) & (QUEST_STATE_OBJECTIVE_0 << questObjective->Index)))
-                            break;
-
-                        return false;
-                    }
-                    case QUEST_OBJECTIVE_TYPE_SPELL:
-                    {
-                        if (!HasSpell(questObjective->ObjectId))
-                            return false;
-
-                        break;
-                    }
-                    case QUEST_OBJECTIVE_TYPE_FACTION_REP:
-                    case QUEST_OBJECTIVE_TYPE_FACTION_REP2:
-                    {
-                        if (GetReputationMgr().GetReputation(questObjective->ObjectId) < questObjective->Amount)
-                            return false;
-
-                        break;
-                    }
-                    case QUEST_OBJECTIVE_TYPE_MONEY:
-                    {
-                        if (!HasEnoughMoney(uint64(questObjective->Amount)))
-                            return false;
-
-                        break;
-                    }
-                    default:
-                    {
-                        if (GetQuestObjectiveCounter(questObjective->Id) < uint32(questObjective->Amount))
-                            return false;
-                    }
-                }
-            }
+                if (!IsQuestObjectiveComplete(qInfo, **citr))
+                    return false;
 
             return true;
         }
     }
     return false;
+}
+
+bool Player::IsQuestObjectiveComplete(Quest const* quest, QuestObjective const& objective) const
+{
+    switch (objective.Type)
+    {
+        case QUEST_OBJECTIVE_TYPE_DUMMY:
+        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER:
+        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE:
+        case QUEST_OBJECTIVE_TYPE_PET_BATTLE_PVP:
+        {
+            // These are event/state objectives — never treat as done by default.
+            // DB Amount is often 0; retail still requires the event (areatrigger etc.).
+            uint32 required = objective.Amount > 0 ? uint32(objective.Amount) : 1;
+            if (GetQuestObjectiveCounter(objective.Id) >= required)
+                return true;
+
+            // 18414 also tracks progress in quest-log state bits (0x100 << index).
+            uint16 slot = FindQuestSlot(quest->GetQuestId());
+            return slot < MAX_QUEST_LOG_SIZE && objective.Index < 24 &&
+                (GetQuestSlotState(slot) & (QUEST_STATE_OBJECTIVE_0 << objective.Index));
+        }
+        case QUEST_OBJECTIVE_TYPE_SPELL:
+            return HasSpell(objective.ObjectId);
+        case QUEST_OBJECTIVE_TYPE_FACTION_REP:
+        case QUEST_OBJECTIVE_TYPE_FACTION_REP2:
+            return GetReputationMgr().GetReputation(objective.ObjectId) >= objective.Amount;
+        case QUEST_OBJECTIVE_TYPE_MONEY:
+            return HasEnoughMoney(uint64(objective.Amount));
+        default:
+            return GetQuestObjectiveCounter(objective.Id) >= uint32(objective.Amount);
+    }
 }
 
 bool Player::CanCompleteRepeatableQuest(Quest const* quest)

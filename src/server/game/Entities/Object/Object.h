@@ -7,6 +7,7 @@
 #define SF_OBJECT_H
 
 #include "Common.h"
+#include "Duration.h"
 #include "GridReference.h"
 #include "Map.h"
 #include "MapObjectCellMoveState.h"
@@ -348,6 +349,7 @@ struct Position
         if (pos)
             pos->Relocate(m_positionX, m_positionY, m_positionZ, m_orientation);
     }
+    Position GetPosition() const { return *this; }
 
     Position::PositionXYZStreamer PositionXYZStream()
     {
@@ -751,6 +753,14 @@ public:
 
     TempSummon* SummonCreature(uint32 id, Position const& pos, TempSummonType spwtype = TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0, uint32 vehId = 0) const;
     TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang = 0, TempSummonType spwtype = TempSummonType::TEMPSUMMON_MANUAL_DESPAWN, uint32 despwtime = 0) const;
+    TempSummon* SummonCreature(uint32 id, Position const& pos, TempSummonType spwtype, Milliseconds despwtime, uint32 vehId = 0) const
+    {
+        return SummonCreature(id, pos, spwtype, uint32(despwtime.count()), vehId);
+    }
+    TempSummon* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSummonType spwtype, Milliseconds despwtime) const
+    {
+        return SummonCreature(id, x, y, z, ang, spwtype, uint32(despwtime.count()));
+    }
     GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
     Creature* SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
     void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);

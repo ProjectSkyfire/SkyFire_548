@@ -48,6 +48,12 @@ uint32 urand(uint32 min, uint32 max)
     return SfmtRand().URandom(min, max);
 }
 
+Milliseconds randtime(Milliseconds min, Milliseconds max)
+{
+    ASSERT(max >= min);
+    return min + Milliseconds(urand(0, uint32((max - min).count())));
+}
+
 float frand(float min, float max)
 {
     ASSERT(max >= min);

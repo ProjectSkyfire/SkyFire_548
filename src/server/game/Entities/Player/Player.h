@@ -1771,6 +1771,7 @@ public:
     bool CanTakeQuest(Quest const* quest, bool msg);
     bool CanAddQuest(Quest const* quest, bool msg);
     bool CanCompleteQuest(uint32 quest_id);
+    bool IsQuestObjectiveComplete(Quest const* quest, QuestObjective const& objective) const;
     bool CanCompleteRepeatableQuest(Quest const* quest);
     bool CanRewardQuest(Quest const* quest, bool msg);
     bool CanRewardQuest(Quest const* quest, uint32 reward, bool msg);
@@ -2100,6 +2101,7 @@ public:
     uint32 GetTalentResetTime() const { return _talentMgr->ResetTalentsTime; }
     void SetTalentResetTime(time_t time_) { _talentMgr->ResetTalentsTime = time_; }
     uint32 GetTalentSpecialization(uint8 spec) const { return _talentMgr->SpecInfo[spec].TalentTree; }
+    uint32 GetTalentSpecialization() const { return GetTalentSpecialization(GetActiveSpec()); }
     void SetTalentSpecialization(uint8 spec, uint32 tree) { _talentMgr->SpecInfo[spec].TalentTree = tree; }
     uint8 GetActiveSpec() const { return _talentMgr->ActiveSpec; }
     void SetActiveSpec(uint8 spec) { _talentMgr->ActiveSpec = spec; }
@@ -2936,6 +2938,7 @@ public:
 
     bool isUsingLfg();
     bool inRandomLfgDungeon();
+    bool IsUsingLfg(bool inProgressOnly = false);
 
     typedef std::set<uint32> DFQuestsDoneList;
     DFQuestsDoneList m_DFQuests;

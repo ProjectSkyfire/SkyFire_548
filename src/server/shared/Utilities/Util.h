@@ -7,6 +7,7 @@
 #define _UTIL_H
 
 #include "Define.h"
+#include "Duration.h"
 #include "Errors.h"
 #include "NetworkAddress.h"
 
@@ -66,6 +67,9 @@ int32 irand(int32 min, int32 max);
 
 /* Return a random number in the range min..max (inclusive). */
 uint32 urand(uint32 min, uint32 max);
+
+/* Return a random duration in the range min..max (inclusive). */
+Milliseconds randtime(Milliseconds min, Milliseconds max);
 
 /* Return a random number in the range 0 .. RAND32_MAX. */
 int32 rand32();

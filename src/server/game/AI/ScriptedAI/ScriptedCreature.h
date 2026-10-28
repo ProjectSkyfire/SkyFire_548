@@ -10,6 +10,7 @@
 #include "CreatureAI.h"
 #include "CreatureAIImpl.h"
 #include "InstanceScript.h"
+#include "TaskScheduler.h"
 
 #define CAST_AI(a, b)   (dynamic_cast<a*>(b))
 
@@ -438,6 +439,7 @@ protected:
 
     EventMap events;
     SummonList summons;
+    TaskScheduler scheduler;
 
 private:
     BossBoundaryMap const* const _boundary;
@@ -482,6 +484,31 @@ protected:
 
     EventMap events;
     SummonList summons;
+};
+
+enum TargetPriority
+{
+    PRIORITY_VICTIM,
+    PRIORITY_NOT_VICTIM,
+    PRIORITY_CHANNELED,
+    PRIORITY_SELF,
+    PRIORITY_ALLY,
+};
+
+struct customCreatureAI : public ScriptedAI
+{
+    customCreatureAI(Creature* creature) : ScriptedAI(creature), summons(me), isCaster(false) { }
+
+    virtual uint64 GetLowestFriendGUID() { return 0; }
+
+    // Casts spell_id when curEventId == event_id and reschedules event_id after repeat ms (0 = once).
+    void ExecuteTargetEvent(uint32 spell_id, uint32 repeat, uint32 event_id, uint32 curEventId, TargetPriority pTarget = PRIORITY_VICTIM);
+
+protected:
+    EventMap events, nonCombatEvents;
+    SummonList summons;
+    bool isCaster;
+    uint64 targetGUID = 0;
 };
 
 // SD2 grid searchers.

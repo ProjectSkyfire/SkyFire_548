@@ -1530,6 +1530,9 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
             if (GetTypeId() == TypeID::TYPEID_PLAYER)
                 ToPlayer()->SendAutoRepeatCancel(this);
 
+        if (GetTypeId() == TypeID::TYPEID_UNIT && IsAIEnabled)
+            ToCreature()->AI()->CastInterrupted(spell->GetSpellInfo());
+
         if (spell->getState() != SPELL_STATE_FINISHED)
             spell->cancel();
 

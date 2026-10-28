@@ -446,6 +446,7 @@ public:
 
     void SetObjectScale(float scale) OVERRIDE;
     void SetDisplayId(uint32 modelId) OVERRIDE;
+    void SetDisplayFromModel(uint32 modelIdx);
 
     void DisappearAndDie();
 
@@ -743,6 +744,7 @@ private:
     //Formation var
     CreatureGroup* m_formation;
     bool TriggerJustRespawned;
+    bool TriggerJustAppeared;
 
     Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing
 };

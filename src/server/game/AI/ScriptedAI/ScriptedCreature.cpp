@@ -12,6 +12,7 @@
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellMgr.h"
 #include "TemporarySummon.h"
 
 // Spell summary for ScriptedAI::SelectSpell
@@ -656,6 +657,76 @@ void WorldBossAI::UpdateAI(uint32 diff)
         ExecuteEvent(eventId);
 
     DoMeleeAttackIfReady();
+}
+
+void customCreatureAI::ExecuteTargetEvent(uint32 spell_id, uint32 repeat, uint32 event_id, uint32 curEventId, TargetPriority pTarget)
+{
+    if (curEventId != event_id)
+        return;
+
+    bool triggered = spell_id == 129040; // Sinister Strike
+
+    if (isCaster)
+    {
+        me->StopMoving();
+
+        if (Unit* vict = me->GetVictim())
+        {
+            if (me->GetExactDist2d(vict) > 45.0f)
+                DoStartMovement(vict);
+            else
+                DoStartNoMovement(vict);
+        }
+    }
+
+    switch (pTarget)
+    {
+        case PRIORITY_VICTIM:
+            if (Unit* target = me->GetVictim())
+                DoCast(target, spell_id, triggered);
+            break;
+        case PRIORITY_NOT_VICTIM:
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, NonTankTargetSelector(me)))
+                DoCast(target, spell_id, triggered);
+            else if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                DoCast(target, spell_id, triggered);
+            break;
+        case PRIORITY_CHANNELED:
+            if (Unit* target = me->GetVictim())
+                targetGUID = target->GetGUID();
+
+            if (SpellInfo const* sInfo = sSpellMgr->GetSpellInfo(spell_id))
+            {
+                me->PrepareChanneledCast(me->GetOrientation(), spell_id);
+
+                // Cone spells behave like a cast followed by an aura.
+                uint32 delay = sInfo->GetMaxDuration() ? sInfo->GetMaxDuration() + sInfo->CastTimeEntry->CastTime + 500 : sInfo->CastTimeEntry->CastTime + 500;
+
+                if (spell_id == 147646) // Rending Swipe
+                    delay = 3000;
+
+                me->m_Events.Schedule(delay, 1, [this]()
+                {
+                    if (me->IsInCombat())
+                        me->RemoveChanneledCast(targetGUID);
+                    else
+                        me->SetReactState(REACT_AGGRESSIVE);
+                });
+            }
+            break;
+        case PRIORITY_SELF:
+            DoCast(me, spell_id, triggered);
+            break;
+        case PRIORITY_ALLY:
+            if (Unit* target = ObjectAccessor::GetUnit(*me, GetLowestFriendGUID()))
+                DoCast(target, spell_id);
+            break;
+    }
+
+    // Global cooldown, so creatures with many ExecuteTargetEvent calls do not chain-cast.
+    me->_AddCreatureSpellCooldown(spell_id, time(NULL) + 2);
+    if (repeat)
+        events.ScheduleEvent(event_id, repeat);
 }
 
 // SD2 grid searchers.

@@ -1401,6 +1401,11 @@ public:
 
     bool QuestObjectiveExists(uint32 objectiveId) const;
     uint32 GetQuestObjectiveQuestId(uint32 objectiveId) const;
+    QuestObjective const* GetQuestObjective(uint32 objectiveId) const
+    {
+        Quest const* quest = GetQuestTemplate(GetQuestObjectiveQuestId(objectiveId));
+        return quest ? quest->GetQuestObjective(objectiveId) : nullptr;
+    }
     SceneTemplate const* GetSceneTemplate(uint32 sceneId) const;
 
     void LoadResearchDigsiteInfo();

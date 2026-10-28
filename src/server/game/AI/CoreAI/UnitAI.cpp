@@ -25,7 +25,7 @@ void UnitAI::AttackStartCaster(Unit* victim, float dist)
         me->GetMotionMaster()->MoveChase(victim, dist);
 }
 
-void UnitAI::DoMeleeAttackIfReady()
+void UnitAI::DoMeleeAttackIfReady(bool /*ignoreLos*/)
 {
     if (me->HasUnitState(UNIT_STATE_CASTING))
         return;
@@ -319,4 +319,57 @@ bool NonTankTargetSelector::operator()(Unit const* target) const
         return false;
 
     return target != _source->GetVictim();
+}
+
+bool MeeleSpecTargetSelector::operator()(WorldObject* target) const
+{
+    Player* player = target ? target->ToPlayer() : NULL;
+    if (!player || player->IsGameMaster())
+        return false;
+
+    if (_spellId && player->HasAura(_spellId))
+        return false;
+
+    uint32 spec = player->GetTalentSpecialization();
+    switch (player->getClass())
+    {
+        case CLASS_ROGUE:
+            return true;
+        case CLASS_WARRIOR:
+            return spec != SPEC_WARRIOR_PROTECTION;
+        case CLASS_PALADIN:
+            return spec == SPEC_PALADIN_RETRIBUTION;
+        case CLASS_MONK:
+            return spec == SPEC_MONK_WINDWALKER;
+        case CLASS_DRUID:
+            return spec == SPEC_DRUID_FERAL;
+        case CLASS_SHAMAN:
+            return spec == SPEC_SHAMAN_ENHANCEMENT;
+        case CLASS_DEATH_KNIGHT:
+            return spec != SPEC_DEATH_KNIGHT_BLOOD;
+        default:
+            return false;
+    }
+}
+
+bool TankSpecTargetSelector::operator()(WorldObject* target) const
+{
+    Player* player = target ? target->ToPlayer() : NULL;
+    if (!player || player->IsGameMaster())
+        return false;
+
+    if (_spellId && player->HasAura(_spellId))
+        return false;
+
+    switch (player->GetTalentSpecialization())
+    {
+        case SPEC_WARRIOR_PROTECTION:
+        case SPEC_PALADIN_PROTECTION:
+        case SPEC_DRUID_GUARDIAN:
+        case SPEC_DEATH_KNIGHT_BLOOD:
+        case SPEC_MONK_BREWMASTER:
+            return true;
+        default:
+            return false;
+    }
 }

@@ -20741,6 +20741,14 @@ bool Player::inRandomLfgDungeon()
     return false;
 }
 
+bool Player::IsUsingLfg(bool inProgressOnly)
+{
+    lfg::LfgState state = sLFGMgr->GetState(GetGUID());
+    if (inProgressOnly)
+        return state == lfg::LFG_STATE_DUNGEON;
+    return state != lfg::LFG_STATE_NONE;
+}
+
 void Player::SetBattlegroundOrBattlefieldRaid(Group* group, int8 subgroup)
 {
     //we must move references from m_group to m_originalGroup

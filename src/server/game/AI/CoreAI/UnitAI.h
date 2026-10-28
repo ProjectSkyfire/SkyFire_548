@@ -103,6 +103,28 @@ private:
     bool _playerOnly;
 };
 
+// Players (not GMs) in a melee damage specialization; with spellId, only those without that aura
+struct MeeleSpecTargetSelector
+{
+public:
+    MeeleSpecTargetSelector(uint32 spellId = 0) : _spellId(spellId) { }
+    bool operator()(WorldObject* target) const;
+
+private:
+    uint32 _spellId;
+};
+
+// Players (not GMs) in a tank specialization; with spellId, only those without that aura
+struct TankSpecTargetSelector
+{
+public:
+    TankSpecTargetSelector(uint32 spellId = 0) : _spellId(spellId) { }
+    bool operator()(WorldObject* target) const;
+
+private:
+    uint32 _spellId;
+};
+
 class UnitAI
 {
 protected:
@@ -236,7 +258,7 @@ public:
 
     float DoGetSpellMaxRange(uint32 spellId, bool positive = false);
 
-    void DoMeleeAttackIfReady();
+    void DoMeleeAttackIfReady(bool ignoreLos = false);
     bool DoSpellAttackIfReady(uint32 spell);
 
     static AISpellInfoType* AISpellInfo;

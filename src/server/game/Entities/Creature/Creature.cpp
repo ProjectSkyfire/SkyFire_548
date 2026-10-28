@@ -163,6 +163,7 @@ m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL)
 
     ResetLootMode(); // restore default loot mode
     TriggerJustRespawned = false;
+    TriggerJustAppeared = false;
     m_isTempWorldObject = false;
     _focusSpell = NULL;
 }
@@ -187,6 +188,7 @@ void Creature::AddToWorld()
         Unit::AddToWorld();
         SearchFormation();
         AIM_Initialize();
+        TriggerJustAppeared = true;
         if (IsVehicle())
             GetVehicleKit()->Install();
     }
@@ -453,6 +455,12 @@ void Creature::Update(uint32 diff)
         AI()->JustRespawned();
         if (m_vehicleKit)
             m_vehicleKit->Reset();
+    }
+
+    if (IsAIEnabled && TriggerJustAppeared && m_deathState != DeathState::DEAD)
+    {
+        TriggerJustAppeared = false;
+        AI()->JustAppeared();
     }
 
     UpdateMovementFlags();
@@ -1571,7 +1579,10 @@ void Creature::Respawn(bool force)
 
         //Call AI respawn virtual function
         if (IsAIEnabled)
+        {
             TriggerJustRespawned = true;//delay event to next tick so all creatures are created on the map before processing
+            TriggerJustAppeared = true;
+        }
 
         uint32 poolid = GetDBTableGUIDLow() ? sPoolMgr->IsPartOfAPool<Creature>(GetDBTableGUIDLow()) : 0;
         if (poolid)
@@ -2669,6 +2680,14 @@ void Creature::SetDisplayId(uint32 modelId)
         SetFloatValue(UNIT_FIELD_BOUNDING_RADIUS, minfo->bounding_radius * GetObjectScale());
         SetFloatValue(UNIT_FIELD_COMBAT_REACH, minfo->combat_reach * GetObjectScale());
     }
+}
+
+void Creature::SetDisplayFromModel(uint32 modelIdx)
+{
+    CreatureTemplate const* cinfo = GetCreatureTemplate();
+    uint32 const models[] = { cinfo->Modelid1, cinfo->Modelid2, cinfo->Modelid3, cinfo->Modelid4 };
+    if (modelIdx < 4 && models[modelIdx])
+        SetDisplayId(models[modelIdx]);
 }
 
 void Creature::SetTarget(uint64 guid)
