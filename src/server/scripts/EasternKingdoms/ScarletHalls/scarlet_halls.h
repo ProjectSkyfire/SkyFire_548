@@ -54,7 +54,15 @@ enum ScarletHallsCreatures
     NPC_OBEDIEND_HOUND = 59309,
     NPC_COMANDER_LINDON = 59191,
     NPC_SERGEANT_VERDONE = 59302,
+    NPC_BOOK_CASE = 59155,
+    NPC_DRAGON_BREATH_TARGET = 59198,
+    NPC_HOODED_CRUSADER = 64738,
     NPC_SCARLET_GUARDIAN = 59299
+};
+
+enum ScarletHallsActions
+{
+    ACTION_KODEX = 0
 };
 
 enum ScarletHallsObjects

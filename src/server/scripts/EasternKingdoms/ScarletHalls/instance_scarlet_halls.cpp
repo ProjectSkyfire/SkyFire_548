@@ -59,6 +59,7 @@ public:
 
         uint64 bosses[ENCOUNTER_COUNT];
         uint64 lindonGuid = 0;
+        uint64 hoodedGuid = 0;
         uint32 lindonState;
         uint64 lindonDoor;
 
@@ -78,6 +79,17 @@ public:
                 case NPC_ARMSMASTER_HARLAN: bosses[1] = creature->GetGUID(); break;
                 case NPC_FLAMEWEAVER_KOEGLER: bosses[2] = creature->GetGUID(); break;
                 case NPC_COMANDER_LINDON: lindonGuid = creature->GetGUID(); break;
+                case NPC_DRAGON_BREATH_TARGET:
+                    creature->SetDisplayId(11686);
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    break;
+                case NPC_HOODED_CRUSADER:
+                    if (creature->GetDBTableGUIDLow() == 8300128)
+                    {
+                        hoodedGuid = creature->GetGUID();
+                        creature->SetVisible(GetBossState(BOSS_FLAMEWEAVER_KOEGLER) == DONE);
+                    }
+                    break;
                 case NPC_SCARLET_GUARDIAN:
                 case NPC_SERGEANT_VERDONE: creature->SetReactState(REACT_PASSIVE); break;
             }
@@ -120,7 +132,9 @@ public:
         {
             if (type < ENCOUNTER_COUNT)
                 return bosses[type];
-            return type == DATA_COMANDER_LINDON ? lindonGuid : 0;
+            if (type == DATA_COMANDER_LINDON)
+                return lindonGuid;
+            return type == NPC_HOODED_CRUSADER ? hoodedGuid : 0;
         }
 
         std::string GetSaveData() OVERRIDE

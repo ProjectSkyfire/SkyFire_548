@@ -134,6 +134,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ScarletHalls/scarlet_halls.cpp
   EasternKingdoms/ScarletHalls/boss_houndmaster_braun.cpp
   EasternKingdoms/ScarletHalls/boss_armsmaster_harlan.cpp
+  EasternKingdoms/ScarletHalls/boss_flameweaver_koegler.cpp
   #EasternKingdoms/ScarletMonastery/boss_azshir_the_sleepless.cpp
   #EasternKingdoms/ScarletMonastery/boss_mograine_and_whitemane.cpp
   #EasternKingdoms/ScarletMonastery/boss_bloodmage_thalnos.cpp
