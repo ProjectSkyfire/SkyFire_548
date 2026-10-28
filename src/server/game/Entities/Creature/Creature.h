@@ -469,6 +469,8 @@ public:
     bool CanWalk() const { return GetCreatureTemplate()->InhabitType & INHABIT_GROUND; }
     bool CanSwim() const { return GetCreatureTemplate()->InhabitType & INHABIT_WATER || IsPet(); }
     bool CanFly()  const OVERRIDE { return GetCreatureTemplate()->InhabitType & INHABIT_AIR; }
+    void OverrideInhabitType(InhabitTypeValues /*inhabitType*/) { }
+    uint32 GetGossipMenuId() const { return GetCreatureTemplate()->GossipMenuId; }
 
     void SetReactState(ReactStates st) { m_reactState = st; }
     ReactStates GetReactState() const { return m_reactState; }

@@ -2574,6 +2574,153 @@ public:
     }
 };
 
+enum PandariaTreasures
+{
+    NPC_GHOSTLY_PANDAREN_FISHERMAN   = 64004,
+    NPC_GHOSTLY_PANDAREN_CRAFTSMAN   = 64191,
+    NPC_GLINTING_RAPANA_WHELK        = 65552,
+    NPC_JADE_WARRIOR_STATUE          = 64272,
+    NPC_FROZEN_TRAIL_PACKER          = 64227,
+
+    QUEST_GHOSTLY_PANDAREN_FISHERMAN = 31284,
+    QUEST_GHOSTLY_PANDAREN_CRAFTSMAN = 31292,
+    QUEST_GLINTING_RAPANA_WHELK      = 31432,
+    QUEST_JADE_WARRIOR_STATUE        = 31307,
+    QUEST_FROZEN_TRAIL_PACKER        = 31304,
+
+    REW_GHOSTLY_PANDAREN_FISHERMAN   = 85973,
+    REW_GHOSTLY_PANDAREN_CRAFTSMAN   = 86079,
+    REW_GLINTING_RAPANA_WHELK        = 86529,
+    REW_JADE_WARRIOR_STATUE          = 86199,
+    REW_FROZEN_TRAIL_PACKER          = 86125,
+};
+
+std::map<uint32, std::pair<uint32, uint32>> pandariaTreasuresMap =
+{
+    { NPC_GHOSTLY_PANDAREN_FISHERMAN, std::make_pair(QUEST_GHOSTLY_PANDAREN_FISHERMAN, REW_GHOSTLY_PANDAREN_FISHERMAN) },
+    { NPC_GHOSTLY_PANDAREN_CRAFTSMAN, std::make_pair(QUEST_GHOSTLY_PANDAREN_CRAFTSMAN, REW_GHOSTLY_PANDAREN_CRAFTSMAN) },
+    { NPC_GLINTING_RAPANA_WHELK,      std::make_pair(QUEST_GLINTING_RAPANA_WHELK,      REW_GLINTING_RAPANA_WHELK)      },
+    { NPC_JADE_WARRIOR_STATUE,        std::make_pair(QUEST_JADE_WARRIOR_STATUE,        REW_JADE_WARRIOR_STATUE)        },
+    { NPC_FROZEN_TRAIL_PACKER,        std::make_pair(QUEST_FROZEN_TRAIL_PACKER,        REW_FROZEN_TRAIL_PACKER)        },
+};
+
+class npc_pandaria_treasures : public CreatureScript
+{
+    public:
+        npc_pandaria_treasures() : CreatureScript("npc_pandaria_treasures") { }
+
+        bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+        {
+            auto itr = pandariaTreasuresMap.find(creature->GetEntry());
+            if (itr != pandariaTreasuresMap.end())
+                if (player->GetQuestStatus(itr->second.first) != QUEST_STATUS_REWARDED)
+                    player->ADD_GOSSIP_ITEM_DB(creature->GetGossipMenuId(), 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+            return true;
+        }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+
+        auto itr = pandariaTreasuresMap.find(creature->GetEntry());
+        if (itr != pandariaTreasuresMap.end())
+            if (Quest const* quest = sObjectMgr->GetQuestTemplate(itr->second.first))
+            {
+                player->RewardQuest(quest, 0, player, false);
+                player->AddItem(itr->second.second, 1);
+            }
+
+        player->CLOSE_GOSSIP_MENU();
+        creature->DespawnOrUnsummon();
+        return true;
+    }
+};
+
+enum RarePandariaNpcs
+{
+    SPELL_SMOKED_BLADE   = 125633,
+    SPELL_GRAPPLING_HOOK = 125623,
+    SPELL_VANISH         = 125632,
+    SPELL_VICIOUS_REND   = 125624,
+
+    EVENT_GRAPPLING_HOOK = 1,
+    EVENT_VIC_REND,
+    EVENT_VANISH,
+};
+
+// Sarnak - 50782
+// Salyin Warscout - 50783
+// Omnis Grinlok - 50805
+struct npc_rogue_rare_npc : public ScriptedAI
+{
+    npc_rogue_rare_npc(Creature* creature) : ScriptedAI(creature) { }
+
+    EventMap events;
+    uint32 delay = 0;
+    uint64 targetGUID;
+
+    void Reset() OVERRIDE
+    {
+        delay = 0;
+        me->m_Events.Schedule(delay += 1000, [this]()
+        {
+            if (Unit* target = ObjectAccessor::GetUnit(*me, targetGUID))
+            {
+                DoCast(target, SPELL_SMOKED_BLADE, true);
+                return;
+            }
+        });
+
+        delay = 0;
+        targetGUID = 0;
+        events.Reset();
+        me->setRegeneratingHealth(true);
+    }
+
+    void EnterCombat(Unit* who) OVERRIDE
+    {
+        Talk(0);
+        me->setRegeneratingHealth(false);
+        DoCast(who, SPELL_GRAPPLING_HOOK);
+        events.ScheduleEvent(EVENT_VANISH, urand(13500, 20 * IN_MILLISECONDS));
+        events.ScheduleEvent(EVENT_VIC_REND, 4 * IN_MILLISECONDS);
+        events.ScheduleEvent(EVENT_GRAPPLING_HOOK, 15 * IN_MILLISECONDS);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        while (uint32 eventId = events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_VANISH:
+                    DoCastVictim(SPELL_VANISH);
+                    events.ScheduleEvent(EVENT_VANISH, urand(13500, 20 * IN_MILLISECONDS));
+                    break;
+                case EVENT_VIC_REND:
+                    DoCastVictim(SPELL_VICIOUS_REND);
+                    events.ScheduleEvent(EVENT_VIC_REND, urand(5500, 9 * IN_MILLISECONDS));
+                    break;
+                case EVENT_GRAPPLING_HOOK:
+                    if (Unit* target = me->GetVictim())
+                        if (target->GetExactDist2d(me) > 5.0f)
+                            DoCast(target, SPELL_GRAPPLING_HOOK);
+                    events.ScheduleEvent(EVENT_GRAPPLING_HOOK, 5 * IN_MILLISECONDS);
+                    break;
+            }
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -2600,4 +2747,6 @@ void AddSC_npcs_special()
     new npc_spring_rabbit();
     new npc_training_target();
     new npc_flee_from_player();
+    new npc_pandaria_treasures();
+    new creature_script<npc_rogue_rare_npc>("npc_rogue_rare_npc");
 }

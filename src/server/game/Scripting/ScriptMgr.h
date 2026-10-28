@@ -53,6 +53,7 @@ struct ConditionSourceInfo;
 struct Condition;
 struct ItemTemplate;
 struct MovementInfo;
+struct SceneTemplate;
 
 enum class PlayerMovementChange
 {
@@ -437,6 +438,9 @@ public:
     // Called when a player opens a gossip dialog with the gameobject.
     virtual bool OnGossipHello(Player* /*player*/, GameObject* /*go*/) { return false; }
 
+    // Called when a player reports the use of the gameobject
+    virtual bool OnReportUse(Player* /*player*/, GameObject* /*go*/) { return false; }
+
     // Called when a player selects a gossip item in the gameobject's gossip menu.
     virtual bool OnGossipSelect(Player* /*player*/, GameObject* /*go*/, uint32 /*sender*/, uint32 /*action*/) { return false; }
 
@@ -490,6 +494,27 @@ public:
 
     // Called when a spell area trigger with this script is added to the world
     virtual IAreaTrigger* GetInterface() const { return NULL; }
+};
+
+class SceneScript : public ScriptObject
+{
+protected:
+    SceneScript(const char* name);
+
+public:
+    bool IsDatabaseBound() const FINAL { return true; }
+
+    // Called when a player start a scene
+    virtual void OnSceneStart(Player* /*player*/, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) { }
+
+    // Called when a player receive trigger from scene
+    virtual void OnSceneTriggerEvent(Player* /*player*/, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/, std::string const& /*triggerName*/) { }
+
+    // Called when a scene is canceled
+    virtual void OnSceneCancel(Player* /*player*/, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) { }
+
+    // Called when a scene is completed
+    virtual void OnSceneComplete(Player* /*player*/, uint32 /*sceneInstanceID*/, SceneTemplate const* /*sceneTemplate*/) { }
 };
 
 class BattlegroundScript : public ScriptObject
@@ -912,6 +937,7 @@ public: /* Initialization */
     /* GameObjectScript */
     bool OnDummyEffect(Unit* caster, uint32 spellId, SpellEffIndex effIndex, GameObject* target);
     bool OnGossipHello(Player* player, GameObject* go);
+    bool OnReportUse(Player* player, GameObject* go);
     bool OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action);
     bool OnGossipSelectCode(Player* player, GameObject* go, uint32 sender, uint32 action, const char* code);
     bool OnQuestAccept(Player* player, GameObject* go, Quest const* quest);
@@ -929,6 +955,12 @@ public: /* Initialization */
 
     /* SpellAreaTriggerScript */
     IAreaTrigger* CreateAreaTriggerInterface(uint32 entry);
+
+    /* SceneScript */
+    void OnSceneStart(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate);
+    void OnSceneTrigger(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate, std::string const& triggerName);
+    void OnSceneCancel(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate);
+    void OnSceneComplete(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate);
 
     /* BattlegroundScript */
     Battleground* CreateBattleground(BattlegroundTypeId typeId);

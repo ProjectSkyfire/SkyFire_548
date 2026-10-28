@@ -924,6 +924,8 @@ public:                                                 // opcodes handlers
     void SendPageText(ObjectGuid GameObjectGUID);
 
     void HandleSceneCompleted(WorldPacket& recvPacket);
+    void HandleScenePlaybackCanceled(WorldPacket& recvPacket);
+    void HandleSceneTriggerEvent(WorldPacket& recvPacket);
 
     void HandleTutorialFlag(WorldPacket& recvData);
     void HandleTutorialClear(WorldPacket& recvData);

@@ -185,12 +185,6 @@ struct UpdateMissileTrajectoryRequest
     uint8 moveStop;
 };
 
-struct SceneCompletedRequest
-{
-    uint32 unk;
-    uint8 hasData;
-};
-
 void ReadRepopRequest(WorldPacket& recvData)
 {
     recvData.read_skip<uint8>();
@@ -603,16 +597,6 @@ DiscardedTimeSyncAcksRequest ReadDiscardedTimeSyncAcksRequest(WorldPacket& recvD
         recvData >> request.counter;
     }
 
-    return request;
-}
-
-SceneCompletedRequest ReadSceneCompletedRequest(WorldPacket& recvPacket)
-{
-    SceneCompletedRequest request;
-    request.unk = 0;
-    request.hasData = recvPacket.ReadBit();
-    if (request.hasData)
-        request.unk = recvPacket.read<uint32>();
     return request;
 }
 }
@@ -3043,9 +3027,27 @@ void WorldSession::SendPageText(ObjectGuid GameObjectGUID)
 
 void WorldSession::HandleSceneCompleted(WorldPacket& recvPacket)
 {
-    SF_LOG_ERROR("network", "recv CMSG_SCENE_COMPLETED");
-    SceneCompletedRequest request = ReadSceneCompletedRequest(recvPacket);
-    SF_LOG_ERROR("network", "hasData %u", request.hasData);
+    uint32 sceneInstanceID = 0;
+    if (!recvPacket.ReadBit())
+        recvPacket >> sceneInstanceID;
+    _player->GetSceneMgr().OnSceneComplete(sceneInstanceID);
+}
+
+void WorldSession::HandleScenePlaybackCanceled(WorldPacket& recvPacket)
+{
+    uint32 sceneInstanceID = 0;
+    if (!recvPacket.ReadBit())
+        recvPacket >> sceneInstanceID;
+    _player->GetSceneMgr().OnSceneCancel(sceneInstanceID);
+}
+
+void WorldSession::HandleSceneTriggerEvent(WorldPacket& recvPacket)
+{
+    recvPacket.ReadBit();
+    uint32 len = recvPacket.ReadBits(6);
+    std::string triggerName = recvPacket.ReadString(len);
+    uint32 sceneInstanceID = recvPacket.read<uint32>();
+    _player->GetSceneMgr().OnSceneTrigger(sceneInstanceID, triggerName);
 }
 
 void WorldSession::SendCrossedInebriationThreshold(ObjectGuid guid, uint32 ItemID, DrunkenState drunkenState)

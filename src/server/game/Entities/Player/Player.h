@@ -17,6 +17,7 @@
 #include "PetDefines.h"
 #include "PlayerTaxi.h"
 #include "QuestDef.h"
+#include "SceneMgr.h"
 #include "SpellMgr.h"
 #include "Unit.h"
 #include "WorldSession.h"
@@ -1522,6 +1523,7 @@ public:
     void TextEmote(std::string const& text);
     /// Handles whispers from Addons and players based on sender, receiver's guid and language.
     void Whisper(std::string const& text, const Language language, uint64 receiver);
+    void Whisper(std::string const& text, const Language language, Player* receiver) { Whisper(text, language, receiver->GetGUID()); }
     void WhisperAddon(std::string const& text, std::string const& prefix, Player* receiver);
 
     /*********************************************************/
@@ -2628,6 +2630,8 @@ public:
         return m_battlePetMgr;
     }
 
+    SceneMgr& GetSceneMgr() { return m_sceneMgr; }
+
     /*********************************************************/
     /***                  PVP SYSTEM                       ***/
     /*********************************************************/
@@ -3472,6 +3476,8 @@ protected:
     uint32 m_lastPotionId;                              // last used health/mana potion in combat, that block next potion use
 
     GlobalCooldownMgr m_GlobalCooldownMgr;
+
+    SceneMgr m_sceneMgr;
 
     PlayerTalentInfo* _talentMgr;
 

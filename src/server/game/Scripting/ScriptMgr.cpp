@@ -196,6 +196,7 @@ void ScriptMgr::Unload()
     SCR_CLEAR(GameObjectScript);
     SCR_CLEAR(AreaTriggerScript);
     SCR_CLEAR(SpellAreaTriggerScript);
+    SCR_CLEAR(SceneScript);
     SCR_CLEAR(BattlegroundScript);
     SCR_CLEAR(OutdoorPvPScript);
     SCR_CLEAR(CommandScript);
@@ -806,6 +807,16 @@ bool ScriptMgr::OnGossipHello(Player* player, GameObject* go)
     return tmpscript->OnGossipHello(player, go);
 }
 
+bool ScriptMgr::OnReportUse(Player* player, GameObject* go)
+{
+    ASSERT(player);
+    ASSERT(go);
+
+    GET_SCRIPT_RET(GameObjectScript, go->GetScriptId(), tmpscript, false);
+    player->PlayerTalkClass->ClearMenus();
+    return tmpscript->OnReportUse(player, go);
+}
+
 bool ScriptMgr::OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
 {
     ASSERT(player);
@@ -924,6 +935,42 @@ IAreaTrigger* ScriptMgr::CreateAreaTriggerInterface(uint32 entry)
 
     GET_SCRIPT_RET(SpellAreaTriggerScript, atTemplate->ScriptId, tmpscript, NULL);
     return tmpscript->GetInterface();
+}
+
+void ScriptMgr::OnSceneStart(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate)
+{
+    ASSERT(player);
+    ASSERT(sceneTemplate);
+
+    GET_SCRIPT(SceneScript, sceneTemplate->ScriptId, tmpscript);
+    tmpscript->OnSceneStart(player, sceneInstanceID, sceneTemplate);
+}
+
+void ScriptMgr::OnSceneTrigger(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate, std::string const& triggerName)
+{
+    ASSERT(player);
+    ASSERT(sceneTemplate);
+
+    GET_SCRIPT(SceneScript, sceneTemplate->ScriptId, tmpscript);
+    tmpscript->OnSceneTriggerEvent(player, sceneInstanceID, sceneTemplate, triggerName);
+}
+
+void ScriptMgr::OnSceneCancel(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate)
+{
+    ASSERT(player);
+    ASSERT(sceneTemplate);
+
+    GET_SCRIPT(SceneScript, sceneTemplate->ScriptId, tmpscript);
+    tmpscript->OnSceneCancel(player, sceneInstanceID, sceneTemplate);
+}
+
+void ScriptMgr::OnSceneComplete(Player* player, uint32 sceneInstanceID, SceneTemplate const* sceneTemplate)
+{
+    ASSERT(player);
+    ASSERT(sceneTemplate);
+
+    GET_SCRIPT(SceneScript, sceneTemplate->ScriptId, tmpscript);
+    tmpscript->OnSceneComplete(player, sceneInstanceID, sceneTemplate);
 }
 
 Battleground* ScriptMgr::CreateBattleground(BattlegroundTypeId /*typeId*/)
@@ -1533,6 +1580,12 @@ SpellAreaTriggerScript::SpellAreaTriggerScript(const char* name)
     ScriptRegistry<SpellAreaTriggerScript>::AddScript(this);
 }
 
+SceneScript::SceneScript(const char* name)
+    : ScriptObject(name)
+{
+    ScriptRegistry<SceneScript>::AddScript(this);
+}
+
 BattlegroundScript::BattlegroundScript(const char* name)
     : ScriptObject(name)
 {
@@ -1628,6 +1681,7 @@ template class ScriptRegistry<CreatureScript>;
 template class ScriptRegistry<GameObjectScript>;
 template class ScriptRegistry<AreaTriggerScript>;
 template class ScriptRegistry<SpellAreaTriggerScript>;
+template class ScriptRegistry<SceneScript>;
 template class ScriptRegistry<BattlegroundScript>;
 template class ScriptRegistry<OutdoorPvPScript>;
 template class ScriptRegistry<CommandScript>;

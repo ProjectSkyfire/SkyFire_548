@@ -1498,6 +1498,9 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     if (go->AI()->GossipHello(_player))
         return;
 
+    if (sScriptMgr->OnReportUse(_player, go))
+        return;
+
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_GAMEOBJECT, go->GetEntry());
 }
 

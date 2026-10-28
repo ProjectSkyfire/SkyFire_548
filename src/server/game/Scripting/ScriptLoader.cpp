@@ -667,6 +667,8 @@ void AddSC_boss_nalak();
 void AddSC_isle_of_thunder();
 void AddSC_instance_isle_of_thunder();
 void AddSC_instance_thunder_king_citadel();
+void AddSC_jade_forest();
+void AddSC_the_veiled_stair();
 
 // Pets
 void AddSC_deathknight_pet_scripts();
@@ -1418,6 +1420,8 @@ void AddPandariaScripts()
     AddSC_isle_of_thunder();
     AddSC_instance_isle_of_thunder();
     AddSC_instance_thunder_king_citadel();
+    AddSC_jade_forest();
+    AddSC_the_veiled_stair();
 #endif
 }
 

@@ -152,6 +152,7 @@ public:
         MoveJump(pos.m_positionX, pos.m_positionY, pos.m_positionZ, speedXY, speedZ, id, arrivalSpellId);
     };
     void MoveJump(float x, float y, float z, float speedXY, float speedZ, uint32 id = EVENT_JUMP, uint32 arrivalSpellId = 0);
+    void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, uint8 stepCount, float velocityOrDuration = 0.0f);
     void MoveFall(uint32 id = 0);
 
     void MoveSeekAssistance(float x, float y, float z);

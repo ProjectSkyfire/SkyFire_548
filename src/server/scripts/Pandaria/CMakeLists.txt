@@ -39,6 +39,8 @@ set(scripts_STAT_SRCS
   Pandaria/zone_isle_of_thunder.cpp
   Pandaria/Scenarios/IsleOfThunder/instance_isle_of_thunder.cpp
   Pandaria/Scenarios/IsleOfThunder/instance_thunder_king_citadel.cpp
+  Pandaria/zone_the_jade_forest.cpp
+  Pandaria/zone_the_veiled_stair.cpp
 )
 
 message("  -> Prepared: Pandaria")

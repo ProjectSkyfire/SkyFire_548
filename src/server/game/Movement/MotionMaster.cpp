@@ -365,6 +365,38 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     Mutate(new EffectMovementGenerator(id, arrivalSpellId), MOTION_SLOT_CONTROLLED);
 }
 
+void MotionMaster::MoveCirclePath(float x, float y, float z, float radius, bool clockwise, uint8 stepCount, float velocityOrDuration)
+{
+    float step = 2 * float(M_PI) / stepCount * (clockwise ? -1.0f : 1.0f);
+    Position pos;
+    pos.Relocate(x, y, z);
+    float angle = pos.GetAngle(_owner->GetPositionX(), _owner->GetPositionY());
+
+    Movement::PointsArray points;
+    points.reserve(stepCount + 1);
+    points.push_back(G3D::Vector3(_owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ()));
+    for (uint8 i = 0; i < stepCount; angle += step, ++i)
+    {
+        G3D::Vector3 point;
+        point.x = x + radius * cosf(angle);
+        point.y = y + radius * sinf(angle);
+
+        if (_owner->CanFly() || _owner->IsFlying())
+            point.z = z;
+        else
+            point.z = _owner->GetMap()->GetHeight(_owner->GetPhaseMask(), point.x, point.y, z);
+
+        points.push_back(point);
+    }
+
+    Movement::MoveSplineInit init(_owner);
+    init.SetCyclic();
+    if (velocityOrDuration)
+        init.SetVelocity(velocityOrDuration);
+    init.MovebyPath(points);
+    init.Launch();
+}
+
 void MotionMaster::MoveFall(uint32 id /*=0*/)
 {
     // use larger distance for vmap height search than in most other cases

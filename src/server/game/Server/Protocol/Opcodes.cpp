@@ -436,6 +436,8 @@ void OpcodeTable::InitializeClientTable()
     DEFINE_OPCODE_HANDLER(CMSG_RIDE_VEHICLE_INTERACT,                   0x0277, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleRideVehicleInteract             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SAVE_CUF_PROFILES,                       0x06E6, STATUS_LOGGEDIN,                     PROCESS_INPLACE,      &WorldSession::HandleSaveCUFProfiles                 ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SCENE_COMPLETED,                         0x0087, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSceneCompleted                  ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SCENE_PLAYBACK_CANCELED,                 0x1087, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleScenePlaybackCanceled           ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(CMSG_SCENE_TRIGGER_EVENT,                     0x02C4, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSceneTriggerEvent               ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SELECT_FACTION,                          0x0027, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSelectFactionOpcode             ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SELF_RES,                                0x0360, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSelfResOpcode                   ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(CMSG_SELL_ITEM,                               0x1358, STATUS_LOGGEDIN,                     PROCESS_THREADUNSAFE, &WorldSession::HandleSellItemOpcode                  ); // 5.4.8 18414

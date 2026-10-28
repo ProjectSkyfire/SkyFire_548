@@ -1187,6 +1187,234 @@ public:
     }
 };
 
+enum RareChests
+{
+    // Objects
+    // Dread Wastes
+    GO_WIND_REAVERS_DAGGER_OF_QUICK_STRIKES    = 213962,
+    GO_MALIKS_STALWART_SPEAR                   = 213964,
+    GO_AMBER_ENCASED_NECKLACE                  = 213966,
+    GO_BLADE_OF_THE_PRIME                      = 213967,
+    GO_SWARMING_CLEAVER_OF_KA_ROZ              = 213968,
+    GO_DISSECTORS_STAFF_OF_MUTATION            = 213969,
+    GO_BLOODSOAKED_CHITIN_FRAGMENT             = 213970,
+    GO_SWARMKEEPERS_MEDALLION                  = 213971,
+    GO_BLADE_OF_THE_POISONED_MIND              = 213972,
+    // Krasarang Wilds
+    GO_EQUIPMENT_LOCKER                        = 213651,
+    GO_PANDAREN_FISHING_SPEAR                  = 213653,
+    GO_BARREL_OF_BANANA_INFUSED_RUM            = 214439,
+    GO_STACK_OF_PAPERS                         = 214403,
+    GO_SAUROK_STONE_TABLET                     = 213750,
+    // Jade Forest
+    GO_ANCIENT_JINYU_STAFF                     = 213741,
+    GO_ANCIENT_PANDAREN_MINING_PICK            = 213364,
+    GO_HAMMER_OF_TEN_THUNDERS                  = 213742,
+    GO_WODINS_MANTID_SHANKER                   = 213363,
+    GO_ANCIENT_PANDAREN_TEA_POT                = 213366,
+    GO_LUCKY_PANDAREN_COIN                     = 213368,
+    GO_OFFERING_OF_REMEMBRANCE                 = 214338,
+    GO_PANDAREN_RITUAL_STONE                   = 213748,
+    GO_SHIPS_LOCKER                            = 213362,
+    GO_STASH_OF_GEMS                           = 214337,
+    GO_CHEST_OF_SUPLIES                        = 214339,
+    // The Vieled Stair
+    GO_FORGOTTEN_LOCKBOX                       = 214325,
+    GO_THE_HAMMER_OF_FOLLY                     = 213845,
+    // Townlong Steppes
+    GO_YAUNGOL_FIRE_CARRIER                    = 213960,
+    GO_ABANDONED_CRATE_OF_GOODS                = 213961,
+    GO_AMBER_ENCASED_MOTH                      = 213844,
+    GO_FRAGMENT_OF_DREAD                       = 213956,
+    GO_HARDENED_SAP_OF_KRI_VESS                = 213959,
+    GO_BAG_OF_WU_KAO_SUPPLIES                  = 214175,
+    // Valley of the Four Winds
+    GO_STAFF_OF_THE_HIDDEN_MASTER              = 213749,
+    GO_CACHE_OF_PILFERED_GOODS                 = 213649,
+    GO_BOAT_BUILDING_INSTRUCTIONS              = 214340,
+    GO_VIRMEN_TREASURE_CHEST                   = 213650,
+    // Kun-Lai Summit
+    GO_HOZEN_WARRIOR_SPEAR                     = 213768,
+    GO_STASH_OF_YAUNGOL_WEAPON                 = 213842,
+    GO_SPRITES_CLOTH_CHEST                     = 213751,
+    GO_TABLET_OF_REN_YUN                       = 213765,
+    GO_ANCIENT_MOGU_TABLET                     = 214438,
+    GO_HOZEN_TREASURE_CHEST                    = 213769,
+    GO_LOST_ADVENTURERS_BELONGINGS             = 213774,
+    GO_MO_MOS_TRASURE_CHEST                    = 214407,
+    GO_RIKKTIKS_TINY_CHEST                     = 213793,
+    GO_STATUE_OF_XUEN                          = 213771,
+    GO_STOLEN_SPIRITE_TREASURE                 = 213770,
+    GO_TERRACOTTA_HEAD                         = 213782,
+
+    // Quests
+    // Dread Wastes quests
+    QUEST_WIND_REAVERS_DAGGER_OF_QUICK_STRIKES = 31666,
+    QUEST_MALIKS_STALWART_SPEAR                = 31430,
+    QUEST_AMBER_ENCASED_NECKLACE               = 31431,
+    QUEST_BLADE_OF_THE_PRIME                   = 31433,
+    QUEST_SWARMING_CLEAVER_OF_KA_ROZ           = 31434,
+    QUEST_DISSECTORS_STAFF_OF_MUTATION         = 31435,
+    QUEST_BLOODSOAKED_CHITIN_FRAGMENT          = 31436,
+    QUEST_SWARMKEEPERS_MEDALLION               = 31437,
+    QUEST_BLADE_OF_THE_POISONED_MIND           = 31438,
+    // Krasarang Wilds quests
+    QUEST_EQUIPMENT_LOCKER                     = 31410,
+    QUEST_PANDAREN_FISHING_SPEAR               = 31409,
+    QUEST_BARREL_OF_BANANA_INFUSED_RUM         = 31411,
+    QUEST_STACK_OF_PAPERS                      = 31863,
+    QUEST_SAUROK_STONE_TABLET                  = 31408,
+    // Jade Forest
+    QUEST_ANCIENT_JINYU_STAFF                  = 31402,
+    QUEST_ANCIENT_PANDAREN_MINING_PICK         = 31399,
+    QUEST_HAMMER_OF_TEN_THUNDERS               = 31403,
+    QUEST_WODINS_MANTID_SHANKER                = 31397,
+    QUEST_ANCIENT_PANDAREN_TEA_POT             = 31400,
+    QUEST_LUCKY_PANDAREN_COIN                  = 31401,
+    QUEST_OFFERING_OF_REMEMBRANCE              = 31865,
+    QUEST_PANDAREN_RITUAL_STONE                = 31404,
+    QUEST_SHIPS_LOCKER                         = 31396,
+    QUEST_STASH_OF_GEMS                        = 31866,
+    QUEST_CHEST_OF_SUPLIES                     = 31864,
+    // The Vieled Stair
+    QUEST_FORGOTTEN_LOCKBOX                    = 31867,
+    QUEST_THE_HAMMER_OF_FOLLY                  = 31428,
+    // Townlong Steppes
+    QUEST_YAUNGOL_FIRE_CARRIER                 = 31425,
+    QUEST_ABANDONED_CRATE_OF_GOODS             = 31427,
+    QUEST_AMBER_ENCASED_MOTH                   = 31426,
+    QUEST_FRAGMENT_OF_DREAD                    = 31423,
+    QUEST_HARDENED_SAP_OF_KRI_VESS             = 31424,
+    QUEST_BAG_OF_WU_KAO_SUPPLIES               = 31466,
+    // Valley of the Four Winds
+    QUEST_STAFF_OF_THE_HIDDEN_MASTER           = 31407,
+    QUEST_CACHE_OF_PILFERED_GOODS              = 31406,
+    QUEST_BOAT_BUILDING_INSTRUCTIONS           = 31869,
+    QUEST_VIRMEN_TREASURE_CHEST                = 31405,
+    // Kun-Lai Summit
+    QUEST_HOZEN_WARRIOR_SPEAR                  = 31413,
+    QUEST_STASH_OF_YAUNGOL_WEAPON              = 31421,
+    QUEST_SPRITES_CLOTH_CHEST                  = 31412,
+    QUEST_TABLET_OF_REN_YUN                    = 31417,
+    QUEST_ANCIENT_MOGU_TABLET                  = 31420,
+    QUEST_HOZEN_TREASURE_CHEST                 = 31414,
+    QUEST_LOST_ADVENTURERS_BELONGINGS          = 31418,
+    QUEST_MO_MOS_TRASURE_CHEST                 = 31868,
+    QUEST_RIKKTIKS_TINY_CHEST                  = 31419,
+    QUEST_STATUE_OF_XUEN                       = 31416,
+    QUEST_STOLEN_SPIRITE_TREASURE              = 31415,
+    QUEST_TERRACOTTA_HEAD                      = 31422,
+
+    // Spells
+    SPELL_CHASTIFIED                           = 131924,
+};
+
+std::map<uint32, uint32> rareChestsMap =
+{
+    // Dread Wastes objects
+    { GO_WIND_REAVERS_DAGGER_OF_QUICK_STRIKES,    QUEST_WIND_REAVERS_DAGGER_OF_QUICK_STRIKES },
+    { GO_MALIKS_STALWART_SPEAR,                   QUEST_MALIKS_STALWART_SPEAR                },
+    { GO_AMBER_ENCASED_NECKLACE,                  QUEST_AMBER_ENCASED_NECKLACE               },
+    { GO_BLADE_OF_THE_PRIME,                      QUEST_BLADE_OF_THE_PRIME                   },
+    { GO_SWARMING_CLEAVER_OF_KA_ROZ,              QUEST_SWARMING_CLEAVER_OF_KA_ROZ           },
+    { GO_DISSECTORS_STAFF_OF_MUTATION,            QUEST_DISSECTORS_STAFF_OF_MUTATION         },
+    { GO_BLOODSOAKED_CHITIN_FRAGMENT,             QUEST_BLOODSOAKED_CHITIN_FRAGMENT          },
+    { GO_SWARMKEEPERS_MEDALLION,                  QUEST_SWARMKEEPERS_MEDALLION               },
+    { GO_BLADE_OF_THE_POISONED_MIND,              QUEST_BLADE_OF_THE_POISONED_MIND           },
+    // Krasarang Wilds objects
+    { GO_EQUIPMENT_LOCKER,                        QUEST_EQUIPMENT_LOCKER                     },
+    { GO_PANDAREN_FISHING_SPEAR,                  QUEST_PANDAREN_FISHING_SPEAR               },
+    { GO_BARREL_OF_BANANA_INFUSED_RUM,            QUEST_BARREL_OF_BANANA_INFUSED_RUM         },
+    { GO_STACK_OF_PAPERS,                         QUEST_STACK_OF_PAPERS                      },
+    { GO_SAUROK_STONE_TABLET,                     QUEST_SAUROK_STONE_TABLET                  },
+    // Jade Forest
+    { GO_ANCIENT_JINYU_STAFF,                     QUEST_ANCIENT_JINYU_STAFF                  },
+    { GO_ANCIENT_PANDAREN_MINING_PICK,            QUEST_ANCIENT_PANDAREN_MINING_PICK         },
+    { GO_HAMMER_OF_TEN_THUNDERS,                  QUEST_HAMMER_OF_TEN_THUNDERS               },
+    { GO_WODINS_MANTID_SHANKER,                   QUEST_WODINS_MANTID_SHANKER                },
+    { GO_ANCIENT_PANDAREN_TEA_POT,                QUEST_ANCIENT_PANDAREN_TEA_POT             },
+    { GO_LUCKY_PANDAREN_COIN,                     QUEST_LUCKY_PANDAREN_COIN                  },
+    { GO_OFFERING_OF_REMEMBRANCE,                 QUEST_OFFERING_OF_REMEMBRANCE              },
+    { GO_PANDAREN_RITUAL_STONE,                   QUEST_PANDAREN_RITUAL_STONE                },
+    { GO_SHIPS_LOCKER,                            QUEST_SHIPS_LOCKER                         },
+    { GO_STASH_OF_GEMS,                           QUEST_STASH_OF_GEMS                        },
+    { GO_CHEST_OF_SUPLIES,                        QUEST_CHEST_OF_SUPLIES                     },
+    // The Vieled Stair
+    { GO_FORGOTTEN_LOCKBOX,                       QUEST_FORGOTTEN_LOCKBOX                    },
+    { GO_THE_HAMMER_OF_FOLLY,                     QUEST_THE_HAMMER_OF_FOLLY                  },
+    // Townlong Steppes
+    { GO_YAUNGOL_FIRE_CARRIER,                    QUEST_YAUNGOL_FIRE_CARRIER                 },
+    { GO_ABANDONED_CRATE_OF_GOODS,                QUEST_ABANDONED_CRATE_OF_GOODS             },
+    { GO_AMBER_ENCASED_MOTH,                      QUEST_AMBER_ENCASED_MOTH                   },
+    { GO_FRAGMENT_OF_DREAD,                       QUEST_FRAGMENT_OF_DREAD                    },
+    { GO_HARDENED_SAP_OF_KRI_VESS,                QUEST_HARDENED_SAP_OF_KRI_VESS             },
+    { GO_BAG_OF_WU_KAO_SUPPLIES,                  QUEST_BAG_OF_WU_KAO_SUPPLIES               },
+    // Valley of the Four Winds
+    { GO_STAFF_OF_THE_HIDDEN_MASTER,              QUEST_STAFF_OF_THE_HIDDEN_MASTER           },
+    { GO_CACHE_OF_PILFERED_GOODS,                 QUEST_CACHE_OF_PILFERED_GOODS              },
+    { GO_BOAT_BUILDING_INSTRUCTIONS,              QUEST_BOAT_BUILDING_INSTRUCTIONS           },
+    { GO_VIRMEN_TREASURE_CHEST,                   QUEST_VIRMEN_TREASURE_CHEST                },
+    // Kun-Lai Summit
+    { GO_HOZEN_WARRIOR_SPEAR,                     QUEST_HOZEN_WARRIOR_SPEAR                  },
+    { GO_STASH_OF_YAUNGOL_WEAPON,                 QUEST_STASH_OF_YAUNGOL_WEAPON              },
+    { GO_SPRITES_CLOTH_CHEST,                     QUEST_SPRITES_CLOTH_CHEST                  },
+    { GO_TABLET_OF_REN_YUN,                       QUEST_TABLET_OF_REN_YUN                    },
+    { GO_ANCIENT_MOGU_TABLET,                     QUEST_ANCIENT_MOGU_TABLET                  },
+    { GO_HOZEN_TREASURE_CHEST,                    QUEST_HOZEN_TREASURE_CHEST                 },
+    { GO_LOST_ADVENTURERS_BELONGINGS,             QUEST_LOST_ADVENTURERS_BELONGINGS          },
+    { GO_MO_MOS_TRASURE_CHEST,                    QUEST_MO_MOS_TRASURE_CHEST                 },
+    { GO_RIKKTIKS_TINY_CHEST,                     QUEST_RIKKTIKS_TINY_CHEST                  },
+    { GO_STATUE_OF_XUEN,                          QUEST_STATUE_OF_XUEN                       },
+    { GO_STOLEN_SPIRITE_TREASURE,                 QUEST_STOLEN_SPIRITE_TREASURE              },
+    { GO_TERRACOTTA_HEAD,                         QUEST_TERRACOTTA_HEAD                      },
+};
+
+class go_pandaria_rare_chests : public GameObjectScript
+{
+    public:
+        go_pandaria_rare_chests() : GameObjectScript("go_pandaria_rare_chests") { }
+
+        bool OnReportUse(Player* player, GameObject* go) OVERRIDE
+        {
+            if (go->GetEntry() == GO_OFFERING_OF_REMEMBRANCE)
+                go->CastSpell(player, SPELL_CHASTIFIED);
+
+            auto itr = rareChestsMap.find(go->GetEntry());
+            if (itr != rareChestsMap.end())
+            {
+                if (player->GetQuestStatus(itr->second) != QUEST_STATUS_REWARDED)
+                {
+                    if (Quest const* quest = sObjectMgr->GetQuestTemplate(itr->second))
+                        player->RewardQuest(quest, 0, player, false);
+                    if (GameObjectTemplate const* objectInfo = sObjectMgr->GetGameObjectTemplate(itr->first))
+                        if (objectInfo->GetLockId() == 0)
+                            player->SendLoot(go->GetGUID(), LootType::LOOT_CORPSE);
+                }
+                else
+                {
+                    player->SendGameError(GameError::ERR_LOOT_CANT_LOOT_THAT);
+                    go->ForcedDespawn();
+                }
+            }
+
+            return false;
+        }
+};
+
+// 209354, 221545 - Golden Lotus
+struct go_golden_lotus : public GameObjectScript
+{
+    go_golden_lotus() : GameObjectScript("go_golden_lotus") { }
+
+    enum { SPELL_LUCK_OF_THE_LOTUS = 130653, };
+
+    void OnLootStateChanged(GameObject* go, uint32 state, Unit* unit) OVERRIDE
+    {
+        if (LootState(state) == LootState::GO_JUST_DEACTIVATED && unit && unit->GetTypeId() == TypeID::TYPEID_PLAYER)
+            unit->CastSpell(unit, SPELL_LUCK_OF_THE_LOTUS, true);
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine();
@@ -1225,4 +1453,6 @@ void AddSC_go_scripts()
     new go_veil_skith_cage();
     new go_frostblade_shrine();
     new go_midsummer_bonfire();
+    new go_pandaria_rare_chests();
+    new go_golden_lotus();
 }

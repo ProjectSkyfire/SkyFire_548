@@ -14,6 +14,7 @@
 #include "ObjectDefines.h"
 #include "UpdateMask.h"
 
+#include <G3D/Quat.h>
 #include <set>
 #include <sstream>
 #include <string>
@@ -630,6 +631,7 @@ public:
     void MovePositionToFirstCollosionBySteps(Position& pos, float dist, float angle, float heightCheckInterval = 2.0f, bool allowInAir = false);
     void GetFirstCollisionPosition(Position& pos, float dist, float angle);
     void GetRandomNearPosition(Position& pos, float radius);
+    Position GetRandomNearPosition(float radius);
     void GetContactPoint(WorldObject const* obj, float& x, float& y, float& z, float distance2d = CONTACT_DISTANCE) const;
 
     float GetObjectSize() const;
@@ -727,6 +729,11 @@ public:
     float GetSightRange(WorldObject const* target = NULL) const;
     bool CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth = false, bool distanceCheck = false) const;
 
+    bool IsPrivateObject() const { return _privateObjectOwner != 0; }
+    uint64 GetPrivateObjectOwner() const { return _privateObjectOwner; }
+    void SetPrivateObjectOwner(uint64 owner) { _privateObjectOwner = owner; }
+    bool CheckPrivateObjectOwnerVisibility(WorldObject const* seer) const;
+
     FlaggedValuesArray32<int32, uint32, StealthType, TOTAL_STEALTH_TYPES> m_stealth;
     FlaggedValuesArray32<int32, uint32, StealthType, TOTAL_STEALTH_TYPES> m_stealthDetect;
 
@@ -762,6 +769,7 @@ public:
         return SummonCreature(id, x, y, z, ang, spwtype, uint32(despwtime.count()));
     }
     GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime);
+    GameObject* SummonGameObject(uint32 entry, float x, float y, float z, float ang, G3D::Quat const& rotation, uint32 respawnTime);
     Creature* SummonTrigger(float x, float y, float z, float ang, uint32 dur, CreatureAI* (*GetAI)(Creature*) = NULL);
     void SummonCreatureGroup(uint8 group, std::list<TempSummon*>* list = NULL);
 
@@ -856,6 +864,7 @@ private:
 
     uint16 m_notifyflags;
     uint16 m_executed_notifies;
+    uint64 _privateObjectOwner;
     virtual bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
 
     bool CanNeverSee(WorldObject const* obj) const;

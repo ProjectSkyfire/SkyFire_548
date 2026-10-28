@@ -832,62 +832,8 @@ void AuraEffect::HandlePlayScene(AuraApplication const* aurApp, uint8 mode, bool
         return;
     }
 
-    // check db2 if packageid exists
-    SceneScriptPackageEntry const* entry = sSceneScriptPackageStore.LookupEntry(sceneTemplate->ScenePackageId);
-    if (!entry)
-    {
-        SF_LOG_ERROR("spells", "ScenePackageID: %u does not exist in db2.", sceneTemplate->ScenePackageId);
-        return;
-    }
-
-    ObjectGuid transportGUID = target->GetTransGUID();
-    float PositionX = target->GetPositionX();
-    float PositionY = target->GetPositionY();
-    float PositionZ = target->GetPositionZ();
-    float PositionO = target->GetOrientation();
-    bool hasSceneID = sceneTemplate->SceneId;
-    bool hasSceneFlags = sceneTemplate->PlaybackFlags;
-    bool hasSceneScriptPackageID = sceneTemplate->ScenePackageId;
-    uint32 sceneInstanceID = 0;
-    if (!sceneInstanceID)
-        ++sceneInstanceID;
     if (apply)
-    {
-        WorldPacket data(SMSG_PLAY_SCENE, 4 + 4 + 4 + 1 + 8 + 4 + 4 + 4 + 4 + 4);
-        data << float(PositionY);
-        data << float(PositionZ);
-        data << float(PositionX);
-
-        data.WriteBit(!hasSceneFlags);
-        data.WriteBit(!sceneInstanceID);
-        data.WriteBit(!PositionO);
-        data.WriteBit(!hasSceneID);
-        data.WriteBit(!hasSceneScriptPackageID);
-        data.WriteBit(true);
-
-        data.WriteGuidMask(transportGUID, 3, 2, 6, 4, 7, 1, 5, 0);
-        data.FlushBits();
-        data.WriteGuidBytes(transportGUID, 6, 3, 5, 4, 1, 2, 0, 7);
-
-        if (hasSceneFlags)
-            data << uint32(sceneTemplate->PlaybackFlags);
-        if (PositionO)
-            data << float(PositionO);
-        if (hasSceneID)
-            data << uint32(sceneTemplate->SceneId);
-        if (sceneInstanceID)
-            data << uint32(sceneInstanceID);
-        if (hasSceneScriptPackageID)
-            data << uint32(sceneTemplate->ScenePackageId);
-
-        target->GetSession()->SendPacket(&data);
-    }
+        target->GetSceneMgr().PlayScene(sceneTemplate->SceneId);
     else
-    {
-        WorldPacket data(SMSG_CANCEL_SCENE, 4 + 1);
-        data.WriteBit(!sceneInstanceID);
-        data.FlushBits();
-        data << uint32(sceneInstanceID);    // SceneInstanceID
-        target->GetSession()->SendPacket(&data);
-    }
+        target->GetSceneMgr().CancelSceneByPackageId(sceneTemplate->ScenePackageId);
 }
