@@ -197,6 +197,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/zone_stranglethorn_vale.cpp
   EasternKingdoms/zone_undercity.cpp
   EasternKingdoms/zone_westfall.cpp
+  EasternKingdoms/zone_twilight_highlands.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")

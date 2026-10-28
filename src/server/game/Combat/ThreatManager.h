@@ -38,6 +38,8 @@ public:
 
     float getThreat() const { return iThreat; }
 
+    Unit* GetVictim() const { return getTarget(); }
+
     bool isOnline() const { return iOnline; }
 
     // The Unit might be in water and the creature can not enter the water, but has range attack
@@ -239,6 +241,7 @@ public:
     // methods to access the lists from the outside to do some dirty manipulation (scriping and such)
     // I hope they are used as little as possible.
     ThreatContainer::StorageType const& getThreatList() const { return iThreatContainer.getThreatList(); }
+    ThreatContainer::StorageType const& GetUnsortedThreatList() const { return getThreatList(); }
     ThreatContainer::StorageType const& getOfflineThreatList() const { return iThreatOfflineContainer.getThreatList(); }
     ThreatContainer& getOnlineContainer() { return iThreatContainer; }
     ThreatContainer& getOfflineContainer() { return iThreatOfflineContainer; }
