@@ -329,7 +329,7 @@ struct boss_krik_thir : public BossAI
 
                 case EVENT_FRENZY:
                     DoCast(me, SPELL_FRENZY);
-                    DoCastVictim(DUNGEON_MODE(SPELL_CURSE_OF_FATIGUE, SPELL_CURSE_OF_FATIGUE_HEROIC));
+                    DoCastAOE(DUNGEON_MODE(SPELL_CURSE_OF_FATIGUE, SPELL_CURSE_OF_FATIGUE_HEROIC));
                     events.ScheduleEvent(EVENT_FRENZY, 15 * IN_MILLISECONDS);
                     break;
             }
