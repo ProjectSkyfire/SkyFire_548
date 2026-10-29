@@ -176,8 +176,8 @@ void ReputationMgr::SendState(FactionState const* faction)
             itr->second.needSend = false;
             if (itr->second.ReputationListID != faction->ReputationListID)
             {
-                data << uint32(itr->second.ReputationListID);
                 data << uint32(itr->second.Standing);
+                data << uint32(itr->second.ReputationListID);
                 ++count;
             }
         }
