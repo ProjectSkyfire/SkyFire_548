@@ -37,11 +37,13 @@
 #include "SpellAuras.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
+#include <set>
 
 enum Spells
 {
     SPELL_EMERGE                = 53500,
     SPELL_SUBMERGE              = 53421,
+    SPELL_CLEAR_ALL_DEBUFFS     = 34098,
     SPELL_IMPALE_AURA           = 53456,
     SPELL_IMPALE_VISUAL         = 53455,
     SPELL_IMPALE_DAMAGE         = 53454,
@@ -90,6 +92,8 @@ enum Events
     EVENT_GUARDIAN,
     EVENT_VENOMANCER,
     EVENT_CLOSE_DOOR,
+    EVENT_EMERGE,
+    EVENT_POUND_UNROOT,
 
     EVENT_PET_BACKSTAB,
     EVENT_PET_SUNDER_ARMOR,
@@ -98,8 +102,7 @@ enum Events
 
 enum Actions
 {
-    ACTION_PET_DIED = 1,
-    ACTION_PET_EVADE
+    ACTION_PET_EVADE = 1
 };
 
 enum Misc
@@ -119,6 +122,7 @@ enum Phases
 enum GUIDTypes
 {
     GUID_TYPE_PET = 0,
+    GUID_TYPE_PET_DIED,
     GUID_TYPE_IMPALE
 };
 
@@ -151,10 +155,14 @@ static Creature* GetAnubarak(Creature* me)
 
 struct boss_anub_arak : public BossAI
 {
-    boss_anub_arak(Creature* creature) : BossAI(creature, DATA_ANUBARAK), _nextSubmerge(0), _petCount(0), _assassinCount(0), _guardianCount(0), _venomancerCount(0), _impaleTarget(0) { }
+    boss_anub_arak(Creature* creature) : BossAI(creature, DATA_ANUBARAK), _nextSubmerge(0), _petCount(0), _assassinCount(0), _guardianCount(0), _venomancerCount(0), _impaleTarget(0), _poundRooted(false) { }
 
     void Reset() OVERRIDE
     {
+        if (_poundRooted)
+            me->SetControlled(false, UNIT_STATE_ROOT);
+        _poundRooted = false;
+        _phasePets.clear();
         BossAI::Reset();
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
         instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_GOTTA_GO_START_EVENT);
@@ -190,13 +198,18 @@ struct boss_anub_arak : public BossAI
 
     void EnterEvadeMode() OVERRIDE
     {
+        if (_poundRooted)
+            me->SetControlled(false, UNIT_STATE_ROOT);
+        _poundRooted = false;
         summons.DespawnAll();
         _DespawnAtEvade();
     }
 
     void SummonAddAt(uint32 entry, Position const& position)
     {
-        me->SummonCreature(entry, position, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
+        if (Creature* summon = me->SummonCreature(entry, position, TempSummonType::TEMPSUMMON_CORPSE_DESPAWN))
+            if (entry == NPC_GUARDIAN || entry == NPC_VENOMANCER)
+                _phasePets.insert(summon->GetGUID());
     }
 
     void SummonAtLedge(uint32 entry)
@@ -251,8 +264,26 @@ struct boss_anub_arak : public BossAI
                     SetWallsOpen(false);
                     break;
                 case EVENT_POUND:
-                    DoCastVictim(SPELL_POUND);
+                {
+                    Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10.0f);
+                    if (!target)
+                        target = me->GetVictim();
+                    if (target)
+                    {
+                        me->SetControlled(true, UNIT_STATE_ROOT);
+                        _poundRooted = true;
+                        events.ScheduleEvent(EVENT_POUND_UNROOT, 3300);
+                        DoCast(target, SPELL_POUND);
+                    }
                     events.ScheduleEvent(EVENT_POUND, urand(26, 32) * IN_MILLISECONDS, 0, PHASE_EMERGE);
+                    break;
+                }
+                case EVENT_POUND_UNROOT:
+                    me->SetControlled(false, UNIT_STATE_ROOT);
+                    _poundRooted = false;
+                    break;
+                case EVENT_EMERGE:
+                    Emerge();
                     break;
                 case EVENT_LEECHING_SWARM:
                     Talk(SAY_LOCUST);
@@ -269,6 +300,7 @@ struct boss_anub_arak : public BossAI
                     break;
                 case EVENT_SUBMERGE:
                     Talk(SAY_SUBMERGE);
+                    DoCast(me, SPELL_CLEAR_ALL_DEBUFFS, true);
                     DoCast(me, SPELL_SUBMERGE);
                     break;
                 case EVENT_DARTER:
@@ -310,6 +342,25 @@ struct boss_anub_arak : public BossAI
             Talk(SAY_SLAY);
     }
 
+    void Emerge()
+    {
+        events.CancelEvent(EVENT_EMERGE);
+        events.CancelEvent(EVENT_DARTER);
+        events.CancelEvent(EVENT_ASSASSIN);
+        events.CancelEvent(EVENT_GUARDIAN);
+        events.CancelEvent(EVENT_VENOMANCER);
+        _phasePets.clear();
+        _petCount = 0;
+        me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
+        me->RemoveAurasDueToSpell(SPELL_IMPALE_AURA);
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+        DoCast(me, SPELL_EMERGE);
+        events.SetPhase(PHASE_EMERGE);
+        events.ScheduleEvent(EVENT_POUND, urand(13, 18) * IN_MILLISECONDS, 0, PHASE_EMERGE);
+        events.ScheduleEvent(EVENT_LEECHING_SWARM, urand(3, 7) * IN_MILLISECONDS, 0, PHASE_EMERGE);
+        events.ScheduleEvent(EVENT_CARRION_BEETLES, urand(10, 15) * IN_MILLISECONDS, 0, PHASE_EMERGE);
+    }
+
     void SetGUID(uint64 guid, int32 id = 0) OVERRIDE
     {
         if (id == GUID_TYPE_IMPALE)
@@ -317,37 +368,14 @@ struct boss_anub_arak : public BossAI
             _impaleTarget = guid;
             events.ScheduleEvent(EVENT_IMPALE, 4 * IN_MILLISECONDS);
         }
+        else if (id == GUID_TYPE_PET_DIED && me->IsAlive() && _phasePets.erase(guid) && _petCount && !--_petCount)
+            Emerge();
     }
 
     void DoAction(int32 action) OVERRIDE
     {
-        if (!me->IsAlive())
-            return;
-
-        switch (action)
-        {
-            case ACTION_PET_DIED:
-                if (!_petCount) // underflow check - something has gone horribly wrong
-                {
-                    EnterEvadeMode();
-                    return;
-                }
-                if (!--_petCount) // last pet died, emerge
-                {
-                    me->RemoveAurasDueToSpell(SPELL_SUBMERGE);
-                    me->RemoveAurasDueToSpell(SPELL_IMPALE_AURA);
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                    DoCast(me, SPELL_EMERGE);
-                    events.SetPhase(PHASE_EMERGE);
-                    events.ScheduleEvent(EVENT_POUND, urand(13, 18) * IN_MILLISECONDS, 0, PHASE_EMERGE);
-                    events.ScheduleEvent(EVENT_LEECHING_SWARM, urand(3, 7) * IN_MILLISECONDS, 0, PHASE_EMERGE);
-                    events.ScheduleEvent(EVENT_CARRION_BEETLES, urand(10, 15) * IN_MILLISECONDS, 0, PHASE_EMERGE);
-                }
-                break;
-            case ACTION_PET_EVADE:
-                EnterEvadeMode();
-                break;
-        }
+        if (me->IsAlive() && action == ACTION_PET_EVADE)
+            EnterEvadeMode();
     }
 
     void DamageTaken(Unit* /*source*/, uint32& damage) OVERRIDE
@@ -369,7 +397,11 @@ struct boss_anub_arak : public BossAI
             me->RemoveAurasDueToSpell(SPELL_LEECHING_SWARM);
             DoCast(me, SPELL_IMPALE_AURA, true);
 
+            events.CancelEvent(EVENT_POUND);
+            events.CancelEvent(EVENT_LEECHING_SWARM);
+            events.CancelEvent(EVENT_CARRION_BEETLES);
             events.SetPhase(PHASE_SUBMERGE);
+            events.ScheduleEvent(EVENT_EMERGE, 60 * IN_MILLISECONDS, 0, PHASE_SUBMERGE);
             switch (_nextSubmerge)
             {
                 case 50: // first submerge phase
@@ -406,6 +438,8 @@ struct boss_anub_arak : public BossAI
         uint8 _guardianCount;
         uint8 _venomancerCount;
         uint64 _impaleTarget;
+        bool _poundRooted;
+        std::set<uint64> _phasePets;
 };
 
 class npc_anubarak_pet_template : public ScriptedAI
@@ -424,7 +458,7 @@ class npc_anubarak_pet_template : public ScriptedAI
             ScriptedAI::JustDied(killer);
             if (_isLarge)
                 if (Creature* anubarak = GetAnubarak(me))
-                    anubarak->AI()->DoAction(ACTION_PET_DIED);
+                    anubarak->AI()->SetGUID(me->GetGUID(), GUID_TYPE_PET_DIED);
         }
 
         void EnterEvadeMode() OVERRIDE

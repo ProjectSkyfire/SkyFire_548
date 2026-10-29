@@ -1092,6 +1092,21 @@ class spell_hadronox_web_doors : public SpellScript
     }
 };
 
+class spell_hadronox_web_grab : public SpellScript
+{
+    PrepareSpellScript(spell_hadronox_web_grab);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject* target) { return target->GetEntry() == NPC_CRUSHER; });
+    }
+
+    void Register() OVERRIDE
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hadronox_web_grab::FilterTargets, EFFECT_ALL, TARGET_UNIT_SRC_AREA_ENEMY);
+    }
+};
+
 class achievement_hadronox_denied : public AchievementCriteriaScript
 {
     public:
@@ -1130,6 +1145,7 @@ void AddSC_boss_hadronox()
     RegisterAuraScript(spell_hadronox_periodic_summon);
     RegisterAuraScript(spell_hadronox_leeching_poison);
     RegisterSpellScript(spell_hadronox_web_doors);
+    RegisterSpellScript(spell_hadronox_web_grab);
 
     new achievement_hadronox_denied();
 }
