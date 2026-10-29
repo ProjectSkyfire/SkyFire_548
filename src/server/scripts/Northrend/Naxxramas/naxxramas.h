@@ -57,6 +57,10 @@ enum Data64
     DATA_KELTHUZAD_PORTAL03,
     DATA_KELTHUZAD_PORTAL04,
     DATA_KELTHUZAD_TRIGGER,
+    DATA_TESLA_COIL_1,
+    DATA_TESLA_COIL_2,
+    DATA_FEUGEN_COIL_GO,
+    DATA_STALAGG_COIL_GO,
 };
 
 enum CreaturesIds
@@ -70,6 +74,7 @@ enum CreaturesIds
     NPC_HEIGAN                  = 15936,
     NPC_FEUGEN                  = 15930,
     NPC_STALAGG                 = 15929,
+    NPC_TESLA                   = 16218,
     NPC_SAPPHIRON               = 15989,
     NPC_KEL_THUZAD              = 15990,
     NPC_CRYPT_GUARD             = 16573,
