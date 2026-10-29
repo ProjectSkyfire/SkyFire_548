@@ -58,6 +58,12 @@ MinionData const minionData[] =
 };
 
 float const HeiganPos[2] = { 2796.0f, -3707.0f };
+enum WingEvents
+{
+    EVENT_KELTHUZAD_WING_TAUNT = 1,
+    SAY_KELTHUZAD_WING_TAUNT = 6
+};
+
 float const HeiganEruptionSlope[3] =
 {
     (-3685.0f - HeiganPos[1]) / (2724.0f - HeiganPos[0]),
@@ -117,6 +123,9 @@ class instance_naxxramas : public InstanceMapScript
                 SapphironGUID           = 0;
                 KelthuzadGUID           = 0;
                 KelthuzadTriggerGUID    = 0;
+                ArachnidPortalGUID      = 0;
+                ConstructPortalGUID     = 0;
+                MilitaryPortalGUID      = 0;
 
                 playerDied              = 0;
 
@@ -224,6 +233,18 @@ class instance_naxxramas : public InstanceMapScript
                     case GO_KELTHUZAD_TRIGGER:
                         KelthuzadTriggerGUID = go->GetGUID();
                         break;
+                    case GO_ARAC_PORTAL:
+                        ArachnidPortalGUID = go->GetGUID();
+                        UpdateWingPortal(go, GetBossState(BOSS_MAEXXNA) == DONE);
+                        break;
+                    case GO_CONS_PORTAL:
+                        ConstructPortalGUID = go->GetGUID();
+                        UpdateWingPortal(go, GetBossState(BOSS_THADDIUS) == DONE);
+                        break;
+                    case GO_MILI_PORTAL:
+                        MilitaryPortalGUID = go->GetGUID();
+                        UpdateWingPortal(go, GetBossState(BOSS_HORSEMEN) == DONE);
+                        break;
                     default:
                         break;
                 }
@@ -243,6 +264,18 @@ class instance_naxxramas : public InstanceMapScript
 
                 switch (go->GetEntry())
                 {
+                    case GO_ARAC_PORTAL:
+                        if (ArachnidPortalGUID == go->GetGUID())
+                            ArachnidPortalGUID = 0;
+                        break;
+                    case GO_CONS_PORTAL:
+                        if (ConstructPortalGUID == go->GetGUID())
+                            ConstructPortalGUID = 0;
+                        break;
+                    case GO_MILI_PORTAL:
+                        if (MilitaryPortalGUID == go->GetGUID())
+                            MilitaryPortalGUID = 0;
+                        break;
                     case GO_BIRTH:
                         if (SapphironGUID)
                         {
@@ -358,6 +391,12 @@ class instance_naxxramas : public InstanceMapScript
                         return PortalsGUID[3];
                     case DATA_KELTHUZAD_TRIGGER:
                         return KelthuzadTriggerGUID;
+                    case DATA_NAXX_PORTAL_ARACHNID:
+                        return ArachnidPortalGUID;
+                    case DATA_NAXX_PORTAL_CONSTRUCT:
+                        return ConstructPortalGUID;
+                    case DATA_NAXX_PORTAL_MILITARY:
+                        return MilitaryPortalGUID;
                 }
 
                 return 0;
@@ -367,6 +406,27 @@ class instance_naxxramas : public InstanceMapScript
             {
                 if (!InstanceScript::SetBossState(id, state))
                     return false;
+
+                uint64 portalGUID = 0;
+                switch (id)
+                {
+                    case BOSS_MAEXXNA:
+                        portalGUID = ArachnidPortalGUID;
+                        break;
+                    case BOSS_THADDIUS:
+                        portalGUID = ConstructPortalGUID;
+                        break;
+                    case BOSS_HORSEMEN:
+                        portalGUID = MilitaryPortalGUID;
+                        break;
+                }
+
+                if (portalGUID)
+                    if (GameObject* portal = instance->GetGameObject(portalGUID))
+                        UpdateWingPortal(portal, state == DONE);
+
+                if (state == DONE && (id == BOSS_MAEXXNA || id == BOSS_LOATHEB || id == BOSS_THADDIUS || id == BOSS_HORSEMEN))
+                    events.ScheduleEvent(EVENT_KELTHUZAD_WING_TAUNT, 6000);
 
                 if (id == BOSS_HORSEMEN && state == DONE)
                 {
@@ -378,6 +438,28 @@ class instance_naxxramas : public InstanceMapScript
                 }
 
                 return true;
+            }
+
+            void UpdateWingPortal(GameObject* portal, bool enabled)
+            {
+                if (enabled)
+                    portal->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                else
+                    portal->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
+            }
+
+            void Update(uint32 diff) OVERRIDE
+            {
+                events.Update(diff);
+                while (uint32 eventId = events.ExecuteEvent())
+                {
+                    if (eventId == EVENT_KELTHUZAD_WING_TAUNT)
+                    {
+                        instance->LoadGrid(3749.67f, -5114.06f);
+                        if (Creature* kelthuzad = instance->GetCreature(KelthuzadGUID))
+                            kelthuzad->AI()->Talk(SAY_KELTHUZAD_WING_TAUNT);
+                    }
+                }
             }
 
             void HeiganErupt(uint32 section)
@@ -529,6 +611,10 @@ class instance_naxxramas : public InstanceMapScript
             uint64 KelthuzadGUID;
             uint64 KelthuzadTriggerGUID;
             uint64 PortalsGUID[4];
+            uint64 ArachnidPortalGUID;
+            uint64 ConstructPortalGUID;
+            uint64 MilitaryPortalGUID;
+            EventMap events;
             uint8 AbominationCount;
 
             /* The Immortal / The Undying */
