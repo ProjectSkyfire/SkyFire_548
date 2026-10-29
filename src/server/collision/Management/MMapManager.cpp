@@ -528,7 +528,8 @@ namespace MMAP
 
     dtNavMesh* MMapData::GetNavMesh(TerrainSet swaps)
     {
-        for (uint32 swap : _activeSwaps)
+        TerrainSet activeSwapsCopy = _activeSwaps;
+        for (uint32 swap : activeSwapsCopy)
         {
             if (swaps.find(swap) == swaps.end()) // swap not active
             {
