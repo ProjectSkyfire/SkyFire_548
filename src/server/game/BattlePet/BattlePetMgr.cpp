@@ -1255,6 +1255,10 @@ bool BattlePetMgr::ApplyBattlePetTrapInput(uint32 roundId, uint32 trapAbilityEff
         if (!capturedPet)
             return false;
 
+        // Capture quest credit is independent of achievement eligibility.
+        if (m_owner)
+            m_owner->KilledMonsterCredit(65356); // Got one! (all variants)
+
         UpdateCapturedBattlePetAchievements(*capturedPet);
     }
 
