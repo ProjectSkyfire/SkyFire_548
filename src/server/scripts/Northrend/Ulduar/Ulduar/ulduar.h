@@ -99,6 +99,7 @@ enum UlduarNPCs
     NPC_GOLEM_LEFT_HAND_BUNNY               = 33141,
     NPC_SIF                                 = 33196,
     NPC_THUNDER_ORB                         = 33378,
+    NPC_LIGHTNING_ORB                       = 33138,
     NPC_THORIM_CONTROLLER                   = 32879,
 
     // Freya's Keepers
