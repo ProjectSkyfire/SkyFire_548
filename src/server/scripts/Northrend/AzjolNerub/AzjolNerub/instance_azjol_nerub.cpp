@@ -5,6 +5,8 @@
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "Player.h"
+#include "WorldSession.h"
 #include "azjol_nerub.h"
 
 DoorData const doorData[] =
@@ -91,6 +93,17 @@ class instance_azjol_nerub : public InstanceMapScript
                     default:
                         break;
                 }
+            }
+
+            bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const OVERRIDE
+            {
+                if (player && player->GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_INSTANCE_REQUIRED_BOSSES))
+                    return true;
+
+                if (bossId > DATA_KRIKTHIR_THE_GATEWATCHER && GetBossState(DATA_KRIKTHIR_THE_GATEWATCHER) != DONE)
+                    return false;
+
+                return true;
             }
 
             uint64 GetData64(uint32 type) const OVERRIDE
