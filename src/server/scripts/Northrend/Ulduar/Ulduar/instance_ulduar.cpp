@@ -22,6 +22,7 @@ static DoorData const doorData[] =
     { GO_HODIR_ENTRANCE,                BOSS_HODIR,             DOOR_TYPE_ROOM,         BOUNDARY_E      },
     { GO_HODIR_DOOR,                    BOSS_HODIR,             DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     { GO_HODIR_ICE_DOOR,                BOSS_HODIR,             DOOR_TYPE_PASSAGE,      BOUNDARY_W      },
+    { GO_THORIM_ENCOUNTER_DOOR,         BOSS_THORIM,            DOOR_TYPE_ROOM,         BOUNDARY_NONE   },
     { GO_VEZAX_DOOR,                    BOSS_VEZAX,             DOOR_TYPE_PASSAGE,      BOUNDARY_E      },
     { GO_YOGG_SARON_DOOR,               BOSS_YOGG_SARON,        DOOR_TYPE_ROOM,         BOUNDARY_S      },
     { GO_DOODAD_UL_SIGILDOOR_03,        BOSS_ALGALON,           DOOR_TYPE_ROOM,         BOUNDARY_W      },
@@ -66,6 +67,10 @@ class instance_ulduar : public InstanceMapScript
             uint64 MimironWorldTriggerGUID;
             uint64 HodirGUID;
             uint64 ThorimGUID;
+            uint64 SifGUID;
+            uint64 ThorimControllerGUID;
+            uint64 RunicColossusGUID;
+            uint64 RuneGiantGUID;
             uint64 FreyaGUID;
             uint64 ElderGUIDs[3];
             uint64 VezaxGUID;
@@ -82,7 +87,12 @@ class instance_ulduar : public InstanceMapScript
             uint64 RazorHarpoonGUIDs[4];
             uint64 KologarnChestGUID;
             uint64 KologarnBridgeGUID;
-            uint64 ThorimChestGUID;
+            uint64 CacheOfStormsGUID;
+            uint64 CacheOfStormsHardmodeGUID;
+            uint64 ThorimLeverGUID;
+            uint64 ThorimRunicDoorGUID;
+            uint64 ThorimStoneDoorGUID;
+            uint64 ThorimPortcullisGUID;
             uint64 HodirRareCacheGUID;
             uint64 HodirChestGUID;
             uint64 MimironElevatorGUID;
@@ -124,6 +134,10 @@ class instance_ulduar : public InstanceMapScript
                 MimironWorldTriggerGUID          = 0;
                 HodirGUID                        = 0;
                 ThorimGUID                       = 0;
+                SifGUID                          = 0;
+                ThorimControllerGUID             = 0;
+                RunicColossusGUID                = 0;
+                RuneGiantGUID                    = 0;
                 FreyaGUID                        = 0;
                 VezaxGUID                        = 0;
                 YoggSaronGUID                    = 0;
@@ -133,7 +147,12 @@ class instance_ulduar : public InstanceMapScript
                 AlgalonGUID                      = 0;
                 KologarnChestGUID                = 0;
                 KologarnBridgeGUID               = 0;
-                ThorimChestGUID                  = 0;
+                CacheOfStormsGUID                = 0;
+                CacheOfStormsHardmodeGUID        = 0;
+                ThorimLeverGUID                  = 0;
+                ThorimRunicDoorGUID              = 0;
+                ThorimStoneDoorGUID              = 0;
+                ThorimPortcullisGUID             = 0;
                 HodirRareCacheGUID               = 0;
                 HodirChestGUID                   = 0;
                 MimironElevatorGUID              = 0;
@@ -343,8 +362,21 @@ class instance_ulduar : public InstanceMapScript
                             creature->UpdateEntry(NPC_BATTLE_PRIEST_GINA, HORDE);
                         break;
 
+                    // Thorim
                     case NPC_THORIM:
                         ThorimGUID = creature->GetGUID();
+                        break;
+                    case NPC_SIF:
+                        SifGUID = creature->GetGUID();
+                        break;
+                    case NPC_THORIM_CONTROLLER:
+                        ThorimControllerGUID = creature->GetGUID();
+                        break;
+                    case NPC_RUNIC_COLOSSUS:
+                        RunicColossusGUID = creature->GetGUID();
+                        break;
+                    case NPC_RUNE_GIANT:
+                        RuneGiantGUID = creature->GetGUID();
                         break;
 
                     // Freya
@@ -471,9 +503,25 @@ class instance_ulduar : public InstanceMapScript
                         if (GetBossState(BOSS_KOLOGARN) == DONE)
                             HandleGameObject(0, false, gameObject);
                         break;
-                    case GO_THORIM_CHEST_HERO:
-                    case GO_THORIM_CHEST:
-                        ThorimChestGUID = gameObject->GetGUID();
+                    case GO_CACHE_OF_STORMS_10:
+                    case GO_CACHE_OF_STORMS_25:
+                        CacheOfStormsGUID = gameObject->GetGUID();
+                        break;
+                    case GO_CACHE_OF_STORMS_HARDMODE_10:
+                    case GO_CACHE_OF_STORMS_HARDMODE_25:
+                        CacheOfStormsHardmodeGUID = gameObject->GetGUID();
+                        break;
+                    case GO_THORIM_LEVER:
+                        ThorimLeverGUID = gameObject->GetGUID();
+                        break;
+                    case GO_THORIM_RUNIC_DOOR:
+                        ThorimRunicDoorGUID = gameObject->GetGUID();
+                        break;
+                    case GO_THORIM_STONE_DOOR:
+                        ThorimStoneDoorGUID = gameObject->GetGUID();
+                        break;
+                    case GO_THORIM_DARK_IRON_PORTCULLIS:
+                        ThorimPortcullisGUID = gameObject->GetGUID();
                         break;
                     case GO_HODIR_RARE_CACHE_OF_WINTER_HERO:
                     case GO_HODIR_RARE_CACHE_OF_WINTER:
@@ -501,6 +549,7 @@ class instance_ulduar : public InstanceMapScript
                     case GO_HODIR_ENTRANCE:
                     case GO_HODIR_DOOR:
                     case GO_HODIR_ICE_DOOR:
+                    case GO_THORIM_ENCOUNTER_DOOR:
                     case GO_VEZAX_DOOR:
                     case GO_YOGG_SARON_DOOR:
                     case GO_MIMIRON_DOOR_1:
@@ -588,6 +637,7 @@ class instance_ulduar : public InstanceMapScript
                     case GO_HODIR_ENTRANCE:
                     case GO_HODIR_DOOR:
                     case GO_HODIR_ICE_DOOR:
+                    case GO_THORIM_ENCOUNTER_DOOR:
                     case GO_VEZAX_DOOR:
                     case GO_YOGG_SARON_DOOR:
                     case GO_MIMIRON_DOOR_1:
@@ -716,10 +766,23 @@ class instance_ulduar : public InstanceMapScript
                     case BOSS_THORIM:
                         if (state == DONE)
                         {
-                            if (GameObject* gameObject = instance->GetGameObject(ThorimChestGUID))
-                                gameObject->SetRespawnTime(gameObject->GetRespawnDelay());
+                            if (Creature* thorim = instance->GetCreature(ThorimGUID))
+                            {
+                                bool hardMode = thorim->IsAIEnabled && thorim->AI()->GetData(DATA_THORIM_HARDMODE);
+                                if (GameObject* cache = instance->GetGameObject(hardMode ? CacheOfStormsHardmodeGUID : CacheOfStormsGUID))
+                                {
+                                    cache->SetLootRecipient(thorim->GetLootRecipient());
+                                    cache->SetRespawnTime(cache->GetRespawnDelay());
+                                    cache->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_LOCKED | GO_FLAG_NOT_SELECTABLE | GO_FLAG_NODESPAWN);
+                                }
+                            }
 
                             instance->SummonCreature(NPC_THORIM_OBSERVATION_RING, ObservationRingKeepersPos[2]);
+                        }
+                        else
+                        {
+                            CloseDoorOrButton(ThorimLeverGUID);
+                            CloseDoorOrButton(ThorimPortcullisGUID);
                         }
                         break;
                     case BOSS_ALGALON:
@@ -891,6 +954,20 @@ class instance_ulduar : public InstanceMapScript
                         return HodirGUID;
                     case BOSS_THORIM:
                         return ThorimGUID;
+                    case DATA_SIF:
+                        return SifGUID;
+                    case DATA_THORIM_LEVER:
+                        return ThorimLeverGUID;
+                    case DATA_RUNIC_COLOSSUS:
+                        return RunicColossusGUID;
+                    case DATA_RUNE_GIANT:
+                        return RuneGiantGUID;
+                    case DATA_RUNIC_DOOR:
+                        return ThorimRunicDoorGUID;
+                    case DATA_STONE_DOOR:
+                        return ThorimStoneDoorGUID;
+                    case DATA_THORIM_CONTROLLER:
+                        return ThorimControllerGUID;
 
                     // Freya
                     case BOSS_FREYA:
@@ -1118,6 +1195,13 @@ class instance_ulduar : public InstanceMapScript
             }
 
         private:
+            void CloseDoorOrButton(uint64 guid)
+            {
+                if (GameObject* gameObject = instance->GetGameObject(guid))
+                    if (gameObject->getLootState() == LootState::GO_ACTIVATED)
+                        gameObject->ResetDoorOrButton();
+            }
+
             EventMap _events;
             uint32 _algalonTimer;
             bool _summonAlgalon;
