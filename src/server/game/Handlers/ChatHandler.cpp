@@ -219,6 +219,8 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
     else
         lang = Language::LANG_UNIVERSAL;
 
+    sScriptMgr->BeforeTeamChat(sender, type, lang);
+
     if (sender->HasAura(1852) && type != ChatMsg::CHAT_MSG_WHISPER)
     {
         SendNotification(GetSkyFireString(LANG_GM_SILENCE), sender->GetName().c_str());
@@ -465,7 +467,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
                 }
             }
 
-            if (ChannelMgr* cMgr = ChannelMgr::forTeam(_player->GetTeam()))
+            if (ChannelMgr* cMgr = ChannelMgr::forTeam(_player->GetNativeTeam()))
             {
                 if (Channel* chn = cMgr->GetChannel(channel, _player))
                 {

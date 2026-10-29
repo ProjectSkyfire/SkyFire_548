@@ -198,6 +198,7 @@ void ScriptMgr::Unload()
     SCR_CLEAR(SpellAreaTriggerScript);
     SCR_CLEAR(BattlegroundScript);
     SCR_CLEAR(OutdoorPvPScript);
+    SCR_CLEAR(PvPScript)
     SCR_CLEAR(CommandScript);
     SCR_CLEAR(WeatherScript);
     SCR_CLEAR(AuctionHouseScript);
@@ -951,6 +952,8 @@ std::vector<ChatCommand> ScriptMgr::GetChatCommands()
         table.insert(table.end(), cmds.begin(), cmds.end());
     }
 
+    FOR_SCRIPTS_RET(CommandScript, itr, end, table)
+        itr->second->ModifyCommands(table);
     return table;
 }
 
@@ -1592,6 +1595,110 @@ GroupScript::GroupScript(const char* name)
     ScriptRegistry<GroupScript>::AddScript(this);
 }
 
+PvPScript::PvPScript(char const* name) : ScriptObject(name)
+{
+    ScriptRegistry<PvPScript>::AddScript(this);
+}
+
+bool ScriptMgr::SelectBGGroups(BattlegroundQueue* q, Battleground* bg, uint8 bracket, uint32 min, uint32 max, bool fill) const
+{
+    FOR_SCRIPTS_RET(PvPScript, itr, end, false)
+        if (itr->second->SelectBGGroups(q, bg, bracket, min, max, fill))
+            return true;
+    return false;
+}
+
+bool ScriptMgr::CanJoinBG(Player* p, Group* g) const
+{
+    FOR_SCRIPTS_RET(PvPScript, itr, end, true)
+        if (!itr->second->CanJoinBG(p, g))
+            return false;
+    return true;
+}
+
+bool ScriptMgr::HandleBGQueueAnnounce(BattlegroundQueue* q, Battleground* bg, Player* p, uint8 bracket, uint32 minLevel, uint32 maxLevel) const
+{
+    FOR_SCRIPTS_RET(PvPScript, itr, end, false)
+        if (itr->second->HandleBGQueueAnnounce(q, bg, p, bracket, minLevel, maxLevel))
+            return true;
+    return false;
+}
+
+void ScriptMgr::BeforeBGAddPlayer(Battleground* bg, Player* p) const
+{
+    FOREACH_SCRIPT(PvPScript)->BeforeBGAddPlayer(bg, p);
+}
+
+void ScriptMgr::AfterBGAddPlayer(Battleground* bg, Player* p) const
+{
+    FOREACH_SCRIPT(PvPScript)->AfterBGAddPlayer(bg, p);
+}
+
+void ScriptMgr::AfterBGRemovePlayer(Battleground* bg, Player* p) const
+{
+    FOREACH_SCRIPT(PvPScript)->AfterBGRemovePlayer(bg, p);
+}
+
+void ScriptMgr::BeforeBGStart(Battleground* bg) const
+{
+    FOREACH_SCRIPT(PvPScript)->BeforeBGStart(bg);
+}
+
+void ScriptMgr::OnFactionUpdate(Player* p) const
+{
+    FOREACH_SCRIPT(PvPScript)->OnFactionUpdate(p);
+}
+
+void ScriptMgr::OnResurrect(Player* p) const
+{
+    FOREACH_SCRIPT(PvPScript)->OnResurrect(p);
+}
+
+void ScriptMgr::BeforeTeamChat(Player* p, ChatMsg type, Language& lang) const
+{
+    FOREACH_SCRIPT(PvPScript)->BeforeTeamChat(p, type, lang);
+}
+
+void ScriptMgr::BeforeReputation(Player* p, uint32& faction, int32& amount, bool incremental) const
+{
+    FOREACH_SCRIPT(PvPScript)->BeforeReputation(p, faction, amount, incremental);
+}
+
+void ScriptMgr::BeforeBFEnter(Battlefield* bf, Player* p) const
+{
+    FOREACH_SCRIPT(PvPScript)->BeforeBFEnter(bf, p);
+}
+
+void ScriptMgr::BeforeBFJoin(Battlefield* bf, Player* p, TeamId& team) const
+{
+    FOREACH_SCRIPT(PvPScript)->BeforeBFJoin(bf, p, team);
+}
+
+void ScriptMgr::AfterBFJoin(Battlefield* bf, Player* p, bool success) const
+{
+    FOREACH_SCRIPT(PvPScript)->AfterBFJoin(bf, p, success);
+}
+
+void ScriptMgr::AfterBFLeave(Battlefield* bf, Player* p) const
+{
+    FOREACH_SCRIPT(PvPScript)->AfterBFLeave(bf, p);
+}
+
+void ScriptMgr::BeforeBFEnd(Battlefield* bf) const
+{
+    FOREACH_SCRIPT(PvPScript)->BeforeBFEnd(bf);
+}
+
+void ScriptMgr::AfterBFEnd(Battlefield* bf) const
+{
+    FOREACH_SCRIPT(PvPScript)->AfterBFEnd(bf);
+}
+
+void ScriptMgr::OnBFKill(Battlefield* bf, Player* killer, Unit* victim) const
+{
+    FOREACH_SCRIPT(PvPScript)->OnBFKill(bf, killer, victim);
+}
+
 // Instantiate static members of ScriptRegistry.
 template<class TScript> std::map<uint32, TScript*> ScriptRegistry<TScript>::ScriptPointerList;
 template<class TScript> uint32 ScriptRegistry<TScript>::_scriptIdCounter = 0;
@@ -1611,6 +1718,7 @@ template class ScriptRegistry<AreaTriggerScript>;
 template class ScriptRegistry<SpellAreaTriggerScript>;
 template class ScriptRegistry<BattlegroundScript>;
 template class ScriptRegistry<OutdoorPvPScript>;
+template class ScriptRegistry<PvPScript>;
 template class ScriptRegistry<CommandScript>;
 template class ScriptRegistry<WeatherScript>;
 template class ScriptRegistry<AuctionHouseScript>;

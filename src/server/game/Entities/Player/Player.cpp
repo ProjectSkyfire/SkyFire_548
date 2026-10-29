@@ -5411,6 +5411,8 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
             bg->HandlePlayerResurrect(this);
     }
 
+    sScriptMgr->OnResurrect(this);
+
     // update visibility
     UpdateObjectVisibility();
 
@@ -5823,7 +5825,7 @@ void Player::CleanupChannels()
         Channel* ch = *m_channels.begin();
         m_channels.erase(m_channels.begin());               // remove from player's channel list
         ch->LeaveChannel(this, false);                     // not send to client, not remove from player's channel list
-        if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetTeam()))
+        if (ChannelMgr* cMgr = ChannelMgr::forTeam(GetNativeTeam()))
             cMgr->LeftChannel(ch->GetName());               // deleted channel if empty
     }
     SF_LOG_DEBUG("chat.system", "Player %s: channels cleaned up!", GetName().c_str());
@@ -5838,7 +5840,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
     if (!current_zone)
         return;
 
-    ChannelMgr* cMgr = ChannelMgr::forTeam(GetTeam());
+    ChannelMgr* cMgr = ChannelMgr::forTeam(GetNativeTeam());
     if (!cMgr)
         return;
 
@@ -7251,12 +7253,27 @@ uint32 Player::TeamForRace(uint8 race)
     return ALLIANCE;
 }
 
+void Player::SetTemporaryTeam(TeamId team)
+{
+    if (team != TEAM_ALLIANCE && team != TEAM_HORDE)
+        return;
+    m_temporaryTeam = team == TEAM_ALLIANCE ? ALLIANCE : HORDE;
+    sScriptMgr->OnFactionUpdate(this);
+}
+
+void Player::ClearTemporaryTeam()
+{
+    m_temporaryTeam = 0;
+    setFactionForRace(getRace());
+}
+
 void Player::setFactionForRace(uint8 race)
 {
     m_team = TeamForRace(race);
 
     ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
     setFaction(rEntry ? rEntry->FactionID : 0);
+    sScriptMgr->OnFactionUpdate(this);
 }
 
 ReputationRank Player::GetReputationRank(uint32 faction) const
