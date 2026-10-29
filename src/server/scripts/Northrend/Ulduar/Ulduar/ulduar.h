@@ -71,6 +71,11 @@ enum UlduarNPCs
     NPC_LEVIATHAN_MKII                      = 33432,
     NPC_VX_001                              = 33651,
     NPC_AERIAL_COMMAND_UNIT                 = 33670,
+    NPC_ASSAULT_BOT                         = 34057,
+    NPC_JUNK_BOT                            = 33855,
+    NPC_BURST_TARGET                        = 34211,
+    NPC_WORLD_TRIGGER_MIMIRON               = 21252,
+    NPC_COMPUTER                            = 34143,
 
     // Freya's Keepers
     NPC_IRONBRANCH                          = 32913,
@@ -192,6 +197,17 @@ enum UlduarGameObjects
     GO_THORIM_CHEST_HERO                    = 194315,
     GO_THORIM_CHEST                         = 194314,
 
+    // Mimiron
+    GO_MIMIRON_ELEVATOR                     = 194749,
+    GO_MIMIRON_BUTTON                       = 194739,
+    GO_MIMIRON_DOOR_1                       = 194774,
+    GO_MIMIRON_DOOR_2                       = 194775,
+    GO_MIMIRON_DOOR_3                       = 194776,
+    GO_CACHE_OF_INNOVATION                  = 194789,
+    GO_CACHE_OF_INNOVATION_FIREFIGHTER      = 194957,
+    GO_CACHE_OF_INNOVATION_HERO             = 194956,
+    GO_CACHE_OF_INNOVATION_FIREFIGHTER_HERO = 194958,
+
     // Vezax
     GO_VEZAX_DOOR                           = 194750,
 
@@ -276,6 +292,15 @@ enum UlduarData
     DATA_STEELBREAKER,
     DATA_MOLGEIM,
     DATA_BRUNDIR,
+
+    // Mimiron
+    DATA_LEVIATHAN_MK_II,
+    DATA_VX_001,
+    DATA_AERIAL_COMMAND_UNIT,
+    DATA_COMPUTER,
+    DATA_MIMIRON_WORLD_TRIGGER,
+    DATA_MIMIRON_ELEVATOR,
+    DATA_MIMIRON_BUTTON,
 
     // Hodir
     DATA_HODIR_RARE_CACHE,
