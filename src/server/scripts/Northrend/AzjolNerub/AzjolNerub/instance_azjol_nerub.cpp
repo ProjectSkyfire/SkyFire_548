@@ -7,6 +7,8 @@
 #include "InstanceScript.h"
 #include "Player.h"
 #include "WorldSession.h"
+#include "SpellScript.h"
+#include "SpellMgr.h"
 #include "azjol_nerub.h"
 
 DoorData const doorData[] =
@@ -201,7 +203,33 @@ class instance_azjol_nerub : public InstanceMapScript
         }
 };
 
+enum DrainPowerSpells
+{
+    SPELL_DRAIN_POWER_AURA = 54315
+};
+
+class spell_azjol_drain_power : public SpellScript
+{
+    PrepareSpellScript(spell_azjol_drain_power);
+
+    bool Validate(SpellInfo const* /*spell*/) OVERRIDE
+    {
+        return sSpellMgr->GetSpellInfo(SPELL_DRAIN_POWER_AURA) != NULL;
+    }
+
+    void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), SPELL_DRAIN_POWER_AURA, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_azjol_drain_power::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+    }
+};
+
 void AddSC_instance_azjol_nerub()
 {
    new instance_azjol_nerub();
+   RegisterSpellScript(spell_azjol_drain_power);
 }
