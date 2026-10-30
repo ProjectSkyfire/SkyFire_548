@@ -197,13 +197,20 @@ void BattlePetSpawnMgr::OnCreatureUnloaded(Creature* creature)
         zoneItr->second.OnCreatureUnloaded(creature);
 }
 
+// The relation is stored on the zone where the critter was swapped. A pet can
+// walk into another zone before it is captured, so every pool on the map is checked.
 bool BattlePetSpawnMgr::ResolveWildBattle(Creature* creature)
 {
     if (!creature)
         return false;
 
-    if (BattlePetWildZonePool* zonePool = GetZonePool(creature))
-        return zonePool->RemoveReplacement(creature);
+    BattlePetMapPoolMap::iterator mapItr = _mapPools.find(creature->GetMapId());
+    if (mapItr == _mapPools.end())
+        return false;
+
+    for (BattlePetZonePoolMap::iterator zoneItr = mapItr->second.begin(); zoneItr != mapItr->second.end(); ++zoneItr)
+        if (zoneItr->second.RemoveReplacement(creature))
+            return true;
 
     return false;
 }
@@ -213,8 +220,13 @@ bool BattlePetSpawnMgr::IsWildBattlePetReplacement(Creature const* creature) con
     if (!creature)
         return false;
 
-    if (BattlePetWildZonePool const* zonePool = GetZonePool(creature))
-        return zonePool->IsReplacement(creature->GetGUID());
+    BattlePetMapPoolMap::const_iterator mapItr = _mapPools.find(creature->GetMapId());
+    if (mapItr == _mapPools.end())
+        return false;
+
+    for (BattlePetZonePoolMap::const_iterator zoneItr = mapItr->second.begin(); zoneItr != mapItr->second.end(); ++zoneItr)
+        if (zoneItr->second.IsReplacement(creature->GetGUID()))
+            return true;
 
     return false;
 }
