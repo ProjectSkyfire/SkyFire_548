@@ -5426,7 +5426,7 @@ void Spell::TakePower()
     if (hit)
         m_caster->ModifyPower(powerType, -m_powerCost);
     else
-        m_caster->ModifyPower(powerType, -(std::rand() % m_powerCost) / 4);
+        m_caster->ModifyPower(powerType, -irand(0, m_powerCost / 4));
 }
 
 SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
@@ -6148,7 +6148,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // chance for fail at orange skinning attempt
                 if ((m_selfContainer && (*m_selfContainer) == this) &&
                     skillValue < sWorld->GetConfigMaxSkillValue() &&
-                    (ReqValue < 0 ? 0 : ReqValue) > (std::rand() % (skillValue + 37) + (skillValue - 25)))
+                    (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
                     return SpellCastResult::SPELL_FAILED_TRY_AGAIN;
 
                 break;
@@ -6212,7 +6212,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
 
                     // chance for failure in orange gather / lockpick (gathering skill can't fail at maxskill)
-                    if ((canFailAtMax || skillValue < sWorld->GetConfigMaxSkillValue()) && reqSkillValue > (std::rand() % (skillValue + 37) + (skillValue - 25)))
+                    if ((canFailAtMax || skillValue < sWorld->GetConfigMaxSkillValue()) && reqSkillValue > irand(skillValue - 25, skillValue + 37))
                         return SpellCastResult::SPELL_FAILED_TRY_AGAIN;
                 }
                 break;

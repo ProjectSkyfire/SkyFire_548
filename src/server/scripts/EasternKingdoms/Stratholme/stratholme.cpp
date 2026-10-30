@@ -235,7 +235,7 @@ public:
                 for (uint32 i = 1; i <= 4; ++i)
                 {
                      //100%, 50%, 33%, 25% chance to spawn
-                     if ((std::rand() % i + 1) == 1)
+                     if (urand(1, i) == 1)
                          DoSummon(NPC_RESTLESS, me, 20.0f, 600000);
                 }
             }

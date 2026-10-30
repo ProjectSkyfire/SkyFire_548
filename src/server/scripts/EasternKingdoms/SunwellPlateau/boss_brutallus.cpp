@@ -315,7 +315,7 @@ public:
                         (*i)->CastSpell((*i), SPELL_BURN, true);
                         break;
                     }
-                BurnTimer = std::rand() % 180000 + 60000;
+                BurnTimer = urand(60000, 180000);
             } else BurnTimer -= diff;
 
             if (BerserkTimer < diff && !Enraged)

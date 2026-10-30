@@ -1638,7 +1638,7 @@ class spell_gen_elune_candle : public SpellScriptLoader
 
                 if (GetHitUnit()->GetEntry() == NPC_OMEN)
                 {
-                    switch (std::rand() % 3)
+                    switch (urand(0, 3))
                     {
                         case 0:
                             spellId = SPELL_ELUNE_CANDLE_OMEN_HEAD;
@@ -1754,7 +1754,7 @@ class spell_gen_gadgetzan_transporter_backfire : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /* effIndex */)
             {
                 Unit* caster = GetCaster();
-                int32 r = std::rand() % 119;
+                int32 r = irand(0, 119);
                 if (r < 20)                           // Transporter Malfunction - 1/6 polymorph
                     caster->CastSpell(caster, SPELL_TRANSPORTER_MALFUNCTION_POLYMORPH, true);
                 else if (r < 100)                     // Evil Twin               - 4/6 evil twin
@@ -2257,7 +2257,7 @@ class spell_gen_netherbloom : public SpellScriptLoader
                         if (target->HasAura(SPELL_NETHERBLOOM_POLLEN_1 + i))
                             return;
 
-                    target->CastSpell(target, SPELL_NETHERBLOOM_POLLEN_1 + (std::rand() % 4), true);
+                    target->CastSpell(target, SPELL_NETHERBLOOM_POLLEN_1 + urand(0, 4), true);
                 }
             }
 
@@ -3153,7 +3153,7 @@ class spell_gen_spectator_cheer_trigger : public SpellScriptLoader
 
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
-                GetCaster()->HandleEmoteCommand(EmoteArray[std::rand() % 2]);
+                GetCaster()->HandleEmoteCommand(EmoteArray[urand(0, 2)]);
             }
 
             void Register() OVERRIDE
@@ -3545,7 +3545,7 @@ class spell_gen_upper_deck_create_foam_sword : public SpellScriptLoader
                             return;
                     }
 
-                    CreateItem(effIndex, itemId[std::rand() % 4]);
+                    CreateItem(effIndex, itemId[urand(0, 4)]);
                 }
             }
 

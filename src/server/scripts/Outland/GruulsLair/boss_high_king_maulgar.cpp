@@ -342,7 +342,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_GREATER_POLYMORPH);
 
-                GreaterPolymorph_Timer = std::rand() % 20000 + 15000;
+                GreaterPolymorph_Timer = urand(15000, 20000);
             } else GreaterPolymorph_Timer -= diff;
 
             //LightningBolt_Timer
@@ -401,8 +401,8 @@ public:
         void Reset() OVERRIDE
         {
             GreaterPowerWordShield_Timer = 5000;
-            Heal_Timer = std::rand() % 40000 + 25000;
-            PrayerofHealing_Timer = std::rand() % 55000 + 45000;
+            Heal_Timer = urand(25000, 40000);
+            PrayerofHealing_Timer = urand(45000, 55000);
 
             instance->SetBossState(DATA_MAULGAR, NOT_STARTED);
         }
@@ -437,14 +437,14 @@ public:
             if (Heal_Timer <= diff)
             {
                 DoCast(me, SPELL_HEAL);
-                Heal_Timer = std::rand() % 40000 + 15000;
+                Heal_Timer = urand(15000, 40000);
             } else Heal_Timer -= diff;
 
             //PrayerofHealing_Timer
             if (PrayerofHealing_Timer <= diff)
             {
                 DoCast(me, SPELL_PRAYER_OH);
-                PrayerofHealing_Timer = std::rand() % 50000 + 35000;
+                PrayerofHealing_Timer = urand(35000, 50000);
             } else PrayerofHealing_Timer -= diff;
 
             DoMeleeAttackIfReady();

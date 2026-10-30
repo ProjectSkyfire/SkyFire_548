@@ -81,9 +81,9 @@ public:
         {
             Flee = false;
 
-            ravageTimer = std::rand() % 8000 + 5000;
-            frostNovaTimer = std::rand() % 12000 + 9000;
-            frostBoltVolleyTimer = std::rand() % 4000 + 2000;
+            ravageTimer           = urand(5000, 8000);
+            frostNovaTimer        = urand(9000, 12000);
+            frostBoltVolleyTimer  = urand(2000, 4000);
         }
 
         void AttackPlayer()
@@ -122,7 +122,7 @@ public:
                     if (ravageTimer <= diff)
                     {
                         DoCastVictim(SPELL_RAVAGE);
-                        ravageTimer = std::rand() % 14000 + 9000;
+                        ravageTimer = urand(9000, 14000);
                     } else ravageTimer -= diff;
                     break;
                 }
@@ -142,14 +142,14 @@ public:
                     {
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_FROST_BOLT_VOLLEY);
-                        frostBoltVolleyTimer = std::rand() % 8000 + 5000;
+                        frostBoltVolleyTimer = urand(5000, 8000);
                     }
                     else frostBoltVolleyTimer -= diff;
 
                     if (frostNovaTimer <= diff)
                     {
                         DoCastAOE(SPELL_FROST_NOVA, false);
-                        frostNovaTimer = std::rand() % 30000 + 25000;
+                        frostNovaTimer = urand(25000, 30000);
                     }
                     else frostNovaTimer -= diff;
                     break;

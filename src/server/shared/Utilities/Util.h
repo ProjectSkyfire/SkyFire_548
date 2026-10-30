@@ -94,7 +94,7 @@ inline bool roll_chance_f(float chance)
 /* Return true if a random roll fits in the specified chance (range 0-100). */
 inline bool roll_chance_i(int chance)
 {
-    return chance > std::rand() % 99;
+    return chance > irand(0, 99);
 }
 
 inline void ApplyPercentModFloatVar(float& var, float val, bool apply)

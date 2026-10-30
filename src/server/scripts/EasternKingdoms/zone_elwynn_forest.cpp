@@ -220,9 +220,9 @@ public:
 
         void Reset() OVERRIDE
         {
-            tSeek = std::rand() % 2000 + 1000;
-            cYell = std::rand() % 100;
-            tYell = std::rand() % 60000 + 5000;
+            tSeek = urand(1000,2000);
+            cYell=urand(0, 100);
+            tYell=urand(5000, 60000);
         }
 
         void DamageTaken(Unit* who, uint32& damage) OVERRIDE
@@ -259,10 +259,10 @@ public:
                     if (cYell < INFANTRY_YELL_CHANCE)//Roll for random chance to Yell phrase
                     {
                         me->AI()->Talk(SAY_INFANTRY_YELL); //Yell phrase
-                        tYell = std::rand() % 120000 + 10000; //After First yell, change time range from 10 to 120 seconds
+                        tYell=urand(10000, 120000);//After First yell, change time range from 10 to 120 seconds
                     }
                     else
-                        tYell = std::rand() % 120000 + 10000; //From 10 to 120 seconds
+                        tYell=urand(10000, 120000);//From 10 to 120 seconds
                 }
                 else
                 {
@@ -296,8 +296,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            tSeek = std::rand() % 2000 + 1000;
-            tGrowl = std::rand() % 10000 + 8500;
+            tSeek = urand(1000,2000);
+            tGrowl=urand(8500,10000);
             me->RestoreFaction();
         }
 
@@ -333,7 +333,7 @@ public:
                     {
                         me->setFaction(WORG_FIGHTING_FACTION);//We must change our faction to one which is able to attack Stormwind Infantry (Faction 232 works well)
                         me->AI()->AttackStart(enemy);
-                        tSeek = std::rand() % 2000 + 1000;
+                        tSeek = urand(1000,2000);
                     }
             }
             else
@@ -344,7 +344,7 @@ public:
                 if (tGrowl <=diff)
                 {
                     DoCast(me->GetVictim(), WORG_GROWL);//Do Growl if ready
-                    tGrowl = std::rand() % 10000 + 8500;
+                    tGrowl=urand(8500,10000);
                 }
                 else
                 {

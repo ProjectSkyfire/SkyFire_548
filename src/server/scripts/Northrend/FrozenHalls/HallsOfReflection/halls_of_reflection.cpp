@@ -1617,12 +1617,12 @@ public:
                     case EVENT_SHIELD:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_SHIELD_THROWN);
-                        _events.ScheduleEvent(EVENT_SHIELD, std::rand() % 12000 + 8000);
+                        _events.ScheduleEvent(EVENT_SHIELD, urand(8000, 12000));
                         break;
                     case EVENT_SPIKE:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                             DoCast(target, SPELL_SPIKE);
-                        _events.ScheduleEvent(EVENT_SPIKE, std::rand() % 20000 + 15000);
+                        _events.ScheduleEvent(EVENT_SPIKE, urand(15000, 20000));
                         break;
                     case EVENT_CLONE:
                         SummonClones();
@@ -1700,7 +1700,7 @@ public:
                 case EVENT_BALEFUL_STRIKE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         DoCast(target, SPELL_BALEFUL_STRIKE);
-                    _events.ScheduleEvent(EVENT_BALEFUL_STRIKE, std::rand() % 8000 + 3000);
+                    _events.ScheduleEvent(EVENT_BALEFUL_STRIKE, urand(3000, 8000));
             }
 
             DoMeleeAttackIfReady();
@@ -1966,7 +1966,7 @@ public:
                 {
                     if (Unit *target = SelectTarget(SELECT_TARGET_RANDOM))
                         DoCast(target, SPELL_COURSE_OF_DOOM);
-                    _curseTimer = std::rand() % 15000 + 10000;
+                    _curseTimer = urand(10000, 15000);
                 }
                 else
                     _curseTimer -= diff;
@@ -1975,7 +1975,7 @@ public:
                 {
                     if (Unit *target = SelectTarget(SELECT_TARGET_TOPAGGRO))
                         DoCast(target, SPELL_SHADOW_BOLT);
-                    _boltTimer = std::rand() % 3000 + 2000;
+                    _boltTimer = urand(2000, 3000);
                 }
                 else
                     _boltTimer -= diff;
@@ -1984,7 +1984,7 @@ public:
                 {
                     if (Unit *target = SelectTarget(SELECT_TARGET_TOPAGGRO))
                         DoCast(target, SPELL_SHADOW_BOLT_VOLLEY);
-                    _boltVolleyTimer = std::rand() % 22000 + 15000;
+                    _boltVolleyTimer = urand(15000, 22000);
                 }
                 else
                     _boltVolleyTimer -= diff;
@@ -2058,7 +2058,7 @@ public:
                 {
                     if (Unit *target = SelectTarget(SELECT_TARGET_TOPAGGRO))
                         DoCast(target, SPELL_ABON_STRIKE);
-                    _strikeTimer = std::rand() % 9000 + 7000;
+                    _strikeTimer = urand(7000, 9000);
                 }
                 else
                     _strikeTimer -= diff;
@@ -2067,7 +2067,7 @@ public:
                 {
                         if (Unit *target = SelectTarget(SELECT_TARGET_TOPAGGRO))
                             DoCast(target, SPELL_VOMIT_SPRAY);
-                        _vomitTimer = std::rand() % 20000 + 15000;
+                        _vomitTimer = urand(15000, 20000);
                 }
                 else
                     _vomitTimer -= diff;

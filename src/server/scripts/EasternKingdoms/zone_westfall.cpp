@@ -129,7 +129,7 @@ public:
         void Reset() OVERRIDE
         {
             cooldown = 0;
-            talkCooldown = std::rand() % 120000 + 60000;
+            talkCooldown = urand(60000, 120000);
             me->setFaction(7);
             me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         }
@@ -141,7 +141,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
-            switch (std::rand() % 3)
+            switch (urand(0, 3))
             {
                 case 0:
                 {
@@ -227,7 +227,7 @@ public:
                 }
             }
 
-            talkCooldown = std::rand() % 120000 + 60000;
+            talkCooldown = urand(60000, 120000);
 
         }
         

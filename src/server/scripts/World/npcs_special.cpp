@@ -1729,7 +1729,7 @@ class npc_wormhole : public CreatureScript
 
             void InitializeAI() OVERRIDE
             {
-                _showUnderground = (std::rand() % 100) == 0; // Guessed value, it is really rare though
+                _showUnderground = urand(0, 100) == 0; // Guessed value, it is really rare though
             }
 
             uint32 GetData(uint32 type) const OVERRIDE
@@ -2290,7 +2290,7 @@ public:
                     spellId = GetFireworkSpell(NPC_FIREWORK_BIG_WHITE);
                     break;
                 case NPC_CLUSTER_ELUNE:
-                    spellId = GetFireworkSpell(std::rand() % NPC_FIREWORK_WHITE + NPC_FIREWORK_BLUE);
+                    spellId = GetFireworkSpell(urand(NPC_FIREWORK_BLUE, NPC_FIREWORK_WHITE));
                     break;
             }
 
@@ -2319,7 +2319,7 @@ public:
                 {
                     if (!me->FindNearestCreature(NPC_OMEN, 100.0f, false) && me->GetDistance2d(omenSummonPos.GetPositionX(), omenSummonPos.GetPositionY()) <= 100.0f)
                     {
-                        switch (std::rand() % 9)
+                        switch (urand(0, 9))
                         {
                             case 0:
                             case 1:
@@ -2387,9 +2387,9 @@ public:
         {
             inLove = false;
             rabbitGUID = 0;
-            jumpTimer = std::rand() % 10000 + 5000;
-            bunnyTimer = std::rand() % 20000 + 10000;
-            searchTimer = std::rand() % 10000 + 5000;
+            jumpTimer = urand(5000, 10000);
+            bunnyTimer = urand(10000, 20000);
+            searchTimer = urand(5000, 10000);
             if (Unit* owner = me->GetOwner())
                 me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
@@ -2411,13 +2411,13 @@ public:
                 {
                     if (Unit* rabbit = Unit::GetUnit(*me, rabbitGUID))
                         DoCast(rabbit, SPELL_SPRING_RABBIT_JUMP);
-                    jumpTimer = std::rand() % 10000 + 5000;
+                    jumpTimer = urand(5000, 10000);
                 } else jumpTimer -= diff;
 
                 if (bunnyTimer <= diff)
                 {
                     DoCast(SPELL_SUMMON_BABY_BUNNY);
-                    bunnyTimer = std::rand() % 40000 + 20000;
+                    bunnyTimer = urand(20000, 40000);
                 } else bunnyTimer -= diff;
             }
             else
@@ -2436,7 +2436,7 @@ public:
                         rabbit->CastSpell(rabbit, SPELL_SPRING_RABBIT_JUMP, true);
                         rabbitGUID = rabbit->GetGUID();
                     }
-                    searchTimer = std::rand() % 10000 + 5000;
+                    searchTimer = urand(5000, 10000);
                 } else searchTimer -= diff;
             }
         }

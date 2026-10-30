@@ -351,7 +351,7 @@ class npc_muglash : public CreatureScript
                 if (Player* player = GetPlayerForEscort())
                     if (HasEscortState(STATE_ESCORT_PAUSED))
                     {
-                        if (std::rand() % 1)
+                        if (urand(0, 1))
                             Talk(SAY_MUG_ON_GUARD, player);
                         return;
                     }

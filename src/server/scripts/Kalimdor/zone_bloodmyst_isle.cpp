@@ -49,7 +49,7 @@ public:
         {
             uint32 spawnCreatureID = 0;
 
-            switch (std::rand() % 2)
+            switch (urand(0, 2))
             {
                 case 0:
                     spawnCreatureID = 17681;
@@ -58,7 +58,7 @@ public:
                     break;
                 case 1:
                 case 2:
-                    spawnCreatureID = possibleSpawns[std::rand() % 30];
+                    spawnCreatureID = possibleSpawns[urand(0, 31)];
                     break;
             }
 

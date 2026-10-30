@@ -1320,7 +1320,7 @@ void Player::HandleDrowning(uint32 time_diff)
                 m_MirrorTimer[FIRE_TIMER] += 1 * IN_MILLISECONDS;
                 // Calculate and deal damage
                 /// @todo Check this formula
-                uint32 damage = std::rand() % 700 + 600;
+                uint32 damage = urand(600, 700);
                 if (m_MirrorTimerFlags & UNDERWATER_INLAVA)
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
                 // need to skip Slime damage in Undercity,
@@ -6422,7 +6422,7 @@ bool Player::UpdateSkillPro(uint16 skillId, int32 chance, uint32 step)
     if (!max || !value || value >= max)
         return false;
 
-    if ((std::rand() % 1000 + 1) > chance)
+    if (irand(1, 1000) > chance)
     {
         SF_LOG_DEBUG("entities.player.skills", "Player::UpdateSkillPro Chance=%3.1f%% missed", chance / 10.0f);
         return false;
@@ -9766,7 +9766,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool isAoE)
                     loot->FillLoot(1, LootTemplates_Creature, this, true);
             // It may need a better formula
             // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
-            bones->loot.gold = uint32((std::rand() % 150 + 50) * 0.016f * pow(float(pLevel) / 5.76f, 2.5f) * sWorld->getRate(Rates::RATE_DROP_MONEY));
+            bones->loot.gold = uint32(urand(50, 150) * 0.016f * pow(float(pLevel) / 5.76f, 2.5f) * sWorld->getRate(Rates::RATE_DROP_MONEY));
         }
 
         if (bones->lootRecipient != this)
@@ -9804,8 +9804,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type, bool isAoE)
                     loot->FillLoot(lootid, LootTemplates_Pickpocketing, this, true);
 
                 // Generate extra money for pick pocket loot
-                const uint32 a = std::rand() % (creature->getLevel() / 2);
-                const uint32 b = std::rand() % (getLevel() / 2);
+                const uint32 a = urand(0, creature->getLevel() / 2);
+                const uint32 b = urand(0, getLevel() / 2);
                 loot->gold = uint32(10 * (a + b) * sWorld->getRate(Rates::RATE_DROP_MONEY));
                 permission = PermissionTypes::OWNER_PERMISSION;
             }
@@ -12783,7 +12783,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
 
     // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
     // this must help in case next save after mass player load after server startup
-    m_nextSave = std::rand() % (m_nextSave * 3 / 2) + (m_nextSave / 2);
+    m_nextSave = urand(m_nextSave / 2, m_nextSave * 3 / 2);
 
     SaveRecallPosition();
 

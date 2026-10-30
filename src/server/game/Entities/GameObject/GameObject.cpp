@@ -245,7 +245,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
     {
         case GAMEOBJECT_TYPE_FISHINGHOLE:
             SetGoAnimProgress(animprogress);
-            m_goValue.FishingHole.MaxOpens = std::rand() % GetGOInfo()->fishinghole.maxSuccessOpens + GetGOInfo()->fishinghole.minSuccessOpens;
+            m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishinghole.minSuccessOpens, GetGOInfo()->fishinghole.maxSuccessOpens);
             break;
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             m_goValue.Building.Health = goinfo->building.intactNumHits + goinfo->building.damagedNumHits;
@@ -404,7 +404,7 @@ void GameObject::Update(uint32 diff)
                         if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
                             SetRespawnTime(DAY);
                         else
-                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + std::rand() % MINUTE + 5; // else copy time from master and add a little
+                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + urand(5, MINUTE); // else copy time from master and add a little
                         SaveRespawnTime(); // also save to DB immediately
                         return;
                     }
@@ -437,7 +437,7 @@ void GameObject::Update(uint32 diff)
                             break;
                         case GAMEOBJECT_TYPE_FISHINGHOLE:
                             // Initialize a new max fish count on respawn
-                            m_goValue.FishingHole.MaxOpens = std::rand() % GetGOInfo()->fishinghole.maxSuccessOpens + GetGOInfo()->fishinghole.minSuccessOpens;
+                            m_goValue.FishingHole.MaxOpens = urand(GetGOInfo()->fishinghole.minSuccessOpens, GetGOInfo()->fishinghole.maxSuccessOpens);
                             break;
                         default:
                             break;
@@ -1709,7 +1709,7 @@ void GameObject::Use(Unit* user)
                     else
                         chance = 100;
 
-                    int32 roll = std::rand() % 100 + 1;
+                    int32 roll = irand(1, 100);
 
                     SF_LOG_DEBUG("misc", "Fishing check (skill: %i zone min skill: %i chance %i roll: %i", skill, zone_skill, chance, roll);
 

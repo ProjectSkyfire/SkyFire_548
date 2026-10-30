@@ -543,7 +543,7 @@ public:
         npc_teleportation_portalAI(Creature* creature) : ScriptedAI(creature), listOfMobs(me)
         {
             instance = creature->GetInstanceScript();
-            uiTypeOfMobsPortal = std::rand() % 1;    // 0 - elite mobs   1 - portal guardian or portal keeper with regular mobs
+            uiTypeOfMobsPortal = urand(0, 1);    // 0 - elite mobs   1 - portal guardian or portal keeper with regular mobs
             bPortalGuardianOrKeeperOrEliteSpawn = false;
             uiSpawnTimer = 0;
         }
@@ -724,43 +724,43 @@ struct violet_hold_trashAI : public npc_escortAI
             {
                 case 0:
                     for (int i=0;i<6;i++)
-                        AddWaypoint(i, FirstPortalWPs[i][0] + (std::rand() % 1 + -1), FirstPortalWPs[i][1] + (std::rand() % 1 + -1), FirstPortalWPs[i][2] + (std::rand() % 1 + -1), 0);
+                        AddWaypoint(i, FirstPortalWPs[i][0]+irand(-1, 1), FirstPortalWPs[i][1]+irand(-1, 1), FirstPortalWPs[i][2]+irand(-1, 1), 0);
                     me->SetHomePosition(FirstPortalWPs[5][0], FirstPortalWPs[5][1], FirstPortalWPs[5][2], 3.149439f);
                     break;
                 case 1:
-                    secondPortalRouteID = std::rand() % 1;
+                    secondPortalRouteID = urand(0, 1);
                     switch (secondPortalRouteID)
                     {
                         case 0:
                             for (int i=0;i<9;i++)
-                                AddWaypoint(i, SecondPortalFirstWPs[i][0] + (std::rand() % 1 + -1), SecondPortalFirstWPs[i][1] + (std::rand() % 1 + -1), SecondPortalFirstWPs[i][2], 0);
-                            me->SetHomePosition(SecondPortalFirstWPs[8][0] + (std::rand() % 1 + -1), SecondPortalFirstWPs[8][1] + (std::rand() % 1 + -1), SecondPortalFirstWPs[8][2] + (std::rand() % 1 + -1), 3.149439f);
+                                AddWaypoint(i, SecondPortalFirstWPs[i][0]+irand(-1, 1), SecondPortalFirstWPs[i][1]+irand(-1, 1), SecondPortalFirstWPs[i][2], 0);
+                            me->SetHomePosition(SecondPortalFirstWPs[8][0]+irand(-1, 1), SecondPortalFirstWPs[8][1]+irand(-1, 1), SecondPortalFirstWPs[8][2]+irand(-1, 1), 3.149439f);
                             break;
                         case 1:
                             for (int i=0;i<8;i++)
-                                AddWaypoint(i, SecondPortalSecondWPs[i][0] + (std::rand() % 1 + -1), SecondPortalSecondWPs[i][1] + (std::rand() % 1 + -1), SecondPortalSecondWPs[i][2], 0);
+                                AddWaypoint(i, SecondPortalSecondWPs[i][0]+irand(-1, 1), SecondPortalSecondWPs[i][1]+irand(-1, 1), SecondPortalSecondWPs[i][2], 0);
                             me->SetHomePosition(SecondPortalSecondWPs[7][0], SecondPortalSecondWPs[7][1], SecondPortalSecondWPs[7][2], 3.149439f);
                             break;
                     }
                     break;
                 case 2:
                     for (int i=0;i<8;i++)
-                        AddWaypoint(i, ThirdPortalWPs[i][0] + (std::rand() % 1 + -1), ThirdPortalWPs[i][1] + (std::rand() % 1 + -1), ThirdPortalWPs[i][2], 0);
+                        AddWaypoint(i, ThirdPortalWPs[i][0]+irand(-1, 1), ThirdPortalWPs[i][1]+irand(-1, 1), ThirdPortalWPs[i][2], 0);
                     me->SetHomePosition(ThirdPortalWPs[7][0], ThirdPortalWPs[7][1], ThirdPortalWPs[7][2], 3.149439f);
                     break;
                 case 3:
                     for (int i=0;i<9;i++)
-                        AddWaypoint(i, FourthPortalWPs[i][0] + (std::rand() % 1 + -1), FourthPortalWPs[i][1] + (std::rand() % 1 + -1), FourthPortalWPs[i][2], 0);
+                        AddWaypoint(i, FourthPortalWPs[i][0]+irand(-1, 1), FourthPortalWPs[i][1]+irand(-1, 1), FourthPortalWPs[i][2], 0);
                     me->SetHomePosition(FourthPortalWPs[8][0], FourthPortalWPs[8][1], FourthPortalWPs[8][2], 3.149439f);
                     break;
                 case 4:
                     for (int i=0;i<6;i++)
-                        AddWaypoint(i, FifthPortalWPs[i][0] + (std::rand() % 1 + -1), FifthPortalWPs[i][1] + (std::rand() % 1 + -1), FifthPortalWPs[i][2], 0);
+                        AddWaypoint(i, FifthPortalWPs[i][0]+irand(-1, 1), FifthPortalWPs[i][1]+irand(-1, 1), FifthPortalWPs[i][2], 0);
                     me->SetHomePosition(FifthPortalWPs[5][0], FifthPortalWPs[5][1], FifthPortalWPs[5][2], 3.149439f);
                     break;
                 case 5:
                     for (int i=0;i<4;i++)
-                        AddWaypoint(i, SixthPoralWPs[i][0] + (std::rand() % 1 + -1), SixthPoralWPs[i][1] + (std::rand() % 1 + -1), SixthPoralWPs[i][2], 0);
+                        AddWaypoint(i, SixthPoralWPs[i][0]+irand(-1, 1), SixthPoralWPs[i][1]+irand(-1, 1), SixthPoralWPs[i][2], 0);
                     me->SetHomePosition(SixthPoralWPs[3][0], SixthPoralWPs[3][1], SixthPoralWPs[3][2], 3.149439f);
                     break;
             }
@@ -850,7 +850,7 @@ public:
                 if (uiSunderArmorTimer <= diff)
                 {
                     DoCastVictim(SPELL_SUNDER_ARMOR);
-                    uiSunderArmorTimer = std::rand() % 10000 + 8000;
+                    uiSunderArmorTimer = urand(8000, 10000);
                 } else uiSunderArmorTimer -= diff;
 
                 DoMeleeAttackIfReady();
@@ -1050,7 +1050,7 @@ public:
             if (uiMagicReflectionTimer <= diff)
             {
                 DoCast(SPELL_MAGIC_REFLECTION);
-                uiMagicReflectionTimer = std::rand() % 15000 + 10000;
+                uiMagicReflectionTimer = urand(10000, 15000);
             } else uiMagicReflectionTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -1303,14 +1303,14 @@ public:
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
                 if (target)
                     DoCast(target, DUNGEON_MODE(SPELL_ARCANE_STREAM, H_SPELL_ARCANE_STREAM));
-                uiArcaneStreamTimer = (std::rand() % 5000)+5000;
+                uiArcaneStreamTimer = urand(0, 5000)+5000;
                 uiArcaneStreamTimerStartingValueHolder = uiArcaneStreamTimer;
             } else uiArcaneStreamTimer -= diff;
 
             if (uiManaDetonationTimer <= diff && uiArcaneStreamTimer >=1500 && uiArcaneStreamTimer <= uiArcaneStreamTimerStartingValueHolder/2)
             {
                 DoCast(DUNGEON_MODE(SPELL_MANA_DETONATION, H_SPELL_MANA_DETONATION));
-                uiManaDetonationTimer = std::rand() % 6000 + 2000;
+                uiManaDetonationTimer = urand(2000, 6000);
             } else uiManaDetonationTimer -= diff;
 
             DoMeleeAttackIfReady();

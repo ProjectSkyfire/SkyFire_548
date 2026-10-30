@@ -339,7 +339,7 @@ public:
                     }
                     else
                     {
-                        if (std::rand() % 4) // next platform
+                        if (urand(0, 4)) // next platform
                         {
                             DoSpawnCreature(CREATURE_EMBER_OF_ALAR, 0, 0, 0, 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5000);
                             if (cur_wp == 3)

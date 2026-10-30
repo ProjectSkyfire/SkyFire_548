@@ -48,8 +48,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            Cleave_Timer = std::rand() % 8000 + 4000;
-            ToxicVolley_Timer = std::rand() % 12000 + 6000;
+            Cleave_Timer = urand(4000, 8000);
+            ToxicVolley_Timer = urand(6000, 12000);
             Check_Timer = 2000;
 
             VemDead = false;
@@ -79,14 +79,14 @@ public:
             if (Cleave_Timer <= diff)
             {
                 DoCastVictim(SPELL_CLEAVE);
-                Cleave_Timer = std::rand() % 12000 + 5000;
+                Cleave_Timer = urand(5000, 12000);
             } else Cleave_Timer -= diff;
 
             //ToxicVolley_Timer
             if (ToxicVolley_Timer <= diff)
             {
                 DoCastVictim(SPELL_TOXIC_VOLLEY);
-                ToxicVolley_Timer = std::rand() % 15000 + 10000;
+                ToxicVolley_Timer = urand(10000, 15000);
             } else ToxicVolley_Timer -= diff;
 
             if (!HealthAbovePct(5) && !Death)
@@ -147,8 +147,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            Charge_Timer = std::rand() % 27000 + 15000;
-            KnockBack_Timer = std::rand() % 20000 + 8000;
+            Charge_Timer = urand(15000, 27000);
+            KnockBack_Timer = urand(8000, 20000);
             Enrage_Timer = 120000;
 
             Enraged = false;
@@ -186,7 +186,7 @@ public:
                     AttackStart(target);
                 }
 
-                Charge_Timer = std::rand() % 16000 + 8000;
+                Charge_Timer = urand(8000, 16000);
             } else Charge_Timer -= diff;
 
             //KnockBack_Timer
@@ -195,7 +195,7 @@ public:
                 DoCastVictim(SPELL_KNOCKBACK);
                 if (DoGetThreat(me->GetVictim()))
                     DoModifyThreatPercent(me->GetVictim(), -80);
-                KnockBack_Timer = std::rand() % 25000 + 15000;
+                KnockBack_Timer = urand(15000, 25000);
             } else KnockBack_Timer -= diff;
 
             //Enrage_Timer
@@ -242,8 +242,8 @@ public:
 
         void Reset() OVERRIDE
         {
-            Heal_Timer = std::rand() % 40000 + 25000;
-            Fear_Timer = std::rand() % 24000 + 12000;
+            Heal_Timer = urand(25000, 40000);
+            Fear_Timer = urand(12000, 24000);
             Check_Timer = 2000;
 
             VemDead = false;
@@ -293,7 +293,7 @@ public:
                     Unit* pKri = Unit::GetUnit(*me, instance->GetData64(DATA_KRI));
                     Unit* pVem = Unit::GetUnit(*me, instance->GetData64(DATA_VEM));
 
-                    switch (std::rand() % 2)
+                    switch (urand(0, 2))
                     {
                         case 0:
                             if (pKri)

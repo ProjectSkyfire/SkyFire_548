@@ -142,7 +142,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
     //calc random
     if (e.GetEventType() != SMART_EVENT_LINK && e.event.event_chance < 100 && e.event.event_chance)
     {
-        uint32 rnd = std::rand() % 100;
+        uint32 rnd = urand(0, 100);
         if (e.event.event_chance <= rnd)
             return;
     }

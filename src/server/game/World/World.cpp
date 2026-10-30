@@ -66,6 +66,7 @@
 #include "TicketMgr.h"
 #include "Transport.h"
 #include "TransportMgr.h"
+#include "Containers.h"
 #include "Util.h"
 #include "Vehicle.h"
 #include "VMapFactory.h"
@@ -2916,7 +2917,7 @@ void World::SendAutoBroadcast()
 
     if (weight)
     {
-        uint32 selectedWeight = std::rand() % (weight - 1);
+        uint32 selectedWeight = urand(0, weight - 1);
         weight = 0;
         for (AutobroadcastsWeightMap::const_iterator it = selectionWeights.begin(); it != selectionWeights.end(); ++it)
         {
@@ -2929,7 +2930,7 @@ void World::SendAutoBroadcast()
         }
     }
     else
-        msg = m_Autobroadcasts[std::rand() % m_Autobroadcasts.size()];
+        msg = Skyfire::Containers::SelectRandomContainerElement(m_Autobroadcasts).second;
 
     uint32 abcenter = sWorld->getIntConfig(WorldIntConfigs::CONFIG_AUTOBROADCAST_CENTER);
 

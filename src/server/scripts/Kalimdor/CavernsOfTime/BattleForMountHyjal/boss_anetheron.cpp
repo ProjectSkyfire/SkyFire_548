@@ -128,7 +128,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
                     DoCast(target, SPELL_CARRION_SWARM);
 
-                SwarmTimer = std::rand() % 60000 + 45000;
+                SwarmTimer = urand(45000, 60000);
                 Talk(SAY_SWARM);
             } else SwarmTimer -= diff;
 
@@ -145,7 +145,7 @@ public:
             if (AuraTimer <= diff)
             {
                 DoCast(me, SPELL_VAMPIRIC_AURA, true);
-                AuraTimer = std::rand() % 20000 + 10000;
+                AuraTimer = urand(10000, 20000);
             } else AuraTimer -= diff;
             if (InfernoTimer <= diff)
             {

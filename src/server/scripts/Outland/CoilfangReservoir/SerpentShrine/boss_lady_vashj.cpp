@@ -284,7 +284,7 @@ public:
 
         void CastShootOrMultishot()
         {
-            switch (std::rand() % 1)
+            switch (urand(0, 1))
             {
                 case 0:
                     // Shoot

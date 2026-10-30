@@ -160,7 +160,7 @@ public:
         {
             uiChargeTimer = 5000;
             uiShieldBreakerTimer = 8000;
-            uiBuffTimer = std::rand() % 60000 + 30000;
+            uiBuffTimer = urand(30000, 60000);
         }
 
         void SetData(uint32 uiType, uint32 /*uiData*/) OVERRIDE
@@ -232,7 +232,7 @@ public:
                 if (!me->HasAura(SPELL_SHIELD))
                     DoCastSpellShield();
 
-                uiBuffTimer = std::rand() % 45000 + 30000;
+                uiBuffTimer = urand(30000, 45000);
             }else uiBuffTimer -= uiDiff;
 
             if (uiChargeTimer <= uiDiff)
@@ -329,9 +329,9 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiBladeStormTimer = std::rand() % 20000 + 15000;
+            uiBladeStormTimer = urand(15000, 20000);
             uiInterceptTimer  = 7000;
-            uiMortalStrikeTimer = std::rand() % 12000 + 8000;
+            uiMortalStrikeTimer = urand(8000, 12000);
         }
 
         void JustReachedHome() OVERRIDE
@@ -399,13 +399,13 @@ public:
             if (uiBladeStormTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_BLADESTORM);
-                uiBladeStormTimer = std::rand() % 20000 + 15000;
+                uiBladeStormTimer = urand(15000, 20000);
             } else uiBladeStormTimer -= uiDiff;
 
             if (uiMortalStrikeTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_MORTAL_STRIKE);
-                uiMortalStrikeTimer = std::rand() % 12000 + 8000;
+                uiMortalStrikeTimer = urand(8000, 12000);
             } else uiMortalStrikeTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
@@ -603,8 +603,8 @@ public:
         {
             uiChainLightningTimer = 16000;
             uiHealingWaveTimer = 12000;
-            uiEartShieldTimer = std::rand() % 35000 + 30000;
-            uiHexMendingTimer = std::rand() % 25000 + 20000;
+            uiEartShieldTimer = urand(30000, 35000);
+            uiHexMendingTimer = urand(20000, 25000);
         }
 
         void EnterCombat(Unit* who) OVERRIDE
@@ -668,7 +668,7 @@ public:
 
             if (uiHealingWaveTimer <= uiDiff)
             {
-                bool bChance = std::rand() % 1;
+                bool bChance = urand(0, 1);
 
                 if (!bChance)
                 {
@@ -684,14 +684,14 @@ public:
             {
                 DoCast(me, SPELL_EARTH_SHIELD);
 
-                uiEartShieldTimer = std::rand() % 35000 + 30000;
+                uiEartShieldTimer = urand(30000, 35000);
             } else uiEartShieldTimer -= uiDiff;
 
             if (uiHexMendingTimer <= uiDiff)
             {
                 DoCastVictim(SPELL_HEX_OF_MENDING, true);
 
-                uiHexMendingTimer = std::rand() % 25000 + 20000;
+                uiHexMendingTimer = urand(20000, 25000);
             } else uiHexMendingTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
