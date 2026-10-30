@@ -4,6 +4,7 @@
 */
 
 #include "AreaTrigger.h"
+#include "BattlePetSpawnMgr.h"
 #include "CellImpl.h"
 #include "Corpse.h"
 #include "Creature.h"
@@ -96,6 +97,10 @@ void AddObjectHelper(CellCoord& cell, CreatureMapType& m, uint32& count, Map* ma
     obj->AddToWorld();
     if (obj->isActiveObject())
         map->AddToActive(obj);
+
+    // Creature-only overload: DB spawns bypass Map::AddToMap, so wild battle pet pools learn about their critters here
+    if (obj->IsAlive())
+        sBattlePetSpawnMgr->OnCreatureAdded(obj);
 
     ++count;
 }
@@ -207,6 +212,8 @@ void ObjectGridUnloader::Visit(GridRefManager<T>& m)
     while (!m.isEmpty())
     {
         T* obj = m.getFirst()->GetSource();
+        if (Creature* creature = obj->ToCreature())
+            sBattlePetSpawnMgr->OnCreatureUnloaded(creature);
         // if option set then object already saved at this moment
         if (!sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();

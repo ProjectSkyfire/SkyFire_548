@@ -181,13 +181,36 @@ void BattlePetSpawnMgr::OnCreatureRemoved(Creature* creature)
         zonePool->OnCreatureRemoved(creature);
 }
 
+// Grid unload deletes creatures without RemoveFromMap, so the pools would keep
+// relations to deleted objects and count them against the pool maximum forever.
+// A replacement may have wandered into another zone, so all zones of the map are checked.
+void BattlePetSpawnMgr::OnCreatureUnloaded(Creature* creature)
+{
+    if (!creature)
+        return;
+
+    BattlePetMapPoolMap::iterator mapItr = _mapPools.find(creature->GetMapId());
+    if (mapItr == _mapPools.end())
+        return;
+
+    for (BattlePetZonePoolMap::iterator zoneItr = mapItr->second.begin(); zoneItr != mapItr->second.end(); ++zoneItr)
+        zoneItr->second.OnCreatureUnloaded(creature);
+}
+
+// The relation is stored on the zone where the critter was swapped. A pet can
+// walk into another zone before it is captured, so every pool on the map is checked.
 bool BattlePetSpawnMgr::ResolveWildBattle(Creature* creature)
 {
     if (!creature)
         return false;
 
-    if (BattlePetWildZonePool* zonePool = GetZonePool(creature))
-        return zonePool->RemoveReplacement(creature);
+    BattlePetMapPoolMap::iterator mapItr = _mapPools.find(creature->GetMapId());
+    if (mapItr == _mapPools.end())
+        return false;
+
+    for (BattlePetZonePoolMap::iterator zoneItr = mapItr->second.begin(); zoneItr != mapItr->second.end(); ++zoneItr)
+        if (zoneItr->second.RemoveReplacement(creature))
+            return true;
 
     return false;
 }
@@ -197,8 +220,13 @@ bool BattlePetSpawnMgr::IsWildBattlePetReplacement(Creature const* creature) con
     if (!creature)
         return false;
 
-    if (BattlePetWildZonePool const* zonePool = GetZonePool(creature))
-        return zonePool->IsReplacement(creature->GetGUID());
+    BattlePetMapPoolMap::const_iterator mapItr = _mapPools.find(creature->GetMapId());
+    if (mapItr == _mapPools.end())
+        return false;
+
+    for (BattlePetZonePoolMap::const_iterator zoneItr = mapItr->second.begin(); zoneItr != mapItr->second.end(); ++zoneItr)
+        if (zoneItr->second.IsReplacement(creature->GetGUID()))
+            return true;
 
     return false;
 }
@@ -294,6 +322,49 @@ void BattlePetWildZonePool::OnCreatureRemoved(Creature* creature)
         BattlePetWildPoolTemplate& spawnTemplate = *itr;
         spawnTemplate.ReadyForReplacement.erase(creature->GetGUID());
         RemoveReplacement(creature->GetGUID(), spawnTemplate);
+    }
+}
+
+// Forgets the relation without deleting anything: the grid unloader deletes the
+// unloaded creature itself. Whichever side unloads, the original gets its normal
+// respawn time back. With SaveRespawnTimeImmediately = 1 the one-month timer set at
+// the swap stays in memory (setDeathState already saved the normal delay); with 0
+// the unloader saves m_respawnTime right after this hook. Either way an original
+// whose replacement left would otherwise stay despawned for a month.
+void BattlePetWildZonePool::OnCreatureUnloaded(Creature* creature)
+{
+    uint64 const guid = creature->GetGUID();
+    for (std::vector<BattlePetWildPoolTemplate>::iterator itr = _templates.begin(); itr != _templates.end(); ++itr)
+    {
+        BattlePetWildPoolTemplate& spawnTemplate = *itr;
+        spawnTemplate.ReadyForReplacement.erase(guid);
+
+        for (std::map<uint64, uint64>::iterator relationItr = spawnTemplate.Replacements.begin();
+            relationItr != spawnTemplate.Replacements.end();)
+        {
+            if (relationItr->first != guid && relationItr->second != guid)
+            {
+                ++relationItr;
+                continue;
+            }
+
+            Creature* original = relationItr->first == guid ? creature
+                : ObjectAccessor::GetObjectInWorld(relationItr->first, static_cast<Creature*>(nullptr));
+            if (original)
+            {
+                if (CreatureData const* creatureData = original->GetCreatureData())
+                    original->SetRespawnTime(creatureData->spawntimesecs);
+                else
+                    original->SetRespawnTime(0);
+
+                // the unloader saves only the creature it unloads; an original that
+                // stays loaded writes its restored timer here
+                if (original != creature)
+                    original->SaveRespawnTime();
+            }
+
+            spawnTemplate.Replacements.erase(relationItr++);
+        }
     }
 }
 
