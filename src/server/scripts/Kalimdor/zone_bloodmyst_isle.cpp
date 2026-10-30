@@ -58,7 +58,7 @@ public:
                     break;
                 case 1:
                 case 2:
-                    spawnCreatureID = possibleSpawns[urand(0, 30)];
+                    spawnCreatureID = possibleSpawns[urand(0, 31)];
                     break;
             }
 

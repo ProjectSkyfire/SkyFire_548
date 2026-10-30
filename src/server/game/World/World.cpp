@@ -66,6 +66,7 @@
 #include "TicketMgr.h"
 #include "Transport.h"
 #include "TransportMgr.h"
+#include "Containers.h"
 #include "Util.h"
 #include "Vehicle.h"
 #include "VMapFactory.h"
@@ -2929,7 +2930,7 @@ void World::SendAutoBroadcast()
         }
     }
     else
-        msg = m_Autobroadcasts[urand(0, m_Autobroadcasts.size())];
+        msg = Skyfire::Containers::SelectRandomContainerElement(m_Autobroadcasts).second;
 
     uint32 abcenter = sWorld->getIntConfig(WorldIntConfigs::CONFIG_AUTOBROADCAST_CENTER);
 

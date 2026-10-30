@@ -588,7 +588,7 @@ class spell_q12634_despawn_fruit_tosser : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 uint32 spellId = SPELL_BANANAS_FALL_TO_GROUND;
-                switch (urand(0, 3))
+                switch (urand(0, 2))
                 {
                     case 1: spellId = SPELL_ORANGE_FALLS_TO_GROUND; break;
                     case 2: spellId = SPELL_PAPAYA_FALLS_TO_GROUND; break;
