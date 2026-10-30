@@ -5,6 +5,10 @@
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "Player.h"
+#include "WorldSession.h"
+#include "SpellScript.h"
+#include "SpellMgr.h"
 #include "azjol_nerub.h"
 
 DoorData const doorData[] =
@@ -34,6 +38,8 @@ class instance_azjol_nerub : public InstanceMapScript
                 WatcherGashraGUID   = 0;
                 WatcherSilthikGUID  = 0;
                 WatcherNarjilGUID   = 0;
+                AnubarakWallGUID    = 0;
+                AnubarakWall2GUID   = 0;
             }
 
             void OnCreatureCreate(Creature* creature) OVERRIDE
@@ -67,10 +73,16 @@ class instance_azjol_nerub : public InstanceMapScript
             {
                 switch (go->GetEntry())
                 {
-                    case GO_KRIKTHIR_DOOR:
                     case GO_ANUBARAK_DOOR_1:
-                    case GO_ANUBARAK_DOOR_2:
+                        AnubarakWallGUID = go->GetGUID();
+                        AddDoor(go, true);
+                        break;
                     case GO_ANUBARAK_DOOR_3:
+                        AnubarakWall2GUID = go->GetGUID();
+                        AddDoor(go, true);
+                        break;
+                    case GO_KRIKTHIR_DOOR:
+                    case GO_ANUBARAK_DOOR_2:
                         AddDoor(go, true);
                         break;
                     default:
@@ -93,6 +105,17 @@ class instance_azjol_nerub : public InstanceMapScript
                 }
             }
 
+            bool CheckRequiredBosses(uint32 bossId, Player const* player = NULL) const OVERRIDE
+            {
+                if (player && player->GetSession()->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_INSTANCE_REQUIRED_BOSSES))
+                    return true;
+
+                if (bossId > DATA_KRIKTHIR_THE_GATEWATCHER && GetBossState(DATA_KRIKTHIR_THE_GATEWATCHER) != DONE)
+                    return false;
+
+                return true;
+            }
+
             uint64 GetData64(uint32 type) const OVERRIDE
             {
                 switch (type)
@@ -109,6 +132,10 @@ class instance_azjol_nerub : public InstanceMapScript
                         return WatcherSilthikGUID;
                     case DATA_WATCHER_NARJIL:
                         return WatcherNarjilGUID;
+                    case DATA_ANUBARAK_WALL:
+                        return AnubarakWallGUID;
+                    case DATA_ANUBARAK_WALL_2:
+                        return AnubarakWall2GUID;
                     default:
                         break;
                 }
@@ -166,6 +193,8 @@ class instance_azjol_nerub : public InstanceMapScript
             uint64 WatcherGashraGUID;
             uint64 WatcherSilthikGUID;
             uint64 WatcherNarjilGUID;
+            uint64 AnubarakWallGUID;
+            uint64 AnubarakWall2GUID;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
@@ -174,7 +203,33 @@ class instance_azjol_nerub : public InstanceMapScript
         }
 };
 
+enum DrainPowerSpells
+{
+    SPELL_DRAIN_POWER_AURA = 54315
+};
+
+class spell_azjol_drain_power : public SpellScript
+{
+    PrepareSpellScript(spell_azjol_drain_power);
+
+    bool Validate(SpellInfo const* /*spell*/) OVERRIDE
+    {
+        return sSpellMgr->GetSpellInfo(SPELL_DRAIN_POWER_AURA) != NULL;
+    }
+
+    void HandleScriptEffect(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetCaster(), SPELL_DRAIN_POWER_AURA, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_azjol_drain_power::HandleScriptEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+    }
+};
+
 void AddSC_instance_azjol_nerub()
 {
    new instance_azjol_nerub();
+   RegisterSpellScript(spell_azjol_drain_power);
 }

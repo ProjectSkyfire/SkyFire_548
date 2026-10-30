@@ -20,7 +20,9 @@ enum DataTypes
     // Additional Data
     DATA_WATCHER_GASHRA             = 3,
     DATA_WATCHER_SILTHIK            = 4,
-    DATA_WATCHER_NARJIL             = 5
+    DATA_WATCHER_NARJIL             = 5,
+    DATA_ANUBARAK_WALL              = 6,
+    DATA_ANUBARAK_WALL_2            = 7
 };
 
 enum CreatureIds
