@@ -112,7 +112,7 @@ public:
                 me->InterruptNonMeleeSpells(false);
                 DoCastVictim(SPELL_AMPLIFY_FLAMES);
 
-                AmplifyTimer = std::rand() % 20000 + 10000;
+                AmplifyTimer = urand(10000, 20000);
             } else AmplifyTimer -= diff;
 
             DoMeleeAttackIfReady();
@@ -399,7 +399,7 @@ public:
 
                 if (PortalGUID[0] && PortalGUID[1])
                 {
-                    if (Creature* pPortal = Unit::GetCreature(*me, PortalGUID[std::rand() % 1]))
+                    if (Creature* pPortal = Unit::GetCreature(*me, PortalGUID[urand(0, 1)]))
                         pPortal->CastSpell(me->GetVictim(), SPELL_SUMMON_FIENDISIMP, false);
                     SummonTimer = 5000;
                 }

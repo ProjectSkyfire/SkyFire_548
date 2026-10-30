@@ -140,7 +140,7 @@ public:
             {
                 uint8 gender = target->getGender();
                 uint32 spellId = SPELL_TRICK_BUFF;
-                switch (std::rand() % 6)
+                switch (urand(0, 6))
                 {
                 case 1:
                     spellId = gender ? SPELL_LEPER_GNOME_COSTUME_FEMALE : SPELL_LEPER_GNOME_COSTUME_MALE;

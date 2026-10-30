@@ -946,7 +946,7 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
             // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
             int32 lastSec = 0;
-            switch (std::rand() % 3)
+            switch (urand(0, 3))
             {
                 case 0: lastSec = 3; break;
                 case 1: lastSec = 7; break;

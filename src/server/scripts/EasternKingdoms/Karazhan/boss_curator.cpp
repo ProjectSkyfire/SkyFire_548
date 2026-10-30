@@ -151,7 +151,7 @@ public:
                         }
                         else
                         {
-                            if ((std::rand() % 1) == 0)
+                            if (urand(0, 1) == 0)
                             {
                                 Talk(SAY_SUMMON);
                             }

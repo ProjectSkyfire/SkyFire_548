@@ -257,7 +257,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             // random durability for items (HIT TAKEN)
             if (roll_chance_f(sWorld->getRate(Rates::RATE_DURABILITY_LOSS_DAMAGE)))
             {
-                EquipmentSlots slot = EquipmentSlots(std::rand() % (EQUIPMENT_SLOT_END - 1));
+                EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
                 victim->ToPlayer()->DurabilityPointLossForEquipSlot(slot);
             }
         }
@@ -274,7 +274,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             // random durability for items (HIT DONE)
             if (roll_chance_f(sWorld->getRate(Rates::RATE_DURABILITY_LOSS_DAMAGE)))
             {
-                EquipmentSlots slot = EquipmentSlots(std::rand() % (EQUIPMENT_SLOT_END - 1));
+                EquipmentSlots slot = EquipmentSlots(urand(0, EQUIPMENT_SLOT_END - 1));
                 ToPlayer()->DurabilityPointLossForEquipSlot(slot);
             }
         }
@@ -1490,7 +1490,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* victim, WeaponAttackTy
     // bonus from skills is 0.04%
     int32    skillBonus = 4 * (attackerMaxSkillValueForLevel - victimMaxSkillValueForLevel);
     int32    sum = 0, tmp = 0;
-    int32    roll = std::rand() % 10000;
+    int32    roll = urand(0, 10000);
 
     SF_LOG_DEBUG("entities.unit", "RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
     SF_LOG_DEBUG("entities.unit", "RollMeleeOutcomeAgainst: rolled %d, miss %d, dodge %d, parry %d, block %d, crit %d",
@@ -1673,7 +1673,7 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool add
     if (max_damage < 1.0f)
         max_damage = 5.0f;
 
-    return std::rand() % (uint32)max_damage + (uint32)min_damage;
+    return urand((uint32)min_damage, (uint32)max_damage);
 }
 
 float Unit::CalculateLevelPenalty(SpellInfo const* spellProto) const

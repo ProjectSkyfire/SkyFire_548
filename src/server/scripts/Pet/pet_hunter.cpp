@@ -174,10 +174,10 @@ class npc_pet_hunter_snake_trap : public CreatureScript
                 {
                     if (_isViper) // Viper
                     {
-                        if ((std::rand() % 2) == 0) //33% chance to cast
+                        if (urand(0, 2) == 0) //33% chance to cast
                         {
                             uint32 spell;
-                            if ((std::rand() % 1) == 0)
+                            if (urand(0, 1) == 0)
                                 spell = SPELL_HUNTER_MIND_NUMBING_POISON;
                             else
                                 spell = SPELL_HUNTER_CRIPPLING_POISON;
@@ -189,7 +189,7 @@ class npc_pet_hunter_snake_trap : public CreatureScript
                     }
                     else // Venomous Snake
                     {
-                        if ((std::rand() % 2) == 0) // 33% chance to cast
+                        if (urand(0, 2) == 0) // 33% chance to cast
                             DoCastVictim(SPELL_HUNTER_DEADLY_POISON);
                         _spellTimer = 1500 + (rand() % 5) * 100;
                     }

@@ -221,7 +221,7 @@ uint32 CreatureTextMgr::SendChat(Creature* source, uint8 textGroup, WorldObject 
         for (CreatureTextGroup::const_iterator iter = tempGroup.begin(); iter != tempGroup.end(); ++iter)
         {
             uint32 chance = uint32(iter->probability);
-            uint32 r = std::rand() % 100;
+            uint32 r = urand(0, 100);
             ++offset;
             if (r <= chance)
                 break;

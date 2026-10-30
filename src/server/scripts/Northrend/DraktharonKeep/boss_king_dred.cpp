@@ -63,9 +63,9 @@ public:
             events.ScheduleEvent(EVENT_BELLOWING_ROAR, 33000);
             events.ScheduleEvent(EVENT_GRIEVOUS_BITE, 20000);
             events.ScheduleEvent(EVENT_MANGLING_SLASH, 18500);
-            events.ScheduleEvent(EVENT_FEARSOME_ROAR, std::rand() % 20000 + 10000);
+            events.ScheduleEvent(EVENT_FEARSOME_ROAR, urand(10000, 20000));
             events.ScheduleEvent(EVENT_PIERCING_SLASH, 17000);
-            events.ScheduleEvent(EVENT_RAPTOR_CALL, std::rand() % 25000 + 20000);
+            events.ScheduleEvent(EVENT_RAPTOR_CALL, urand(20000, 25000));
         }
 
         void DoAction(int32 action) OVERRIDE
@@ -122,7 +122,7 @@ public:
                     case EVENT_FEARSOME_ROAR:
                     {
                         DoCastAOE(SPELL_FEARSOME_ROAR);
-                        events.ScheduleEvent(EVENT_FEARSOME_ROAR, std::rand() % 20000 + 10000);
+                        events.ScheduleEvent(EVENT_FEARSOME_ROAR, urand(10000, 20000));
                         break;
                     }
                     case EVENT_PIERCING_SLASH:
@@ -139,7 +139,7 @@ public:
 
                         me->GetClosePoint(x, y, z, me->GetObjectSize() / 3, 10.0f);
                         me->SummonCreature(RAND(NPC_DRAKKARI_GUTRIPPER, NPC_DRAKKARI_SCYTHECLAW), x, y, z, 0, TempSummonType::TEMPSUMMON_DEAD_DESPAWN, 1000);
-                        events.ScheduleEvent(EVENT_RAPTOR_CALL, std::rand() % 25000 + 20000);
+                        events.ScheduleEvent(EVENT_RAPTOR_CALL, urand(20000, 25000));
                         break;
                     }
                     default:
@@ -175,7 +175,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            GutRipTimer = std::rand() % 15000 + 10000;
+            GutRipTimer = urand(10000, 15000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -186,7 +186,7 @@ public:
             if (GutRipTimer <= diff)
             {
                 DoCastVictim(SPELL_GUT_RIP, false);
-                GutRipTimer = std::rand() % 15000 + 10000;
+                GutRipTimer = urand(10000, 15000);
             }
             else
                 GutRipTimer -= diff;
@@ -226,7 +226,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiRendTimer = std::rand() % 15000 + 10000;
+            uiRendTimer = urand(10000, 15000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -237,7 +237,7 @@ public:
             if (uiRendTimer <= diff)
             {
                 DoCastVictim(SPELL_REND, false);
-                uiRendTimer = std::rand() % 15000 + 10000;
+                uiRendTimer = urand(10000, 15000);
             }
             else
                 uiRendTimer -= diff;

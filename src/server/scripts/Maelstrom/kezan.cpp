@@ -63,7 +63,7 @@ public:
             {
                 Reset();
 
-                switch (std::rand() % 2)
+                switch (urand(0, 2))
                 {
                     case 0:
                         me->HandleEmoteCommand(EMOTE_STATE_EXCLAIM);

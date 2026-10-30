@@ -231,7 +231,7 @@ public:
 
             Flying = true;
 
-            FlyTimer = std::rand() % 60000 + 45000; //timer wrong between 45 and 60 seconds
+            FlyTimer = urand(45000, 60000); //timer wrong between 45 and 60 seconds
             ++FlyCount;
 
             RainofBonesTimer = 5000; //timer wrong (maybe)
@@ -295,7 +295,7 @@ public:
                 if (BellowingRoarTimer <= diff)
                 {
                     DoCastVictim(SPELL_BELLOWING_ROAR);
-                    BellowingRoarTimer = std::rand() % 40000 + 30000;
+                    BellowingRoarTimer = urand(30000, 40000);
                 } else BellowingRoarTimer -= diff;
 
                 if (SmolderingBreathTimer <= diff)

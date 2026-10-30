@@ -362,7 +362,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     const char* gender = "his";
                     if (m_caster->getGender() > 0)
                         gender = "her";
-                    snprintf(buf, sizeof(buf), "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, std::rand() % 10 + 1, std::rand() % 10 + 1);
+                    snprintf(buf, sizeof(buf), "%s rubs %s [Decahedral Dwarven Dice] between %s hands and rolls. One %u and one %u.", m_caster->GetName().c_str(), gender, gender, urand(1, 10), urand(1, 10));
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
                 }
@@ -373,7 +373,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     const char* gender = "his";
                     if (m_caster->getGender() > 0)
                         gender = "her";
-                    snprintf(buf, sizeof(buf), "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName().c_str(), gender, std::rand() % 6 + 1, std::rand() % 6 + 1);
+                    snprintf(buf, sizeof(buf), "%s causually tosses %s [Worn Troll Dice]. One %u and one %u.", m_caster->GetName().c_str(), gender, urand(1, 6), urand(1, 6));
                     m_caster->MonsterTextEmote(buf, 0);
                     break;
                 }
@@ -436,7 +436,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                 case 52479: // Gift of the Harvester
                     if (unitTarget && m_originalCaster)
                     {
-                        uint32 spellId = std::rand() % 1 ? damage : Skyfire::Spells::GetGiftOfTheHarvesterFallbackSpellId();
+                        uint32 spellId = urand(0, 1) ? damage : Skyfire::Spells::GetGiftOfTheHarvesterFallbackSpellId();
                         m_originalCaster->CastSpell(unitTarget, spellId, true);
                     }
                     return;

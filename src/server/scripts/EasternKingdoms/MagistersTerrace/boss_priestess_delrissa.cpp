@@ -278,7 +278,7 @@ public:
             {
                 Unit* target = me;
 
-                if (std::rand() % 1)
+                if (urand(0, 1))
                     if (Unit* pAdd = Unit::GetUnit(*me, m_auiLackeyGUID[rand()%MAX_ACTIVE_LACKEY]))
                         if (pAdd->IsAlive())
                             target = pAdd;
@@ -291,7 +291,7 @@ public:
             {
                 Unit* target = me;
 
-                if (std::rand() % 1)
+                if (urand(0, 1))
                     if (Unit* pAdd = Unit::GetUnit(*me, m_auiLackeyGUID[rand()%MAX_ACTIVE_LACKEY]))
                         if (pAdd->IsAlive() && !pAdd->HasAura(SPELL_SHIELD))
                             target = pAdd;
@@ -304,11 +304,11 @@ public:
             {
                 Unit* target = NULL;
 
-                if (std::rand() % 1)
+                if (urand(0, 1))
                     target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true);
                 else
                 {
-                    if (std::rand() % 1)
+                    if (urand(0, 1))
                         target = me;
                     else
                         if (Unit* pAdd = Unit::GetUnit(*me, m_auiLackeyGUID[rand()%MAX_ACTIVE_LACKEY]))
@@ -365,7 +365,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
         // For later development, some alternative threat system should be made
         // We do not know what this system is based upon, but one theory is class (healers=high threat, dps=medium, etc)
         // We reset their threat frequently as an alternative until such a system exist
-        ResetThreatTimer = std::rand() % 20000 + 5000;
+        ResetThreatTimer = urand(5000, 20000);
 
         // in case she is not alive and Reset was for some reason called, respawn her (most likely party wipe after killing her)
         if (Creature* pDelrissa = Unit::GetCreature(*me, instance ? instance->GetData64(DATA_DELRISSA) : 0))
@@ -469,7 +469,7 @@ struct boss_priestess_lackey_commonAI : public ScriptedAI
         if (ResetThreatTimer <= diff)
         {
             DoResetThreat();
-            ResetThreatTimer = std::rand() % 20000 + 5000;
+            ResetThreatTimer = urand(5000, 20000);
         } else ResetThreatTimer -= diff;
     }
 };

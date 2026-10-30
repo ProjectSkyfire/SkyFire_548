@@ -405,7 +405,7 @@ public:
                             uiPhase = 14;
                             break;
                         case 14:
-                            _bossRandom = std::rand() % 3;
+                            _bossRandom = urand(0, 3);
                             if (Creature* creature = me->SummonCreature(Boss[_bossRandom].uiBoss, SpawnPosition[2], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 1000))
                                 creature->AI()->SetData(1, _bossRandom);
                             uiPhase = 0;
@@ -947,7 +947,7 @@ public:
         {
             uiBossRandom = 0;
             uiSpellInfo = 0;
-            uiElementalSpellTimer = std::rand() % 8000 + 5000;
+            uiElementalSpellTimer = urand(5000, 8000);
 
             bAddAttack = false;
         }
@@ -1018,7 +1018,7 @@ public:
             {
                 DoCastVictim(Boss[uiBossRandom].uiSpell);
 
-                uiElementalSpellTimer = std::rand() % 8000 + 5000;
+                uiElementalSpellTimer = urand(5000, 8000);
             } else uiElementalSpellTimer -= uiDiff;
 
             if (!bAddAttack && !HealthAbovePct(20))
@@ -1084,7 +1084,7 @@ public:
                 me->GetMotionMaster()->MoveIdle();
 
             _spell = 0;
-            _missleTimer = std::rand() % 7000 + 2000;
+            _missleTimer = urand(2000, 7000);
         }
 
         void AttackStart(Unit* who) OVERRIDE
@@ -1112,7 +1112,7 @@ public:
                 {
                     if (_spell) // Sometimes it is 0, why?
                         DoCast(me, _spell); // this spell (what spell) is not supported ... YET!
-                    _missleTimer = std::rand() % 7000 + 2000;
+                    _missleTimer = urand(2000, 7000);
                 } else _missleTimer -= diff;
             }
 
@@ -1422,7 +1422,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            _events.ScheduleEvent(EVENT_TURN_TO_POT, std::rand() % 26000 + 15000);
+            _events.ScheduleEvent(EVENT_TURN_TO_POT, urand(15000, 26000));
         }
 
         void SetData(uint32 type, uint32 data) OVERRIDE
@@ -1464,7 +1464,7 @@ public:
                     case EVENT_TURN_BACK:
                         me->SetFacingTo(4.886922f);
                         me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-                        _events.ScheduleEvent(EVENT_TURN_TO_POT, std::rand() % 41000 + 25000);
+                        _events.ScheduleEvent(EVENT_TURN_TO_POT, urand(25000, 41000));
                         break;
                     case EVENT_EASY_123:
                         if (Player* player = ObjectAccessor::GetPlayer(*me, _playerGUID))
@@ -1645,13 +1645,13 @@ public:
                 switch (GetSpellInfo()->Id)
                 {
                     case SPELL_RANDOM_INGREDIENT_EASY:
-                        ingredient = std::rand() % 10;
+                        ingredient = urand(0, 10);
                         break;
                     case SPELL_RANDOM_INGREDIENT_MEDIUM:
-                        ingredient = std::rand() % 15 + 11;
+                        ingredient = urand(11, 15);
                         break;
                     case SPELL_RANDOM_INGREDIENT_HARD:
-                        ingredient = std::rand() % 20 + 16;
+                        ingredient = urand(16, 20);
                         break;
                 }
 

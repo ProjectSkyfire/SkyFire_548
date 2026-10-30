@@ -1485,7 +1485,7 @@ public:
                 {
                     uint8 newPlace = 0;
 
-                    newPlace = std::rand() % 3;
+                    newPlace = urand(0, 3);
 
                     switch (newPlace)
                     {

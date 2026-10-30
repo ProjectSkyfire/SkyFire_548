@@ -70,7 +70,7 @@ bool Weather::ReGenerate()
     ///- 30% - weather gets better (if not fine) or change weather type
     ///- 30% - weather worsens (if not fine)
     ///- 10% - radical change (if not fine)
-    uint32 u = std::rand() % 99;
+    uint32 u = urand(0, 99);
 
     if (u < 30)
         return false;
@@ -125,7 +125,7 @@ bool Weather::ReGenerate()
             if (m_grade > 0.6666667f)
             {
                 // Severe change, but how severe?
-                uint32 rnd = std::rand() % 99;
+                uint32 rnd = urand(0, 99);
                 if (rnd < 50)
                 {
                     m_grade -= 0.6666667f;
@@ -142,7 +142,7 @@ bool Weather::ReGenerate()
     uint32 chance2 = chance1 + m_weatherChances->data[season].snowChance;
     uint32 chance3 = chance2 + m_weatherChances->data[season].stormChance;
 
-    uint32 rnd = std::rand() % 99;
+    uint32 rnd = urand(0, 99);
     if (rnd <= chance1)
         m_type = WEATHER_TYPE_RAIN;
     else if (rnd <= chance2)
@@ -169,7 +169,7 @@ bool Weather::ReGenerate()
     else
     {
         // Severe change, but how severe?
-        rnd = std::rand() % 99;
+        rnd = urand(0, 99);
         if (rnd < 50)
             m_grade = (float)rand_norm() * 0.3333f + 0.3334f;
         else

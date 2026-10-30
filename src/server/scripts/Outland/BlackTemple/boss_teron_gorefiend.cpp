@@ -236,7 +236,7 @@ public:
             if (instance)
                 instance->SetBossState(DATA_TERON_GOREFIEND, NOT_STARTED);
 
-            IncinerateTimer = std::rand() % 31000 + 20000;
+            IncinerateTimer = urand(20000, 31000);
             SummonDoomBlossomTimer = 12000;
             EnrageTimer = 600000;
             CrushingShadowsTimer = 22000;
@@ -293,7 +293,7 @@ public:
         float CalculateRandomLocation(float Loc, uint32 radius)
         {
             float coord = Loc;
-            switch (std::rand() % 1)
+            switch (urand(0, 1))
             {
                 case 0:
                     coord += rand()%radius;
@@ -452,7 +452,7 @@ public:
                 {
                     Talk(SAY_SPECIAL);
                     DoCast(target, SPELL_INCINERATE);
-                    IncinerateTimer = std::rand() % (51 * IN_MILLISECONDS) + (20 * IN_MILLISECONDS);
+                    IncinerateTimer = urand(20, 51) * 1000;
                 }
             } else IncinerateTimer -= diff;
 
@@ -460,7 +460,7 @@ public:
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     DoCast(target, SPELL_CRUSHING_SHADOWS);
-                CrushingShadowsTimer = std::rand() % (26 * IN_MILLISECONDS) + (10 * IN_MILLISECONDS);
+                CrushingShadowsTimer = urand(10, 26) * 1000;
             } else CrushingShadowsTimer -= diff;
 
             /*** NOTE FOR FUTURE DEV: UNCOMMENT BELOW ONLY IF MIND CONTROL IS FULLY IMPLEMENTED **/
@@ -483,7 +483,7 @@ public:
             if (RandomYellTimer <= diff)
             {
                 Talk(SAY_SPELL);
-                RandomYellTimer = std::rand() % (101 * IN_MILLISECONDS) + (50 * IN_MILLISECONDS);
+                RandomYellTimer = urand(50, 101) * 1000;
             } else RandomYellTimer -= diff;
 
             if (!me->HasAura(SPELL_BERSERK))

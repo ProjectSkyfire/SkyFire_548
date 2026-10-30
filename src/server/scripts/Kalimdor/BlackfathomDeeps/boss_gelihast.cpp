@@ -35,7 +35,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            netTimer = std::rand() % 4000 + 2000;
+            netTimer = urand(2000, 4000);
             if (instance)
                 instance->SetData(TYPE_GELIHAST, NOT_STARTED);
         }
@@ -60,7 +60,7 @@ public:
             if (netTimer < diff)
             {
                 DoCastVictim(SPELL_NET);
-                netTimer = std::rand() % 7000 + 4000;
+                netTimer = urand(4000, 7000);
             } else netTimer -= diff;
 
             DoMeleeAttackIfReady();

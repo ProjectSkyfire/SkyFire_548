@@ -109,16 +109,16 @@ public:
 
             uiPhase = PHASE_UNDEAD;
 
-            uiIcyTouchTimer = std::rand() % 9000 + 5000;
-            uiPlagueStrikeTimer = std::rand() % 13000 + 10000;
-            uiDeathRespiteTimer = std::rand() % 16000 + 15000;
-            uiObliterateTimer = std::rand() % 19000 + 17000;
-            uiDesecration = std::rand() % 16000 + 15000;
+            uiIcyTouchTimer = urand(5000, 9000);
+            uiPlagueStrikeTimer = urand(10000, 13000);
+            uiDeathRespiteTimer = urand(15000, 16000);
+            uiObliterateTimer = urand(17000, 19000);
+            uiDesecration = urand(15000, 16000);
             uiDeathArmyCheckTimer = 7000;
             uiResurrectTimer = 4000;
             uiGhoulExplodeTimer = 8000;
-            uiDeathBiteTimer = std::rand() % 4000 + 2000;
-            uiMarkedDeathTimer = std::rand() % 7000 + 5000;
+            uiDeathBiteTimer = urand(2000, 4000);
+            uiMarkedDeathTimer = urand(5000, 7000);
         }
 
         void RemoveSummons()
@@ -168,17 +168,17 @@ public:
                     if (uiIcyTouchTimer <= uiDiff)
                     {
                         DoCastVictim(SPELL_ICY_TOUCH);
-                        uiIcyTouchTimer = std::rand() % 7000 + 5000;
+                        uiIcyTouchTimer = urand(5000, 7000);
                     } else uiIcyTouchTimer -= uiDiff;
                     if (uiPlagueStrikeTimer <= uiDiff)
                     {
                         DoCastVictim(SPELL_ICY_TOUCH);
-                        uiPlagueStrikeTimer = std::rand() % 15000 + 12000;
+                        uiPlagueStrikeTimer = urand(12000, 15000);
                     } else uiPlagueStrikeTimer -= uiDiff;
                     if (uiObliterateTimer <= uiDiff)
                     {
                         DoCastVictim(SPELL_OBLITERATE);
-                        uiObliterateTimer = std::rand() % 19000 + 17000;
+                        uiObliterateTimer = urand(17000, 19000);
                     } else uiObliterateTimer -= uiDiff;
                     switch (uiPhase)
                     {
@@ -191,7 +191,7 @@ public:
                                     if (target && target->IsAlive())
                                         DoCast(target, SPELL_DEATH_RESPITE);
                                 }
-                                uiDeathRespiteTimer = std::rand() % 16000 + 15000;
+                                uiDeathRespiteTimer = urand(15000, 16000);
                             } else uiDeathRespiteTimer -= uiDiff;
                             break;
                         }
@@ -219,7 +219,7 @@ public:
                                     if (target && target->IsAlive())
                                         DoCast(target, SPELL_DESECRATION);
                                 }
-                                uiDesecration = std::rand() % 16000 + 15000;
+                                uiDesecration = urand(15000, 16000);
                             } else uiDesecration -= uiDiff;
                             if (uiGhoulExplodeTimer <= uiDiff)
                             {
@@ -237,7 +237,7 @@ public:
                     if (uiDeathBiteTimer <= uiDiff)
                     {
                         DoCastAOE(SPELL_DEATH_BITE);
-                        uiDeathBiteTimer = std::rand() % 4000 + 2000;
+                        uiDeathBiteTimer = urand(2000, 4000);
                     } else uiDeathBiteTimer -= uiDiff;
                     if (uiMarkedDeathTimer <= uiDiff)
                     {
@@ -246,7 +246,7 @@ public:
                             if (target && target->IsAlive())
                                 DoCast(target, SPELL_MARKED_DEATH);
                         }
-                        uiMarkedDeathTimer = std::rand() % 7000 + 5000;
+                        uiMarkedDeathTimer = urand(5000, 7000);
                     } else uiMarkedDeathTimer -= uiDiff;
                     break;
                 }

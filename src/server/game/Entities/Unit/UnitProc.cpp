@@ -977,7 +977,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 71433;  // default main hand attack
                     // roll if offhand
                     if (Player const* player = ToPlayer())
-                        if (player->GetWeaponForAttack(WeaponAttackType::OFF_ATTACK, true) && std::rand() % 1)
+                        if (player->GetWeaponForAttack(WeaponAttackType::OFF_ATTACK, true) && urand(0, 1))
                             triggered_spell_id = 71434;
                     target = victim;
                     break;

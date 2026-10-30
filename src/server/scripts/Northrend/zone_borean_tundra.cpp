@@ -352,14 +352,14 @@ public:
 
             if (player->GetQuestStatus(11611) == QUEST_STATUS_INCOMPLETE)
             {
-                uint8 uiRand = std::rand() % 99;
+                uint8 uiRand = urand(0, 99);
                 if (uiRand < 25)
                 {
                     player->CastSpell(me, 45532, true);
                     player->KilledMonsterCredit(WARSONG_PEON, 0);
                 }
                 else if (uiRand < 75)
-                    player->CastSpell(me, nerubarVictims[std::rand() % 2], true);
+                    player->CastSpell(me, nerubarVictims[urand(0, 2)], true);
             }
         }
     };
@@ -1338,9 +1338,9 @@ public:
             leryssaGUID         = 0;
             arlosGUID           = 0;
             bCheck              = false;
-            shadowBoltTimer = std::rand() % 12000 + 5000;
-            deflectionTimer = std::rand() % 25000 + 20000;
-            soulBlastTimer = std::rand() % 18000 + 12000;
+            shadowBoltTimer = urand(5000, 12000);
+            deflectionTimer = urand(20000, 25000);
+            soulBlastTimer  = urand(12000, 18000);
         }
         void MovementInform(uint32 uiType, uint32 /*uiId*/) OVERRIDE
         {
@@ -1371,19 +1371,19 @@ public:
                 if (shadowBoltTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_SHADOW_BOLT);
-                    shadowBoltTimer = std::rand() % 12000 + 5000;
+                    shadowBoltTimer = urand(5000, 12000);
                 } else shadowBoltTimer -= uiDiff;
 
                 if (deflectionTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_DEFLECTION);
-                    deflectionTimer = std::rand() % 25000 + 20000;
+                    deflectionTimer = urand(20000, 25000);
                 } else deflectionTimer -= uiDiff;
 
                 if (soulBlastTimer <= uiDiff)
                 {
                     DoCastVictim(SPELL_SOUL_BLAST);
-                    soulBlastTimer = std::rand() % 18000 + 12000;
+                    soulBlastTimer  = urand(12000, 18000);
                 } else soulBlastTimer -= uiDiff;
             }
 
@@ -2106,7 +2106,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiExplosionTimer = std::rand() % 10000 + 5000;
+            uiExplosionTimer = urand(5000, 10000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -2162,7 +2162,7 @@ public:
 
         void Reset() OVERRIDE
         {
-            uiTimer = std::rand() % 18000 + 13000;
+            uiTimer = urand(13000, 18000);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -2175,7 +2175,7 @@ public:
                     pCannon = me->FindNearestGameObject(GO_VALIANCE_KEEP_CANNON_2, 10);
                 if (pCannon)
                     pCannon->Use(me);
-                uiTimer = std::rand() % 18000 + 13000;
+                uiTimer = urand(13000, 18000);
             }
             else uiTimer -= diff;
 
@@ -2249,7 +2249,7 @@ public:
                                         DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
                             }
                         }
-                        m_uiTimer = std::rand() % 120000 + 90000;
+                        m_uiTimer = urand(90000, 120000);
                     }
                         break;
                     case NPC_WARMAGE_CALANDRA:
@@ -2263,7 +2263,7 @@ public:
                                         DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
                             }
                         }
-                        m_uiTimer = std::rand() % 120000 + 90000;
+                        m_uiTimer = urand(90000, 120000);
                     }
                         break;
                     case NPC_WARMAGE_WATKINS:
@@ -2277,7 +2277,7 @@ public:
                                         DoCast(pOrb, SPELL_TRANSITUS_SHIELD_BEAM);
                             }
                         }
-                        m_uiTimer = std::rand() % 120000 + 90000;
+                        m_uiTimer = urand(90000, 120000);
                     }
                         break;
                 }
