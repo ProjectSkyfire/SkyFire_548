@@ -14,7 +14,7 @@ enum Spells
 {
     SPELL_BLESSING_OF_BLACKFATHOM                           = 8733,
     SPELL_RAVAGE                                            = 8391,
-    SPELL_FROST_NOVA                                        = 865,
+    SPELL_FROST_NOVA                                        = 11831, // 865 is not in 5.4.8
     SPELL_FROST_BOLT_VOLLEY                                 = 8398,
     SPELL_TELEPORT_DARNASSUS                                = 9268
 };
