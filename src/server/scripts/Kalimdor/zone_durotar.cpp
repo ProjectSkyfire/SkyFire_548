@@ -341,6 +341,9 @@ struct npc_swiftclaw_vehicle : public ScriptedAI
 {
     npc_swiftclaw_vehicle(Creature* creature) : ScriptedAI(creature) { }
 
+    // Keep this AI while the player steers, or the pens are never checked.
+    void OnCharmed(bool /*apply*/) OVERRIDE { }
+
     void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) OVERRIDE
     {
         if (!apply)
