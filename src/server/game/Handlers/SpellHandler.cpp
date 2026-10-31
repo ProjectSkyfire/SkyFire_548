@@ -1524,41 +1524,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (!ValidateCastSource(recvPacket, _player, caster, spellInfo, spellId, request.targetGuid))
         return;
 
-    // Aura Overriden Spells
-    Unit::AuraEffectList swaps = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
-    Unit::AuraEffectList const& swaps2 = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
-    if (!swaps2.empty())
-        swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
-
-    if (!swaps.empty())
-    {
-        for (Unit::AuraEffectList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
-        {
-            // Prefer MiscValue as the overridden spell id when set (modern cores);
-            // otherwise match by SpellClassMask via IsAffectingSpell.
-            bool matches = (*itr)->GetMiscValue()
-                ? uint32((*itr)->GetMiscValue()) == spellInfo->Id
-                : (*itr)->IsAffectingSpell(spellInfo);
-            if (!matches)
-                continue;
-
-            if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo((*itr)->GetAmount()))
-            {
-                if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||
-                    caster->ToPlayer()->getLevel() < spellInfo->BaseLevel)
-                    continue;
-
-                if (caster->ToPlayer()->getLevel() < newInfo->SpellLevel ||
-                    caster->ToPlayer()->getLevel() < newInfo->BaseLevel)
-                    continue;
-
-                spellInfo = newInfo;
-                spellId = newInfo->Id;
-            }
-            break;
-        }
-    }
-
     // Specialization Overriden Spells
     uint32 SpecializationID = caster->ToPlayer()->GetTalentSpecialization(caster->ToPlayer()->GetActiveSpec());
     if (SpecializationID)
@@ -1641,6 +1606,42 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 }
                 break;
             }
+        }
+    }
+
+    // Aura Overriden Spells, applied to the spell the specialization and talents resolved: the client sends the
+    // replaced spell (Shadow Bolt for a Destruction Incinerate), and Fire and Brimstone overrides Incinerate.
+    Unit::AuraEffectList swaps = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+    Unit::AuraEffectList const& swaps2 = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
+    if (!swaps2.empty())
+        swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
+
+    if (!swaps.empty())
+    {
+        for (Unit::AuraEffectList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
+        {
+            // Prefer MiscValue as the overridden spell id when set (modern cores);
+            // otherwise match by SpellClassMask via IsAffectingSpell.
+            bool matches = (*itr)->GetMiscValue()
+                ? uint32((*itr)->GetMiscValue()) == spellInfo->Id
+                : (*itr)->IsAffectingSpell(spellInfo);
+            if (!matches)
+                continue;
+
+            if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo((*itr)->GetAmount()))
+            {
+                if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||
+                    caster->ToPlayer()->getLevel() < spellInfo->BaseLevel)
+                    continue;
+
+                if (caster->ToPlayer()->getLevel() < newInfo->SpellLevel ||
+                    caster->ToPlayer()->getLevel() < newInfo->BaseLevel)
+                    continue;
+
+                spellInfo = newInfo;
+                spellId = newInfo->Id;
+            }
+            break;
         }
     }
 
