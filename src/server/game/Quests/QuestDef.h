@@ -257,6 +257,10 @@ class Quest
 public:
     Quest(Field* questRecord);
     uint32 XPValue(Player* player) const;
+    // Open world scaling: the level this quest plays at for this character.
+    int32 GetQuestLevelFor(Player const* player) const;
+    // Reward money for this character (scaled with their quest level when they use scaling).
+    int32 GetRewMoney(Player const* player) const;
 
     bool HasFlag(uint32 flag) const { return (Flags & flag) != 0; }
     void SetFlag(uint32 flag) { Flags |= flag; }

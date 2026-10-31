@@ -317,7 +317,7 @@ inline void KillRewarder::_InitGroupData()
                     // 2.4. _maxNotGrayMember - maximum level of alive group member within reward distance,
                     //      for whom victim is not gray;
                     uint32 grayLevel = Skyfire::XP::GetGrayLevel(lvl);
-                    if (_victim->getLevel() > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember->getLevel() < lvl))
+                    if (_victim->getLevelForTarget(member) > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember->getLevel() < lvl))
                         _maxNotGrayMember = member;
                 }
         // 2.5. _isFullXP - flag identifying that for all group members victim is not gray,
@@ -370,7 +370,9 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
             AddPct(xp, (*i)->GetAmount());
 
         // 4.2.3. Calculate expansion penalty
-        if (_victim->GetTypeId() == TypeID::TYPEID_UNIT && player->getLevel() >= GetMaxLevelForExpansion(_victim->ToCreature()->GetCreatureTemplate()->expansion))
+        // (not for a creature open world scaling lifted to the player: that fight is at their level)
+        if (_victim->GetTypeId() == TypeID::TYPEID_UNIT && player->getLevel() >= GetMaxLevelForExpansion(_victim->ToCreature()->GetCreatureTemplate()->expansion)
+            && _victim->getLevelForTarget(player) == _victim->getLevel())
             xp = CalculatePct(xp, 10); // Players get only 10% xp for killing creatures of lower expansion levels than himself
 
         // 4.2.4. Give XP to player.
@@ -20318,7 +20320,7 @@ uint32 Player::GetResurrectionSpellId()
 // Used in triggers for check "Only to targets that grant experience or honor" req
 bool Player::isHonorOrXPTarget(Unit const* victim)
 {
-    uint8 v_level = victim->getLevel();
+    uint8 v_level = victim->getLevelForTarget(this);
     uint8 k_grey = Skyfire::XP::GetGrayLevel(getLevel());
 
     // Victim level less gray level

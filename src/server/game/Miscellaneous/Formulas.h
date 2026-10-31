@@ -163,7 +163,7 @@ namespace Skyfire
                 gain = 0;
             else
             {
-                gain = BaseGain(player->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(u->GetMapId(), u->GetZoneId()));
+                gain = BaseGain(player->getLevel(), u->getLevelForTarget(player), GetContentLevelsForMapAndZone(u->GetMapId(), u->GetZoneId()));
 
                 if (gain != 0 && u->GetTypeId() == TypeID::TYPEID_UNIT && ((Creature*)u)->isElite())
                 {

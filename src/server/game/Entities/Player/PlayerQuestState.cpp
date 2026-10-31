@@ -786,7 +786,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     if (Guild* guild = sGuildMgr->GetGuildById(GetGuildId()))
         guild->GiveXP(uint32(quest->XPValue(this) * sWorld->getRate(Rates::RATE_XP_QUEST) * sWorld->getRate(Rates::RATE_XP_GUILD_MODIFIER)), this);
 
-    moneyRew += quest->GetRewMoney();
+    moneyRew += quest->GetRewMoney(this);
     ModifyMoney(moneyRew);
 
     if (moneyRew > 0)
@@ -2290,12 +2290,12 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP)
     if (getLevel() < sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_PLAYER_LEVEL))
     {
         xp = XP;
-        moneyReward = quest->GetRewMoney();
+        moneyReward = quest->GetRewMoney(this);
     }
     else // At max level, increase gold reward
     {
         xp = 0;
-        moneyReward = uint32(quest->GetRewMoney() + int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(Rates::RATE_DROP_MONEY)));
+        moneyReward = uint32(quest->GetRewMoney(this) + int32(quest->GetRewMoneyMaxLevel() * sWorld->getRate(Rates::RATE_DROP_MONEY)));
     }
 
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, 4 + 4 + 4 + 4 + 4 + 4 + 1);
@@ -2494,4 +2494,17 @@ uint32 Player::GetQuestObjectiveCounter(uint32 objectiveId) const
         return citr->second;
 
     return 0;
+}
+
+void Player::RefreshQuestLogQueries()
+{
+    for (auto const& itr : m_QuestStatus)
+    {
+        QuestStatus const status = itr.second.Status;
+        if (status != QUEST_STATUS_INCOMPLETE && status != QUEST_STATUS_COMPLETE && status != QUEST_STATUS_FAILED)
+            continue;
+
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(itr.first))
+            PlayerTalkClass->SendQuestQueryResponse(quest);
+    }
 }
