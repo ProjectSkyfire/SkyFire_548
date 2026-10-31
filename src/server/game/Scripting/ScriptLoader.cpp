@@ -660,6 +660,7 @@ void AddSC_boss_xin_the_weaponmaster();
 void AddSC_instance_mogu_shan_palace();
 void AddSC_boss_lei_shi();
 void AddSC_boss_protectors_of_the_endless();
+void AddSC_boss_sha_of_fear();
 void AddSC_boss_tsulong();
 void AddSC_instance_terrace_of_endless_spring();
 void AddSC_terrace_of_endless_spring();
@@ -1409,6 +1410,7 @@ void AddPandariaScripts()
     AddSC_instance_mogu_shan_palace();
     AddSC_boss_lei_shi();
     AddSC_boss_protectors_of_the_endless();
+    AddSC_boss_sha_of_fear();
     AddSC_boss_tsulong();
     AddSC_instance_terrace_of_endless_spring();
     AddSC_terrace_of_endless_spring();
