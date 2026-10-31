@@ -491,7 +491,9 @@ public:
             me->SetDisplayId(DISPLAY_TSULON_DAY);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PC |
                 UNIT_FLAG_PACIFIED | UNIT_FLAG_NON_ATTACKABLE);
-            DoCastAOE(SPELL_TSULONG_KILL_CREDIT, true);
+            // The credit spell is not in the 5.4.8 client; its criteria name it as their spell target.
+            if (instance)
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_TSULONG_KILL_CREDIT);
 
             if (attacker)
             {

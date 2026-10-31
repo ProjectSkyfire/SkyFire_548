@@ -287,7 +287,8 @@ struct boss_protector_base : public BossAI
     {
         instance->SetBossState(DATA_PROTECTORS, DONE);
 
-        DoCastAOE(SPELL_PROTECTORS_CREDIT);
+        // The credit spell is not in the 5.4.8 client; its criteria name it as their spell target.
+        instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_PROTECTORS_CREDIT);
 
         if (Player* player = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
         {

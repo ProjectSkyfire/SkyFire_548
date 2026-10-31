@@ -2368,9 +2368,9 @@ class spell_transfer_light : public SpellScript
         if (Unit* caster = GetCaster())
             if (Player* target = ObjectAccessor::GetPlayer(*caster, caster->GetTarget()))
                 if (target->IsAlive())
-                    return SPELL_CAST_OK;
+                    return SpellCastResult::SPELL_CAST_OK;
 
-        return SPELL_FAILED_SPELL_UNAVAILABLE;
+        return SpellCastResult::SPELL_FAILED_SPELL_UNAVAILABLE;
     }
 
     void HandleTransfer()

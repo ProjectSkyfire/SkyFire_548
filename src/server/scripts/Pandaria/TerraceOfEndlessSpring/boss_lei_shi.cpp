@@ -377,7 +377,9 @@ public:
                 if (leiShiFreed)
                     return;
 
-                DoCastAOE(SPELL_LEI_SHI_KILL_CREDIT, true);
+                // The credit spell is not in the 5.4.8 client; its criteria name it as their spell target.
+                if (instance)
+                    instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_LEI_SHI_KILL_CREDIT);
                 // Personal loot and currency rewards are not implemented here.
                 HandleAchievement();
                 DespawnParasitoids();
