@@ -34,3 +34,27 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `position_x`, `posit
 UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90 WHERE `entry` IN (65736, 64846);
 UPDATE `creature_template` SET `npcflag` = 16777216 WHERE `entry` = 65736;
 UPDATE `creature_template` SET `minlevel` = 92, `maxlevel` = 92 WHERE `entry` IN (64443, 62962);
+
+-- The summoned adds and helpers the boss scripts use were friendly and level 1 (placeholder faction 35); values
+-- from Legends of Azeroth 5.4.8.
+UPDATE `creature_template` SET `unit_flags` = 131072, `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90 WHERE `entry` = 60621;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90 WHERE `entry` = 60646;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 3 WHERE `entry` = 60885;
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `minlevel` = 90, `maxlevel` = 90 WHERE `entry` = 60886;
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14, `minlevel` = 90, `maxlevel` = 90, `InhabitType` = 4, `flags_extra` = 128 WHERE `entry` = 60906;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90, `InhabitType` = 1, `speed_run` = 0.5, `Health_mod` = 12 WHERE `entry` = 61003;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 92, `maxlevel` = 92 WHERE `entry` = 61034;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 33 WHERE `entry` = 61038;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 33 WHERE `entry` = 61042;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 33 WHERE `entry` = 61046;
+UPDATE `creature_template` SET `flags_extra` = 0 WHERE `entry` = 62849;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 2.45 WHERE `entry` = 62919;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90, `Health_mod` = 8.8 WHERE `entry` = 62969;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 92, `maxlevel` = 92, `Health_mod` = 1.65 WHERE `entry` = 62977;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 93, `maxlevel` = 93 WHERE `entry` = 63099;
+UPDATE `creature_template` SET `InhabitType` = 4, `flags_extra` = 0 WHERE `entry` = 63337;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16 WHERE `entry` = 63346;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90 WHERE `entry` = 64346;
+UPDATE `creature_template` SET `minlevel` = 90, `maxlevel` = 90 WHERE `entry` = 64390;
+UPDATE `creature_template` SET `faction_A` = 16, `faction_H` = 16, `minlevel` = 90, `maxlevel` = 90 WHERE `entry` = 64393;
+UPDATE `creature_template` SET `faction_A` = 14, `faction_H` = 14 WHERE `entry` = 65691;
