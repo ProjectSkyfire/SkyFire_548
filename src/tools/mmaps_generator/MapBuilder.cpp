@@ -29,7 +29,7 @@ namespace DisableMgr
 }
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
-#define MMAP_VERSION 5.2f
+#define MMAP_VERSION 5.3f
 
 struct MmapTileHeader
 {
@@ -496,12 +496,12 @@ namespace MMAP
         // these are WORLD UNIT based metrics
         // this are basic unit dimentions
         // value have to divide GRID_SIZE(533.3333f) ( aka: 0.5333, 0.2666, 0.3333, 0.1333, etc )
-        const static float BASE_UNIT_DIM = m_bigBaseUnit ? 0.5333333f : 0.2666666f;
+        const float BASE_UNIT_DIM = m_bigBaseUnit ? 0.5333333f : 0.2666666f;
 
         // All are in UNIT metrics!
-        const static int VERTEX_PER_MAP = int(GRID_SIZE/BASE_UNIT_DIM + 0.5f);
-        const static int VERTEX_PER_TILE = m_bigBaseUnit ? 40 : 80; // must divide VERTEX_PER_MAP
-        const static int TILES_PER_MAP = VERTEX_PER_MAP/VERTEX_PER_TILE;
+        const int VERTEX_PER_MAP = int(GRID_SIZE/BASE_UNIT_DIM + 0.5f);
+        const int VERTEX_PER_TILE = m_bigBaseUnit ? 40 : 80; // must divide VERTEX_PER_MAP
+        const int TILES_PER_MAP = VERTEX_PER_MAP/VERTEX_PER_TILE;
 
         rcConfig config;
         memset(&config, 0, sizeof(rcConfig));

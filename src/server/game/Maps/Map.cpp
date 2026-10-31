@@ -27,10 +27,13 @@
 #include "WorldSession.h"
 
 u_map_magic MapMagic = { {'M', 'A', 'P', 'S'} };
-u_map_magic MapVersionMagic = { {'v', '1', '.', '4'} };
+u_map_magic MapVersionMagic = { {'v', '1', '.', '5'} };
 u_map_magic MapAreaMagic = { {'A', 'R', 'E', 'A'} };
 u_map_magic MapHeightMagic = { {'M', 'H', 'G', 'T'} };
 u_map_magic MapLiquidMagic = { {'M', 'L', 'I', 'Q'} };
+
+static uint16 const holetab_h[4] = { 0x1111, 0x2222, 0x4444, 0x8888 };
+static uint16 const holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
@@ -1587,6 +1590,9 @@ bool GridMap::loadData(char* filename)
             fclose(in);
             return false;
         }
+        // load up hole data
+        if (header.holesSize && !loadHolesData(in, header.holesOffset, header.holesSize))
+            SF_LOG_ERROR("maps", "Error loading map holes data, continuing without holes\n");
         fclose(in);
         return true;
     }
@@ -1605,12 +1611,14 @@ void GridMap::unloadData()
     delete[] m_liquidEntry;
     delete[] m_liquidFlags;
     delete[] m_liquidMap;
+    delete[] m_holes;
     m_V9 = NULL;
     m_V8 = NULL;
     m_areaMap = NULL;
     m_liquidEntry = NULL;
     m_liquidFlags = NULL;
     m_liquidMap = NULL;
+    m_holes = NULL;
     m_gridGetHeight = &GridMap::getHeightFromFlat;
 }
 
@@ -1710,6 +1718,48 @@ bool GridMap::loadLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
             return false;
     }
     return true;
+}
+
+bool GridMap::loadHolesData(FILE* in, uint32 offset, uint32 /*size*/)
+{
+    if (fseek(in, offset, SEEK_SET) != 0)
+        return false;
+
+    m_holes = new uint16[16 * 16];
+    if (fread(m_holes, sizeof(uint16), 16 * 16, in) != 16 * 16)
+    {
+        delete[] m_holes;
+        m_holes = NULL;
+        return false;
+    }
+
+    return true;
+}
+
+bool GridMap::isHole(int row, int col) const
+{
+    if (!m_holes)
+        return false;
+
+    int cellRow = row / 8;     // 8 squares per cell
+    int cellCol = col / 8;
+    int holeRow = (row % 8) / 2;
+    int holeCol = (col - (cellCol * 8)) / 2;
+
+    uint16 hole = m_holes[cellRow * 16 + cellCol];
+    return (hole & holetab_h[holeCol] & holetab_v[holeRow]) != 0;
+}
+
+bool GridMap::isHoleAt(float x, float y) const
+{
+    if (!m_holes)
+        return false;
+
+    x = MAP_RESOLUTION * (32 - x / SIZE_OF_GRIDS);
+    y = MAP_RESOLUTION * (32 - y / SIZE_OF_GRIDS);
+    int x_int = (int)x & (MAP_RESOLUTION - 1);
+    int y_int = (int)y & (MAP_RESOLUTION - 1);
+    return isHole(x_int, y_int);
 }
 
 uint16 GridMap::getArea(float x, float y) const
@@ -2116,7 +2166,7 @@ float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float
     {
         float gridHeight = gmap->getHeight(x, y);
         // look from a bit higher pos to find the floor, ignore under surface case
-        if (z + 2.0f > gridHeight)
+        if (z + 2.0f > gridHeight && !gmap->isHoleAt(x, y))
             mapHeight = gridHeight;
     }
 
@@ -2135,13 +2185,10 @@ float Map::GetHeight(float x, float y, float z, bool checkVMap /*= true*/, float
         if (mapHeight > INVALID_HEIGHT)
         {
             // we have mapheight and vmapheight and must select more appropriate
-
-            // we are already under the surface or vmap height above map heigt
-            // or if the distance of the vmap height is less the land height distance
-            if (z < mapHeight || vmapHeight > mapHeight || fabs(mapHeight - z) > fabs(vmapHeight - z))
-                return vmapHeight;
+            if (fabs(mapHeight - z) <= fabs(vmapHeight - z))
+                return mapHeight;
             else
-                return mapHeight;                           // better use .map surface height
+                return vmapHeight;
         }
         else
             return vmapHeight;                              // we have only vmapHeight (if have)

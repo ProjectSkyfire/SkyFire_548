@@ -366,7 +366,7 @@ void ReadLiquidTypeTableDBC()
 
 // Map file format data
 static char const* MAP_MAGIC         = "MAPS";
-static char const* MAP_VERSION_MAGIC = "v1.4";
+static char const* MAP_VERSION_MAGIC = "v1.5";
 static char const* MAP_AREA_MAGIC    = "AREA";
 static char const* MAP_HEIGHT_MAGIC  = "MHGT";
 static char const* MAP_LIQUID_MAGIC  = "MLIQ";
@@ -608,12 +608,27 @@ bool ConvertADT(char *filename, char *filename2, int /*cell_y*/, int /*cell_x*/,
             }
         }
 
-        // Hole data
+        // Hole data. Flag 0x10000 = Cata+ 8x8 high-res holes in HighResHoles.
+        // Fold those into the legacy 4x4 16-bit mask so .map v1.4 readers still work.
         if (!(mcnk->flags & 0x10000))
         {
             if (uint16 hole = mcnk->holes)
             {
                 holes[mcnk->iy][mcnk->ix] = mcnk->holes;
+                hasHoles = true;
+            }
+        }
+        else if (uint64 hi = mcnk->union_5_3_0.HighResHoles)
+        {
+            uint16 packed = 0;
+            uint8 const* rows = reinterpret_cast<uint8 const*>(&hi);
+            for (int row = 0; row < 8; ++row)
+                for (int col = 0; col < 8; ++col)
+                    if (rows[row] & (1 << col))
+                        packed |= uint16(1u << ((row / 2) * 4 + (col / 2)));
+            if (packed)
+            {
+                holes[mcnk->iy][mcnk->ix] = packed;
                 hasHoles = true;
             }
         }
