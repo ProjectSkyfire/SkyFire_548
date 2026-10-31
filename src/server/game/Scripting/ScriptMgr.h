@@ -739,6 +739,11 @@ public:
 
     // Called after a quest is successfully added to the player's log.
     virtual void OnQuestAdd(Player* /*player*/, Quest const* /*quest*/) { }
+
+    // Called after a quest is rewarded (turned in). questGiver is the NPC,
+    // gameobject or item it was turned in to, or the player itself / NULL for
+    // auto-complete and scripted rewards.
+    virtual void OnQuestReward(Player* /*player*/, Quest const* /*quest*/, Object* /*questGiver*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -996,6 +1001,7 @@ public: /* Initialization */
     void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 newArea);
     void OnPlayerUpdate(Player* player, uint32 diff);
     void OnPlayerQuestAdd(Player* player, Quest const* quest);
+    void OnPlayerQuestReward(Player* player, Quest const* quest, Object* questGiver);
 
     /* GuildScript */
     void OnGuildAddMember(Guild* guild, Player* player, uint8& plRank);

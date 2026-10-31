@@ -857,6 +857,8 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         UpdatePvPState();
     }
 
+    sScriptMgr->OnPlayerQuestReward(this, quest, questGiver);
+
     //lets remove flag for delayed teleports
     SetCanDelayTeleport(false);
 }
