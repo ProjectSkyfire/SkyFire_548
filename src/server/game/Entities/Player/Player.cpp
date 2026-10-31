@@ -8586,7 +8586,8 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
     if (attacktype < WeaponAttackType::MAX_ATTACK)
         _ApplyWeaponDependentAuraMods(item, attacktype, apply);
 
-    _ApplyItemBonuses(proto, slot, apply);
+    // The item's own item level shift (upgrade modifier) changes its stats, armor and damage.
+    _ApplyItemBonuses(item->GetStatTemplate(), slot, apply);
     ApplyItemEquipSpell(item, apply);
     ApplyEnchantment(item, apply);
 
@@ -9408,7 +9409,7 @@ void Player::_RemoveAllItemMods()
             if (attacktype < WeaponAttackType::MAX_ATTACK)
                 _ApplyWeaponDependentAuraMods(m_items[i], attacktype, false);
 
-            _ApplyItemBonuses(proto, i, false);
+            _ApplyItemBonuses(m_items[i]->GetStatTemplate(), i, false);
         }
     }
 
@@ -9434,7 +9435,7 @@ void Player::_ApplyAllItemMods()
             if (attacktype < WeaponAttackType::MAX_ATTACK)
                 _ApplyWeaponDependentAuraMods(m_items[i], attacktype, true);
 
-            _ApplyItemBonuses(proto, i, true);
+            _ApplyItemBonuses(m_items[i]->GetStatTemplate(), i, true);
         }
     }
 
@@ -9474,7 +9475,7 @@ void Player::_ApplyAllLevelScaleItemMods(bool apply)
             if (!proto)
                 continue;
 
-            _ApplyItemBonuses(proto, i, apply, true);
+            _ApplyItemBonuses(m_items[i]->GetStatTemplate(), i, apply, true);
         }
     }
 }
@@ -21298,6 +21299,7 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
         }
 
         Item* pItem = StoreNewItem(dest, lootItem->itemid, true, lootItem->randomPropertyId);
+        sScriptMgr->OnPlayerLootItem(this, pItem, lootItem->count);
         SendNewItem(pItem, lootItem->count, false, false, broadcast);
     }
 }
@@ -21332,6 +21334,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint64 lootGuid)
     {
         AllowedLooterSet looters = item->GetAllowedLooters();
         Item* newitem = StoreNewItem(dest, item->itemid, true, item->randomPropertyId, looters);
+        sScriptMgr->OnPlayerLootItem(this, newitem, item->count);
 
         if (qitem)
         {

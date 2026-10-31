@@ -724,6 +724,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, reward, 1) == EQUIP_ERR_OK)
         {
             Item* item = StoreNewItem(dest, reward, true, Item::GenerateItemRandomPropertyId(reward));
+            sScriptMgr->OnPlayerQuestRewardItem(this, item, quest);
             SendNewItem(item, 1, true, false);
         }
     }
@@ -734,6 +735,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
         if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, reward, quest->GetRewChoiceItemCount(reward)) == EQUIP_ERR_OK)
         {
             Item* item = StoreNewItem(dest, reward, true, Item::GenerateItemRandomPropertyId(reward));
+            sScriptMgr->OnPlayerQuestRewardItem(this, item, quest);
             SendNewItem(item, quest->GetRewChoiceItemCount(reward), true, false);
         }
     }
@@ -748,6 +750,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
                 if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]) == EQUIP_ERR_OK)
                 {
                     Item* item = StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
+                    sScriptMgr->OnPlayerQuestRewardItem(this, item, quest);
                     SendNewItem(item, quest->RewardItemIdCount[i], true, false);
                 }
             }

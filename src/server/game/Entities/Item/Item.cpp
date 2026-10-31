@@ -8,6 +8,7 @@
 #include "DatabaseEnv.h"
 #include "Item.h"
 #include "ItemEnchantmentMgr.h"
+#include "ItemScalingHooks.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -491,6 +492,9 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, Field* fields, uint32 entr
         stmt->setUInt32(3, guid);
         CharacterDatabase.Execute(stmt);
     }
+
+    if (ItemScalingHooks::ItemLoadedFn loaded = ItemScalingHooks::ItemLoaded.load(std::memory_order_relaxed))
+        loaded(this);
 
     return true;
 }
@@ -1675,4 +1679,36 @@ void Item::ItemContainerDeleteLootMoneyAndLootItemsFromDB()
     // Deletes money and items associated with an openable item from the DB
     ItemContainerDeleteLootMoneyFromDB();
     ItemContainerDeleteLootItemsFromDB();
+}
+
+uint32 Item::GetUpgradeId() const
+{
+    return GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2);
+}
+
+void Item::SetUpgradeId(uint32 upgradeId)
+{
+    SetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, 2, upgradeId);
+
+    // The 5.4.8 client reads the modifiers as a prefix: the mask has to cover every index up
+    // to the last one in use (reforge 0, transmog 1, upgrade 2). 4 alone is ignored and bits
+    // past the list break the item; 7 shows the upgrade (tested in game).
+    uint32 mask = GetUInt32Value(ITEM_FIELD_MODIFIERS_MASK) & ~7u;
+    for (int32 index = 2; index >= 0; --index)
+    {
+        if (GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, uint16(index)))
+        {
+            mask |= (1u << (index + 1)) - 1;
+            break;
+        }
+    }
+    SetUInt32Value(ITEM_FIELD_MODIFIERS_MASK, mask);
+}
+
+ItemTemplate const* Item::GetStatTemplate() const
+{
+    if (ItemScalingHooks::StatTemplateFn resolver = ItemScalingHooks::StatTemplate.load(std::memory_order_relaxed))
+        if (ItemTemplate const* proto = resolver(this))
+            return proto;
+    return GetTemplate();
 }

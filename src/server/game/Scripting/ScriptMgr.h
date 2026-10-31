@@ -744,6 +744,13 @@ public:
     // gameobject or item it was turned in to, or the player itself / NULL for
     // auto-complete and scripted rewards.
     virtual void OnQuestReward(Player* /*player*/, Quest const* /*quest*/, Object* /*questGiver*/) { }
+
+    // Called when the player gets an item from loot (own loot, group roll, master loot),
+    // after it is stored in their bags.
+    virtual void OnLootItem(Player* /*player*/, Item* /*item*/, uint32 /*count*/) { }
+
+    // Called for each item a quest reward gives, after it is stored in the player's bags.
+    virtual void OnQuestRewardItem(Player* /*player*/, Item* /*item*/, Quest const* /*quest*/) { }
 };
 
 class GuildScript : public ScriptObject
@@ -1002,6 +1009,8 @@ public: /* Initialization */
     void OnPlayerUpdate(Player* player, uint32 diff);
     void OnPlayerQuestAdd(Player* player, Quest const* quest);
     void OnPlayerQuestReward(Player* player, Quest const* quest, Object* questGiver);
+    void OnPlayerLootItem(Player* player, Item* item, uint32 count);
+    void OnPlayerQuestRewardItem(Player* player, Item* item, Quest const* quest);
 
     /* GuildScript */
     void OnGuildAddMember(Guild* guild, Player* player, uint8& plRank);

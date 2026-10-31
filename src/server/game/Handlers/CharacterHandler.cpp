@@ -16,6 +16,7 @@
 #include "DBCStores.h"
 #include "Group.h"
 #include "Guild.h"
+#include "ItemScalingHooks.h"
 #include "GuildMgr.h"
 #include "Language.h"
 #include "LFGMgr.h"
@@ -1634,8 +1635,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     HotfixData const& hotfix = sObjectMgr->GetHotfixData();
 
+    // Plus ItemUpgrade rows a module adds for per-item scaling (ItemScalingHooks).
+    std::vector<std::pair<uint32, uint32>> upgradeRows;
+    if (ItemScalingHooks::UpgradeHotfixListFn list = ItemScalingHooks::UpgradeHotfixList.load(std::memory_order_relaxed))
+        list(upgradeRows);
+
     data.Initialize(SMSG_HOTFIX_NOTIFY_BLOB);
-    data.WriteBits(hotfix.size(), 20);
+    data.WriteBits(hotfix.size() + upgradeRows.size(), 20);
     data.FlushBits();
 
     for (uint32 i = 0; i < hotfix.size(); ++i)
@@ -1643,6 +1649,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         data << uint32(hotfix[i].Timestamp);
         data << uint32(hotfix[i].Entry);
         data << uint32(hotfix[i].Type);
+    }
+
+    for (auto const& row : upgradeRows)
+    {
+        data << uint32(row.second);
+        data << uint32(row.first);
+        data << uint32(DB2_REPLY_ITEM_UPGRADE);
     }
 
     SendPacket(&data);

@@ -1597,6 +1597,14 @@ struct GtBattlePetXpEntry
     float value;
 };
 
+// Item level -> the stat budget a socket costs (5.4 item stats subtract
+// socket cost multiplier x this from each stat's budget share).
+struct GtItemSocketCostPerLevelEntry
+{
+    //uint32 itemLevel;
+    float    cost;
+};
+
 struct GtCombatRatingsEntry
 {
     //uint32 level;

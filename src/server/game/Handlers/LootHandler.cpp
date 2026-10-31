@@ -17,6 +17,7 @@
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -563,6 +564,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
 
     // not move item from loot to target inventory
     Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, looters);
+    sScriptMgr->OnPlayerLootItem(target, newitem, uint32(item.count));
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item.itemid, item.count);
     target->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, item.itemid, item.count, uint64(loot->loot_type));
