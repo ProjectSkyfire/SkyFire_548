@@ -8,6 +8,7 @@
 #include "ScriptedGossip.h"
 #include "SpellScript.h"
 #include "Player.h"
+#include "Vehicle.h"
 
 class npc_zuni_bridge : public CreatureScript
 {
@@ -298,6 +299,85 @@ public:
     };
 };
 
+
+/*######
+## Quest: Young and Vicious (24626)
+## npc_swiftclaw, npc_swiftclaw_vehicle
+######*/
+
+enum YoungAndVicious
+{
+    NPC_SWIFTCLAW                   = 37989,
+    NPC_SWIFTCLAW_VEHICLE           = 38002,
+    SPELL_RAPTOR_ROPE               = 70927,
+    SEAT_SWIFTCLAW_RIDER            = 1,
+    SAY_SWIFTCLAW_RUNS              = 0,
+    EVENT_CHECK_RAPTOR_PENS         = 1,
+};
+
+Position const RaptorPensPos = { -1291.9f, -5518.1f, 20.9f, 0.0f };
+
+struct npc_swiftclaw : public ScriptedAI
+{
+    npc_swiftclaw(Creature* creature) : ScriptedAI(creature) { }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
+    {
+        Player* player = caster->ToPlayer();
+        if (!player || spell->Id != SPELL_RAPTOR_ROPE)
+            return;
+
+        player->KilledMonsterCredit(NPC_SWIFTCLAW);
+        if (Creature* swiftclaw = player->SummonCreature(NPC_SWIFTCLAW_VEHICLE, *me, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
+        {
+            player->RemoveAurasByType(SPELL_AURA_MOUNTED);
+            player->EnterVehicle(swiftclaw, SEAT_SWIFTCLAW_RIDER);
+        }
+        me->DespawnOrUnsummon();
+    }
+};
+
+struct npc_swiftclaw_vehicle : public ScriptedAI
+{
+    npc_swiftclaw_vehicle(Creature* creature) : ScriptedAI(creature) { }
+
+    void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) OVERRIDE
+    {
+        if (!apply)
+        {
+            me->DespawnOrUnsummon(1000);
+            return;
+        }
+
+        Talk(SAY_SWIFTCLAW_RUNS, passenger);
+        _events.ScheduleEvent(EVENT_CHECK_RAPTOR_PENS, 1000);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        if (_events.ExecuteEvent() != EVENT_CHECK_RAPTOR_PENS)
+            return;
+
+        if (me->GetDistance(RaptorPensPos) > 20.0f)
+        {
+            _events.ScheduleEvent(EVENT_CHECK_RAPTOR_PENS, 1000);
+            return;
+        }
+
+        if (Vehicle* vehicle = me->GetVehicleKit())
+        {
+            if (Unit* rider = vehicle->GetPassenger(SEAT_SWIFTCLAW_RIDER))
+                if (Player* player = rider->ToPlayer())
+                    player->KilledMonsterCredit(NPC_SWIFTCLAW_VEHICLE);
+            vehicle->RemoveAllPassengers();
+        }
+    }
+
+private:
+    EventMap _events;
+};
 
 enum darkspearshore
 {
@@ -1319,6 +1399,8 @@ void AddSC_durotar()
 {
     new npc_zuni_bridge();
     new npc_voljin_darkspear_hold();
+    RegisterCreatureAI(npc_swiftclaw);
+    RegisterCreatureAI(npc_swiftclaw_vehicle);
     new npc_zuni();
     new npc_jinthala();
     RegisterCreatureAI(npc_darkspear_jailor);
