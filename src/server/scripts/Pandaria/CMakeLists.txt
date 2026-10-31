@@ -23,6 +23,7 @@ set(scripts_STAT_SRCS
   Pandaria/StormstoutBrewery/stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/instance_stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/stormstout_brewery.h
+  Pandaria/TerraceOfEndlessSpring/boss_protectors_of_the_endless.cpp
   Pandaria/TerraceOfEndlessSpring/instance_terrace_of_endless_spring.cpp
   Pandaria/TerraceOfEndlessSpring/terrace_of_endless_spring.cpp
   Pandaria/TerraceOfEndlessSpring/terrace_of_endless_spring.h
