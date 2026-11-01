@@ -1497,7 +1497,7 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
     if (!go->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
         return;
 
-    if (go->AI()->GossipHello(_player))
+    if (go->AI()->OnReportUse(_player))
         return;
 
     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_GAMEOBJECT, go->GetEntry());
