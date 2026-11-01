@@ -34,11 +34,15 @@ namespace LocalLevelScaling
     using ViewFieldResolver = bool(*)(Player const* viewer, Creature const* creature, uint16 index, uint32& value);
     // Whether this character's quests play at their own level.
     using QuestScalingResolver = bool(*)(Player const* player);
+    // Whether this character may queue for a dungeon finder entry above its maximum level,
+    // because the dungeon scales to them (difficulty as in LFGDungeons.dbc).
+    using QueueAboveMaxLevelResolver = bool(*)(Player const* player, uint32 mapId, uint8 difficulty);
 
     inline std::atomic<ViewLevelResolver> ViewLevelOwner{ nullptr };
     inline std::atomic<ViewArmorResolver> ViewArmorOwner{ nullptr };
     inline std::atomic<ViewFieldResolver> ViewFieldOwner{ nullptr };
     inline std::atomic<QuestScalingResolver> QuestScalingOwner{ nullptr };
+    inline std::atomic<QueueAboveMaxLevelResolver> QueueAboveMaxLevelOwner{ nullptr };
 
     // Share of a scaled quest's money / experience kept at the far end of the level range (%).
     inline std::atomic<uint32> QuestMoneyKeepSharePercent{ 100 };
@@ -74,6 +78,12 @@ namespace LocalLevelScaling
     {
         QuestScalingResolver owner = QuestScalingOwner.load(std::memory_order_relaxed);
         return owner && player && owner(player);
+    }
+
+    inline bool CanQueueAboveMaxLevel(Player const* player, uint32 mapId, uint8 difficulty)
+    {
+        QueueAboveMaxLevelResolver owner = QueueAboveMaxLevelOwner.load(std::memory_order_relaxed);
+        return owner && player && owner(player, mapId, difficulty);
     }
 
     // A scaled quest plays at the character's level, never below its own.
