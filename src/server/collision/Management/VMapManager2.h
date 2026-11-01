@@ -78,7 +78,7 @@ namespace VMAP
             void unloadMap(unsigned int mapId, int x, int y);
             void unloadMap(unsigned int mapId);
 
-            bool isInLineOfSight(unsigned int mapId, float x1, float y1, float z1, float x2, float y2, float z2) ;
+            bool isInLineOfSight(unsigned int mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags) OVERRIDE;
             /**
             fill the hit pos and return true, if an object was hit
             */

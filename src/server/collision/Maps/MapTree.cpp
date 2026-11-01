@@ -5,6 +5,7 @@
 
 #include "MapTree.h"
 #include "ModelInstance.h"
+#include "ModelIgnoreFlags.h"
 #include "VMapManager2.h"
 #include "VMapDefinitions.h"
 #include "Log.h"
@@ -23,10 +24,10 @@ namespace VMAP
     class MapRayCallback
     {
         public:
-            explicit MapRayCallback(ModelInstance* val): prims(val), hit(false) { }
+            MapRayCallback(ModelInstance* val, ModelIgnoreFlags ignoreFlags): prims(val), hit(false), flags(ignoreFlags) { }
             bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit=true)
             {
-                bool result = prims[entry].intersectRay(ray, distance, pStopAtFirstHit);
+                bool result = prims[entry].intersectRay(ray, distance, pStopAtFirstHit, flags);
                 if (result)
                     hit = true;
                 return result;
@@ -35,6 +36,7 @@ namespace VMAP
     protected:
         ModelInstance* prims;
         bool hit;
+        ModelIgnoreFlags flags;
     };
 
     class AreaInfoCallback
@@ -129,10 +131,10 @@ namespace VMAP
     Else, pMaxDist is not modified and returns false;
     */
 
-    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float &pMaxDist, bool pStopAtFirstHit) const
+    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float &pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags) const
     {
         float distance = pMaxDist;
-        MapRayCallback intersectionCallBack(iTreeValues);
+        MapRayCallback intersectionCallBack(iTreeValues, ignoreFlags);
         iTree.intersectRay(pRay, intersectionCallBack, distance, pStopAtFirstHit);
         if (intersectionCallBack.didHit())
             pMaxDist = distance;
@@ -140,7 +142,7 @@ namespace VMAP
     }
     //=========================================================
 
-    bool StaticMapTree::isInLineOfSight(const Vector3& pos1, const Vector3& pos2) const
+    bool StaticMapTree::isInLineOfSight(const Vector3& pos1, const Vector3& pos2, ModelIgnoreFlags ignoreFlags) const
     {
         float maxDist = (pos2 - pos1).magnitude();
         // return false if distance is over max float, in case of cheater teleporting to the end of the universe
@@ -155,7 +157,7 @@ namespace VMAP
             return true;
         // direction with length of 1
         G3D::Ray ray = G3D::Ray::fromOriginAndDirection(pos1, (pos2 - pos1)/maxDist);
-        if (getIntersectionTime(ray, maxDist, true))
+        if (getIntersectionTime(ray, maxDist, true, ignoreFlags))
             return false;
 
         return true;
@@ -181,7 +183,7 @@ namespace VMAP
         Vector3 dir = (pPos2 - pPos1)/maxDist;              // direction with length of 1
         G3D::Ray ray(pPos1, dir);
         float dist = maxDist;
-        if (getIntersectionTime(ray, dist, false))
+        if (getIntersectionTime(ray, dist, false, ModelIgnoreFlags::Nothing))
         {
             pResultHitPos = pPos1 + dir * dist;
             if (pModifyDist < 0)
@@ -217,7 +219,7 @@ namespace VMAP
         Vector3 dir = Vector3(0, 0, -1);
         G3D::Ray ray(pPos, dir);   // direction with length of 1
         float maxDist = maxSearchDist;
-        if (getIntersectionTime(ray, maxDist, false))
+        if (getIntersectionTime(ray, maxDist, false, ModelIgnoreFlags::Nothing))
         {
             height = pPos.z - maxDist;
         }

@@ -4,6 +4,7 @@
 */
 
 #include "ModelInstance.h"
+#include "ModelIgnoreFlags.h"
 #include "WorldModel.h"
 #include "MapTree.h"
 #include "VMapDefinitions.h"
@@ -19,8 +20,11 @@ namespace VMAP
         iInvScale = 1.f/iScale;
     }
 
-    bool ModelInstance::intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const
+    bool ModelInstance::intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags) const
     {
+        if ((ignoreFlags & ModelIgnoreFlags::M2) != ModelIgnoreFlags::Nothing && (flags & MOD_M2))
+            return false;
+
         if (!iModel)
         {
             //std::cout << "<object not loaded>\n";

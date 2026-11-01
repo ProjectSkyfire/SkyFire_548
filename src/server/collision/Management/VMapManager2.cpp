@@ -120,7 +120,7 @@ namespace VMAP
         }
     }
 
-    bool VMapManager2::isInLineOfSight(unsigned int mapId, float x1, float y1, float z1, float x2, float y2, float z2)
+    bool VMapManager2::isInLineOfSight(unsigned int mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
     {
         if (!isLineOfSightCalcEnabled() || DisableMgr::IsDisabledFor(DISABLE_TYPE_VMAP, mapId, NULL, VMAP_DISABLE_LOS))
             return true;
@@ -132,7 +132,7 @@ namespace VMAP
             Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
             if (pos1 != pos2)
             {
-                return instanceTree->second->isInLineOfSight(pos1, pos2);
+                return instanceTree->second->isInLineOfSight(pos1, pos2, ignoreFlags);
             }
         }
 
