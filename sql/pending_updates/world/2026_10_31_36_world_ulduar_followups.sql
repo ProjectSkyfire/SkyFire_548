@@ -7,3 +7,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 -- Ulduar: the Winter Jormungar near Hodir could not be targeted (not selectable, immune to players);
 -- TrinityCore 3.3.5 and Legends of Azeroth 5.4.8 both give them no unit flags.
 UPDATE `creature_template` SET `unit_flags` = 0 WHERE `entry` = 34137;
+
+-- Ulduar: the teleporters were not selectable (flags 48), so players could not reach the Antechamber or any other
+-- unlocked stop; TrinityCore 3.3.5 gives them faction 35 and flags 32.
+UPDATE `gameobject_template` SET `faction` = 35, `flags` = 32 WHERE `entry` = 194569;
