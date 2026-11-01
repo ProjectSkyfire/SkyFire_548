@@ -22706,25 +22706,39 @@ void Player::SendInspectResult(Player const* player)
 
         ObjectGuid creatorGuid = item->GetUInt64Value(ITEM_FIELD_CREATOR);
         uint32 enchantCount = 0;
+        int32 const randomProperty = item->GetItemRandomPropertyId();
+        uint32 const suffixFactor = item->GetItemSuffixFactor();
 
         data.WriteBit(creatorGuid[1]);
-        data.WriteBit(0); // unk1
-        data.WriteBit(0);
+        data.WriteBit(suffixFactor != 0);
+        data.WriteBit(1); // always set by the 5.4.8 client's own servers
         data.WriteBit(creatorGuid[3]);
         size_t enchCountBitPos = data.bitwpos();
         data.WriteBits(0, 21); // enchant count placeholder
         data.WriteBit(creatorGuid[2]);
         data.WriteBit(creatorGuid[6]);
         data.WriteBit(creatorGuid[4]);
-        data.WriteBit(0); // unk2
+        data.WriteBit(randomProperty != 0);
         data.WriteBit(creatorGuid[0]);
         data.WriteBit(creatorGuid[5]);
         data.WriteBit(creatorGuid[7]);
 
-        // if (unk2)
-        // enchantData << uint16(0);
+        if (randomProperty)
+            enchantData << int16(randomProperty);
         enchantData.WriteByteSeq(creatorGuid[3]);
-        enchantData << uint32(0);
+
+        // Item modifiers (reforge, transmogrification, upgrade): byte size, mask, then one
+        // value per bit set. Without them an inspected item shows its base version.
+        uint32 const modifiersMask = item->GetUInt32Value(ITEM_FIELD_MODIFIERS_MASK) & 7;
+        uint32 modifierCount = 0;
+        for (uint8 m = 0; m < 3; ++m)
+            if (modifiersMask & (1 << m))
+                ++modifierCount;
+        enchantData << uint32(4 + modifierCount * 4);
+        enchantData << uint32(modifiersMask);
+        for (uint8 m = 0; m < 3; ++m)
+            if (modifiersMask & (1 << m))
+                enchantData << uint32(item->GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, m));
 
         for (uint8 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
         {
@@ -22744,8 +22758,8 @@ void Player::SendInspectResult(Player const* player)
         enchantData.WriteByteSeq(creatorGuid[4]);
         enchantData.WriteByteSeq(creatorGuid[7]);
         enchantData.WriteByteSeq(creatorGuid[2]);
-        // if (unk1)
-        // enchantData << uint32(0);
+        if (suffixFactor)
+            enchantData << uint32(suffixFactor);
         enchantData.WriteByteSeq(creatorGuid[5]);
         enchantData << uint8(i); // slot
         enchantData.WriteByteSeq(creatorGuid[0]);
