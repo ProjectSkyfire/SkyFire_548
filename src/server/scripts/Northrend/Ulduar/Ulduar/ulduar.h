@@ -240,6 +240,8 @@ enum UlduarGameObjects
     GO_CACHE_OF_INNOVATION_HERO             = 194956,
     GO_CACHE_OF_INNOVATION_FIREFIGHTER_HERO = 194958,
 
+    GO_ANCIENT_GATE_OF_THE_KEEPERS          = 194255,
+
     // Vezax
     GO_VEZAX_DOOR                           = 194750,
 
