@@ -701,6 +701,8 @@ public:
     {
         m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
         m_respawnDelayTime = respawn > 0 ? respawn : 0;
+        if (respawn && !m_spawnedByDefault)
+            UpdateObjectVisibility(true);
     }
     void Respawn();
     /// Temporarily despawn; respawns after DB spawntimesecs (or 1s if none).
