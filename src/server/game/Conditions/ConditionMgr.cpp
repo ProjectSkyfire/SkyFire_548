@@ -219,7 +219,24 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
         case CONDITION_OBJECT_ENTRY:
         {
             if (uint32(object->GetTypeId()) == ConditionValue1)
+            {
                 condMeets = (!ConditionValue2) || (object->GetEntry() == ConditionValue2);
+
+                if (ConditionValue3)
+                {
+                    switch (object->GetTypeId())
+                    {
+                        case TypeID::TYPEID_UNIT:
+                            condMeets &= object->ToCreature()->GetDBTableGUIDLow() == ConditionValue3;
+                            break;
+                        case TypeID::TYPEID_GAMEOBJECT:
+                            condMeets &= object->ToGameObject()->GetDBTableGUIDLow() == ConditionValue3;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
             break;
         }
         case CONDITION_TYPE_MASK:
@@ -2065,6 +2082,22 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                         SF_LOG_ERROR("sql.sql", "ObjectEntry condition has non existing creature template entry  (%u), skipped", cond->ConditionValue2);
                         return false;
                     }
+                    if (cond->ConditionValue3)
+                    {
+                        if (CreatureData const* creatureData = sObjectMgr->GetCreatureData(cond->ConditionValue3))
+                        {
+                            if (cond->ConditionValue2 && creatureData->id != cond->ConditionValue2)
+                            {
+                                SF_LOG_ERROR("sql.sql", "ObjectEntry condition has guid %u set but does not match creature entry (%u), skipped", cond->ConditionValue3, cond->ConditionValue2);
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            SF_LOG_ERROR("sql.sql", "ObjectEntry condition has non existing creature guid (%u), skipped", cond->ConditionValue3);
+                            return false;
+                        }
+                    }
                     break;
                 case uint32(TypeID::TYPEID_GAMEOBJECT):
                     if (cond->ConditionValue2 && !sObjectMgr->GetGameObjectTemplate(cond->ConditionValue2))
@@ -2072,18 +2105,34 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                         SF_LOG_ERROR("sql.sql", "ObjectEntry condition has non existing game object template entry  (%u), skipped", cond->ConditionValue2);
                         return false;
                     }
+                    if (cond->ConditionValue3)
+                    {
+                        if (GameObjectData const* goData = sObjectMgr->GetGOData(cond->ConditionValue3))
+                        {
+                            if (cond->ConditionValue2 && goData->id != cond->ConditionValue2)
+                            {
+                                SF_LOG_ERROR("sql.sql", "ObjectEntry condition has guid %u set but does not match game object entry (%u), skipped", cond->ConditionValue3, cond->ConditionValue2);
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            SF_LOG_ERROR("sql.sql", "ObjectEntry condition has non existing game object guid (%u), skipped", cond->ConditionValue3);
+                            return false;
+                        }
+                    }
                     break;
                 case uint32(TypeID::TYPEID_PLAYER):
                 case uint32(TypeID::TYPEID_CORPSE):
                     if (cond->ConditionValue2)
                         SF_LOG_ERROR("sql.sql", "ObjectEntry condition has useless data in value2 (%u)!", cond->ConditionValue2);
+                    if (cond->ConditionValue3)
+                        SF_LOG_ERROR("sql.sql", "ObjectEntry condition has useless data in value3 (%u)!", cond->ConditionValue3);
                     break;
                 default:
                     SF_LOG_ERROR("sql.sql", "ObjectEntry condition has wrong typeid set (%u), skipped", cond->ConditionValue1);
                     return false;
             }
-            if (cond->ConditionValue3)
-                SF_LOG_ERROR("sql.sql", "ObjectEntry condition has useless data in value3 (%u)!", cond->ConditionValue3);
             break;
         }
         case CONDITION_TYPE_MASK:
