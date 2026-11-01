@@ -320,7 +320,7 @@ class spell_night_terrors_missile : public SpellScript
 
     void Register() OVERRIDE
     {
-        OnEffectHit += SpellEffectFn(spell_night_terrors_missile::SummonNightTerrors, EFFECT_0, SPELL_EFFECT_DUMMY);
+        OnEffectHit += SpellEffectFn(spell_night_terrors_missile::SummonNightTerrors, EFFECT_0, SPELL_EFFECT_TRIGGER_MISSILE);
     }
 };
 
