@@ -1433,6 +1433,16 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
         return;
     }
 
+    // The character may still be in the world from another session (for example one a module logs in without a
+    // client); loading it a second time would put the same character in the world twice.
+    if (ObjectAccessor::FindPlayer(playerGuid))
+    {
+        SF_LOG_ERROR("network", "Account (%u) tried to log in character (%u), which is already in the world.",
+            GetAccountId(), GUID_LOPART(playerGuid));
+        SendCharacterLoginFailed(ResponseCodes::CHAR_LOGIN_DUPLICATE_CHARACTER);
+        return;
+    }
+
     m_playerLoading = true;
     m_pendingPlayerLoginGuid = playerGuid;
 
