@@ -702,6 +702,29 @@ namespace
         return passed;
     }
 
+    bool TestSqlScriptKeepsMultilineExtendedInsertTogether()
+    {
+        std::string sql =
+            "INSERT INTO `creature` VALUES\n"
+            "(1,44402,1,1,0),\n"
+            "(2,44401,1,1,0);\n"
+            "INSERT INTO `creature_addon` VALUES\n"
+            "(1,0);\n";
+
+        std::vector<std::string> statements = Skyfire::Database::SplitSqlStatements(sql);
+
+        bool passed = true;
+        passed &= Expect(statements.size() == 2, "SQL splitter should keep a multiline extended insert as one statement");
+        passed &= Expect(statements[0].find("(1,44402,1,1,0)") != std::string::npos,
+            "SQL splitter should keep the first row of a multiline extended insert");
+        passed &= Expect(statements[0].find("(2,44401,1,1,0)") != std::string::npos,
+            "SQL splitter should keep the last row of a multiline extended insert");
+        passed &= Expect(statements[1].find("INSERT INTO `creature_addon`") != std::string::npos,
+            "SQL splitter should start the next statement after a multiline extended insert");
+
+        return passed;
+    }
+
     bool TestSqlScriptExecutorStopsOnFailure()
     {
         std::vector<std::string> executed;
@@ -854,6 +877,7 @@ int main()
     passed &= TestSqlScriptSplitsStatementsSafely();
     passed &= TestSqlScriptIgnoresQuotesInsideComments();
     passed &= TestSqlScriptSplitsDelimiterStatements();
+    passed &= TestSqlScriptKeepsMultilineExtendedInsertTogether();
     passed &= TestSqlScriptExecutorStopsOnFailure();
     passed &= TestStableSqlHash();
     passed &= TestSqlStringEscaping();

@@ -99,91 +99,173 @@ namespace Database
             return !delimiter.empty();
         }
 
-        std::string::size_type FindDelimiterOutsideQuotedText(std::string const& sql, std::string const& delimiter)
+        // Remembers quote and comment state so each appended line is scanned once.
+        // MariaDB dumps put every extended-insert row on its own line, and rescanning
+        // the whole statement after each line makes those imports look stuck.
+        struct SqlStatementScanner
         {
             bool inSingleQuote = false;
             bool inDoubleQuote = false;
             bool inBacktick = false;
             bool escaped = false;
+            bool inLineComment = false;
+            bool inBlockComment = false;
+            std::string::size_type resume = 0;
 
-            for (std::string::size_type i = 0; i < sql.length(); ++i)
+            void Reset()
             {
-                char c = sql[i];
-
-                if (inSingleQuote)
-                {
-                    if (escaped)
-                        escaped = false;
-                    else if (c == '\\')
-                        escaped = true;
-                    else if (c == '\'')
-                        inSingleQuote = false;
-
-                    continue;
-                }
-
-                if (inDoubleQuote)
-                {
-                    if (escaped)
-                        escaped = false;
-                    else if (c == '\\')
-                        escaped = true;
-                    else if (c == '"')
-                        inDoubleQuote = false;
-
-                    continue;
-                }
-
-                if (inBacktick)
-                {
-                    if (c == '`')
-                        inBacktick = false;
-
-                    continue;
-                }
-
-                if (c == '-' && i + 1 < sql.length() && sql[i + 1] == '-' &&
-                    (i + 2 == sql.length() || std::isspace(static_cast<unsigned char>(sql[i + 2]))))
-                {
-                    i += 2;
-                    while (i < sql.length() && sql[i] != '\n')
-                        ++i;
-
-                    continue;
-                }
-
-                if (c == '#')
-                {
-                    while (i < sql.length() && sql[i] != '\n')
-                        ++i;
-
-                    continue;
-                }
-
-                if (c == '/' && i + 1 < sql.length() && sql[i + 1] == '*')
-                {
-                    i += 2;
-                    while (i + 1 < sql.length() && !(sql[i] == '*' && sql[i + 1] == '/'))
-                        ++i;
-
-                    if (i + 1 < sql.length())
-                        ++i;
-
-                    continue;
-                }
-
-                if (!delimiter.empty() && sql.compare(i, delimiter.length(), delimiter) == 0)
-                    return i;
-
-                if (c == '\'')
-                    inSingleQuote = true;
-                else if (c == '"')
-                    inDoubleQuote = true;
-                else if (c == '`')
-                    inBacktick = true;
+                *this = SqlStatementScanner();
             }
 
-            return std::string::npos;
+            std::string::size_type FindDelimiter(std::string const& sql, std::string const& delimiter)
+            {
+                std::string::size_type i = resume;
+                while (i < sql.length())
+                {
+                    char c = sql[i];
+
+                    if (inLineComment)
+                    {
+                        ++i;
+                        if (c == '\n')
+                            inLineComment = false;
+                        continue;
+                    }
+
+                    if (inBlockComment)
+                    {
+                        if (c == '*' && i + 1 >= sql.length())
+                        {
+                            resume = i;
+                            return std::string::npos;
+                        }
+
+                        if (c == '*' && sql[i + 1] == '/')
+                        {
+                            inBlockComment = false;
+                            i += 2;
+                            continue;
+                        }
+
+                        ++i;
+                        continue;
+                    }
+
+                    if (inSingleQuote)
+                    {
+                        if (escaped)
+                            escaped = false;
+                        else if (c == '\\')
+                            escaped = true;
+                        else if (c == '\'')
+                            inSingleQuote = false;
+
+                        ++i;
+                        continue;
+                    }
+
+                    if (inDoubleQuote)
+                    {
+                        if (escaped)
+                            escaped = false;
+                        else if (c == '\\')
+                            escaped = true;
+                        else if (c == '"')
+                            inDoubleQuote = false;
+
+                        ++i;
+                        continue;
+                    }
+
+                    if (inBacktick)
+                    {
+                        if (c == '`')
+                            inBacktick = false;
+
+                        ++i;
+                        continue;
+                    }
+
+                    if (c == '-' && i + 1 < sql.length() && sql[i + 1] == '-')
+                    {
+                        if (i + 2 >= sql.length())
+                        {
+                            resume = i;
+                            return std::string::npos;
+                        }
+
+                        if (std::isspace(static_cast<unsigned char>(sql[i + 2])))
+                        {
+                            inLineComment = true;
+                            i += 2;
+                            continue;
+                        }
+                    }
+
+                    if (c == '#')
+                    {
+                        inLineComment = true;
+                        ++i;
+                        continue;
+                    }
+
+                    if (c == '/' && i + 1 >= sql.length())
+                    {
+                        resume = i;
+                        return std::string::npos;
+                    }
+
+                    if (c == '/' && sql[i + 1] == '*')
+                    {
+                        inBlockComment = true;
+                        i += 2;
+                        continue;
+                    }
+
+                    if (!delimiter.empty())
+                    {
+                        std::string::size_type remaining = sql.length() - i;
+                        if (remaining < delimiter.length() &&
+                            sql.compare(i, remaining, delimiter, 0, remaining) == 0)
+                        {
+                            resume = i;
+                            return std::string::npos;
+                        }
+
+                        if (remaining >= delimiter.length() &&
+                            sql.compare(i, delimiter.length(), delimiter) == 0)
+                        {
+                            resume = i;
+                            return i;
+                        }
+                    }
+
+                    if (c == '\'')
+                        inSingleQuote = true;
+                    else if (c == '"')
+                        inDoubleQuote = true;
+                    else if (c == '`')
+                        inBacktick = true;
+
+                    ++i;
+                }
+
+                resume = sql.length();
+                return std::string::npos;
+            }
+        };
+
+        bool TakeNextStatement(std::string& current, SqlStatementScanner& scanner, std::string const& delimiter,
+            std::string& statement)
+        {
+            std::string::size_type delimiterPosition = scanner.FindDelimiter(current, delimiter);
+            if (delimiterPosition == std::string::npos)
+                return false;
+
+            statement = Trim(current.substr(0, delimiterPosition));
+            current.erase(0, delimiterPosition + delimiter.length());
+            scanner.resume = 0;
+            return true;
         }
     }
 
@@ -344,6 +426,7 @@ namespace Database
         std::string delimiter = ";";
         std::istringstream input(sql);
         std::string line;
+        SqlStatementScanner scanner;
 
         while (std::getline(input, line))
         {
@@ -351,23 +434,18 @@ namespace Database
             if (Trim(current).empty() && TryReadDelimiterCommand(line, newDelimiter))
             {
                 current.clear();
+                scanner.Reset();
                 delimiter = newDelimiter;
                 continue;
             }
 
             current += line;
             current.push_back('\n');
-            while (true)
+            std::string statement;
+            while (TakeNextStatement(current, scanner, delimiter, statement))
             {
-                std::string::size_type delimiterPosition = FindDelimiterOutsideQuotedText(current, delimiter);
-                if (delimiterPosition == std::string::npos)
-                    break;
-
-                std::string statement = Trim(current.substr(0, delimiterPosition));
                 if (!statement.empty())
                     statements.push_back(statement);
-
-                current.erase(0, delimiterPosition + delimiter.length());
             }
         }
 
@@ -396,6 +474,7 @@ namespace Database
         std::string line;
         SqlStatementContext context;
         context.TotalBytes = totalBytes;
+        SqlStatementScanner scanner;
 
         while (std::getline(input, line))
         {
@@ -405,27 +484,22 @@ namespace Database
             if (Trim(current).empty() && TryReadDelimiterCommand(line, newDelimiter))
             {
                 current.clear();
+                scanner.Reset();
                 delimiter = newDelimiter;
                 continue;
             }
 
             current += line;
             current.push_back('\n');
-            while (true)
+            std::string statement;
+            while (TakeNextStatement(current, scanner, delimiter, statement))
             {
-                std::string::size_type delimiterPosition = FindDelimiterOutsideQuotedText(current, delimiter);
-                if (delimiterPosition == std::string::npos)
-                    break;
-
-                std::string statement = Trim(current.substr(0, delimiterPosition));
                 if (!statement.empty())
                 {
                     ++context.StatementCount;
                     if (!executor(statement, context))
                         return false;
                 }
-
-                current.erase(0, delimiterPosition + delimiter.length());
             }
         }
 
