@@ -32,6 +32,10 @@
 #    define DECLSPEC_DEPRECATED __declspec(deprecated)
 #  endif //DECLSPEC_DEPRECATED
 #else //PLATFORM != PLATFORM_WINDOWS
+#  include <limits.h>
+#  ifndef PATH_MAX
+#    define PATH_MAX 4096
+#  endif
 #  define SKYFIRE_PATH_MAX PATH_MAX
 #  define DECLSPEC_NORETURN
 #  define DECLSPEC_DEPRECATED

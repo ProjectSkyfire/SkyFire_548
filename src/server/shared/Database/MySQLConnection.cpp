@@ -186,7 +186,8 @@ bool MySQLConnection::Execute(PreparedStatement* stmt)
 
         uint32 _s = getMSTime();
 
-#if MYSQL_VERSION_ID >= 80300
+        // MariaDB stores its own version in MYSQL_VERSION_ID and has no MySQL 8.3 named-parameter API.
+#if !defined(MARIADB_VERSION_ID) && MYSQL_VERSION_ID >= 80300
         if (mysql_stmt_bind_named_param(msql_STMT, msql_BIND, m_mStmt->m_paramCount, nullptr))
 #else
         if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
@@ -240,7 +241,8 @@ bool MySQLConnection::_Query(PreparedStatement* stmt, MYSQL_RES** pResult, uint6
 
         uint32 _s = getMSTime();
 
-#if MYSQL_VERSION_ID >= 80300
+        // MariaDB stores its own version in MYSQL_VERSION_ID and has no MySQL 8.3 named-parameter API.
+#if !defined(MARIADB_VERSION_ID) && MYSQL_VERSION_ID >= 80300
         if (mysql_stmt_bind_named_param(msql_STMT, msql_BIND, m_mStmt->m_paramCount, nullptr))
 #else
         if (mysql_stmt_bind_param(msql_STMT, msql_BIND))
@@ -473,6 +475,10 @@ PreparedResultSet* MySQLConnection::Query(PreparedStatement* stmt)
 
 bool MySQLConnection::_HandleMySQLErrno(uint32 errNo)
 {
+    // MariaDB Connector/C skips this code. MySQL defines it as 2048.
+#ifndef CR_INVALID_CONN_HANDLE
+#define CR_INVALID_CONN_HANDLE 2048
+#endif
     switch (errNo)
     {
         case CR_SERVER_GONE_ERROR:

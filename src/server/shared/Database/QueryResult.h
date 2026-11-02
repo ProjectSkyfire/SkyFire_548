@@ -81,7 +81,13 @@ private:
     MYSQL_STMT* m_stmt;
     MYSQL_RES* m_res;
 
-    bool* m_isNull;
+    // MariaDB's MYSQL_BIND::is_null is my_bool* (char*). MySQL 8 uses bool*.
+#ifdef MARIADB_VERSION_ID
+    using NullIndicator = my_bool;
+#else
+    using NullIndicator = bool;
+#endif
+    NullIndicator* m_isNull;
     unsigned long* m_length;
 
     void FreeBindBuffer();
