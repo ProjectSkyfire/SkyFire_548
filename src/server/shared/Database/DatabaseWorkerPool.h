@@ -20,6 +20,8 @@
 
 #define MIN_MYSQL_SERVER_VERSION 50100u
 #define MIN_MYSQL_CLIENT_VERSION 50100u
+/* MariaDB Connector/C reports its package version here: 3.4.10 is 30410, not a MySQL version. */
+#define MIN_MARIADB_CLIENT_VERSION 30000u
 
 class PingOperation : public SQLOperation
 {
@@ -42,7 +44,11 @@ public:
         _connections.resize(IDX_SIZE);
 
         WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
+#ifdef MARIADB_VERSION_ID
+        WPFatal(mysql_get_client_version() >= MIN_MARIADB_CLIENT_VERSION, "SkyFire does not support MariaDB Connector/C versions below 3.0");
+#else
         WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "SkyFire does not support MySQL versions below 5.1");
+#endif
     }
 
     ~DatabaseWorkerPool()
