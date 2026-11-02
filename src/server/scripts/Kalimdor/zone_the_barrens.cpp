@@ -17,8 +17,10 @@ EndContentData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
+#include "ObjectAccessor.h"
 #include "ScriptedEscortAI.h"
 #include "Player.h"
+#include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 
@@ -782,9 +784,165 @@ class spell_q25027_bramblestaff : public SpellScript
     }
 };
 
+/*######
+## Drag it Out of Them
+######*/
+
+enum DragItOutOfThem
+{
+    QUEST_DRAG_IT_OUT_OF_THEM       = 13961,
+    SPELL_SNARED_IN_NET             = 65581,
+    SPELL_SNARED_NET_CONNECTOR      = 65596,
+    SPELL_SUMMON_RAZORMANE          = 65595,
+    SPELL_DRAGING_A_RAZORMANE       = 65601,
+    NPC_RAZORMANE_PILLAGER_SUMMONED = 34514
+};
+
+class npc_razormane_pillager : public CreatureScript
+{
+public:
+    npc_razormane_pillager() : CreatureScript("npc_razormane_pillager") { }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        {
+            creature->DespawnOrUnsummon();
+            player->CastSpell(player, SPELL_SUMMON_RAZORMANE, true);
+        }
+
+        player->CLOSE_GOSSIP_MENU();
+        return true;
+    }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        if (player->GetQuestStatus(QUEST_DRAG_IT_OUT_OF_THEM) != QUEST_STATUS_INCOMPLETE)
+            return false;
+
+        player->ADD_GOSSIP_ITEM_DB(player->GetDefaultGossipMenuForSource(creature), 0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    struct npc_razormane_pillagerAI : public ScriptedAI
+    {
+        npc_razormane_pillagerAI(Creature* creature) : ScriptedAI(creature), summonerGUID(0) { }
+
+        uint64 summonerGUID;
+
+        void IsSummonedBy(Unit* summoner) OVERRIDE
+        {
+            summonerGUID = summoner->GetGUID();
+            me->CastSpell(summoner, SPELL_DRAGING_A_RAZORMANE, true);
+            me->CastSpell(summoner, SPELL_SNARED_NET_CONNECTOR, true);
+            me->setFaction(35);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED | UNIT_FLAG_IMMUNE_TO_NPC);
+            me->DespawnOrUnsummon(300 * IN_MILLISECONDS);
+            me->SetStandState(UNIT_STAND_STATE_DEAD);
+        }
+
+        void Reset() OVERRIDE
+        {
+            me->setFaction(109);
+        }
+
+        void UpdateAI(uint32 /*diff*/) OVERRIDE
+        {
+            if (me->GetEntry() == NPC_RAZORMANE_PILLAGER_SUMMONED)
+            {
+                if (Unit* owner = ObjectAccessor::GetUnit(*me, summonerGUID))
+                    me->GetMotionMaster()->MoveFollow(owner, 2.5f, me->GetAngle(owner));
+
+                return;
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_razormane_pillagerAI(creature);
+    }
+};
+
+class spell_groldom_net : public SpellScript
+{
+    PrepareSpellScript(spell_groldom_net);
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        if (Unit* target = GetHitUnit())
+            target->CastSpell(target, SPELL_SNARED_IN_NET, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_groldom_net::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+class spell_snared_in_net : public AuraScript
+{
+    PrepareAuraScript(spell_snared_in_net);
+
+    void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Unit* owner = GetOwner()->ToCreature())
+        {
+            owner->setFaction(35);
+            owner->m_Events.Schedule(300 * IN_MILLISECONDS, 1, [owner]()
+            {
+                owner->setFaction(109);
+                owner->RemoveAurasDueToSpell(SPELL_SNARED_IN_NET);
+            });
+        }
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectApply += AuraEffectApplyFn(spell_snared_in_net::Apply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class AreaTrigger_at_groldom_farm : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_groldom_farm() : AreaTriggerScript("AreaTrigger_at_groldom_farm") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->HasAura(SPELL_DRAGING_A_RAZORMANE) && player->GetQuestStatus(QUEST_DRAG_IT_OUT_OF_THEM) == QUEST_STATUS_INCOMPLETE)
+        {
+            if (Aura* dragAura = player->GetAura(SPELL_DRAGING_A_RAZORMANE))
+                if (Unit* caster = dragAura->GetCaster())
+                    if (caster->ToCreature())
+                        caster->ToCreature()->DespawnOrUnsummon(1000);
+
+            player->RemoveAurasDueToSpell(SPELL_DRAGING_A_RAZORMANE);
+            player->RemoveAurasDueToSpell(SPELL_SNARED_NET_CONNECTOR);
+            player->CompleteQuest(QUEST_DRAG_IT_OUT_OF_THEM);
+        }
+
+        return false;
+    }
+};
+
 void AddSC_the_barrens()
 {
     new npc_wizzlecrank_shredder();
+    new npc_razormane_pillager();
+    RegisterSpellScript(spell_groldom_net);
+    RegisterAuraScript(spell_snared_in_net);
+    new AreaTrigger_at_groldom_farm();
     RegisterCreatureAI(npc_barrent_wounded_defender);
     RegisterSpellScript(spell_barrens_bandage);
     RegisterSpellScript(spell_q25027_bramblestaff);
