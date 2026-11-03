@@ -545,6 +545,7 @@ union GameObjectValue
         uint32 HoldProgress;
         bool WaitingAtPathStart;
         bool HoldingAtProgress;
+        bool StopEventPending;
     } Transport;
     //25 GAMEOBJECT_TYPE_FISHINGHOLE
     struct

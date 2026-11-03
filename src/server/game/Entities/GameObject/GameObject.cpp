@@ -13,6 +13,7 @@
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "GroupMgr.h"
+#include "InstanceScript.h"
 #include "ObjectMgr.h"
 #include "OutdoorPvPMgr.h"
 #include "Player.h"
@@ -962,6 +963,7 @@ void GameObject::InitializeLegacyTransport()
     m_goValue.Transport.HoldingAtProgress = false;
     m_goValue.Transport.HoldProgress = 0;
     m_goValue.Transport.StateChangeEndTime = 0;
+    m_goValue.Transport.StopEventPending = false;
 
     m_transportPauseTimes.clear();
 
@@ -993,6 +995,7 @@ void GameObject::UpdateLegacyTransportPathProgress()
     uint32 newProgress = m_goValue.Transport.PathProgress;
     bool updateStoppedFlag = false;
     bool stopped = false;
+    bool arrived = false;
     if (m_goValue.Transport.HoldingAtProgress)
     {
         newProgress = m_goValue.Transport.HoldProgress;
@@ -1019,6 +1022,7 @@ void GameObject::UpdateLegacyTransportPathProgress()
         {
             newProgress = targetProgress;
             stopped = true;
+            arrived = m_goValue.Transport.StopEventPending;
         }
 
         updateStoppedFlag = true;
@@ -1027,12 +1031,30 @@ void GameObject::UpdateLegacyTransportPathProgress()
     if (updateStoppedFlag)
         SetLegacyTransportStopped(stopped);
 
-    if (newProgress == m_goValue.Transport.PathProgress)
-        return;
+    if (newProgress != m_goValue.Transport.PathProgress)
+    {
+        m_goValue.Transport.PathProgress = newProgress;
+        // Legacy transport movement is client-side from DBC path data; only notify progress changes here.
+        MarkLegacyTransportPathProgressChanged();
+    }
 
-    m_goValue.Transport.PathProgress = newProgress;
-    // Legacy transport movement is client-side from DBC path data; only notify progress changes here.
-    MarkLegacyTransportPathProgressChanged();
+    if (arrived)
+    {
+        m_goValue.Transport.StopEventPending = false;
+
+        uint32 const eventId = GetGoState() == GOState::GO_STATE_TRANSPORT_STOPPED ?
+            GetGOInfo()->transport.pause2EventID : GetGOInfo()->transport.pause1EventID;
+        if (!eventId)
+            return;
+
+        GetMap()->ScriptsStart(sEventScripts, eventId, this, this);
+        EventInform(eventId);
+
+        // Local transports have no zone script, tell the instance directly.
+        if (!m_zoneScript)
+            if (InstanceScript* instance = GetInstanceScript())
+                instance->ProcessEvent(this, eventId);
+    }
 }
 
 void GameObject::HandleLegacyTransportStateChange(GOState oldState, GOState newState)
@@ -1089,6 +1111,7 @@ void GameObject::HandleLegacyTransportStateChange(GOState oldState, GOState newS
     }
 
     SetLegacyTransportStopped(travelTime == 0);
+    m_goValue.Transport.StopEventPending = travelTime != 0;
 
     if (oldState != newState)
         MarkLegacyTransportPathProgressChanged();
