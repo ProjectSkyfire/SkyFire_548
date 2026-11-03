@@ -3331,6 +3331,21 @@ template class AchievementMgr<Guild>;
 template class AchievementMgr<Player>;
 
 //==========================================================
+// Criteria.dbc numbers the timer start events differently from AchievementCriteriaTimedTypes, which is what
+// the spell hooks and the scripts start timers with, so these timed criteria never found their timer.
+static AchievementCriteriaTimedTypes GetTimedType(uint32 startEvent)
+{
+    switch (startEvent)
+    {
+        case 8:
+            return ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET;
+        case 13:
+            return ACHIEVEMENT_TIMED_TYPE_EVENT;
+        default:
+            return AchievementCriteriaTimedTypes(startEvent);
+    }
+}
+
 void AchievementGlobalMgr::LoadAchievementCriteriaList()
 {
     uint32 oldMSTime = getMSTime();
@@ -3382,7 +3397,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
         m_AchievementCriteriasByType[criteria->type].push_back(criteria);
 
         if (criteria->timeLimit)
-            m_AchievementCriteriasByTimedType[criteria->timedCriteriaStartType].push_back(criteria);
+            m_AchievementCriteriasByTimedType[GetTimedType(criteria->timedCriteriaStartType)].push_back(criteria);
     }
 
     SF_LOG_INFO("server.loading", ">> Loaded %u achievement criteria in %u ms", ++criterias, GetMSTimeDiffToNow(oldMSTime));
