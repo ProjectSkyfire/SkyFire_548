@@ -1081,8 +1081,12 @@ void Spell::SelectImplicitNearbyTargets(SpellEffIndex effIndex, SpellImplicitTar
                 AddGOTarget(gobjTarget, effMask);
             break;
         case TARGET_OBJECT_TYPE_DEST:
-            m_targets.SetDst(*target);
+        {
+            SpellDestination dest(*target);
+            CallScriptDestinationTargetSelectHandlers(dest, effIndex, targetType);
+            m_targets.SetDst(dest);
             break;
+        }
         default:
             ASSERT(false && "Spell::SelectImplicitNearbyTargets: received not implemented target object type");
             break;
