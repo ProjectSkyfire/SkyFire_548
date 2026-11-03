@@ -19,6 +19,8 @@ The teleporter appears to be active and stable.
 - Antechamber of Ulduar
 - Shattered Walkway
 - Conservatory of Life
+- Spark of Imagination
+- Prison of Yogg-Saron
 */
 
 enum UlduarTeleporter
@@ -30,6 +32,8 @@ enum UlduarTeleporter
     ANTECHAMBER                                  = 204,
     WALKWAY                                      = 205,
     CONSERVATORY                                 = 206,
+    SPARK_OF_IMAGINATION                         = 207,
+    YOGG_SARON_PRISON                            = 208,
 };
 
 class ulduar_teleporter : public GameObjectScript
@@ -75,6 +79,14 @@ class ulduar_teleporter : public GameObjectScript
                     player->TeleportTo(603, 2086.27f, -24.3134f, 421.239f, 0.0f);
                     player->CLOSE_GOSSIP_MENU();
                     break;
+                case SPARK_OF_IMAGINATION:
+                    player->TeleportTo(603, 2518.13f, 2569.34f, 412.682f, 0.0f);
+                    player->CLOSE_GOSSIP_MENU();
+                    break;
+                case YOGG_SARON_PRISON:
+                    player->TeleportTo(603, 1855.07f, -11.4879f, 334.559f, 5.53269f);
+                    player->CLOSE_GOSSIP_MENU();
+                    break;
             }
 
             return true;
@@ -98,6 +110,10 @@ class ulduar_teleporter : public GameObjectScript
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Shattered Walkway", GOSSIP_SENDER_MAIN, WALKWAY);
                 if (instance->GetBossState(BOSS_AURIAYA) == DONE)
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Conservatory of Life", GOSSIP_SENDER_MAIN, CONSERVATORY);
+                if (instance->GetBossState(BOSS_KOLOGARN) == DONE)
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Spark of Imagination", GOSSIP_SENDER_MAIN, SPARK_OF_IMAGINATION);
+                if (instance->GetBossState(BOSS_VEZAX) == DONE)
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Teleport to the Prison of Yogg-Saron", GOSSIP_SENDER_MAIN, YOGG_SARON_PRISON);
             }
 
             player->SEND_GOSSIP_MENU(gameObject->GetGOInfo()->GetGossipMenuId(), gameObject->GetGUID());
