@@ -17,7 +17,6 @@
 #include "ulduar.h"
 
 /* @todo Achievements
-          Storm Cloud (Shaman ability)
           Destroying of Toasty Fires
 */
 
@@ -66,7 +65,10 @@ enum HodirSpells
 
     // Shamans
     SPELL_LAVA_BURST                             = 61924,
-    SPELL_STORM_CLOUD                            = 65123,
+    SPELL_STORM_CLOUD_10                         = 65123,
+    SPELL_STORM_CLOUD_25                         = 65133,
+    SPELL_STORM_POWER_10                         = 63711,
+    SPELL_STORM_POWER_25                         = 65134,
 
     // Mages
     SPELL_FIREBALL                               = 61909,
@@ -134,9 +136,12 @@ enum HodirActions
 #define ACHIEVEMENT_COOLEST_FRIENDS              RAID_MODE<uint8>(2963, 2965)
 #define FRIENDS_COUNT                            RAID_MODE<uint8>(4, 8)
 
-enum Misc
+enum HodirData
 {
-    DATA_GETTING_COLD_IN_HERE                    = 29672968 // 2967, 2968 are achievement IDs
+    DATA_GETTING_COLD_IN_HERE                    = 1,
+    DATA_CHEESE_THE_FREEZE,
+    DATA_COOLEST_FRIENDS,
+    DATA_THIS_CACHE_WAS_RARE
 };
 
 Position const SummonPositions[8] =
@@ -376,7 +381,7 @@ class boss_hodir : public CreatureScript
                             continue;
 
                         player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KILL_CREDIT, 0, 0, me);
-                        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, SPELL_KILL_CREDIT);
+                        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, SPELL_KILL_CREDIT, 0, 0, me);
                     }
                     instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
 
@@ -462,13 +467,30 @@ class boss_hodir : public CreatureScript
                         if (Unit* target = ObjectAccessor::GetUnit(*me, (*itr)->getUnitGuid()))
                             if (Aura* BitingColdAura = target->GetAura(SPELL_BITING_COLD_TRIGGERED))
                                 if ((target->GetTypeId() == TypeID::TYPEID_PLAYER) && (BitingColdAura->GetStackAmount() > 2))
-                                        me->AI()->SetData(DATA_GETTING_COLD_IN_HERE, 0);
+                                    gettingColdInHere = false;
                     gettingColdInHereTimer = 1000;
                 }
                 else
                     gettingColdInHereTimer -= diff;
 
                 DoMeleeAttackIfReady();
+            }
+
+            uint32 GetData(uint32 type) const OVERRIDE
+            {
+                switch (type)
+                {
+                    case DATA_GETTING_COLD_IN_HERE:
+                        return gettingColdInHere;
+                    case DATA_CHEESE_THE_FREEZE:
+                        return cheeseTheFreeze;
+                    case DATA_COOLEST_FRIENDS:
+                        return iHaveTheCoolestFriends;
+                    case DATA_THIS_CACHE_WAS_RARE:
+                        return iCouldSayThatThisCacheWasRare;
+                    default:
+                        return 0;
+                }
             }
 
             void DoAction(int32 action) OVERRIDE
@@ -713,10 +735,20 @@ class npc_hodir_shaman : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_STORM_CLOUD:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                DoCast(target, SPELL_STORM_CLOUD, true);
+                        {
+                            // The shaman only has enemies on its threat list, so the player is picked from the map.
+                            std::vector<Player*> players;
+                            Map::PlayerList const& playerList = me->GetMap()->GetPlayers();
+                            for (Map::PlayerList::const_iterator itr = playerList.begin(); itr != playerList.end(); ++itr)
+                                if (Player* player = itr->GetSource())
+                                    if (player->IsAlive() && !player->IsGameMaster())
+                                        players.push_back(player);
+
+                            if (!players.empty())
+                                DoCast(players[urand(0, players.size() - 1)], RAID_MODE<uint32>(SPELL_STORM_CLOUD_10, SPELL_STORM_CLOUD_25), true);
                             events.ScheduleEvent(EVENT_STORM_CLOUD, urand(15000, 20000));
                             break;
+                        }
                         default:
                             break;
                     }
@@ -1008,6 +1040,72 @@ public:
     }
 };
 
+class achievement_cheese_the_freeze : public AchievementCriteriaScript
+{
+    public:
+        achievement_cheese_the_freeze() : AchievementCriteriaScript("achievement_cheese_the_freeze") { }
+
+        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        {
+            return target && target->GetAI() && target->GetAI()->GetData(DATA_CHEESE_THE_FREEZE);
+        }
+};
+
+class achievement_getting_cold_in_here : public AchievementCriteriaScript
+{
+    public:
+        achievement_getting_cold_in_here() : AchievementCriteriaScript("achievement_getting_cold_in_here") { }
+
+        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        {
+            return target && target->GetAI() && target->GetAI()->GetData(DATA_GETTING_COLD_IN_HERE);
+        }
+};
+
+class achievement_i_have_the_coolest_friends : public AchievementCriteriaScript
+{
+    public:
+        achievement_i_have_the_coolest_friends() : AchievementCriteriaScript("achievement_i_have_the_coolest_friends") { }
+
+        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        {
+            return target && target->GetAI() && target->GetAI()->GetData(DATA_COOLEST_FRIENDS);
+        }
+};
+
+class achievement_this_cache_was_rare : public AchievementCriteriaScript
+{
+    public:
+        achievement_this_cache_was_rare() : AchievementCriteriaScript("achievement_this_cache_was_rare") { }
+
+        bool OnCheck(Player* /*player*/, Unit* target) OVERRIDE
+        {
+            return target && target->GetAI() && target->GetAI()->GetData(DATA_THIS_CACHE_WAS_RARE);
+        }
+};
+
+class achievement_staying_buffed_all_winter : public AchievementCriteriaScript
+{
+    public:
+        achievement_staying_buffed_all_winter() : AchievementCriteriaScript("achievement_staying_buffed_all_winter") { }
+
+        bool OnCheck(Player* player, Unit* /*target*/) OVERRIDE
+        {
+            return player->HasAura(SPELL_SINGED) && player->HasAura(SPELL_STARLIGHT) && player->HasAura(SPELL_STORM_POWER_10);
+        }
+};
+
+class achievement_staying_buffed_all_winter_25 : public AchievementCriteriaScript
+{
+    public:
+        achievement_staying_buffed_all_winter_25() : AchievementCriteriaScript("achievement_staying_buffed_all_winter_25") { }
+
+        bool OnCheck(Player* player, Unit* /*target*/) OVERRIDE
+        {
+            return player->HasAura(SPELL_SINGED) && player->HasAura(SPELL_STARLIGHT) && player->HasAura(SPELL_STORM_POWER_25);
+        }
+};
+
 void AddSC_boss_hodir()
 {
     new boss_hodir();
@@ -1022,4 +1120,10 @@ void AddSC_boss_hodir()
     new npc_flash_freeze();
     new spell_biting_cold();
     new spell_biting_cold_dot();
+    new achievement_cheese_the_freeze();
+    new achievement_getting_cold_in_here();
+    new achievement_i_have_the_coolest_friends();
+    new achievement_this_cache_was_rare();
+    new achievement_staying_buffed_all_winter();
+    new achievement_staying_buffed_all_winter_25();
 }
