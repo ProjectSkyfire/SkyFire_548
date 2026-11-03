@@ -213,6 +213,10 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
             break;
     }
 
+    if (GameObject const* go = ToGameObject())
+        if (go->GetTransport())
+            flags |= UPDATEFLAG_GO_TRANSPORT_POSITION;
+
     if (flags & UPDATEFLAG_STATIONARY_POSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
@@ -698,9 +702,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetTransOffsetY());
         *data << int8(self->GetTransSeat());
         *data << float(self->GetTransOffsetX());
-        data->WriteBit(transGuid[2]);
-        data->WriteBit(transGuid[4]);
-        data->WriteBit(transGuid[1]);
+        data->WriteByteSeq(transGuid[2]);
+        data->WriteByteSeq(transGuid[4]);
+        data->WriteByteSeq(transGuid[1]);
 
         if (self->m_movementInfo.transport.time3 && self->m_movementInfo.transport.guid)
             *data << uint32(self->m_movementInfo.transport.time3);
@@ -710,11 +714,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
         *data << float(self->GetTransOffsetO());
         *data << float(self->GetTransOffsetZ());
 
-        data->WriteBit(transGuid[6]);
-        data->WriteBit(transGuid[0]);
-        data->WriteBit(transGuid[5]);
-        data->WriteBit(transGuid[3]);
-        data->WriteBit(transGuid[7]);
+        data->WriteByteSeq(transGuid[6]);
+        data->WriteByteSeq(transGuid[0]);
+        data->WriteByteSeq(transGuid[5]);
+        data->WriteByteSeq(transGuid[3]);
+        data->WriteByteSeq(transGuid[7]);
     }
 
     /*
