@@ -5,7 +5,6 @@
 
 /*
     @todo
-        Fix void zone damage
         If the boss is to close to a scrap pile -> no summon  -- Needs retail confirmation
         make the life sparks visible...     /? Need test
         Codestyle
@@ -56,6 +55,7 @@ enum Spells
     //------------------VOID ZONE--------------------
     SPELL_VOID_ZONE_10                          = 64203,
     SPELL_VOID_ZONE_25                          = 64235,
+    SPELL_CONSUMPTION                           = 64208,
 
     // Life Spark
     SPELL_STATIC_CHARGED_10                     = 64227,
@@ -794,6 +794,44 @@ public:
     }
 };
 
+/*-------------------------------------------------------
+ *
+ *        VOID ZONE
+ *
+ *///----------------------------------------------------
+class npc_void_zone : public CreatureScript
+{
+public:
+    npc_void_zone() : CreatureScript("npc_void_zone") { }
+
+    struct npc_void_zoneAI : public ScriptedAI
+    {
+        npc_void_zoneAI(Creature* creature) : ScriptedAI(creature)
+        {
+            _consumptionTimer = TIMER_VOID_ZONE;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (_consumptionTimer <= diff)
+            {
+                DoCast(me, SPELL_CONSUMPTION, true);
+                _consumptionTimer = TIMER_VOID_ZONE;
+            }
+            else
+                _consumptionTimer -= diff;
+        }
+
+    private:
+        uint32 _consumptionTimer;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_void_zoneAI(creature);
+    }
+};
+
 class spell_xt002_searing_light_spawn_life_spark : public SpellScriptLoader
 {
 public:
@@ -1128,6 +1166,7 @@ void AddSC_boss_xt002()
     new npc_boombot();
 
     new npc_life_spark();
+    new npc_void_zone();
     new boss_xt002();
 
     new spell_xt002_searing_light_spawn_life_spark();
