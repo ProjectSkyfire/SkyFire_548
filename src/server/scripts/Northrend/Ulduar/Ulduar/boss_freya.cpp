@@ -101,8 +101,7 @@ enum FreyaSpells
     // Ancient Conservator
     SPELL_CONSERVATOR_GRIP                       = 62532,
     SPELL_NATURE_FURY                            = 62589,
-    SPELL_SUMMON_PERIODIC                        = 62566,
-    SPELL_SPORE_SUMMON_NW                        = 62582, // Not used, triggered by SPELL_SUMMON_PERIODIC
+    SPELL_SPORE_SUMMON_NW                        = 62582,
     SPELL_SPORE_SUMMON_NE                        = 62591,
     SPELL_SPORE_SUMMON_SE                        = 62592,
     SPELL_SPORE_SUMMON_SW                        = 62593,
@@ -1275,7 +1274,7 @@ class npc_ancient_conservator : public CreatureScript
             {
                 for (uint8 n = 0; n < sporesCount; ++n)
                 {
-                    DoCast(SPELL_SUMMON_PERIODIC);
+                    DoCast(SPELL_SPORE_SUMMON_NW);
                     DoCast(SPELL_SPORE_SUMMON_NE);
                     DoCast(SPELL_SPORE_SUMMON_SE);
                     DoCast(SPELL_SPORE_SUMMON_SW);
