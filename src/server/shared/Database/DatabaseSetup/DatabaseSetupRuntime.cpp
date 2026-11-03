@@ -30,20 +30,42 @@ namespace Database
 {
     namespace
     {
-        bool StartsWithCaseInsensitive(std::string const& text, char const* prefix)
+        bool MatchesCaseInsensitiveAt(std::string const& text, std::string::size_type pos, char const* prefix)
         {
             std::size_t prefixLength = std::strlen(prefix);
-            if (text.length() < prefixLength)
+            if (pos + prefixLength > text.length())
                 return false;
 
             for (std::size_t i = 0; i < prefixLength; ++i)
             {
-                if (std::tolower(static_cast<unsigned char>(text[i])) !=
+                if (std::tolower(static_cast<unsigned char>(text[pos + i])) !=
                     std::tolower(static_cast<unsigned char>(prefix[i])))
                     return false;
             }
 
             return true;
+        }
+
+        bool StartsWithKeywordPairCaseInsensitive(std::string const& text, std::string::size_type begin,
+            char const* firstKeyword, char const* secondKeyword)
+        {
+            std::size_t firstLen = std::strlen(firstKeyword);
+            if (!MatchesCaseInsensitiveAt(text, begin, firstKeyword))
+                return false;
+
+            std::string::size_type pos = begin + firstLen;
+            if (pos >= text.length() || !std::isspace(static_cast<unsigned char>(text[pos])))
+                return false;
+
+            while (pos < text.length() && std::isspace(static_cast<unsigned char>(text[pos])))
+                ++pos;
+
+            std::size_t secondLen = std::strlen(secondKeyword);
+            if (!MatchesCaseInsensitiveAt(text, pos, secondKeyword))
+                return false;
+
+            std::string::size_type endPos = pos + secondLen;
+            return endPos == text.length() || !std::isalnum(static_cast<unsigned char>(text[endPos]));
         }
 
         std::string ExtractSqlTableName(std::string const& statement)
@@ -52,23 +74,22 @@ namespace Database
             while (begin < statement.length() && std::isspace(static_cast<unsigned char>(statement[begin])))
                 ++begin;
 
-            std::string trimmed = statement.substr(begin);
-            if (!StartsWithCaseInsensitive(trimmed, "DROP TABLE") &&
-                !StartsWithCaseInsensitive(trimmed, "CREATE TABLE") &&
-                !StartsWithCaseInsensitive(trimmed, "INSERT INTO") &&
-                !StartsWithCaseInsensitive(trimmed, "DELETE FROM") &&
-                !StartsWithCaseInsensitive(trimmed, "ALTER TABLE"))
+            if (!StartsWithKeywordPairCaseInsensitive(statement, begin, "DROP", "TABLE") &&
+                !StartsWithKeywordPairCaseInsensitive(statement, begin, "CREATE", "TABLE") &&
+                !StartsWithKeywordPairCaseInsensitive(statement, begin, "INSERT", "INTO") &&
+                !StartsWithKeywordPairCaseInsensitive(statement, begin, "DELETE", "FROM") &&
+                !StartsWithKeywordPairCaseInsensitive(statement, begin, "ALTER", "TABLE"))
                 return "";
 
-            std::string::size_type tableBegin = trimmed.find('`');
+            std::string::size_type tableBegin = statement.find('`', begin);
             if (tableBegin == std::string::npos)
                 return "";
 
-            std::string::size_type tableEnd = trimmed.find('`', tableBegin + 1);
+            std::string::size_type tableEnd = statement.find('`', tableBegin + 1);
             if (tableEnd == std::string::npos)
                 return "";
 
-            return trimmed.substr(tableBegin + 1, tableEnd - tableBegin - 1);
+            return statement.substr(tableBegin + 1, tableEnd - tableBegin - 1);
         }
 
         uint32 CalculateSqlProgressPercent(SqlStatementContext const& sqlContext)
@@ -156,7 +177,7 @@ namespace Database
                 }
 
                 if (i + keywordLength <= sql.length() &&
-                    StartsWithCaseInsensitive(sql.substr(i, keywordLength), keyword))
+                    MatchesCaseInsensitiveAt(sql, i, keyword))
                 {
                     bool beforeBoundary = i == 0 ||
                         !std::isalnum(static_cast<unsigned char>(sql[i - 1]));
@@ -285,16 +306,20 @@ namespace Database
             constexpr std::size_t InsertChunkRows = 250;
             constexpr std::size_t LargeInsertThreshold = 1024 * 1024;
 
-            std::string trimmed = TrimCopy(sql);
-            if (trimmed.length() < LargeInsertThreshold || !StartsWithCaseInsensitive(trimmed, "INSERT INTO"))
+            std::string::size_type begin = 0;
+            while (begin < sql.length() && std::isspace(static_cast<unsigned char>(sql[begin])))
+                ++begin;
+
+            if (sql.length() - begin < LargeInsertThreshold ||
+                !StartsWithKeywordPairCaseInsensitive(sql, begin, "INSERT", "INTO"))
                 return ExecuteSetupQuery(setupConnection, sql, queryContext, context);
 
-            std::string::size_type valuesPosition = FindKeywordOutsideQuotedText(trimmed, "VALUES");
+            std::string::size_type valuesPosition = FindKeywordOutsideQuotedText(sql, "VALUES");
             if (valuesPosition == std::string::npos)
                 return ExecuteSetupQuery(setupConnection, sql, queryContext, context);
 
-            std::string header = TrimCopy(trimmed.substr(0, valuesPosition + 6));
-            std::string values = TrimCopy(trimmed.substr(valuesPosition + 6));
+            std::string header = TrimCopy(sql.substr(begin, valuesPosition + 6 - begin));
+            std::string values = TrimCopy(sql.substr(valuesPosition + 6));
             std::vector<std::string> rows = SplitInsertRows(values);
 
             if (rows.size() <= InsertChunkRows)

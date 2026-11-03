@@ -46,17 +46,31 @@ namespace Database
             return directory + separator + name;
         }
 
-        std::string Trim(std::string const& text)
+        std::string TrimRange(std::string const& text, std::string::size_type begin, std::string::size_type end)
         {
-            std::string::size_type begin = 0;
-            while (begin < text.length() && std::isspace(static_cast<unsigned char>(text[begin])))
+            while (begin < end && std::isspace(static_cast<unsigned char>(text[begin])))
                 ++begin;
 
-            std::string::size_type end = text.length();
             while (end > begin && std::isspace(static_cast<unsigned char>(text[end - 1])))
                 --end;
 
             return text.substr(begin, end - begin);
+        }
+
+        std::string Trim(std::string const& text)
+        {
+            return TrimRange(text, 0, text.length());
+        }
+
+        bool IsWhitespaceOnly(std::string const& text)
+        {
+            for (unsigned char c : text)
+            {
+                if (!std::isspace(c))
+                    return false;
+            }
+
+            return true;
         }
 
         bool ReadTextFile(std::filesystem::path const& path, std::string& contents)
@@ -262,7 +276,7 @@ namespace Database
             if (delimiterPosition == std::string::npos)
                 return false;
 
-            statement = Trim(current.substr(0, delimiterPosition));
+            statement = TrimRange(current, 0, delimiterPosition);
             current.erase(0, delimiterPosition + delimiter.length());
             scanner.resume = 0;
             return true;
@@ -431,7 +445,7 @@ namespace Database
         while (std::getline(input, line))
         {
             std::string newDelimiter;
-            if (Trim(current).empty() && TryReadDelimiterCommand(line, newDelimiter))
+            if (IsWhitespaceOnly(current) && TryReadDelimiterCommand(line, newDelimiter))
             {
                 current.clear();
                 scanner.Reset();
@@ -481,7 +495,7 @@ namespace Database
             context.BytesRead += line.length() + 1;
 
             std::string newDelimiter;
-            if (Trim(current).empty() && TryReadDelimiterCommand(line, newDelimiter))
+            if (IsWhitespaceOnly(current) && TryReadDelimiterCommand(line, newDelimiter))
             {
                 current.clear();
                 scanner.Reset();
