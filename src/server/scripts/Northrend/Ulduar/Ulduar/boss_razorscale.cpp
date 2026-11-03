@@ -369,6 +369,10 @@ class boss_razorscale : public CreatureScript
 
             void MovementInform(uint32 type, uint32 id) OVERRIDE
             {
+                // takeoff finished: face the arena; the takeoff movement keeps only the position's coordinates
+                if (type == EFFECT_MOTION_TYPE && id == 0)
+                    me->SetFacingTo(RazorFlight.GetOrientation());
+
                 if (type == EFFECT_MOTION_TYPE && id == 1)
                 {
                     phase = PHASE_GROUND;
