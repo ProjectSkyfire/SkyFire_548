@@ -5,7 +5,6 @@
 
 /*
  * Comment: there is missing code on triggers,
- *          brann bronzebeard needs correct gossip info.
  *          requires more work involving area triggers.
  *          if reached brann speaks through his radio..
  */
@@ -1161,6 +1160,7 @@ class npc_lorekeeper : public CreatureScript
                         {
                             if (Creature* Branz = creature->FindNearestCreature(NPC_BRANZ_BRONZBEARD, 1000, true))
                             {
+                                Branz->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                                 Delorah->GetMotionMaster()->MovePoint(0, Branz->GetPositionX()-4, Branz->GetPositionY(), Branz->GetPositionZ());
                                 /// @todo Delorah->AI()->Talk(xxxx, Branz); when reached at branz
                             }
@@ -1191,55 +1191,40 @@ class npc_lorekeeper : public CreatureScript
         }
 };
 
-//enable hardmode
-////npc_brann_bronzebeard this requires more work involving area triggers. if reached this guy speaks through his radio..
-//#define GOSSIP_ITEM_1  "xxxxx"
-//#define GOSSIP_ITEM_2  "xxxxx"
-//
-/*
+enum BrannBronzebeardGossips
+{
+    GOSSIP_MENU_BRANN_BRONZEBEARD   = 10355,
+    GOSSIP_OPTION_BRANN_BRONZEBEARD = 0
+};
+
 class npc_brann_bronzebeard : public CreatureScript
 {
 public:
     npc_brann_bronzebeard() : CreatureScript("npc_brann_bronzebeard") { }
 
-    //bool OnGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) OVERRIDE
-    //{
-    //    player->PlayerTalkClass->ClearMenus();
-    //    switch (action)
-    //    {
-    //        case GOSSIP_ACTION_INFO_DEF+1:
-    //            if (player)
-    //            {
-    //                player->PrepareGossipMenu(creature);
-    //
-    //                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
-    //                player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-    //            }
-    //            break;
-    //        case GOSSIP_ACTION_INFO_DEF+2:
-    //            if (player)
-    //                player->CLOSE_GOSSIP_MENU();
-    //            if (Creature* Lorekeeper = creature->FindNearestCreature(NPC_LOREKEEPER, 1000, true)) //lore keeper of lorgannon
-    //                Lorekeeper->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-    //            break;
-    //    }
-    //    return true;
-    //}
-    //bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
-    //{
-    //    InstanceScript* instance = creature->GetInstanceScript();
-    //    if (instance && instance->GetData(BOSS_LEVIATHAN) !=DONE)
-    //    {
-    //        player->PrepareGossipMenu(creature);
-    //
-    //        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
-    //        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-    //    }
-    //    return true;
-    //}
-    //
-}
-*/
+    struct npc_brann_bronzebeardAI : public ScriptedAI
+    {
+        npc_brann_bronzebeardAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void sGossipSelect(Player* player, uint32 sender, uint32 action) OVERRIDE
+        {
+            if (sender == GOSSIP_MENU_BRANN_BRONZEBEARD && action == GOSSIP_OPTION_BRANN_BRONZEBEARD)
+            {
+                me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                player->CLOSE_GOSSIP_MENU();
+
+                // The hard mode has to be chosen before Brann starts the assault.
+                if (Creature* loreKeeper = me->FindNearestCreature(NPC_LOREKEEPER, 1000.0f, true))
+                    loreKeeper->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_brann_bronzebeardAI(creature);
+    }
+};
 
 class go_ulduar_tower : public GameObjectScript
 {
@@ -1779,7 +1764,7 @@ void AddSC_boss_flame_leviathan()
     new npc_freyas_ward();
     new npc_freya_ward_summon();
     new npc_lorekeeper();
-    // new npc_brann_bronzebeard();
+    new npc_brann_bronzebeard();
     new go_ulduar_tower();
 
     new achievement_three_car_garage_demolisher();
