@@ -988,6 +988,13 @@ void GameObject::InitializeLegacyTransport()
 
 void GameObject::UpdateLegacyTransportPathProgress()
 {
+    UpdateLegacyTransportPathProgress(GetGoState());
+}
+
+// Moves the progress toward the stop of the given state. During a state change the object already has the new
+// state, so the change passes the old one.
+void GameObject::UpdateLegacyTransportPathProgress(GOState state)
+{
     uint32 const period = GetTransportPeriod();
     if (!period)
         return;
@@ -1006,7 +1013,7 @@ void GameObject::UpdateLegacyTransportPathProgress()
         newProgress = Skyfire::GameObjects::WrapTransportPathProgress(getMSTime(), period);
     else
     {
-        uint32 const targetProgress = GetLegacyTransportTargetProgress(GetGoState());
+        uint32 const targetProgress = GetLegacyTransportTargetProgress(state);
         uint32 const stopTime = m_goValue.Transport.StateChangeEndTime;
         uint32 const now = getMSTime();
 
@@ -1042,7 +1049,7 @@ void GameObject::UpdateLegacyTransportPathProgress()
     {
         m_goValue.Transport.StopEventPending = false;
 
-        uint32 const eventId = GetGoState() == GOState::GO_STATE_TRANSPORT_STOPPED ?
+        uint32 const eventId = state == GOState::GO_STATE_TRANSPORT_STOPPED ?
             GetGOInfo()->transport.pause2EventID : GetGOInfo()->transport.pause1EventID;
         if (!eventId)
             return;
@@ -1069,7 +1076,8 @@ void GameObject::HandleLegacyTransportStateChange(GOState oldState, GOState newS
     if (!period)
         return;
 
-    UpdateLegacyTransportPathProgress();
+    // The state is already the new one: bring the progress up to date with the old one first.
+    UpdateLegacyTransportPathProgress(oldState);
 
     m_goValue.Transport.HoldingAtProgress = false;
     if (newState == GOState::GO_STATE_TRANSPORT_STOPPED && m_goValue.Transport.WaitingAtPathStart)

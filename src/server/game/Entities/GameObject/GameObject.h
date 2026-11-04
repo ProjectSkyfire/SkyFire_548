@@ -852,6 +852,7 @@ protected:
     void UpdateModel();                                 // updates model in case displayId were changed
     void InitializeLegacyTransport();
     void UpdateLegacyTransportPathProgress();
+    void UpdateLegacyTransportPathProgress(GOState state);
     void HandleLegacyTransportStateChange(GOState oldState, GOState newState);
     void SetLegacyTransportStopped(bool stopped);
     void MarkLegacyTransportPathProgressChanged();
