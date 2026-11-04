@@ -831,7 +831,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 flags) const
     {
         GameObject const* go = ToGameObject();
 
-        if (go && (go->ToTransport() || go->GetGoType() == GAMEOBJECT_TYPE_TRANSPORT))
+        // Ships and zeppelins send their path progress. For everything else, local transports too, this is the
+        // server time the client measures the transport's stop time (GAMEOBJECT_FIELD_LEVEL) against.
+        if (go && go->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
             *data << uint32(go->GetGOValue()->Transport.PathProgress);
         else
             *data << uint32(getMSTime());
