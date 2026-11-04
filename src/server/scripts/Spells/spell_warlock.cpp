@@ -546,7 +546,7 @@ public:
 
         void Register() OVERRIDE
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warl_healthstone_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            OnEffectLaunchTarget += SpellEffectFn(spell_warl_healthstone_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
         }
     };
 
@@ -4271,7 +4271,7 @@ public:
 
         void Register() OVERRIDE
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warl_devour_magic_heal_SpellScript::CalculateHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            OnEffectLaunchTarget += SpellEffectFn(spell_warl_devour_magic_heal_SpellScript::CalculateHeal, EFFECT_0, SPELL_EFFECT_HEAL);
         }
     };
 
