@@ -2056,7 +2056,7 @@ CreatureAddon const* Creature::GetCreatureAddon() const
 }
 
 //creature_addon table
-bool Creature::LoadCreaturesAddon(bool reload)
+bool Creature::LoadCreaturesAddon(bool reload, bool evading)
 {
     CreatureAddon const* cainfo = GetCreatureAddon();
     if (!cainfo)
@@ -2119,6 +2119,11 @@ bool Creature::LoadCreaturesAddon(bool reload)
                 SF_LOG_ERROR("sql.sql", "Creature (GUID: %u Entry: %u) has wrong spell %u defined in `auras` field.", GetGUIDLow(), GetEntry(), *itr);
                 continue;
             }
+
+            // An evading creature walks home first. An aura that holds it in place (a sleep stun, a root) would keep it
+            // where it left combat, evading for good; it comes back when the creature reaches home.
+            if (evading && (AdditionalSpellInfo->HasAura(SPELL_AURA_MOD_STUN) || AdditionalSpellInfo->HasAura(SPELL_AURA_MOD_ROOT)))
+                continue;
 
             // skip already applied aura
             if (HasAura(*itr))
