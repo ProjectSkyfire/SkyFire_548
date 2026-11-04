@@ -49,8 +49,9 @@ void Totem::InitStats(uint32 duration)
         uint8 Slot = uint8(m_Properties->Slot - 1);
         GetOwner()->ToPlayer()->GetSession()->SendTotemCreated(TotemGUID, duration, SpellID, Slot);
 
-        // set display id depending on caster's race
-        SetDisplayId(GetOwner()->GetModelForTotem(PlayerTotemType(m_Properties->Id)));
+        // set display id depending on caster's race; totems without a race model keep their template model
+        if (uint32 modelId = GetOwner()->GetModelForTotem(PlayerTotemType(m_Properties->Id)))
+            SetDisplayId(modelId);
     }
 
     Minion::InitStats(duration);

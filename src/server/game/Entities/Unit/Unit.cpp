@@ -8369,6 +8369,9 @@ uint32 Unit::GetModelForTotem(uint32 totemType) const
     if (totemType == 3399)
         totemType = SUMMON_TYPE_TOTEM_AIR;
 
+    if (totemType == 3401) // Windwalk Totem
+        totemType = SUMMON_TYPE_TOTEM_AIR;
+
     if (totemType == 3400)
         totemType = SUMMON_TYPE_TOTEM_EARTH;
 
