@@ -8,6 +8,7 @@
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
 #include "CellImpl.h"
+#include "LocalLevelScaling.h"
 #include "CombatPackets.h"
 #include "Common.h"
 #include "ScriptMgr.h"
@@ -10010,6 +10011,13 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
                 }
 
                 fieldBuffer << uint32(displayId);
+            }
+            // Open world scaling: the recipient's own version of this creature.
+            else if (creature && LocalLevelScaling::IsViewField(index))
+            {
+                uint32 value = m_uint32Values[index];
+                LocalLevelScaling::PatchViewField(target, creature, index, value);
+                fieldBuffer << uint32(value);
             }
             // hide lootable animation for unallowed players
             else if (index == OBJECT_FIELD_DYNAMIC_FLAGS)

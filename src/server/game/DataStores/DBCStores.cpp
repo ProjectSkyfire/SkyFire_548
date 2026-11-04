@@ -97,6 +97,7 @@ DBCStorage <GlyphSlotEntry> sGlyphSlotStore(GlyphSlotfmt);
 DBCStorage <GtBarberShopCostBaseEntry>    sGtBarberShopCostBaseStore(GtBarberShopCostBasefmt);
 DBCStorage <GtBattlePetXpEntry>           sGtBattlePetXpStore(GtBattlePetXpfmt);
 DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore(GtCombatRatingsfmt);
+DBCStorage <GtItemSocketCostPerLevelEntry> sGtItemSocketCostPerLevelStore(GtItemSocketCostPerLevelfmt);
 DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore(GtChanceToMeleeCritBasefmt);
 DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore(GtChanceToMeleeCritfmt);
 DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore(GtChanceToSpellCritBasefmt);
@@ -427,6 +428,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtBarberShopCostBaseStore, dbcPath, "gtBarberShopCostBase.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtBattlePetXpStore, dbcPath, "gtBattlePetXP.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtCombatRatingsStore, dbcPath, "gtCombatRatings.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sGtItemSocketCostPerLevelStore, dbcPath, "gtItemSocketCostPerLevel.dbc");
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtChanceToMeleeCritBaseStore, dbcPath, "gtChanceToMeleeCritBase.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtChanceToMeleeCritStore, dbcPath, "gtChanceToMeleeCrit.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sGtChanceToSpellCritBaseStore, dbcPath, "gtChanceToSpellCritBase.dbc");//15595

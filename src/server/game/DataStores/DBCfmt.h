@@ -58,6 +58,7 @@ char const GlyphSlotfmt[] = "nix";
 char const GtBarberShopCostBasefmt[] = "xf";
 char const GtBattlePetXpfmt[] = "xf";
 char const GtCombatRatingsfmt[] = "xf";
+char const GtItemSocketCostPerLevelfmt[] = "xf";
 char const GtOCTHpPerStaminafmt[] = "df";
 char const GtChanceToMeleeCritBasefmt[] = "xf";
 char const GtChanceToMeleeCritfmt[] = "xf";

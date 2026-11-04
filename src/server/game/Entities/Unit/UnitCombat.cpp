@@ -18,6 +18,7 @@
 #include "Group.h"
 #include "InstanceSaveMgr.h"
 #include "InstanceScript.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "MapManager.h"
 #include "MovementStructures.h"
@@ -737,7 +738,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
             damageInfo->HitInfo |= HITINFO_GLANCING;
             damageInfo->TargetState = VictimState::VICTIMSTATE_WOUND;
             damageInfo->procEx |= PROC_EX_NORMAL_HIT;
-            int32 leveldif = int32(victim->getLevel()) - int32(getLevel());
+            int32 leveldif = int32(victim->getLevelForTarget(this)) - int32(getLevelForTarget(victim));
             if (leveldif > 3)
                 leveldif = 3;
             float reducePercent = 1 - leveldif * 0.1f;
@@ -1022,6 +1023,11 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
 {
     float armor = float(victim->GetArmor());
 
+    // Open world scaling: a character fighting their own version of a creature meets its armor.
+    if (Creature const* creature = victim->ToCreature())
+        if (Player const* viewer = GetCharmerOrOwnerPlayerOrPlayerItself())
+            LocalLevelScaling::ViewArmorFor(viewer, creature, armor);
+
     // bypass enemy armor by SPELL_AURA_BYPASS_ARMOR_FOR_CASTER
     int32 armorBypassPct = 0;
     AuraEffectList const& reductionAuras = victim->GetAuraEffectsByType(SPELL_AURA_BYPASS_ARMOR_FOR_CASTER);
@@ -1054,7 +1060,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* victim, const uint32 damage, SpellInfo
     if (armor < 0.0f)
         armor = 0.0f;
 
-    float levelModifier = getLevel();
+    float levelModifier = getLevelForTarget(victim);
 
     if (levelModifier > 85)
         levelModifier = levelModifier + (4.5 * (levelModifier - 59)) + (20 * (levelModifier - 80)) + (22 * (levelModifier - 85));
@@ -1087,7 +1093,7 @@ uint32 Unit::CalcSpellResistance(Unit* victim, SpellSchoolMask schoolMask, Spell
     uint8 const bossLevel = 83;
     uint32 const bossResistanceConstant = 510;
     uint32 resistanceConstant = 0;
-    uint8 level = victim->getLevel();
+    uint8 level = victim->getLevelForTarget(this);
 
     if (level == bossLevel)
         resistanceConstant = bossResistanceConstant;

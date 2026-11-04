@@ -124,6 +124,7 @@ extern DBCStorage <GlyphSlotEntry>               sGlyphSlotStore;
 extern DBCStorage <GtBarberShopCostBaseEntry>    sGtBarberShopCostBaseStore;
 extern DBCStorage <GtBattlePetXpEntry>           sGtBattlePetXpStore;
 extern DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore;
+extern DBCStorage <GtItemSocketCostPerLevelEntry> sGtItemSocketCostPerLevelStore;
 extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
 extern DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore;
 extern DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore;

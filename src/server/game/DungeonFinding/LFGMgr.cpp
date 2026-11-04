@@ -16,6 +16,7 @@
 #include "LFGPlayerData.h"
 #include "LFGQueue.h"
 #include "LFGScripts.h"
+#include "LocalLevelScaling.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -2462,7 +2463,8 @@ namespace lfg
                     lockStatus = LFG_LOCKSTATUS_RAID_LOCKED;
                 else if (dungeon->minlevel > level)
                     lockStatus = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
-                else if (dungeon->maxlevel < level)
+                else if (dungeon->maxlevel < level
+                    && !LocalLevelScaling::CanQueueAboveMaxLevel(player, dungeon->map, dungeon->difficulty))
                     lockStatus = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
                 else if (dungeon->seasonal && !IsSeasonActive(dungeon->id))
                     lockStatus = LFG_LOCKSTATUS_NOT_IN_SEASON;
@@ -3340,14 +3342,16 @@ namespace lfg
         return 0;
     }
 
-    LfgDungeonSet LFGMgr::GetRandomAndSeasonalDungeons(uint8 level, uint8 expansion)
+    LfgDungeonSet LFGMgr::GetRandomAndSeasonalDungeons(uint8 level, uint8 expansion, Player const* player)
     {
         LfgDungeonSet randomDungeons;
         for (lfg::LFGDungeonContainer::const_iterator itr = LfgDungeonStore.begin(); itr != LfgDungeonStore.end(); ++itr)
         {
             lfg::LFGDungeonData const& dungeon = itr->second;
             if ((dungeon.type == lfg::LFG_TYPE_RANDOM || (dungeon.seasonal && sLFGMgr->IsSeasonActive(dungeon.id)))
-                && dungeon.expansion <= expansion && dungeon.minlevel <= level && level <= dungeon.maxlevel)
+                && dungeon.expansion <= expansion && dungeon.minlevel <= level
+                && (level <= dungeon.maxlevel
+                    || LocalLevelScaling::CanQueueAboveMaxLevel(player, dungeon.map, dungeon.difficulty)))
                 randomDungeons.insert(dungeon.Entry());
         }
         return randomDungeons;

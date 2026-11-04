@@ -25,6 +25,7 @@
 #include "GuildMgr.h"
 #include "InstanceScript.h"
 #include "Language.h"
+#include "ItemScalingHooks.h"
 #include "Log.h"
 #include "LootMgr.h"
 #include "MapManager.h"
@@ -2641,6 +2642,30 @@ void WorldSession::HandleRequestHotfix(WorldPacket& recvPacket)
         recvPacket.ReadByteSeq(guids[i][1]);
         recvPacket >> entries[i];
         recvPacket.ReadGuidBytes(guids[i], 0, 5, 6, 4, 7, 2, 3);
+    }
+
+    if (type == DB2_REPLY_ITEM_UPGRADE)
+    {
+        // Rows a module adds for per-item scaling (ItemScalingHooks); SkyFire has no
+        // ItemUpgrade store, and Blizzard's own rows are left to the client's copy (an empty
+        // reply would erase them client-side).
+        ItemScalingHooks::UpgradeRowWriterFn writer = ItemScalingHooks::UpgradeRowWriter.load(std::memory_order_relaxed);
+        for (uint32 i = 0; i < count && writer; ++i)
+        {
+            ByteBuffer record;
+            uint32 timestamp = 0;
+            if (!writer(entries[i], record, timestamp))
+                continue;
+
+            WorldPacket data(SMSG_DB_REPLY);
+            data << uint32(entries[i]);
+            data << uint32(timestamp);
+            data << uint32(type);
+            data << uint32(record.size());
+            data.append(record);
+            SendPacket(&data);
+        }
+        return;
     }
 
     if (knownUnsupportedType)

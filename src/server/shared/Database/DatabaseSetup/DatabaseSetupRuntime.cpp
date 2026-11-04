@@ -713,8 +713,23 @@ namespace Database
     bool ApplyPendingSetupUpdates(MYSQL* setupConnection, SetupOptions const& options, SetupPlan const& plan,
         SetupRuntimeContext const& context)
     {
+        // The plan is built before the base SQL is installed, and a base dump can
+        // already record updates it contains (characters_database.sql does).
+        // Re-read the tracking table so those are skipped instead of re-run and
+        // then rejected as duplicate rows.
+        SetupState current;
+        if (!LoadDatabaseSetupState(setupConnection, options, current, context))
+            return false;
+
         for (SqlUpdateFile const& update : plan.PendingUpdates)
         {
+            if (current.AppliedUpdates.count(update.Name))
+            {
+                SF_LOG_INFO(context.LogFilter, "%s database update %s is already recorded, skipping.",
+                    context.DatabaseNameTitle, update.Name.c_str());
+                continue;
+            }
+
             std::string updateSql;
             SF_LOG_INFO(context.LogFilter, "Applying %s database update %s.",
                 context.DatabaseName, update.Name.c_str());

@@ -3,6 +3,7 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "LocalLevelScaling.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "QuestDef.h"
@@ -147,11 +148,20 @@ Quest::Quest(Field* questRecord)
     m_questObjecitveTypeCount.assign(QUEST_OBJECTIVE_TYPE_END, 0);
 }
 
+int32 Quest::GetQuestLevelFor(Player const* player) const
+{
+    if (player && LocalLevelScaling::QuestScalingEnabled(player))
+        return LocalLevelScaling::ScaleQuestLevel(Level, player->getLevel());
+    return Level;
+}
+
 uint32 Quest::XPValue(Player* player) const
 {
     if (player)
     {
-        int32 quest_level = (Level == -1 ? player->getLevel() : Level);
+        bool const scaled = LocalLevelScaling::QuestScalingEnabled(player);
+        int32 quest_level = scaled ? LocalLevelScaling::ScaleQuestLevel(Level, player->getLevel())
+            : (Level == -1 ? player->getLevel() : Level);
         const QuestXPEntry* xpentry = sQuestXPStore.LookupEntry(quest_level);
         if (!xpentry)
             return 0;
@@ -172,6 +182,11 @@ uint32 Quest::XPValue(Player* player) const
         else
             xp = 50 * ((xp + 25) / 50);
 
+        // A quest lifted far above its own level keeps only part of the level-appropriate reward.
+        if (scaled)
+            xp = xp * LocalLevelScaling::RewardKeepPercent(
+                LocalLevelScaling::QuestXpKeepSharePercent.load(std::memory_order_relaxed), Level, quest_level) / 100;
+
         return xp;
     }
 
@@ -181,6 +196,31 @@ uint32 Quest::XPValue(Player* player) const
 int32 Quest::GetRewMoney() const
 {
     return int32(RewardMoney * sWorld->getRate(Rates::RATE_DROP_MONEY));
+}
+
+int32 Quest::GetRewMoney(Player const* player) const
+{
+    int32 const money = GetRewMoney();
+    if (money <= 0 || Level <= 0 || !player || !LocalLevelScaling::QuestScalingEnabled(player))
+        return money;
+
+    int32 const effective = LocalLevelScaling::ScaleQuestLevel(Level, player->getLevel());
+    if (effective <= Level)
+        return money;
+
+    // Money grows with the quest's level like its experience does: the quest XP table's
+    // ratio between the two levels, discounted for the levels it was lifted, and never
+    // below the authored reward.
+    QuestXPEntry const* own = sQuestXPStore.LookupEntry(Level);
+    QuestXPEntry const* lifted = sQuestXPStore.LookupEntry(effective);
+    uint32 const xpId = RewardXPId ? RewardXPId : 5;
+    if (!own || !lifted || !own->Exp[xpId])
+        return money;
+
+    uint64 scaledMoney = uint64(money) * lifted->Exp[xpId] / own->Exp[xpId];
+    scaledMoney = scaledMoney * LocalLevelScaling::RewardKeepPercent(
+        LocalLevelScaling::QuestMoneyKeepSharePercent.load(std::memory_order_relaxed), Level, effective) / 100;
+    return int32(std::max<uint64>(scaledMoney, uint64(money)));
 }
 
 uint32 Quest::GetRewMoneyMaxLevel() const

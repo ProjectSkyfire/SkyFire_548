@@ -166,7 +166,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
                 ObjectMgr::GetLocaleString(localeData->Title, locale, title);
 
         if (questLevelInTitle)
-            AddQuestLevelToTitle(title, quest->GetQuestLevel());
+            AddQuestLevelToTitle(title, quest->GetQuestLevelFor(_session->GetPlayer()));
 
         data.WriteBit(quest->IsRepeatable());
         data.WriteBits(title.length(), 9);
@@ -196,7 +196,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, uint64 objectGUID) const
 
         data.WriteString(updatedQuestTitles[i]);
         data << int32(quest->GetFlags());
-        data << int32(quest->GetQuestLevel());
+        data << int32(quest->GetQuestLevelFor(_session->GetPlayer()));
         data << int32(item.QuestIcon);
         data << int32(item.QuestId);
         data << int32(quest->GetFlags2());
@@ -341,7 +341,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
                     ObjectMgr::GetLocaleString(localeData->Title, locale, title);
 
             if (questLevelInTitle)
-                AddQuestLevelToTitle(title, quest->GetQuestLevel());
+                AddQuestLevelToTitle(title, quest->GetQuestLevelFor(_session->GetPlayer()));
 
             data.WriteBit(quest->IsRepeatable());
             data.WriteBits(title.size(), 9);
@@ -351,7 +351,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
             questData.WriteString(title);
             questData << uint32(quest->GetFlags2());
             questData << uint32(qmi.QuestIcon);
-            questData << uint32(quest->GetQuestLevel());
+            questData << uint32(quest->GetQuestLevelFor(_session->GetPlayer()));
         }
     }
 
@@ -417,7 +417,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     }
 
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
-        AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
+        AddQuestLevelToTitle(questTitle, quest->GetQuestLevelFor(_session->GetPlayer()));
 
     ByteBuffer objData;
     for (QuestObjectiveSet::const_iterator citr = quest->m_questObjectives.begin(); citr != quest->m_questObjectives.end(); ++citr)
@@ -497,7 +497,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, uint64 npcGUID, 
     data << uint32(quest->GetFlags());
     data << uint32(quest->GetCharTitleId());
     data << uint32(quest->RewardItemId[2]);
-    data << uint32(quest->GetRewMoney());
+    data << uint32(quest->GetRewMoney(_session->GetPlayer()));
     data << uint32(quest->RewardItemIdCount[2]);
     data << uint32(quest->GetFlags2());
     data << uint32(quest->GetRewSpell());
@@ -624,7 +624,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     }
 
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
-        AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
+        AddQuestLevelToTitle(questTitle, quest->GetQuestLevelFor(_session->GetPlayer()));
 
     WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);   // guess size
     data << uint32(quest->GetQuestId());
@@ -695,7 +695,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
         data << uint32(quest->RewardFactionId[i]);                          // reward factions ids
     }
 
-    data << uint32(hiddenReward ? 0 : quest->GetRewMoney());                // reward money (below max lvl)
+    data << uint32(hiddenReward ? 0 : quest->GetRewMoney(_session->GetPlayer()));                // reward money (below max lvl)
     data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[4]);
     data << uint32(hiddenReward ? 0 : quest->RewardChoiceItemCount[1]);
     data << uint32(quest->GetFlags2());
@@ -717,7 +717,9 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << int32(quest->GetMinLevel());                                    // min level
     data << uint32(quest->GetRewardReputationMask());                       // rep mask (unsure on what it does)
     data << uint32(quest->GetPointOpt());
-    data << int32(quest->GetQuestLevel());                                  // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevel (0 is not known, but assuming this is no longer valid for quest intended for client)
+    // may be -1 (the player's level). Open world scaling sends each character the level the quest
+    // plays at for them; Player::RefreshQuestLogQueries re-sends it when that changes.
+    data << int32(quest->GetQuestLevelFor(_session->GetPlayer()));
     data << uint32(quest->GetQuestMethod());                                // 0 = complete-on-accept (Method), 1 unused, 2 = normal
     data << uint32(quest->RequiredSourceItemCount[2]);
     data << uint32(quest->GetXPId());                                       // seems to always have the same value as the first XP ID field
@@ -803,7 +805,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
                 QuestTakerEntry = l_Object->GetEntry();
 
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
-        AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
+        AddQuestLevelToTitle(questTitle, quest->GetQuestLevelFor(_session->GetPlayer()));
 
     uint32 rewItemDisplayId[QUEST_REWARDS_COUNT] = { };
     for (uint8 i = 0; i < QUEST_REWARDS_COUNT; i++)
@@ -887,7 +889,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, uint64 npcGuid, b
     data << uint32(quest->RewardChoiceItemCount[0]);
     data << uint32(rewChoiceItemDisplayId[5]);
     data << uint32(quest->GetQuestGiverPortrait());
-    data << uint32(quest->GetRewMoney());
+    data << uint32(quest->GetRewMoney(_session->GetPlayer()));
     data << uint32(quest->RewardChoiceItemId[5]);
     data << uint32(rewChoiceItemDisplayId[1]);
     data << uint32(quest->RewardChoiceItemCount[2]);
@@ -1015,7 +1017,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* quest, uint64 npcGuid, 
     }
 
     if (sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_UI_QUESTLEVELS_IN_DIALOGS))
-        AddQuestLevelToTitle(questTitle, quest->GetQuestLevel());
+        AddQuestLevelToTitle(questTitle, quest->GetQuestLevelFor(_session->GetPlayer()));
 
     ObjectGuid QuestGiverGUID = npcGuid;
     uint32 currencyCounter = quest->GetQuestObjectiveCountType(QUEST_OBJECTIVE_TYPE_CURRENCY);

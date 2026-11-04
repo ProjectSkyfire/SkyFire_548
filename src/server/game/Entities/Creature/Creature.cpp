@@ -23,6 +23,7 @@
 #include "GroupMgr.h"
 #include "InstanceScript.h"
 #include "Log.h"
+#include "LocalLevelScaling.h"
 #include "LootMgr.h"
 #include "MapManager.h"
 #include "MoveSpline.h"
@@ -2337,6 +2338,14 @@ void Creature::AllLootRemovedFromCorpse()
 
 uint8 Creature::getLevelForTarget(WorldObject const* target) const
 {
+    // Open world scaling: a character (or their pet) fights their own version of this creature,
+    // and the core asks here for the level hit, resist, glancing and kill XP are rolled at.
+    if (target && !isWorldBoss())
+        if (Unit const* opponent = target->ToUnit())
+            if (Player const* viewer = opponent->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, this))
+                    return view;
+
     if (!isWorldBoss() || !target->ToUnit())
         return Unit::getLevelForTarget(target);
 

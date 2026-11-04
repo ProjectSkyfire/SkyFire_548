@@ -317,7 +317,7 @@ inline void KillRewarder::_InitGroupData()
                     // 2.4. _maxNotGrayMember - maximum level of alive group member within reward distance,
                     //      for whom victim is not gray;
                     uint32 grayLevel = Skyfire::XP::GetGrayLevel(lvl);
-                    if (_victim->getLevel() > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember->getLevel() < lvl))
+                    if (_victim->getLevelForTarget(member) > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember->getLevel() < lvl))
                         _maxNotGrayMember = member;
                 }
         // 2.5. _isFullXP - flag identifying that for all group members victim is not gray,
@@ -370,7 +370,9 @@ inline void KillRewarder::_RewardXP(Player* player, float rate)
             AddPct(xp, (*i)->GetAmount());
 
         // 4.2.3. Calculate expansion penalty
-        if (_victim->GetTypeId() == TypeID::TYPEID_UNIT && player->getLevel() >= GetMaxLevelForExpansion(_victim->ToCreature()->GetCreatureTemplate()->expansion))
+        // (not for a creature open world scaling lifted to the player: that fight is at their level)
+        if (_victim->GetTypeId() == TypeID::TYPEID_UNIT && player->getLevel() >= GetMaxLevelForExpansion(_victim->ToCreature()->GetCreatureTemplate()->expansion)
+            && _victim->getLevelForTarget(player) == _victim->getLevel())
             xp = CalculatePct(xp, 10); // Players get only 10% xp for killing creatures of lower expansion levels than himself
 
         // 4.2.4. Give XP to player.
@@ -8584,7 +8586,8 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
     if (attacktype < WeaponAttackType::MAX_ATTACK)
         _ApplyWeaponDependentAuraMods(item, attacktype, apply);
 
-    _ApplyItemBonuses(proto, slot, apply);
+    // The item's own item level shift (upgrade modifier) changes its stats, armor and damage.
+    _ApplyItemBonuses(item->GetStatTemplate(), slot, apply);
     ApplyItemEquipSpell(item, apply);
     ApplyEnchantment(item, apply);
 
@@ -9406,7 +9409,7 @@ void Player::_RemoveAllItemMods()
             if (attacktype < WeaponAttackType::MAX_ATTACK)
                 _ApplyWeaponDependentAuraMods(m_items[i], attacktype, false);
 
-            _ApplyItemBonuses(proto, i, false);
+            _ApplyItemBonuses(m_items[i]->GetStatTemplate(), i, false);
         }
     }
 
@@ -9432,7 +9435,7 @@ void Player::_ApplyAllItemMods()
             if (attacktype < WeaponAttackType::MAX_ATTACK)
                 _ApplyWeaponDependentAuraMods(m_items[i], attacktype, true);
 
-            _ApplyItemBonuses(proto, i, true);
+            _ApplyItemBonuses(m_items[i]->GetStatTemplate(), i, true);
         }
     }
 
@@ -9472,7 +9475,7 @@ void Player::_ApplyAllLevelScaleItemMods(bool apply)
             if (!proto)
                 continue;
 
-            _ApplyItemBonuses(proto, i, apply, true);
+            _ApplyItemBonuses(m_items[i]->GetStatTemplate(), i, apply, true);
         }
     }
 }
@@ -20318,7 +20321,7 @@ uint32 Player::GetResurrectionSpellId()
 // Used in triggers for check "Only to targets that grant experience or honor" req
 bool Player::isHonorOrXPTarget(Unit const* victim)
 {
-    uint8 v_level = victim->getLevel();
+    uint8 v_level = victim->getLevelForTarget(this);
     uint8 k_grey = Skyfire::XP::GetGrayLevel(getLevel());
 
     // Victim level less gray level
@@ -21296,6 +21299,7 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
         }
 
         Item* pItem = StoreNewItem(dest, lootItem->itemid, true, lootItem->randomPropertyId);
+        sScriptMgr->OnPlayerLootItem(this, pItem, lootItem->count);
         SendNewItem(pItem, lootItem->count, false, false, broadcast);
     }
 }
@@ -21330,6 +21334,7 @@ void Player::StoreLootItem(uint8 lootSlot, Loot* loot, uint64 lootGuid)
     {
         AllowedLooterSet looters = item->GetAllowedLooters();
         Item* newitem = StoreNewItem(dest, item->itemid, true, item->randomPropertyId, looters);
+        sScriptMgr->OnPlayerLootItem(this, newitem, item->count);
 
         if (qitem)
         {
@@ -22701,25 +22706,39 @@ void Player::SendInspectResult(Player const* player)
 
         ObjectGuid creatorGuid = item->GetUInt64Value(ITEM_FIELD_CREATOR);
         uint32 enchantCount = 0;
+        int32 const randomProperty = item->GetItemRandomPropertyId();
+        uint32 const suffixFactor = item->GetItemSuffixFactor();
 
         data.WriteBit(creatorGuid[1]);
-        data.WriteBit(0); // unk1
-        data.WriteBit(0);
+        data.WriteBit(suffixFactor != 0);
+        data.WriteBit(1); // always set by the 5.4.8 client's own servers
         data.WriteBit(creatorGuid[3]);
         size_t enchCountBitPos = data.bitwpos();
         data.WriteBits(0, 21); // enchant count placeholder
         data.WriteBit(creatorGuid[2]);
         data.WriteBit(creatorGuid[6]);
         data.WriteBit(creatorGuid[4]);
-        data.WriteBit(0); // unk2
+        data.WriteBit(randomProperty != 0);
         data.WriteBit(creatorGuid[0]);
         data.WriteBit(creatorGuid[5]);
         data.WriteBit(creatorGuid[7]);
 
-        // if (unk2)
-        // enchantData << uint16(0);
+        if (randomProperty)
+            enchantData << int16(randomProperty);
         enchantData.WriteByteSeq(creatorGuid[3]);
-        enchantData << uint32(0);
+
+        // Item modifiers (reforge, transmogrification, upgrade): byte size, mask, then one
+        // value per bit set. Without them an inspected item shows its base version.
+        uint32 const modifiersMask = item->GetUInt32Value(ITEM_FIELD_MODIFIERS_MASK) & 7;
+        uint32 modifierCount = 0;
+        for (uint8 m = 0; m < 3; ++m)
+            if (modifiersMask & (1 << m))
+                ++modifierCount;
+        enchantData << uint32(4 + modifierCount * 4);
+        enchantData << uint32(modifiersMask);
+        for (uint8 m = 0; m < 3; ++m)
+            if (modifiersMask & (1 << m))
+                enchantData << uint32(item->GetDynamicUInt32Value(ITEM_DYNAMIC_MODIFIERS, m));
 
         for (uint8 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
         {
@@ -22739,8 +22758,8 @@ void Player::SendInspectResult(Player const* player)
         enchantData.WriteByteSeq(creatorGuid[4]);
         enchantData.WriteByteSeq(creatorGuid[7]);
         enchantData.WriteByteSeq(creatorGuid[2]);
-        // if (unk1)
-        // enchantData << uint32(0);
+        if (suffixFactor)
+            enchantData << uint32(suffixFactor);
         enchantData.WriteByteSeq(creatorGuid[5]);
         enchantData << uint8(i); // slot
         enchantData.WriteByteSeq(creatorGuid[0]);

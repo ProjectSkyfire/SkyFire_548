@@ -1287,6 +1287,25 @@ void ScriptMgr::OnPlayerQuestAdd(Player* player, Quest const* quest)
     FOREACH_SCRIPT(PlayerScript)->OnQuestAdd(player, quest);
 }
 
+void ScriptMgr::OnPlayerQuestReward(Player* player, Quest const* quest, Object* questGiver)
+{
+    FOREACH_SCRIPT(PlayerScript)->OnQuestReward(player, quest, questGiver);
+}
+
+void ScriptMgr::OnPlayerLootItem(Player* player, Item* item, uint32 count)
+{
+    if (!item)
+        return;
+    FOREACH_SCRIPT(PlayerScript)->OnLootItem(player, item, count);
+}
+
+void ScriptMgr::OnPlayerQuestRewardItem(Player* player, Item* item, Quest const* quest)
+{
+    if (!item)
+        return;
+    FOREACH_SCRIPT(PlayerScript)->OnQuestRewardItem(player, item, quest);
+}
+
 void ScriptMgr::OnPlayerCreate(Player* player)
 {
     FOREACH_SCRIPT(PlayerScript)->OnCreate(player);
