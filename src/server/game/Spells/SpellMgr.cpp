@@ -2981,6 +2981,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 31298: // Sleep (needs target selection script)
             case 51904: // Summon Ghouls On Scarlet Crusade (this should use conditions table, script for this spell needs to be fixed)
             case 68933: // Wrath of Air Totem rank 2 (Aura)
+            case 116943: // Earthgrab, the totem pulse: on the totem only, not on the enemies around it
             case 29200: // Purify Helboar Meat
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
