@@ -11424,7 +11424,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
     if (!ignore_condition && pEnchant->EnchantmentCondition && !EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
-    if ((pEnchant->requiredMinLevel > getLevel()) || (pEnchant->requiredMaxLevel < getLevel()))
+    // requiredMaxLevel is where the enchant's scaling stops, not a limit on who can use it, and most weapon and proc
+    // enchants leave it at 0
+    if (pEnchant->requiredMinLevel > getLevel())
         return;
 
     if (pEnchant->requiredSkill > 0 && pEnchant->requiredSkillValue > GetSkillValue(pEnchant->requiredSkill))
