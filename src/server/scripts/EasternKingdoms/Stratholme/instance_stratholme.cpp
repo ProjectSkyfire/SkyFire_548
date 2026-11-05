@@ -57,6 +57,7 @@ class instance_stratholme : public InstanceMapScript
             uint64 ysidaTriggerGUID;
             std::set<uint64> crystalsGUID;
             std::set<uint64> abomnationGUID;
+            std::set<uint64> qBrotherhoodGUID;
             EventMap events;
 
             void Initialize() OVERRIDE
@@ -82,6 +83,7 @@ class instance_stratholme : public InstanceMapScript
                 ysidaTriggerGUID = 0;
                 crystalsGUID.clear();
                 abomnationGUID.clear();
+                qBrotherhoodGUID.clear();
             }
 
             bool StartSlaugtherSquare()
@@ -130,6 +132,37 @@ class instance_stratholme : public InstanceMapScript
                     case NPC_ABOM_VENOM:
                         abomnationGUID.insert(creature->GetGUID());
                         break;
+                    case NPC_COMMANDER_ELIGOR:
+                    case NPC_PACKMASTER_STONEBRUISER:
+                    case NPC_WILHELM:
+                        // the copies past the main gate only show up once Balnazzar is dead
+                        if (creature->GetPositionY() > -3364.41f)
+                        {
+                            qBrotherhoodGUID.insert(creature->GetGUID());
+                            creature->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            creature->SetVisible(false);
+                        }
+                        break;
+                }
+            }
+
+            void OnUnitDeath(Unit* unit) OVERRIDE
+            {
+                if (unit->GetTypeId() != TypeID::TYPEID_UNIT || unit->GetEntry() != NPC_BALNAZZAR)
+                    return;
+
+                for (uint64 guid : qBrotherhoodGUID)
+                {
+                    if (Creature* questgiver = instance->GetCreature(guid))
+                    {
+                        if (questgiver->GetEntry() == NPC_WILHELM)
+                        {
+                            questgiver->SetVisible(true);
+                            questgiver->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        }
+                        else if (questgiver->AI())
+                            questgiver->AI()->DoAction(ACTION_BALNAZZAR);
+                    }
                 }
             }
 

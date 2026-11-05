@@ -6,6 +6,14 @@
 #ifndef DEF_STRATHOLME_H
 #define DEF_STRATHOLME_H
 
+const Position StoneBruiserPath[2] =
+{
+    { 3434.65f, -3070.02f, 136.53f, 2.20f },
+    { 3435.61f, -3064.97f, 136.51f, 2.26f },
+};
+
+const Position EligorPath = { 3429.58f, -3064.53f, 136.49f, 2.19f };
+
 enum DataTypes
 {
     TYPE_BARON_RUN                      = 1,
@@ -39,6 +47,26 @@ enum CreatureIds
     NPC_ABOM_VENOM                      = 10417,
     NPC_BLACK_GUARD                     = 10394,
     NPC_YSIDA                           = 16031,
+    NPC_BALNAZZAR                       = 10813,
+    NPC_WILHELM                         = 45201,
+
+    // Trash
+    NPC_SKELETAL_GUARDIAN               = 10390,
+    NPC_SKELETAL_BERSERKER              = 10391,
+    NPC_BROKEN_CADAVER                  = 10383,
+    NPC_MANGLED_CADAVER                 = 10382,
+    NPC_PLAGUE_GHOUL                    = 42975,
+    NPC_RISEN_GUARDSMAN                 = 10418,
+    NPC_RISEN_INITIATE                  = 10420,
+
+    // Questers
+    NPC_COMMANDER_ELIGOR                = 45200,
+    NPC_PACKMASTER_STONEBRUISER         = 45323,
+};
+
+enum Actions
+{
+    ACTION_BALNAZZAR                    = 0,
 };
 
 enum GameobjectIds
@@ -64,6 +92,18 @@ enum QuestIds
 enum SpellIds
 {
     SPELL_BARON_ULTIMATUM               = 27861
+};
+
+// Undead the Argent Crusaders engage on spawn
+const std::vector<uint32> CitizenType
+{
+    NPC_SKELETAL_GUARDIAN,
+    NPC_SKELETAL_BERSERKER,
+    NPC_BROKEN_CADAVER,
+    NPC_MANGLED_CADAVER,
+    NPC_PLAGUE_GHOUL,
+    NPC_RISEN_GUARDSMAN,
+    NPC_RISEN_INITIATE,
 };
 
 #endif
