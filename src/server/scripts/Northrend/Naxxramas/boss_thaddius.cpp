@@ -7,6 +7,7 @@
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "Player.h"
+#include "GameObject.h"
 #include "naxxramas.h"
 
 //Stalagg
@@ -50,7 +51,25 @@ enum ThaddiusActions
 };
 
 //generic
-#define C_TESLA_COIL            16218           //the coils (emotes "Tesla Coil overloads!")
+enum TeslaSpells
+{
+    SPELL_STALAGG_CHAIN = 28096,
+    SPELL_FEUGEN_CHAIN  = 28111,
+    SPELL_TESLA_SHOCK   = 28099,
+    SPELL_SHOCK_VISUAL  = 28159,
+    SPELL_SPARK_VISUAL  = 28136,
+    SPELL_INACTIVE_VISUAL = 28160
+};
+
+Creature* GetTeslaCoil(Creature* add)
+{
+    return add->FindNearestCreature(NPC_TESLA, 1000.0f, true);
+}
+
+GameObject* GetTeslaCoilGO(Creature* add, uint32 entry)
+{
+    return add->FindNearestGameObject(entry, 1000.0f);
+}
 
 //Thaddius
 enum ThaddiusYells
@@ -110,6 +129,10 @@ public:
 
             // Moreover, the adds may not yet be spawn. So just track down the status if mob is spawn
             // and each mob will send its status at reset (meaning that it is alive)
+            uiAddsTimer = 0;
+            transitionTimer = 0;
+            transitionStage = 0;
+            polaritySwitch = false;
             checkFeugenAlive = false;
             if (Creature* pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
                 checkFeugenAlive = pFeugen->IsAlive();
@@ -134,6 +157,31 @@ public:
         bool checkFeugenAlive;
         bool polaritySwitch;
         uint32 uiAddsTimer;
+        uint32 transitionTimer;
+        uint8 transitionStage;
+
+        void CoilTransition(uint8 stage)
+        {
+            if (!instance)
+                return;
+            uint32 adds[] = { DATA_FEUGEN, DATA_STALAGG };
+            uint32 objects[] = { DATA_FEUGEN_COIL_GO, DATA_STALAGG_COIL_GO };
+            for (uint8 i = 0; i < 2; ++i)
+            {
+                Creature* add = me->GetCreature(*me, instance->GetData64(adds[i]));
+                Creature* coil = add ? GetTeslaCoil(add) : NULL;
+                if (stage == 1 && coil)
+                {
+                    coil->CastStop();
+                    coil->AI()->Talk(1);
+                }
+                else if (stage == 2 && coil)
+                    coil->CastSpell(me, SPELL_SHOCK_VISUAL, false);
+                else if (stage == 3)
+                    if (GameObject* go = GameObject::GetGameObject(*me, instance->GetData64(objects[i])))
+                        go->SetGoState(GOState::GO_STATE_READY);
+            }
+        }
 
         void KilledUnit(Unit* /*victim*/) OVERRIDE
         {
@@ -167,12 +215,16 @@ public:
 
             if (!checkFeugenAlive && !checkStalaggAlive)
             {
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
-                // REACT_AGGRESSIVE only reset when he takes damage.
-                DoZoneInCombat();
+                if (!transitionStage && !transitionTimer)
+                {
+                    transitionStage = 1;
+                    transitionTimer = 10000;
+                }
             }
             else
             {
+                transitionStage = 0;
+                transitionTimer = 0;
                 me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
                 me->SetReactState(REACT_PASSIVE);
             }
@@ -208,6 +260,31 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            if (transitionStage)
+            {
+                if (transitionTimer <= diff)
+                {
+                    CoilTransition(transitionStage);
+                    if (transitionStage == 2 || transitionStage == 3)
+                        me->CastSpell(me, SPELL_SPARK_VISUAL, true);
+                    if (transitionStage == 3)
+                    {
+                        transitionStage = 0;
+                        transitionTimer = 0;
+                        me->RemoveAurasDueToSpell(SPELL_INACTIVE_VISUAL);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
+                        DoZoneInCombat();
+                    }
+                    else
+                    {
+                        ++transitionStage;
+                        transitionTimer = 2000;
+                    }
+                }
+                else
+                    transitionTimer -= diff;
+            }
+
             if (checkFeugenAlive && checkStalaggAlive)
                 uiAddsTimer = 0;
 
@@ -265,6 +342,74 @@ public:
     };
 };
 
+struct tesla_linkAI : public ScriptedAI
+{
+    tesla_linkAI(Creature* creature, uint32 chain, uint32 goEntry) : ScriptedAI(creature), chainSpell(chain), coilGOEntry(goEntry), linkTimer(0), linked(false), broken(false) { }
+
+    uint32 chainSpell;
+    uint32 coilGOEntry;
+    uint32 linkTimer;
+    bool linked;
+    bool broken;
+
+    void ResetLink()
+    {
+        linkTimer = 0;
+        linked = false;
+        broken = false;
+        if (GameObject* go = GetTeslaCoilGO(me, coilGOEntry))
+            go->SetGoState(GOState::GO_STATE_ACTIVE);
+    }
+
+    void StopLink()
+    {
+        me->RemoveAurasDueToSpell(chainSpell);
+        if (Creature* coil = GetTeslaCoil(me))
+            coil->CastStop();
+        linked = false;
+    }
+
+    void UpdateLink(uint32 diff)
+    {
+        if (linkTimer > diff)
+        {
+            linkTimer -= diff;
+            return;
+        }
+        // 28098 and 28110 are absent in 5.4.8; check the link directly.
+        linkTimer = 1000;
+        Creature* coil = GetTeslaCoil(me);
+        if (!coil)
+        {
+            linked = false;
+            return;
+        }
+        if (GameObject* go = GetTeslaCoilGO(me, coilGOEntry))
+            if (go->GetGoState() != GOState::GO_STATE_ACTIVE)
+                go->SetGoState(GOState::GO_STATE_ACTIVE);
+        if (me->IsInCombat() && me->GetDistance(me->GetHomePosition()) > 28.0f)
+        {
+            if (!broken)
+            {
+                broken = true;
+                linked = false;
+                me->RemoveAurasDueToSpell(chainSpell);
+                coil->CastStop();
+                coil->AI()->Talk(0);
+            }
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                coil->CastSpell(target, SPELL_TESLA_SHOCK, true);
+        }
+        else if (!linked || broken)
+        {
+            broken = false;
+            linked = true;
+            coil->CastStop();
+            coil->CastSpell(me, chainSpell, true);
+        }
+    }
+};
+
 class npc_stalagg : public CreatureScript
 {
 public:
@@ -275,9 +420,9 @@ public:
         return new npc_stalaggAI(creature);
     }
 
-    struct npc_stalaggAI : public ScriptedAI
+    struct npc_stalaggAI : public tesla_linkAI
     {
-        npc_stalaggAI(Creature* creature) : ScriptedAI(creature)
+        npc_stalaggAI(Creature* creature) : tesla_linkAI(creature, SPELL_STALAGG_CHAIN, GO_CONS_NOX_TESLA_STALAGG)
         {
             instance = creature->GetInstanceScript();
         }
@@ -289,6 +434,7 @@ public:
 
         void Reset() OVERRIDE
         {
+            ResetLink();
             if (instance)
                 if (Creature* pThaddius = me->GetCreature(*me, instance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
@@ -312,6 +458,7 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_STAL_DEATH);
+            StopLink();
             if (instance)
                 if (Creature* pThaddius = me->GetCreature(*me, instance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
@@ -320,6 +467,7 @@ public:
 
         void UpdateAI(uint32 uiDiff) OVERRIDE
         {
+            UpdateLink(uiDiff);
             if (!UpdateVictim())
                 return;
 
@@ -368,9 +516,9 @@ public:
         return new npc_feugenAI(creature);
     }
 
-    struct npc_feugenAI : public ScriptedAI
+    struct npc_feugenAI : public tesla_linkAI
     {
-        npc_feugenAI(Creature* creature) : ScriptedAI(creature)
+        npc_feugenAI(Creature* creature) : tesla_linkAI(creature, SPELL_FEUGEN_CHAIN, GO_CONS_NOX_TESLA_FEUGEN)
         {
             instance = creature->GetInstanceScript();
         }
@@ -381,6 +529,7 @@ public:
 
         void Reset() OVERRIDE
         {
+            ResetLink();
             if (instance)
                 if (Creature* pThaddius = me->GetCreature(*me, instance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
@@ -403,6 +552,7 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_FEUG_DEATH);
+            StopLink();
             if (instance)
                 if (Creature* pThaddius = me->GetCreature(*me, instance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
@@ -411,6 +561,7 @@ public:
 
         void UpdateAI(uint32 uiDiff) OVERRIDE
         {
+            UpdateLink(uiDiff);
             if (!UpdateVictim())
                 return;
 
@@ -423,6 +574,24 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+};
+
+class npc_tesla : public CreatureScript
+{
+public:
+    npc_tesla() : CreatureScript("npc_tesla") { }
+
+    struct npc_teslaAI : public ScriptedAI
+    {
+        npc_teslaAI(Creature* creature) : ScriptedAI(creature) { me->SetReactState(REACT_PASSIVE); }
+        void AttackStart(Unit* /*target*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterEvadeMode() OVERRIDE { }
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE { damage = 0; }
+        void UpdateAI(uint32 /*diff*/) OVERRIDE { }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE { return new npc_teslaAI(creature); }
 };
 
 class spell_thaddius_pos_neg_charge : public SpellScriptLoader
@@ -555,6 +724,7 @@ void AddSC_boss_thaddius()
     new boss_thaddius();
     new npc_stalagg();
     new npc_feugen();
+    new npc_tesla();
     new spell_thaddius_pos_neg_charge();
     new spell_thaddius_polarity_shift();
     new achievement_polarity_switch();
