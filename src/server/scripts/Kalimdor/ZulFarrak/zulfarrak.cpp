@@ -207,6 +207,9 @@ public:
     {
         if (InstanceScript* instance = go->GetInstanceScript())
         {
+            if (instance->GetData(EVENT_PYRAMID) != PYRAMID_NOT_STARTED)
+                return false;
+
             instance->SetData(EVENT_PYRAMID, PYRAMID_CAGES_OPEN);
             //set bly & co to aggressive & start moving to top of stairs
             initBlyCrewMember(instance, ENTRY_BLY, 1884.99f, 1263, 41.52f);
