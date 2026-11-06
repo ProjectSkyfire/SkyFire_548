@@ -43,6 +43,8 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             _JustDied();
+            if (instance)
+                instance->SetData(TYPE_AKU_MAI, DONE);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
