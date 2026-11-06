@@ -132,6 +132,8 @@ public:
             Summons.DespawnAll();
             SummonWhelpCount = 0;
             IsMoving = false;
+            NextMove = 0;
+            events.Reset();
 
             if (instance)
             {
@@ -222,16 +224,16 @@ public:
                         if (PointData)
                         {
                             me->SetSpeed(MOVE_FLIGHT, 1.0f);
-                            me->GetMotionMaster()->MovePoint(PointData->LocId, PointData->fX, PointData->fY, PointData->fZ);
+                            NextMove = 2;
                         }
                         break;
                     case 9:
-                        me->GetMotionMaster()->MoveChase(me->GetVictim());
+                        NextMove = 3;
                         events.ScheduleEvent(EVENT_BELLOWING_ROAR, 1000);
                         break;
                     case 10:
                         me->SetCanFly(true);
-                        me->GetMotionMaster()->MovePoint(11, Phase2Location.GetPositionX(), Phase2Location.GetPositionY(), Phase2Location.GetPositionZ()+25);
+                        NextMove = 1;
                         me->SetSpeed(MOVE_FLIGHT, 1.0f);
                         Talk(SAY_PHASE_2_TRANS);
                         if (instance)
@@ -241,9 +243,7 @@ public:
                         break;
                     case 11:
                         if (PointData)
-                            me->GetMotionMaster()->MovePoint(PointData->LocId, PointData->fX, PointData->fY, PointData->fZ);
-                        me->GetMotionMaster()->Clear(false);
-                        me->GetMotionMaster()->MoveIdle();
+                            NextMove = 2;
                         break;
                     default:
                         IsMoving = false;
@@ -292,7 +292,7 @@ public:
         {
             uint8 MaxCount = sizeof(MoveData)/sizeof(OnyxMove);
 
-            uint8 iTemp = urand(0, MaxCount-1);
+            uint8 iTemp = urand(0, MaxCount-2);
 
             if (iTemp >= MovePoint)
                 ++iTemp;
@@ -304,6 +304,18 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
+            uint8 nextMove = NextMove;
+            NextMove = 0;
+            if (nextMove == 1)
+                me->GetMotionMaster()->MovePoint(11, Phase2Location.GetPositionX(), Phase2Location.GetPositionY(), Phase2Location.GetPositionZ()+25);
+            else if (nextMove == 2 && PointData)
+            {
+                IsMoving = true;
+                me->GetMotionMaster()->MovePoint(PointData->LocId, PointData->fX, PointData->fY, PointData->fZ);
+            }
+            else if (nextMove == 3)
+                me->GetMotionMaster()->MoveChase(me->GetVictim());
 
             //Common to PHASE_START && PHASE_END
             if (Phase == PHASE_START || Phase == PHASE_END)
@@ -378,6 +390,7 @@ public:
                     SetCombatMovement(true);
                     me->SetCanFly(false);
                     IsMoving = false;
+                    NextMove = 0;
                     me->GetMotionMaster()->MovePoint(9, me->GetHomePosition());
                     events.ScheduleEvent(EVENT_BELLOWING_ROAR, 30000);
                     return;
@@ -400,6 +413,8 @@ public:
                                     DoCast(me, PointData->SpellId);
                                 events.ScheduleEvent(EVENT_DEEP_BREATH, 70000);
                             }
+                            else
+                                events.ScheduleEvent(EVENT_DEEP_BREATH, 1000);
                             break;
                         case EVENT_MOVEMENT:         // Phase PHASE_BREATH
                             if (!IsMoving && !(me->HasUnitState(UNIT_STATE_CASTING)))
@@ -414,6 +429,8 @@ public:
                                 IsMoving = true;
                                 events.ScheduleEvent(EVENT_MOVEMENT, 25000);
                             }
+                            else
+                                events.ScheduleEvent(EVENT_MOVEMENT, 500);
                             break;
                         case EVENT_FIREBALL:         // Phase PHASE_BREATH
                             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != POINT_MOTION_TYPE)
@@ -423,6 +440,8 @@ public:
 
                                 events.ScheduleEvent(EVENT_FIREBALL, 8000);
                             }
+                            else
+                                events.ScheduleEvent(EVENT_FIREBALL, 1000);
                             break;
                         case EVENT_LAIR_GUARD:       // Phase PHASE_BREATH
                              me->SummonCreature(NPC_LAIRGUARD, SpawnLocations[2], TempSummonType::TEMPSUMMON_CORPSE_DESPAWN);
@@ -453,6 +472,7 @@ public:
             uint8 MovePoint;
             uint8 SummonWhelpCount;
             bool IsMoving;
+            uint8 NextMove;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
