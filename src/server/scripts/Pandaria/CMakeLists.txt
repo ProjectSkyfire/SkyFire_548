@@ -23,6 +23,13 @@ set(scripts_STAT_SRCS
   Pandaria/StormstoutBrewery/stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/instance_stormstout_brewery.cpp
   Pandaria/StormstoutBrewery/stormstout_brewery.h
+  Pandaria/TerraceOfEndlessSpring/boss_lei_shi.cpp
+  Pandaria/TerraceOfEndlessSpring/boss_protectors_of_the_endless.cpp
+  Pandaria/TerraceOfEndlessSpring/boss_sha_of_fear.cpp
+  Pandaria/TerraceOfEndlessSpring/boss_tsulong.cpp
+  Pandaria/TerraceOfEndlessSpring/instance_terrace_of_endless_spring.cpp
+  Pandaria/TerraceOfEndlessSpring/terrace_of_endless_spring.cpp
+  Pandaria/TerraceOfEndlessSpring/terrace_of_endless_spring.h
   Pandaria/TempleOfJadeSerpent/temple_of_jade_serpent.h
   Pandaria/TempleOfJadeSerpent/instance_temple_of_jade_serpent.cpp
   Pandaria/TempleOfJadeSerpent/boss_wise_mari.cpp

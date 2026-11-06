@@ -658,6 +658,12 @@ void AddSC_boss_gekkan();
 void AddSC_boss_trial_of_the_king();
 void AddSC_boss_xin_the_weaponmaster();
 void AddSC_instance_mogu_shan_palace();
+void AddSC_boss_lei_shi();
+void AddSC_boss_protectors_of_the_endless();
+void AddSC_boss_sha_of_fear();
+void AddSC_boss_tsulong();
+void AddSC_instance_terrace_of_endless_spring();
+void AddSC_terrace_of_endless_spring();
 // Valley of the four Winds
 void AddSC_valley_of_the_four_winds();
 
@@ -1402,6 +1408,12 @@ void AddPandariaScripts()
     AddSC_boss_trial_of_the_king();
     AddSC_boss_xin_the_weaponmaster();
     AddSC_instance_mogu_shan_palace();
+    AddSC_boss_lei_shi();
+    AddSC_boss_protectors_of_the_endless();
+    AddSC_boss_sha_of_fear();
+    AddSC_boss_tsulong();
+    AddSC_instance_terrace_of_endless_spring();
+    AddSC_terrace_of_endless_spring();
     // Valley of the four Winds
     AddSC_valley_of_the_four_winds();
 #endif
