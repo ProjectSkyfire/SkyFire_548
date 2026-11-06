@@ -41,6 +41,10 @@ public:
 
         void Reset() OVERRIDE
         {
+            // A wipe while the adds are out left him friendly, unselectable and invisible for good
+            me->RestoreFaction();
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            me->SetDisplayId(me->GetNativeDisplayId());
             ToxicVolleyTimer = 7000;
             UppercutTimer = 16000;
             AddsTimer = 19000;
