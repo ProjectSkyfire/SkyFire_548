@@ -950,6 +950,371 @@ private:
     EventMap _events;
 };
 
+/*######
+## Quest: An Ancient Enemy (24814)
+## npc_voljin_ancient_enemy, npc_zarjira, npc_fire_of_the_seas
+######*/
+
+enum AncientEnemy
+{
+    NPC_VOLJIN_SPITESCALE_COVE          = 38225,
+    NPC_ZUNI_SPITESCALE_COVE            = 38423,
+    NPC_VANIRA                          = 38437,
+    NPC_ZARJIRA                         = 38306,
+    NPC_FIRE_OF_THE_SEAS                = 38542,
+    NPC_MANIFESTATION_OF_THE_SEA_WITCH  = 38302,
+
+    SPELL_SHOOT                         = 20463,
+    SPELL_SHADOW_SHOCK                  = 73087,
+    SPELL_FROSTBOLT                     = 46987,
+    SPELL_FIRE_OF_THE_SEAS              = 72250,
+    SPELL_FIRE_OF_THE_SEAS_BEAM         = 73294,
+    SPELL_STAMP_OUT_FIRE_OF_THE_SEAS    = 73296,
+
+    SAY_VOLJIN_INTRO                    = 0,
+    SAY_VOLJIN_FIRES                    = 1,
+    SAY_ZARJIRA_INTRO                   = 0,
+    SAY_ZARJIRA_FIRE_STAMPED            = 1,
+    SAY_ZARJIRA_FIRES_OUT               = 2,
+    SAY_VANIRA_ENGAGE                   = 0,
+
+    ACTION_START_ANCIENT_ENEMY          = 1,
+    ACTION_ZARJIRA_INTRO                = 2,
+    ACTION_FIRES_LIT                    = 3,
+    ACTION_FIRES_OUT                    = 4,
+    ACTION_LIGHT_FIRE                   = 5,
+    ACTION_FIRE_STAMPED                 = 6,
+};
+
+// Where Vanira, Zuni and Vol'jin stand to face Zar'jira.
+Position const AncientEnemyPos[3] =
+{
+    { -716.50f, -5597.82f, 25.56f, 1.23f },
+    { -730.68f, -5592.52f, 25.50f, 0.52f },
+    { -722.39f, -5597.65f, 25.50f, 0.89f }
+};
+
+struct npc_voljin_ancient_enemy : public ScriptedAI
+{
+    enum Events
+    {
+        EVENT_INTRO = 1,
+        EVENT_SHOOT,
+        EVENT_SHADOW_SHOCK,
+    };
+
+    npc_voljin_ancient_enemy(Creature* creature) : ScriptedAI(creature), _inProgress(false), _firesLit(false) { }
+
+    void Reset() OVERRIDE
+    {
+        _events.Reset();
+        _inProgress = false;
+        _firesLit = false;
+        me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    }
+
+    void AttackStart(Unit* who) OVERRIDE
+    {
+        AttackStartNoMove(who);
+    }
+
+    void EnterCombat(Unit* /*who*/) OVERRIDE
+    {
+        _events.ScheduleEvent(EVENT_SHOOT, 2000);
+        _events.ScheduleEvent(EVENT_SHADOW_SHOCK, urand(20000, 30000));
+    }
+
+    void DoAction(int32 action) OVERRIDE
+    {
+        switch (action)
+        {
+            case ACTION_START_ANCIENT_ENEMY:
+                if (_inProgress)
+                    return;
+
+                _inProgress = true;
+                me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                if (Creature* vanira = me->FindNearestCreature(NPC_VANIRA, 20.0f))
+                {
+                    vanira->SetWalk(true);
+                    vanira->GetMotionMaster()->MovePoint(0, AncientEnemyPos[0]);
+                }
+                if (Creature* zuni = me->FindNearestCreature(NPC_ZUNI_SPITESCALE_COVE, 20.0f))
+                {
+                    zuni->SetWalk(true);
+                    zuni->GetMotionMaster()->MovePoint(0, AncientEnemyPos[1]);
+                }
+                me->SetWalk(true);
+                me->GetMotionMaster()->MovePoint(0, AncientEnemyPos[2]);
+                _events.ScheduleEvent(EVENT_INTRO, 10000);
+                break;
+            case ACTION_FIRES_LIT:
+                _firesLit = true;
+                Talk(SAY_VOLJIN_FIRES);
+                break;
+            case ACTION_FIRES_OUT:
+                _firesLit = false;
+                break;
+            default:
+                break;
+        }
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_INTRO:
+                    Talk(SAY_VOLJIN_INTRO);
+                    if (Creature* zarjira = me->FindNearestCreature(NPC_ZARJIRA, 40.0f))
+                        zarjira->AI()->DoAction(ACTION_ZARJIRA_INTRO);
+                    break;
+                case EVENT_SHOOT:
+                    if (!_firesLit)
+                        DoCastVictim(SPELL_SHOOT);
+                    _events.ScheduleEvent(EVENT_SHOOT, urand(3000, 4000));
+                    break;
+                case EVENT_SHADOW_SHOCK:
+                    if (!_firesLit)
+                        DoCastVictim(SPELL_SHADOW_SHOCK);
+                    _events.ScheduleEvent(EVENT_SHADOW_SHOCK, urand(20000, 30000));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        UpdateVictim();
+    }
+
+    void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+    {
+        player->CLOSE_GOSSIP_MENU();
+        player->KilledMonsterCredit(NPC_VOLJIN_SPITESCALE_COVE);
+        DoAction(ACTION_START_ANCIENT_ENEMY);
+    }
+
+private:
+    EventMap _events;
+    bool _inProgress;
+    bool _firesLit;
+};
+
+struct npc_zarjira : public ScriptedAI
+{
+    enum Events
+    {
+        EVENT_INTRO = 1,
+        EVENT_ENGAGE,
+        EVENT_FROSTBOLT,
+        EVENT_MANIFESTATION,
+        EVENT_CHECK_PLAYERS,
+    };
+
+    npc_zarjira(Creature* creature) : ScriptedAI(creature), _summons(creature), _firesLeft(0), _firesPhaseDone(false) { }
+
+    void Reset() OVERRIDE
+    {
+        _events.Reset();
+        _firesLeft = 0;
+        _firesPhaseDone = false;
+        me->SetReactState(REACT_DEFENSIVE);
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+    }
+
+    void AttackStart(Unit* who) OVERRIDE
+    {
+        AttackStartNoMove(who);
+    }
+
+    void EnterEvadeMode() OVERRIDE
+    {
+        EndEvent();
+        ScriptedAI::EnterEvadeMode();
+    }
+
+    void JustSummoned(Creature* summon) OVERRIDE
+    {
+        _summons.Summon(summon);
+    }
+
+    void DoAction(int32 action) OVERRIDE
+    {
+        switch (action)
+        {
+            case ACTION_ZARJIRA_INTRO:
+                _events.ScheduleEvent(EVENT_INTRO, 12000);
+                break;
+            case ACTION_FIRE_STAMPED:
+                if (!_firesLeft)
+                    break;
+                if (--_firesLeft)
+                {
+                    Talk(SAY_ZARJIRA_FIRE_STAMPED);
+                    break;
+                }
+                Talk(SAY_ZARJIRA_FIRES_OUT);
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                if (Creature* voljin = me->FindNearestCreature(NPC_VOLJIN_SPITESCALE_COVE, 40.0f))
+                    voljin->AI()->DoAction(ACTION_FIRES_OUT);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+    {
+        if (_firesPhaseDone || !me->HealthBelowPctDamaged(50, damage))
+            return;
+
+        // Below half health she draws power from the braziers and players cannot hurt her until they stamp them out.
+        _firesPhaseDone = true;
+        me->InterruptNonMeleeSpells(false);
+
+        std::list<Creature*> fires;
+        me->GetCreatureListWithEntryInGrid(fires, NPC_FIRE_OF_THE_SEAS, 30.0f);
+        for (Creature* fire : fires)
+            fire->AI()->DoAction(ACTION_LIGHT_FIRE);
+
+        _firesLeft = uint32(fires.size());
+        if (!_firesLeft)
+            return;
+
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+        if (Creature* voljin = me->FindNearestCreature(NPC_VOLJIN_SPITESCALE_COVE, 40.0f))
+            voljin->AI()->DoAction(ACTION_FIRES_LIT);
+    }
+
+    void JustDied(Unit* /*killer*/) OVERRIDE
+    {
+        // Vol'jin and his allies do much of the damage, so every player at the fight gets the credit.
+        std::list<Player*> players;
+        me->GetPlayerListInGrid(players, 50.0f);
+        for (Player* player : players)
+            player->KilledMonsterCredit(NPC_ZARJIRA);
+
+        EndEvent();
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_INTRO:
+                    Talk(SAY_ZARJIRA_INTRO);
+                    _events.ScheduleEvent(EVENT_ENGAGE, 10000);
+                    break;
+                case EVENT_ENGAGE:
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+                    if (Creature* vanira = me->FindNearestCreature(NPC_VANIRA, 40.0f))
+                        vanira->AI()->Talk(SAY_VANIRA_ENGAGE);
+                    if (Creature* zuni = me->FindNearestCreature(NPC_ZUNI_SPITESCALE_COVE, 40.0f))
+                        zuni->AI()->AttackStart(me);
+                    if (Creature* voljin = me->FindNearestCreature(NPC_VOLJIN_SPITESCALE_COVE, 40.0f))
+                    {
+                        voljin->AI()->AttackStart(me);
+                        AttackStart(voljin);
+                    }
+                    _events.ScheduleEvent(EVENT_FROSTBOLT, 3000);
+                    _events.ScheduleEvent(EVENT_MANIFESTATION, 10000);
+                    _events.ScheduleEvent(EVENT_CHECK_PLAYERS, 5000);
+                    break;
+                case EVENT_FROSTBOLT:
+                    if (Creature* voljin = me->FindNearestCreature(NPC_VOLJIN_SPITESCALE_COVE, 40.0f))
+                        DoCast(voljin, SPELL_FROSTBOLT);
+                    _events.ScheduleEvent(EVENT_FROSTBOLT, 3000);
+                    break;
+                case EVENT_MANIFESTATION:
+                {
+                    Position pos;
+                    me->GetRandomNearPosition(pos, 8.0f);
+                    me->SummonCreature(NPC_MANIFESTATION_OF_THE_SEA_WITCH, pos, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
+                    _events.ScheduleEvent(EVENT_MANIFESTATION, urand(15000, 20000));
+                    break;
+                }
+                case EVENT_CHECK_PLAYERS:
+                    if (!me->FindNearestPlayer(60.0f))
+                    {
+                        EnterEvadeMode();
+                        return;
+                    }
+                    _events.ScheduleEvent(EVENT_CHECK_PLAYERS, 5000);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    void EndEvent()
+    {
+        _summons.DespawnAll();
+
+        std::list<Creature*> fires;
+        me->GetCreatureListWithEntryInGrid(fires, NPC_FIRE_OF_THE_SEAS, 30.0f);
+        for (Creature* fire : fires)
+            fire->AI()->EnterEvadeMode();
+
+        uint32 const allies[3] = { NPC_VOLJIN_SPITESCALE_COVE, NPC_VANIRA, NPC_ZUNI_SPITESCALE_COVE };
+        for (uint32 entry : allies)
+            if (Creature* ally = me->FindNearestCreature(entry, 60.0f))
+                ally->AI()->EnterEvadeMode();
+    }
+
+    EventMap _events;
+    SummonList _summons;
+    uint32 _firesLeft;
+    bool _firesPhaseDone;
+};
+
+struct npc_fire_of_the_seas : public ScriptedAI
+{
+    npc_fire_of_the_seas(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() OVERRIDE
+    {
+        me->RemoveAllAuras();
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
+
+    void DoAction(int32 action) OVERRIDE
+    {
+        if (action != ACTION_LIGHT_FIRE)
+            return;
+
+        DoCast(me, SPELL_FIRE_OF_THE_SEAS, true);
+        if (Creature* zarjira = me->FindNearestCreature(NPC_ZARJIRA, 30.0f))
+            DoCast(zarjira, SPELL_FIRE_OF_THE_SEAS_BEAM, true);
+        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
+
+    void SpellHit(Unit* /*caster*/, SpellInfo const* spell) OVERRIDE
+    {
+        if (spell->Id != SPELL_STAMP_OUT_FIRE_OF_THE_SEAS || me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            return;
+
+        me->InterruptNonMeleeSpells(false);
+        Reset();
+        if (Creature* zarjira = me->FindNearestCreature(NPC_ZARJIRA, 30.0f))
+            zarjira->AI()->DoAction(ACTION_FIRE_STAMPED);
+    }
+};
+
 void AddSC_durotar()
 {
     new npc_zuni_bridge();
@@ -963,4 +1328,7 @@ void AddSC_durotar()
     new npc_clattering_scorpid();
     RegisterCreatureAI(npc_injured_razor_hill_grunt);
     RegisterSpellScript(spell_injured_razor_hill_grunt_cancel_feign_death);
+    RegisterCreatureAI(npc_voljin_ancient_enemy);
+    RegisterCreatureAI(npc_zarjira);
+    RegisterCreatureAI(npc_fire_of_the_seas);
 }
