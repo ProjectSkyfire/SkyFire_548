@@ -19634,7 +19634,11 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
     {
         SkillLineAbilityEntry const* pAbility = sSkillLineAbilityStore.LookupEntry(j);
-        if (!pAbility || pAbility->skillId != skill_id || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
+        // Abilities learned with the skill's rank and those learned with the character's level both come with the
+        // skill; the second kind holds class passives on shared skill lines, such as Victorious State on Defense
+        if (!pAbility || pAbility->skillId != skill_id ||
+            (pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL &&
+             pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL))
             continue;
         // Check race if set
         if (pAbility->racemask && !(pAbility->racemask & raceMask))
@@ -19643,10 +19647,14 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
         if (pAbility->classmask && !(pAbility->classmask & classMask))
             continue;
 
-        if (sSpellMgr->GetSpellInfo(pAbility->spellId))
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pAbility->spellId))
         {
+            // Check level, skip class spells if not high enough
+            if (std::max(spellInfo->SpellLevel, spellInfo->BaseLevel) > getLevel())
+                continue;
+
             // need unlearn spell
-            if (skill_value < pAbility->req_skill_value)
+            if (skill_value < pAbility->req_skill_value && pAbility->learnOnGetSkill == ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
                 removeSpell(pAbility->spellId);
             // need learn
             else if (!IsInWorld())
