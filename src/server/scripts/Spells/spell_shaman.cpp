@@ -77,6 +77,7 @@ enum ShamanSpells
     SPELL_SHAMAN_GROUNDING_TOTEM_REFLECT        = 89523,
     SPELL_SHAMAN_HEALING_RAIN                   = 73920,
     SPELL_SHAMAN_HEALING_RAIN_TICK              = 73921,
+    SPELL_SHAMAN_HEALING_RAIN_VISUAL            = 147490,
     SPELL_SHAMAN_HEALING_STREAM_TOTEM_BONUS     = 138304,
     SPELL_SHAMAN_ITEM_T14_ELEMENTAL_4P          = 123124,
     SPELL_SHAMAN_ITEM_T14_RESTORATION_4P        = 123135,
@@ -153,7 +154,8 @@ enum ShamanNpcs
     NPC_SHAMAN_EARTH_ELEMENTAL                  = 15352,
     NPC_SHAMAN_FIRE_ELEMENTAL                   = 15438,
     NPC_SHAMAN_PRIMAL_EARTH_ELEMENTAL           = 61056,
-    NPC_SHAMAN_PRIMAL_FIRE_ELEMENTAL            = 61029
+    NPC_SHAMAN_PRIMAL_FIRE_ELEMENTAL            = 61029,
+    NPC_SHAMAN_HEALING_RAIN_STALKER             = 73400
 };
 
 enum ShamanSpellIcons
@@ -1189,12 +1191,39 @@ public:
             _x = x;
             _y = y;
             _z = z;
+
+            // the rain itself: an invisible stalker at the spot casts the visual for as long as the aura lasts
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            DespawnStalker(caster);
+            if (TempSummon* stalker = caster->SummonCreature(NPC_SHAMAN_HEALING_RAIN_STALKER, x, y, z, 0.0f,
+                TempSummonType::TEMPSUMMON_TIMED_DESPAWN, GetDuration()))
+            {
+                stalker->CastSpell(stalker, SPELL_SHAMAN_HEALING_RAIN_VISUAL, true);
+                _stalkerGuid = stalker->GetGUID();
+            }
         }
 
     private:
         bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
         {
-            return sSpellMgr->GetSpellInfo(SPELL_SHAMAN_HEALING_RAIN_TICK) != NULL;
+            return sSpellMgr->GetSpellInfo(SPELL_SHAMAN_HEALING_RAIN_TICK) != NULL &&
+                sSpellMgr->GetSpellInfo(SPELL_SHAMAN_HEALING_RAIN_VISUAL) != NULL;
+        }
+
+        void DespawnStalker(Unit* caster)
+        {
+            if (Creature* stalker = ObjectAccessor::GetCreature(*caster, _stalkerGuid))
+                stalker->DespawnOrUnsummon();
+            _stalkerGuid = 0;
+        }
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                DespawnStalker(caster);
         }
 
         void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -1230,8 +1259,10 @@ public:
         {
             OnEffectApply += AuraEffectApplyFn(spell_sha_healing_rain_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_sha_healing_rain_AuraScript::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+            OnEffectRemove += AuraEffectRemoveFn(spell_sha_healing_rain_AuraScript::HandleRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
 
+        uint64 _stalkerGuid = 0;
         bool _hasDest = false;
         bool _unleashLife = false;
         float _x = 0.0f;
