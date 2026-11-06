@@ -3473,7 +3473,7 @@ public:
         void Register() OVERRIDE
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_seal_of_insight_heal_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_CASTER_AREA_RAID);
-            OnEffectHitTarget += SpellEffectFn(spell_pal_seal_of_insight_heal_SpellScript::HandleSelfHeal, EFFECT_0, SPELL_EFFECT_HEAL);
+            OnEffectLaunchTarget += SpellEffectFn(spell_pal_seal_of_insight_heal_SpellScript::HandleSelfHeal, EFFECT_0, SPELL_EFFECT_HEAL);
             OnHit += SpellHitFn(spell_pal_seal_of_insight_heal_SpellScript::HandleHit);
         }
     };
