@@ -443,142 +443,203 @@ public:
 
 /*######
 ## Quest: Proving Pit: 24642, 24754, 24762, 24768, 24774, 24780, 24786, 26276, 31161
-## npc_darkspear_jailor
+## npc_darkspear_jailor, npc_captive_spitescale_scout
 ######*/
 
-Position DarkSpearJailorPos = { -1153.53f, -5519.42f, 11.98f, 6.27f };
-Position DarkSpearJailorPos2 = { -1135.68f, -5417.78f, 13.26f, 1.47f };
-Position NagaPos = { -1149.90f, -5527.76f, 8.10f, 4.76f };
-Position NagaPos2 = { -1141.74f, -5414.54f, 10.59f, 3.42f };
-
-class npc_darkspear_jailor : public CreatureScript
+enum ProvingPit
 {
-public:
-    npc_darkspear_jailor() : CreatureScript("npc_darkspear_jailor") { }
+    NPC_DARKSPEAR_JAILOR            = 39062,
+    NPC_CAPTIVE_SPITESCALE_SCOUT    = 38142,
+    GO_DARKSPEAR_CAGE               = 201968,
 
-    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    SAY_JAILOR_PIT                  = 0,
+    SAY_SCOUT_AGGRO                 = 0,
+
+    ACTION_OPEN_CAGE                = 1,
+    DATA_RELEASE_SCOUT              = 1,
+    DATA_SCOUT_CAGED                = 2,
+
+    POINT_JAILOR_PATH               = 1,
+    POINT_JAILOR_CAGE               = 2,
+    POINT_JAILOR_BACK               = 3,
+    POINT_JAILOR_HOME               = 4,
+    POINT_SCOUT_PIT                 = 1,
+
+    EVENT_JAILOR_NEXT_POINT         = 1,
+    EVENT_JAILOR_LEAVE_CAGE         = 2,
+    EVENT_SCOUT_ATTACK              = 1,
+};
+
+// One entry per pit: the jailor walks around the cage to its door, then the scout walks down into the pit.
+Position const JailorCagePath[2][2] =
+{
+    { { -1158.725f, -5520.147f, 12.086f, 0.0f }, { -1153.468f, -5519.447f, 11.987f, 0.0f } },
+    { { -1137.682f, -5428.351f, 13.705f, 0.0f }, { -1136.195f, -5417.040f, 13.269f, 0.0f } }
+};
+
+Position const ScoutPitPos[2] =
+{
+    { -1150.158f, -5526.100f, 8.105f, 0.0f },
+    { -1142.020f, -5415.306f, 10.597f, 0.0f }
+};
+
+struct npc_darkspear_jailor : public ScriptedAI
+{
+    npc_darkspear_jailor(Creature* creature) : ScriptedAI(creature), _pit(0), _point(0) { }
+
+    void Reset() OVERRIDE
     {
-        return new npc_darkspear_jailorAI(creature);
+        _events.Reset();
     }
 
-    struct npc_darkspear_jailorAI : public ScriptedAI
+    void DoAction(int32 action) OVERRIDE
     {
-        enum JailorEvents
-        {
-            EVENT_JAILOR_OPENING = 1,
-            EVENT_JAILOR_OPEN_CAGE = 2,
-            EVENT_JAILOR_RESET = 3,
-        };
-        EventMap events;
-        npc_darkspear_jailorAI(Creature* creature) : ScriptedAI(creature) { }
+        if (action != ACTION_OPEN_CAGE)
+            return;
 
-        void Reset() OVERRIDE
-        {
-            events.Reset();
-        }
+        _pit = me->GetDistance(JailorCagePath[0][1]) < me->GetDistance(JailorCagePath[1][1]) ? 0 : 1;
+        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        me->SetWalk(false);
+        me->GetMotionMaster()->MovePoint(POINT_JAILOR_PATH, JailorCagePath[_pit][0]);
+    }
 
-        void MovementInform(uint32 type, uint32 id) OVERRIDE
-        {
-            if (type != POINT_MOTION_TYPE)
-                return;
+    void SetData(uint32 type, uint32 /*data*/) OVERRIDE
+    {
+        if (type == DATA_SCOUT_CAGED)
+            me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    }
 
-            switch (id)
+    void MovementInform(uint32 type, uint32 id) OVERRIDE
+    {
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        _point = id;
+        _events.ScheduleEvent(EVENT_JAILOR_NEXT_POINT, 1000);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
             {
-                case 0:
-                {
-                    events.ScheduleEvent(EVENT_JAILOR_OPENING, 1000);
+                case EVENT_JAILOR_NEXT_POINT:
+                    switch (_point)
+                    {
+                        case POINT_JAILOR_PATH:
+                            me->GetMotionMaster()->MovePoint(POINT_JAILOR_CAGE, JailorCagePath[_pit][1]);
+                            break;
+                        case POINT_JAILOR_CAGE:
+                            me->HandleEmoteCommand(EMOTE_ONESHOT_USE_STANDING);
+                            if (Creature* scout = me->FindNearestCreature(NPC_CAPTIVE_SPITESCALE_SCOUT, 30.0f))
+                                scout->AI()->SetData(DATA_RELEASE_SCOUT, _pit);
+                            _events.ScheduleEvent(EVENT_JAILOR_LEAVE_CAGE, 2000);
+                            break;
+                        case POINT_JAILOR_BACK:
+                            me->GetMotionMaster()->MovePoint(POINT_JAILOR_HOME, me->GetHomePosition());
+                            break;
+                        case POINT_JAILOR_HOME:
+                            me->SetFacingTo(me->GetHomePosition().GetOrientation());
+                            break;
+                        default:
+                            break;
+                    }
                     break;
-                }
+                case EVENT_JAILOR_LEAVE_CAGE:
+                    me->GetMotionMaster()->MovePoint(POINT_JAILOR_BACK, JailorCagePath[_pit][0]);
+                    break;
                 default:
                     break;
             }
         }
+    }
 
-        void UpdateAI(uint32 diff) OVERRIDE
-        {
-            events.Update(diff);
-            while (uint32 eventId = events.ExecuteEvent())
-            {
-                switch (eventId)
-                {
-                    case EVENT_JAILOR_OPENING:
-                    {
-                        me->HandleEmoteCommand(EMOTE_ONESHOT_USE_STANDING);
-                        events.ScheduleEvent(EVENT_JAILOR_OPEN_CAGE, 1000);
-                        break;
-                    }
-                    case EVENT_JAILOR_OPEN_CAGE:
-                    {
-                        if (GameObject* cage = me->FindNearestGameObject(201968, 5.0f))
-                            cage->UseDoorOrButton(120);
-
-                        if (Creature* monk = me->FindNearestCreature(63310, 25.0f))
-                        {
-                            if (Creature* Naga = me->FindNearestCreature(38142, 5.0f))
-                            {
-                                Naga->setFaction(14);
-                                Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                Naga->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                                Naga->GetMotionMaster()->MovePoint(0, NagaPos2);
-                                Naga->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
-                            }
-                        }
-                        else
-                        {
-                            if (Creature* Naga2 = me->FindNearestCreature(38142, 5.0f))
-                            {
-                                Naga2->setFaction(14);
-                                Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                                Naga2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                                Naga2->GetMotionMaster()->MovePoint(0, NagaPos);
-                                Naga2->MonsterSay("I sshal ssslaughter you, Darksspear runt!", Language::LANG_UNIVERSAL, 0);
-                            }
-                        }
-
-                        events.ScheduleEvent(EVENT_JAILOR_RESET, 120000);
-                        break;
-                    }
-                    case EVENT_JAILOR_RESET:
-                    {
-                        me->GetMotionMaster()->MovePoint(1, me->GetHomePosition());
-                        Reset();
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-        }
-    };
-
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
     {
-        player->PlayerTalkClass->ClearMenus();
-        if (action == GOSSIP_ACTION_INFO_DEF)
+        player->CLOSE_GOSSIP_MENU();
+        player->KilledMonsterCredit(NPC_DARKSPEAR_JAILOR);
+
+        if (me->FindNearestCreature(NPC_CAPTIVE_SPITESCALE_SCOUT, 30.0f))
         {
-            player->CLOSE_GOSSIP_MENU();
-            if (Creature* monk = creature->FindNearestCreature(63310, 25.0f))
-            {
-                creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos2);
-            }
+            Talk(SAY_JAILOR_PIT, player);
+            DoAction(ACTION_OPEN_CAGE);
+        }
+    }
+
+private:
+    EventMap _events;
+    uint8 _pit;
+    uint32 _point;
+};
+
+struct npc_captive_spitescale_scout : public ScriptedAI
+{
+    npc_captive_spitescale_scout(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() OVERRIDE
+    {
+        _events.Reset();
+
+        // When it evades, it is locked up again once it is back in the cage.
+        if (!me->IsInEvadeMode())
+            LockUp();
+    }
+
+    void JustReachedHome() OVERRIDE
+    {
+        LockUp();
+    }
+
+    void SetData(uint32 type, uint32 pit) OVERRIDE
+    {
+        if (type != DATA_RELEASE_SCOUT)
+            return;
+
+        if (GameObject* cage = me->FindNearestGameObject(GO_DARKSPEAR_CAGE, 10.0f))
+            cage->UseDoorOrButton();
+        me->GetMotionMaster()->MovePoint(POINT_SCOUT_PIT, ScoutPitPos[pit]);
+    }
+
+    void MovementInform(uint32 type, uint32 id) OVERRIDE
+    {
+        if (type == POINT_MOTION_TYPE && id == POINT_SCOUT_PIT)
+            _events.ScheduleEvent(EVENT_SCOUT_ATTACK, 1000);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        if (_events.ExecuteEvent() == EVENT_SCOUT_ATTACK)
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+            Talk(SAY_SCOUT_AGGRO);
+            if (Player* player = me->FindNearestPlayer(30.0f))
+                AttackStart(player);
             else
-            {
-                creature->GetMotionMaster()->MovePoint(0, DarkSpearJailorPos);
-            }
-            const char* text = player->getGender() == GENDER_MALE ? "Get in the pit and show us your stuff, boy." : "Get in the pit and show us your stuff, girl.";
-            creature->MonsterSay(text, Language::LANG_UNIVERSAL, creature);
-            player->KilledMonsterCredit(39062);            
+                EnterEvadeMode();
         }
-        return true;
+
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
     }
 
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+private:
+    void LockUp()
     {
-        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "I'm ready to face my challenge.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
-        return true;
+        if (GameObject* cage = me->FindNearestGameObject(GO_DARKSPEAR_CAGE, 10.0f))
+            cage->ResetDoorOrButton();
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
+        if (Creature* jailor = me->FindNearestCreature(NPC_DARKSPEAR_JAILOR, 30.0f))
+            jailor->AI()->SetData(DATA_SCOUT_CAGED, 0);
     }
+
+    EventMap _events;
 };
 
 
@@ -895,7 +956,8 @@ void AddSC_durotar()
     new npc_voljin_darkspear_hold();
     new npc_zuni();
     new npc_jinthala();
-    new npc_darkspear_jailor();
+    RegisterCreatureAI(npc_darkspear_jailor);
+    RegisterCreatureAI(npc_captive_spitescale_scout);
     new npc_lazy_peon();
     new spell_voodoo();
     new npc_clattering_scorpid();
