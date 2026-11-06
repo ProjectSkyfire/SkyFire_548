@@ -45,6 +45,7 @@ public:
     // Calculate the path from owner to given destination
     // return: true if new path was calculated, false otherwise (no change needed)
     bool CalculatePath(float destX, float destY, float destZ, bool forceDest = false);
+    bool CalculatePath(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, bool forceDest = false);
 
     // option setters - use optional
     void SetUseStraightPath(bool useStraightPath) { _useStraightPath = useStraightPath; }
