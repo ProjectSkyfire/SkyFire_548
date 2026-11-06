@@ -249,6 +249,20 @@ public:
             }
         }
 
+        void EnterEvadeMode() OVERRIDE
+        {
+            // Rooted at the idol, a normal evade would walk him home, which he cannot, and an evading creature gets no
+            // AI updates, so the ritual would never move on after the first wave
+            if (channeling)
+            {
+                me->DeleteThreatList();
+                me->CombatStop(true);
+                return;
+            }
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             // The quest can be abandoned and taken again once he is back
