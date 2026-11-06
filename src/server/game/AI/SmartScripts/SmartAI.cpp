@@ -422,7 +422,7 @@ void SmartAI::EnterEvadeMode()
     me->AddUnitState(UNIT_STATE_EVADE);
     me->DeleteThreatList();
     me->CombatStop(true);
-    me->LoadCreaturesAddon(true);
+    me->LoadCreaturesAddon(true, true);
     me->SetLootRecipient(NULL);
     me->ResetPlayerDamageReq();
 

@@ -450,7 +450,7 @@ public:
     void DisappearAndDie();
 
     bool Create(uint32 guidlow, Map* map, uint32 Entry, uint32 vehId, uint32 team, float x, float y, float z, float ang, const CreatureData* data = NULL);
-    bool LoadCreaturesAddon(bool reload = false);
+    bool LoadCreaturesAddon(bool reload = false, bool evading = false);
     void SelectLevel(const CreatureTemplate* cinfo);
     void LoadEquipment(int8 id = 1, bool force = false);
 
