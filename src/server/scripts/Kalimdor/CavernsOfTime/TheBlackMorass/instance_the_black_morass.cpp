@@ -198,6 +198,8 @@ public:
                     if (data == IN_PROGRESS)
                     {
                         SF_LOG_DEBUG("scripts", "Instance The Black Morass: Starting event.");
+                        Events.Reset();
+                        Clear();
                         InitWorldState();
                         m_auiEncounter[1] = IN_PROGRESS;
                         ScheduleEventNextPortal(1);
