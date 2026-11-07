@@ -63,6 +63,29 @@ class boss_rajaxx : public CreatureScript
                 events.ScheduleEvent(EVENT_THUNDERCRASH, 12000);
             }
 
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+            {
+                if (!enraged && me->HealthBelowPctDamaged(30, damage))
+                {
+                    DoCast(me, SPELL_FRENZY);
+                    enraged = true;
+                }
+            }
+
+            void DoAction(int32 action) OVERRIDE
+            {
+                if (!me->IsAlive())
+                    return;
+
+                if (action >= ACTION_WAVE_STARTS_3 && action <= ACTION_WAVE_STARTS_7)
+                    Talk(action - ACTION_WAVE_STARTS_3);
+                else if (action == ACTION_RAJAXX_ENTER)
+                {
+                    Talk(SAY_INTRO);
+                    DoZoneInCombat(me, 200.0f);
+                }
+            }
+
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 //SAY_DEATH

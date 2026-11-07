@@ -49,6 +49,7 @@ enum Points
 };
 
 const Position AyamissAirPos =  { -9689.292f, 1547.912f, 48.02729f, 0.0f };
+const Position AyamissGroundPos = { -9689.981f, 1548.2961f, 33.27733f, 0.0f };
 const Position AltarPos =       { -9717.18f, 1517.72f, 27.4677f, 0.0f };
 /// @todo These below are probably incorrect, taken from SD2
 const Position SwarmerPos =     { -9647.352f, 1578.062f, 55.32f, 0.0f };
@@ -76,11 +77,17 @@ public:
             _Reset();
             _phase = PHASE_AIR;
             _enraged = false;
+            _swarmers.clear();
+            me->ClearUnitState(UNIT_STATE_ROOT);
+            me->SetCanFly(false);
+            me->SetDisableGravity(false);
+            me->SetReactState(REACT_AGGRESSIVE);
             SetCombatMovement(false);
         }
 
         void JustSummoned(Creature* who) OVERRIDE
         {
+            summons.Summon(who);
             switch (who->GetEntry())
             {
                 case NPC_SWARMER:
@@ -116,7 +123,14 @@ public:
                     }
                     case POINT_GROUND:
                     {
-                        me->ClearUnitState(UNIT_STATE_ROOT);
+                        me->SetDisableGravity(false);
+                        me->SetCanFly(false);
+                        SetCombatMovement(true);
+                        me->SetReactState(REACT_AGGRESSIVE);
+                        DoResetThreat();
+                        events.ScheduleEvent(EVENT_LASH, urand(5000, 8000));
+                        events.ScheduleEvent(EVENT_TRASH, urand(3000, 6000));
+                        events.CancelEvent(EVENT_POISON_STINGER);
                         break;
                     }
                 }
@@ -126,6 +140,10 @@ public:
         void EnterEvadeMode() OVERRIDE
         {
             me->ClearUnitState(UNIT_STATE_ROOT);
+            me->SetCanFly(false);
+            me->SetDisableGravity(false);
+            me->SetReactState(REACT_AGGRESSIVE);
+            _swarmers.clear();
             BossAI::EnterEvadeMode();
         }
 
@@ -154,15 +172,9 @@ public:
             if (_phase == PHASE_AIR && me->GetHealthPct() < 70.0f)
             {
                 _phase = PHASE_GROUND;
-                SetCombatMovement(true);
-                me->SetCanFly(false);
-                Position VictimPos;
-                me->GetVictim()->GetPosition(&VictimPos);
-                me->GetMotionMaster()->MovePoint(POINT_GROUND, VictimPos);
-                DoResetThreat();
-                events.ScheduleEvent(EVENT_LASH, urand(5000, 8000));
-                events.ScheduleEvent(EVENT_TRASH, urand(3000, 6000));
-                events.CancelEvent(EVENT_POISON_STINGER);
+                me->SetReactState(REACT_PASSIVE);
+                me->ClearUnitState(UNIT_STATE_ROOT);
+                me->GetMotionMaster()->MovePoint(POINT_GROUND, AyamissGroundPos);
             }
             else
             {
@@ -197,9 +209,9 @@ public:
                         if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true))
                         {
                             DoCast(target, SPELL_PARALYZE);
-                            instance->SetData64(DATA_PARALYZED, target->GetGUID());
                             uint8 Index = urand(0, 1);
-                            me->SummonCreature(NPC_LARVA, LarvaPos[Index], TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000);
+                            if (Creature* larva = me->SummonCreature(NPC_LARVA, LarvaPos[Index], TempSummonType::TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 30000))
+                                larva->AI()->SetGUID(target->GetGUID());
                         }
                         events.ScheduleEvent(EVENT_PARALYZE, 15000);
                         break;
@@ -260,13 +272,19 @@ public:
         npc_hive_zara_larvaAI(Creature* creature) : ScriptedAI(creature)
         {
             _instance = me->GetInstanceScript();
+            _targetGUID = 0;
+        }
+
+        void SetGUID(uint64 guid, int32 /*id*/ = 0) OVERRIDE
+        {
+            _targetGUID = guid;
         }
 
         void MovementInform(uint32 type, uint32 id) OVERRIDE
         {
             if (type == POINT_MOTION_TYPE)
                 if (id == POINT_PARALYZE)
-                    if (Player* target = ObjectAccessor::GetPlayer(*me, _instance->GetData64(DATA_PARALYZED)))
+                    if (Player* target = ObjectAccessor::GetPlayer(*me, _targetGUID))
                         DoCast(target, SPELL_FEED); // Omnomnom
         }
 
@@ -296,6 +314,7 @@ public:
         }
     private:
         InstanceScript* _instance;
+        uint64 _targetGUID;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE

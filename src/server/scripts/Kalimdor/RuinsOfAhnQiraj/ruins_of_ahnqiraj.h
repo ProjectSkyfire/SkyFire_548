@@ -16,7 +16,18 @@ enum DataTypes
     DATA_OSSIRIAN           = 5,
     NUM_ENCOUNTER           = 6,
 
-    DATA_PARALYZED          = 7
+    DATA_PARALYZED          = 7,
+    DATA_RAJAXX_EVENT       = 8
+};
+
+enum RajaxxActions
+{
+    ACTION_WAVE_STARTS_3        = 1,
+    ACTION_WAVE_STARTS_4        = 2,
+    ACTION_WAVE_STARTS_5        = 3,
+    ACTION_WAVE_STARTS_6        = 4,
+    ACTION_WAVE_STARTS_7        = 5,
+    ACTION_RAJAXX_ENTER         = 6
 };
 
 enum Creatures

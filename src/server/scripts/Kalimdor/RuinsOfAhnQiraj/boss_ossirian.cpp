@@ -92,6 +92,16 @@ class boss_ossirian : public CreatureScript
                 CrystalGUID = 0;
             }
 
+            void JustSummoned(Creature* summon) OVERRIDE
+            {
+                summons.Summon(summon);
+            }
+
+            uint64 GetGUID(int32 /*id*/ = 0) const OVERRIDE
+            {
+                return CrystalGUID;
+            }
+
             void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
             {
                 for (uint8 i = 0; i < NUM_WEAKNESS; ++i)
@@ -99,8 +109,16 @@ class boss_ossirian : public CreatureScript
                     if (spell->Id == SpellWeakness[i])
                     {
                         me->RemoveAurasDueToSpell(SPELL_SUPREME);
-                        ((TempSummon*)caster)->UnSummon();
-                        SpawnNextCrystal();
+                        if (caster && caster->GetGUID() == TriggerGUID)
+                        {
+                            if (GameObject* crystal = me->GetMap()->GetGameObject(CrystalGUID))
+                                crystal->Delete();
+                            CrystalGUID = 0;
+                            caster->ToCreature()->DespawnOrUnsummon();
+                            TriggerGUID = 0;
+                            SpawnNextCrystal();
+                        }
+                        break;
                     }
                 }
             }
@@ -142,7 +160,10 @@ class boss_ossirian : public CreatureScript
                         Position Point;
                         me->GetRandomPoint(RoomCenter, RoomRadius, Point);
                         if (Creature* Tornado = me->GetMap()->SummonCreature(NPC_SAND_VORTEX, Point))
+                        {
+                            summons.Summon(Tornado);
                             Tornado->CastSpell(Tornado, SPELL_SAND_STORM, true);
+                        }
                     }
 
                     SpawnNextCrystal();
@@ -170,7 +191,16 @@ class boss_ossirian : public CreatureScript
             void Cleanup()
             {
                 if (GameObject* Crystal = me->GetMap()->GetGameObject(CrystalGUID))
-                    Crystal->Use(me);
+                    Crystal->Delete();
+                CrystalGUID = 0;
+                TriggerGUID = 0;
+
+                WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
+                data << uint32(WEATHER_STATE_FINE);
+                data << float(0.0f);
+                data.WriteBit(false);
+                data.FlushBits();
+                me->GetMap()->SendToPlayers(&data);
             }
 
             void SpawnNextCrystal()
@@ -178,7 +208,7 @@ class boss_ossirian : public CreatureScript
                 if (CrystalIterator == NUM_CRYSTALS)
                     CrystalIterator = 0;
 
-                if (Creature* Trigger = me->GetMap()->SummonCreature(NPC_OSSIRIAN_TRIGGER, CrystalCoordinates[CrystalIterator]))
+                if (Creature* Trigger = me->SummonCreature(NPC_OSSIRIAN_TRIGGER, CrystalCoordinates[CrystalIterator]))
                 {
                     TriggerGUID = Trigger->GetGUID();
                     if (GameObject* Crystal = Trigger->SummonGameObject(GO_OSSIRIAN_CRYSTAL,
@@ -189,6 +219,11 @@ class boss_ossirian : public CreatureScript
                     {
                         CrystalGUID = Crystal->GetGUID();
                         ++CrystalIterator;
+                    }
+                    else
+                    {
+                        Trigger->DespawnOrUnsummon();
+                        TriggerGUID = 0;
                     }
                 }
             }
@@ -273,14 +308,14 @@ class go_ossirian_crystal : public GameObjectScript
     public:
         go_ossirian_crystal() : GameObjectScript("go_ossirian_crystal") { }
 
-        bool OnGossipHello(Player* player, GameObject* /*go*/) OVERRIDE
+        bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
         {
             InstanceScript* Instance = player->GetInstanceScript();
             if (!Instance)
                 return false;
 
             Creature* Ossirian = player->FindNearestCreature(NPC_OSSIRIAN, 30.0f);
-            if (!Ossirian || Instance->GetBossState(DATA_OSSIRIAN) != IN_PROGRESS)
+            if (!Ossirian || Instance->GetBossState(DATA_OSSIRIAN) != IN_PROGRESS || Ossirian->AI()->GetGUID() != go->GetGUID())
                 return false;
 
             Ossirian->AI()->DoAction(ACTION_TRIGGER_WEAKNESS);
