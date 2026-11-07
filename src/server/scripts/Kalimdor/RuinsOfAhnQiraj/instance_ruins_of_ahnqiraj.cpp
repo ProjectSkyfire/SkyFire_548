@@ -29,6 +29,18 @@ uint32 const RajaxxWaveSpawns[RAJAXX_WAVE_COUNT][RAJAXX_WAVE_SIZE] =
     { 9200218, 9200217, 9200216, 9200235, 9200234, 9200233, 9200112 }
 };
 
+// Where each wave stands; their grids are loaded with the first player so every member is known before the event
+float const RajaxxWavePos[RAJAXX_WAVE_COUNT][2] =
+{
+    { -9007.4f, 1556.87f },
+    { -9041.36f, 1512.58f },
+    { -9033.17f, 1604.66f },
+    { -9087.01f, 1530.26f },
+    { -9085.03f, 1622.4f },
+    { -9127.98f, 1558.54f },
+    { -9108.29f, 1584.17f }
+};
+
 class instance_ruins_of_ahnqiraj : public InstanceMapScript
 {
     public:
@@ -51,6 +63,8 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                 _checkTimer     = 1000;
                 _currentWave    = 0;
                 _idleChecks     = 0;
+                _andorovGUID    = 0;
+                _wavesLoaded    = false;
             }
 
             void OnCreatureCreate(Creature* creature) OVERRIDE
@@ -75,6 +89,9 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                     case NPC_OSSIRIAN:
                         _ossirianGUID = creature->GetGUID();
                         break;
+                    case NPC_ANDOROV:
+                        _andorovGUID = creature->GetGUID();
+                        break;
                 }
 
                 for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
@@ -85,6 +102,16 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                             if (creature->IsAlive())
                                 _waveAlive[wave].insert(creature->GetGUID());
                         }
+            }
+
+            void OnPlayerEnter(Player* /*player*/) OVERRIDE
+            {
+                if (_wavesLoaded)
+                    return;
+
+                _wavesLoaded = true;
+                for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
+                    instance->LoadGrid(RajaxxWavePos[wave][0], RajaxxWavePos[wave][1]);
             }
 
             void OnUnitDeath(Unit* unit) OVERRIDE
@@ -177,6 +204,11 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                     if (Creature* rajaxx = instance->GetCreature(_rajaxxGUID))
                         if (rajaxx->IsAlive() && rajaxx->IsInCombat())
                             rajaxx->AI()->EnterEvadeMode();
+
+                    // Andorov must be there for the next attempt
+                    if (Creature* andorov = instance->GetCreature(_andorovGUID))
+                        if (!andorov->IsAlive())
+                            andorov->Respawn();
                 }
             }
 
@@ -211,6 +243,9 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                 else if (_rajaxxEvent == IN_PROGRESS)
                 {
                     // a wipe needs ten seconds without a living player in combat, so the pause between waves is not one
+                    // a wave sent while nobody was in reach is sent again
+                    SendWave(_currentWave);
+
                     if (AnyPlayerFighting())
                         _idleChecks = 0;
                     else if (++_idleChecks >= 10)
@@ -313,6 +348,8 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
             uint32 _checkTimer;
             uint8 _currentWave;
             uint8 _idleChecks;
+            uint64 _andorovGUID;
+            bool _wavesLoaded;
             std::set<uint64> _waveMembers[RAJAXX_WAVE_COUNT];
             std::set<uint64> _waveAlive[RAJAXX_WAVE_COUNT];
         };

@@ -34,6 +34,7 @@ enum Creatures
 {
     NPC_KURINAXX                = 15348,
     NPC_RAJAXX                  = 15341,
+    NPC_ANDOROV                 = 15471,
     NPC_MOAM                    = 15340,
     NPC_BURU                    = 15370,
     NPC_AYAMISS                 = 15369,

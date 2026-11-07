@@ -52,7 +52,12 @@ class npc_andorov : public CreatureScript
             {
                 // at the battle he holds this ground between fights instead of walking back to the entrance
                 if (type == POINT_MOTION_TYPE && id == 0)
+                {
                     me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                    if (InstanceScript* instance = me->GetInstanceScript())
+                        if (instance->GetData(DATA_RAJAXX_EVENT) == NOT_STARTED)
+                            instance->SetData(DATA_RAJAXX_EVENT, IN_PROGRESS);
+                }
             }
 
             void JustReachedHome() OVERRIDE
