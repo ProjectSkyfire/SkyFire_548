@@ -49,6 +49,8 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                 _paralyzedGUID  = 0;
                 _rajaxxEvent    = NOT_STARTED;
                 _checkTimer     = 1000;
+                _currentWave    = 0;
+                _idleChecks     = 0;
             }
 
             void OnCreatureCreate(Creature* creature) OVERRIDE
@@ -87,21 +89,39 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
 
             void OnUnitDeath(Unit* unit) OVERRIDE
             {
-                if (unit->GetTypeId() != TypeID::TYPEID_UNIT || _rajaxxEvent != IN_PROGRESS)
+                if (unit->GetTypeId() != TypeID::TYPEID_UNIT)
                     return;
 
                 for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
-                    if (_waveAlive[wave].erase(unit->GetGUID()) && _waveAlive[wave].empty())
+                    if (_waveAlive[wave].erase(unit->GetGUID()))
                     {
-                        if (wave + 1 < RAJAXX_WAVE_COUNT)
-                            SendWave(wave + 1);
-
-                        // Rajaxx announces waves 3 to 7 as the previous one falls, then joins after the last
-                        if (wave >= 1)
-                            if (Creature* rajaxx = instance->GetCreature(_rajaxxGUID))
-                                rajaxx->AI()->DoAction(ACTION_WAVE_STARTS_3 + wave - 1);
+                        // only the wave being fought moves the event on, so a wave pulled early cannot skip ahead
+                        if (_rajaxxEvent == IN_PROGRESS && wave == _currentWave && _waveAlive[wave].empty())
+                            AdvanceFrom(wave);
                         return;
                     }
+            }
+
+            void AdvanceFrom(uint8 wave)
+            {
+                while (true)
+                {
+                    // Rajaxx announces waves 3 to 7 as the previous one falls, then joins after the last
+                    if (wave >= 1)
+                        if (Creature* rajaxx = instance->GetCreature(_rajaxxGUID))
+                            rajaxx->AI()->DoAction(ACTION_WAVE_STARTS_3 + wave - 1);
+
+                    if (wave + 1 >= RAJAXX_WAVE_COUNT)
+                        return;
+
+                    _currentWave = wave + 1;
+                    if (!_waveAlive[_currentWave].empty())
+                    {
+                        SendWave(_currentWave);
+                        return;
+                    }
+                    ++wave;
+                }
             }
 
             void SendWave(uint8 wave)
@@ -128,11 +148,19 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                     return;
 
                 _rajaxxEvent = data;
+                _idleChecks = 0;
                 if (data == IN_PROGRESS)
-                    SendWave(0);
+                {
+                    _currentWave = 0;
+                    if (_waveAlive[0].empty())
+                        AdvanceFrom(0);
+                    else
+                        SendWave(0);
+                }
                 else if (data == NOT_STARTED)
                 {
-                    // a wipe: every wave comes back for the next attempt
+                    // a wipe: survivors go home and every wave comes back for the next attempt
+                    _currentWave = 0;
                     for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
                     {
                         _waveAlive[wave].clear();
@@ -141,9 +169,14 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                             {
                                 if (!creature->IsAlive())
                                     creature->Respawn();
+                                else if (creature->IsInCombat())
+                                    creature->AI()->EnterEvadeMode();
                                 _waveAlive[wave].insert(*itr);
                             }
                     }
+                    if (Creature* rajaxx = instance->GetCreature(_rajaxxGUID))
+                        if (rajaxx->IsAlive() && rajaxx->IsInCombat())
+                            rajaxx->AI()->EnterEvadeMode();
                 }
             }
 
@@ -166,17 +199,23 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
 
                 if (_rajaxxEvent == NOT_STARTED)
                 {
-                    // until Lieutenant General Andorov leads the attack, engaging the first wave starts the event
-                    for (std::set<uint64>::const_iterator itr = _waveAlive[0].begin(); itr != _waveAlive[0].end(); ++itr)
+                    // engaging the first wave starts the event; a wave 1 member already dead counts too
+                    bool engaged = !_waveMembers[0].empty() && _waveAlive[0].size() < _waveMembers[0].size();
+                    for (std::set<uint64>::const_iterator itr = _waveAlive[0].begin(); !engaged && itr != _waveAlive[0].end(); ++itr)
                         if (Creature* creature = instance->GetCreature(*itr))
                             if (creature->IsInCombat())
-                            {
-                                SetData(DATA_RAJAXX_EVENT, IN_PROGRESS);
-                                break;
-                            }
+                                engaged = true;
+                    if (engaged)
+                        SetData(DATA_RAJAXX_EVENT, IN_PROGRESS);
                 }
-                else if (_rajaxxEvent == IN_PROGRESS && !AnyPlayerFighting())
-                    SetData(DATA_RAJAXX_EVENT, NOT_STARTED);
+                else if (_rajaxxEvent == IN_PROGRESS)
+                {
+                    // a wipe needs ten seconds without a living player in combat, so the pause between waves is not one
+                    if (AnyPlayerFighting())
+                        _idleChecks = 0;
+                    else if (++_idleChecks >= 10)
+                        SetData(DATA_RAJAXX_EVENT, NOT_STARTED);
+                }
             }
 
             bool SetBossState(uint32 bossId, EncounterState state) OVERRIDE
@@ -272,6 +311,8 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
             uint64 _paralyzedGUID;
             uint32 _rajaxxEvent;
             uint32 _checkTimer;
+            uint8 _currentWave;
+            uint8 _idleChecks;
             std::set<uint64> _waveMembers[RAJAXX_WAVE_COUNT];
             std::set<uint64> _waveAlive[RAJAXX_WAVE_COUNT];
         };

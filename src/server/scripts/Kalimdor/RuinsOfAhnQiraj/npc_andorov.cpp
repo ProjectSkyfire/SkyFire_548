@@ -30,7 +30,12 @@ class npc_andorov : public CreatureScript
             if (sender == GOSSIP_SENDER_MAIN && action == GOSSIP_ACTION_INFO_DEF)
                 if (InstanceScript* instance = creature->GetInstanceScript())
                     if (instance->GetData(DATA_RAJAXX_EVENT) == NOT_STARTED)
-                        instance->SetData(DATA_RAJAXX_EVENT, IN_PROGRESS);
+                    {
+                        // he leads his elites to the first wave; the battle starts when it is engaged
+                        creature->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        creature->SetWalk(false);
+                        creature->GetMotionMaster()->MovePoint(0, -8978.11f, 1550.36f, 21.6f);
+                    }
 
             player->CLOSE_GOSSIP_MENU();
             return true;
@@ -38,21 +43,46 @@ class npc_andorov : public CreatureScript
 
         struct npc_andorovAI : public ScriptedAI
         {
-            npc_andorovAI(Creature* creature) : ScriptedAI(creature) { }
+            npc_andorovAI(Creature* creature) : ScriptedAI(creature), _lastState(NOT_STARTED)
+            {
+                _spawnPos = me->GetHomePosition();
+            }
+
+            void MovementInform(uint32 type, uint32 id) OVERRIDE
+            {
+                // at the battle he holds this ground between fights instead of walking back to the entrance
+                if (type == POINT_MOTION_TYPE && id == 0)
+                    me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            }
+
+            void JustReachedHome() OVERRIDE
+            {
+                me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            }
 
             void UpdateAI(uint32 /*diff*/) OVERRIDE
             {
                 if (InstanceScript* instance = me->GetInstanceScript())
-                    if (instance->GetData(DATA_RAJAXX_EVENT) == NOT_STARTED && !me->IsInEvadeMode() &&
-                        (me->IsInCombat() || me->GetDistance(me->GetHomePosition()) > 1.0f))
+                {
+                    uint32 state = instance->GetData(DATA_RAJAXX_EVENT);
+                    // the attack failed: he goes back to the entrance and can be asked again
+                    if (_lastState == IN_PROGRESS && state == NOT_STARTED)
                     {
+                        _lastState = state;
+                        me->SetHomePosition(_spawnPos);
                         EnterEvadeMode();
                         return;
                     }
+                    _lastState = state;
+                }
 
                 if (UpdateVictim())
                     DoMeleeAttackIfReady();
             }
+
+        private:
+            uint32 _lastState;
+            Position _spawnPos;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
