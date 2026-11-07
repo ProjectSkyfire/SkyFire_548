@@ -332,6 +332,7 @@ void AddSC_boss_temple_guardian_anhuur();
 void AddSC_boss_earthrager_ptah();
 void AddSC_boss_anraphet();
 void AddSC_instance_lost_city_of_the_tolvir();
+void AddSC_boss_general_husam();
 void AddSC_instance_firelands();               //Firelands
 void AddSC_boss_alysrazor();
 void AddSC_mount_hyjal();
@@ -1092,6 +1093,7 @@ void AddKalimdorScripts()
     AddSC_boss_earthrager_ptah();
     AddSC_boss_anraphet();
     AddSC_instance_lost_city_of_the_tolvir();
+    AddSC_boss_general_husam();
 
     AddSC_instance_firelands();               //Firelands
     AddSC_boss_alysrazor();
