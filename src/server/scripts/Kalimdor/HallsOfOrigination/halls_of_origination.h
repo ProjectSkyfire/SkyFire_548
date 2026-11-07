@@ -61,6 +61,8 @@ enum Creatures
 
     NPC_BRANN_BRONZEBEARD_0         = 39908,
     NPC_OMEGA_STANCE                = 41194,
+    BOSS_SETESH                     = 39732,
+    BOSS_RAJH                       = 39378,
 };
 
 enum GameObjects
@@ -91,6 +93,7 @@ enum Misc
     AREA_TOMB_OF_THE_EARTHRAGER     = 5610,
     ACHIEV_VAULT_OF_LIGHTS_EVENT    = 24212, // Faster Than The Speed Of Light
     SPELL_VAULT_OF_LIGHTS_CREDIT    = 94067, // Not in DBC
+    WORLDSTATE_SUN_OF_A             = 8783,
 };
 
 enum GlobalActions
