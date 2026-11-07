@@ -306,6 +306,7 @@ void AddSC_razorfen_kraul();                 //Razorfen Kraul
 void AddSC_instance_razorfen_kraul();
 void AddSC_boss_kurinnaxx();                 //Ruins of ahn'qiraj
 void AddSC_boss_rajaxx();
+void AddSC_npc_andorov();
 void AddSC_boss_moam();
 void AddSC_boss_buru();
 void AddSC_boss_ayamiss();
@@ -1048,6 +1049,7 @@ void AddKalimdorScripts()
     AddSC_instance_razorfen_kraul();
     AddSC_boss_kurinnaxx();                 //Ruins of ahn'qiraj
     AddSC_boss_rajaxx();
+    AddSC_npc_andorov();
     AddSC_boss_moam();
     AddSC_boss_buru();
     AddSC_boss_ayamiss();
