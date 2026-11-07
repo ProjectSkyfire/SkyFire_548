@@ -37,6 +37,9 @@ class instance_lost_city_of_the_tolvir : public InstanceMapScript
                 _lockmawGUID = 0;
                 _barimGUID = 0;
                 _siamatGUID = 0;
+                _aughGUID = 0;
+                _harbingerGUID = 0;
+                _blazeGUID = 0;
             }
 
             void OnCreatureCreate(Creature* creature) OVERRIDE
@@ -55,7 +58,19 @@ class instance_lost_city_of_the_tolvir : public InstanceMapScript
                     case BOSS_SIAMAT:
                         _siamatGUID = creature->GetGUID();
                         break;
+                    case BOSS_AUGH:
+                        _aughGUID = creature->GetGUID();
+                        break;
                 }
+            }
+
+            void SetData64(uint32 type, uint64 data) OVERRIDE
+            {
+                // Barim's Harbinger of Darkness and Blaze of the Heavens register themselves while they exist
+                if (type == DATA_HARBINGER)
+                    _harbingerGUID = data;
+                else if (type == DATA_BLAZE)
+                    _blazeGUID = data;
             }
 
             uint64 GetData64(uint32 type) const OVERRIDE
@@ -70,6 +85,12 @@ class instance_lost_city_of_the_tolvir : public InstanceMapScript
                         return _barimGUID;
                     case DATA_SIAMAT:
                         return _siamatGUID;
+                    case DATA_AUGH:
+                        return _aughGUID;
+                    case DATA_HARBINGER:
+                        return _harbingerGUID;
+                    case DATA_BLAZE:
+                        return _blazeGUID;
                     default:
                         return 0;
                 }
@@ -90,13 +111,17 @@ class instance_lost_city_of_the_tolvir : public InstanceMapScript
                 std::istringstream loadStream(data);
                 char head1 = 0;
                 char head2 = 0;
-                uint32 states[MAX_ENCOUNTER];
+                uint32 states[MAX_ENCOUNTER] = {};
                 if (!(loadStream >> head1 >> head2) || head1 != 'L' || head2 != 'S')
                     return;
 
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                for (uint8 i = 0; i < DATA_AUGH; ++i)
                     if (!(loadStream >> states[i]))
                         return;
+
+                loadStream >> std::ws;
+                if (loadStream.peek() != std::char_traits<char>::eof() && !(loadStream >> states[DATA_AUGH]))
+                    return;
 
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 {
@@ -111,6 +136,9 @@ class instance_lost_city_of_the_tolvir : public InstanceMapScript
             uint64 _lockmawGUID;
             uint64 _barimGUID;
             uint64 _siamatGUID;
+            uint64 _aughGUID;
+            uint64 _harbingerGUID;
+            uint64 _blazeGUID;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE

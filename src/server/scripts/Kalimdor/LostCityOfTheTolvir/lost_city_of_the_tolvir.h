@@ -24,7 +24,11 @@ enum LostCityOfTheTolvirData
     DATA_LOCKMAW = 1,
     DATA_HIGH_PROPHET_BARIM = 2,
     DATA_SIAMAT = 3,
-    MAX_ENCOUNTER = 4
+    DATA_AUGH = 4,
+    MAX_ENCOUNTER = 5,
+
+    DATA_HARBINGER = 5,
+    DATA_BLAZE = 6
 };
 
 enum LostCityOfTheTolvirCreatures
@@ -32,7 +36,8 @@ enum LostCityOfTheTolvirCreatures
     BOSS_GENERAL_HUSAM = 44577,
     BOSS_LOCKMAW = 43614,
     BOSS_HIGH_PROPHET_BARIM = 43612,
-    BOSS_SIAMAT = 44819
+    BOSS_SIAMAT = 44819,
+    BOSS_AUGH = 49045
 };
 
 #endif
