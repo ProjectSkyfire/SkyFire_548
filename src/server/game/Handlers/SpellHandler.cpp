@@ -215,7 +215,9 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
         if (hasMovementFlags2)
             movementInfo.flags2 = recvPacket.ReadBits(13);
 
-        if (hasMovement)
+        // Only present when the flags bit says so: reading it unconditionally misaligns the rest of the packet
+        // whenever the item is used while moving or swimming without movement flags.
+        if (hasMovementFlags)
             movementInfo.flags = recvPacket.ReadBits(30);
     }
 
@@ -349,10 +351,10 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
             recvPacket >> movementInfo.jump.fallTime;
         }
 
-        recvPacket.ReadByteSeq(movementTransportGuid[3]);
-        recvPacket.ReadByteSeq(movementTransportGuid[7]);
-        recvPacket.ReadByteSeq(movementTransportGuid[6]);
-        recvPacket.ReadByteSeq(movementTransportGuid[1]);
+        recvPacket.ReadByteSeq(movementGuid[3]);
+        recvPacket.ReadByteSeq(movementGuid[7]);
+        recvPacket.ReadByteSeq(movementGuid[6]);
+        recvPacket.ReadByteSeq(movementGuid[1]);
         recvPacket >> movementInfo.pos.m_positionY;
 
         if (hasSplineElevation)
@@ -364,20 +366,20 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
         if (hasOrientation)
             movementInfo.pos.SetOrientation(recvPacket.read<float>());
 
-        recvPacket.ReadByteSeq(movementTransportGuid[2]);
+        recvPacket.ReadByteSeq(movementGuid[2]);
         recvPacket >> movementInfo.pos.m_positionZ;
 
         if (hasTimestamp)
             recvPacket >> movementInfo.time;
 
         recvPacket >> movementInfo.pos.m_positionX;
-        recvPacket.ReadByteSeq(movementTransportGuid[5]);
-        recvPacket.ReadByteSeq(movementTransportGuid[0]);
+        recvPacket.ReadByteSeq(movementGuid[5]);
+        recvPacket.ReadByteSeq(movementGuid[0]);
 
         if (hasPitch)
             movementInfo.pitch = G3D::wrap(recvPacket.read<float>(), float(-M_PI), float(M_PI));
 
-        recvPacket.ReadByteSeq(movementTransportGuid[4]);
+        recvPacket.ReadByteSeq(movementGuid[4]);
     }
 
     if (hasDestLocation)

@@ -764,6 +764,7 @@ public:
     CreatureModelInfo const* GetCreatureModelInfo(uint32 modelId);
     CreatureModelInfo const* GetCreatureModelRandomGender(uint32* displayID);
     static uint32 ChooseDisplayId(CreatureTemplate const* cinfo, CreatureData const* data = NULL);
+    static bool GetTriggerDisplays(CreatureTemplate const* cinfo, uint32& invisibleDisplay, uint32& visibleDisplay);
     static void ChooseCreatureFlags(CreatureTemplate const* cinfo, uint32& npcflag, uint32& unit_flags, uint32& dynamicflags, CreatureData const* data = NULL);
     EquipmentInfo const* GetEquipmentInfo(uint32 entry, int8& id);
     CreatureAddon const* GetCreatureAddon(uint32 lowguid);

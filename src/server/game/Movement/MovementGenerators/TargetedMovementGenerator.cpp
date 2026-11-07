@@ -179,7 +179,8 @@ bool TargetedMovementGeneratorMedium<T, D>::DoUpdate(T* owner, uint32 time_diff)
         float allowed_dist = owner->GetCombatReach() + sWorld->getRate(Rates::RATE_TARGET_POS_RECALCULATION_RANGE);
         G3D::Vector3 dest = owner->movespline->FinalDestination();
 
-        if (owner->GetTypeId() == TypeID::TYPEID_UNIT && owner->ToCreature()->CanFly())
+        if (owner->GetTypeId() == TypeID::TYPEID_UNIT && (owner->ToCreature()->CanFly()
+            || (owner->ToCreature()->CanSwim() && i_target->IsInWater())))
             targetMoved = !i_target->IsWithinDist3d(dest.x, dest.y, dest.z, allowed_dist);
         else
             targetMoved = !i_target->IsWithinDist2d(dest.x, dest.y, allowed_dist);

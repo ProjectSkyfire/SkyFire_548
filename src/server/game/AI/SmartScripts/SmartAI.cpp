@@ -12,6 +12,7 @@
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "InstanceScript.h"
+#include "MoveSpline.h"
 #include "ObjectDefines.h"
 #include "ObjectMgr.h"
 #include "ScriptedCreature.h"
@@ -417,6 +418,15 @@ void SmartAI::EnterEvadeMode()
     if (!me->IsAlive() || me->IsInEvadeMode())
         return;
 
+    // A player is driving (a vehicle in its control seat, a mind-controlled creature): end the fight but leave
+    // movement to the player. Evading would switch it to walk and send it home under the player.
+    if (me->GetCharmerGUID() && IS_PLAYER_GUID(me->GetCharmerGUID()))
+    {
+        me->DeleteThreatList();
+        me->CombatStop(true);
+        return;
+    }
+
     RemoveAuras();
 
     me->AddUnitState(UNIT_STATE_EVADE);
@@ -716,7 +726,25 @@ void SmartAI::SetRun(bool run)
 
 void SmartAI::SetFly(bool fly)
 {
+    // Change what the creature inhabits too, or UpdateMovementFlags puts the template's flight state back.
+    uint32 inhabitType = fly ? (me->GetInhabitType() | INHABIT_AIR) : (me->GetInhabitType() & ~INHABIT_AIR);
+    me->SetInhabitType(inhabitType ? inhabitType : uint32(INHABIT_GROUND));
+    if (!fly)
+    {
+        me->SetCanFly(false);
+        me->SetFlying(false);
+    }
     me->SetDisableGravity(fly);
+
+    // Landed already (after a jump, say): no fall to wait for. Still in the air: drop to the ground.
+    if (!fly && !me->movespline->isFalling())
+    {
+        float ground = me->GetMap()->GetHeight(me->GetPhaseMask(), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 1.0f);
+        if (me->GetPositionZ() - ground < 0.5f)
+            me->SetFall(false);
+        else
+            me->GetMotionMaster()->MoveFall();
+    }
 }
 
 void SmartAI::SetSwim(bool swim)

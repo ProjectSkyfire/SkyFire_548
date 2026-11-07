@@ -430,8 +430,7 @@ void Unit::UpdateSplinePosition()
     if (Skyfire::PetTransport::ShouldApplySplineGroundClamp(hasTransport, GetTypeId() == TypeID::TYPEID_UNIT, movespline->isFalling()))
     {
         Creature const* creature = ToCreature();
-        CreatureTemplate const* cInfo = creature->GetCreatureTemplate();
-        if (cInfo && !(cInfo->InhabitType & INHABIT_AIR) && !creature->CanFly()
+        if (!creature->CanFly()
             && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER | MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY))
         {
             float ground = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z + 5.0f, true);
@@ -5562,7 +5561,7 @@ void Unit::SetPower(Powers power, int32 val)
         data.WriteByteSeq(guid[2]);
         data.WriteByteSeq(guid[4]);
 
-        data << uint8(powerIndex);
+        data << uint8(power);
         data << int32(val);
 
         data.WriteByteSeq(guid[6]);
@@ -5625,6 +5624,12 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     uint32 classId = getClass();
     //if (ToPet() && ToPet()->getPetType() == HUNTER_PET)
     //    classId = CLASS_HUNTER;
+
+    // The client shows the energy of energy-using vehicles from the first power slot.
+    if (classId == CLASS_ROGUE)
+        if (Creature const* creature = ToCreature())
+            if (creature->GetCreatureTemplate()->VehicleId)
+                return powerType == POWER_ENERGY ? 0 : (powerType == POWER_MANA ? MAX_POWERS : GetPowerIndexByClass(powerType, classId));
 
     return GetPowerIndexByClass(powerType, classId);
 }
@@ -9997,7 +10002,14 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
                                     break;
                                 }
 
-                    if (cinfo->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER)
+                    // Triggers show players their invisible display and GMs the stand-in model, so GMs can find them.
+                    uint32 invisibleDisplay, visibleDisplay;
+                    if (ObjectMgr::GetTriggerDisplays(cinfo, invisibleDisplay, visibleDisplay))
+                    {
+                        if (target->IsGameMaster() && displayId == invisibleDisplay)
+                            displayId = visibleDisplay ? visibleDisplay : 17519;    // world visible trigger's model
+                    }
+                    else if (cinfo->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER)
                     {
                         if (target->IsGameMaster())
                         {

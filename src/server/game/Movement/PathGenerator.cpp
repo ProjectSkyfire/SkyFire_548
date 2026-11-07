@@ -71,6 +71,18 @@ bool PathGenerator::CalculatePath(float x, float y, float z, float destX, float 
         return true;
     }
 
+    // The navmesh only covers the sea floor and the water surface, so a swimmer would never reach a target below the surface.
+    if (Creature const* creature = _sourceUnit->ToCreature())
+    {
+        Map const* map = _sourceUnit->GetBaseMap();
+        if (creature->CanSwim() && map->IsInWater(x, y, z) && map->IsInWater(destX, destY, destZ))
+        {
+            BuildShortcut();
+            _type = PathType(PATHFIND_NORMAL | PATHFIND_NOT_USING_PATH);
+            return true;
+        }
+    }
+
     UpdateFilter();
 
     BuildPolyPath(start, dest);
@@ -489,6 +501,16 @@ void PathGenerator::BuildPointPath(const float* startPoint, const float* endPoin
 float PathGenerator::ResolveTerrainZ(Unit const* unit, float x, float y, float z)
 {
     Map const* map = unit->GetBaseMap();
+
+    if (Creature const* creature = unit->ToCreature())
+    {
+        if (creature->CanSwim() && map->IsInWater(x, y, z))
+        {
+            unit->UpdateAllowedPositionZ(x, y, z);
+            return z;
+        }
+    }
+
     uint32 const phase = unit->GetPhaseMask();
     float ground = map->GetHeight(phase, x, y, z + 5.0f, true);
     float floor = map->GetHeight(phase, x, y, z, true);
@@ -516,9 +538,8 @@ void PathGenerator::DensifyGroundPath()
     if (!creature->CanWalk())
         return;
 
-    if (CreatureTemplate const* info = creature->GetCreatureTemplate())
-        if ((info->InhabitType & INHABIT_AIR) && !(info->InhabitType & INHABIT_GROUND))
-            return;
+    if ((creature->GetInhabitType() & INHABIT_AIR) && !(creature->GetInhabitType() & INHABIT_GROUND))
+        return;
 
     Movement::PointsArray densified;
     densified.reserve(_pathPoints.size() * 4);

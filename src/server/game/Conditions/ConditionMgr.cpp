@@ -13,6 +13,7 @@
 #include "ReputationMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptMgr.h"
+#include "SmartAI.h"
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
@@ -385,6 +386,20 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
             }
             break;
         }
+        case CONDITION_SAI_PHASE:
+        {
+            if (Creature* creature = object->ToCreature())
+            {
+                if (creature->GetAIName() == "SmartAI" && !creature->IsPet() && creature->AI())
+                    condMeets = CAST_AI(SmartAI, creature->AI())->GetPhase() == ConditionValue1;
+            }
+            else if (GameObject* go = object->ToGameObject())
+            {
+                if (go->GetAIName() == "SmartGameObjectAI" && go->AI())
+                    condMeets = CAST_AI(SmartGameObjectAI, go->AI())->GetPhase() == ConditionValue1;
+            }
+            break;
+        }
         default:
             condMeets = false;
             break;
@@ -577,6 +592,9 @@ uint32 Condition::GetSearcherTypeMaskForCondition()
             break;
         case CONDITION_QUESTSTATE:
             mask |= GRID_MAP_TYPE_MASK_PLAYER;
+            break;
+        case CONDITION_SAI_PHASE:
+            mask |= GRID_MAP_TYPE_MASK_CREATURE | GRID_MAP_TYPE_MASK_GAMEOBJECT;
             break;
         default:
             ASSERT(false && "Condition::GetSearcherTypeMaskForCondition - missing condition handling!");
@@ -2296,6 +2314,14 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
                 SF_LOG_ERROR("sql.sql", "CreatureType condition has non existing CreatureType in value1 (%u), skipped", cond->ConditionValue1);
                 return false;
             }
+            break;
+        }
+        case CONDITION_SAI_PHASE:
+        {
+            if (cond->ConditionValue2)
+                SF_LOG_ERROR("sql.sql", "SaiPhase condition has useless data in value2 (%u)!", cond->ConditionValue2);
+            if (cond->ConditionValue3)
+                SF_LOG_ERROR("sql.sql", "SaiPhase condition has useless data in value3 (%u)!", cond->ConditionValue3);
             break;
         }
         default:

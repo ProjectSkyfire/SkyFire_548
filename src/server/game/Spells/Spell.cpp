@@ -4015,8 +4015,16 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
         static_cast<uint32>(opcode));
 
     WorldPacket data(opcode, (4 + 1 + 1));
-    data << uint32(spellInfo->Id);
-    data << uint32(result);                                  // problem
+    if (opcode == SMSG_CAST_FAILED)
+    {
+        data << uint32(spellInfo->Id);
+        data << uint32(result);                              // problem
+    }
+    else
+    {
+        data << uint32(result);                              // problem
+        data << uint32(spellInfo->Id);
+    }
     data << uint8(cast_count);
 
     size_t pos = data.bitwpos();

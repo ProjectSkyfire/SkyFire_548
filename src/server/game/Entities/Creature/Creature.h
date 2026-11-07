@@ -41,6 +41,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN = 0x00040000,       // creature won't increase weapon skills
     CREATURE_FLAG_EXTRA_TAUNT_DIMINISH = 0x00080000,       // Taunt is a subject to diminishing returns on this creautre
     CREATURE_FLAG_EXTRA_ALL_DIMINISH = 0x00100000,       // Creature is subject to all diminishing returns as player are
+    CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ = 0x02000000, // creature does not need to take player damage for kill credit
     CREATURE_FLAG_EXTRA_DUNGEON_BOSS = 0x10000000        // creature is a dungeon boss (SET DYNAMICALLY, DO NOT ADD IN DB)
 };
 
@@ -49,7 +50,7 @@ enum CreatureFlagsExtra
     CREATURE_FLAG_EXTRA_NO_CRUSH | CREATURE_FLAG_EXTRA_NO_XP_AT_KILL | CREATURE_FLAG_EXTRA_TRIGGER | \
     CREATURE_FLAG_EXTRA_NO_TAUNT | CREATURE_FLAG_EXTRA_WORLDEVENT | CREATURE_FLAG_EXTRA_NO_CRIT | \
     CREATURE_FLAG_EXTRA_NO_SKILLGAIN | CREATURE_FLAG_EXTRA_TAUNT_DIMINISH | CREATURE_FLAG_EXTRA_ALL_DIMINISH | \
-    CREATURE_FLAG_EXTRA_GUARD)
+    CREATURE_FLAG_EXTRA_GUARD | CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ)
 
 #define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
@@ -465,9 +466,12 @@ public:
     bool IsCivilian() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
     bool IsTrigger() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER; }
     bool IsGuard() const { return GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_GUARD; }
-    bool CanWalk() const { return GetCreatureTemplate()->InhabitType & INHABIT_GROUND; }
-    bool CanSwim() const { return GetCreatureTemplate()->InhabitType & INHABIT_WATER || IsPet(); }
-    bool CanFly()  const OVERRIDE { return GetCreatureTemplate()->InhabitType & INHABIT_AIR; }
+    // Runtime copy of the template's InhabitType, so scripts can land a flyer or lift a walker (reset on respawn).
+    uint32 GetInhabitType() const { return m_inhabitType; }
+    void SetInhabitType(uint32 inhabitType) { m_inhabitType = inhabitType; }
+    bool CanWalk() const { return m_inhabitType & INHABIT_GROUND; }
+    bool CanSwim() const { return m_inhabitType & INHABIT_WATER || IsPet(); }
+    bool CanFly()  const OVERRIDE { return m_inhabitType & INHABIT_AIR; }
 
     void SetReactState(ReactStates st) { m_reactState = st; }
     ReactStates GetReactState() const { return m_reactState; }
@@ -663,7 +667,7 @@ public:
 
     void SetDisableReputationGain(bool disable) { DisableReputationGain = disable; }
     bool IsReputationGainDisabled() const { return DisableReputationGain; }
-    bool IsDamageEnoughForLootingAndReward() const { return m_PlayerDamageReq == 0; }
+    bool IsDamageEnoughForLootingAndReward() const { return (GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ) || m_PlayerDamageReq == 0; }
     void LowerPlayerDamageReq(uint32 unDamage);
     void ResetPlayerDamageReq() { m_PlayerDamageReq = GetHealth() / 2; }
     uint32 m_PlayerDamageReq;
@@ -742,6 +746,7 @@ private:
 
     //Formation var
     CreatureGroup* m_formation;
+    uint32 m_inhabitType;
     bool TriggerJustRespawned;
 
     Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing

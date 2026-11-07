@@ -70,7 +70,8 @@ enum ConditionTypes
     CONDITION_TAXI                  = 46,                   // 0                0              0                  true if player is on taxi / in flight
     CONDITION_QUESTSTATE            = 47,                   // quest_id         state_mask     0                  true if player is in any of the provided quest states (1=none, 2=complete, 8=incomplete, 32=failed, 64=rewarded)
     CONDITION_QUEST_OBJECTIVE_PROGRESS = 48,                // objectiveId      0              progressValue      true if player has quest objective progress equal to ConditionValue3 (quest in log)
-    CONDITION_MAX                   = 49                    // MAX
+    CONDITION_SAI_PHASE             = 101,                  // phase            0              0                  true if the object's SmartAI event phase equals value1
+    CONDITION_MAX                   = 102                   // MAX
 };
 
 /*! Documentation on implementing a new ConditionSourceType:

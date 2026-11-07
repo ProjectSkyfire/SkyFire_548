@@ -935,7 +935,7 @@ struct CreatureDisplayInfoEntry
     // 2        m_soundID
     // 3        m_extendedDisplayInfoID
     float       scale;                                      // 4        m_creatureModelScale
-    // 5        m_creatureModelAlpha
+    uint32      ModelAlpha;                                 // 5        m_creatureModelAlpha (0 = invisible)
     // 6-8      m_textureVariation[3]
     // 9        m_portraitTextureName
     // 10       m_sizeClass
@@ -968,7 +968,7 @@ struct CreatureModelDataEntry
 {
     //uint32 Id;
     //uint32 Flags;
-    //char* ModelPath
+    char* ModelPath;
     //uint32 Unk1;
     //float Scale;                                             // Used in calculation of unit collision data
     //int32 Unk2

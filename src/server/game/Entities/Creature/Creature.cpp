@@ -146,7 +146,7 @@ m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemov
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
-m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL)
+m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL), m_inhabitType(INHABIT_GROUND)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -294,6 +294,7 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
 
     SetEntry(entry);                                        // normal entry always
     m_creatureInfo = cinfo;                                 // map mode related always
+    m_inhabitType = cinfo->InhabitType;
 
     // equal to player Race field, but creature does not have race
     SetRace(0);
@@ -1077,6 +1078,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
             break;
         case CLASS_ROGUE:
             setPowerType(POWER_ENERGY);
+            SetModifierValue(UNIT_MOD_ENERGY, BASE_VALUE, float(GetCreatePowers(POWER_ENERGY)));
+            SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
             break;
         case CLASS_MONK:
             setPowerType(POWER_CHI);
@@ -1511,17 +1514,19 @@ void Creature::setDeathState(DeathState s)
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
 
+        m_inhabitType = GetCreatureTemplate()->InhabitType;
         UpdateMovementFlags();
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         SetUInt32Value(UNIT_FIELD_NPC_FLAGS, cinfo->npcflag);
         ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
-        LoadCreaturesAddon(true);
         Motion_Initialize();
         //if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
         //    SetPhaseMask(GetCreatureData()->phaseMask, false);
         Unit::setDeathState(DeathState::ALIVE);
+        // After ALIVE: AddAura skips units that are not alive, so the addon's auras would be lost on every respawn.
+        LoadCreaturesAddon(true);
     }
 }
 
@@ -1597,8 +1602,13 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
         return;
     }
 
+    // A living creature leaves the clients first, so players see it vanish instead of dying on the spot before the
+    // corpse is removed.
     if (IsAlive())
+    {
+        DestroyForNearbyPlayers();
         setDeathState(DeathState::JUST_DIED);
+    }
 
     RemoveCorpse(false);
 }
@@ -2083,7 +2093,7 @@ bool Creature::LoadCreaturesAddon(bool reload, bool evading)
         //! Check using InhabitType as movement flags are assigned dynamically
         //! basing on whether the creature is in air or not
         //! Set MovementFlag_Hover. Otherwise do nothing.
-        if (GetByteValue(UNIT_FIELD_ANIM_TIER, 3) & UNIT_BYTE1_FLAG_HOVER && !(GetCreatureTemplate()->InhabitType & INHABIT_AIR))
+        if (GetByteValue(UNIT_FIELD_ANIM_TIER, 3) & UNIT_BYTE1_FLAG_HOVER && !(m_inhabitType & INHABIT_AIR))
             AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
     }
 
@@ -2601,7 +2611,7 @@ void Creature::UpdateMovementFlags()
     if (m_movedPlayer)
         return;
 
-    uint32 inhabitType = GetCreatureTemplate()->InhabitType;
+    uint32 inhabitType = m_inhabitType;
 
     if (CanFly() && !IsFalling())
     {
@@ -2620,14 +2630,12 @@ void Creature::UpdateMovementFlags()
     if (!(inhabitType & INHABIT_AIR) && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
     {
         MovementGeneratorType const curMove = GetMotionMaster()->GetCurrentMovementGeneratorType();
-        if (curMove == CHASE_MOTION_TYPE)
+        if (curMove == CHASE_MOTION_TYPE || (!IsInCombat() && (curMove == IDLE_MOTION_TYPE || curMove == RANDOM_MOTION_TYPE)))
         {
             if (inhabitType & INHABIT_WATER)
                 SetSwim(IsInWater());
             return;
         }
-        if (!IsInCombat() && (curMove == IDLE_MOTION_TYPE || curMove == RANDOM_MOTION_TYPE))
-            return;
     }
 
     // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
