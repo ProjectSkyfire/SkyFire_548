@@ -287,6 +287,15 @@ void ReputationMgr::Initialize()
 
 bool ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental)
 {
+    uint32 factionId = factionEntry->ID;
+    sScriptMgr->BeforeReputation(_player, factionId, standing, incremental);
+    if (factionId != factionEntry->ID)
+    {
+        FactionEntry const* redirected = sFactionStore.LookupEntry(factionId);
+        if (!redirected)
+            return false;
+        factionEntry = redirected;
+    }
     sScriptMgr->OnPlayerReputationChange(_player, factionEntry->ID, standing, incremental);
     bool res = false;
     // if spillover definition exists in DB, override DBC

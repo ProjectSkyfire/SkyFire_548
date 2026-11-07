@@ -7,6 +7,7 @@
 #include "ArenaTeamMgr.h"
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
+#include "ScriptMgr.h"
 #include "Chat.h"
 #include "Group.h"
 #include "Language.h"
@@ -128,6 +129,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
     ginfo->JoinTime = getMSTime();
     ginfo->RemoveInviteTime = 0;
     ginfo->Team = leader->GetTeam();
+    ginfo->NativeTeam = leader->GetNativeTeam();
     ginfo->ArenaTeamRating = ArenaRating;
     ginfo->ArenaMatchmakerRating = MatchmakerRating;
     ginfo->OpponentsTeamRating = 0;
@@ -177,6 +179,8 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* grp, Battlegr
         {
             if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(ginfo->BgTypeId))
             {
+                if (sScriptMgr->HandleBGQueueAnnounce(this, bg, leader, BracketID, bracketEntry->minLevel, bracketEntry->maxLevel))
+                    return ginfo;
                 char const* bgName = bg->GetName();
                 uint32 MinPlayers = bg->GetMinPlayersPerTeam();
                 uint32 qHorde = 0;
@@ -744,7 +748,8 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
             m_SelectionPools[TEAM_HORDE].Init();
 
             // call a function that does the job for us
-            FillPlayersToBG(bg, bracket_id);
+            if (!sScriptMgr->SelectBGGroups(this, bg, BracketID, 0, bg->GetMaxPlayersPerTeam(), true))
+                FillPlayersToBG(bg, bracket_id);
 
             // now everything is set, invite players
             for (GroupsQueueType::const_iterator citr = m_SelectionPools[TEAM_ALLIANCE].SelectedGroups.begin(); citr != m_SelectionPools[TEAM_ALLIANCE].SelectedGroups.end(); ++citr)
@@ -789,7 +794,8 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
     m_SelectionPools[TEAM_ALLIANCE].Init();
     m_SelectionPools[TEAM_HORDE].Init();
 
-    if (bg_template->isBattleground())
+    bool customSelection = bg_template->isBattleground() && sScriptMgr->SelectBGGroups(this, bg_template, BracketID, MinPlayersPerTeam, MaxPlayersPerTeam, false);
+    if (bg_template->isBattleground() && !customSelection)
     {
         if (CheckPremadeMatch(bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
         {
@@ -816,7 +822,8 @@ void BattlegroundQueue::BattlegroundQueueUpdate(uint32 /*diff*/, BattlegroundTyp
     if (!isRated)
     {
         // if there are enough players in pools, start new battleground or non rated arena
-        if (CheckNormalMatch(bg_template, bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam)
+        if ((customSelection ? (m_SelectionPools[TEAM_ALLIANCE].GetPlayerCount() >= MinPlayersPerTeam && m_SelectionPools[TEAM_HORDE].GetPlayerCount() >= MinPlayersPerTeam)
+                             : CheckNormalMatch(bg_template, bracket_id, MinPlayersPerTeam, MaxPlayersPerTeam))
             || (bg_template->isArena() && CheckSkirmishForSameFaction(bracket_id, MinPlayersPerTeam)))
         {
             // we successfully created a pool
