@@ -3257,6 +3257,16 @@ void Player::GiveLevel(uint8 level)
 
     UpdateSkillsForLevel();
 
+    // Skill abilities learned with the character level (class passives on shared skill lines, such as Victorious
+    // State on Defense) come with the new level, not only at the next login; learning one can add a skill, so the
+    // skill ids are copied first
+    std::vector<uint32> skillIds;
+    for (SkillStatusMap::const_iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
+        if (itr->second.uState != SkillUpdateState::SKILL_DELETED)
+            skillIds.push_back(itr->first);
+    for (uint32 skillId : skillIds)
+        learnSkillRewardedSpells(skillId, GetPureSkillValue(skillId));
+
     // save base values (bonuses already included in stored stats
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
