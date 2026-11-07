@@ -5,5 +5,18 @@ UPDATE `gossip_menu_option` SET `OptionType` = 3, `OptionNpcflag` = 128 WHERE `O
 UPDATE `gossip_menu_option` SET `OptionType` = 8, `OptionNpcflag` = 65536 WHERE `OptionType` = 0 AND `OptionNpcflag` = 0 AND ((`MenuID` = 1297 AND `OptionID` = 1));
 UPDATE `gossip_menu_option` SET `OptionType` = 9, `OptionNpcflag` = 131072 WHERE `OptionType` = 0 AND `OptionNpcflag` = 0 AND ((`MenuID` = 2404 AND `OptionID` = 0));
 UPDATE `gossip_menu_option` SET `OptionType` = 12, `OptionNpcflag` = 1048576 WHERE `OptionType` = 0 AND `OptionNpcflag` = 0 AND ((`MenuID` = 10606 AND `OptionID` = 0));
-UPDATE `gossip_menu_option` SET `OptionType` = 1, `OptionNpcflag` = 1 WHERE `OptionType` = 0 AND `OptionNpcflag` = 0;
-UPDATE `gossip_menu_option` SET `OptionNpcflag` = 1 WHERE `OptionType` = 1 AND `OptionNpcflag` = 0;
+-- The 4.3.4 data also keeps many options twice: a typeless copy next to the typed row of the same menu with the same
+-- text and the same follow-up menu. Those copies stay hidden, otherwise they show as duplicate buttons. The derived
+-- table is materialized, which MySQL needs to read the table it updates (error 1093).
+UPDATE `gossip_menu_option` AS `g`
+LEFT JOIN (SELECT DISTINCT `MenuID`, `OptionText`, `ActionMenuID` FROM `gossip_menu_option` WHERE `OptionType` <> 0) AS `t`
+    ON `t`.`MenuID` = `g`.`MenuID` AND `t`.`OptionText` = `g`.`OptionText` AND `t`.`ActionMenuID` = `g`.`ActionMenuID`
+SET `g`.`OptionType` = 1, `g`.`OptionNpcflag` = 1
+WHERE `g`.`OptionType` = 0 AND `g`.`OptionNpcflag` = 0 AND `t`.`MenuID` IS NULL;
+-- The same copies exist as plain options without an NPC flag; leave one alone when another option of its menu with
+-- the same text and follow-up menu is already shown.
+UPDATE `gossip_menu_option` AS `g`
+LEFT JOIN (SELECT DISTINCT `MenuID`, `OptionText`, `ActionMenuID` FROM `gossip_menu_option` WHERE `OptionType` <> 0 AND `OptionNpcflag` <> 0) AS `t`
+    ON `t`.`MenuID` = `g`.`MenuID` AND `t`.`OptionText` = `g`.`OptionText` AND `t`.`ActionMenuID` = `g`.`ActionMenuID`
+SET `g`.`OptionNpcflag` = 1
+WHERE `g`.`OptionType` = 1 AND `g`.`OptionNpcflag` = 0 AND `t`.`MenuID` IS NULL;
