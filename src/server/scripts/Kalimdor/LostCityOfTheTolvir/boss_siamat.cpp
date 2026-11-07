@@ -53,7 +53,6 @@ enum eSpells
     SPELL_LIGHTNING_CHARGE           = 91872,
     SPELL_LIGHTNING_CHARGE_AURA      = 93959,
 
-    SPELL_ACHIEVEMENT                = 93957,
 };
 
 enum eCreatures
@@ -165,17 +164,6 @@ class boss_siamat : public CreatureScript
                     events.SetPhase(PHASE_WAILING_WINDS);
                     events.ScheduleEvent(EVENT_WAILING_WINDS, 1000, 0, PHASE_WAILING_WINDS);
                     events.ScheduleEvent(EVENT_STORM_BOLT_S, urand(10000, 25000), 0, PHASE_SIAMAT);
-                }
-            }
-
-            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
-            {
-                if (damage >= me->GetHealth() && instance)
-                {
-                    for (auto&& itr : instance->instance->GetPlayers())
-                        if (Player* player = itr.GetSource())
-                            if (player->GetAuraCount(SPELL_LIGHTNING_CHARGE_AURA) >= 3)
-                                DoCast(player, SPELL_ACHIEVEMENT, true);
                 }
             }
 
