@@ -419,6 +419,9 @@ class boss_algalon_the_observer : public CreatureScript
                     me->SetDisableGravity(false);
                 else if (pointId == POINT_ALGALON_OUTRO)
                 {
+                    // The walk keeps the evade state so he neither regenerates nor fights back, but an evading
+                    // creature gets no AI updates, and the rest of the outro (kill credit, Brann) runs from them
+                    me->ClearUnitState(UNIT_STATE_EVADE);
                     me->SetFacingTo(1.605703f);
                     events.ScheduleEvent(EVENT_OUTRO_3, 1200);
                     events.ScheduleEvent(EVENT_OUTRO_4, 2400);
