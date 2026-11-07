@@ -329,6 +329,8 @@ void AddSC_instance_temple_of_ahnqiraj();
 //void AddSC_instance_zulfarrak();
 void AddSC_instance_halls_of_origination();    //Halls of Origination
 void AddSC_instance_vortex_pinnacle();
+void AddSC_boss_altairus();
+void AddSC_boss_grand_vizier_ertan();
 void AddSC_boss_temple_guardian_anhuur();
 void AddSC_boss_earthrager_ptah();
 void AddSC_boss_anraphet();
@@ -1090,6 +1092,9 @@ void AddKalimdorScripts()
     AddSC_instance_halls_of_origination();    //Halls of Origination
 
     AddSC_instance_vortex_pinnacle();
+    AddSC_boss_altairus();
+
+    AddSC_boss_grand_vizier_ertan();
     AddSC_boss_temple_guardian_anhuur();
     AddSC_boss_earthrager_ptah();
     AddSC_boss_anraphet();

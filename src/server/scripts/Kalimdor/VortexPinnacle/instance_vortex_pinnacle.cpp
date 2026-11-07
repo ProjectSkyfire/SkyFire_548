@@ -15,8 +15,13 @@
 * with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ScriptPCH.h"
+#include "Creature.h"
+#include "ScriptMgr.h"
+#include "InstanceScript.h"
+#include "ScriptedCreature.h"
+#include "Player.h"
 #include "vortex_pinnacle.h"
+#include <sstream>
 
 class instance_vortex_pinnacle : public InstanceMapScript
 {
@@ -107,7 +112,81 @@ class instance_vortex_pinnacle : public InstanceMapScript
         }
 };
 
+
+// The entrance shortcuts and the platform currents use the same destinations.
+static bool IsAltairusSlipstream(Creature* creature)
+{
+    float x = creature->GetPositionX();
+    return x < -1000.0f || (x > -500.0f && x < -350.0f);
+}
+
+class npc_vortex_slipstream : public CreatureScript
+{
+public:
+    npc_vortex_slipstream() : CreatureScript("npc_vortex_slipstream") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        InstanceScript* instance = creature->GetInstanceScript();
+        bool altairus = IsAltairusSlipstream(creature);
+        if (!instance || instance->GetBossState(altairus ? DATA_ALTAIRUS : DATA_ERTAN) != DONE)
+            return true;
+
+        if (altairus)
+            player->NearTeleportTo(-1193.67f, 472.83f, 644.86f, 0.50f);
+        else
+            player->NearTeleportTo(-906.08f, -176.51f, 674.50f, 2.86f);
+        return true;
+    }
+
+    struct npc_vortex_slipstreamAI : public ScriptedAI
+    {
+        npc_vortex_slipstreamAI(Creature* creature) : ScriptedAI(creature)
+        {
+            me->SetCanFly(true);
+            SetCombatMovement(false);
+        }
+
+        EventMap events;
+
+        void UpdateInteraction()
+        {
+            InstanceScript* instance = me->GetInstanceScript();
+            uint32 boss = IsAltairusSlipstream(me) ? DATA_ALTAIRUS : DATA_ERTAN;
+            me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            if (instance && instance->GetBossState(boss) == DONE)
+                me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            else
+                me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        }
+
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+            UpdateInteraction();
+            DoCast(me, 85021, true);
+            events.ScheduleEvent(1, 1000);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            events.Update(diff);
+            if (events.ExecuteEvent())
+            {
+                UpdateInteraction();
+                events.ScheduleEvent(1, 1000);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_vortex_slipstreamAI(creature);
+    }
+};
+
 void AddSC_instance_vortex_pinnacle()
 {
     new instance_vortex_pinnacle();
+    new npc_vortex_slipstream();
 }

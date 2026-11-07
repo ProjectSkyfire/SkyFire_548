@@ -118,6 +118,8 @@ set(scripts_STAT_SRCS
   Kalimdor/HallsOfOrigination/boss_anraphet.cpp
   Kalimdor/VortexPinnacle/vortex_pinnacle.h
   Kalimdor/VortexPinnacle/instance_vortex_pinnacle.cpp
+  Kalimdor/VortexPinnacle/boss_altairus.cpp
+  Kalimdor/VortexPinnacle/boss_grand_vizier_ertan.cpp
   Kalimdor/Firelands/instance_firelands.cpp
   Kalimdor/Firelands/firelands.h
   Kalimdor/Firelands/boss_alysrazor.cpp
