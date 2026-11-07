@@ -19639,6 +19639,14 @@ void Player::learnQuestRewardedSpells()
 
 void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 {
+    // The abilities of a class skill line carry no class mask of their own: a character who somehow holds another
+    // class's line must not get its abilities
+    if (SkillLineEntry const* skillLine = sSkillLineStore.LookupEntry(skill_id))
+        if (skillLine->categoryId == SKILL_CATEGORY_CLASS)
+            if (uint32 skillClass = GetClassBySkillId(skill_id))
+                if (skillClass != getClass())
+                    return;
+
     uint32 raceMask = getRaceMask();
     uint32 classMask = getClassMask();
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
