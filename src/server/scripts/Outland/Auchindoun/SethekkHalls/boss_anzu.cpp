@@ -142,7 +142,10 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
-            if (!UpdateVictim())
+            // Keep victim/evade handling active, but do not pause spell timers
+            // when banish prevents Anzu from maintaining a melee victim.
+            bool const hasVictim = UpdateVictim();
+            if (!me->IsInCombat() || (!hasVictim && !me->HasAura(SPELL_BANISH_SELF)))
                 return;
 
             events.Update(diff);
@@ -163,7 +166,7 @@ public:
                 switch (eventId)
                 {
                     case EVENT_PARALYZING_SCREECH:
-                        DoCastVictim(SPELL_PARALYZING_SCREECH);
+                        DoCastAOE(SPELL_PARALYZING_SCREECH);
                         events.ScheduleEvent(EVENT_PARALYZING_SCREECH, 26000);
                         break;
                     case EVENT_CYCLONE_OF_FEATHERS:
@@ -180,14 +183,25 @@ public:
                         }
                         break;
                     case EVENT_FLESH_RIP:
-                        if (!me->HasAura(SPELL_BANISH_SELF) && me->IsWithinMeleeRange(me->GetVictim()))
+                    {
+                        auto const isMeleePlayer = [this](Unit* unit)
                         {
-                            DoCastVictim(SPELL_FLESH_RIP);
+                            return unit && unit->IsAlive() && unit->GetTypeId() == TypeID::TYPEID_PLAYER &&
+                                me->IsWithinMeleeRange(unit);
+                        };
+                        Unit* target = me->GetVictim();
+                        if (!isMeleePlayer(target))
+                            target = SelectTarget(SELECT_TARGET_RANDOM, 0, isMeleePlayer);
+
+                        if (!me->HasAura(SPELL_BANISH_SELF) && target)
+                        {
+                            DoCast(target, SPELL_FLESH_RIP);
                             events.ScheduleEvent(EVENT_FLESH_RIP, 15000);
                         }
                         else
                             events.ScheduleEvent(EVENT_FLESH_RIP, 1000);
                         break;
+                    }
                     case EVENT_DIVE:
                     {
                         SpellInfo const* spell = sSpellMgr->GetSpellInfo(SPELL_DIVE);
@@ -213,7 +227,8 @@ public:
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     break;
             }
-            DoMeleeAttackIfReady();
+            if (!me->HasAura(SPELL_BANISH_SELF))
+                DoMeleeAttackIfReady();
         }
 
     private:
