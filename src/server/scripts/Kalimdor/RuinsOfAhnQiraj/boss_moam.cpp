@@ -55,17 +55,9 @@ class boss_moam : public CreatureScript
                 _Reset();
                 me->SetPower(POWER_MANA, 0);
                 _isStonePhase = false;
+                events.ScheduleEvent(EVENT_TRAMPLE, urand(10000, 25000));
+                events.ScheduleEvent(EVENT_DRAIN_MANA, 6000);
                 events.ScheduleEvent(EVENT_STONE_PHASE, 90000);
-                //events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
-            }
-
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
-            {
-                if (!_isStonePhase && HealthBelowPct(45))
-                {
-                    _isStonePhase = true;
-                    DoAction(ACTION_STONE_PHASE_START);
-                }
             }
 
             void DoAction(int32 action) OVERRIDE
@@ -75,15 +67,21 @@ class boss_moam : public CreatureScript
                     case ACTION_STONE_PHASE_END:
                     {
                         me->RemoveAurasDueToSpell(SPELL_ENERGIZE);
+                        events.CancelEvent(EVENT_STONE_PHASE_END);
+                        events.ScheduleEvent(EVENT_TRAMPLE, urand(10000, 15000));
+                        events.ScheduleEvent(EVENT_DRAIN_MANA, 6000);
                         events.ScheduleEvent(EVENT_STONE_PHASE, 90000);
                         _isStonePhase = false;
                         break;
                     }
                     case ACTION_STONE_PHASE_START:
                     {
-                        DoCast(me, SPELL_SUMMON_MANA_FIEND_1);
-                        DoCast(me, SPELL_SUMMON_MANA_FIEND_2);
-                        DoCast(me, SPELL_SUMMON_MANA_FIEND_3);
+                        _isStonePhase = true;
+                        events.CancelEvent(EVENT_TRAMPLE);
+                        events.CancelEvent(EVENT_DRAIN_MANA);
+                        DoCast(me, SPELL_SUMMON_MANA_FIEND_1, true);
+                        DoCast(me, SPELL_SUMMON_MANA_FIEND_2, true);
+                        DoCast(me, SPELL_SUMMON_MANA_FIEND_3, true);
                         DoCast(me, SPELL_ENERGIZE);
                         events.ScheduleEvent(EVENT_STONE_PHASE_END, 90000);
                         break;
@@ -125,6 +123,10 @@ class boss_moam : public CreatureScript
                     {
                         case EVENT_STONE_PHASE:
                             DoAction(ACTION_STONE_PHASE_START);
+                            return;
+                        case EVENT_TRAMPLE:
+                            DoCast(me, SPELL_TRAMPLE);
+                            events.ScheduleEvent(EVENT_TRAMPLE, urand(10000, 15000));
                             break;
                         case EVENT_DRAIN_MANA:
                         {

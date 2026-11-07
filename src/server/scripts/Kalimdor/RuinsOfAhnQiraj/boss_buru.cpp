@@ -62,7 +62,7 @@ class boss_buru : public CreatureScript
                 BossAI::EnterEvadeMode();
 
                 for (std::list<uint64>::iterator i = Eggs.begin(); i != Eggs.end(); ++i)
-                    if (Creature* egg = me->GetMap()->GetCreature(*Eggs.begin()))
+                    if (Creature* egg = me->GetMap()->GetCreature(*i))
                         egg->Respawn();
 
                 Eggs.clear();
@@ -101,8 +101,8 @@ class boss_buru : public CreatureScript
 
                 me->RemoveAurasDueToSpell(SPELL_FULL_SPEED);
                 me->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
-                events.ScheduleEvent(EVENT_GATHERING_SPEED, 9000);
-                events.ScheduleEvent(EVENT_FULL_SPEED, 60000);
+                events.RescheduleEvent(EVENT_GATHERING_SPEED, 9000);
+                events.RescheduleEvent(EVENT_FULL_SPEED, 60000);
 
                 if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
                 {
@@ -146,9 +146,10 @@ class boss_buru : public CreatureScript
                             events.ScheduleEvent(EVENT_CREEPING_PLAGUE, 6000);
                             break;
                         case EVENT_RESPAWN_EGG:
-                            if (Creature* egg = me->GetMap()->GetCreature(*Eggs.begin()))
+                            if (!Eggs.empty())
                             {
-                                egg->Respawn();
+                                if (Creature* egg = me->GetMap()->GetCreature(*Eggs.begin()))
+                                    egg->Respawn();
                                 Eggs.pop_front();
                             }
                             break;
@@ -159,7 +160,11 @@ class boss_buru : public CreatureScript
 
                 if (me->GetHealthPct() < 20.0f && _phase == PHASE_EGG)
                 {
-                    DoCast(me, SPELL_BURU_TRANSFORM); // Enrage
+                    events.CancelEvent(EVENT_DISMEMBER);
+                    events.CancelEvent(EVENT_GATHERING_SPEED);
+                    events.CancelEvent(EVENT_FULL_SPEED);
+                    events.ScheduleEvent(EVENT_CREEPING_PLAGUE, 2000);
+                    DoCast(me, SPELL_BURU_TRANSFORM);
                     DoCast(me, SPELL_FULL_SPEED, true);
                     me->RemoveAurasDueToSpell(SPELL_THORNS);
                     _phase = PHASE_TRANSFORM;

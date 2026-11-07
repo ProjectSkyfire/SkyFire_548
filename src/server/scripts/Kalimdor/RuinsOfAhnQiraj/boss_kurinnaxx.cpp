@@ -53,9 +53,9 @@ class boss_kurinnaxx : public CreatureScript
                 events.ScheduleEvent(EVENT_WIDE_SLASH, 11000);
             }
 
-            void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
             {
-                if (!_enraged && HealthBelowPct(30))
+                if (!_enraged && me->HealthBelowPctDamaged(30, damage))
                 {
                     DoCast(me, SPELL_ENRAGE);
                     _enraged = true;
@@ -100,7 +100,7 @@ class boss_kurinnaxx : public CreatureScript
                             break;
                         case EVENT_TRASH:
                             DoCast(me, SPELL_TRASH);
-                            events.ScheduleEvent(EVENT_WIDE_SLASH, 16000);
+                            events.ScheduleEvent(EVENT_TRASH, 16000);
                             break;
                         default:
                             break;
