@@ -3637,7 +3637,8 @@ bool WorldObject::InSamePhase(WorldObject const* obj) const
 
 void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target)
 {
-    ObjectGuid TargetGUID = target->GetGUID();
+    // without a target the sound plays to everyone nearby, with the source standing in for the target
+    ObjectGuid TargetGUID = target ? target->GetGUID() : GetGUID();
     ObjectGuid SourceGUID = GetGUID();
 
     WorldPacket data(SMSG_PLAY_OBJECT_SOUND, 8 + 8 + 4);
@@ -3657,7 +3658,10 @@ void WorldObject::PlayDistanceSound(uint32 sound_id, Player* target)
     data.WriteGuidBytes(TargetGUID, 4);
     data.WriteGuidBytes(SourceGUID, 4, 7, 0, 6);
     data.WriteGuidBytes(TargetGUID, 0);
-    target->SendDirectMessage(&data);
+    if (target)
+        target->SendDirectMessage(&data);
+    else
+        SendMessageToSet(&data, true);
 }
 
 void WorldObject::PlayDirectSound(uint32 sound_id, Player* target /*= NULL*/)
