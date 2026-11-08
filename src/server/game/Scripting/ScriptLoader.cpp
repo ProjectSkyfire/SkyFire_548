@@ -352,6 +352,11 @@ void AddSC_teldrassil();
 void AddSC_the_barrens();
 void AddSC_thunder_bluff();
 void AddSC_winterspring();
+void AddSC_instance_well_of_eternity();                    //CoT Well of Eternity
+void AddSC_well_of_eternity_teleport();
+void AddSC_boss_perotharn();
+void AddSC_boss_queen_azshara();
+void AddSC_boss_mannoroth();
 
 // Northrend
 
@@ -1096,6 +1101,11 @@ void AddKalimdorScripts()
     AddSC_mount_hyjal();
     AddSC_feralas();
     AddSC_felwood();
+    AddSC_instance_well_of_eternity();                    //CoT Well of Eternity
+    AddSC_well_of_eternity_teleport();
+    AddSC_boss_perotharn();
+    AddSC_boss_queen_azshara();
+    AddSC_boss_mannoroth();
 #endif
 }
 
