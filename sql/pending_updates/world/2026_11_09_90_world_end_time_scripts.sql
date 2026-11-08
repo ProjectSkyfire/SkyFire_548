@@ -122,3 +122,16 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 101401, 0, 0, 31, 0, 3, 54403, 0, 0, 0, 0, '', 'Blighted Arrows targets Blighted Arrows'),
 (13, 3, 102183, 0, 0, 31, 0, 4, 0, 0, 0, 0, 0, '', 'Piercing Gaze of Elune targets players');
+
+DELETE FROM `areatrigger_scripts` WHERE `entry`=6955;
+INSERT INTO `areatrigger_scripts` (`entry`, `ScriptName`) VALUES
+(6955, 'at_et_tyrande');
+
+DELETE FROM `spell_target_position` WHERE `id` IN (102564, 102579, 104761, 102126, 103868, 104764);
+INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(102126, 0, 938, 2997.37, 570.222, 25.3074, 5.54309),
+(102564, 0, 938, 3711.59, -375.389, 113.064, 2.23589),
+(102579, 0, 938, 3833.33, 1101.35, 83.413, 3.78613),
+(103868, 0, 938, 4343.33, 1294.59, 147.504, 0.765022),
+(104761, 0, 938, 2959.33, 64.8018, 11.46, 2.95),
+(104764, 0, 938, 4042.71, -351.774, 122.216, 4.32825);

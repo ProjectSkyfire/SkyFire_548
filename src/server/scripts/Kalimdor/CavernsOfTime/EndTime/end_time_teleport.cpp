@@ -45,22 +45,21 @@ class go_end_time_teleport : public GameObjectScript
 
         bool OnGossipHello(Player* player, GameObject* go) OVERRIDE
         {
-            bool ru = player->GetSession()->GetSessionDbLocaleIndex() == LOCALE_ruRU;
 
             if (player->IsInCombat())
                 return true;
 
             if (InstanceScript* instance = go->GetInstanceScript())
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Перенестись ко входу.":"Entryway of Time.", GOSSIP_SENDER_MAIN, START_TELEPORT);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Entryway of Time.", GOSSIP_SENDER_MAIN, START_TELEPORT);
 
                 if (player->IsGameMaster())
                 {
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Изумрудное святилище драконов.":"Emerald Dragonshrine.", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Лазуритовое святилище драконов.":"Azure Dragonshrine.", GOSSIP_SENDER_MAIN, JAINA_TELEPORT);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Обсидиановое святилище драконов.":"Obsidian Dragonshrine.", GOSSIP_SENDER_MAIN, BAINE_TELEPORT);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Рубиновое святилище драконов.":"Ruby Dragonshrine.", GOSSIP_SENDER_MAIN, SYLVANAS_TELEPORT);
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Бронзовое святилище драконов.":"Bronze Dragonshrine.", GOSSIP_SENDER_MAIN, MUROZOND_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Emerald Dragonshrine.", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Azure Dragonshrine.", GOSSIP_SENDER_MAIN, JAINA_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Obsidian Dragonshrine.", GOSSIP_SENDER_MAIN, BAINE_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Ruby Dragonshrine.", GOSSIP_SENDER_MAIN, SYLVANAS_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bronze Dragonshrine.", GOSSIP_SENDER_MAIN, MUROZOND_TELEPORT);
                 }
                 else
                 {
@@ -71,16 +70,16 @@ class go_end_time_teleport : public GameObjectScript
                     switch (echo1)
                     {
                         case DATA_ECHO_OF_JAINA:
-                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Лазуритовое святилище драконов.":"Azure Dragonshrine.", GOSSIP_SENDER_MAIN, JAINA_TELEPORT);
+                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Azure Dragonshrine.", GOSSIP_SENDER_MAIN, JAINA_TELEPORT);
                             break;
                         case DATA_ECHO_OF_BAINE:
-                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Обсидиановое святилище драконов.":"Obsidian Dragonshrine.", GOSSIP_SENDER_MAIN, BAINE_TELEPORT);
+                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Obsidian Dragonshrine.", GOSSIP_SENDER_MAIN, BAINE_TELEPORT);
                             break;
                         case DATA_ECHO_OF_TYRANDE:
-                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Изумрудное святилище драконов.":"Emerald Dragonshrine.", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
+                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Emerald Dragonshrine.", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
                             break;
                         case DATA_ECHO_OF_SYLVANAS:
-                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Рубиновое святилище драконов.":"Ruby Dragonshrine.", GOSSIP_SENDER_MAIN, SYLVANAS_TELEPORT);
+                            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Ruby Dragonshrine.", GOSSIP_SENDER_MAIN, SYLVANAS_TELEPORT);
                             break;
                     }
 
@@ -89,22 +88,22 @@ class go_end_time_teleport : public GameObjectScript
                         switch (echo2)
                         {
                             case DATA_ECHO_OF_JAINA:
-                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Лазуритовое святилище драконов.":"Azure Dragonshrine.", GOSSIP_SENDER_MAIN, JAINA_TELEPORT);
+                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Azure Dragonshrine.", GOSSIP_SENDER_MAIN, JAINA_TELEPORT);
                                 break;
                             case DATA_ECHO_OF_BAINE:
-                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Обсидиановое святилище драконов.":"Obsidian Dragonshrine.", GOSSIP_SENDER_MAIN, BAINE_TELEPORT);
+                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Obsidian Dragonshrine.", GOSSIP_SENDER_MAIN, BAINE_TELEPORT);
                                 break;
                             case DATA_ECHO_OF_TYRANDE:
-                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Изумрудное святилище драконов.":"Emerald Dragonshrine.", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
+                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Emerald Dragonshrine.", GOSSIP_SENDER_MAIN, TYRANDE_TELEPORT);
                                 break;
                             case DATA_ECHO_OF_SYLVANAS:
-                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Рубиновое святилище драконов.":"Ruby Dragonshrine.", GOSSIP_SENDER_MAIN, SYLVANAS_TELEPORT);
+                                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Ruby Dragonshrine.", GOSSIP_SENDER_MAIN, SYLVANAS_TELEPORT);
                                 break;
                         }
                     }
 
                     if (instance->GetData(DATA_SECOND_ENCOUNTER) == DONE)
-                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, ru ? "Бронзовое святилище драконов.":"Bronze Dragonshrine.", GOSSIP_SENDER_MAIN, MUROZOND_TELEPORT);
+                        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Bronze Dragonshrine.", GOSSIP_SENDER_MAIN, MUROZOND_TELEPORT);
                 }
             }
 
