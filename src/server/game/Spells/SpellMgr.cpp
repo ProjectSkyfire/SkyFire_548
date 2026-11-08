@@ -3693,6 +3693,10 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].BasePoints = -10;
                 spellInfo->Effects[EFFECT_1].BasePoints = -10;
                 break;
+            // Throne of the Four Winds
+            case 85269: // Catch Fall
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_CASTER);
+                break;
             default:
                 break;
         }
