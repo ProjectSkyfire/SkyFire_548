@@ -356,6 +356,7 @@ void AddSC_instance_hour_of_twilight();                    //CoT Hour of Twiligh
 void AddSC_boss_arcurion();
 void AddSC_boss_asira_dawnslayer();
 void AddSC_boss_archbishop_benedictus();
+void AddSC_hour_of_twilight();
 
 // Northrend
 
@@ -1104,6 +1105,7 @@ void AddKalimdorScripts()
     AddSC_boss_arcurion();
     AddSC_boss_asira_dawnslayer();
     AddSC_boss_archbishop_benedictus();
+    AddSC_hour_of_twilight();
 #endif
 }
 

@@ -127,6 +127,7 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/HourOfTwilight/boss_asira_dawnslayer.cpp
   Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.h
   Kalimdor/CavernsOfTime/HourOfTwilight/instance_hour_of_twilight.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.cpp
 )
 
 message("  -> Prepared: Kalimdor")
