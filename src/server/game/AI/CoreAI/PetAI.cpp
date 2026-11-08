@@ -81,6 +81,15 @@ void PetAI::UpdateAI(uint32 diff)
     else
         m_updateAlliesTimer -= diff;
 
+    if (owner && owner->GetTypeId() == TypeID::TYPEID_UNIT && me->GetVictim() &&
+        !me->CanCreatureAttack(me->GetVictim()))
+    {
+        _stopAttack();
+        me->DeleteThreatList();
+        me->CombatStop(true);
+        return;
+    }
+
     if (me->GetVictim() && me->GetVictim()->IsAlive())
     {
         // is only necessary to stop casting, the pet must not exit combat
@@ -544,6 +553,10 @@ bool PetAI::CanAttack(Unit* target)
     // Hmmm...
     if (!target)
         return false;
+
+    if (Unit* owner = me->GetCharmerOrOwner())
+        if (owner->GetTypeId() == TypeID::TYPEID_UNIT && !me->CanCreatureAttack(target))
+            return false;
 
     if (!target->IsAlive())
     {
