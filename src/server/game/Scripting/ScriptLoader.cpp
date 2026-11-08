@@ -355,6 +355,7 @@ void AddSC_winterspring();
 void AddSC_instance_throne_of_the_four_winds();
 void AddSC_throne_of_the_four_winds();
 void AddSC_boss_conclave_of_wind();
+void AddSC_boss_alakir();
 
 // Northrend
 
@@ -1102,6 +1103,7 @@ void AddKalimdorScripts()
     AddSC_instance_throne_of_the_four_winds();
     AddSC_throne_of_the_four_winds();
     AddSC_boss_conclave_of_wind();
+    AddSC_boss_alakir();
 #endif
 }
 

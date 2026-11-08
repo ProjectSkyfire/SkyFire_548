@@ -126,6 +126,7 @@ set(scripts_STAT_SRCS
   Kalimdor/ThroneOfTheFourWinds/instance_throne_of_the_four_winds.cpp
   Kalimdor/ThroneOfTheFourWinds/throne_of_the_four_winds.cpp
   Kalimdor/ThroneOfTheFourWinds/boss_conclave_of_wind.cpp
+  Kalimdor/ThroneOfTheFourWinds/boss_alakir.cpp
 )
 
 message("  -> Prepared: Kalimdor")

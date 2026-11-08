@@ -95,6 +95,8 @@ class instance_throne_of_the_four_winds : public InstanceMapScript
                             go->SetGoState(GOState::GO_STATE_ACTIVE);
                         break;
                     case GO_FLOOR_ALAKIR:
+                        // the ring floor's origin lies far from the ring, so keep its grid loaded while players stand on it
+                        go->setActive(true);
                         if (GetBossState(DATA_ALAKIR) == DONE)
                             go->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
                         break;
@@ -209,7 +211,7 @@ class instance_throne_of_the_four_winds : public InstanceMapScript
                 uint64 uiNezir;
                 uint64 uiRohash;
                 uint64 uiAlakir;
-                uint64 uiHeartOfWind[MAX_DIFFICULTY];
+                uint64 uiHeartOfWind[MAX_HEART_OF_WIND];
                 bool bSlipstreamsSpawned;
         };
 

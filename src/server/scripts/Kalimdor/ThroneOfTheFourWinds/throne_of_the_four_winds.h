@@ -20,6 +20,9 @@
 
 #include "ScriptedCreature.h"
 
+// One Heart of the Wind chest per raid size and difficulty (10, 25, 10 heroic, 25 heroic)
+uint8 const MAX_HEART_OF_WIND = 4;
+
 enum Data
 {
     DATA_CONCLAVE_OF_WIND           = 0,
