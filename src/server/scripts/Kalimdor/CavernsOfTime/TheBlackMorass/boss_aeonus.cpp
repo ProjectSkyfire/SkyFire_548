@@ -46,7 +46,10 @@ public:
     {
         boss_aeonusAI(Creature* creature) : BossAI(creature, TYPE_AEONUS) { }
 
-        void Reset() OVERRIDE { }
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {

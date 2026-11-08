@@ -46,7 +46,10 @@ public:
     {
         boss_temporusAI(Creature* creature) : BossAI(creature, TYPE_TEMPORUS) { }
 
-        void Reset() OVERRIDE { }
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
