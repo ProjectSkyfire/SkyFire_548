@@ -18989,7 +18989,10 @@ void Player::UpdateVisibilityForPlayer()
 {
     // updates visibility of all objects around point of view for current player
     Skyfire::VisibleNotifier notifier(*this);
-    m_seer->VisitNearbyObject(GetSightRange(), notifier);
+    // in instances use the range of the relocation notifier: an always visible object whose origin lies outside the
+    // sight range, such as a large destructible floor, would otherwise be sent out of range here and only come back
+    // with the next movement; the open world keeps the cheaper scan
+    m_seer->VisitNearbyObject(GetMap()->Instanceable() ? MAX_VISIBILITY_DISTANCE : GetSightRange(), notifier);
     notifier.SendToSelf();   // send gathered data
 }
 
