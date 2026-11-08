@@ -54,6 +54,7 @@ class instance_halls_of_origination : public InstanceMapScript
                 RajhGUID = 0;
                 AnraphetDoorGUID = 0;
                 SunMirrorGUID = 0;
+                LiftOfTheMakersGUID = 0;
                 _deadElementals = 0;
             }
 
@@ -150,6 +151,12 @@ class instance_halls_of_origination : public InstanceMapScript
                 return 0;
             }
 
+            void SetData64(uint32 index, uint64 data) OVERRIDE
+            {
+                if (index == DATA_LIFT_OF_THE_MAKERS_GUID)
+                    LiftOfTheMakersGUID = data;
+            }
+
             uint64 GetData64(uint32 index) const OVERRIDE
             {
                 switch (index)
@@ -172,6 +179,8 @@ class instance_halls_of_origination : public InstanceMapScript
                         return SeteshGUID;
                     case DATA_RAJH:
                         return RajhGUID;
+                    case DATA_LIFT_OF_THE_MAKERS_GUID:
+                        return LiftOfTheMakersGUID;
                 }
 
                 return 0;
@@ -269,6 +278,7 @@ class instance_halls_of_origination : public InstanceMapScript
             uint64 RajhGUID;
             uint64 AnraphetDoorGUID;
             uint64 SunMirrorGUID;
+            uint64 LiftOfTheMakersGUID;
             uint32 _deadElementals;
         };
 

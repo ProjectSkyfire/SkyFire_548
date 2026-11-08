@@ -356,6 +356,7 @@ void AddSC_teldrassil();
 void AddSC_the_barrens();
 void AddSC_thunder_bluff();
 void AddSC_winterspring();
+void AddSC_halls_of_origination();
 
 // Northrend
 
@@ -1104,6 +1105,7 @@ void AddKalimdorScripts()
     AddSC_mount_hyjal();
     AddSC_feralas();
     AddSC_felwood();
+    AddSC_halls_of_origination();
 #endif
 }
 

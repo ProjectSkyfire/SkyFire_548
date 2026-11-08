@@ -37,6 +37,9 @@ enum Data
     DATA_BRANN_0_GUID,
     DATA_DEAD_ELEMENTALS,
     DATA_ANRAPHET_GUID,
+
+    // Lift of the Makers
+    DATA_LIFT_OF_THE_MAKERS_GUID,
 };
 
 enum Creatures
@@ -72,6 +75,8 @@ enum GameObjects
     GO_ANHUURS_DOOR                 = 202307,
     GO_ANHUURS_RIGHT_BEACON         = 203136,
     GO_ANHUURS_LEFT_BEACON          = 203133,
+
+    GO_LIFT_OF_THE_MAKERS           = 207547,
 
     GO_VAULT_OF_LIGHTS_DOOR         = 202313,
     GO_SUN_MIRROR                   = 207726,
