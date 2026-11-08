@@ -107,6 +107,15 @@ public:
             }
         }
 
+        void OnCreatureRemove(Creature* creature) OVERRIDE
+        {
+            InstanceScript::OnCreatureRemove(creature);
+
+            // Taretha only summons Epoch Hunter while this is empty, so a stale guid left a second attempt without a boss.
+            if (creature->GetEntry() == EPOCH_ENTRY)
+                EpochGUID = 0;
+        }
+
         void SetData(uint32 type, uint32 data) OVERRIDE
         {
             Player* player = GetPlayerInMap();
