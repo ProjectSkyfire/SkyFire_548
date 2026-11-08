@@ -298,7 +298,7 @@ public:
                 {
                     QuestStatus status = player->GetQuestStatus(13149);
                     if (status != QUEST_STATUS_COMPLETE && status != QUEST_STATUS_REWARDED)
-                        return false;
+                        return true;
                     player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ARTHAS_0, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
                     player->SEND_GOSSIP_MENU(907, creature->GetGUID());
                     break;
