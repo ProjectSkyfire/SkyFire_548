@@ -116,7 +116,8 @@ UPDATE `creature_template` SET `exp`=3, `maxlevel`=85, `minlevel`=85, `speed_run
 UPDATE `creature_template` SET `exp`=3, `mechanic_immune_mask`=16384 WHERE `entry`=56389;
 UPDATE `creature_template` SET `exp`=3, `spell1`=102265, `spell2`=102263 WHERE `entry`=56579;
 UPDATE `creature_template` SET `exp`=3, `mechanic_immune_mask`=617299967, `npcflag`=16777217 WHERE `entry`=57107;
-UPDATE `creature_template` SET `unit_flags`=33554432 WHERE `entry`=57329;
+-- Fel Flames Stalker: an invisible helper; the trigger flag keeps its model hidden from players on this core.
+UPDATE `creature_template` SET `unit_flags`=33554432, `flags_extra`=128 WHERE `entry`=57329;
 UPDATE `creature_template` SET `exp`=3, `faction_A`=90, `faction_H`=90, `maxlevel`=85, `minlevel`=85, `speed_run`=1.38889 WHERE `entry`=57410;
 UPDATE `creature_template` SET `exp`=3, `mechanic_immune_mask`=617299967 WHERE `entry`=57458;
 UPDATE `creature_template` SET `exp`=3, `flags_extra`=128, `maxlevel`=85, `minlevel`=85, `unit_flags`=33554432 WHERE `entry`=57631;

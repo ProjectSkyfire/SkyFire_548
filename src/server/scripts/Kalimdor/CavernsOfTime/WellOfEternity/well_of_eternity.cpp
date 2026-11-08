@@ -190,7 +190,7 @@ enum Spells
     SPELL_BLIZZARD              = 102267,
 
     // Royal Handmaiden
-    SPELL_SWEET_LULLABY         = 120245,
+    SPELL_SWEET_LULLABY         = 102245, // 120245 in the source, a transposed id; 102245 is the 5.4.8 ranged stun
 
     // Illidan 2
     SPELL_WATERS_OF_ETERNITY    = 103952,
