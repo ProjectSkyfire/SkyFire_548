@@ -128,6 +128,7 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/WellOfEternity/instance_well_of_eternity.cpp
   Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity.h
   Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity_teleport.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity.cpp
 )
 
 message("  -> Prepared: Kalimdor")

@@ -357,6 +357,7 @@ void AddSC_well_of_eternity_teleport();
 void AddSC_boss_perotharn();
 void AddSC_boss_queen_azshara();
 void AddSC_boss_mannoroth();
+void AddSC_well_of_eternity();
 
 // Northrend
 
@@ -1106,6 +1107,7 @@ void AddKalimdorScripts()
     AddSC_boss_perotharn();
     AddSC_boss_queen_azshara();
     AddSC_boss_mannoroth();
+    AddSC_well_of_eternity();
 #endif
 }
 
