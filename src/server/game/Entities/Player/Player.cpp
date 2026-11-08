@@ -4650,7 +4650,7 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
 
     if (!noCost && !sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_NO_RESET_TALENT_COST))
     {
-        cost = GetNextResetTalentsCost();
+        cost = resetTalents ? GetNextResetTalentsCost() : GetNextResetSpecializationCost();
 
         if (!HasEnoughMoney(uint64(cost)))
         {
@@ -4718,8 +4718,16 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS, cost);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS, 1);
 
-        SetTalentResetCost(cost);
-        SetTalentResetTime(time(NULL));
+        if (resetTalents)
+        {
+            SetTalentResetCost(cost);
+            SetTalentResetTime(time(NULL));
+        }
+        else
+        {
+            SetSpecializationResetCost(cost);
+            SetSpecializationResetTime(time(NULL));
+        }
     }
 
     /* when prev line will dropped use next line
