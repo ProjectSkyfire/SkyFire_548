@@ -265,6 +265,8 @@ void AddSC_boss_gelihast();
 void AddSC_boss_kelris();
 void AddSC_boss_aku_mai();
 void AddSC_instance_blackfathom_deeps();
+void AddSC_boss_echo_of_sylvanas();
+void AddSC_boss_echo_of_tyrande();
 void AddSC_boss_echo_of_baine();
 void AddSC_boss_echo_of_jaina();
 void AddSC_boss_murozond();
@@ -1013,6 +1015,8 @@ void AddKalimdorScripts()
     AddSC_boss_kelris();
     AddSC_boss_aku_mai();
     AddSC_instance_blackfathom_deeps();
+    AddSC_boss_echo_of_sylvanas();
+    AddSC_boss_echo_of_tyrande();
     AddSC_boss_echo_of_baine();
     AddSC_boss_echo_of_jaina();
     AddSC_boss_murozond();

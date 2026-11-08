@@ -22,6 +22,8 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/old_hillsbrad.cpp
   Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/instance_old_hillsbrad.cpp
   Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/boss_captain_skarloc.cpp
+  Kalimdor/CavernsOfTime/EndTime/boss_echo_of_sylvanas.cpp
+  Kalimdor/CavernsOfTime/EndTime/boss_echo_of_tyrande.cpp
   Kalimdor/CavernsOfTime/EndTime/boss_echo_of_baine.cpp
   Kalimdor/CavernsOfTime/EndTime/boss_echo_of_jaina.cpp
   Kalimdor/CavernsOfTime/EndTime/boss_murozond.cpp
