@@ -10,6 +10,15 @@
 #include "InstanceScript.h"
 #include "ruins_of_ahnqiraj.h"
 
+enum Andorov
+{
+    PATH_TO_BATTLE      = 1547100,
+    PATH_TO_ENTRANCE    = 1547101,
+    POINT_PATH_END      = 11
+};
+
+Position const BattlePos = { -8939.951f, 1551.127f, 21.566868f, 0.0f };
+
 class npc_andorov : public CreatureScript
 {
     public:
@@ -33,8 +42,7 @@ class npc_andorov : public CreatureScript
                     {
                         // he leads his elites to the first wave; the battle starts when it is engaged
                         creature->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                        creature->SetWalk(false);
-                        creature->GetMotionMaster()->MovePoint(0, -8978.11f, 1550.36f, 21.6f);
+                        creature->GetMotionMaster()->MovePath(PATH_TO_BATTLE, false);
                     }
 
             player->CLOSE_GOSSIP_MENU();
@@ -43,21 +51,27 @@ class npc_andorov : public CreatureScript
 
         struct npc_andorovAI : public ScriptedAI
         {
-            npc_andorovAI(Creature* creature) : ScriptedAI(creature), _lastState(NOT_STARTED)
+            npc_andorovAI(Creature* creature) : ScriptedAI(creature), _lastState(NOT_STARTED), _returning(false) { }
+
+            void JustRespawned() OVERRIDE
             {
-                _spawnPos = me->GetHomePosition();
+                _returning = false;
+                ScriptedAI::JustRespawned();
             }
 
             void MovementInform(uint32 type, uint32 id) OVERRIDE
             {
-                // at the battle he holds this ground between fights instead of walking back to the entrance
-                if (type == POINT_MOTION_TYPE && id == 0)
+                if (type != WAYPOINT_MOTION_TYPE || id != POINT_PATH_END)
+                    return;
+
+                InstanceScript* instance = me->GetInstanceScript();
+                if (_returning)
                 {
-                    me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                    if (InstanceScript* instance = me->GetInstanceScript())
-                        if (instance->GetData(DATA_RAJAXX_EVENT) == NOT_STARTED)
-                            instance->SetData(DATA_RAJAXX_EVENT, IN_PROGRESS);
+                    _returning = false;
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 }
+                else if (instance && instance->GetData(DATA_RAJAXX_EVENT) == NOT_STARTED)
+                    instance->SetData(DATA_RAJAXX_EVENT, IN_PROGRESS);
             }
 
             void JustReachedHome() OVERRIDE
@@ -70,12 +84,13 @@ class npc_andorov : public CreatureScript
                 if (InstanceScript* instance = me->GetInstanceScript())
                 {
                     uint32 state = instance->GetData(DATA_RAJAXX_EVENT);
-                    // the attack failed: he goes back to the entrance and can be asked again
-                    if (_lastState == IN_PROGRESS && state == NOT_STARTED)
+                    // the attack failed: he walks back to the entrance and can be asked again
+                    if (_lastState == IN_PROGRESS && state == NOT_STARTED && !_returning && me->GetExactDist2d(&BattlePos) < 80.0f)
                     {
                         _lastState = state;
-                        me->SetHomePosition(_spawnPos);
-                        EnterEvadeMode();
+                        _returning = true;
+                        _EnterEvadeMode();
+                        me->GetMotionMaster()->MovePath(PATH_TO_ENTRANCE, false);
                         return;
                     }
                     _lastState = state;
@@ -87,7 +102,7 @@ class npc_andorov : public CreatureScript
 
         private:
             uint32 _lastState;
-            Position _spawnPos;
+            bool _returning;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
