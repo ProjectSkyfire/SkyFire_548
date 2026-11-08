@@ -18,6 +18,7 @@ enum Spells
     SAY_AGGRO               = 0,
     SPELL_BOMB              = 9143,
     SPELL_GOBLIN_DRAGON_GUN = 21833,
+    SPELL_FLASH_BOMB        = 29419,
 };
 
 class boss_tinkerer_gizlock : public CreatureScript
@@ -36,12 +37,14 @@ public:
         {
             uiBombTimer = 0;
             uiGoblinDragonGunTimer = 0;
+            uiFlashBombTimer = 0;
         }
 
         void Reset() OVERRIDE
         {
-            uiBombTimer = 2000;
-            uiGoblinDragonGunTimer = 13000;
+            uiBombTimer = 4000;
+            uiGoblinDragonGunTimer = urand(6000, 9000);
+            uiFlashBombTimer = 25000;
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE 
@@ -57,8 +60,9 @@ public:
             //uiBombTimer
             if (uiBombTimer <= diff)
             {
-                DoCastVictim(SPELL_BOMB);
-                uiBombTimer = 2000;
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(target, SPELL_BOMB);
+                uiBombTimer = 12000;
             }
             else uiBombTimer -= diff;
 
@@ -66,9 +70,16 @@ public:
             if (uiGoblinDragonGunTimer <= diff)
             {
                 DoCastVictim(SPELL_GOBLIN_DRAGON_GUN);
-                uiGoblinDragonGunTimer = 17000;
+                uiGoblinDragonGunTimer = urand(16000, 19000);
             }
             else uiGoblinDragonGunTimer -= diff;
+
+            if (uiFlashBombTimer <= diff)
+            {
+                DoCast(me, SPELL_FLASH_BOMB);
+                uiFlashBombTimer = 25000;
+            }
+            else uiFlashBombTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
@@ -76,6 +87,7 @@ public:
     private:
         uint32 uiBombTimer;
         uint32 uiGoblinDragonGunTimer;
+        uint32 uiFlashBombTimer;
     };
 };
 
