@@ -126,3 +126,6 @@ DELETE FROM `spell_target_position` WHERE `id` IN (108928, 108929);
 INSERT INTO `spell_target_position` (`id`, `effIndex`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
 (108928, 0, 940, 4440.64, 454.088, 46.311, 3.25432),
 (108929, 0, 940, 3956.93, 284.866, 14.4072, 2.97708);
+
+-- Target Dummy and Cannon are invisible triggers in 5.4.8 (LoA's templates): trigger flag and not selectable.
+UPDATE `creature_template` SET `flags_extra`=128, `unit_flags`=33554944 WHERE `entry` IN (56126, 58287);
