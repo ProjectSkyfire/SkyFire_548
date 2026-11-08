@@ -22,6 +22,10 @@ set(scripts_STAT_SRCS
   Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/old_hillsbrad.cpp
   Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/instance_old_hillsbrad.cpp
   Kalimdor/CavernsOfTime/EscapeFromDurnholdeKeep/boss_captain_skarloc.cpp
+  Kalimdor/CavernsOfTime/EndTime/end_time.cpp
+  Kalimdor/CavernsOfTime/EndTime/end_time.h
+  Kalimdor/CavernsOfTime/EndTime/end_time_teleport.cpp
+  Kalimdor/CavernsOfTime/EndTime/instance_end_time.cpp
   Kalimdor/CavernsOfTime/BattleForMountHyjal/boss_archimonde.cpp
   Kalimdor/CavernsOfTime/BattleForMountHyjal/hyjalAI.h
   Kalimdor/CavernsOfTime/BattleForMountHyjal/hyjal_trash.h
