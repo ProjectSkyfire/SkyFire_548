@@ -1398,6 +1398,49 @@ struct npc_fire_of_the_seas : public ScriptedAI
     }
 };
 
+enum ThonksSpyglass
+{
+    SPELL_TELESCOPE_RAGGARAN  = 73741,
+    SPELL_TELESCOPE_TEKLA     = 73763,
+    SPELL_TELESCOPE_MISHA     = 73764,
+    SPELL_TELESCOPE_ZEN_TAJI  = 73765,
+
+    OBJECTIVE_RAGGARAN        = 256157,
+    OBJECTIVE_FLOODED_HUT     = 256158,
+    OBJECTIVE_MISHA           = 256159,
+    OBJECTIVE_ZEN_TAJI        = 256160,
+
+    QUEST_LOST_IN_THE_FLOODS  = 25187
+};
+
+// 73817 - Thonk's Spyglass
+class spell_thonks_spyglass : public SpellScript
+{
+    PrepareSpellScript(spell_thonks_spyglass);
+
+    void HandleAfterCast()
+    {
+        Player* player = GetCaster()->ToPlayer();
+        if (!player || player->GetQuestStatus(QUEST_LOST_IN_THE_FLOODS) != QUEST_STATUS_INCOMPLETE)
+            return;
+
+        // Each use shows the first place that has not been seen yet
+        if (!player->GetQuestObjectiveCounter(OBJECTIVE_RAGGARAN))
+            player->CastSpell(player, SPELL_TELESCOPE_RAGGARAN, true);
+        else if (!player->GetQuestObjectiveCounter(OBJECTIVE_FLOODED_HUT))
+            player->CastSpell(player, SPELL_TELESCOPE_TEKLA, true);
+        else if (!player->GetQuestObjectiveCounter(OBJECTIVE_MISHA))
+            player->CastSpell(player, SPELL_TELESCOPE_MISHA, true);
+        else if (!player->GetQuestObjectiveCounter(OBJECTIVE_ZEN_TAJI))
+            player->CastSpell(player, SPELL_TELESCOPE_ZEN_TAJI, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        AfterCast += SpellCastFn(spell_thonks_spyglass::HandleAfterCast);
+    }
+};
+
 void AddSC_durotar()
 {
     new npc_zuni_bridge();
@@ -1416,4 +1459,5 @@ void AddSC_durotar()
     RegisterCreatureAI(npc_voljin_ancient_enemy);
     RegisterCreatureAI(npc_zarjira);
     RegisterCreatureAI(npc_fire_of_the_seas);
+    RegisterSpellScript(spell_thonks_spyglass);
 }
