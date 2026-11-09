@@ -590,6 +590,7 @@ enum q25464
     SAY_GEDDON_LIVING_BOMB          = 0,
 
     NPC_BARON_GEDDON                = 40147,
+    NPC_BARON_GEDDON_CREDIT         = 40334,
     NPC_GALROND_OF_THE_CLAW         = 40148,
 
     SAY_GALROND_WARNING             = 0,
@@ -964,9 +965,21 @@ class spell_weakening : public SpellScriptLoader
 
             }
 
+            void HandlePeriodic(AuraEffect const* /*aurEff*/)
+            {
+                Unit* caster = GetCaster();
+                if (!caster || GetTarget()->GetEntry() != NPC_BARON_GEDDON)
+                    return;
+
+                if (Player* player = caster->ToPlayer())
+                    if (player->GetQuestStatus(QUEST_THE_RETUN_OF_BARON_GEDDON) == QUEST_STATUS_INCOMPLETE)
+                        player->KilledMonsterCredit(NPC_BARON_GEDDON_CREDIT, 0);
+            }
+
             void Register() OVERRIDE
             {
                 OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(spell_weakening_AuraScript::OnUpdate, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_weakening_AuraScript::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
             }
         };
 
