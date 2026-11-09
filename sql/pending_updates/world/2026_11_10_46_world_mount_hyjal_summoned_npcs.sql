@@ -8,8 +8,7 @@ UPDATE `creature_template` SET `lootid` = 40107 WHERE `entry` = 40107 AND `looti
 
 DELETE FROM `smart_scripts` WHERE (`source_type` = 0 AND `entryorguid` IN (39659, 39640, 39797, 40107, 40121, 41114)) OR (`source_type` = 9 AND `entryorguid` IN (4012100, 4111401, 4111402)) OR (`source_type` = 0 AND `entryorguid` = 39446 AND `id` IN (1, 2));
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(39640, 0, 0, 1, 19, 0, 100, 0, 25332, 0, 0, 0, 0, 86, 74351, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Kristoff Manheim - On Accepted Quest - Cross Cast Shadowed by Kristoff'),
-(39640, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Kristoff Manheim - Linked To Id 0 - Despawn'),
+(39640, 0, 0, 0, 19, 0, 100, 0, 25332, 0, 0, 0, 0, 86, 74351, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Kristoff Manheim - On Accepted Quest - Cross Cast Shadowed by Kristoff'),
 (39659, 0, 0, 0, 8, 0, 100, 0, 74142, 0, 0, 0, 0, 33, 39673, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Spawn of Smolderos - Give Kill Credit'),
 (39797, 0, 0, 1, 54, 0, 100, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Kristoff Manheim - On Summoned - Set React State Passive'),
 (39797, 0, 1, 2, 61, 0, 100, 0, 0, 0, 0, 0, 0, 11, 24222, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Kristoff Manheim - Linked To Id 0 - Cast Vanish Visual'),
@@ -66,6 +65,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (4111402, 9, 9, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Thisalee Crow - On Script - Despawn'),
 (39446, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 0, 12, 39622, 1, 60000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lycanthoth - Summon Spirit of Lo''Gosh'),
 (39446, 0, 2, 0, 6, 0, 100, 0, 0, 0, 0, 0, 0, 12, 39627, 1, 60000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Lycanthoth - Summon Spirit of Goldrinn');
+
+-- Do not gate Lycanthoth's spirits on the killing unit, which can be a pet or another player.
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 39446 AND `SourceId` = 0 AND `SourceGroup` IN (2, 3);
 
 DELETE FROM `creature_text` WHERE `entry` IN (40107, 39797, 41114);
 INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
