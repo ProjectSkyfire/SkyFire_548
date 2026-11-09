@@ -572,7 +572,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineStore, dbcPath, "SkillLine.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineAbilityStore, dbcPath, "SkillLineAbility.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSoundEntriesStore, dbcPath, "SoundEntries.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore, dbcPath, "Spell.dbc"/*, &CustomSpellEntryfmt, &CustomSpellEntryIndex*/);//
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore, dbcPath, "Spell.dbc", &CustomSpellEntryfmt, &CustomSpellEntryIndex);//
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoriesStore, dbcPath, "SpellCategories.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCategoryStore, dbcPath, "SpellCategory.dbc");
     for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
@@ -597,13 +597,13 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellAuraOptionsStore, dbcPath, "SpellAuraOptions.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellAuraRestrictionsStore, dbcPath, "SpellAuraRestrictions.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCastingRequirementsStore, dbcPath, "SpellCastingRequirements.dbc");//15595
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellEffectStore, dbcPath, "SpellEffect.dbc"/*, &CustomSpellEffectEntryfmt, &CustomSpellEffectEntryIndex*/);//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellEffectStore, dbcPath, "SpellEffect.dbc", &CustomSpellEffectEntryfmt, &CustomSpellEffectEntryIndex);//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellCastTimesStore, dbcPath, "SpellCastTimes.dbc");//15595
     // LoadDBC(availableDbcLocales, bad_dbc_files, sSpellDifficultyStore,        dbcPath, "SpellDifficulty.dbc", &CustomSpellDifficultyfmt, &CustomSpellDifficultyIndex);//15595 -- DBC gone, wtf blizzard ...
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellDurationStore, dbcPath, "SpellDuration.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellFocusObjectStore, dbcPath, "SpellFocusObject.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellItemEnchantmentStore, dbcPath, "SpellItemEnchantment.dbc");//18414
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellMiscStore, dbcPath, "SpellMisc.dbc");//17538
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellMiscStore, dbcPath, "SpellMisc.dbc", &CustomSpellMiscfmt, &CustomSpellMiscIndex);//17538
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellEffectScalingStore, dbcPath, "SpellEffectScaling.dbc");//17538
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellItemEnchantmentConditionStore, dbcPath, "SpellItemEnchantmentCondition.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellRadiusStore, dbcPath, "SpellRadius.dbc");//15595

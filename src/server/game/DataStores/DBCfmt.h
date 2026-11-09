@@ -145,12 +145,15 @@ char const SpellTotemsEntryfmt[] = "diiii";
 char const SpellDifficultyfmt[] = "niiii";
 const std::string CustomSpellDifficultyfmt = "ppppp";
 const std::string CustomSpellDifficultyIndex = "id";
-//                                             0         10        20    26
+//                                             0         10        20
 char const SpellEffectEntryfmt[] = "niifiiiffiiiiiifiifiiiiixiiiix";
-const std::string CustomSpellEffectEntryfmt = "ppppppppppapppappppppppppp";
+const std::string CustomSpellEffectEntryfmt = "papppppppppapppappppppapapppp";
 const std::string CustomSpellEffectEntryIndex = "Id";
-//const std::string CustomSpellEntryfmt = "ppppppppppppppapaaaaaaaaapaaaaaapapppaapppaaapa";
-//const std::string CustomSpellEntryIndex = "Id";
+// The trailing 'a' in the next two skips the Comment column of the sql table
+const std::string CustomSpellEntryfmt = "paaaaaaaaapapppapppaapaapa";
+const std::string CustomSpellEntryIndex = "Id";
+const std::string CustomSpellMiscfmt = "paappppppppppaaaapppaaaaapa";
+const std::string CustomSpellMiscIndex = "Id";
 char const SpellEffectScalingfmt[] = "nfffxi";
 char const SpellFocusObjectfmt[] = "nx";
 char const SpellItemEnchantmentfmt[] = "nxiiiiiiiiisiiiiiiiixxxxxx";
