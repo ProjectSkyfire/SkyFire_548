@@ -31,6 +31,7 @@ class instance_vortex_pinnacle : public InstanceMapScript
                 _ertanGUID = 0;
                 _altairusGUID = 0;
                 _asaadGUID = 0;
+                _goldenOrbs = 0;
             }
 
             void OnCreatureCreate(Creature* creature) OVERRIDE
@@ -47,6 +48,19 @@ class instance_vortex_pinnacle : public InstanceMapScript
                         _asaadGUID = creature->GetGUID();
                         break;
                 }
+            }
+
+            void SetData(uint32 type, uint32 /*data*/) OVERRIDE
+            {
+                if (type != DATA_GOLDEN_ORB)
+                    return;
+
+                ++_goldenOrbs;
+                DoUpdateWorldState(WORLDSTATE_GOLDEN_ORBS_COLLECTED, _goldenOrbs);
+                if (_goldenOrbs == GOLDEN_ORBS_FOR_ACHIEVEMENT)
+                    DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, SPELL_ACHIEVEMENT_CHECK);
+
+                SaveToDB();
             }
 
             uint64 GetData64(uint32 type) const OVERRIDE
@@ -67,7 +81,7 @@ class instance_vortex_pinnacle : public InstanceMapScript
             std::string GetSaveData() OVERRIDE
             {
                 std::ostringstream saveStream;
-                saveStream << "V P " << GetBossSaveData();
+                saveStream << "V P " << GetBossSaveData() << _goldenOrbs;
                 return saveStream.str();
             }
 
@@ -87,6 +101,9 @@ class instance_vortex_pinnacle : public InstanceMapScript
                     if (!(loadStream >> states[i]))
                         return;
 
+                if (!(loadStream >> _goldenOrbs))
+                    _goldenOrbs = 0;
+
                 for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 {
                     if (states[i] == IN_PROGRESS || states[i] > SPECIAL)
@@ -99,6 +116,7 @@ class instance_vortex_pinnacle : public InstanceMapScript
             uint64 _ertanGUID;
             uint64 _altairusGUID;
             uint64 _asaadGUID;
+            uint32 _goldenOrbs;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE

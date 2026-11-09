@@ -23,7 +23,15 @@ enum VortexPinnacleData
     DATA_ERTAN = 0,
     DATA_ALTAIRUS = 1,
     DATA_ASAAD = 2,
-    MAX_ENCOUNTER = 3
+    MAX_ENCOUNTER = 3,
+    DATA_GOLDEN_ORB = 4
+};
+
+enum VortexPinnacleMisc
+{
+    SPELL_ACHIEVEMENT_CHECK = 94756,
+    WORLDSTATE_GOLDEN_ORBS_COLLECTED = 5649,
+    GOLDEN_ORBS_FOR_ACHIEVEMENT = 5
 };
 
 enum VortexPinnacleCreatures
