@@ -21,8 +21,6 @@
 #include <thread>
 #include <vector>
 
-uint32 GetLiquidFlags(uint32 /*liquidType*/) { return 0; }
-
 namespace DisableMgr
 {
     bool IsDisabledFor(DisableType /*type*/, uint32 /*entry*/, Unit const* /*unit*/, uint8 /*flags*/ /*= 0*/) { return false; }

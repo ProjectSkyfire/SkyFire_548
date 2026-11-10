@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <thread>
+#include <unordered_map>
 
 #ifdef _WIN32
     #include "direct.h"
@@ -17,6 +18,18 @@
 
 using namespace MMAP;
 
+namespace
+{
+    // LiquidType.dbc id to liquid kind (0 water, 1 ocean, 2 magma, 3 slime)
+    std::unordered_map<uint32, uint8> _liquidTypes;
+}
+
+uint32 GetLiquidFlags(uint32 liquidType)
+{
+    auto itr = _liquidTypes.find(liquidType);
+    return itr != _liquidTypes.end() ? (1 << itr->second) : 0;
+}
+
 void CreateDir(std::string const& path)
 {
 #ifdef _WIN32
@@ -24,6 +37,28 @@ void CreateDir(std::string const& path)
 #else
     mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IRWXO); // 0777
 #endif
+}
+
+bool loadLiquidTypes()
+{
+    FILE* dbc = fopen("dbc/LiquidType.dbc", "rb");
+    if (!dbc)
+        return false;
+
+    // WDBC header: magic, record count, field count, record size, string block size
+    uint32 header[5];
+    bool loaded = fread(header, sizeof(uint32), 5, dbc) == 5 && header[0] == 0x43424457 && header[2] >= 4;
+    for (uint32 i = 0; loaded && i < header[1]; ++i)
+    {
+        std::vector<uint32> record(header[3] / sizeof(uint32));
+        if (fread(record.data(), 1, header[3], dbc) != header[3])
+            loaded = false;
+        else
+            _liquidTypes[record[0]] = record[3];
+    }
+
+    fclose(dbc);
+    return loaded;
 }
 
 bool checkDirectories(bool debugOutput)
@@ -287,6 +322,9 @@ int main(int argc, char** argv)
 
     if (!checkDirectories(debugOutput))
         return silent ? -3 : finish("Press ENTER to close...", -3);
+
+    if (!loadLiquidTypes())
+        return silent ? -5 : finish("Failed to load dbc/LiquidType.dbc", -5);
 
     MapBuilder builder(maxAngle, skipLiquid, skipContinents, skipJunkMaps,
                        skipBattlegrounds, debugOutput, bigBaseUnit, offMeshInputPath);
