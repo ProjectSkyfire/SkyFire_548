@@ -3,8 +3,10 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "Creature.h"
 #include "DBCStructure.h"
 #include "HostileRefManager.h"
+#include "Map.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "ThreatManager.h"
@@ -107,6 +109,56 @@ void HostileRefManager::deleteReferences()
         HostileReference* nextRef = ref->next();
         ref->removeReference();
         delete ref;
+        ref = nextRef;
+    }
+}
+
+//=================================================
+// A creature that is out of combat, dead, on another map or evading never drops the reference it holds, and
+// one that is far away or in another phase may not be updated, so the owner would stay in combat for good.
+// In instances only dead, removed or departed creatures count, so boss phases keep their threat lists.
+
+void HostileRefManager::deleteStaleReferences()
+{
+    bool fighting = iOwner->GetVictim() || !iOwner->getAttackers().empty();
+
+    HostileReference* ref = getFirst();
+    while (ref)
+    {
+        HostileReference* nextRef = ref->next();
+        Unit* source = ref->GetSource()->GetOwner();
+        char const* reason = NULL;
+
+        if (!source->IsInWorld())
+            reason = "not in world";
+        else if (!source->IsAlive())
+            reason = "dead";
+        else if (!source->IsInMap(iOwner))
+            reason = "other map";
+        // Instance bosses stop combat and evade on purpose during their phases while keeping their threat list
+        else if (source->GetMap()->Instanceable())
+            reason = NULL;
+        else if (source->HasUnitState(UNIT_STATE_EVADE))
+            reason = "evading";
+        else if (!source->IsInCombat())
+            reason = "not in combat";
+        else if (!fighting)
+        {
+            if (!source->InSamePhase(iOwner))
+                reason = "other phase";
+            else if (!(source->GetTypeId() == TypeID::TYPEID_UNIT && source->ToCreature()->isWorldBoss())
+                && !source->IsWithinDist(iOwner, source->GetMap()->GetVisibilityRange()))
+                reason = "too far";
+        }
+
+        if (reason)
+        {
+            SF_LOG_ERROR("entities.unit", "Dropped the stale threat reference of creature %u (guid %u, map %u) on %s: %s.",
+                source->GetEntry(), source->GetGUIDLow(), source->GetMapId(), iOwner->GetName().c_str(), reason);
+            ref->removeReference();
+            delete ref;
+        }
+
         ref = nextRef;
     }
 }

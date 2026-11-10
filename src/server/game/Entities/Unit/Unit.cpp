@@ -241,6 +241,7 @@ Unit::Unit(bool isWorldObject) :
     m_baseSpellCritChance = 5;
 
     m_CombatTimer = 0;
+    m_hostileRefCheckTimer = HOSTILE_REF_CHECK_INTERVAL;
 
     for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
         m_threatModifier[i] = 1.0f;
@@ -347,6 +348,17 @@ void Unit::Update(uint32 p_time)
                 ClearInCombat();
             else
                 m_CombatTimer -= p_time;
+        }
+        else if (GetTypeId() == TypeID::TYPEID_PLAYER)
+        {
+            // The references of a creature that can no longer fight the player would hold the combat state for good
+            if (m_hostileRefCheckTimer <= p_time)
+            {
+                m_hostileRefCheckTimer = HOSTILE_REF_CHECK_INTERVAL;
+                m_HostileRefManager.deleteStaleReferences();
+            }
+            else
+                m_hostileRefCheckTimer -= p_time;
         }
     }
 

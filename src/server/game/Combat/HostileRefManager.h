@@ -39,6 +39,9 @@ public:
     // tell the source to remove them from the list and free the mem
     void deleteReferences();
 
+    // Remove the references of creatures that cannot be fighting the owner any more
+    void deleteStaleReferences();
+
     // Remove specific faction references
     void deleteReferencesForFaction(uint32 faction);
 

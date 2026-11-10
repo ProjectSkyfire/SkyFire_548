@@ -18,6 +18,7 @@
 #include "ThreatManager.h"
 
 #define WORLD_TRIGGER   12999
+#define HOSTILE_REF_CHECK_INTERVAL 2000
 
 enum SpellInterruptFlags
 {
@@ -3015,6 +3016,7 @@ protected:
 private:
     uint32 m_state;                                     // Even derived shouldn't modify
     uint32 m_CombatTimer;
+    uint32 m_hostileRefCheckTimer;
     TimeTrackerSmall m_movesplineTimer;
 
     Diminishing m_Diminishing;
