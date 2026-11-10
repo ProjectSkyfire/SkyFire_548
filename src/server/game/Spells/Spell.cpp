@@ -4014,32 +4014,16 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
         static_cast<uint32>(customError),
         static_cast<uint32>(opcode));
 
-    WorldPacket data(opcode, (4 + 1 + 1));
-    if (opcode == SMSG_CAST_FAILED)
-    {
-        data << uint32(spellInfo->Id);
-        data << uint32(result);                              // problem
-    }
-    else
-    {
-        data << uint32(result);                              // problem
-        data << uint32(spellInfo->Id);
-    }
-    data << uint8(cast_count);
-
-    size_t pos = data.bitwpos();
-    data.WriteBit(1);
-    data.WriteBit(1);
-    data.FlushBits();
-
-    size_t dataPos = data.wpos();
+    // arg1 is the value the client formats into the error text (focus, area, item...), arg2 the secondary one
+    std::optional<uint32> arg1;
+    std::optional<uint32> arg2;
     switch (result)
     {
         case SpellCastResult::SPELL_FAILED_NOT_READY:
-            data << uint32(0);                              // unknown (value 1 update cooldowns on client flag)
+            arg1 = 0;                                       // unknown (value 1 update cooldowns on client flag)
             break;
         case SpellCastResult::SPELL_FAILED_REQUIRES_SPELL_FOCUS:
-            data << uint32(spellInfo->RequiresSpellFocus);  // SpellFocusObject.dbc id
+            arg1 = spellInfo->RequiresSpellFocus;           // SpellFocusObject.dbc id
             break;
         case SpellCastResult::SPELL_FAILED_REQUIRES_AREA:   // AreaTable.dbc id
             // hardcode areas limitation case
@@ -4047,37 +4031,37 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
             {
                 case 41617:                                 // Cenarion Mana Salve
                 case 41619:                                 // Cenarion Healing Salve
-                    data << uint32(3905);
+                    arg1 = 3905;
                     break;
                 case 41618:                                 // Bottled Nethergon Energy
                 case 41620:                                 // Bottled Nethergon Vapor
-                    data << uint32(3842);
+                    arg1 = 3842;
                     break;
                 case 45373:                                 // Bloodberry Elixir
-                    data << uint32(4075);
+                    arg1 = 4075;
                     break;
                 default:                                    // default case (don't must be)
-                    data << uint32(0);
+                    arg1 = 0;
                     break;
             }
             break;
         case SpellCastResult::SPELL_FAILED_TOTEMS:
             if (spellInfo->Totem[0])
-                data << uint32(spellInfo->Totem[0]);
+                arg1 = spellInfo->Totem[0];
             if (spellInfo->Totem[1])
-                data << uint32(spellInfo->Totem[1]);
+                arg2 = spellInfo->Totem[1];
             break;
         case SpellCastResult::SPELL_FAILED_TOTEM_CATEGORY:
             if (spellInfo->TotemCategory[0])
-                data << uint32(spellInfo->TotemCategory[0]);
+                arg1 = spellInfo->TotemCategory[0];
             if (spellInfo->TotemCategory[1])
-                data << uint32(spellInfo->TotemCategory[1]);
+                arg2 = spellInfo->TotemCategory[1];
             break;
         case SpellCastResult::SPELL_FAILED_EQUIPPED_ITEM_CLASS:
         case SpellCastResult::SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND:
         case SpellCastResult::SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND:
-            data << uint32(spellInfo->EquippedItemClass);
-            data << uint32(spellInfo->EquippedItemSubClassMask);
+            arg1 = spellInfo->EquippedItemClass;
+            arg2 = spellInfo->EquippedItemSubClassMask;
             break;
         case SpellCastResult::SPELL_FAILED_TOO_MANY_OF_ITEM:
         {
@@ -4087,31 +4071,31 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
                     item = spellInfo->Effects[eff].ItemType;
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item);
             if (proto && proto->ItemLimitCategory)
-                data << uint32(proto->ItemLimitCategory);
+                arg1 = proto->ItemLimitCategory;
             break;
         }
         case SpellCastResult::SPELL_FAILED_PREVENTED_BY_MECHANIC:
-            data << uint32(spellInfo->GetAllEffectsMechanicMask());  // SpellMechanic.dbc id
+            arg1 = spellInfo->GetAllEffectsMechanicMask();  // SpellMechanic.dbc id
             break;
         case SpellCastResult::SPELL_FAILED_NEED_EXOTIC_AMMO:
-            data << uint32(spellInfo->EquippedItemSubClassMask); // seems correct...
+            arg1 = spellInfo->EquippedItemSubClassMask;     // seems correct...
             break;
         case SpellCastResult::SPELL_FAILED_NEED_MORE_ITEMS:
-            data << uint32(0);                              // Item id
-            data << uint32(0);                              // Item count?
+            arg1 = 0;                                       // Item id
+            arg2 = 0;                                       // Item count?
             break;
         case SpellCastResult::SPELL_FAILED_MIN_SKILL:
-            data << uint32(0);                              // SkillLine.dbc id
-            data << uint32(0);                              // required skill value
+            arg1 = 0;                                       // SkillLine.dbc id
+            arg2 = 0;                                       // required skill value
             break;
         case SpellCastResult::SPELL_FAILED_FISHING_TOO_LOW:
-            data << uint32(0);                              // required fishing skill
+            arg1 = 0;                                       // required fishing skill
             break;
         case SpellCastResult::SPELL_FAILED_CUSTOM_ERROR:
-            data << uint32(customError);
+            arg1 = customError;
             break;
         case SpellCastResult::SPELL_FAILED_SILENCED:
-            data << uint32(0);                              // Unknown
+            arg1 = 0;                                       // Unknown
             break;
         case SpellCastResult::SPELL_FAILED_REAGENTS:
         {
@@ -4131,7 +4115,7 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
                 }
             }
 
-            data << uint32(missingItem);  // first missing item
+            arg1 = missingItem;                             // first missing item
             break;
         }
         // TODO: SPELL_FAILED_NOT_STANDING
@@ -4139,13 +4123,20 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
             break;
     }
 
-    if (int32 diff = data.wpos() - dataPos)
-    {
-        if ((diff / 4) == 1)
-            data.PutBits(pos, 0, 1);
-        else
-            data.PutBits(pos, 0, 2); // 1 and 1
-    }
+    // Both opcodes share one layout; the client reads the arg2 bit and value before arg1's
+    WorldPacket data(opcode, 4 + 4 + 1 + 1 + 4 + 4);
+    data << uint32(spellInfo->Id);
+    data << uint32(result);
+    data << uint8(cast_count);
+    data.WriteBit(!arg2);
+    data.WriteBit(!arg1);
+    data.FlushBits();
+
+    if (arg2)
+        data << uint32(*arg2);
+    if (arg1)
+        data << uint32(*arg1);
+
     caster->GetSession()->SendPacket(&data);
 }
 
