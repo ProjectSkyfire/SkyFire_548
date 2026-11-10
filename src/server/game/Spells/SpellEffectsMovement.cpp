@@ -150,7 +150,7 @@ void Spell::CalculateJumpSpeeds(uint8 i, float dist, float& speedXY, float& spee
     speedZ = std::sqrt(2.0f * float(Movement::gravity) * height);
 }
 
-void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
+void Spell::EffectTeleportUnits(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
@@ -170,11 +170,17 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
     if (mapid == MAPID_INVALID)
         mapid = unitTarget->GetMapId();
 
-    // Same-map spell teleports (Shadowstep, Blink, etc.) must not CombatStop —
+    // Same-map spell teleports (Shadowstep, Blink, etc.) must not CombatStop,
     // that fires SMSG_CANCEL_COMBAT between SPELL_GO and MOVE_TELEPORT and drops
-    // the departure smoke/visual for observers.
+    // the departure smoke/visual for observers. Teleports to a stored location
+    // (Hearthstone, city teleports) still leave combat, otherwise a stale threat
+    // reference far behind keeps the player in combat.
+    SpellEffectInfo const& effectInfo = m_spellInfo->Effects[effIndex];
+    bool storedDest = effectInfo.TargetA.GetTarget() == TARGET_DEST_HOME || effectInfo.TargetA.GetTarget() == TARGET_DEST_DB ||
+        effectInfo.TargetB.GetTarget() == TARGET_DEST_HOME || effectInfo.TargetB.GetTarget() == TARGET_DEST_DB;
+
     uint32 options = 0;
-    if (mapid == unitTarget->GetMapId())
+    if (mapid == unitTarget->GetMapId() && !storedDest)
         options |= TELE_TO_NOT_LEAVE_COMBAT;
 
     float x, y, z, orientation;
