@@ -446,6 +446,63 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
     return true;
 }
 
+namespace
+{
+    // Out-of-combat scan so hostile creatures that are already standing in range
+    // start fighting. MoveInLineOfSight only runs when one of them moves.
+    class NearestStandingHostileCheck
+    {
+    public:
+        explicit NearestStandingHostileCheck(Creature const* creature, float range) : me(creature), m_range(range) { }
+
+        bool operator()(Unit* unit)
+        {
+            if (!me->IsWithinDistInMap(unit, m_range))
+                return false;
+
+            if (!me->CanStartAttack(unit, false))
+                return false;
+
+            m_range = me->GetDistance(unit);
+            return true;
+        }
+
+    private:
+        Creature const* me;
+        float m_range;
+    };
+}
+
+static void EngageNearestStandingHostile(Creature* creature)
+{
+    if (!creature->IsAIEnabled || creature->IsInCombat() || creature->IsInEvadeMode() || !creature->IsAlive())
+        return;
+
+    if (!creature->HasReactState(REACT_AGGRESSIVE) || creature->IsCivilian() || creature->IsPet() || creature->IsTotem()
+        || creature->IsTrigger() || creature->IsCharmed() || creature->IsVehicle() || creature->isWorldBoss() || creature->IsDungeonBoss())
+        return;
+
+    if (creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+        return;
+
+    if (creature->HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_FLEEING | UNIT_STATE_CONFUSED | UNIT_STATE_EVADE))
+        return;
+
+    float range = creature->GetCreatureTemplate()->DetectionRange;
+    if (range < ATTACK_DISTANCE)
+        range = ATTACK_DISTANCE;
+    if (range > MAX_AGGRO_RADIUS)
+        range = MAX_AGGRO_RADIUS;
+
+    Unit* target = NULL;
+    NearestStandingHostileCheck check(creature, range);
+    Skyfire::UnitLastSearcher<NearestStandingHostileCheck> searcher(creature, target, check);
+    creature->VisitNearbyObject(range, searcher);
+
+    if (target)
+        creature->AI()->AttackStart(target);
+}
+
 void Creature::Update(uint32 diff)
 {
     if (IsAIEnabled && TriggerJustRespawned)
@@ -589,6 +646,9 @@ void Creature::Update(uint32 diff)
                 if (!bIsPolymorphed) // if polymorphed, skip the timer
                     m_regenTimer -= diff;*/
             m_regenTimer = CREATURE_REGEN_INTERVAL;
+
+            if (!IsInCombat() && !IsInEvadeMode())
+                EngageNearestStandingHostile(this);
             break;
         }
         default:
