@@ -835,23 +835,25 @@ void LoadDBCStores(const std::string& dataPath)
             if (!node)
                 continue;
 
+            // A node without any path is a quest or scripted flight point. Keeping it in the network
+            // lets it win the nearest node search over the real flight master next to it.
             TaxiPathSetBySource::const_iterator src_i = sTaxiPathSetBySource.find(i);
-            if (src_i != sTaxiPathSetBySource.end() && !src_i->second.empty())
-            {
-                bool ok = false;
-                for (TaxiPathSetForSource::const_iterator dest_i = src_i->second.begin(); dest_i != src_i->second.end(); ++dest_i)
-                {
-                    // not spell path
-                    if (spellPaths.find(dest_i->second.ID) == spellPaths.end())
-                    {
-                        ok = true;
-                        break;
-                    }
-                }
+            if (src_i == sTaxiPathSetBySource.end() || src_i->second.empty())
+                continue;
 
-                if (!ok)
-                    continue;
+            bool ok = false;
+            for (TaxiPathSetForSource::const_iterator dest_i = src_i->second.begin(); dest_i != src_i->second.end(); ++dest_i)
+            {
+                // not spell path
+                if (spellPaths.find(dest_i->second.ID) == spellPaths.end())
+                {
+                    ok = true;
+                    break;
+                }
             }
+
+            if (!ok)
+                continue;
 
             // valid taxi network node
             uint8  field = (uint8)((i - 1) / 8);
