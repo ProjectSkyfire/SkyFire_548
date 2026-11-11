@@ -229,6 +229,12 @@ namespace MMAP
             {
                 if (map->rootPhaseMap == mapId)
                 {
+                    // A phase tile is kept once loaded: the grid's unload looks it up under the root map id, so it is
+                    // never freed, and loading it again on every reload of the grid lost the earlier copy each time.
+                    PhaseTileMap::const_iterator loaded = _phaseTiles.find(map->MapID);
+                    if (loaded != _phaseTiles.end() && loaded->second.count(packedGridPos))
+                        continue;
+
                     PhasedTile* data = LoadTile(map->MapID, x, y);
                     // only a few tiles have terrain swaps, do not write error for them
                     if (data)
@@ -272,12 +278,18 @@ namespace MMAP
         const MapEntry* const map = sMapStore.LookupEntry(mapId); // map existence already checked when loading
         uint32 rootMapId = map->rootPhaseMap;
 
-        if (_phaseTiles[mapId][packedGridPos])
+        // find() rather than operator[], which added an empty entry for every grid unload of every map.
+        PhaseTileMap::iterator tiles = _phaseTiles.find(mapId);
+        if (tiles == _phaseTiles.end())
+            return;
+
+        PhaseTileContainer::iterator tile = tiles->second.find(packedGridPos);
+        if (tile != tiles->second.end() && tile->second)
         {
             SF_LOG_DEBUG("phase", "MMAP:UnloadPhaseTile: Unloaded phased %04u_%02i_%02i.mmtile for root phase map %u", mapId, x, y, rootMapId);
-            dtFree(_phaseTiles[mapId][packedGridPos]->data);
-            delete _phaseTiles[mapId][packedGridPos];
-            _phaseTiles[mapId].erase(packedGridPos);
+            dtFree(tile->second->data);
+            delete tile->second;
+            tiles->second.erase(tile);
         }
     }
 
