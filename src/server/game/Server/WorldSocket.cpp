@@ -1275,6 +1275,18 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     session->ReadAddonsInfo(addonsData);
     session->LoadPermissions();
 
+    // The client names its realm at login. A value that is not one of this server's realms leaves the client without a
+    // home realm in the auth response and puts its characters on another realm than everyone else, so names and the
+    // who list stay empty for it. Fall back to this realm and log what was sent.
+    if (realmNameStore.find(VirtualRealmID) == realmNameStore.end())
+    {
+        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: account %u sent unknown virtual realm id %u, using realm %u",
+            id, VirtualRealmID, realmID);
+        VirtualRealmID = realmID;
+    }
+    else
+        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: account %u logged in with virtual realm id %u", id, VirtualRealmID);
+
     session->SetVirtualRealmID(VirtualRealmID);
 
     // Initialize Warden system only if it is enabled by config
