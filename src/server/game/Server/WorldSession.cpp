@@ -139,6 +139,11 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
 
     InitializeQueryCallbackParameters();
 
+    // Only WorldSocket compresses packets, so a session without a socket needs no zlib stream (about 270 KB each).
+    _compressionStream = NULL;
+    if (!sock)
+        return;
+
     _compressionStream = new z_stream();
     _compressionStream->zalloc = (alloc_func)NULL;
     _compressionStream->zfree = (free_func)NULL;
@@ -188,11 +193,14 @@ WorldSession::~WorldSession()
 
     LoginDatabase.PExecute("UPDATE account SET online = 0 WHERE id = %u;", GetAccountId());     // One-time query
 
-    int32 z_res = deflateEnd(_compressionStream);
-    if (z_res != Z_OK && z_res != Z_DATA_ERROR) // Z_DATA_ERROR signals that internal state was BUSY
-        SF_LOG_ERROR("network", "Can't close packet compression stream (zlib: deflateEnd) Error code: %i (%s)", z_res, zError(z_res));
+    if (_compressionStream)
+    {
+        int32 z_res = deflateEnd(_compressionStream);
+        if (z_res != Z_OK && z_res != Z_DATA_ERROR) // Z_DATA_ERROR signals that internal state was BUSY
+            SF_LOG_ERROR("network", "Can't close packet compression stream (zlib: deflateEnd) Error code: %i (%s)", z_res, zError(z_res));
 
-    delete _compressionStream;
+        delete _compressionStream;
+    }
 }
 
 std::string const& WorldSession::GetPlayerName() const
