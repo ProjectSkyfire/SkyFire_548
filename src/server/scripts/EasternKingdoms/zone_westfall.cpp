@@ -42,8 +42,7 @@ public:
         {
             if ((std::rand() % 2) == 1)
             {
-                creature->setFaction(14);
-                CAST_AI(npc_transient::npc_transientAI, creature->AI())->AttackStart(player);
+                CAST_AI(npc_transient::npc_transientAI, creature->AI())->TurnHostile(player);
             }
             else
             {
@@ -55,8 +54,7 @@ public:
         {
             if ((std::rand() % 2) == 1)
             {
-                creature->setFaction(14);
-                CAST_AI(npc_transient::npc_transientAI, creature->AI())->AttackStart(player);
+                CAST_AI(npc_transient::npc_transientAI, creature->AI())->TurnHostile(player);
             }
             else
             {
@@ -134,6 +132,15 @@ public:
             talkCooldown = urand(60000, 120000);
             me->setFaction(7);
             me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        // The spawn is immune to players while friendly; without clearing that the player could not fight back.
+        void TurnHostile(Player* player)
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            me->setFaction(14);
+            AttackStart(player);
         }
 
         void JustRespawned() OVERRIDE
@@ -256,8 +263,19 @@ public:
                     talkCooldown -= diff;
             }
 
-            if (me->getFaction() == 14)
-                DoMeleeAttackIfReady();
+            if (me->getFaction() != 14)
+                return;
+
+            // Evading once the player is dead or gone calls Reset, which makes the transient friendly again. UpdateVictim
+            // does not evade a creature that already left combat, so do it here.
+            if (!UpdateVictim())
+            {
+                if (!me->GetVictim() && !me->IsInCombat())
+                    EnterEvadeMode();
+                return;
+            }
+
+            DoMeleeAttackIfReady();
         }
     private:
         uint32 cooldown;
