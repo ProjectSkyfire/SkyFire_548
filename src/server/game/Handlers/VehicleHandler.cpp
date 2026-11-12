@@ -133,7 +133,8 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvData)
 
     if (Player* player = ObjectAccessor::FindPlayer(VehicleGUID))
     {
-        if (!player->GetVehicleKit())
+        // Only a passenger mount can be ridden, not any other vehicle kit a player gets from an aura
+        if (!player->IsMounted() || !player->GetVehicleKit())
             return;
         if (!player->IsInRaidWith(_player))
             return;
