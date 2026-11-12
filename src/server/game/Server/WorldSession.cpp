@@ -228,6 +228,9 @@ uint32 WorldSession::GetGuidLow() const
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const* packet, bool forced /*= false*/)
 {
+    if (m_packetObserver)
+        m_packetObserver(*packet);
+
     WorldSocket* socket = m_InstanceSocket ? m_InstanceSocket : m_Socket;
     if (!socket)
         return;
