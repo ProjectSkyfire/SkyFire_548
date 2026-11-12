@@ -650,6 +650,8 @@ void Creature::Update(uint32 diff)
 
             if (!IsInCombat() && !IsInEvadeMode())
                 EngageNearestStandingHostile(this);
+            else if (IsInCombat())
+                DropIdleBystanders();
             break;
         }
         default:
@@ -1877,6 +1879,33 @@ bool Creature::HasRangedAttack() const
 
     m_hasRangedAttack = ranged ? 1 : 0;
     return ranged;
+}
+
+// While fighting another NPC, forget players and pets that only got pulled in (an area spell, healing or buffing
+// a unit in the fight) and have not hurt this creature for a while, so they can leave combat.
+void Creature::DropIdleBystanders()
+{
+    Unit* victim = GetVictim();
+    if (!victim || victim->IsControlledByPlayer() || !CanHaveThreatList())
+        return;
+
+    std::vector<HostileReference*> idle;
+    for (ThreatContainer::StorageType const* list : { &getThreatManager().getThreatList(), &getThreatManager().getOfflineThreatList() })
+    {
+        for (HostileReference* ref : *list)
+        {
+            Unit* target = ref->getTarget();
+            if (target && target != victim && target->IsControlledByPlayer()
+                && GetMSTimeDiffToNow(ref->getLastDirectThreatTime()) > CREATURE_BYSTANDER_THREAT_TIMEOUT)
+                idle.push_back(ref);
+        }
+    }
+
+    for (HostileReference* ref : idle)
+    {
+        ref->removeReference();
+        delete ref;
+    }
 }
 
 // select nearest hostile unit within the given distance (regardless of threat list).

@@ -54,6 +54,7 @@ enum CreatureFlagsExtra
 
 #define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
+#define CREATURE_BYSTANDER_THREAT_TIMEOUT 10 * IN_MILLISECONDS
 
 #define MAX_CREATURE_QUEST_ITEMS 6
 
@@ -578,6 +579,7 @@ public:
     SpellInfo const* reachWithSpellAttack(Unit* victim);
     SpellInfo const* reachWithSpellCure(Unit* victim);
     bool HasRangedAttack() const;
+    void DropIdleBystanders();
 
     uint32 m_spells[CREATURE_MAX_SPELLS];
     CreatureSpellCooldowns m_CreatureSpellCooldowns;

@@ -11,6 +11,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "ThreatManager.h"
+#include "Timer.h"
 #include "Unit.h"
 #include "UnitEvents.h"
 
@@ -97,8 +98,14 @@ HostileReference::HostileReference(Unit* refUnit, ThreatManager* threatManager, 
     iTempThreatModifier = 0.0f;
     link(refUnit, threatManager);
     iUnitGuid = refUnit->GetGUID();
+    iLastDirectThreatTime = getMSTime();
     iOnline = true;
     iAccessible = true;
+}
+
+void HostileReference::updateLastDirectThreatTime()
+{
+    iLastDirectThreatTime = getMSTime();
 }
 
 //============================================================
@@ -410,6 +417,11 @@ void ThreatManager::addThreat(Unit* victim, float threat, SpellSchoolMask school
         return;
 
     doAddThreat(victim, ThreatCalcHelper::calcThreat(victim, iOwner, threat, schoolMask, threatSpell));
+
+    if (HostileReference* ref = iThreatContainer.getReferenceByTarget(victim))
+        ref->updateLastDirectThreatTime();
+    else if (HostileReference* offlineRef = iThreatOfflineContainer.getReferenceByTarget(victim))
+        offlineRef->updateLastDirectThreatTime();
 }
 
 void ThreatManager::doAddThreat(Unit* victim, float threat)
