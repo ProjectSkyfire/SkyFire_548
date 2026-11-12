@@ -1,0 +1,151 @@
+-- Quest race masks, the Outland map (Outland, Eversong Woods, Ghostlands, Azuremyst Isle, Bloodmyst Isle): quests whose race mask is narrower than in the 5.4.8 data
+-- (mostly missing the Worgen, Goblin and Pandaren races). A row is only changed from the mask it has now.
+-- Alliance is 18875469 and Horde is 33555378. Based on Legends of Azeroth 5.4.8 (AllowableRaces).
+
+-- Azuremyst Isle
+UPDATE `quest_template` SET `RequiredRaces` = 18874445 WHERE `RequiredRaces` = 77 AND `Id` IN (
+    9369
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1024 AND `Id` IN (
+    9279, 9283, 9463, 9473, 9505, 9603, 9604, 9605, 9606, 9612
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    9293, 9294, 9303, 9305, 9309, 9311, 9312, 9313, 9314, 9371, 9452, 9453, 9454, 9455, 9456, 9506, 9512, 9513, 9514,
+    9515, 9523, 9527, 9528, 9530, 9531, 9537, 9538, 9539, 9540, 9541, 9542, 9544, 9559, 9560, 9562, 9564, 9565, 9566,
+    9570, 9571, 9573, 9602, 9616, 9622, 9623, 9798, 9799, 10302, 10303, 10324, 10428
+);
+
+-- Blade's Edge Mountains
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    9795, 10486, 10487, 10488, 10489, 10503, 10505, 10524, 10525, 10526, 10542, 10543, 10544, 10545, 10565, 10566,
+    10614, 10615, 10617, 10618, 10709, 10714, 10715, 10718, 10720, 10721, 10723, 10724, 10742, 10749, 10783, 10784,
+    10785, 10786, 10843, 10845, 10846, 10851, 10853, 10859, 10860, 10865, 10867, 10928, 11036, 11047
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    9794, 10455, 10456, 10457, 10502, 10504, 10506, 10510, 10511, 10512, 10516, 10517, 10518, 10555, 10556, 10557,
+    10580, 10581, 10584, 10594, 10608, 10609, 10620, 10632, 10657, 10671, 10674, 10675, 10690, 10710, 10711, 10712,
+    10795, 10796, 10797, 10798, 10799, 10800, 10801, 10802, 10803, 10805, 10806, 10818, 10927, 11040, 11043
+);
+
+-- Bloodmyst Isle
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1024 AND `Id` IN (
+    9753, 9759, 9760, 9761, 9762
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1032 AND `Id` IN (
+    9756
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    9548, 9549, 9550, 9557, 9561, 9567, 9569, 9574, 9576, 9578, 9579, 9580, 9581, 9584, 9585, 9594, 9620, 9624, 9625,
+    9628, 9629, 9632, 9633, 9634, 9641, 9642, 9643, 9646, 9647, 9648, 9649, 9663, 9666, 9667, 9668, 9669, 9670, 9671,
+    9672, 9674, 9682, 9683, 9687, 9688, 9689, 9693, 9694, 9696, 9698, 9699, 9700, 9703, 9706, 9711, 9740, 9741, 9746,
+    9748, 9751, 9779, 10063, 10064, 10065, 10066, 10067
+);
+
+-- Eversong Woods
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 512 AND `Id` IN (
+    8346, 9130, 9133, 9134, 9135
+);
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    8350, 8463, 8468, 8472, 8473, 8474, 8475, 8476, 8477, 8479, 8480, 8482, 8483, 8486, 8487, 8488, 8490, 8491, 8547,
+    8884, 8885, 8886, 8887, 8888, 8889, 8890, 8891, 8892, 8894, 8895, 9035, 9062, 9064, 9066, 9067, 9076, 9119, 9252,
+    9253, 9254, 9255, 9256, 9258, 9352, 9358, 9359, 9360, 9363, 9394, 9395, 9704, 9705, 10166
+);
+
+-- Ghostlands
+UPDATE `quest_template` SET `RequiredRaces` = 33554866 WHERE `RequiredRaces` = 178 AND `Id` IN (
+    9811
+);
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    9138, 9139, 9140, 9143, 9144, 9145, 9146, 9147, 9148, 9149, 9150, 9151, 9152, 9155, 9156, 9157, 9158, 9159, 9160,
+    9161, 9162, 9163, 9164, 9166, 9167, 9169, 9170, 9171, 9172, 9173, 9174, 9175, 9176, 9192, 9193, 9199, 9207, 9212,
+    9214, 9215, 9216, 9217, 9218, 9219, 9220, 9274, 9275, 9276, 9277, 9281, 9282, 9315, 9758, 9877
+);
+
+-- Hellfire Peninsula
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    9340, 9345, 9366, 9370, 9374, 9375, 9376, 9381, 9387, 9391, 9396, 9397, 9400, 9401, 9405, 9406, 9407, 9410, 9438,
+    9441, 9442, 9447, 9466, 9472, 9483, 9588, 10086, 10087, 10103, 10110, 10120, 10121, 10123, 10124, 10129, 10136,
+    10157, 10162, 10208, 10213, 10220, 10229, 10230, 10242, 10250, 10258, 10278, 10286, 10287, 10289, 10291, 10294,
+    10295, 10347, 10388, 10389, 10390, 10391, 10392, 10393, 10442, 10449, 10450, 10538, 10755, 10756, 10757, 10758,
+    10792, 10809, 10813, 10834, 10835, 10838, 10864, 10875, 10876, 11003, 13409, 13411
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    9355, 9383, 9385, 9390, 9398, 9399, 9417, 9420, 9423, 9424, 9426, 9427, 9430, 9490, 9543, 9545, 9558, 9563, 9587,
+    10047, 10050, 10055, 10057, 10058, 10078, 10079, 10093, 10099, 10106, 10119, 10140, 10141, 10142, 10143, 10144,
+    10146, 10160, 10163, 10254, 10288, 10340, 10344, 10346, 10382, 10394, 10395, 10396, 10397, 10399, 10400, 10443,
+    10482, 10483, 10484, 10485, 10754, 10762, 10763, 10764, 10895, 10903, 10909, 10916, 10919, 10935, 10936, 10937,
+    11002, 13408, 13410
+);
+
+-- Isle of Quel'Danas
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    24562, 24563
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    24522, 24535
+);
+
+-- Nagrand
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    9863, 9868, 9870, 9872, 9891, 9906, 9907, 9910, 9916, 9934, 9935, 9937, 9939, 9944, 9945, 9946, 9948, 9983, 10044,
+    10045, 10081, 10082, 10085, 10101, 10102, 10107, 10114, 10168, 10170, 10171, 10172, 10175, 10212, 10478, 10479,
+    11037, 11048, 11503
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    9869, 9871, 9873, 9874, 9879, 9917, 9918, 9920, 9921, 9922, 9923, 9924, 9933, 9936, 9938, 9940, 9954, 9955, 9982,
+    10108, 10113, 10476, 10477, 11042, 11044, 11502
+);
+
+-- Netherstorm
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    10404
+);
+
+-- Shadowmoon Valley
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    10595, 10596, 10597, 10598, 10599, 10600, 10603, 10604, 10611, 10613, 10623, 10624, 10625, 10627, 10633, 10639,
+    10647, 10663, 10681, 10702, 10745, 10750, 10751, 10765, 10767, 10768, 10769, 11498
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    10562, 10563, 10564, 10573, 10582, 10586, 10589, 10606, 10612, 10621, 10626, 10642, 10643, 10644, 10645, 10648,
+    10662, 10680, 10703, 10744, 10766, 10772, 10773, 10774, 10775, 10776, 11497
+);
+
+-- Shattrath City
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    11046
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    11045
+);
+
+-- Silvermoon City
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 512 AND `Id` IN (
+    9627
+);
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    10359, 10360, 10361, 10362, 10363
+);
+
+-- Terokkar Forest
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    9888, 9889, 9890, 9929, 9947, 9960, 9987, 9993, 9995, 9997, 10000, 10003, 10006, 10008, 10013, 10018, 10023,
+    10027, 10034, 10036, 10039, 10041, 10043, 10052, 10201, 10447, 10448, 10791, 10862, 10868, 11506
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    9961, 9986, 9992, 9994, 9996, 9998, 10002, 10005, 10007, 10012, 10016, 10022, 10026, 10028, 10033, 10035, 10038,
+    10040, 10042, 10051, 10444, 10446, 10863, 10869, 11505
+);
+
+-- The Exodar
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    7792, 7798, 10356, 10357, 10358, 10373, 10520
+);
+
+-- Zangarmarsh
+UPDATE `quest_template` SET `RequiredRaces` = 33555378 WHERE `RequiredRaces` = 690 AND `Id` IN (
+    9773, 9796, 9797, 9828, 9845, 9903, 9904, 10117
+);
+UPDATE `quest_template` SET `RequiredRaces` = 18875469 WHERE `RequiredRaces` = 1101 AND `Id` IN (
+    9780, 9791, 9792, 9827, 9834, 9835, 9839, 9848, 9901, 10116
+);
