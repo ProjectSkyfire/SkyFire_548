@@ -1772,7 +1772,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid, u
 
     data.WriteGuidBytes(targetGuid, 1);
 
-    data << uint8(id);
+    data << uint8(Index);
 
     data.WriteGuidBytes(whoGuid, 0, 5, 3);
     data.WriteGuidBytes(targetGuid, 7, 6);
@@ -1780,7 +1780,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid, u
     data.WriteGuidBytes(targetGuid, 2, 4, 0, 3, 5);
     data.WriteGuidBytes(whoGuid, 6);
 
-    data << uint8(Index);
+    data << uint8(id);
 
     data.WriteGuidBytes(whoGuid, 4, 2, 7);
 
@@ -1800,8 +1800,14 @@ void Group::SendTargetIconList(WorldSession* session)
         return;
 
     uint8 Index = 0;
+    uint32 count = 0;
+    for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
+        if (m_targetIcons[i] != 0)
+            ++count;
+
+    ByteBuffer dataBuffer;
     WorldPacket data(SMSG_RAID_TARGET_UPDATE_ALL, (1 + TARGETICONCOUNT * 9));
-    data.WriteBits(0, 25);
+    data.WriteBits(count, 23);
 
     for (uint8 i = 0; i < TARGETICONCOUNT; ++i)
     {
@@ -1812,11 +1818,13 @@ void Group::SendTargetIconList(WorldSession* session)
 
         data.WriteGuidMask(guid, 2, 1, 3, 7, 6, 4, 0, 5);
 
-        data.WriteGuidBytes(guid, 4, 7, 1, 0, 6, 5, 3);
-        data << uint8(i);
-        data.WriteGuidBytes(guid, 2);
+        dataBuffer.WriteGuidBytes(guid, 4, 7, 1, 0, 6, 5, 3);
+        dataBuffer << uint8(i);
+        dataBuffer.WriteGuidBytes(guid, 2);
     }
 
+    data.FlushBits();
+    data.append(dataBuffer);
     data << uint8(Index);
 
     session->SendPacket(&data);
