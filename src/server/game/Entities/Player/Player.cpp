@@ -609,6 +609,7 @@ Player::Player(WorldSession* session) : Unit(true)
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
     m_isInWater = false;
+    m_isFlyingInCombat = false;
     m_drunkTimer = 0;
     m_restTime = 0;
     m_deathTimer = 0;
@@ -1632,6 +1633,13 @@ void Player::Update(uint32 p_time)
             }
 
             UpdateRestAreaState();
+
+            // Creatures recheck whether they can still reach the player while it flies, and once after it lands
+            bool flyingInCombat = IsFlying() && IsInCombat();
+            if (flyingInCombat || m_isFlyingInCombat)
+                getHostileRefManager().updateThreatTables();
+            m_isFlyingInCombat = flyingInCombat;
+
             m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
         }
         else

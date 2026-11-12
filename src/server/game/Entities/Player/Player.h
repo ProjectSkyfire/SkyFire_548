@@ -3629,6 +3629,7 @@ private:
     uint8 m_MirrorTimerFlags;
     uint8 m_MirrorTimerFlagsLast;
     bool m_isInWater;
+    bool m_isFlyingInCombat;
 
     // Guid of player who invited player to guild as last
     uint64 m_lastGuildInviterGUID;

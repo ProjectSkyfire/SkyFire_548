@@ -577,6 +577,7 @@ public:
 
     SpellInfo const* reachWithSpellAttack(Unit* victim);
     SpellInfo const* reachWithSpellCure(Unit* victim);
+    bool HasRangedAttack() const;
 
     uint32 m_spells[CREATURE_MAX_SPELLS];
     CreatureSpellCooldowns m_CreatureSpellCooldowns;
@@ -748,6 +749,7 @@ private:
     CreatureGroup* m_formation;
     uint32 m_inhabitType;
     bool TriggerJustRespawned;
+    mutable int8 m_hasRangedAttack = -1;
 
     Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing
 };

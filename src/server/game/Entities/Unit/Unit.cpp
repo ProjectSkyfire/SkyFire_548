@@ -1624,8 +1624,12 @@ bool Unit::isInAccessiblePlaceFor(Creature const* c) const
 {
     if (IsInWater())
         return c->CanSwim();
-    else
-        return c->CanWalk() || c->CanFly();
+
+    // Creatures that can neither fly nor attack from range give up on players flying out of melee reach.
+    if (GetTypeId() == TypeID::TYPEID_PLAYER && IsFlying() && !c->CanFly() && !c->IsWithinMeleeRange(this) && !c->HasRangedAttack())
+        return false;
+
+    return c->CanWalk() || c->CanFly();
 }
 
 bool Unit::IsInWater() const
