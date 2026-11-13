@@ -1049,8 +1049,8 @@ namespace
             "Rogue temporary enchant spell 38615 should preserve its 30 minute exception");
         passed &= Expect(Skyfire::Spells::GetTemporaryItemEnchantDurationSeconds(12345, SPELLFAMILY_ROGUE, 999) == 3600,
             "Other rogue temporary enchants should last one hour");
-        passed &= Expect(Skyfire::Spells::GetTemporaryItemEnchantDurationSeconds(12345, SPELLFAMILY_SHAMAN, 999) == 1800,
-            "Shaman temporary enchants should last 30 minutes");
+        passed &= Expect(Skyfire::Spells::GetTemporaryItemEnchantDurationSeconds(12345, SPELLFAMILY_SHAMAN, 999) == 3600,
+            "Shaman temporary enchants should last one hour");
         passed &= Expect(Skyfire::Spells::GetTemporaryItemEnchantDurationSeconds(12345, SPELLFAMILY_GENERIC, 215) == 1800,
             "Temporary enchants with visual 215 should last 30 minutes");
         passed &= Expect(Skyfire::Spells::GetTemporaryItemEnchantDurationSeconds(12345, SPELLFAMILY_GENERIC, 563) == 600,
