@@ -5,6 +5,9 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "InstanceScript.h"
+#include "Map.h"
+#include "Player.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "Cell.h"
@@ -364,10 +367,26 @@ class boss_hodir : public CreatureScript
                     me->SetControlled(true, UNIT_STATE_STUNNED);
                     me->CombatStop(true);
 
+                    // Replace the missing kill credit spell with its achievement criteria.
+                    Map::PlayerList const& players = instance->instance->GetPlayers();
+                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    {
+                        Player* player = itr->GetSource();
+                        if (!player || player->IsGameMaster() || !player->IsAlive())
+                            continue;
+
+                        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KILL_CREDIT, 0, 0, me);
+                        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, SPELL_KILL_CREDIT);
+                    }
+                    instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
+
                     me->setFaction(35);
                     me->DespawnOrUnsummon(10000);
 
-                    DoCastAOE(SPELL_KILL_CREDIT);
+                    if (Player* looter = me->GetLootRecipient())
+                        if (InstanceMap* instanceMap = instance->instance->ToInstanceMap())
+                            if (instanceMap->IsRaidOrHeroicDungeon() && (me->GetCreatureTemplate()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND))
+                                instanceMap->PermBindAllPlayers(looter);
 
                     _JustDied();
                 }
