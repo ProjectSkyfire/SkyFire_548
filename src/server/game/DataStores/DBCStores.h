@@ -57,7 +57,7 @@ std::list<uint32> GetSpellsForLevels(uint32 classId, uint32 raceMask, uint32 spe
 std::vector<uint32> const* GetSpecializationSpells(uint32 specializationId);
 
 typedef std::unordered_map<uint32, std::unordered_map<uint32, MapDifficulty>> MapDifficultyMap;
-MapDifficulty const* GetDefaultMapDifficulty(uint32 mapId);
+MapDifficulty const* GetDefaultMapDifficulty(uint32 mapId, DifficultyID* difficulty = nullptr);
 MapDifficulty const* GetMapDifficultyData(uint32 mapId, DifficultyID difficulty);
 MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, DifficultyID& difficulty);
 
