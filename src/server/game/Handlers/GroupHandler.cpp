@@ -647,8 +647,8 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recvData)
     if (!group)
         return;
 
-    uint8 Symbol, Index;
-    recvData >> Symbol >> Index;
+    uint8 Index, Symbol;
+    recvData >> Index >> Symbol;                            // the party index comes first, then the mark
 
     /** error handling **/
     /********************/
