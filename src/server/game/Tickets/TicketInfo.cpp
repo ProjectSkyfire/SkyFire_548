@@ -231,7 +231,7 @@ BugTicket::BugTicket(Player* player, WorldPacket& bugPacket) : TicketInfo(player
     bugPacket >> _pos.z;
     bugPacket >> _Orientation;
     bugPacket >> _mapId;
-    uint8 lenNote = bugPacket.ReadBits(10);
+    uint16 lenNote = bugPacket.ReadBits(10);
     _bugnote = bugPacket.ReadString(lenNote);
 }
 
@@ -322,7 +322,7 @@ SuggestTicket::SuggestTicket(Player* player, WorldPacket& suggestPacket) : Ticke
     suggestPacket >> _pos.z;
     suggestPacket >> _Orientation;
     suggestPacket >> _mapId;
-    uint8 lenNote = suggestPacket.ReadBits(10);
+    uint16 lenNote = suggestPacket.ReadBits(10);
     _suggestnote = suggestPacket.ReadString(lenNote);
 }
 
