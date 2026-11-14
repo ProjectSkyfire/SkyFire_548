@@ -601,4 +601,9 @@ enum CurrencyTypes
     CURRENCY_TYPE_BLOODY_COIN = 789,
 };
 
+enum ScenarioStepFlags
+{
+    SCENARIO_STEP_FLAG_BONUS_OBJECTIVE = 0x1,
+};
+
 #endif
