@@ -4683,7 +4683,8 @@ void Unit::setDeathState(DeathState s)
         if (ZoneScript* zoneScript = GetZoneScript() ? GetZoneScript() : GetInstanceScript())
             zoneScript->OnUnitDeath(this);
 
-        if (GetTypeId() == TypeID::TYPEID_UNIT)
+        // Player pets, guardians and totems are not kill objectives.
+        if (GetTypeId() == TypeID::TYPEID_UNIT && !IsControlledByPlayer())
             if (InstanceMap* instanceMap = GetMap()->ToInstanceMap())
                 if (InstanceScenario* scenario = instanceMap->GetScenario())
                     scenario->OnCreatureKilled(GetEntry());
