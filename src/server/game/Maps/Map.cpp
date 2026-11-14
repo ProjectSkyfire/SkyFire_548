@@ -3076,14 +3076,18 @@ bool InstanceMap::AddPlayerToMap(Player* player)
         if (!i_scenario)
         {
             uint32 dungeonId = 0;
+            uint64 groupGuid = 0;
             if (Group* group = player->GetGroup())
                 if (group->isLFGGroup())
-                    dungeonId = sLFGMgr->GetDungeon(group->GetGUID());
+                {
+                    groupGuid = group->GetGUID();
+                    dungeonId = sLFGMgr->GetDungeon(groupGuid);
+                }
 
             uint32 const scenarioId = sScenarioMgr->ResolveScenarioId(GetId(), GetSpawnMode(), player->GetTeamId(), dungeonId);
             if (Skyfire::Scenarios::ScenarioData const* data = sScenarioMgr->GetData(scenarioId))
             {
-                i_scenario = new InstanceScenario(this, *data, dungeonId);
+                i_scenario = new InstanceScenario(this, *data, dungeonId, groupGuid);
                 i_scenario->Start();
             }
             else
