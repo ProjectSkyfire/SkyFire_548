@@ -8,6 +8,7 @@
 #include "DatabaseEnv.h"
 #include "GameObject.h"
 #include "Group.h"
+#include "InstanceScenario.h"
 #include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "Log.h"
@@ -374,6 +375,27 @@ void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
             }
         }
     }
+}
+
+void InstanceScript::DoScenarioCriteria(uint32 criteriaId, uint64 amount)
+{
+    if (InstanceMap* map = instance->ToInstanceMap())
+        if (InstanceScenario* scenario = map->GetScenario())
+            scenario->AddCriteria(criteriaId, amount);
+}
+
+void InstanceScript::DoSetScenarioStep(uint32 step)
+{
+    if (InstanceMap* map = instance->ToInstanceMap())
+        if (InstanceScenario* scenario = map->GetScenario())
+            scenario->ForceStep(step);
+}
+
+void InstanceScript::DoCompleteScenario()
+{
+    if (InstanceMap* map = instance->ToInstanceMap())
+        if (InstanceScenario* scenario = map->GetScenario())
+            scenario->Complete();
 }
 
 // Cast spell on all players in instance

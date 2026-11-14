@@ -38,6 +38,7 @@ struct Position;
 class Battleground;
 class MapInstanced;
 class InstanceMap;
+class InstanceScenario;
 class Transport;
 namespace Skyfire { struct ObjectUpdater; }
 
@@ -665,6 +666,7 @@ public:
     bool Reset(InstanceResetMethod method);
     uint32 GetScriptId() const { return i_script_id; }
     InstanceScript* GetInstanceScript() { return i_data; }
+    InstanceScenario* GetScenario() { return i_scenario; }
     void PermBindAllPlayers(Player* source);
     void UnloadAll() OVERRIDE;
     bool CanEnter(Player* player) OVERRIDE;
@@ -679,6 +681,7 @@ private:
     bool m_resetAfterUnload;
     bool m_unloadWhenEmpty;
     InstanceScript* i_data;
+    InstanceScenario* i_scenario;
     uint32 i_script_id;
 };
 

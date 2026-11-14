@@ -21,6 +21,7 @@
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "InstanceSaveMgr.h"
+#include "InstanceScenario.h"
 #include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
@@ -4681,6 +4682,12 @@ void Unit::setDeathState(DeathState s)
         // players in instance don't have ZoneScript, but they have InstanceScript
         if (ZoneScript* zoneScript = GetZoneScript() ? GetZoneScript() : GetInstanceScript())
             zoneScript->OnUnitDeath(this);
+
+        // Player pets, guardians and totems are not kill objectives.
+        if (GetTypeId() == TypeID::TYPEID_UNIT && !IsControlledByPlayer())
+            if (InstanceMap* instanceMap = GetMap()->ToInstanceMap())
+                if (InstanceScenario* scenario = instanceMap->GetScenario())
+                    scenario->OnCreatureKilled(GetEntry());
     }
     else if (s == DeathState::JUST_RESPAWNED)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE); // clear skinnable for creature and player (at battleground)

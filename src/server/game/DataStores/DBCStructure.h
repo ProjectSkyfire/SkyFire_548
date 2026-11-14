@@ -1343,7 +1343,7 @@ struct CriteriaTreeEntry
     uint32 criteriaID;                                      // 1
     uint32 criteriaCount;                                   // 2
     //uint32 unk;                                           // 3
-    //uint32 op;                                            // 4
+    uint32 op;                                              // 4 CriteriaTreeOperator
     uint32 parentID;                                        // 5
     //uint32 treeFlags;                                     // 6
     //char* name;                                           // 7
@@ -2235,6 +2235,28 @@ struct ScalingStatValuesEntry
 //    uint32    skillValue[16];                             // 1-17   m_cost
 //    uint32    maxSkillValue[16];                          // 18-32  m_valueMax
 //};
+
+// Scenario.dbc
+struct ScenarioEntry
+{
+    uint32 ID;                                              // 0
+    //char* Name;                                           // 1
+    uint32 Flags;                                           // 2
+};
+
+// ScenarioStep.dbc
+struct ScenarioStepEntry
+{
+    uint32 ID;                                              // 0
+    uint32 CriteriaTreeID;                                  // 1
+    uint32 ScenarioID;                                      // 2
+    uint32 Step;                                            // 3 order within the scenario, starts at 0
+    //char* Description;                                    // 4
+    //char* Name;                                           // 5
+    uint32 Flags;                                           // 6 ScenarioStepFlags
+
+    bool IsBonusObjective() const { return (Flags & SCENARIO_STEP_FLAG_BONUS_OBJECTIVE) != 0; }
+};
 
 struct SkillLineEntry
 {

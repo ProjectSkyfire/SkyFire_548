@@ -55,6 +55,7 @@
 #include "Player.h"
 #include "PoolMgr.h"
 #include "RuntimeMetrics.h"
+#include "ScenarioMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptMgr.h"
 #include "SkillDiscovery.h"
@@ -1460,6 +1461,7 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Initialize data stores...");
     LoadDBCStores(m_dataPath);
     LoadDB2Stores(m_dataPath);
+    sScenarioMgr->Load();
 
     SF_LOG_INFO("server.loading", "Loading SpellInfo store...");
     sSpellMgr->LoadSpellInfoStore();
