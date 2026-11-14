@@ -19,7 +19,7 @@ class Player;
 class InstanceScenario
 {
 public:
-    InstanceScenario(Map* map, Skyfire::Scenarios::ScenarioData const& data, uint32 dungeonId);
+    InstanceScenario(Map* map, Skyfire::Scenarios::ScenarioData const& data, uint32 dungeonId, uint64 groupGuid);
 
     uint32 GetScenarioId() const { return _progress.GetScenarioId(); }
     Skyfire::Scenarios::ScenarioProgress const& GetProgress() const { return _progress; }
@@ -50,6 +50,7 @@ private:
     Map* _map;
     Skyfire::Scenarios::ScenarioProgress _progress;
     uint32 _dungeonId;                  // LfgDungeons row the group queued for, 0 if none
+    uint64 _groupGuid;                  // the LFG group that entered, kept so a later group change cannot lose the reward
     time_t _startTime;
     bool _finished;
 };

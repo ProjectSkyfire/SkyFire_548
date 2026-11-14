@@ -26,7 +26,10 @@ namespace
         CriteriaNode node;
         CriteriaTreeEntry const* tree = sCriteriaTreeStore.LookupEntry(treeId);
         if (!tree)
+        {
+            SF_LOG_ERROR("server.loading", "Scenario criteria tree %u is missing from CriteriaTree.dbc, its step counts as done", treeId);
             return node;
+        }
 
         node.TreeId = treeId;
         node.CriteriaId = tree->criteriaID;
@@ -38,7 +41,12 @@ namespace
             node.Asset = criteria->raw.criteriaArg1;
         }
 
-        if (depth < 8)
+        if (depth >= 8)
+        {
+            if (children.count(treeId))
+                SF_LOG_ERROR("server.loading", "Scenario criteria tree %u is nested deeper than 8 levels, cut off", treeId);
+        }
+        else
         {
             auto range = children.equal_range(treeId);
             for (auto it = range.first; it != range.second; ++it)

@@ -4,7 +4,7 @@
 */
 
 #include "InstanceScenario.h"
-#include "Group.h"
+#include "GroupMgr.h"
 #include "LFGMgr.h"
 #include "Log.h"
 #include "Map.h"
@@ -21,8 +21,8 @@ namespace
     uint32 const CRITERIA_TYPE_KILL_CREATURE = 0;
 }
 
-InstanceScenario::InstanceScenario(Map* map, ScenarioData const& data, uint32 dungeonId)
-    : _map(map), _progress(data), _dungeonId(dungeonId), _startTime(time(NULL)), _finished(false)
+InstanceScenario::InstanceScenario(Map* map, ScenarioData const& data, uint32 dungeonId, uint64 groupGuid)
+    : _map(map), _progress(data), _dungeonId(dungeonId), _groupGuid(groupGuid), _startTime(time(NULL)), _finished(false)
 {
 }
 
@@ -144,12 +144,8 @@ void InstanceScenario::Finish()
 
     SF_LOG_INFO("scenario", "Scenario %u in instance %u completed", _progress.GetScenarioId(), _map->GetInstanceId());
 
-    if (!_dungeonId)
-        return;
-
-    Map::PlayerList const& players = _map->GetPlayers();
-    if (!players.isEmpty())
-        if (Player* player = players.begin()->GetSource())
-            if (Group* group = player->GetGroup())
-                sLFGMgr->FinishDungeon(group->GetGUID(), _dungeonId);
+    // A group that has since disbanded has no finder data left; asking the
+    // finder about it would only create an empty entry.
+    if (_dungeonId && _groupGuid && sGroupMgr->GetGroupByGUID(GUID_LOPART(_groupGuid)))
+        sLFGMgr->FinishDungeon(_groupGuid, _dungeonId);
 }
