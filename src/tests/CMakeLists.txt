@@ -897,3 +897,16 @@ target_include_directories(game_domain_tests PRIVATE
 )
 
 add_test(NAME game_domain_tests COMMAND game_domain_tests)
+
+add_executable(scenario_progress_tests
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios/ScenarioProgress.cpp
+  ScenarioProgressTests.cpp
+)
+
+target_include_directories(scenario_progress_tests PRIVATE
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios
+)
+
+add_test(NAME scenario_progress_tests COMMAND scenario_progress_tests)
