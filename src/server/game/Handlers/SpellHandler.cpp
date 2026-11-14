@@ -1526,8 +1526,11 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (!ValidateCastSource(recvPacket, _player, caster, spellInfo, spellId, request.targetGuid))
         return;
 
+    // A vehicle or another controlled unit can be the caster; the overrides below only apply to a player's own spells
+    Player* casterPlayer = caster->ToPlayer();
+
     // Specialization Overriden Spells
-    uint32 SpecializationID = caster->ToPlayer()->GetTalentSpecialization(caster->ToPlayer()->GetActiveSpec());
+    uint32 SpecializationID = casterPlayer ? casterPlayer->GetTalentSpecialization(casterPlayer->GetActiveSpec()) : 0;
     if (SpecializationID)
     {
         for (uint32 i = 0; i < sSpecializationSpellsStore.GetNumRows(); i++)
@@ -1560,7 +1563,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     // Talent Overriden Spells
-    uint32 ClassID = caster->ToPlayer()->getClass();
+    uint32 ClassID = casterPlayer ? casterPlayer->getClass() : 0;
     if (ClassID)
     {
         for (uint32 i = 0; i < sTalentStore.GetNumRows(); i++)
@@ -1632,12 +1635,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
             if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo((*itr)->GetAmount()))
             {
-                if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||
-                    caster->ToPlayer()->getLevel() < spellInfo->BaseLevel)
+                if (caster->getLevel() < spellInfo->SpellLevel ||
+                    caster->getLevel() < spellInfo->BaseLevel)
                     continue;
 
-                if (caster->ToPlayer()->getLevel() < newInfo->SpellLevel ||
-                    caster->ToPlayer()->getLevel() < newInfo->BaseLevel)
+                if (caster->getLevel() < newInfo->SpellLevel ||
+                    caster->getLevel() < newInfo->BaseLevel)
                     continue;
 
                 spellInfo = newInfo;
