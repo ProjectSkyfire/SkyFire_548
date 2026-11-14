@@ -53,6 +53,7 @@ add_test(NAME database_setup_tests COMMAND database_setup_tests)
 
 add_executable(realm_socket_tests
   ${CMAKE_SOURCE_DIR}/src/server/authserver/Server/RealmSocket.cpp
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging/Errors.cpp
   ${CMAKE_SOURCE_DIR}/src/server/shared/Packets/PacketLogServer.cpp
   PacketLogServerConfigStub.cpp
   RealmSocketLogStub.cpp
@@ -532,6 +533,7 @@ add_executable(paladin_spell_calculation_tests
 
 target_include_directories(paladin_spell_calculation_tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
   ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
   ${CMAKE_SOURCE_DIR}/src/server/scripts/Spells
 )
@@ -562,6 +564,7 @@ add_executable(pvp_power_tests
 )
 
 target_include_directories(pvp_power_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
   ${CMAKE_SOURCE_DIR}/src/server/shared
   ${CMAKE_SOURCE_DIR}/src/server/game/Combat
   ${CMAKE_SOURCE_DIR}/src/server/game/Miscellaneous
@@ -626,27 +629,13 @@ target_compile_definitions(death_knight_scent_of_blood_tests PRIVATE SKYFIRE_SOU
 add_test(NAME death_knight_scent_of_blood_tests COMMAND death_knight_scent_of_blood_tests)
 
 add_executable(battle_pet_packet_tests
+  BattlePetTestStores.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePet.cpp
   ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet/BattlePetPackets.cpp
   GameDomainTestSupport.cpp
   BattlePetPacketTests.cpp
 )
 
-target_include_directories(battle_pet_packet_tests PRIVATE
-  ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
-  ${CMAKE_SOURCE_DIR}/src/server/shared
-  ${CMAKE_SOURCE_DIR}/src/server/shared/DataStores
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Debugging
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Logging
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Packets
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Platform
-  ${CMAKE_SOURCE_DIR}/src/server/shared/Utilities
-  ${CMAKE_SOURCE_DIR}/src/server/game/BattlePet
-  ${CMAKE_SOURCE_DIR}/src/server/game/DataStores
-  ${CMAKE_SOURCE_DIR}/src/server/game/Server
-  ${CMAKE_SOURCE_DIR}/src/server/game/Server/Protocol
-)
 
 add_test(NAME battle_pet_packet_tests COMMAND battle_pet_packet_tests)
 
@@ -808,7 +797,7 @@ add_executable(game_domain_tests
   GameDomainTests.cpp
 )
 
-target_include_directories(game_domain_tests PRIVATE
+set(SKYFIRE_GAME_TEST_INCLUDE_DIRS
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/dep/g3dlite/include
   ${CMAKE_SOURCE_DIR}/dep/recastnavigation/Detour
@@ -862,6 +851,7 @@ target_include_directories(game_domain_tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src/server/game/Guilds
   ${CMAKE_SOURCE_DIR}/src/server/game/Handlers
   ${CMAKE_SOURCE_DIR}/src/server/game/Instances
+  ${CMAKE_SOURCE_DIR}/src/server/game/Loot
   ${CMAKE_SOURCE_DIR}/src/server/game/Maps
   ${CMAKE_SOURCE_DIR}/src/server/game/Miscellaneous
   ${CMAKE_SOURCE_DIR}/src/server/game/Movement
@@ -881,5 +871,8 @@ target_include_directories(game_domain_tests PRIVATE
   ${Boost_INCLUDE_DIRS}
   ${MYSQL_INCLUDE_DIR}
 )
+
+target_include_directories(game_domain_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE_DIRS})
+target_include_directories(battle_pet_packet_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE_DIRS})
 
 add_test(NAME game_domain_tests COMMAND game_domain_tests)

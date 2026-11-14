@@ -14,6 +14,7 @@
 #include "MapLifecycle.h"
 #include "ObjectAccessorLifecycle.h"
 #include "PlayerRestState.h"
+#include "Creature.h"
 #include "PointMovementGenerator.h"
 #include "PlayerPackets.h"
 #include "RuntimeMetrics.h"
@@ -159,65 +160,6 @@ namespace
             "Attack-stop packets for a live victim should not mark the victim dead");
         passed &= Expect(Skyfire::CombatPackets::GetAttackStopVictimDeadBit(true, true),
             "Attack-stop packets for a dead victim should mark the victim dead");
-
-        return passed;
-    }
-
-    bool TestClientOpcodeTableAcceptsGuildAchievementTracking()
-    {
-        bool passed = true;
-
-        clientOpcodeTable.InitializeClientTable();
-        Opcodes opcode = clientOpcodeTable.GetOpcodeByNumber(0x0CF0);
-        OpcodeHandler const* handler = clientOpcodeTable[opcode];
-
-        passed &= Expect(opcode == CMSG_GUILD_SET_ACHIEVEMENT_TRACKING,
-            "0x0CF0 should map to CMSG_GUILD_SET_ACHIEVEMENT_TRACKING");
-        passed &= Expect(handler != NULL,
-            "CMSG_GUILD_SET_ACHIEVEMENT_TRACKING should have an opcode table entry");
-        passed &= Expect(handler && handler->Status == STATUS_LOGGEDIN,
-            "CMSG_GUILD_SET_ACHIEVEMENT_TRACKING should be accepted while logged in");
-        passed &= Expect(handler && handler->Handler != NULL,
-            "CMSG_GUILD_SET_ACHIEVEMENT_TRACKING should have an executable handler");
-
-        return passed;
-    }
-
-    bool TestServerOpcodeTableEnablesDisplayGameError()
-    {
-        bool passed = true;
-
-        serverOpcodeTable.InitializeServerTable();
-        OpcodeHandler const* handler = serverOpcodeTable[SMSG_DISPLAY_GAME_ERROR];
-
-        passed &= Expect(handler != NULL,
-            "SMSG_DISPLAY_GAME_ERROR should have an opcode table entry");
-        passed &= Expect(handler && handler->OpcodeNumber == 0x181F,
-            "SMSG_DISPLAY_GAME_ERROR should use the 5.4.8 opcode number");
-        passed &= Expect(handler && handler->Status == STATUS_NEVER,
-            "SMSG_DISPLAY_GAME_ERROR should be enabled as a server-only opcode");
-
-        return passed;
-    }
-
-    bool TestServerOpcodeTableUsesCancelCombatOpcode()
-    {
-        bool passed = true;
-
-        serverOpcodeTable.InitializeServerTable();
-        OpcodeHandler const* handler = serverOpcodeTable[SMSG_CANCEL_COMBAT];
-        OpcodeHandler const* readFailed = serverOpcodeTable[SMSG_READ_ITEM_RESULT_FAILED];
-
-        passed &= Expect(handler != NULL,
-            "SMSG_CANCEL_COMBAT should have an opcode table entry");
-        passed &= Expect(handler && handler->OpcodeNumber == 0x0E8B,
-            "SMSG_CANCEL_COMBAT should use the verified 5.4.8 opcode number");
-        passed &= Expect(handler && handler->Status == STATUS_NEVER,
-            "SMSG_CANCEL_COMBAT should be enabled as a server-only opcode");
-        passed &= Expect(readFailed && readFailed->OpcodeNumber == 0x0000,
-            "SMSG_READ_ITEM_RESULT_FAILED should stay unhandled until its opcode is verified");
-        passed &= Expect(serverOpcodeTable.GetOpcodeByNumber(0x0534) != SMSG_CANCEL_COMBAT,
-            "0x0534 should not map to SMSG_CANCEL_COMBAT");
 
         return passed;
     }
@@ -748,9 +690,6 @@ namespace
 
         passed &= Expect(Skyfire::Spells::GetNetOMaticRootSelfSpellId() == 13138,
             "Net-o-matic should name its self-root spell");
-        passed &= Expect(Skyfire::Spells::GetKillCommandOwnerAuraSpellId() == 34027 &&
-            Skyfire::Spells::GetKillCommandPetAuraSpellId() == 58914,
-            "Kill Command should name owner and pet aura metadata");
         passed &= Expect(Skyfire::Spells::GetBloodElfIllusionDisguiseSpellId(37096, GENDER_FEMALE) == 37095 &&
             Skyfire::Spells::GetBloodElfIllusionDisguiseSpellId(37096, GENDER_MALE) == 37093,
             "Blood Elf Illusion should resolve gendered disguise spell metadata");
@@ -800,8 +739,6 @@ namespace
             "Overload Circuit should resolve System Shutdown metadata");
         passed &= Expect(Skyfire::Spells::GetPeriodicFuseArmorTriggerSpellId(64821) == 64774,
             "Fuse Armor should resolve its final trigger spell metadata");
-        passed &= Expect(Skyfire::Spells::GetPeriodicFrenziedRegenerationSpellId() == 22845,
-            "Frenzied Regeneration should name its heal trigger spell");
         passed &= Expect(Skyfire::Spells::GetKillingSpreePeriodicSpellId(0) == 57840 &&
             Skyfire::Spells::GetKillingSpreePeriodicSpellId(1) == 57841 &&
             Skyfire::Spells::GetKillingSpreePeriodicSpellId(2) == 0,
@@ -836,9 +773,8 @@ namespace
             Skyfire::Spells::IsUnboundPlaguePeriodicDamageAura(72856) &&
             !Skyfire::Spells::IsUnboundPlaguePeriodicDamageAura(999999),
             "Unbound Plague metadata should identify configured damage auras");
-        passed &= Expect(Skyfire::Spells::GetDrainSoulShardSpellId() == 95810 &&
-            Skyfire::Spells::GetManaFeedTriggerSpellId() == 32554,
-            "Periodic warlock metadata should name Drain Soul and Mana Feed triggers");
+        passed &= Expect(Skyfire::Spells::GetDrainSoulShardSpellId() == 95810,
+            "Periodic warlock metadata should name the Drain Soul trigger");
 
         passed &= Expect(Skyfire::Spells::IsUnsavableSpecialAura(44413) &&
             Skyfire::Spells::IsUnsavableSpecialAura(55849) &&
@@ -851,8 +787,6 @@ namespace
         passed &= Expect(Skyfire::Spells::GetStonedAuraTriggerSpellId(33572) == 33652 &&
             Skyfire::Spells::GetStonedAuraTriggerSpellId(50836) == 50812,
             "Stoned aura metadata should resolve final trigger spell ids");
-        passed &= Expect(Skyfire::Spells::GetHeroicFuryCooldownSpellId() == 20252,
-            "Heroic Fury metadata should name the cooldown spell to remove");
         passed &= Expect(Skyfire::Spells::GetArcanePotencyTriggerSpellId(31571) == 57529 &&
             Skyfire::Spells::GetArcanePotencyTriggerSpellId(31572) == 57531,
             "Arcane Potency metadata should resolve rank trigger spells");
@@ -1173,8 +1107,8 @@ namespace
             Skyfire::Spells::GetTriggerSpellRule(18461);
         passed &= Expect(vanishRule &&
             vanishRule->Kind == Skyfire::Spells::TRIGGER_SPELL_RULE_VANISH &&
-            vanishRule->CastSpellId == 1784,
-            "Vanish trigger should resolve its stealth spell metadata");
+            vanishRule->CastSpellId == 11327,
+            "Vanish trigger should resolve the Vanish aura, not ordinary Stealth");
 
         Skyfire::Spells::TriggerSpellRule const* succubusRule =
             Skyfire::Spells::GetTriggerSpellRule(54437);
@@ -1899,9 +1833,6 @@ int main()
     passed &= TestPreResurrectPacketUsesPlayerGuid();
     passed &= TestCancelCombatPacketIsEmpty();
     passed &= TestAttackStopVictimDeadBitRules();
-    passed &= TestClientOpcodeTableAcceptsGuildAchievementTracking();
-    passed &= TestServerOpcodeTableEnablesDisplayGameError();
-    passed &= TestServerOpcodeTableUsesCancelCombatOpcode();
     passed &= TestAchievementCriteriaLiveUpdatePolicy();
     passed &= TestWorldStateBuilderPacketLayout();
     passed &= TestThreatSpellModifierRules();

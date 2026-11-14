@@ -317,11 +317,12 @@ namespace
         packet.ReadBit();
         packet.ReadBit();
         packet.ReadBits(2);
-        packet.ReadBits(20);
+        uint32 const abilityCount = packet.ReadBits(20);
         packet.ReadBit();
         packet.ReadBits(7);
         packet.ReadBits(2);
-        packet.ReadBits(3);
+        for (uint32 i = 0; i < abilityCount; ++i)
+            packet.ReadBit();
         packet.ReadBits(2);
     }
 
@@ -370,11 +371,11 @@ namespace
     {
         uint32 value32 = 0;
         uint16 value16 = 0;
-        uint8 value8 = 0;
 
         packet >> teamIndex;
 
-        for (uint8 i = 0; i < 3; i++)
+        // This fixture has one nonzero ability, a zero GUID, no flags or nickname.
+        for (uint8 i = 0; i < 1; i++)
         {
             uint32 abilityId = 0;
             uint8 abilityIndex = 0;
@@ -402,7 +403,6 @@ namespace
         packet >> value32;
         packet >> value32;
         packet >> value16;
-        packet >> value8;
         packet >> value32;
     }
 
@@ -411,7 +411,6 @@ namespace
         uint32 value32 = 0;
         uint8 value8 = 0;
 
-        packet >> value32;
         packet >> value32;
         packet >> value8;
         packet >> value8;
@@ -919,39 +918,23 @@ namespace
         passed &= Expect(roundId == 0,
             "Pet battle first round packet should write the supplied round id");
 
-        passed &= Expect(packet.ReadBits(3) == 0,
-            "Pet battle first round packet should start with no dead pets");
-        passed &= Expect(packet.ReadBit() == false,
-            "Pet battle first round packet should clear the unknown round bit");
-        passed &= Expect(packet.ReadBits(22) == 2,
-            "Pet battle first round packet should write two front-pet effects");
-
-        for (uint8 i = 0; i < 2; i++)
+        passed &= Expect(!packet.ReadBit(), "First round should include the next battle state");
+        passed &= Expect(packet.ReadBits(3) == 0, "First round should have no dead pets");
+        passed &= Expect(packet.ReadBits(20) == 0, "First round should have no cooldowns");
+        passed &= Expect(packet.ReadBits(22) == 2, "First round should contain two front-pet effects");
+        for (uint8 i = 0; i < 2; ++i)
         {
-            passed &= Expect(packet.ReadBit() == false,
-                "Front-pet effect should include an effect type");
-            passed &= Expect(packet.ReadBit() == true,
-                "Front-pet effect should omit source aura instance");
-            passed &= Expect(packet.ReadBit() == true,
-                "Front-pet effect should omit ability effect id");
-            passed &= Expect(packet.ReadBits(25) == 1,
-                "Front-pet effect should target one pet");
-            passed &= Expect(packet.ReadBit() == true,
-                "Front-pet effect should set the target block marker");
-            passed &= Expect(packet.ReadBit() == false,
-                "Front-pet effect should include a target pet index");
-            passed &= Expect(packet.ReadBits(3) == 3,
-                "Front-pet effect should use target type 3");
-            passed &= Expect(packet.ReadBit() == true,
-                "Front-pet effect should omit flags");
-            passed &= Expect(packet.ReadBit() == true,
-                "Front-pet effect should omit stack depth");
-            passed &= Expect(packet.ReadBit() == false,
-                "Front-pet effect should include a caster pet index");
+            passed &= Expect(packet.ReadBit(), "Front-pet effect should omit source aura");
+            passed &= Expect(packet.ReadBit(), "Front-pet effect should omit ability effect");
+            passed &= Expect(packet.ReadBit(), "Front-pet effect should omit turn instance");
+            passed &= Expect(packet.ReadBit(), "Front-pet effect should omit stack depth");
+            passed &= Expect(!packet.ReadBit(), "Front-pet effect should include caster");
+            passed &= Expect(packet.ReadBits(25) == 1, "Front-pet effect should have one target");
+            passed &= Expect(!packet.ReadBit(), "Front-pet effect should include target pet");
+            passed &= Expect(packet.ReadBits(3) == 4, "Front-pet effect should use the no-payload target type");
+            passed &= Expect(packet.ReadBit(), "Front-pet effect should omit flags");
+            passed &= Expect(!packet.ReadBit(), "Front-pet effect should include effect type");
         }
-
-        passed &= Expect(packet.ReadBits(20) == 0,
-            "Pet battle first round packet should start with no cooldowns");
 
         uint8 expectedPetIndexes[2] = { 0, 3 };
         for (uint8 i = 0; i < 2; i++)
@@ -1015,17 +998,9 @@ namespace
         bool passed = true;
 
         WorldPacket packet(CMSG_BATTLE_PET_WILD_REQUEST, 32);
-        packet.WriteBit(0);                  // AbilityID present
-        packet.WriteBit(0);                  // MoveType present
-        packet.WriteBit(1);                  // DebugFlags omitted
-        packet.WriteBit(1);                  // IgnoreAbandonPenalty
-        packet.WriteBit(1);                  // NewFrontPet omitted
-        packet.WriteBit(1);                  // BattleInterrupted omitted
-        packet.WriteBit(0);                  // RoundID present
-        packet.FlushBits();
-        packet << uint32(42);
-        packet << uint8(1);
-        packet << uint32(7330);
+        // 5.4.8 presence bits, move type, round ID, ability ID.
+        uint8 const payload[] = { 0x78, 1, 42, 0, 0, 0, 0xA2, 0x1C, 0, 0 };
+        packet.append(payload, sizeof(payload));
 
         packet.rpos(0);
         Skyfire::BattlePetPackets::BattlePetInput input = Skyfire::BattlePetPackets::ReadBattlePetInput(packet);
@@ -1053,19 +1028,9 @@ namespace
         bool passed = true;
 
         WorldPacket packet(CMSG_BATTLE_PET_WILD_REQUEST, 32);
-        packet.WriteBit(1);                  // AbilityID omitted
-        packet.WriteBit(0);                  // MoveType present
-        packet.WriteBit(0);                  // DebugFlags present
-        packet.WriteBit(0);                  // IgnoreAbandonPenalty clear
-        packet.WriteBit(0);                  // NewFrontPet present
-        packet.WriteBit(0);                  // BattleInterrupted present
-        packet.WriteBit(0);                  // RoundID present
-        packet.FlushBits();
-        packet << uint8(2);
-        packet << uint32(99);
-        packet << uint8(3);
-        packet << uint8(0xAB);
-        packet << int8(1);
+        // 5.4.8 presence bits, move/debug, round, interruption, new pet.
+        uint8 const payload[] = { 0x80, 3, 0xAB, 99, 0, 0, 0, 2, 1 };
+        packet.append(payload, sizeof(payload));
 
         packet.rpos(0);
         Skyfire::BattlePetPackets::BattlePetInput input = Skyfire::BattlePetPackets::ReadBattlePetInput(packet);
@@ -1073,9 +1038,9 @@ namespace
         passed &= Expect(!input.IgnoreAbandonPenalty,
             "Pet battle input should preserve a clear ignore-abandon-penalty bit");
         passed &= Expect(input.HasBattleInterrupted && input.BattleInterrupted == 2,
-            "Pet battle input should read interruption data before round data");
+            "Pet battle input should read interruption data after round data");
         passed &= Expect(input.HasRoundID && input.RoundID == 99,
-            "Pet battle input should read the round id after interruption data");
+            "Pet battle input should read the round id before interruption data");
         passed &= Expect(input.HasMoveType && input.MoveType == 3,
             "Pet battle input should read move type before optional debug flags");
         passed &= Expect(!input.HasAbilityID,
@@ -1280,57 +1245,32 @@ namespace
 
     bool TestPetBattleRoundResultPacketWritesEmptyRound()
     {
-        bool passed = true;
-
         Skyfire::BattlePetPackets::BattlePetRoundResult round;
         round.RoundID = 5;
         round.InputFlags[1] = 4;
         round.TrapStatus[0] = 2;
         round.TrapStatus[1] = 1;
-
         WorldPacket packet = Skyfire::BattlePetPackets::BuildRoundResultPacket(round);
-
-        passed &= Expect(packet.GetOpcode() == SMSG_PET_BATTLE_ROUND_RESULT,
-            "Pet battle round result packet should use SMSG_PET_BATTLE_ROUND_RESULT");
-
+        bool passed = Expect(packet.GetOpcode() == SMSG_PET_BATTLE_ROUND_RESULT, "Round opcode mismatch");
         packet.rpos(0);
-        passed &= Expect(packet.ReadBit() == false,
-            "Pet battle round result packet should include the next battle state");
-        passed &= Expect(packet.ReadBits(20) == 0,
-            "Pet battle round result packet should start with no cooldowns");
-        passed &= Expect(packet.ReadBits(22) == 0,
-            "Pet battle round result packet should write an empty effect list");
-        passed &= Expect(packet.ReadBits(3) == 0,
-            "Pet battle round result packet should write no dead pets");
-
-        for (uint8 i = 0; i < 2; i++)
+        for (uint8 i = 0; i < 2; ++i)
         {
-            uint8 inputFlags = 0;
-            uint16 roundTime = 1;
-            uint8 trapStatus = 0;
-
-            packet >> inputFlags;
-            packet >> roundTime;
-            packet >> trapStatus;
-
-            passed &= Expect(inputFlags == round.InputFlags[i],
-                "Pet battle round result packet should write next input flags");
-            passed &= Expect(roundTime == 0,
-                "Pet battle round result packet should clear round time");
-            passed &= Expect(trapStatus == round.TrapStatus[i],
-                "Pet battle round result packet should write next trap status");
+            uint8 trap = 0, flags = 0;
+            uint16 time = 1;
+            packet >> trap >> flags >> time;
+            passed &= Expect(trap == round.TrapStatus[i] && flags == round.InputFlags[i] && time == 0,
+                "Round header should preserve trap/input flags and clear round time");
         }
-
-        uint32 roundId = 0;
-        uint8 nextState = 0;
-        packet >> roundId;
-        packet >> nextState;
-
-        passed &= Expect(roundId == 5,
-            "Pet battle round result packet should write the round id");
-        passed &= Expect(nextState == 2,
-            "Pet battle round result packet should write the next battle state");
-
+        uint32 id = 0;
+        packet >> id;
+        passed &= Expect(id == 5, "Round ID mismatch");
+        passed &= Expect(packet.ReadBits(22) == 0, "Empty round should have no effects");
+        passed &= Expect(!packet.ReadBit(), "Round should include next state");
+        passed &= Expect(packet.ReadBits(3) == 0, "Empty round should have no dead pets");
+        passed &= Expect(packet.ReadBits(20) == 0, "Empty round should have no cooldowns");
+        uint8 state = 0;
+        packet >> state;
+        passed &= Expect(state == 2 && packet.rpos() == packet.size(), "Empty round state/length mismatch");
         return passed;
     }
 
@@ -1351,7 +1291,7 @@ namespace
 
         WorldPacket packet = Skyfire::BattlePetPackets::BuildRoundResultPacket(round);
 
-        packet.rpos(0);
+        packet.rpos(12);
         passed &= Expect(packet.ReadBits(22) == 0,
             "Pet battle round result cooldown packet should still write an empty effect list");
         packet.ReadBit(); // has next battle state
@@ -1404,7 +1344,7 @@ namespace
         round.Cooldowns.push_back(cooldown);
 
         WorldPacket packet = Skyfire::BattlePetPackets::BuildRoundResultPacket(round);
-        packet.rpos(0);
+        packet.rpos(12);
         packet.ReadBits(22);
         packet.ReadBit();
         packet.ReadBits(3);
@@ -1436,7 +1376,7 @@ namespace
         round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(0, 3, 70, 855, 3));
 
         WorldPacket packet = Skyfire::BattlePetPackets::BuildRoundResultPacket(round);
-        packet.rpos(0);
+        packet.rpos(12);
         passed &= Expect(packet.ReadBits(22) == 3,
             "Pet battle multi-hit round should write three damage effects");
 
@@ -1445,14 +1385,11 @@ namespace
 
     bool TestPetBattleRoundResultPacketWritesDamageEffect()
     {
-        bool passed = true;
-
         Skyfire::BattlePetPackets::BattlePetRoundEffectTarget target;
         target.PetX = 3;
-        target.Type = 6;
+        target.Type = 3;
         target.HasRemainingHealth = true;
         target.RemainingHealth = 77;
-
         Skyfire::BattlePetPackets::BattlePetRoundEffect effect;
         effect.CasterPBOID = 0;
         effect.PetBattleEffectType = 5;
@@ -1462,99 +1399,36 @@ namespace
         effect.AbilityEffectID = 700;
         effect.SourceAuraInstanceID = 3;
         effect.Targets.push_back(target);
-
         Skyfire::BattlePetPackets::BattlePetRoundResult round;
         round.RoundID = 6;
         round.Effects.push_back(effect);
-        round.DeadPets.push_back(3);
-
         WorldPacket packet = Skyfire::BattlePetPackets::BuildRoundResultPacket(round);
-
-        packet.rpos(0);
-        packet.ReadBit();
-        packet.ReadBits(20);
-        passed &= Expect(packet.ReadBits(22) == 1,
-            "Pet battle round result packet should write one effect");
-
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect should include caster PBOID");
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect should include effect type");
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect should include effect flags");
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect should include turn instance id");
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect should include stack depth");
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect should include ability effect id");
-        passed &= Expect(packet.ReadBits(25) == 1,
-            "Round effect should write one target");
-        passed &= Expect(packet.ReadBits(3) == 6,
-            "Round effect target should write target type");
-        passed &= Expect(packet.ReadBit() == false,
-            "Damage target should include remaining health");
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect target should include pet index");
-        passed &= Expect(packet.ReadBit() == false,
-            "Round effect should include source aura instance");
-        passed &= Expect(packet.ReadBits(3) == 1,
-            "Round result should write one dead pet");
-
-        uint16 turnInstance = 0;
-        uint8 targetPet = 0;
-        int32 remainingHealth = 0;
-        uint16 flags = 0;
-        uint16 sourceAura = 0;
-        uint8 caster = 0;
-        uint8 stackDepth = 0;
-        uint32 abilityEffect = 0;
-        uint8 effectType = 0;
-
-        packet >> turnInstance;
-        packet >> targetPet;
-        packet >> remainingHealth;
-        packet >> flags;
-        packet >> sourceAura;
-        packet >> caster;
-        packet >> stackDepth;
-        packet >> abilityEffect;
-        packet >> effectType;
-
-        passed &= Expect(turnInstance == 1,
-            "Round effect should write turn instance id before target data");
-        passed &= Expect(targetPet == 3,
-            "Round effect target should write pet index");
-        passed &= Expect(remainingHealth == 77,
-            "Damage target should write remaining health");
-        passed &= Expect(flags == 2,
-            "Round effect should write flags after target data");
-        passed &= Expect(sourceAura == 3,
-            "Round effect should write source aura instance");
-        passed &= Expect(caster == 0,
-            "Round effect should write caster PBOID");
-        passed &= Expect(stackDepth == 1,
-            "Round effect should write stack depth");
-        passed &= Expect(abilityEffect == 700,
-            "Round effect should write ability effect id");
-        passed &= Expect(effectType == 5,
-            "Round effect should write effect type last");
-
-        for (uint8 i = 0; i < 2; i++)
-        {
-            packet.read_skip<uint8>();
-            packet.read_skip<uint16>();
-            packet.read_skip<uint8>();
-        }
-
-        packet.read_skip<uint32>();
-        packet.read_skip<uint8>();
-
-        uint8 deadPet = 0;
-        packet >> deadPet;
-        passed &= Expect(deadPet == 3,
-            "Round result should write dead pet indexes after round state");
-
+        packet.rpos(12);
+        bool passed = Expect(packet.ReadBits(22) == 1, "Round should contain one effect");
+        passed &= Expect(!packet.ReadBit(), "Effect should include ability effect ID");
+        passed &= Expect(!packet.ReadBit(), "Effect should include effect type");
+        passed &= Expect(packet.ReadBits(25) == 1, "Effect should contain one target");
+        passed &= Expect(!packet.ReadBit(), "Effect should include source aura");
+        passed &= Expect(packet.ReadBits(3) == 3, "Damage target should use health target type");
+        passed &= Expect(!packet.ReadBit(), "Target should include pet index");
+        passed &= Expect(!packet.ReadBit(), "Target should include remaining health");
+        passed &= Expect(!packet.ReadBit(), "Effect should include caster");
+        passed &= Expect(!packet.ReadBit(), "Effect should include turn instance");
+        passed &= Expect(!packet.ReadBit(), "Effect should include stack depth");
+        passed &= Expect(!packet.ReadBit(), "Effect should include flags");
+        passed &= Expect(!packet.ReadBit(), "Round should include next state");
+        passed &= Expect(packet.ReadBits(3) == 0, "Nonlethal round should have no dead pets");
+        passed &= Expect(packet.ReadBits(20) == 0, "Round should have no cooldowns");
+        uint16 flags = 0, turn = 0, aura = 0;
+        uint32 ability = 0;
+        uint8 pet = 0, type = 0, caster = 0, stack = 0, state = 0;
+        int32 health = 0;
+        packet >> flags >> ability >> pet >> health >> type >> turn >> caster >> stack >> aura >> state;
+        passed &= Expect(flags == 2 && ability == 700 && pet == 3 && health == 77,
+            "Damage effect should preserve flags, ability, target and health");
+        passed &= Expect(type == 5 && turn == 1 && caster == 0 && stack == 1 && aura == 3,
+            "Effect suffix should preserve type, turn, caster, stack and source aura order");
+        passed &= Expect(state == 2 && packet.rpos() == packet.size(), "Damage round state/length mismatch");
         return passed;
     }
 
@@ -1585,7 +1459,7 @@ namespace
         Skyfire::BattlePetPackets::BattlePetRoundEffectTarget const& target = effect.Targets[0];
         passed &= Expect(target.PetX == 3,
             "Damage round helper should preserve the target pet index");
-        passed &= Expect(target.Type == 6,
+        passed &= Expect(target.Type == 3,
             "Damage round helper should use the remaining-health target type");
         passed &= Expect(target.HasRemainingHealth && target.RemainingHealth == 0,
             "Damage round helper should write the target remaining health");
@@ -1608,8 +1482,8 @@ namespace
             "Swap effect helper should target one pet");
         passed &= Expect(effect.Targets[0].PetX == 2,
             "Swap effect helper should preserve the new front pet target");
-        passed &= Expect(effect.Targets[0].Type == 3,
-            "Swap effect helper should use target type 3 for selected front pets");
+        passed &= Expect(effect.Targets[0].Type == 4,
+            "Swap effect helper should use the no-payload target type for selected front pets");
 
         return passed;
     }
@@ -2319,30 +2193,18 @@ namespace
             "Pet battle final round packet should use SMSG_PET_BATTLE_FINAL_ROUND");
 
         packet.rpos(0);
-        passed &= Expect(packet.ReadBits(20) == 1,
-            "Pet battle final round packet should write pet count");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round pet should clear captured/caged");
-        passed &= Expect(packet.ReadBit() == true,
-            "Final round pet should write seen action");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round pet should include xp");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round pet should clear duplicate captured/caged bit");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round pet should include initial level");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round pet should include new level");
-        passed &= Expect(packet.ReadBit() == true,
-            "Final round pet should write awarded xp");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round should clear pvp battle");
-        passed &= Expect(packet.ReadBit() == true,
-            "Final round should mark first team as winner");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round should leave second team as loser");
-        passed &= Expect(packet.ReadBit() == false,
-            "Final round should clear abandoned");
+        passed &= Expect(!packet.ReadBit(), "Final round should clear PvP");
+        passed &= Expect(packet.ReadBit(), "Ally should win");
+        passed &= Expect(!packet.ReadBit(), "Enemy should lose");
+        passed &= Expect(packet.ReadBits(20) == 1, "Final round should contain one pet");
+        passed &= Expect(!packet.ReadBit(), "Pet should include new level");
+        passed &= Expect(!packet.ReadBit(), "Pet should not be caged");
+        passed &= Expect(packet.ReadBit(), "Pet should have seen action");
+        passed &= Expect(!packet.ReadBit(), "Pet should include XP");
+        passed &= Expect(!packet.ReadBit(), "Pet should not be captured");
+        passed &= Expect(!packet.ReadBit(), "Pet should include initial level");
+        passed &= Expect(packet.ReadBit(), "Pet should be awarded XP");
+        passed &= Expect(packet.ReadBit(), "Final round should set result acknowledgement");
 
         uint16 xp = 0;
         uint8 pboid = 0;
@@ -2352,12 +2214,12 @@ namespace
         uint16 initialLevel = 0;
         uint32 npcCreatureId[2] = { };
 
+        packet >> remainingHealth;
+        packet >> initialLevel;
         packet >> xp;
         packet >> pboid;
-        packet >> remainingHealth;
         packet >> newLevel;
         packet >> maxHealth;
-        packet >> initialLevel;
         packet >> npcCreatureId[0];
         packet >> npcCreatureId[1];
 
@@ -2400,16 +2262,13 @@ namespace
         WorldPacket packet = Skyfire::BattlePetPackets::BuildFinalRoundPacket(finalRound);
 
         packet.rpos(0);
-        passed &= Expect(packet.ReadBits(20) == 1,
-            "Captured final round packet should write pet count");
-        passed &= Expect(packet.ReadBit() == true,
-            "Captured final round pet should set the captured/caged bit");
-        passed &= Expect(packet.ReadBit() == true,
-            "Captured final round pet should preserve seen action");
-        passed &= Expect(packet.ReadBit() == true,
-            "Captured final round pet should omit xp when none was awarded");
-        passed &= Expect(packet.ReadBit() == true,
-            "Captured final round pet should set the duplicate captured/caged bit");
+        packet.ReadBits(3); // PvP and winners
+        passed &= Expect(packet.ReadBits(20) == 1, "Captured round should contain one pet");
+        passed &= Expect(!packet.ReadBit(), "Captured pet should include new level");
+        passed &= Expect(!packet.ReadBit(), "Captured pet is not a caged inventory item");
+        passed &= Expect(packet.ReadBit(), "Captured pet should have seen action");
+        passed &= Expect(!packet.ReadBit(), "Captured pet should include zero XP");
+        passed &= Expect(packet.ReadBit(), "Pet should be marked captured");
 
         return passed;
     }
