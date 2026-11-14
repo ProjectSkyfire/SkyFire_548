@@ -601,6 +601,19 @@ enum CurrencyTypes
     CURRENCY_TYPE_BLOODY_COIN = 789,
 };
 
+// CriteriaTree.dbc operator: how a tree node combines its children.
+// Values seen in the 18414 file: 0, 1, 4, 5, 6, 7, 8; names follow TrinityCore.
+enum CriteriaTreeOperator
+{
+    CRITERIA_TREE_OPERATOR_COMPLETE           = 0,  // leaf: its criteria reached the amount
+    CRITERIA_TREE_OPERATOR_NOT_COMPLETE       = 1,
+    CRITERIA_TREE_OPERATOR_COMPLETE_ALL       = 4,
+    CRITERIA_TREE_OPERATOR_SUM                = 5,
+    CRITERIA_TREE_OPERATOR_HIGHEST            = 6,
+    CRITERIA_TREE_OPERATOR_STARTED_AT_LEAST   = 7,
+    CRITERIA_TREE_OPERATOR_COMPLETE_AT_LEAST  = 8,
+};
+
 enum ScenarioStepFlags
 {
     SCENARIO_STEP_FLAG_BONUS_OBJECTIVE = 0x1,

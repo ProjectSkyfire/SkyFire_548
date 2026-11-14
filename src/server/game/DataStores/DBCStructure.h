@@ -1343,7 +1343,7 @@ struct CriteriaTreeEntry
     uint32 criteriaID;                                      // 1
     uint32 criteriaCount;                                   // 2
     //uint32 unk;                                           // 3
-    //uint32 op;                                            // 4
+    uint32 op;                                              // 4 CriteriaTreeOperator
     uint32 parentID;                                        // 5
     //uint32 treeFlags;                                     // 6
     //char* name;                                           // 7
