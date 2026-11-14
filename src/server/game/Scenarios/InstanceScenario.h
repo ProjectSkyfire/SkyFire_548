@@ -11,6 +11,7 @@
 
 #include <ctime>
 
+class InstanceScript;
 class Map;
 class Player;
 
@@ -45,6 +46,8 @@ private:
     void AfterChange(std::vector<uint32> const& changed, bool force = false);
     void SendStateToAll() const;
     void SendProgress(uint32 criteriaId) const;
+    void AfterStepChange();
+    InstanceScript* GetScript() const;
     void Finish();
 
     Map* _map;

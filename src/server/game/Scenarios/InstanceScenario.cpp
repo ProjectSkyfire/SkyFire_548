@@ -5,6 +5,7 @@
 
 #include "InstanceScenario.h"
 #include "GroupMgr.h"
+#include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "Log.h"
 #include "Map.h"
@@ -93,12 +94,12 @@ void InstanceScenario::AddCriteria(uint32 criteriaId, uint64 amount)
 
 void InstanceScenario::ForceStep(uint32 step)
 {
+    // A finished scenario stays finished; reopening it would never pay out again.
+    if (_finished)
+        return;
+
     if (_progress.SetStep(step))
-    {
-        SendStateToAll();
-        if (_progress.IsComplete())
-            Finish();
-    }
+        AfterStepChange();
 }
 
 void InstanceScenario::Complete()
@@ -129,11 +130,24 @@ void InstanceScenario::AfterChange(std::vector<uint32> const& changed, bool forc
 
     if (_progress.AdvanceIfStepDone())
     {
-        SF_LOG_DEBUG("scenario", "Scenario %u in instance %u is now at step %d", _progress.GetScenarioId(), _map->GetInstanceId(), _progress.GetCurrentStep());
-        SendStateToAll();
-        if (_progress.IsComplete())
-            Finish();
+        SF_LOG_INFO("scenario", "Scenario %u in instance %u is now at step %d", _progress.GetScenarioId(), _map->GetInstanceId(), _progress.GetCurrentStep());
+        AfterStepChange();
     }
+}
+
+void InstanceScenario::AfterStepChange()
+{
+    SendStateToAll();
+    if (_progress.IsComplete())
+        Finish();
+    else if (InstanceScript* script = GetScript())
+        script->OnScenarioStepChange(_progress.GetCurrentStep());
+}
+
+InstanceScript* InstanceScenario::GetScript() const
+{
+    InstanceMap* map = _map->ToInstanceMap();
+    return map ? map->GetInstanceScript() : nullptr;
 }
 
 void InstanceScenario::Finish()
@@ -143,6 +157,9 @@ void InstanceScenario::Finish()
     _finished = true;
 
     SF_LOG_INFO("scenario", "Scenario %u in instance %u completed", _progress.GetScenarioId(), _map->GetInstanceId());
+
+    if (InstanceScript* script = GetScript())
+        script->OnScenarioComplete();
 
     // A group that has since disbanded has no finder data left; asking the
     // finder about it would only create an empty entry.

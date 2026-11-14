@@ -27,7 +27,10 @@ namespace
         CriteriaTreeEntry const* tree = sCriteriaTreeStore.LookupEntry(treeId);
         if (!tree)
         {
-            SF_LOG_ERROR("server.loading", "Scenario criteria tree %u is missing from CriteriaTree.dbc, its step counts as done", treeId);
+            // Tree 0 is a step without objectives (placeholder or test steps in
+            // the client data): it counts as done, nothing to report.
+            if (treeId)
+                SF_LOG_ERROR("server.loading", "Scenario criteria tree %u is missing from CriteriaTree.dbc, its step counts as done", treeId);
             return node;
         }
 

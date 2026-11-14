@@ -179,6 +179,22 @@ public:
     // Remove Auras due to Spell on all players in instance
     void DoRemoveAurasDueToSpellOnPlayers(uint32 spell);
 
+    // Scenario objectives the core cannot see itself (script events, objects,
+    // spells): count a criteria of the current step by id. Kills of a creature
+    // entry named by the step count on their own. No-ops outside a scenario.
+    void DoScenarioCriteria(uint32 criteriaId, uint64 amount = 1);
+
+    // Jump to a main step of the scenario, or finish it
+    void DoSetScenarioStep(uint32 step);
+    void DoCompleteScenario();
+
+    // Called after the scenario moved to a new step (step is the number the
+    // client shows) and once when it completed. When several steps are done at
+    // once (a step without objectives), the call names the step now current;
+    // the ones passed over get no call. Do not force the step you are told about.
+    virtual void OnScenarioStepChange(int32 /*step*/) { }
+    virtual void OnScenarioComplete() { }
+
     // Cast spell on all players in instance
     void DoCastSpellOnPlayers(uint32 spell);
 
