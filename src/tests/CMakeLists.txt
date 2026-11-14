@@ -640,6 +640,20 @@ add_executable(battle_pet_packet_tests
 
 add_test(NAME battle_pet_packet_tests COMMAND battle_pet_packet_tests)
 
+add_executable(scenario_packet_tests
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios/ScenarioPackets.cpp
+  GameDomainTestSupport.cpp
+  ScenarioPacketTests.cpp
+)
+
+target_include_directories(scenario_packet_tests PRIVATE
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios
+  $<TARGET_PROPERTY:game,INCLUDE_DIRECTORIES>
+)
+
+add_test(NAME scenario_packet_tests COMMAND scenario_packet_tests)
+
 add_executable(gossip_schema_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/Globals/GossipSchema.cpp
   GossipSchemaTests.cpp
