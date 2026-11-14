@@ -17,9 +17,12 @@
 #include "MapLifecycle.h"
 #include "MapManager.h"
 #include "MMapFactory.h"
+#include "InstanceScenario.h"
+#include "LFGMgr.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Pet.h"
+#include "ScenarioMgr.h"
 #include "ScriptMgr.h"
 #include "Transport.h"
 #include "Vehicle.h"
@@ -2860,7 +2863,7 @@ template void Map::RemoveFromMap(AreaTrigger*, bool);
 InstanceMap::InstanceMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Map* _parent)
     : Map(id, expiry, InstanceId, SpawnMode, _parent),
     m_resetAfterUnload(false), m_unloadWhenEmpty(false),
-    i_data(NULL), i_script_id(0)
+    i_data(NULL), i_scenario(NULL), i_script_id(0)
 {
     //lets initialize visibility distance for dungeons
     InstanceMap::InitVisibilityDistance();
@@ -2874,6 +2877,8 @@ InstanceMap::~InstanceMap()
 {
     delete i_data;
     i_data = NULL;
+    delete i_scenario;
+    i_scenario = NULL;
 }
 
 void InstanceMap::InitVisibilityDistance()
@@ -3063,6 +3068,31 @@ bool InstanceMap::AddPlayerToMap(Player* player)
 
     // this will acquire the same mutex so it cannot be in the previous block
     Map::AddPlayerToMap(player);
+
+    if (IsScenario())
+    {
+        // The scenario is chosen when the first player enters: it depends on
+        // the dungeon the group queued for and on the player's faction.
+        if (!i_scenario)
+        {
+            uint32 dungeonId = 0;
+            if (Group* group = player->GetGroup())
+                if (group->isLFGGroup())
+                    dungeonId = sLFGMgr->GetDungeon(group->GetGUID());
+
+            uint32 const scenarioId = sScenarioMgr->ResolveScenarioId(GetId(), GetSpawnMode(), player->GetTeamId(), dungeonId);
+            if (Skyfire::Scenarios::ScenarioData const* data = sScenarioMgr->GetData(scenarioId))
+            {
+                i_scenario = new InstanceScenario(this, *data, dungeonId);
+                i_scenario->Start();
+            }
+            else
+                SF_LOG_DEBUG("scenario", "No scenario for map %u difficulty %u", GetId(), uint32(GetSpawnMode()));
+        }
+
+        if (i_scenario)
+            i_scenario->SendState(player);
+    }
 
     if (i_data)
         i_data->OnPlayerEnter(player);
