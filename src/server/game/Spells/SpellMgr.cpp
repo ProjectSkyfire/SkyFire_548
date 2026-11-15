@@ -3114,7 +3114,8 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->ProcCharges = 1;
                 break;
             case 44544: // Fingers of Frost
-                spellInfo->Effects[EFFECT_0].SpellClassMask = flag128(685904631, 1151048, 0, 0);
+                // Only Ice Lance and Deep Freeze act as if the target were frozen; the client data lists Deep Freeze alone
+                spellInfo->Effects[EFFECT_0].SpellClassMask = flag128(0x00020000, 0x00100000, 0, 0);
                 break;
 
             case 28200: // Ascendance (Talisman of Ascendance trinket)
