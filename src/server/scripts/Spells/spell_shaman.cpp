@@ -55,6 +55,8 @@ enum ShamanSpells
     SPELL_SHAMAN_FIRE_ELEMENTAL_TOTEM           = 2894,
     SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1         = 8349,
     SPELL_SHAMAN_FLAME_SHOCK                    = 8050,
+    SPELL_SHAMAN_FROST_SHOCK_FREEZE             = 63685,
+    SPELL_SHAMAN_FROZEN_POWER                   = 63374,
     SPELL_SHAMAN_FLAMES_OF_LIFE                 = 137808,
     SPELL_SHAMAN_FULMINATION                    = 88766,
     SPELL_SHAMAN_FULMINATION_INFO               = 95774,
@@ -920,6 +922,42 @@ public:
     AuraScript* GetAuraScript() const OVERRIDE
     {
         return new spell_sha_flow_of_the_elements_AuraScript();
+    }
+};
+
+// 8056 - Frost Shock
+class spell_sha_frozen_power : public SpellScriptLoader
+{
+public:
+    spell_sha_frozen_power() : SpellScriptLoader("spell_sha_frozen_power") { }
+
+    class spell_sha_frozen_power_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_frozen_power_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FROST_SHOCK_FREEZE) && sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FROZEN_POWER);
+        }
+
+        // Frozen Power has no proc data, the root is applied by the Frost Shock cast itself
+        void HandleAfterHit()
+        {
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (target && caster->HasAura(SPELL_SHAMAN_FROZEN_POWER))
+                caster->CastSpell(target, SPELL_SHAMAN_FROST_SHOCK_FREEZE, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterHit += SpellHitFn(spell_sha_frozen_power_SpellScript::HandleAfterHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_sha_frozen_power_SpellScript();
     }
 };
 
@@ -3928,6 +3966,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_elemental_blast();
     new spell_sha_fire_nova();
     new spell_sha_flow_of_the_elements();
+    new spell_sha_frozen_power();
     new spell_sha_fulmination();
     new spell_sha_glyph_of_cleansing_waters();
     new spell_sha_glyph_of_flame_shock();
