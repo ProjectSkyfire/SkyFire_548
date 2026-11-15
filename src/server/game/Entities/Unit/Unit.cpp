@@ -3421,6 +3421,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             if (victim->HasAuraWithMechanic((1 << MECHANIC_STUN) | (1 << MECHANIC_KNOCKOUT)))
                                 if (AuraEffect const* aurEff = GetAuraEffect(56369, EFFECT_0))
                                     crit_chance += aurEff->GetAmount();
+
+                        // Inferno Blast is guaranteed to critically strike
+                        if (spellProto->Id == 108853)
+                            return true;
                         break;
                     }
                     case SPELLFAMILY_DRUID:
@@ -3483,13 +3487,15 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     }
                     case SPELLFAMILY_SHAMAN:
                     {
-                        // Lava Burst
-                        if (spellProto->SpellFamilyFlags[1] & 0x00001000)
+                        switch (spellProto->Id)
                         {
-                            if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, GetGUID()))
+                            case 51505: // Lava Burst
+                            case 77451: // Lava Burst (Elemental Overload)
                                 if (victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
                                     return true;
-                            break;
+                                break;
+                            default:
+                                break;
                         }
                         break;
                     }
