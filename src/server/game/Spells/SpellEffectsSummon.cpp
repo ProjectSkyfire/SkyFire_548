@@ -862,15 +862,27 @@ void Spell::EffectDestroyAllTotems(SpellEffIndex /*effIndex*/)
         if (totem && totem->IsTotem())
         {
             uint32 spell_id = totem->GetUInt32Value(UNIT_FIELD_CREATED_BY_SPELL);
-            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spell_id);
-            if (spellInfo)
+            for (uint32 i = 0; i < sSpellPowerStore.GetNumRows(); ++i)
             {
-                //mana += spellInfo->ManaCost;
-                //mana += int32(CalculatePct(m_caster->GetCreateMana(), spellInfo->ManaCostPercentage));
+                SpellPowerEntry const* spellPower = sSpellPowerStore.LookupEntry(i);
+                if (!spellPower || spellPower->spellId != spell_id || spellPower->powerType != POWER_MANA)
+                    continue;
+
+                int32 cost = int32(spellPower->manaCost + CalculatePct(m_caster->GetCreateMana(), spellPower->ManaCostPercentageFloat));
+                if (Player* modOwner = m_caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(spell_id, SPELLMOD_COST, cost);
+
+                mana += cost;
+                break;
             }
             totem->ToTotem()->UnSummon();
         }
     }
+
+    // The returned percent sits on the energize spell so that Glyph of Totemic Recall can raise it
+    if (SpellInfo const* energizeInfo = sSpellMgr->GetSpellInfo(39104))
+        damage = energizeInfo->Effects[EFFECT_1].CalcValue(m_caster);
+
     ApplyPct(mana, damage);
     if (mana)
         m_caster->CastCustomSpell(m_caster, 39104, &mana, NULL, NULL, true);
