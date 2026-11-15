@@ -3516,11 +3516,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 {
                     case SPELLFAMILY_WARRIOR:
                     {
-                        // bloodthirst double crit chance
+                        // Bloodthirst: double crit chance; the base chance is added once more after the switch
                         if (spellProto->SpellFamilyFlags[1] & 0x00000400
                             && spellProto->SpellIconID == 38)
                         {
-                            crit_chance += (GetUnitCriticalChance(attackType, victim) * 2.0f);
+                            crit_chance += GetUnitCriticalChance(attackType, victim);
                             break;
                         }
                         break;
