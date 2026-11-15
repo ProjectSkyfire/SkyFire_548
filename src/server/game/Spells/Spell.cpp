@@ -2258,6 +2258,7 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
     targetInfo.processed = false;                              // Effects not apply on target
     targetInfo.alive = target->IsAlive();
     targetInfo.damage = 0;
+    targetInfo.unmitigated = 0;
     targetInfo.crit = false;
     targetInfo.scaleAura = false;
     if (m_auraScaleMask && targetInfo.effectMask == m_auraScaleMask && m_caster != target)
@@ -2615,7 +2616,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger && missInfo != SPELL_MISS_REFLECT)
         {
-            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo, m_triggeredByAuraSpell, 0, this, damageInfo.blocked);
+            caster->ProcDamageAndSpell(unitTarget, procAttacker, procVictim, procEx, damageInfo.damage, m_attackType, m_spellInfo, m_triggeredByAuraSpell, 0, this, damageInfo.blocked, damageInfo.unmitigated);
             if (caster->GetTypeId() == TypeID::TYPEID_PLAYER && (m_spellInfo->Attributes & SPELL_ATTR0_STOP_ATTACK_TARGET) == 0 &&
                 (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE || m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED))
                 caster->ToPlayer()->CastItemCombatSpell(unitTarget, m_attackType, procVictim, procEx);
@@ -2633,7 +2634,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         procEx |= createProcExtendMask(&damageInfo, missInfo);
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (canEffectTrigger && missInfo != SPELL_MISS_REFLECT)
-            caster->ProcDamageAndSpell(unit, procAttacker, procVictim, procEx, 0, m_attackType, m_spellInfo, m_triggeredByAuraSpell, 0, this);
+            caster->ProcDamageAndSpell(unit, procAttacker, procVictim, procEx, 0, m_attackType, m_spellInfo, m_triggeredByAuraSpell, 0, this, 0, target->unmitigated);
 
         // Failed Pickpocket, reveal rogue
         if (missInfo == SPELL_MISS_RESIST && m_spellInfo->AttributesCu & SPELL_ATTR0_CU_PICKPOCKET && unitTarget->GetTypeId() == TypeID::TYPEID_UNIT)
@@ -7766,6 +7767,14 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier)
     // In case spell reflect from target, do all effect on caster (if hit)
     else if (targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE)
         unit = m_caster;
+    // Dodged and parried attacks of creatures still feed Vengeance, so the damage they would have done is kept
+    bool avoided = false;
+    if (!unit && (targetInfo.missCondition == SPELL_MISS_DODGE || targetInfo.missCondition == SPELL_MISS_PARRY) &&
+        m_caster->GetTypeId() == TypeID::TYPEID_UNIT && !m_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
+    {
+        unit = ObjectAccessor::GetUnit(*m_caster, targetInfo.targetGUID);
+        avoided = true;
+    }
     if (!unit)
         return;
 
@@ -7775,6 +7784,28 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier)
         {
             m_damage = 0;
             m_healing = 0;
+
+            if (avoided)
+            {
+                switch (m_spellInfo->Effects[i].Effect)
+                {
+                    case SPELL_EFFECT_SCHOOL_DAMAGE:
+                    case SPELL_EFFECT_WEAPON_DAMAGE:
+                    case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                    case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+                    case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                        // The damage handlers are called directly, the spell scripts must not run for an avoided hit
+                        effectHandleMode = SPELL_EFFECT_HANDLE_LAUNCH_TARGET;
+                        unitTarget = unit;
+                        damage = CalculateDamage(i, unitTarget);
+                        (this->*SpellEffects[m_spellInfo->Effects[i].Effect])(SpellEffIndex(i));
+                        targetInfo.unmitigated += m_damage;
+                        break;
+                    default:
+                        break;
+                }
+                continue;
+            }
 
             HandleEffects(unit, NULL, NULL, i, SPELL_EFFECT_HANDLE_LAUNCH_TARGET);
 
