@@ -853,9 +853,9 @@ void Spell::EffectDestroyAllTotems(SpellEffIndex /*effIndex*/)
         return;
 
     int32 mana = 0;
-    for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
+    for (uint8 slot = SUMMON_SLOT_TOTEM; slot <= SUMMON_SLOT_TOTEM_EXTRA; ++slot)
     {
-        if (!m_caster->m_SummonSlot[slot])
+        if ((slot >= MAX_TOTEM_SLOT && slot != SUMMON_SLOT_TOTEM_EXTRA) || !m_caster->m_SummonSlot[slot])
             continue;
 
         Creature* totem = m_caster->GetMap()->GetCreature(m_caster->m_SummonSlot[slot]);

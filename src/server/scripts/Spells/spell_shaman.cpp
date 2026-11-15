@@ -2848,8 +2848,11 @@ public:
             if (!dest)
                 return;
 
-            for (uint8 slot = SUMMON_SLOT_TOTEM; slot < MAX_TOTEM_SLOT; ++slot)
+            for (uint8 slot = SUMMON_SLOT_TOTEM; slot <= SUMMON_SLOT_TOTEM_EXTRA; ++slot)
             {
+                if (slot >= MAX_TOTEM_SLOT && slot != SUMMON_SLOT_TOTEM_EXTRA)
+                    continue;
+
                 Creature* totem = ObjectAccessor::GetCreature(*shaman, shaman->m_SummonSlot[slot]);
                 if (!totem || !totem->IsTotem())
                     continue;
