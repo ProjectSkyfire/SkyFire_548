@@ -12,6 +12,8 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "ObjectAccessor.h"
 #include "Unit.h"
 #include "DynamicObject.h"
@@ -853,7 +855,6 @@ public:
 };
 
 // 1535 Fire Nova
-/// Updated 4.3.4
 class spell_sha_fire_nova : public SpellScriptLoader
 {
 public:
@@ -863,21 +864,40 @@ public:
     {
         PrepareSpellScript(spell_sha_fire_nova_SpellScript);
 
-        void HandleDummy(SpellEffIndex /*effIndex*/)
+        // Fire Nova needs one of the shaman's own Flame Shocks in range; without one it must not go on cooldown
+        SpellCastResult CheckCast()
         {
             Unit* caster = GetCaster();
+            float radius = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(caster);
+
+            std::list<Unit*> targets;
+            Skyfire::AnyUnfriendlyUnitInObjectRangeCheck check(caster, caster, radius);
+            Skyfire::UnitListSearcher<Skyfire::AnyUnfriendlyUnitInObjectRangeCheck> searcher(caster, targets, check);
+            caster->VisitNearbyObject(radius, searcher);
+
+            for (Unit* target : targets)
+                if (target->HasAura(SPELL_SHAMAN_FLAME_SHOCK, caster->GetGUID()))
+                    return SpellCastResult::SPELL_CAST_OK;
+
+            return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+        }
+
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(Skyfire::UnitAuraCheck(false, SPELL_SHAMAN_FLAME_SHOCK, GetCaster()->GetGUID()));
+        }
+
+        // The wave comes from each burning enemy; Flame Shock itself stays on the target
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
             if (Unit* target = GetHitUnit())
-            {
-                if (target->HasAura(SPELL_SHAMAN_FLAME_SHOCK))
-                {
-                    caster->CastSpell(target, SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, true);
-                    target->RemoveAurasDueToSpell(SPELL_SHAMAN_FLAME_SHOCK);
-                }
-            }
+                GetCaster()->CastSpell(target, SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, true);
         }
 
         void Register() OVERRIDE
         {
+            OnCheckCast += SpellCheckCastFn(spell_sha_fire_nova_SpellScript::CheckCast);
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_sha_fire_nova_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
             OnEffectHitTarget += SpellEffectFn(spell_sha_fire_nova_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
