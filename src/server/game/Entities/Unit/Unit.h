@@ -1690,6 +1690,7 @@ public:
     }
     void ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply);
     void ApplyCastTimePercentMod(float val, bool apply);
+    float GetSpellHasteRegenMultiplier() const;
 
     SheathState GetSheath() const
     {

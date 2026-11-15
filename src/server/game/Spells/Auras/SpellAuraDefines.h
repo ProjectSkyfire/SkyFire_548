@@ -424,7 +424,7 @@ enum AuraType
     SPELL_AURA_MOD_CURRENCY_GAIN2 = 376,
     SPELL_AURA_CAST_WHILE_WALKING2 = 377,
     // 378 unusued
-    SPELL_AURA_379 = 379,
+    SPELL_AURA_MOD_MANA_REGEN_PERCENT = 379,
     // 380 unused
     SPELL_AURA_381 = 381,
     SPELL_AURA_382 = 382,
@@ -457,7 +457,7 @@ enum AuraType
     SPELL_AURA_409 = 409,
     SPELL_AURA_410 = 410,
     SPELL_AURA_MOD_CHARGES = 411,                           // implemented in Player spell charge tracking
-    SPELL_AURA_412 = 412,
+    SPELL_AURA_MOD_MANA_REGEN_BY_HASTE = 412,
     SPELL_AURA_413 = 413,
     SPELL_AURA_414 = 414,
     SPELL_AURA_415 = 415,

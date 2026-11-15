@@ -877,6 +877,10 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
 
     // ignore negative values (can be result apply spellmods to aura damage
     uint32 amount = std::max(m_amount, 0) * target->GetMaxPower(powerType) / 100;
+
+    if (caster == target && m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && target->HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+        amount = uint32(float(amount) * target->GetSpellHasteRegenMultiplier());
+
     SF_LOG_INFO("spells", "PeriodicTick: %u (TypeId: %u) energize %u (TypeId: %u) for %u dmg inflicted by %u",
         GUID_LOPART(GetCasterGUID()), uint8(GuidHigh2TypeId(GUID_HIPART(GetCasterGUID()))), target->GetGUIDLow(), uint8(target->GetTypeId()), amount, GetId());
 
@@ -908,6 +912,9 @@ void AuraEffect::HandlePeriodicEnergizeAuraTick(Unit* target, Unit* caster) cons
 
     // ignore negative values (can be result apply spellmods to aura damage
     int32 amount = std::max(m_amount, 0);
+
+    if (caster == target && m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && target->HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+        amount = int32(float(amount) * target->GetSpellHasteRegenMultiplier());
 
     SpellPeriodicAuraLogInfo pInfo(this, amount, 0, 0, 0, GetMiscValue(), 0.0f, false);
     target->SendPeriodicAuraLog(&pInfo);

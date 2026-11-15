@@ -3283,11 +3283,15 @@ void Unit::SendEnergizeSpellLog(Unit* victim, uint32 spellId, int32 damage, Powe
 
 void Unit::EnergizeBySpell(Unit* victim, uint32 spellId, int32 damage, Powers powerType)
 {
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+
+    if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+        damage = int32(float(damage) * GetSpellHasteRegenMultiplier());
+
     SendEnergizeSpellLog(victim, spellId, damage, powerType);
     // needs to be called after sending spell log
     victim->ModifyPower(powerType, damage);
 
-    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     victim->getHostileRefManager().threatAssist(this, float(damage) * 0.5f, spellInfo);
 }
 
@@ -3319,6 +3323,8 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
         // Check if we are ever using mana - PaperDollFrame.lua
         if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
             DoneAdvertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+
+        DoneAdvertisedBenefit = int32(float(DoneAdvertisedBenefit) * GetTotalAuraMultiplier(SPELL_AURA_MOD_SPELL_POWER_PCT));
 
         // Damage bonus from stats
         AuraEffectList const& mDamageDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
@@ -3661,6 +3667,8 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask) const
         // Check if we are ever using mana - PaperDollFrame.lua
         if (GetPowerIndex(POWER_MANA) != MAX_POWERS)
             advertisedBenefit += std::max(0, int32(GetStat(STAT_INTELLECT)) - 10);  // spellpower from intellect
+
+        advertisedBenefit = int32(float(advertisedBenefit) * GetTotalAuraMultiplier(SPELL_AURA_MOD_SPELL_POWER_PCT));
 
         // Healing bonus from stats
         AuraEffectList const& mHealingDoneOfStatPercent = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);
@@ -6428,6 +6436,16 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply)
         ApplyPercentModFloatValue(UNIT_FIELD_MOD_CASTING_SPEED, -val, apply);
         ApplyPercentModFloatValue(UNIT_FIELD_MOD_SPELL_HASTE, -val, apply);
     }
+
+    if (HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+        if (Player* player = ToPlayer())
+            player->UpdateManaRegen();
+}
+
+float Unit::GetSpellHasteRegenMultiplier() const
+{
+    // Cast time slows must not lower the regeneration
+    return 1.0f / std::min(GetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED), 1.0f);
 }
 
 uint32 Unit::GetCastingTimeForBonus(SpellInfo const* spellProto, DamageEffectType damagetype, uint32 CastingTime) const

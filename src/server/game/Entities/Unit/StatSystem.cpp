@@ -120,6 +120,13 @@ void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 
     apply = _ModifyUInt32(apply, m_baseSpellPower, amount);
 
+    // Spell power percentage auras scale the whole sum, so a plain delta would be wrong
+    if (HasAuraType(SPELL_AURA_MOD_SPELL_POWER_PCT))
+    {
+        UpdateSpellDamageAndHealingBonus();
+        return;
+    }
+
     // For speed just update for client
     ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, amount, apply);
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
@@ -760,6 +767,9 @@ void Player::UpdateManaRegen()
     */
     // base regen since pandaria is 2% aka 6000 MP @90.
     float base_regen = GetMaxPower(POWER_MANA) * 0.02f;
+    base_regen *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MANA_REGEN_PERCENT);
+    if (HasAuraType(SPELL_AURA_MOD_MANA_REGEN_BY_HASTE))
+        base_regen *= GetSpellHasteRegenMultiplier();
     // Mana regen from spirit
     float spirit_regen = OCTRegenMPPerSpirit();
     // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT aura on spirit base regen
