@@ -13,11 +13,13 @@
 
 enum ShamanSpells
 {
-    SPELL_SHAMAN_ANGEREDEARTH   = 36213,
-    SPELL_SHAMAN_FIREBLAST      = 57984,
-    SPELL_SHAMAN_FIRENOVA       = 12470,
-    SPELL_SHAMAN_FIRESHIELD     = 13376,
-    SPELL_SHAMAN_STATIC_CHARGE  = 118905
+    SPELL_SHAMAN_ANGEREDEARTH           = 36213,
+    SPELL_SHAMAN_FIREBLAST              = 57984,
+    SPELL_SHAMAN_FIRENOVA               = 12470,
+    SPELL_SHAMAN_FIRESHIELD             = 13376,
+    SPELL_SHAMAN_SEARING_FLAMES         = 77661,
+    SPELL_SHAMAN_SEARING_FLAMES_PASSIVE = 77657,
+    SPELL_SHAMAN_STATIC_CHARGE          = 118905
 };
 
 enum ShamanEvents
@@ -89,6 +91,16 @@ class npc_pet_shaman_fire_elemental : public CreatureScript
                 _events.ScheduleEvent(EVENT_SHAMAN_FIREBLAST, urand(5000, 20000));
                 _events.ScheduleEvent(EVENT_SHAMAN_FIRESHIELD, 0);
                 me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
+            }
+
+            void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType damageType) OVERRIDE
+            {
+                if (!damage || damageType != DIRECT_DAMAGE)
+                    return;
+
+                if (Unit* owner = me->GetOwner())
+                    if (owner->HasAura(SPELL_SHAMAN_SEARING_FLAMES_PASSIVE))
+                        owner->CastSpell(owner, SPELL_SHAMAN_SEARING_FLAMES, true);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE

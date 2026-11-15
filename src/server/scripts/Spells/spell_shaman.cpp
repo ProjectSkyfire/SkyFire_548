@@ -110,6 +110,7 @@ enum ShamanSpells
     SPELL_SHAMAN_RUSHING_STREAMS                = 147074,
     SPELL_SHAMAN_SATED                          = 57724,
     SPELL_SHAMAN_SEARING_FLAMES                 = 77661,
+    SPELL_SHAMAN_SEARING_FLAMES_PASSIVE         = 77657,
     SPELL_SHAMAN_SPIRIT_LINK                    = 98021,
     SPELL_SHAMAN_SPIRITWALKERS_AEGIS            = 131557,
     SPELL_SHAMAN_SPIRITWALKERS_AEGIS_EFFECT     = 131558,
@@ -3651,6 +3652,40 @@ public:
     }
 };
 
+// 3606 - Searing Bolt
+class spell_sha_searing_bolt : public SpellScriptLoader
+{
+public:
+    spell_sha_searing_bolt() : SpellScriptLoader("spell_sha_searing_bolt") { }
+
+    class spell_sha_searing_bolt_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_sha_searing_bolt_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+        {
+            return sSpellMgr->GetSpellInfo(SPELL_SHAMAN_SEARING_FLAMES_PASSIVE) && sSpellMgr->GetSpellInfo(SPELL_SHAMAN_SEARING_FLAMES);
+        }
+
+        void HandleOnHit()
+        {
+            Unit* owner = GetCaster()->GetOwner();
+            if (owner && owner->HasAura(SPELL_SHAMAN_SEARING_FLAMES_PASSIVE))
+                owner->CastSpell(owner, SPELL_SHAMAN_SEARING_FLAMES, true);
+        }
+
+        void Register() OVERRIDE
+        {
+            OnHit += SpellHitFn(spell_sha_searing_bolt_SpellScript::HandleOnHit);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_sha_searing_bolt_SpellScript();
+    }
+};
+
 // 51527 - Static Shock
 class spell_sha_static_shock : public SpellScriptLoader
 {
@@ -3955,6 +3990,7 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_grounding_totem_effect();
     new spell_sha_hp_based_totem();
     new spell_sha_primal_elementalist();
+    new spell_sha_searing_bolt();
     new spell_sha_static_shock();
     new spell_sha_stormlash_totem();
     new spell_sha_windfury_weapon();
