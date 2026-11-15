@@ -461,8 +461,8 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* victim, uint32 spellID, uint32 damage)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellID);
     SpellNonMeleeDamage damageInfo(this, victim, spellInfo->Id, spellInfo->SchoolMask);
-    damage = SpellDamageBonusDone(victim, spellInfo, damage, SPELL_DIRECT_DAMAGE);
-    damage = victim->SpellDamageBonusTaken(this, spellInfo, damage, SPELL_DIRECT_DAMAGE);
+    damage = SpellDamageBonusDone(victim, spellInfo, EFFECT_0, damage, SPELL_DIRECT_DAMAGE);
+    damage = victim->SpellDamageBonusTaken(this, spellInfo, EFFECT_0, damage, SPELL_DIRECT_DAMAGE);
 
     CalculateSpellDamageTaken(&damageInfo, damage, spellInfo);
     DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
@@ -898,8 +898,8 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
             if (Unit* caster = (*dmgShieldItr)->GetCaster())
             {
-                damage = caster->SpellDamageBonusDone(this, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
-                damage = this->SpellDamageBonusTaken(caster, i_spellProto, damage, SPELL_DIRECT_DAMAGE);
+                damage = caster->SpellDamageBonusDone(this, i_spellProto, (*dmgShieldItr)->GetEffIndex(), damage, SPELL_DIRECT_DAMAGE);
+                damage = this->SpellDamageBonusTaken(caster, i_spellProto, (*dmgShieldItr)->GetEffIndex(), damage, SPELL_DIRECT_DAMAGE);
             }
 
             // No Unit::CalcAbsorbResist here - opcode doesn't send that data - this damage is probably not affected by that

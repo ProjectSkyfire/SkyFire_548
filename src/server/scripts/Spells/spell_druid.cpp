@@ -794,8 +794,8 @@ public:
             int32 healAmount = aurEff->GetAmount();
             if (Unit* caster = GetCaster())
             {
-                healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, HEAL, stack);
-                healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, stack);
+                healAmount = caster->SpellHealingBonusDone(GetTarget(), GetSpellInfo(), aurEff->GetEffIndex(), healAmount, HEAL, stack);
+                healAmount = GetTarget()->SpellHealingBonusTaken(caster, GetSpellInfo(), aurEff->GetEffIndex(), healAmount, HEAL, stack);
             }
 
             GetTarget()->CastCustomSpell(GetTarget(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, aurEff, GetCasterGUID());
@@ -811,8 +811,8 @@ public:
                     int32 healAmount = aurEff->GetAmount();
                     if (Unit* caster = GetCaster())
                     {
-                        healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
-                        healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
+                        healAmount = caster->SpellHealingBonusDone(target, GetSpellInfo(), aurEff->GetEffIndex(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
+                        healAmount = target->SpellHealingBonusTaken(caster, GetSpellInfo(), aurEff->GetEffIndex(), healAmount, HEAL, dispelInfo->GetRemovedCharges());
                     }
 
                     target->CastCustomSpell(target, SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, &healAmount, NULL, NULL, true, NULL, NULL, GetCasterGUID());
@@ -5993,8 +5993,8 @@ public:
 
             if (healAmount > 0)
             {
-                healAmount = int32(druid->SpellHealingBonusDone(druid, GetSpellInfo(), uint32(healAmount), HEAL));
-                healAmount = int32(druid->SpellHealingBonusTaken(druid, GetSpellInfo(), uint32(healAmount), HEAL));
+                healAmount = int32(druid->SpellHealingBonusDone(druid, GetSpellInfo(), EFFECT_0, uint32(healAmount), HEAL));
+                healAmount = int32(druid->SpellHealingBonusTaken(druid, GetSpellInfo(), EFFECT_0, uint32(healAmount), HEAL));
             }
 
             SetHitHeal(healAmount);

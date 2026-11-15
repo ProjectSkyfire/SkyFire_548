@@ -66,7 +66,7 @@ namespace
     }
 }
 
-uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack) const
+uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 effIndex, uint32 pdamage, DamageEffectType damagetype, uint32 stack) const
 {
     if (!spellProto || !victim || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -83,7 +83,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     // For totems get damage bonus from owner
     if (GetTypeId() == TypeID::TYPEID_UNIT && ToCreature()->IsTotem())
         if (Unit* owner = GetOwner())
-            return owner->SpellDamageBonusDone(victim, spellProto, pdamage, damagetype);
+            return owner->SpellDamageBonusDone(victim, spellProto, effIndex, pdamage, damagetype);
 
     // Done total percent damage auras
     float DoneTotalMod = 1.0f;
@@ -255,11 +255,11 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
             }
         }
     }
-    // Default calculation
-    if (DoneAdvertisedBenefit)
+    // A table value of 0 or no table row means the coefficient of the effect from the client data, a negative one no scaling
+    if (DoneAdvertisedBenefit && coeff >= 0)
     {
-        if (!bonus || coeff < 0)
-            coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         float factorMod = CalculateLevelPenalty(spellProto) * stack;
 
@@ -285,7 +285,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellInfo const* spellProto, uin
     return uint32(std::max(tmpDamage, 0.0f));
 }
 
-uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack) const
+uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 effIndex, uint32 pdamage, DamageEffectType damagetype, uint32 stack) const
 {
     if (!spellProto || damagetype == DIRECT_DAMAGE)
         return pdamage;
@@ -347,11 +347,10 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     if (bonus)
         coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
 
-    // Default calculation
-    if (TakenAdvertisedBenefit)
+    if (TakenAdvertisedBenefit && coeff >= 0)
     {
-        if (!bonus || coeff < 0)
-            coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         float factorMod = CalculateLevelPenalty(spellProto) * stack;
         // level penalty still applied on Taken bonus - is it blizzlike?
@@ -384,12 +383,12 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
     return uint32(std::max(tmpDamage, 0.0f));
 }
 
-uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack) const
+uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack) const
 {
     // For totems get healing bonus from owner (statue isn't totem in fact)
     if (GetTypeId() == TypeID::TYPEID_UNIT && IsTotem())
         if (Unit* owner = GetOwner())
-            return owner->SpellHealingBonusDone(victim, spellProto, healamount, damagetype, stack);
+            return owner->SpellHealingBonusDone(victim, spellProto, effIndex, healamount, damagetype, stack);
 
     // No bonus healing for potion spells
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
@@ -462,16 +461,15 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     }
     else
     {
-        // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
-        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
+        // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells without a coefficient in the client data
+        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE && spellProto->Effects[effIndex].BonusMultiplier == 0.0f)
             return healamount;
     }
 
-    // Default calculation
-    if (DoneAdvertisedBenefit)
+    if (DoneAdvertisedBenefit && coeff >= 0)
     {
-        if (!bonus || coeff < 0)
-            coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack) * 1.88f;  // As wowwiki says: C = (Cast Time / 3.5) * 1.88 (for healing spells)
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         factorMod *= CalculateLevelPenalty(spellProto) * stack;
 
@@ -513,7 +511,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     return uint32(std::max(heal, 0.0f));
 }
 
-uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 healamount, DamageEffectType damagetype, uint32 stack) const
+uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, uint32 effIndex, uint32 healamount, DamageEffectType damagetype, uint32 stack) const
 {
     float TakenTotalMod = 1.0f;
 
@@ -553,19 +551,18 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
         coeff = (damagetype == DOT) ? bonus->dot_damage : bonus->direct_damage;
     else
     {
-        // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
-        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE)
+        // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells without a coefficient in the client data
+        if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE && spellProto->Effects[effIndex].BonusMultiplier == 0.0f)
         {
             healamount = uint32(std::max((float(healamount) * TakenTotalMod), 0.0f));
             return healamount;
         }
     }
 
-    // Default calculation
-    if (TakenAdvertisedBenefit)
+    if (TakenAdvertisedBenefit && coeff >= 0)
     {
-        if (!bonus || coeff < 0)
-            coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack) * 1.88f;  // As wowwiki says: C = (Cast Time / 3.5) * 1.88 (for healing spells)
+        if (coeff == 0)
+            coeff = spellProto->Effects[effIndex].BonusMultiplier;
 
         factorMod *= CalculateLevelPenalty(spellProto) * int32(stack);
         if (Player* modOwner = GetSpellModOwner())

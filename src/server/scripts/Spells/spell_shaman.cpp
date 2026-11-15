@@ -625,12 +625,12 @@ public:
             return true;
         }
 
-        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+        void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
         {
             if (Unit* caster = GetCaster())
             {
-                amount = caster->SpellHealingBonusDone(GetUnitOwner(), GetSpellInfo(), amount, HEAL);
-                amount = GetUnitOwner()->SpellHealingBonusTaken(caster, GetSpellInfo(), amount, HEAL);
+                amount = caster->SpellHealingBonusDone(GetUnitOwner(), GetSpellInfo(), aurEff->GetEffIndex(), amount, HEAL);
+                amount = GetUnitOwner()->SpellHealingBonusTaken(caster, GetSpellInfo(), aurEff->GetEffIndex(), amount, HEAL);
             }
         }
 
@@ -952,7 +952,7 @@ public:
             int32 usedCharges = lightningShield->GetCharges() - 1;
             SpellInfo const* orbInfo = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE);
             int32 basePoints = caster->CalculateSpellDamage(target, orbInfo, EFFECT_0);
-            int32 damage = usedCharges * int32(caster->SpellDamageBonusDone(target, orbInfo, uint32(std::max(basePoints, 0)), SPELL_DIRECT_DAMAGE));
+            int32 damage = usedCharges * int32(caster->SpellDamageBonusDone(target, orbInfo, EFFECT_0, uint32(std::max(basePoints, 0)), SPELL_DIRECT_DAMAGE));
 
             caster->CastCustomSpell(SPELL_SHAMAN_FULMINATION_TRIGGERED, SPELLVALUE_BASE_POINT0, damage, target, true);
             lightningShield->SetCharges(1);
