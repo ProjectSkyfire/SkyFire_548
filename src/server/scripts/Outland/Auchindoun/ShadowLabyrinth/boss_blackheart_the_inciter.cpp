@@ -111,7 +111,7 @@ class boss_blackheart_the_inciter : public CreatureScript
                         case EVENT_CHARGE_ATTACK:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                                 DoCast(target, SPELL_CHARGE);
-                            events.ScheduleEvent(EVENT_CHARGE, urand(15000, 25000));
+                            events.ScheduleEvent(EVENT_CHARGE_ATTACK, urand(15000, 25000));
                             break;
                         case EVENT_WAR_STOMP:
                             DoCast(me, SPELL_WAR_STOMP);
