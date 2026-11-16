@@ -44,6 +44,7 @@ class instance_shattered_halls : public InstanceMapScript
                     victimsGUID[i] = 0;
                 executed            = 0;
                 executionTimer      = 0;
+                saveTimer           = 0;
                 executionerEvent    = EXECUTIONER_EVENT_NOT_STARTED;
                 restoreExecutioner  = false;
                 team                = 0;
@@ -208,8 +209,19 @@ class instance_shattered_halls : public InstanceMapScript
                 if (executionTimer > diff)
                 {
                     executionTimer -= diff;
+
+                    // The timer only ticks in memory: without this a reload gives back the time
+                    // that passed since the last save
+                    saveTimer += diff;
+                    if (saveTimer >= MINUTE * IN_MILLISECONDS)
+                    {
+                        saveTimer = 0;
+                        SaveToDB();
+                    }
                     return;
                 }
+
+                saveTimer = 0;
 
                 DoCastSpellOnPlayers(SPELL_REMOVE_KARGATH_EXECUTIONER);
                 switch (++executed)
@@ -359,6 +371,7 @@ class instance_shattered_halls : public InstanceMapScript
 
                 uint8 executed;
                 uint32 executionTimer;
+                uint32 saveTimer;
                 uint8 executionerEvent;
                 bool restoreExecutioner;
                 uint32 team;
