@@ -106,7 +106,7 @@ enum Spells
 };
 
 // Helper to get id of the aura on different modes (HasAura(baseId) wont work)
-#define BOILING_BLOOD_HELPER RAID_MODE<int32>(72385, 72441, 72442, 72443)
+#define BOILING_BLOOD_HELPER 72385
 
 enum EventTypes
 {
@@ -1193,7 +1193,7 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
 
                 // select one random target, with preference of ranged targets
                 uint32 targetsAtRange = 0;
-                uint32 const minTargets = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 10 : 4);
+                uint32 const minTargets = uint32(GetCaster()->GetMap()->Is25ManRaid() ? 10 : 4);
                 targets.sort(Skyfire::ObjectDistanceOrderPred(GetCaster(), false));
 
                 // get target count at range

@@ -59,7 +59,7 @@ enum Spells
     SPELL_VILE_GAS_TRIGGER                  = 72285,
 };
 
-#define MUTATED_INFECTION RAID_MODE<int32>(69674, 71224, 73022, 73023)
+#define MUTATED_INFECTION 69674
 
 enum Events
 {
