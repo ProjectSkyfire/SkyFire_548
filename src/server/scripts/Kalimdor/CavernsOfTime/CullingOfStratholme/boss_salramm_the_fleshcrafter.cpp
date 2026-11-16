@@ -91,11 +91,14 @@ public:
                 return;
 
             //Curse of twisted flesh timer
-            if (uiCurseFleshTimer <= diff)
+            if (IsHeroic())
             {
-                DoCastVictim(SPELL_CURSE_OF_TWISTED_FLESH);
-                uiCurseFleshTimer = 37000;
-            } else uiCurseFleshTimer -= diff;
+                if (uiCurseFleshTimer <= diff)
+                {
+                    DoCastVictim(SPELL_CURSE_OF_TWISTED_FLESH);
+                    uiCurseFleshTimer = 37000;
+                } else uiCurseFleshTimer -= diff;
+            }
 
             //Shadow bolt timer
             if (uiShadowBoltTimer <= diff)
