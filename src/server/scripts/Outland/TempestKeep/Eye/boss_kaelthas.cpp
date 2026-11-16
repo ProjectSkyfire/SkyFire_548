@@ -13,8 +13,6 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "the_eye.h"
-#include "WorldPacket.h"
-#include "Opcodes.h"
 
 enum Yells
 {
@@ -85,7 +83,7 @@ enum Spells
     SPELL_NETHER_BEAM                   = 35873,
 
     // Thaladred the Darkener spells
-    SPELL_PSYCHIC_BLOW                  = 10689,
+    SPELL_PSYCHIC_BLOW                  = 36966,
     SPELL_SILENCE                       = 30225,
     // Lord Sanguinar spells
     SPELL_BELLOWING_ROAR                = 40636,
@@ -918,13 +916,8 @@ class boss_kaelthas : public CreatureScript
                                                 //Gravity lapse - needs an exception in Spell system to work
 
                                                 unit->CastSpell(unit, SPELL_GRAVITY_LAPSE, true, 0, 0, me->GetGUID());
+                                                // The aura carries the flight, the 3.3.5 packet workaround is not valid for the 5.4.8 client
                                                 unit->CastSpell(unit, SPELL_GRAVITY_LAPSE_AURA, true, 0, 0, me->GetGUID());
-
-                                                //Using packet workaround
-                                                WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                                                data.append(unit->GetPackGUID());
-                                                data << uint32(0);
-                                                unit->SendMessageToSet(&data, true);
                                             }
                                         }
                                         GravityLapse_Timer = 10000;
@@ -946,11 +939,7 @@ class boss_kaelthas : public CreatureScript
                                         {
                                             if (Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid()))
                                             {
-                                                //Using packet workaround
-                                                WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
-                                                data.append(unit->GetPackGUID());
-                                                data << uint32(0);
-                                                unit->SendMessageToSet(&data, true);
+                                                unit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_AURA);
                                             }
                                         }
 
