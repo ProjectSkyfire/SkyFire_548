@@ -13,6 +13,7 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
+#include "SpellAuraEffects.h"
 #include "shadow_labyrinth.h"
 
 enum Murmur
@@ -25,6 +26,8 @@ enum Murmur
     SPELL_SONIC_BOOM_CAST       = 33923,
     SPELL_SONIC_BOOM_EFFECT     = 33666,
     SPELL_MURMURS_TOUCH         = 33711,
+    SPELL_MURMURS_TOUCH_H       = 38794,
+    SPELL_SHOCKWAVE             = 33686,
     // Text
     EMOTE_SONIC_BOOM            = 0
 };
@@ -264,10 +267,34 @@ class spell_murmur_thundering_storm : public SpellScriptLoader
         }
 };
 
+// 33711, 38794 - Murmur's Touch
+class spell_murmur_murmurs_touch : public AuraScript
+{
+    PrepareAuraScript(spell_murmur_murmurs_touch);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+    {
+        return sSpellMgr->GetSpellInfo(SPELL_SHOCKWAVE) != nullptr;
+    }
+
+    void OnPeriodic(AuraEffect const* aurEff)
+    {
+        uint32 lastTick = GetId() == SPELL_MURMURS_TOUCH_H ? 7 : 14;
+        if (aurEff->GetTickNumber() == lastTick)
+            GetTarget()->CastSpell(GetTarget(), SPELL_SHOCKWAVE, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_murmur_murmurs_touch::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+};
+
 void AddSC_boss_murmur()
 {
     new boss_murmur();
     new spell_murmur_sonic_boom();
     new spell_murmur_sonic_boom_effect();
     new spell_murmur_thundering_storm();
+    RegisterAuraScript(spell_murmur_murmurs_touch);
 }
