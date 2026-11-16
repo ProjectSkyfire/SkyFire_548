@@ -25,8 +25,9 @@ enum Spells
 {
     SPELL_ACID_SPRAY            = 38153,
     SPELL_EXPLODING_BREAKER     = 30925,
+    H_SPELL_EXPLODING_BREAKER   = 40059,
     SPELL_KNOCKDOWN             = 20276,
-    SPELL_DOMINATION            = 25772
+    SPELL_DOMINATION            = 30923
 };
 
 class boss_the_maker : public CreatureScript
@@ -52,7 +53,7 @@ public:
         {
             AcidSpray_Timer = 15000;
             ExplodingBreaker_Timer = 6000;
-            Domination_Timer = 120000;
+            Domination_Timer = urand(20000, 30000);
             Knockdown_Timer = 10000;
 
             if (!instance)
@@ -106,23 +107,22 @@ public:
             if (ExplodingBreaker_Timer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_EXPLODING_BREAKER);
+                    DoCast(target, DUNGEON_MODE(SPELL_EXPLODING_BREAKER, H_SPELL_EXPLODING_BREAKER));
                 ExplodingBreaker_Timer = 4000 + rand() % 8000;
             }
             else
                 ExplodingBreaker_Timer -= diff;
 
-            /* // Disabled until Core Support for mind control
-            if (domination_timer_timer <= diff)
+            if (Domination_Timer <= diff)
             {
-            Unit* target;
-            target = SelectUnit(SELECT_TARGET_RANDOM, 0);
+                // Position 1 skips the tank, so a lone player is never dominated.
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true))
+                    DoCast(target, SPELL_DOMINATION);
 
-            DoCast(target, SPELL_DOMINATION);
-
-            domination_timer = 120000;
-            } else domination_timer -=diff;
-            */
+                Domination_Timer = urand(20000, 30000);
+            }
+            else
+                Domination_Timer -= diff;
 
             if (Knockdown_Timer <= diff)
             {
