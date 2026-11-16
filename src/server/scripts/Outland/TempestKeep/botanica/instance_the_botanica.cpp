@@ -16,6 +16,7 @@ class instance_the_botanica : public InstanceMapScript
         {
             instance_the_botanica_InstanceMapScript(Map* map) : InstanceScript(map)
             {
+                SetBossNumber(EncounterCount);
                 CommanderSarannisGUID       = 0;
                 HighBotanistFreywinnGUID    = 0;
                 ThorngrinTheTenderGUID      = 0;
