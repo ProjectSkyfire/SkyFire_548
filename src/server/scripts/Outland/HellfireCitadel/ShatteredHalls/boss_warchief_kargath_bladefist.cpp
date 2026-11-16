@@ -58,6 +58,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
 
             void Reset() OVERRIDE
             {
+                _Reset();
                 removeAdds();
 
                 me->SetSpeed(MOVE_RUN, 2);
@@ -78,13 +79,12 @@ class boss_warchief_kargath_bladefist : public CreatureScript
             {
                 Talk(SAY_DEATH);
                 removeAdds();
-
-                if (instance)
-                    instance->SetBossState(DATA_KARGATH, DONE);
+                _JustDied();
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
+                _EnterCombat();
                 Talk(SAY_AGGRO);
             }
 
