@@ -107,6 +107,7 @@ public:
 
         uint32 Whirlwind_Timer;
         uint32 Fear_Timer;
+        uint32 Hamstring_Timer;
         uint32 MortalStrike_Timer;
         uint32 ExplodingShout_Timer;
 
@@ -117,6 +118,7 @@ public:
 
             Whirlwind_Timer = 20000;
             Fear_Timer = 30000;
+            Hamstring_Timer = 30000;
             MortalStrike_Timer = 45000;
             ExplodingShout_Timer = 25000;
         }
@@ -163,6 +165,13 @@ public:
                 DoCastVictim(SPELL_FRIGHTENING_SHOUT);
                 Fear_Timer = 25000+rand()%10000;
             } else Fear_Timer -= diff;
+
+            //Hamstring
+            if (Hamstring_Timer <= diff)
+            {
+                DoCastVictim(SPELL_HAMSTRING);
+                Hamstring_Timer = urand(15000, 20000);
+            } else Hamstring_Timer -= diff;
 
             //Mortal Strike
             if (MortalStrike_Timer <= diff)
