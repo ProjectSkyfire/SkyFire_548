@@ -10,9 +10,9 @@ uint32 const EncounterCount          = 3;
 
 enum DataTypes
 {
-    DATA_NETHEKURSE                  = 1,
-    DATA_OMROGG                      = 2,
-    DATA_KARGATH                     = 3
+    DATA_NETHEKURSE                  = 0,
+    DATA_OMROGG                      = 1,
+    DATA_KARGATH                     = 2
 };
 
 enum CreatureIds
