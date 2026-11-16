@@ -97,10 +97,14 @@ class instance_arcatraz : public InstanceMapScript
                 {
                 case CONTAINMENT_CORE_SECURITY_FIELD_ALPHA:
                     Containment_Core_Security_Field_AlphaGUID = go->GetGUID();
+                    if (m_auiEncounter[2] == DONE)
+                        HandleGameObject(0, true, go);
                     break;
 
                 case CONTAINMENT_CORE_SECURITY_FIELD_BETA:
                     Containment_Core_Security_Field_BetaGUID = go->GetGUID();
+                    if (m_auiEncounter[1] == DONE)
+                        HandleGameObject(0, true, go);
                     break;
 
                 case POD_ALPHA:
@@ -229,6 +233,9 @@ class instance_arcatraz : public InstanceMapScript
                     }
                     break;
                 }
+
+                if (data == DONE && type >= TYPE_ZEREKETH && type <= TYPE_HARBINGERSKYRISS)
+                    SaveToDB();
             }
 
             uint32 GetData(uint32 type) const OVERRIDE
@@ -243,6 +250,47 @@ class instance_arcatraz : public InstanceMapScript
                 case TYPE_WARDEN_5:         return m_auiEncounter[8];
                 }
                 return 0;
+            }
+
+            std::string GetSaveData() OVERRIDE
+            {
+                OUT_SAVE_INST_DATA;
+
+                std::ostringstream saveStream;
+                saveStream << "A T " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' ' << m_auiEncounter[2] << ' ' << m_auiEncounter[3];
+
+                OUT_SAVE_INST_DATA_COMPLETE;
+                return saveStream.str();
+            }
+
+            void Load(char const* in) OVERRIDE
+            {
+                if (!in)
+                {
+                    OUT_LOAD_INST_DATA_FAIL;
+                    return;
+                }
+
+                OUT_LOAD_INST_DATA(in);
+
+                char dataHead1, dataHead2;
+
+                std::istringstream loadStream(in);
+                loadStream >> dataHead1 >> dataHead2;
+
+                if (dataHead1 == 'A' && dataHead2 == 'T')
+                {
+                    for (uint8 i = 0; i < 4; ++i)
+                    {
+                        loadStream >> m_auiEncounter[i];
+                        if (m_auiEncounter[i] == IN_PROGRESS || m_auiEncounter[i] == FAIL)
+                            m_auiEncounter[i] = NOT_STARTED;
+                    }
+                }
+                else
+                    OUT_LOAD_INST_DATA_FAIL;
+
+                OUT_LOAD_INST_DATA_COMPLETE;
             }
 
             uint64 GetData64(uint32 data) const OVERRIDE
