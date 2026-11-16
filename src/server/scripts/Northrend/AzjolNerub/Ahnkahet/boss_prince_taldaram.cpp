@@ -22,6 +22,7 @@ enum Spells
     SPELL_BEAM_VISUAL                             = 60342,
     SPELL_EMBRACE_OF_THE_VAMPYR                   = 55959,
     SPELL_VANISH                                  = 55964,
+    SPELL_SHADOWSTEP                              = 55966,
     CREATURE_FLAME_SPHERE                         = 30106,
     H_CREATURE_FLAME_SPHERE_1                     = 31686,
     H_CREATURE_FLAME_SPHERE_2                     = 31687,
@@ -206,7 +207,10 @@ class boss_taldaram : public CreatureScript
                             break;
                         case EVENT_VANISHED:
                             if (Unit* embraceTarget = GetEmbraceTarget())
+                            {
+                                DoCast(embraceTarget, SPELL_SHADOWSTEP);
                                 DoCast(embraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
+                            }
                             Talk(SAY_FEED);
                             me->GetMotionMaster()->Clear();
                             me->SetSpeed(MOVE_WALK, 1.0f, true);
