@@ -500,6 +500,7 @@ void World::LoadConfigSettings(bool reload)
     setRate(Rates::RATE_XP_KILL, sConfigMgr->GetFloatDefault("Rate.XP.Kill", 1.0f));
     setRate(Rates::RATE_XP_QUEST, sConfigMgr->GetFloatDefault("Rate.XP.Quest", 1.0f));
     setRate(Rates::RATE_XP_EXPLORE, sConfigMgr->GetFloatDefault("Rate.XP.Explore", 1.0f));
+    setRate(Rates::RATE_XP_PET_BATTLE_PLAYER, sConfigMgr->GetFloatDefault("Rate.XP.PetBattlePlayer", 1.0f));
     setRate(Rates::RATE_REPAIRCOST, sConfigMgr->GetFloatDefault("Rate.RepairCost", 1.0f));
     if (getRate(Rates::RATE_REPAIRCOST) < 0.0f)
     {

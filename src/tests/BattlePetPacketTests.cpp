@@ -664,6 +664,24 @@ namespace
         return passed;
     }
 
+    bool TestBattlePetBattlePaysPlayerExperienceWithinFiveLevels()
+    {
+        bool passed = true;
+
+        passed &= Expect(BattlePetBattlePaysPlayerExperience(10, 10),
+            "A same-level win should pay the character experience");
+        passed &= Expect(BattlePetBattlePaysPlayerExperience(15, 10),
+            "A team pet five levels above the enemy should still pay the character experience");
+        passed &= Expect(!BattlePetBattlePaysPlayerExperience(16, 10),
+            "A team pet more than five levels above the enemy should pay no character experience");
+        passed &= Expect(BattlePetBattlePaysPlayerExperience(3, 25),
+            "A lower-level team should pay the character experience");
+        passed &= Expect(!BattlePetBattlePaysPlayerExperience(0, 10) && !BattlePetBattlePaysPlayerExperience(10, 0),
+            "Unknown levels should pay no character experience");
+
+        return passed;
+    }
+
     bool TestBattlePetCapturedLevelPenalty()
     {
         bool passed = true;
@@ -2423,6 +2441,7 @@ int main()
     passed &= TestBattlePetExperienceLevelsAtThreshold();
     passed &= TestBattlePetExperienceCapsAtMaxLevel();
     passed &= TestBattlePetExperienceRewardScalesByLevelDifference();
+    passed &= TestBattlePetBattlePaysPlayerExperienceWithinFiveLevels();
     passed &= TestBattlePetCapturedLevelPenalty();
     passed &= TestBattlePetTrapAbilityForLoadoutFlags();
     passed &= TestBattlePetAchievementLoadoutRewards();

@@ -239,6 +239,7 @@ private:
     void ClearActivePetBattlePlayerState();
     void PersistActivePetBattleHealth();
     uint16 RewardActivePetBattlePet(BattlePet* battlePet, bool awardExperience);
+    void RewardPlayerExperience(uint8 highestAllyLevel);
     uint32 GetUniqueBattlePetSpeciesCount() const;
     void UpdateBattlePetCollectionAchievements(BattlePet const* battlePet = NULL);
     void UpdateCapturedBattlePetAchievements(BattlePet const& battlePet);
