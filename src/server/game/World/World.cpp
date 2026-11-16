@@ -1247,7 +1247,13 @@ void World::LoadConfigSettings(bool reload)
     SF_LOG_INFO("server.loading", "VMap support included. LineOfSight: %i, getHeight: %i, indoorCheck: %i", enableLOS, enableHeight, enableIndoor);
     SF_LOG_INFO("server.loading", "VMap data directory is: %svmaps", m_dataPath.c_str());
 
-    setIntConfig(WorldIntConfigs::CONFIG_MAX_WHO, sConfigMgr->GetIntDefault("MaxWhoListReturns", 49));
+    int32 maxWhoListReturns = sConfigMgr->GetIntDefault("MaxWhoListReturns", 49);
+    if (maxWhoListReturns < 0 || maxWhoListReturns > 50)
+    {
+        SF_LOG_ERROR("server.loading", "MaxWhoListReturns (%i) must be between 0 and 50. Using 49.", maxWhoListReturns);
+        maxWhoListReturns = 49;
+    }
+    setIntConfig(WorldIntConfigs::CONFIG_MAX_WHO, maxWhoListReturns);
     SetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_SPELLS, sConfigMgr->GetBoolDefault("PlayerStart.AllSpells", false));
     if (GetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_SPELLS))
         SF_LOG_WARN("server.loading", "PlayerStart.AllSpells enabled - may not function as intended!");

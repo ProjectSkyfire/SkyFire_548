@@ -847,7 +847,8 @@ MinPetName = 2
 #
 #    MaxWhoListReturns
 #        Description: Set the max number of players returned in the /who list and interface.
-#        Default:     49 - (stable)
+#                     Allowed range: 0-50. Invalid values use the default.
+#        Default:     49
 
 MaxWhoListReturns = 49
 
