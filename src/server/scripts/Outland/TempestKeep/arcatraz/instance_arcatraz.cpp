@@ -61,6 +61,8 @@ class instance_arcatraz : public InstanceMapScript
             uint64 Wardens_ShieldGUID;
             uint64 GoSphereGUID;
             uint64 MellicharGUID;
+            uint64 DalliahGUID;
+            uint64 SoccothratesGUID;
 
             void Initialize() OVERRIDE
             {
@@ -76,6 +78,8 @@ class instance_arcatraz : public InstanceMapScript
                         Wardens_ShieldGUID = 0;
                         GoSphereGUID = 0;
                         MellicharGUID = 0;
+                DalliahGUID = 0;
+                SoccothratesGUID = 0;
             }
 
             bool IsEncounterInProgress() const OVERRIDE
@@ -131,8 +135,18 @@ class instance_arcatraz : public InstanceMapScript
 
             void OnCreatureCreate(Creature* creature) OVERRIDE
             {
-                if (creature->GetEntry() == MELLICHAR)
-                    MellicharGUID = creature->GetGUID();
+                switch (creature->GetEntry())
+                {
+                    case MELLICHAR:
+                        MellicharGUID = creature->GetGUID();
+                        break;
+                    case NPC_DALLIAH_THE_DOOMSAYER:
+                        DalliahGUID = creature->GetGUID();
+                        break;
+                    case NPC_WRATH_SCRYER_SOCCOTHRATES:
+                        SoccothratesGUID = creature->GetGUID();
+                        break;
+                }
             }
 
             void SetData(uint32 type, uint32 data) OVERRIDE
@@ -237,6 +251,8 @@ class instance_arcatraz : public InstanceMapScript
                 {
                 case DATA_MELLICHAR:        return MellicharGUID;
                 case DATA_SPHERE_SHIELD:    return GoSphereGUID;
+                case DATA_DALLIAH:          return DalliahGUID;
+                case DATA_SOCCOTHRATES:     return SoccothratesGUID;
                 }
                 return 0;
             }
