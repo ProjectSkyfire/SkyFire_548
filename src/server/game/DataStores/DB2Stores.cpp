@@ -46,6 +46,7 @@ DB2Storage<SpellReagentsEntry>              sSpellReagentsStore(SpellReagentsfmt
 
 BattlePetBreedSet                           sBattlePetBreedSet;
 BattlePetItemXSpeciesStore                  sBattlePetItemXSpeciesStore;
+BattlePetSpellXSpeciesStore                 sBattlePetSpellXSpeciesStore;
 BattlePetAbilityTurnByAbilityStore          sBattlePetAbilityTurnByAbilityStore;
 BattlePetAbilityEffectByTurnStore           sBattlePetAbilityEffectByTurnStore;
 BattlePetQualityMultiplierStore             sBattlePetQualityMultiplierStore;
@@ -164,6 +165,14 @@ void LoadDB2Stores(std::string const& dataPath)
     for (uint32 i = 0; i < sItemToBattlePetStore.GetNumRows(); i++)
         if (ItemToBattlePetEntry const* itemEntry = sItemToBattlePetStore.LookupEntry(i))
             sBattlePetItemXSpeciesStore.insert(std::make_pair(itemEntry->ItemId, itemEntry->SpeciesId));
+
+    // a few summon spells belong to more than one species, the lowest species id wins
+    // species ids start at 2 in 5.4.8, so 0 is free to mean "not a battle pet spell"
+    sBattlePetSpellXSpeciesStore.clear();
+    for (uint32 i = 1; i < sBattlePetSpeciesStore.GetNumRows(); i++)
+        if (BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(i))
+            if (speciesEntry->SpellId)
+                sBattlePetSpellXSpeciesStore.insert(std::make_pair(speciesEntry->SpellId, uint16(i)));
 
     sBattlePetAbilityTurnByAbilityStore.clear();
     for (uint32 i = 0; i < sBattlePetAbilityTurnStore.GetNumRows(); i++)
@@ -298,6 +307,15 @@ uint32 BattlePetGetSummonSpell(uint16 speciesId)
         return 0;
 
     return speciesEntry->SpellId;
+}
+
+uint16 BattlePetGetSpeciesBySummonSpell(uint32 spellId)
+{
+    BattlePetSpellXSpeciesStore::const_iterator itr = sBattlePetSpellXSpeciesStore.find(spellId);
+    if (itr == sBattlePetSpellXSpeciesStore.end())
+        return 0;
+
+    return itr->second;
 }
 
 bool BattlePetSpeciesHasFlag(uint16 speciesId, uint16 flag)
