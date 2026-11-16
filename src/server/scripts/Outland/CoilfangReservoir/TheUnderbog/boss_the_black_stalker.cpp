@@ -12,6 +12,7 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "the_underbog.h"
 
 enum Spells
 {
@@ -43,7 +44,10 @@ public:
     {
         boss_the_black_stalkerAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = creature->GetInstanceScript();
         }
+
+        InstanceScript* instance;
 
         uint32 SporeStriders_Timer;
         uint32 Levitate_Timer;
@@ -65,9 +69,16 @@ public:
             LevitatedTarget = 0;
             LevitatedTarget_Timer = 0;
             Striders.clear();
+
+            if (instance)
+                instance->SetBossState(DATA_THE_BLACK_STALKER, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE
+        {
+            if (instance)
+                instance->SetBossState(DATA_THE_BLACK_STALKER, IN_PROGRESS);
+        }
 
         void JustSummoned(Creature* summon) OVERRIDE
         {
@@ -87,6 +98,9 @@ public:
             for (std::list<uint64>::const_iterator i = Striders.begin(); i != Striders.end(); ++i)
                 if (Creature* strider = Unit::GetCreature(*me, *i))
                     strider->DisappearAndDie();
+
+            if (instance)
+                instance->SetBossState(DATA_THE_BLACK_STALKER, DONE);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

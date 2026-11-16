@@ -12,6 +12,7 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "the_underbog.h"
 
 enum Spells
 {
@@ -32,6 +33,7 @@ public:
     {
         boss_hungarfenAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = creature->GetInstanceScript();
             Root = false;
             Mushroom_Timer = 0;
             AcidGeyser_Timer = 0;
@@ -42,9 +44,22 @@ public:
             Root = false;
             Mushroom_Timer = 5000;                              // 1 mushroom after 5s, then one per 10s. This should be different in heroic mode
             AcidGeyser_Timer = 10000;
+
+            if (instance)
+                instance->SetBossState(DATA_HUNGARFEN, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE
+        {
+            if (instance)
+                instance->SetBossState(DATA_HUNGARFEN, IN_PROGRESS);
+        }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            if (instance)
+                instance->SetBossState(DATA_HUNGARFEN, DONE);
+        }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -80,6 +95,7 @@ public:
             DoMeleeAttackIfReady();
         }
     private:
+        InstanceScript* instance;
         bool Root;
         uint32 Mushroom_Timer;
         uint32 AcidGeyser_Timer;

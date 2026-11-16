@@ -12,6 +12,7 @@ gets instead the deserter debuff.
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "the_underbog.h"
 
 class instance_the_underbog : public InstanceMapScript
 {
@@ -25,7 +26,10 @@ public:
 
     struct instance_the_underbog_InstanceMapScript : public InstanceScript
     {
-        instance_the_underbog_InstanceMapScript(Map* map) : InstanceScript(map) { }
+        instance_the_underbog_InstanceMapScript(Map* map) : InstanceScript(map)
+        {
+            SetBossNumber(EncounterCount);
+        }
     };
 };
 
