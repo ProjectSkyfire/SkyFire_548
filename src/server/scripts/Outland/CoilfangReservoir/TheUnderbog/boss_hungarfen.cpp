@@ -87,12 +87,15 @@ public:
                 Mushroom_Timer = 10000;
             } else Mushroom_Timer -= diff;
 
-            if (AcidGeyser_Timer <= diff)
+            if (IsHeroic())
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_ACID_GEYSER);
-                AcidGeyser_Timer = 10000+rand()%7500;
-            } else AcidGeyser_Timer -= diff;
+                if (AcidGeyser_Timer <= diff)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(target, SPELL_ACID_GEYSER);
+                    AcidGeyser_Timer = 10000+rand()%7500;
+                } else AcidGeyser_Timer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }
