@@ -9,6 +9,9 @@
 #include "SpellAuraEffects.h"
 #include "pit_of_saron.h"
 #include "Vehicle.h"
+#include "PassiveAI.h"
+#include "ObjectAccessor.h"
+#include "Player.h"
 
 enum Spells
 {
@@ -25,6 +28,19 @@ enum Events
     EVENT_FIREBALL              = 1,
     EVENT_TACTICAL_BLINK        = 2,
 };
+
+bool ScheduledIcicleSummons::Execute(uint64 /*time*/, uint32 /*diff*/)
+{
+    if (roll_chance_i(12))
+    {
+        _trigger->CastSpell(_trigger, SPELL_ICICLE_SUMMON, true);
+        _trigger->m_Events.AddEvent(new ScheduledIcicleSummons(_trigger), _trigger->m_Events.CalculateTime(urand(20000, 35000)));
+    }
+    else
+        _trigger->m_Events.AddEvent(new ScheduledIcicleSummons(_trigger), _trigger->m_Events.CalculateTime(urand(1000, 20000)));
+
+    return true;
+}
 
 class npc_ymirjar_flamebearer : public CreatureScript
 {
@@ -223,10 +239,102 @@ class spell_trash_npc_glacial_strike : public SpellScriptLoader
         }
 };
 
+class npc_pit_of_saron_icicle : public CreatureScript
+{
+    public:
+        npc_pit_of_saron_icicle() : CreatureScript("npc_pit_of_saron_icicle") { }
+
+        struct npc_pit_of_saron_icicleAI : public PassiveAI
+        {
+            npc_pit_of_saron_icicleAI(Creature* creature) : PassiveAI(creature), _fallTimer(0), _summonerGUID(0)
+            {
+                me->SetDisplayId(me->GetCreatureTemplate()->Modelid1);
+            }
+
+            void IsSummonedBy(Unit* summoner) OVERRIDE
+            {
+                _summonerGUID = summoner->GetGUID();
+                _fallTimer = 3650;
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                if (!_fallTimer)
+                    return;
+
+                if (_fallTimer > diff)
+                {
+                    _fallTimer -= diff;
+                    return;
+                }
+
+                _fallTimer = 0;
+                DoCast(me, SPELL_ICICLE_FALL_TRIGGER, true);
+                DoCast(me, SPELL_ICICLE_FALL_VISUAL);
+
+                if (Unit* caster = ObjectAccessor::GetUnit(*me, _summonerGUID))
+                    caster->RemoveDynObject(SPELL_ICICLE_SUMMON);
+            }
+
+        private:
+            uint32 _fallTimer;
+            uint64 _summonerGUID;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const OVERRIDE
+        {
+            return new npc_pit_of_saron_icicleAI(creature);
+        }
+};
+
+enum TyrannusEventCavernEmote
+{
+    SAY_TYRANNUS_CAVERN_ENTRANCE = 3
+};
+
+class at_pit_cavern_entrance : public AreaTriggerScript
+{
+    public:
+        at_pit_cavern_entrance() : AreaTriggerScript("at_pit_cavern_entrance") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) OVERRIDE
+        {
+            if (InstanceScript* instance = player->GetInstanceScript())
+            {
+                if (instance->GetData(DATA_CAVERN_ACTIVE))
+                    return true;
+
+                instance->SetData(DATA_CAVERN_ACTIVE, 1);
+
+                if (Creature* tyrannus = ObjectAccessor::GetCreature(*player, instance->GetData64(DATA_TYRANNUS_EVENT)))
+                    tyrannus->AI()->Talk(SAY_TYRANNUS_CAVERN_ENTRANCE);
+            }
+
+            return true;
+        }
+};
+
+class at_pit_cavern_end : public AreaTriggerScript
+{
+    public:
+        at_pit_cavern_end() : AreaTriggerScript("at_pit_cavern_end") { }
+
+        bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) OVERRIDE
+        {
+            if (InstanceScript* instance = player->GetInstanceScript())
+                instance->SetData(DATA_CAVERN_ACTIVE, 0);
+
+            return true;
+        }
+};
+
 void AddSC_pit_of_saron()
 {
     new npc_ymirjar_flamebearer();
     new npc_iceborn_protodrake();
     new npc_geist_ambusher();
     new spell_trash_npc_glacial_strike();
+    new npc_pit_of_saron_icicle();
+    new at_pit_cavern_entrance();
+    new at_pit_cavern_end();
 }

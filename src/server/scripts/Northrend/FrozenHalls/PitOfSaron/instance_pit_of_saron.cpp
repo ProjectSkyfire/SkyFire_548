@@ -36,6 +36,7 @@ class instance_pit_of_saron : public InstanceMapScript
                 _ickGUID = 0;
                 _tyrannusGUID = 0;
                 _rimefangGUID = 0;
+                _cavernActive = 0;
                 _jainaOrSylvanas1GUID = 0;
                 _jainaOrSylvanas2GUID = 0;
                 _teamInInstance = 0;
@@ -59,6 +60,15 @@ class instance_pit_of_saron : public InstanceMapScript
 
                 switch (creature->GetEntry())
                 {
+                    case NPC_CAVERN_EVENT_TRIGGER:
+                        // A trigger can be created again when its grid reloads: keep the GUID once
+                        if (std::find(_cavernTriggers.begin(), _cavernTriggers.end(), creature->GetGUID()) == _cavernTriggers.end())
+                            _cavernTriggers.push_back(creature->GetGUID());
+
+                        // The cavern was entered before this grid loaded; a new object has no icicle event yet
+                        if (_cavernActive)
+                            creature->m_Events.AddEvent(new ScheduledIcicleSummons(creature), creature->m_Events.CalculateTime(1000));
+                        break;
                     case NPC_GARFROST:
                         _garfrostGUID = creature->GetGUID();
                         break;
@@ -218,11 +228,30 @@ class instance_pit_of_saron : public InstanceMapScript
                 {
                     case DATA_TEAM_IN_INSTANCE:
                         return _teamInInstance;
+                    case DATA_CAVERN_ACTIVE:
+                        return _cavernActive;
                     default:
                         break;
                 }
 
                 return 0;
+            }
+
+            void SetData(uint32 type, uint32 data) OVERRIDE
+            {
+                if (type != DATA_CAVERN_ACTIVE)
+                    return;
+
+                _cavernActive = data;
+
+                for (std::list<uint64>::const_iterator itr = _cavernTriggers.begin(); itr != _cavernTriggers.end(); ++itr)
+                    if (Creature* trigger = instance->GetCreature(*itr))
+                    {
+                        if (data)
+                            trigger->m_Events.AddEvent(new ScheduledIcicleSummons(trigger), trigger->m_Events.CalculateTime(1000));
+                        else
+                            trigger->m_Events.KillAllEvents(false);
+                    }
             }
 
             uint64 GetData64(uint32 type) const OVERRIDE
@@ -308,6 +337,8 @@ class instance_pit_of_saron : public InstanceMapScript
             uint64 _jainaOrSylvanas2GUID;
 
             uint32 _teamInInstance;
+            uint32 _cavernActive;
+            std::list<uint64> _cavernTriggers;
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
