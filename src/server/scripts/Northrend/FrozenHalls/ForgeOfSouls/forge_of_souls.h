@@ -12,7 +12,6 @@ enum Data
 {
     DATA_BRONJAHM           = 0,
     DATA_DEVOURER           = 1,
-    DATA_DEVOURER_EVENT     = 2,
     DATA_TEAM_IN_INSTANCE   = 3,
 };
 
