@@ -30,6 +30,13 @@ public:
         {
             SetBossNumber(EncounterCount);
         }
+
+        void SetData(uint32 type, uint32 data) OVERRIDE
+        {
+            // Ghaz'an and Swamplord Musel'ek are SmartAI creatures, which can only set instance data
+            if (type == DATA_GHAZAN || type == DATA_SWAMPLORD_MUSELEK)
+                SetBossState(type, EncounterState(data));
+        }
     };
 };
 
