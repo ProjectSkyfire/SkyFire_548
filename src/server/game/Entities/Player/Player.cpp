@@ -24720,3 +24720,10 @@ void Player::UpdatePhasing()
 
     GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
 }
+
+bool Player::IsShieldedByPetBattleFrom(Unit const* attacker) const
+{
+    // Creatures leave a player in a pet battle alone; other players may still attack.
+    return attacker && attacker != this && !attacker->IsControlledByPlayer()
+        && m_battlePetMgr && m_battlePetMgr->HasActivePetBattle();
+}
