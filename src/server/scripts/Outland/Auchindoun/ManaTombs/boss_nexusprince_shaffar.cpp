@@ -17,6 +17,7 @@ EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "mana_tombs.h"
 
 enum Yells
 {
@@ -65,7 +66,13 @@ public:
 
     struct boss_nexusprince_shaffarAI : public ScriptedAI
     {
-        boss_nexusprince_shaffarAI(Creature* creature) : ScriptedAI(creature), summons(me) { HasTaunted = false; }
+        boss_nexusprince_shaffarAI(Creature* creature) : ScriptedAI(creature), summons(me)
+        {
+            instance = creature->GetInstanceScript();
+            HasTaunted = false;
+        }
+
+        InstanceScript* instance;
 
         uint32 Blink_Timer;
         uint32 Beacon_Timer;
@@ -95,6 +102,9 @@ public:
             me->SummonCreature(NPC_BEACON, posX - dist, posY - dist, posZ, angle, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
             me->SummonCreature(NPC_BEACON, posX - dist, posY + dist, posZ, angle, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
             me->SummonCreature(NPC_BEACON, posX + dist, posY, posZ, angle, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200000);
+
+            if (instance)
+                instance->SetBossState(DATA_NEXUSPRINCE_SHAFFAR, NOT_STARTED);
         }
 
         void EnterEvadeMode() OVERRIDE
@@ -116,6 +126,9 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
+
+            if (instance)
+                instance->SetBossState(DATA_NEXUSPRINCE_SHAFFAR, IN_PROGRESS);
 
             DoZoneInCombat();
             summons.DoZoneInCombat();
@@ -148,6 +161,9 @@ public:
         {
             Talk(SAY_DEAD);
             summons.DespawnAll();
+
+            if (instance)
+                instance->SetBossState(DATA_NEXUSPRINCE_SHAFFAR, DONE);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
