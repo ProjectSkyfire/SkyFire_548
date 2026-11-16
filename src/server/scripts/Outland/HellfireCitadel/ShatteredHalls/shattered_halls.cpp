@@ -46,7 +46,7 @@ class at_nethekurse_exit : public AreaTriggerScript
             instance->instance->LoadGrid(ExecutionerPos.GetPositionX(), ExecutionerPos.GetPositionY());
 
             Creature* kargath = instance->instance->GetCreature(instance->GetData64(NPC_KARGATH_BLADEFIST));
-            if (!kargath || instance->GetData64(NPC_SHATTERED_EXECUTIONER))
+            if (!kargath || instance->GetData(DATA_EXECUTIONER_EVENT) != EXECUTIONER_EVENT_NOT_STARTED)
                 return false;
 
             Creature* executioner = kargath->SummonCreature(NPC_SHATTERED_EXECUTIONER, ExecutionerPos);

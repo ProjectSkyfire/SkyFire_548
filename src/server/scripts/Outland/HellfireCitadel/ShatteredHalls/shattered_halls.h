@@ -21,7 +21,17 @@ enum DataTypes
     DATA_TEAM_IN_INSTANCE            = 5,
     DATA_FIRST_PRISONER              = 6,
     DATA_SECOND_PRISONER             = 7,
-    DATA_THIRD_PRISONER              = 8
+    DATA_THIRD_PRISONER              = 8,
+    DATA_EXECUTIONER_EVENT           = 9
+};
+
+// Saved with the instance: the executioner GUID is empty after a reload both before the event and
+// after it, so the GUID cannot tell whether the event may start
+enum ExecutionerEventStates
+{
+    EXECUTIONER_EVENT_NOT_STARTED    = 0,
+    EXECUTIONER_EVENT_RUNNING        = 1,
+    EXECUTIONER_EVENT_DONE           = 2
 };
 
 enum CreatureIds

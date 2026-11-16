@@ -44,6 +44,7 @@ class instance_shattered_halls : public InstanceMapScript
                     victimsGUID[i] = 0;
                 executed            = 0;
                 executionTimer      = 0;
+                executionerEvent    = EXECUTIONER_EVENT_NOT_STARTED;
                 restoreExecutioner  = false;
                 team                = 0;
             }
@@ -117,8 +118,9 @@ class instance_shattered_halls : public InstanceMapScript
                         break;
                     case NPC_SHATTERED_EXECUTIONER:
                         executionerGUID = creature->GetGUID();
-                        if (!executionTimer && executed < VictimCount)
+                        if (executionerEvent == EXECUTIONER_EVENT_NOT_STARTED)
                         {
+                            executionerEvent = EXECUTIONER_EVENT_RUNNING;
                             executionTimer = 55 * MINUTE * IN_MILLISECONDS;
                             DoCastSpellOnPlayers(SPELL_KARGATH_EXECUTIONER_1);
                         }
@@ -175,6 +177,7 @@ class instance_shattered_halls : public InstanceMapScript
                 {
                     DoCastSpellOnPlayers(SPELL_REMOVE_KARGATH_EXECUTIONER);
                     executionTimer = 0;
+                    executionerEvent = EXECUTIONER_EVENT_DONE;
                     SaveToDB();
                 }
             }
@@ -187,6 +190,8 @@ class instance_shattered_halls : public InstanceMapScript
                         return executed;
                     case DATA_TEAM_IN_INSTANCE:
                         return team;
+                    case DATA_EXECUTIONER_EVENT:
+                        return executionerEvent;
                     default:
                         return 0;
                 }
@@ -219,6 +224,7 @@ class instance_shattered_halls : public InstanceMapScript
                         break;
                     default:
                         executionTimer = 0;
+                        executionerEvent = EXECUTIONER_EVENT_DONE;
                         break;
                 }
 
@@ -281,7 +287,7 @@ class instance_shattered_halls : public InstanceMapScript
                 saveStream << "S H " << GetBossSaveData();
 
                 if (instance->IsHeroic())
-                    saveStream << ' ' << uint32(executed) << ' ' << executionTimer;
+                    saveStream << ' ' << uint32(executed) << ' ' << executionTimer << ' ' << uint32(executionerEvent);
 
                 OUT_SAVE_INST_DATA_COMPLETE;
                 return saveStream.str();
@@ -317,10 +323,22 @@ class instance_shattered_halls : public InstanceMapScript
                     {
                         uint32 savedExecuted = 0;
                         uint32 savedTimer = 0;
+                        uint32 savedEvent = EXECUTIONER_EVENT_NOT_STARTED;
                         if (loadStream >> savedExecuted >> savedTimer)
                         {
                             executed = savedExecuted < VictimCount ? uint8(savedExecuted) : uint8(VictimCount);
                             executionTimer = executed < VictimCount ? savedTimer : 0;
+
+                            // Saves from before the event state existed end after the timer
+                            if (!(loadStream >> savedEvent))
+                                savedEvent = executionTimer ? EXECUTIONER_EVENT_RUNNING : (executed ? EXECUTIONER_EVENT_DONE : EXECUTIONER_EVENT_NOT_STARTED);
+
+                            if (savedEvent > EXECUTIONER_EVENT_DONE)
+                                savedEvent = EXECUTIONER_EVENT_NOT_STARTED;
+                            else if (savedEvent == EXECUTIONER_EVENT_RUNNING && !executionTimer)
+                                savedEvent = EXECUTIONER_EVENT_DONE;
+
+                            executionerEvent = uint8(savedEvent);
                             restoreExecutioner = executionTimer != 0;
                         }
                     }
@@ -341,6 +359,7 @@ class instance_shattered_halls : public InstanceMapScript
 
                 uint8 executed;
                 uint32 executionTimer;
+                uint8 executionerEvent;
                 bool restoreExecutioner;
                 uint32 team;
         };
