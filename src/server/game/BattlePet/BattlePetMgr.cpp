@@ -782,10 +782,16 @@ void BattlePetMgr::ClearActivePetBattle()
 
     // the journal keeps the pre-battle xp, level and health until a pet update arrives
     if (m_activePetBattle.IsActive() && m_owner && m_owner->GetSession())
+    {
         for (uint8 i = 0; i < ActivePetBattle::BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++i)
-            if (m_activePetBattle.HasAllyPet(i))
-                if (BattlePet* battlePet = GetBattlePet(m_activePetBattle.AllyTeam[i].PetID))
-                    SendBattlePetUpdate(battlePet, false);
+        {
+            if (!m_activePetBattle.HasAllyPet(i))
+                continue;
+
+            if (BattlePet* battlePet = GetBattlePet(m_activePetBattle.AllyTeam[i].PetID))
+                SendBattlePetUpdate(battlePet, false);
+        }
+    }
 
     DespawnResolvedWildPetBattleWorldObject();
     ClearActivePetBattleWorldObjectState();
