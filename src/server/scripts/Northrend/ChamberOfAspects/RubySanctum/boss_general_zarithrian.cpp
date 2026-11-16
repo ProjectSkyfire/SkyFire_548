@@ -34,6 +34,7 @@ enum Events
     EVENT_CLEAVE                    = 1,
     EVENT_INTIDMDATING_ROAR         = 2,
     EVENT_SUMMON_ADDS               = 3,
+    EVENT_SUMMON_ADDS2              = 6,
     // Onyx Flamecaller
     EVENT_BLAST_NOVA                = 4,
     EVENT_LAVA_GOUT                 = 5,
@@ -94,9 +95,11 @@ class boss_general_zarithrian : public CreatureScript
                 _EnterCombat();
                 Talk(SAY_AGGRO);
                 events.Reset();
-                events.ScheduleEvent(EVENT_CLEAVE, 15000);
-                events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
-                events.ScheduleEvent(EVENT_SUMMON_ADDS, 40000);
+                events.ScheduleEvent(EVENT_CLEAVE, 8000);
+                events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 14000);
+                events.ScheduleEvent(EVENT_SUMMON_ADDS, 15000);
+                if (Is25ManRaid())
+                    events.ScheduleEvent(EVENT_SUMMON_ADDS2, 16000);
             }
 
             void JustReachedHome() OVERRIDE
@@ -150,6 +153,9 @@ class boss_general_zarithrian : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_SUMMON_ADDS:
+                            Talk(SAY_ADDS);
+                            // no break
+                        case EVENT_SUMMON_ADDS2:
                         {
                             if (Creature* stalker1 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHRIAN_SPAWN_STALKER_1)))
                                 stalker1->CastSpell(stalker1, SPELL_SUMMON_FLAMECALLER, false);
@@ -157,13 +163,13 @@ class boss_general_zarithrian : public CreatureScript
                             if (Creature* stalker2 = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_ZARITHRIAN_SPAWN_STALKER_2)))
                                 stalker2->CastSpell(stalker2, SPELL_SUMMON_FLAMECALLER, false);
 
-                            Talk(SAY_ADDS);
-                            events.ScheduleEvent(EVENT_SUMMON_ADDS, 42000);
+                            events.ScheduleEvent(eventId, 45000);
                             break;
                         }
                         case EVENT_INTIDMDATING_ROAR:
                             DoCast(me, SPELL_INTIMIDATING_ROAR, true);
-                            events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, 42000);
+                            events.ScheduleEvent(EVENT_INTIDMDATING_ROAR, urand(35000, 40000));
+                            break;
                         case EVENT_CLEAVE:
                             DoCastVictim(SPELL_CLEAVE_ARMOR);
                             events.ScheduleEvent(EVENT_CLEAVE, 15000);
