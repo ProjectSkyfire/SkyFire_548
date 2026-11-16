@@ -20,6 +20,7 @@ set(scripts_STAT_SRCS
   Outland/HellfireCitadel/BloodFurnace/instance_blood_furnace.cpp
   Outland/HellfireCitadel/BloodFurnace/boss_broggok.cpp
   Outland/HellfireCitadel/ShatteredHalls/shattered_halls.h
+  Outland/HellfireCitadel/ShatteredHalls/shattered_halls.cpp
   Outland/HellfireCitadel/ShatteredHalls/boss_warchief_kargath_bladefist.cpp
   Outland/HellfireCitadel/ShatteredHalls/boss_nethekurse.cpp
   Outland/HellfireCitadel/ShatteredHalls/instance_shattered_halls.cpp
