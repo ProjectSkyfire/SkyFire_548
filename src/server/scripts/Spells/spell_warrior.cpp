@@ -1671,6 +1671,7 @@ public:
             return sSpellMgr->GetSpellInfo(SPELL_WARRIOR_STORM_BOLT_STUN) != NULL;
         }
 
+        // The stun is a missile of its own: launching it with the hammer makes both land together
         void HandleStun(SpellEffIndex /*effIndex*/)
         {
             if (Unit* target = GetHitUnit())
@@ -1679,7 +1680,7 @@ public:
 
         void Register() OVERRIDE
         {
-            OnEffectHitTarget += SpellEffectFn(spell_warr_storm_bolt_SpellScript::HandleStun, EFFECT_1, SPELL_EFFECT_DUMMY);
+            OnEffectLaunchTarget += SpellEffectFn(spell_warr_storm_bolt_SpellScript::HandleStun, EFFECT_0, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
         }
     };
 
