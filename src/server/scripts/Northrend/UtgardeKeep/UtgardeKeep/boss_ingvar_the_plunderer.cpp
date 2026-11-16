@@ -13,6 +13,8 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "utgarde_keep.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 
 enum Yells
 {
@@ -78,7 +80,8 @@ enum Spells
     SPELL_SCOURG_RESURRECTION_HEAL              = 42704, // Heal Max + DummyAura
     SPELL_SCOURG_RESURRECTION_BEAM              = 42857, // Channeling Beam of Annhylde
     SPELL_SCOURG_RESURRECTION_DUMMY             = 42862, // Some Emote Dummy?
-    SPELL_INGVAR_TRANSFORM                      = 42796
+    SPELL_INGVAR_TRANSFORM                      = 42796,
+    SPELL_WOE_STRIKE_EFFECT                     = 42739
 };
 
 enum Misc
@@ -395,9 +398,34 @@ public:
     };
 };
 
+// 42730, 59735 - Woe Strike
+class spell_ingvar_woe_strike : public AuraScript
+{
+    PrepareAuraScript(spell_ingvar_woe_strike);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        HealInfo* healInfo = eventInfo.GetHealInfo();
+        return healInfo && healInfo->GetHeal();
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        GetTarget()->CastSpell(eventInfo.GetActor(), SPELL_WOE_STRIKE_EFFECT, true, NULL, aurEff);
+    }
+
+    void Register() OVERRIDE
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ingvar_woe_strike::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_ingvar_woe_strike::HandleProc, EFFECT_1, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
 void AddSC_boss_ingvar_the_plunderer()
 {
     new boss_ingvar_the_plunderer();
     new npc_annhylde_the_caller();
     new npc_ingvar_throw_dummy();
+    RegisterAuraScript(spell_ingvar_woe_strike);
 }
