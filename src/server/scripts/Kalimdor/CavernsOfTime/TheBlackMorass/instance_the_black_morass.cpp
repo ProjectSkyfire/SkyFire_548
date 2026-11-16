@@ -37,17 +37,28 @@ float PortalLocation[4][4]=
 struct Wave
 {
     uint32 PortalBoss;                                      //protector of current portal
-    uint32 NextPortalTime;                                  //time to next portal, or 0 if portal boss need to be killed
 };
 
 static Wave RiftWaves[]=
 {
-    { RIFT_BOSS,                0 },
-    { NPC_CRONO_LORD_DEJA,      0 },
-    { RIFT_BOSS,           120000 },
-    { NPC_TEMPORUS,        140000 },
-    { RIFT_BOSS,           120000 },
-    { NPC_AEONUS,               0 }
+    { RIFT_BOSS },
+    { NPC_CRONO_LORD_DEJA },
+    { RIFT_BOSS },
+    { NPC_TEMPORUS },
+    { RIFT_BOSS },
+    { NPC_AEONUS }
+};
+
+// The next portal opens this long after a portal (not a boss portal), the boss
+// portals wait for their boss, and a portal opens right after the last open
+// one is closed. Timers as in TrinityCore 3.3.5.
+enum PortalTimers
+{
+    PORTAL_INTERVAL         = 120000,
+    PORTAL_INTERVAL_LATE    = 90000,
+    PORTAL_AFTER_BOSS       = 125000,
+    PORTAL_AFTER_CLOSE_MAX  = 5000,
+    PORTAL_COUNT_MAX        = 18
 };
 
 enum EventIds
@@ -72,6 +83,8 @@ public:
         uint32 m_auiEncounter[EncounterCount];
 
         uint32 mRiftPortalCount;
+        uint32 mOpenRifts;
+        bool   mBossPortalActive;
         uint32 mShieldPercent;
         uint8  mRiftWaveCount;
         uint8  mRiftWaveId;
@@ -90,6 +103,8 @@ public:
             memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
             mRiftPortalCount    = 0;
+            mOpenRifts          = 0;
+            mBossPortalActive   = false;
             mShieldPercent      = 100;
             mRiftWaveCount      = 0;
             mRiftWaveId         = 0;
@@ -172,6 +187,8 @@ public:
                                 medivh->DealDamage(medivh, medivh->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                                 m_auiEncounter[0] = FAIL;
                                 m_auiEncounter[1] = NOT_STARTED;
+                                Events.Reset();
+                                InitWorldState(false);
                             }
                         }
                     }
@@ -183,13 +200,15 @@ public:
                         SF_LOG_DEBUG("scripts", "Instance The Black Morass: Starting event.");
                         InitWorldState();
                         m_auiEncounter[1] = IN_PROGRESS;
-                        ScheduleEventNextPortal(15000);
+                        ScheduleEventNextPortal(1);
                     }
 
                     if (data == DONE)
                     {
                         //this may be completed further out in the post-event
                         SF_LOG_DEBUG("scripts", "Instance The Black Morass: Event completed.");
+                        Events.Reset();
+                        DoUpdateWorldState(WORLD_STATE_BM, 0);
                         Map::PlayerList const& players = instance->GetPlayers();
 
                         if (!players.isEmpty())
@@ -212,14 +231,37 @@ public:
                 }
                 break;
             case TYPE_RIFT:
-                if (data == SPECIAL)
-                {
-                    if (mRiftPortalCount < 7)
-                        ScheduleEventNextPortal(5000);
-                }
-                else
-                    m_auiEncounter[1] = data;
+                m_auiEncounter[1] = data;
                 break;
+            }
+        }
+
+        void OnUnitDeath(Unit* unit) OVERRIDE
+        {
+            if (m_auiEncounter[1] != IN_PROGRESS)
+                return;
+
+            switch (unit->GetEntry())
+            {
+                case NPC_RIFT_LORD:
+                case NPC_RIFT_KEEPER:
+                    // the party closed a portal; with no portal left the next one follows at once,
+                    // unless a boss portal is open: that one waits for its boss
+                    if (mOpenRifts)
+                        --mOpenRifts;
+                    if (!mOpenRifts && !mBossPortalActive && mRiftPortalCount < PORTAL_COUNT_MAX)
+                        ScheduleEventNextPortal(urand(1, PORTAL_AFTER_CLOSE_MAX));
+                    break;
+                case NPC_CRONO_LORD_DEJA:
+                case NPC_TEMPORUS:
+                    if (mOpenRifts)
+                        --mOpenRifts;
+                    mBossPortalActive = false;
+                    if (mRiftPortalCount < PORTAL_COUNT_MAX)
+                        ScheduleEventNextPortal(PORTAL_AFTER_BOSS);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -282,6 +324,8 @@ public:
 
                 _currentRiftId = tmp;
 
+                ++mOpenRifts;
+
                 Creature* temp = medivh->SummonCreature(NPC_TIME_RIFT,
                     PortalLocation[tmp][0], PortalLocation[tmp][1], PortalLocation[tmp][2], PortalLocation[tmp][3],
                     TempSummonType::TEMPSUMMON_CORPSE_DESPAWN, 0);
@@ -323,14 +367,18 @@ public:
                 ++mRiftPortalCount;
                 DoUpdateWorldState(WORLD_STATE_BM_RIFT, mRiftPortalCount);
                 DoSpawnPortal();
-                ScheduleEventNextPortal(RiftWaves[GetRiftWaveId()].NextPortalTime);
+
+                // the boss portals (6, 12, 18) wait for their boss
+                if (mRiftPortalCount != 6 && mRiftPortalCount != 12 && mRiftPortalCount != 18)
+                    ScheduleEventNextPortal(mRiftPortalCount > 12 ? PORTAL_INTERVAL_LATE : PORTAL_INTERVAL);
+                else
+                    mBossPortalActive = true;
             }
         }
 
         void ScheduleEventNextPortal(uint32 nextPortalTime)
         {
-            if (nextPortalTime > 0)
-                Events.RescheduleEvent(EVENT_NEXT_PORTAL, nextPortalTime);
+            Events.RescheduleEvent(EVENT_NEXT_PORTAL, nextPortalTime);
         }
 
         protected:
