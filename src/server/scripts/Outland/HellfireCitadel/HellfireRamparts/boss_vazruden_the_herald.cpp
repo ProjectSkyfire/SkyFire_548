@@ -344,7 +344,7 @@ class boss_vazruden_the_herald : public CreatureScript
                     summoned->SetDisableGravity(true);
                     summoned->SetSpeed(MOVE_FLIGHT, 2.5f);
                     if (victim)
-                        AttackStartNoMove(victim);
+                        summoned->Attack(victim, true);
                 }
                 else
                     if (victim)
