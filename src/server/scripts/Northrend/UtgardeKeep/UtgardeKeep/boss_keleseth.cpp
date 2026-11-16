@@ -281,7 +281,8 @@ class npc_vrykul_skeleton : public CreatureScript
                             break;
                         case EVENT_SHADOW_FISSURE:
                             DoCast(me, SPELL_SHADOW_FISSURE, true);
-                            DoCastAOE(SPELL_BONE_ARMOR, true);
+                            if (IsHeroic())
+                                DoCastAOE(SPELL_BONE_ARMOR, true);
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             me->RemoveFlag(UNIT_FIELD_ANIM_TIER, UNIT_STAND_STATE_DEAD);
                             me->GetMotionMaster()->MoveChase(me->GetVictim());
