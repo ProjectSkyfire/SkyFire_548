@@ -4,15 +4,69 @@
 */
 
 #include "SFSoap.h"
+#include "Threading/LockedQueue.h"
 
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <functional>
 #include <iostream>
 #include <mutex>
+#include <thread>
+#include <vector>
+
+// Match the world queue's close-and-drain protocol while SOAP requests race
+// shutdown. Each request keeps its callback storage alive until completion.
+static bool TestShutdownQueue()
+{
+    Skyfire::LockedQueue<SOAPCommand*, Skyfire::Mutex> queue;
+    SOAPCommand pending;
+    if (!queue.try_add(&pending))
+        return false;
+
+    std::atomic<unsigned> finished{0};
+    std::atomic<bool> started{false};
+    std::vector<std::thread> producers;
+    for (unsigned i = 0; i < 8; ++i)
+        producers.emplace_back([&]
+        {
+            started = true;
+            for (unsigned n = 0; n < 300; ++n)
+            {
+                SOAPCommand command;
+                if (!queue.try_add(&command))
+                    command.complete(false);
+                command.wait();
+                if (!command.hasCommandSucceeded())
+                    ++finished;
+            }
+        });
+
+    while (!started.load())
+        std::this_thread::yield();
+    queue.cancel();
+    SOAPCommand* command = nullptr;
+    while (queue.next(command))
+        command->complete(false);
+    pending.wait();
+    for (auto& producer : producers)
+        producer.join();
+
+    SOAPCommand late;
+    if (queue.try_add(&late) || !queue.empty() || finished != 2400 || pending.hasCommandSucceeded())
+        return false;
+    // Closing twice must remain safe and must not resurrect the queue.
+    queue.cancel();
+    return !queue.try_add(&late);
+}
 
 int main()
 {
+    if (!TestShutdownQueue())
+    {
+        std::cerr << "SOAP shutdown queue failed to reject or complete requests\n";
+        return 1;
+    }
     SFSoapService service;
 
     if (service.IsRunning())

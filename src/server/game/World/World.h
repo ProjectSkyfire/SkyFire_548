@@ -762,7 +762,9 @@ public:
     static int32 GetVisibilityNotifyPeriodInBGArenas() { return m_visibility_notify_periodInBGArenas; }
 
     void ProcessCliCommands();
-    void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
+    void QueueCliCommand(CliCommandHolder* commandHolder);
+    // World thread only, before teardown. Completes pending requests without executing them.
+    void CloseCliCommands();
 
     void ForceGameEventUpdate();
 

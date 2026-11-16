@@ -447,6 +447,7 @@ endif()
 target_link_libraries(sfsoap_service_tests Threads::Threads)
 
 add_test(NAME sfsoap_service_tests COMMAND sfsoap_service_tests)
+set_tests_properties(sfsoap_service_tests PROPERTIES TIMEOUT 15)
 
 add_executable(world_socket_session_state_tests
   WorldSocketSessionStateTests.cpp

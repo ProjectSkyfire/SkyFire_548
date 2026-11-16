@@ -131,9 +131,7 @@ World::~World()
         m_sessions.erase(m_sessions.begin());
     }
 
-    CliCommandHolder* command = NULL;
-    while (cliCmdQueue.next(command))
-        delete command;
+    CloseCliCommands();
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
@@ -2885,12 +2883,40 @@ void World::UpdateSessions(uint32 diff)
 }
 
 // This handles the issued and queued CLI commands
+namespace
+{
+    void RejectCliCommand(CliCommandHolder* command)
+    {
+        if (command->m_print)
+            command->m_print(command->m_callbackArg, "Server is shutting down; command was not executed.\n");
+        if (command->m_commandFinished)
+            command->m_commandFinished(command->m_callbackArg, false);
+        delete command;
+    }
+}
+
+void World::QueueCliCommand(CliCommandHolder* command)
+{
+    if (!cliCmdQueue.try_add(command))
+        RejectCliCommand(command);
+}
+
+void World::CloseCliCommands()
+{
+    // Producers either enqueue before cancel (and are drained below), or are
+    // rejected by try_add. No callback can be stranded after the world exits.
+    cliCmdQueue.cancel();
+    CliCommandHolder* command = nullptr;
+    while (cliCmdQueue.next(command))
+        RejectCliCommand(command);
+}
+
 void World::ProcessCliCommands()
 {
     CliCommandHolder::Print* zprint = NULL;
     void* callbackArg = NULL;
     CliCommandHolder* command = NULL;
-    while (cliCmdQueue.next(command))
+    while (!IsStopped() && cliCmdQueue.next(command))
     {
         SF_LOG_INFO("misc", "CLI command under processing...");
         zprint = command->m_print;
