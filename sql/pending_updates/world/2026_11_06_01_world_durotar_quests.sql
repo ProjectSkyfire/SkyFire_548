@@ -55,6 +55,8 @@ INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 -- (credit 39365) could not be reached. Script rows from the 5.4.8 data.
 -- ---------------------------------------------------------------------------------------------------------------
 UPDATE `creature_template` SET `gossip_menu_id` = 11209, `npcflag` = `npcflag` | 1, `AIName` = 'SmartAI' WHERE `entry` = 39380 AND `ScriptName` = '';
+-- The release data has the menu's option with type 0 and NPC flag 0, so the gossip menu skipped it; 5.4.8 has 1 and 1.
+UPDATE `gossip_menu_option` SET `OptionType` = 1, `OptionNpcflag` = 1 WHERE `MenuID` = 11209 AND `OptionID` = 0;
 DELETE FROM `smart_scripts` WHERE `source_type` = 0 AND `entryorguid` = 39380;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (39380, 0, 0, 1, 62, 0, 100, 0, 11209, 0, 0, 0, 0, 33, 39365, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Shin Stonepillar - On Gossip Option 0 Selected - Kill Credit The Kodo'),
