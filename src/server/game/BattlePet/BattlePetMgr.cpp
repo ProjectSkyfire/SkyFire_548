@@ -29,6 +29,18 @@
 
 namespace
 {
+    // Kill credit creatures of the trainer tutorial quests Learning the Ropes
+    // and Level Up!. Retail grants them through client spells 127966 and
+    // 129584; nothing casts those here, so credit them directly. Got one! is
+    // credited where a capture is stored.
+    enum BattlePetQuestCredits
+    {
+        BATTLE_PET_QUEST_CREDIT_WIN     = 65355,
+        BATTLE_PET_QUEST_CREDIT_LEVEL_3 = 65876,
+    };
+
+    uint8 const BATTLE_PET_QUEST_CREDIT_LEVEL = 3;
+
     CreatureTemplate const* GetBattlePetCreatureTemplate(BattlePet const* battlePet)
     {
         if (!battlePet)
@@ -1409,6 +1421,9 @@ void BattlePetMgr::UpdateBattlePetLevelAchievement(BattlePet const& battlePet, u
     uint32 const familyMask = BattlePetSpeciesFamilyMask(battlePet.GetSpecies());
     for (uint8 level = initialLevel + 1; level <= finalLevel; ++level)
         m_owner->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BATTLE_PET_LEVEL, level, familyMask);
+
+    if (initialLevel < BATTLE_PET_QUEST_CREDIT_LEVEL && finalLevel >= BATTLE_PET_QUEST_CREDIT_LEVEL)
+        m_owner->KilledMonsterCredit(BATTLE_PET_QUEST_CREDIT_LEVEL_3);
 }
 
 void BattlePetMgr::UpdateFinishedPetBattleAchievements()
@@ -1420,6 +1435,8 @@ void BattlePetMgr::UpdateFinishedPetBattleAchievements()
 
     if (m_activePetBattle.Winner != PET_BATTLE_WINNER_ALLY)
         return;
+
+    m_owner->KilledMonsterCredit(BATTLE_PET_QUEST_CREDIT_WIN);
 
     BattlePetAchievementContext const context = BuildActivePetBattleAchievementContext(
         m_activePetBattle.EnemySpecies, m_activePetBattle.EnemyQuality, true, false);
