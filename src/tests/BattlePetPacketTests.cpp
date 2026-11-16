@@ -623,6 +623,35 @@ namespace
         return passed;
     }
 
+    // A pet that levels up on the winning round is back at full health. The battle copy of its health is written
+    // back to the pet when the battle is cleared, so it has to carry the new health too.
+    bool TestBattleLevelUpHealthSurvivesBattleEndWriteBack()
+    {
+        bool passed = true;
+
+        BattlePet battlePet(45, 39, 2, ITEM_QUALITY_NORMAL, 0);
+        ActivePetBattle battle;
+        battle.StartWild(0x100, battlePet.GetId(), battlePet.GetMaxHealth(), 2, 0x300, 1000, 1000, 42, 2,
+            ITEM_QUALITY_NORMAL, 3);
+        battle.Finish(PET_BATTLE_WINNER_ALLY);
+
+        battlePet.AddExperience(BattlePetExperienceForNextLevel(2));
+        passed &= Expect(battlePet.GetLevel() == 3 && battlePet.GetCurrentHealth() == battlePet.GetMaxHealth(),
+            "The level-up should restore the pet to its new max health");
+        passed &= Expect(battle.SetAllyPet(battle.AllyFrontPet, battlePet.GetId(), battlePet.GetMaxHealth(),
+            battlePet.GetCurrentHealth()), "The finished battle should accept the levelled pet's health");
+
+        uint32 health = 0;
+        passed &= Expect(battle.GetAllyPetHealth(battlePet.GetId(), health) && health == battlePet.GetMaxHealth(),
+            "The battle-end health write-back should read the new max health, not the health the battle ended with");
+        passed &= Expect(battle.AllyHealth == battlePet.GetMaxHealth() && battle.AllyMaxHealth == battlePet.GetMaxHealth(),
+            "The front pet copy should carry the new health");
+        passed &= Expect(battle.Finished && battle.Winner == PET_BATTLE_WINNER_ALLY,
+            "Refreshing the pet should leave the battle result alone");
+
+        return passed;
+    }
+
     bool TestBattlePetExperienceCapsAtMaxLevel()
     {
         bool passed = true;
@@ -2421,6 +2450,7 @@ int main()
     passed &= TestBattlePetAbilityJournalFlagSlots();
     passed &= TestBattlePetHealthPercentUsesCeilingForNonZeroHeals();
     passed &= TestBattlePetExperienceLevelsAtThreshold();
+    passed &= TestBattleLevelUpHealthSurvivesBattleEndWriteBack();
     passed &= TestBattlePetExperienceCapsAtMaxLevel();
     passed &= TestBattlePetExperienceRewardScalesByLevelDifference();
     passed &= TestBattlePetCapturedLevelPenalty();
