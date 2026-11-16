@@ -7115,6 +7115,11 @@ void Unit::SetRooted(bool apply, bool packetOnly /*= false*/)
             // setting MOVEMENTFLAG_ROOT
             RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
             AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
+
+            // A creature rooted in the middle of a path kept following its running spline
+            if (GetTypeId() == TypeID::TYPEID_UNIT && !GetVehicle() && !GetTransport() && !GetTransGUID() &&
+                GetMotionMaster()->GetCurrentMovementGeneratorType() != EFFECT_MOTION_TYPE)
+                StopMoving();
         }
         else
             RemoveUnitMovementFlag(MOVEMENTFLAG_ROOT);
