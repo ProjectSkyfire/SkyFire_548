@@ -321,7 +321,11 @@ public:
                     break;
                 case 29:
                     Talk(SAY_TH_SKARLOC_MEET);
-                    me->SummonCreature(ENTRY_SCARLOC, 2036.48f, 271.22f, 63.43f, 5.27f, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
+                    // after a wipe the boss stays dead: go on to the talk with Thrall at the next waypoint
+                    if (instance->GetData(DATA_SKARLOC_DEFEATED))
+                        instance->SetData(TYPE_THRALL_PART1, DONE);
+                    else
+                        me->SummonCreature(ENTRY_SCARLOC, 2036.48f, 271.22f, 63.43f, 5.27f, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
                     //temporary, skarloc should rather be triggered to walk up to thrall
                     break;
                 case 30:
