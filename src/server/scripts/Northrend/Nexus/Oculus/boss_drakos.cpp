@@ -5,11 +5,13 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "oculus.h"
 
 enum Spells
 {
     SPELL_MAGIC_PULL                              = 51336,
+    SPELL_MAGIC_PULL_EFFECT                       = 50770,
     SPELL_THUNDERING_STOMP                        = 50774,
     SPELL_UNSTABLE_SPHERE_PASSIVE                 = 50756,
     SPELL_UNSTABLE_SPHERE_PULSE                   = 50757,
@@ -176,8 +178,30 @@ public:
     };
 };
 
+// 51336 - Magic Pull
+class spell_drakos_magic_pull : public SpellScript
+{
+    PrepareSpellScript(spell_drakos_magic_pull);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+    {
+        return sSpellMgr->GetSpellInfo(SPELL_MAGIC_PULL_EFFECT) != nullptr;
+    }
+
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        GetCaster()->CastSpell(GetHitUnit(), SPELL_MAGIC_PULL_EFFECT, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_drakos_magic_pull::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_boss_drakos()
 {
     new boss_drakos();
     new npc_unstable_sphere();
+    RegisterSpellScript(spell_drakos_magic_pull);
 }
