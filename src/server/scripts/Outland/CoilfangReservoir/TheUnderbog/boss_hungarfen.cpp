@@ -12,6 +12,8 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "GridNotifiers.h"
 #include "the_underbog.h"
 
 enum Spells
@@ -167,8 +169,37 @@ public:
     }
 };
 
+// 31689 - Spore Cloud
+class spell_hungarfen_spore_cloud : public SpellScriptLoader
+{
+public:
+    spell_hungarfen_spore_cloud() : SpellScriptLoader("spell_hungarfen_spore_cloud") { }
+
+    class spell_hungarfen_spore_cloud_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hungarfen_spore_cloud_SpellScript);
+
+        // Triggered by the players standing in the cloud, so the enemies it finds are Hungarfen and the mushrooms
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(Skyfire::ObjectTypeIdCheck(TypeID::TYPEID_PLAYER, false));
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hungarfen_spore_cloud_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_hungarfen_spore_cloud_SpellScript();
+    }
+};
+
 void AddSC_boss_hungarfen()
 {
     new boss_hungarfen();
     new npc_underbog_mushroom();
+    new spell_hungarfen_spore_cloud();
 }
