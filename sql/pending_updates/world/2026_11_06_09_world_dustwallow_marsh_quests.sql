@@ -1,8 +1,8 @@
--- Dustwallow Marsh quest fixes. Reference data: 4.3.4 for the event scripts, the Raptor Capture credit rows and the
--- gryphon survey gossip script; 5.4.8 for the spawns, the Ogre Remains and Captured Totem rows, the Daggermaw credit
--- row and the quest ids of the Agitator gossip condition and the Mok'Morokk rows. The other quest id corrections are
--- the current quest ids of scripts that home and 4.3.4 still key to the old quests. Safe to run twice: every block
--- deletes its own keys first or sets absolute values.
+-- Dustwallow Marsh quest fixes. Reference data: 4.3.4 for the event scripts, the Raptor Capture credit rows, the
+-- gryphon survey and Overlord Mok'Morokk's script; 5.4.8 for the spawns, the Ogre Remains and Captured Totem rows,
+-- the Daggermaw credit row and the quest ids of the Agitator gossip condition and Mok'Morokk's script. The other
+-- quest id corrections are the current quest ids of scripts that 4.3.4 still keys to the old quests. Safe to run
+-- twice: every block deletes its own keys first or sets absolute values.
 
 -- Renn McGill (starts "Secondhand Diving Gear" and "Jaina Must Know", ends "Renn McGill") had no spawn, so the
 -- Alliance chain from "Defias in Dustwallow?" stopped. Lurking Shark ("Nat's Bargain", kill target) and Gavis
@@ -47,28 +47,48 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (4352, 0, 0, 0, 8, 0, 100, 0, 42325, 0, 0, 0, 0, 11, 42337, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Bloodfen Screecher - On Spellhit Capture Raptor - Cast Raptor Capture Credit'),
 (4352, 0, 1, 0, 2, 0, 100, 1, 0, 20, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Bloodfen Screecher - Between 0-20% Health - Say Line 0');
 
--- Cassa Crimsonwing ("Survey Alcaz Island"): the C++ script bound to her shows the gryphon option only for the old
--- quest 11142, so the ride never starts for the current quest 27239. Use the 4.3.4 SmartAI (cast the survey spell on
--- option 0 and close the gossip) with the database gossip option, and show the option only while quest 27239 is
--- taken (4.3.4 uses the old id 11142 for that condition). The two rows are the 4.3.4 rows with the unused event
--- flag 512 cleared.
-UPDATE `creature_template` SET `ScriptName` = '', `AIName` = 'SmartAI' WHERE `entry` = 23704;
-DELETE FROM `smart_scripts` WHERE `source_type` = 0 AND `entryorguid` = 23704;
-INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(23704, 0, 0, 1, 62, 0, 100, 0, 8782, 0, 0, 0, 0, 11, 42295, 2, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Cassa Crimsonwing - On Gossip Option 0 Selected - Cast Spell 42295'),
-(23704, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Cassa Crimsonwing - On Linked Actions - Close Gossip');
-DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 8782 AND `SourceEntry` = 0;
-INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
-(15, 8782, 0, 0, 0, 9, 0, 27239, 0, 0, 0, 0, 0, '', 'Show gossip option only if player has taken quest 27239');
-
 -- "Traitors Among Us": the gossip option that exposes a Deserter Agitator needs the quest taken, but its condition
 -- names the old quest 11126 (4.3.4), so the option never shows. 5.4.8 uses 27210.
 UPDATE `conditions` SET `ConditionValue1` = 27210 WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 8762 AND `SourceEntry` = 0 AND `ConditionTypeOrReference` = 9 AND `ConditionValue1` IN (11126, 27210);
 
--- "Challenge Overlord Mok'Morokk": Mok'Morokk's quest-accepted event and the quest credit in his action list name
--- the old quest 1173, so accepting 27418 does not start the fight and the quest cannot be credited. 5.4.8 uses 27418.
-UPDATE `smart_scripts` SET `event_param1` = 27418 WHERE `entryorguid` = 4500 AND `source_type` = 0 AND `id` = 1 AND `event_type` = 19 AND `event_param1` IN (1173, 27418);
-UPDATE `smart_scripts` SET `action_param1` = 27418 WHERE `entryorguid` = 450001 AND `source_type` = 9 AND `id` = 4 AND `action_type` = 15 AND `action_param1` IN (1173, 27418);
+-- "Challenge Overlord Mok'Morokk": Overlord Mok'Morokk has no script, so accepting the quest does not start the
+-- fight and the credit is never given. The 4.3.4 script with the current quest id 27418: on accept he says his line,
+-- turns hostile and attacks the player, at 25% health he gives the credit, turns friendly again and walks away.
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 4500 AND `ScriptName` = '';
+DELETE FROM `smart_scripts` WHERE `source_type` = 0 AND `entryorguid` = 4500;
+DELETE FROM `smart_scripts` WHERE `source_type` = 9 AND `entryorguid` IN (450000, 450001);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(4500, 0, 0, 0, 0, 0, 100, 0, 1000, 3000, 7000, 10000, 0, 11, 6749, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - In Combat - Cast Wide Swipe'),
+(4500, 0, 1, 2, 19, 0, 100, 1, 27418, 0, 0, 0, 0, 64, 1, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - On Quest Accept - Store Targetlist'),
+(4500, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 80, 450000, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - On Quest Accept - Run Script'),
+(4500, 0, 3, 0, 2, 0, 100, 1, 0, 25, 0, 0, 0, 80, 450001, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Between 0-25% Health - Run Script'),
+(4500, 0, 4, 0, 0, 0, 100, 1, 0, 0, 0, 0, 0, 42, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - In Combat - Set Invincibility HP Level'),
+(4500, 0, 5, 0, 58, 0, 100, 0, 0, 4500, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - On Waypoint Ended - Despawn'),
+(4500, 0, 6, 7, 25, 0, 100, 0, 0, 0, 0, 0, 0, 18, 768, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - On Reset - Set Unit Flags 768'),
+(4500, 0, 7, 8, 61, 0, 100, 0, 0, 0, 0, 0, 0, 82, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - On Reset - Add Quest Giver Flag'),
+(4500, 0, 8, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 2, 29, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - On Reset - Set Faction 29'),
+(4500, 0, 9, 0, 11, 0, 100, 0, 0, 0, 0, 0, 0, 42, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - On Respawn - Set Invincibility HP Level'),
+(450000, 9, 0, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 12, 1, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Say Line 0'),
+(450000, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 2, 16, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Set Faction 16'),
+(450000, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 83, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Remove Quest Giver Flag'),
+(450000, 9, 3, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 19, 768, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Remove Unit Flags 768'),
+(450000, 9, 4, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 12, 1, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Attack Start'),
+(450001, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 18, 768, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Set Unit Flags 768'),
+(450001, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Remove All Auras'),
+(450001, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 2, 29, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Set Faction 29'),
+(450001, 9, 3, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Evade'),
+(450001, 9, 4, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 15, 27418, 0, 0, 0, 0, 0, 12, 1, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Quest Credit'),
+(450001, 9, 5, 0, 0, 0, 100, 0, 500, 500, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 12, 1, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Say Line 1'),
+(450001, 9, 6, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 53, 1, 4500, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Overlord Mok''Morokk - Script - Start Waypoint');
+DELETE FROM `creature_text` WHERE `entry` = 4500;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(4500, 0, 0, 'Puny $r wanna fight Overlord Mok''Morokk? Me beat you! Me boss here!', 12, 0, 100, 0, 0, 0, 'Overlord Mok''Morokk - On Quest Accept'),
+(4500, 1, 0, 'Me scared! Me run now!', 14, 0, 100, 0, 0, 0, 'Overlord Mok''Morokk - Between 0-25% Health');
+DELETE FROM `waypoints` WHERE `entry` = 4500;
+INSERT INTO `waypoints` (`entry`, `pointid`, `position_x`, `position_y`, `position_z`, `point_comment`) VALUES
+(4500, 1, -3138.49, -2864.64, 34.76, 'Overlord Mok''Morokk'),
+(4500, 2, -3128.08, -2847.37, 34.72, 'Overlord Mok''Morokk'),
+(4500, 3, -3108.94, -2839.6, 34.28, 'Overlord Mok''Morokk');
 
 -- "Questioning Reethe": Ogron's fail-on-death and quest-accepted rows and Paval Reethe's quest credit name the old
 -- quest 1273, so the escort never starts and the quest (completed by that credit) cannot be finished. 4.3.4 and
@@ -98,6 +118,11 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 DELETE FROM `smart_scripts` WHERE `source_type` = 0 AND `entryorguid` = 4345 AND `id` = 1;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (4345, 0, 1, 0, 6, 0, 100, 0, 0, 0, 0, 0, 0, 33, 23811, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Drywallow Daggermaw - On Death - Quest Credit');
+-- The credit only counts while a Captured Totem stands within 30 yards of the Daggermaw (condition on the smart event
+-- 1, which is source group 2).
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceGroup` = 2 AND `SourceEntry` = 4345 AND `SourceId` = 0;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(22, 2, 4345, 0, 0, 29, 1, 23811, 30, 0, 0, 0, 0, '', 'Execute SAI only if a Captured Totem is within 30 yards');
 
 -- "Mudrock Soup and Bugs" (Morgan Stern) requires quest 1260, which is a deprecated quest nobody offers, so the quest
 -- and its follow-up "... and Bugs" can never be taken. 4.3.4 has no prerequisite.
