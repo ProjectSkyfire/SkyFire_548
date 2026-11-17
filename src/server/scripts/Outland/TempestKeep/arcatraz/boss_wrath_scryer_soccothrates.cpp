@@ -41,6 +41,7 @@ enum Says
 enum Spells
 {
     SPELL_FELFIRE_SHOCK             = 35759,
+    SPELL_FELFIRE_SHOCK_H           = 39006,
     SPELL_KNOCK_AWAY                = 36512
 };
 
@@ -154,7 +155,7 @@ class boss_wrath_scryer_soccothrates : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FELFIRE_SHOCK:
-                            DoCastVictim(SPELL_FELFIRE_SHOCK);
+                            DoCastVictim(DUNGEON_MODE(SPELL_FELFIRE_SHOCK, SPELL_FELFIRE_SHOCK_H));
                             events.ScheduleEvent(EVENT_FELFIRE_SHOCK, urand(10000, 15000));
                             break;
                         case EVENT_KNOCK_AWAY:
