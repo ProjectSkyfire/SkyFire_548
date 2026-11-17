@@ -15,6 +15,8 @@ EndScriptData */
 #include "halls_of_lightning.h"
 #include "Player.h"
 #include "SpellInfo.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
 
 enum Enums
 {
@@ -37,7 +39,11 @@ enum Enums
     SPELL_SUMMON_MOLTEN_GOLEM               = 52405,
 
     // Molten Golem
-    SPELL_BLAST_WAVE                        = 23113,
+    SPELL_COOL_DOWN                         = 52441,
+    SPELL_COOL_DOWN_SLOW                    = 52443,
+    SPELL_COSMETIC_STUN_IMMUNE_FREEZE_ANIM  = 59123,
+
+    // Molten Golem
     SPELL_IMMOLATION_STRIKE_N               = 52433,
     SPELL_IMMOLATION_STRIKE_H               = 59530,
     SPELL_SHATTER_N                         = 52429,
@@ -49,6 +55,8 @@ enum Enums
 
     MAX_GOLEM                               = 2,
     MAX_TEMPER                              = 3,
+    HEAT_FIRST_DELAY                        = 8500,
+    HEAT_REPEAT_DELAY                       = 10000,
 
     DATA_SHATTER_RESISTANT                  = 2042
 };
@@ -85,6 +93,7 @@ public:
         uint8 GolemsShattered;
         uint32 m_uiPause_Timer;
         uint32 m_uiShatter_Timer;
+        uint32 m_uiHeat_Timer;
         uint32 m_uiDelay_Timer;
         uint32 m_uiSummonPhase;
 
@@ -99,6 +108,7 @@ public:
 
             m_uiPause_Timer = 3500;
             m_uiShatter_Timer = 5000;
+            m_uiHeat_Timer = 0;
             m_uiDelay_Timer = 1000;
             m_uiSummonPhase = 0;
             GolemsShattered = 0;
@@ -192,8 +202,7 @@ public:
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                     summoned->GetMotionMaster()->MoveFollow(target, 0.0f, 0.0f);
 
-                // Why healing when just summoned?
-                summoned->CastSpell(summoned, DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H), false, NULL, NULL, me->GetGUID());
+                summoned->CastSpell(summoned, SPELL_COOL_DOWN, true);
             }
         }
 
@@ -237,6 +246,18 @@ public:
                 return;
             }
 
+            // Heat the Molten Golems every 10 seconds after a temper, until the next temper or the stomp
+            if (m_uiHeat_Timer)
+            {
+                if (m_uiHeat_Timer <= uiDiff)
+                {
+                    DoCastAOE(DUNGEON_MODE(SPELL_HEAT_N, SPELL_HEAT_H));
+                    m_uiHeat_Timer = HEAT_REPEAT_DELAY;
+                }
+                else
+                    m_uiHeat_Timer -= uiDiff;
+            }
+
             // One Shattering Stomp at 25% health, after the third temper
             if (!m_bHasTemper && !m_bHasStomped && m_uiHealthAmountModifier > MAX_TEMPER && me->HealthBelowPct(25))
             {
@@ -248,6 +269,8 @@ public:
 
                 m_bHasStomped = true;
                 m_bCanShatterGolem = true;
+                m_uiShatter_Timer = 3000;
+                m_uiHeat_Timer = 0;
             }
 
             // Shatter Golems 3 seconds after Shattering Stomp
@@ -283,6 +306,7 @@ public:
                 case 1:
                     // 1 - Start run to Anvil
                     Talk(EMOTE_TO_ANVIL);
+                    m_uiHeat_Timer = 0;
                     me->GetMotionMaster()->MoveTargetedHome();
                     m_uiSummonPhase = 2;        // Set Next Phase
                     break;
@@ -326,6 +350,7 @@ public:
                         for (uint8 i = 0; i < MAX_GOLEM; ++i)
                             me->CastSpell(creatureTarget, SPELL_SUMMON_MOLTEN_GOLEM, true);
 
+                    m_uiHeat_Timer = HEAT_FIRST_DELAY;
                     m_bIsStriking = true;
                     m_uiSummonPhase = 0;        // Reset back to Phase 0 for next time
                     break;
@@ -353,51 +378,23 @@ public:
     {
         npc_molten_golemAI(Creature* creature) : ScriptedAI(creature) { }
 
-        bool m_bIsFrozen;
-
-        uint32 m_uiBlast_Timer;
-        uint32 m_uiDeathDelay_Timer;
         uint32 m_uiImmolation_Timer;
 
         void Reset() OVERRIDE
         {
-            m_bIsFrozen = false;
-
-            m_uiBlast_Timer = 20000;
-            m_uiDeathDelay_Timer = 0;
-            m_uiImmolation_Timer = 5000;
+            m_uiImmolation_Timer = urand(7000, 12000);
         }
 
-        void AttackStart(Unit* who) OVERRIDE
+        void DamageTaken(Unit* attacker, uint32 &uiDamage) OVERRIDE
         {
-            if (me->Attack(who, true))
-            {
-                me->AddThreat(who, 0.0f);
-                me->SetInCombatWith(who);
-                who->SetInCombatWith(me);
-
-                if (!m_bIsFrozen)
-                    me->GetMotionMaster()->MoveChase(who);
-            }
+            // Molten Golems only die by cooling down and being shattered
+            if (me->GetEntry() == NPC_MOLTEN_GOLEM && attacker != me && uiDamage >= me->GetHealth())
+                uiDamage = me->GetHealth() - 1;
         }
 
-        void DamageTaken(Unit* /*pDoneBy*/, uint32 &uiDamage) OVERRIDE
+        void JustDied(Unit* /*killer*/) OVERRIDE
         {
-            if (uiDamage > me->GetHealth())
-            {
-                me->UpdateEntry(NPC_BRITTLE_GOLEM);
-                me->SetHealth(1);
-                uiDamage = 0;
-                me->RemoveAllAuras();
-                me->AttackStop();
-                // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);  //Set in DB
-                // me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE); //Set in DB
-                if (me->IsNonMeleeSpellCasted(false))
-                    me->InterruptNonMeleeSpells(false);
-                if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-                    me->GetMotionMaster()->MovementExpired();
-                m_bIsFrozen = true;
-            }
+            me->DespawnOrUnsummon(5000);
         }
 
         void SpellHit(Unit* /*pCaster*/, const SpellInfo* pSpell) OVERRIDE
@@ -410,17 +407,9 @@ public:
 
         void UpdateAI(uint32 uiDiff) OVERRIDE
         {
-            // Return since we have no target or if we are frozen
-            if (!UpdateVictim() || m_bIsFrozen)
+            // Return since we have no target or if we are cooled
+            if (!UpdateVictim() || me->GetEntry() == NPC_BRITTLE_GOLEM)
                 return;
-
-            if (m_uiBlast_Timer <= uiDiff)
-            {
-                DoCast(me, SPELL_BLAST_WAVE);
-                m_uiBlast_Timer = 20000;
-            }
-            else
-                m_uiBlast_Timer -= uiDiff;
 
             if (m_uiImmolation_Timer <= uiDiff)
             {
@@ -433,6 +422,57 @@ public:
             DoMeleeAttackIfReady();
         }
     };
+};
+
+// 52441 - Cool Down
+class spell_volkhan_cool_down : public AuraScript
+{
+    PrepareAuraScript(spell_volkhan_cool_down);
+
+    void HandlePeriodic(AuraEffect const* /*aurEff*/)
+    {
+        PreventDefaultAction();
+
+        Unit* target = GetTarget();
+        if (target->GetHealthPct() > 1.0f)
+        {
+            uint32 damage = target->CountPctFromMaxHealth(target->GetMap()->IsHeroic() ? 1 : 2);
+            target->SetHealth(damage < target->GetHealth() ? target->GetHealth() - damage : 1);
+            int32 bp = -int32(100.0f - target->GetHealthPct());
+            target->CastCustomSpell(target, SPELL_COOL_DOWN_SLOW, &bp, NULL, NULL, true);
+        }
+        else
+        {
+            target->CastSpell(target, SPELL_COSMETIC_STUN_IMMUNE_FREEZE_ANIM, true);
+            target->RemoveAurasDueToSpell(SPELL_COOL_DOWN_SLOW);
+            GetAura()->Remove();
+        }
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_volkhan_cool_down::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+    }
+};
+
+// 59123 - Cosmetic - Stun + Immune Permanent (Freeze Anim)
+class spell_volkhan_cosmetic_stun_immune_permanent : public AuraScript
+{
+    PrepareAuraScript(spell_volkhan_cosmetic_stun_immune_permanent);
+
+    void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (Creature* target = GetTarget()->ToCreature())
+        {
+            target->UpdateEntry(NPC_BRITTLE_GOLEM);
+            target->SetHealth(1);
+        }
+    }
+
+    void Register() OVERRIDE
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_volkhan_cosmetic_stun_immune_permanent::HandleApply, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+    }
 };
 
 class achievement_shatter_resistant : public AchievementCriteriaScript
@@ -450,5 +490,7 @@ void AddSC_boss_volkhan()
 {
     new boss_volkhan();
     new npc_molten_golem();
+    RegisterAuraScript(spell_volkhan_cool_down);
+    RegisterAuraScript(spell_volkhan_cosmetic_stun_immune_permanent);
     new achievement_shatter_resistant();
 }
