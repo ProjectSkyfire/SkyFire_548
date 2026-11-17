@@ -48,6 +48,7 @@ enum Enums
     NPC_BRITTLE_GOLEM                       = 28681,
 
     MAX_GOLEM                               = 2,
+    MAX_TEMPER                              = 3,
 
     DATA_SHATTER_RESISTANT                  = 2042
 };
@@ -79,10 +80,10 @@ public:
         bool m_bHasTemper;
         bool m_bIsStriking;
         bool m_bCanShatterGolem;
+        bool m_bHasStomped;
 
         uint8 GolemsShattered;
         uint32 m_uiPause_Timer;
-        uint32 m_uiShatteringStomp_Timer;
         uint32 m_uiShatter_Timer;
         uint32 m_uiDelay_Timer;
         uint32 m_uiSummonPhase;
@@ -94,9 +95,9 @@ public:
             m_bIsStriking = false;
             m_bHasTemper = false;
             m_bCanShatterGolem = false;
+            m_bHasStomped = false;
 
             m_uiPause_Timer = 3500;
-            m_uiShatteringStomp_Timer = 0;
             m_uiShatter_Timer = 5000;
             m_uiDelay_Timer = 1000;
             m_uiSummonPhase = 0;
@@ -236,23 +237,17 @@ public:
                 return;
             }
 
-            // When to start shatter? After 60, 40 or 20% hp?
-            if (!m_bHasTemper && m_uiHealthAmountModifier >= 3)
+            // One Shattering Stomp at 25% health, after the third temper
+            if (!m_bHasTemper && !m_bHasStomped && m_uiHealthAmountModifier > MAX_TEMPER && me->HealthBelowPct(25))
             {
-                if (m_uiShatteringStomp_Timer <= uiDiff)
-                {
-                    // Should he stomp even if he has no brittle golem to shatter?
-                    Talk(SAY_STOMP);
+                Talk(SAY_STOMP);
 
-                    DoCast(me, SPELL_SHATTERING_STOMP_N);
+                DoCast(me, DUNGEON_MODE(SPELL_SHATTERING_STOMP_N, SPELL_SHATTERING_STOMP_H));
 
-                    Talk(EMOTE_SHATTER);
+                Talk(EMOTE_SHATTER);
 
-                    m_uiShatteringStomp_Timer = 30000;
-                    m_bCanShatterGolem = true;
-                }
-                else
-                    m_uiShatteringStomp_Timer -= uiDiff;
+                m_bHasStomped = true;
+                m_bCanShatterGolem = true;
             }
 
             // Shatter Golems 3 seconds after Shattering Stomp
@@ -269,7 +264,7 @@ public:
             }
 
             // Health check
-            if (!m_bCanShatterGolem && me->HealthBelowPct(100 - 20 * m_uiHealthAmountModifier))
+            if (!m_bCanShatterGolem && m_uiHealthAmountModifier <= MAX_TEMPER && me->HealthBelowPct(100 - 20 * m_uiHealthAmountModifier))
             {
                 ++m_uiHealthAmountModifier;
 
