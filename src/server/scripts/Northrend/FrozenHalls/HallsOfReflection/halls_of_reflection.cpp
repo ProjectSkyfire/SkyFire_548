@@ -801,6 +801,8 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                                 DoCast(me, SPELL_SYLVANAS_CLOAKOFDARKNESS);
                         }
                         me->SetHealth(252000);
+                        // Talking to her before the escape starts leaves the event without a state, so the undead despawn
+                        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
                         break;
                     case EVENT_ESCAPE_1:
                         _instance->SetData(DATA_ESCAPE_EVENT, IN_PROGRESS);
