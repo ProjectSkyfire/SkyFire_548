@@ -1833,12 +1833,13 @@ public:
             _emergeTimer = 4000;
             _doEmerge = false;
             _doJump = false;
-            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
-                _instance->SetData(DATA_SUMMONS, 1);
         }
 
         void IsSummonedBy(Unit*) OVERRIDE
         {
+            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
+                _instance->SetData(DATA_SUMMONS, 1);
+
             DoCast(me, SPELL_EMERGE_VISUAL);
             DoZoneInCombat(me, 100.00f);
         }
@@ -1934,13 +1935,13 @@ public:
             _boltVolleyTimer = 15000;
             _curseTimer = 7000;
             _doEmerge = false;
-            if (_instance)
-                if (_instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
-                    _instance->SetData(DATA_SUMMONS, 1);
         }
 
         void IsSummonedBy(Unit*) OVERRIDE
         {
+            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
+                _instance->SetData(DATA_SUMMONS, 1);
+
             DoCast(me, SPELL_EMERGE_VISUAL);
             DoZoneInCombat(me, 100.00f);
         }
@@ -2050,13 +2051,13 @@ public:
             _doWalk = false;
             _vomitTimer = 15000;
             _strikeTimer = 6000;
-            if (_instance)
-                if (_instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
-                    _instance->SetData(DATA_SUMMONS, 1);
         }
 
         void IsSummonedBy(Unit*) OVERRIDE
         {
+            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
+                _instance->SetData(DATA_SUMMONS, 1);
+
             DoCast(me, SPELL_EMERGE_VISUAL);
             DoZoneInCombat(me, 100.00f);
         }
