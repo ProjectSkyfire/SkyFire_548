@@ -13,10 +13,14 @@
 enum Spells
 {
     SPELL_LIGHTING_RING                               = 51849, // Periodic Trigger (interval 2s) spell = 50841
+    SPELL_LIGHTING_RING_H                             = 59861,
     SPELL_LIGHTING_RING_1                             = 50840, // Periodic Trigger (interval 2s) spell = 50841
     SPELL_STATIC_CHARGE                               = 50834, // Periodic Trigger 2s interval, spell =50835
+    SPELL_STATIC_CHARGE_H                             = 59846,
     SPELL_CHAIN_LIGHTING                              = 50830,
+    SPELL_CHAIN_LIGHTING_H                            = 59844,
     SPELL_LIGHTING_SHIELD                             = 50831,
+    SPELL_LIGHTING_SHIELD_H                           = 59845,
     SPELL_FRENZY                                      = 28747,
     SPELL_TOXIC_VOLLEY                                = 50838,
 
@@ -201,16 +205,16 @@ class boss_sjonnir : public CreatureScript
                     {
                         case EVENT_CHAIN_LIGHTNING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                DoCast(target, SPELL_CHAIN_LIGHTING);
+                                DoCast(target, DUNGEON_MODE(SPELL_CHAIN_LIGHTING, SPELL_CHAIN_LIGHTING_H));
                             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(10000, 15000));
                             break;
                         case EVENT_LIGHTNING_SHIELD:
-                            if (!me->HasAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_LIGHTING_SHIELD, me)))
-                                DoCast(me, SPELL_LIGHTING_SHIELD);
+                            if (!me->HasAura(DUNGEON_MODE(SPELL_LIGHTING_SHIELD, SPELL_LIGHTING_SHIELD_H)))
+                                DoCast(me, DUNGEON_MODE(SPELL_LIGHTING_SHIELD, SPELL_LIGHTING_SHIELD_H));
                             events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, urand(5000, 15000));
                             break;
                         case EVENT_STATIC_CHARGE:
-                            DoCastVictim(SPELL_STATIC_CHARGE);
+                            DoCastVictim(DUNGEON_MODE(SPELL_STATIC_CHARGE, SPELL_STATIC_CHARGE_H));
                             events.ScheduleEvent(EVENT_STATIC_CHARGE, urand(20000, 25000));
                             break;
                         case EVENT_LIGHTNING_RING:
@@ -218,7 +222,7 @@ class boss_sjonnir : public CreatureScript
                             events.ScheduleEvent(EVENT_LIGHTNING_RING, 50000);
                             break;
                         case EVENT_LIGHTNING_RING_FRENZY:
-                            DoCast(me, SPELL_LIGHTING_RING);
+                            DoCast(me, DUNGEON_MODE(SPELL_LIGHTING_RING, SPELL_LIGHTING_RING_H));
                             events.ScheduleEvent(EVENT_LIGHTNING_RING_FRENZY, 15000);
                             break;
                         case EVENT_FRENZY:
