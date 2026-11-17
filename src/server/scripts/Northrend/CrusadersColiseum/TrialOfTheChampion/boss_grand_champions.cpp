@@ -25,8 +25,7 @@ enum Spells
     SPELL_SHIELD                    = 66482,
 
     // Marshal Jacob Alerius && Mokra the Skullcrusher || Warrior
-    SPELL_MORTAL_STRIKE             = 68783,
-    SPELL_MORTAL_STRIKE_H           = 68784,
+    SPELL_MORTAL_STRIKE             = 67542,
     SPELL_BLADESTORM                = 63784,
     SPELL_INTERCEPT                 = 67540,
     SPELL_ROLLING_THROW             = 47115, //not implemented in the AI yet...
