@@ -706,7 +706,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
     {
         npc_jaina_or_sylvanas_escape_horAI(Creature* creature) : ScriptedAI(creature),
             _instance(creature->GetInstanceScript()), _lichkingGUID(0), _walltargetGUID(0),
-            _icewallGUID(0), _icewall(0)
+            _icewallGUID(0), _icewall(0), _wallArmed(false)
         {
         }
 
@@ -715,6 +715,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
         uint64 _walltargetGUID; // dummy
         uint64 _icewallGUID; // object
         uint32 _icewall; // icewall number
+        bool _wallArmed; // the undead of the wall are all summoned, so their death can break it
 
         EventMap _events;
 
@@ -727,6 +728,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
             _walltargetGUID = 0;
             _icewallGUID = 0;
             _icewall = 0;
+            _wallArmed = false;
             _events.ScheduleEvent(EVENT_ESCAPE, 0);
         }
 
@@ -744,6 +746,10 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                     _events.ScheduleEvent(EVENT_ESCAPE_1, 1000);
                     break;
                 case ACTION_WALL_BROKEN:
+                    // The count of living undead also reaches zero between two waves of one wall
+                    if (!_wallArmed)
+                        break;
+                    _wallArmed = false;
                     _icewall++;
                     if (_icewall != 4)
                         _events.ScheduleEvent(EVENT_ESCAPE_17, 3000);
@@ -764,6 +770,13 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                     _events.ScheduleEvent(EVENT_ESCAPE_7, 0);
                     break;
             }
+        }
+
+        void ArmIceWall()
+        {
+            _wallArmed = true;
+            if (!_instance->GetData(DATA_SUMMONS))
+                DoAction(ACTION_WALL_BROKEN);
         }
 
         void DestroyIceWall()
@@ -935,6 +948,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                             DoCast(me, SPELL_JAINA_DESTROY_ICE_WALL, true);
                         else
                             DoCast(me, SPELL_SYLVANAS_DESTROY_ICE_WALL, true);
+                        ArmIceWall();
                         break;
                     case EVENT_ESCAPE_17:// ICEWALL BROKEN
                         me->GetMotionMaster()->MoveIdle();
@@ -1037,6 +1051,8 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                                 _events.ScheduleEvent(EVENT_ESCAPE_22, 1000);
                             }
                         }
+                        if (_icewall == 1)
+                            ArmIceWall();
                         break;
                     case EVENT_ESCAPE_22:
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
@@ -1044,6 +1060,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                             if (_icewall >= 2 && _icewall < 4)
                                 lichking->AI()->DoCast(lichking, SPELL_SUMMON_LUMBERING_ABOMINATION);
                         }
+                        ArmIceWall();
                         break;
                     case EVENT_ESCAPE_23: // FINAL PART
                         DestroyIceWall();
