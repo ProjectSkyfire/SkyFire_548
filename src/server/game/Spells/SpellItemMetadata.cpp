@@ -42,7 +42,7 @@ namespace Spells
             return DURATION_ONE_HOUR;
 
         if (spellFamilyName == SPELLFAMILY_SHAMAN)
-            return DURATION_THIRTY_MINUTES;
+            return DURATION_ONE_HOUR;
 
         if (spellVisual == SPELL_VISUAL_THIRTY_MINUTE_ENCHANT)
             return DURATION_THIRTY_MINUTES;
