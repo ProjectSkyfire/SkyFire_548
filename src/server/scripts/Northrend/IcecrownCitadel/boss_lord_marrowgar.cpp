@@ -695,7 +695,10 @@ class spell_marrowgar_bone_slice : public SpellScriptLoader
 
             void ClearSpikeImmunities()
             {
-                GetCaster()->GetAI()->DoAction(ACTION_CLEAR_SPIKE_IMMUNITIES);
+                // Only Marrowgar has an AI to tell; a player caster (a GM test cast) has none
+                if (Unit* caster = GetCaster())
+                    if (UnitAI* ai = caster->GetAI())
+                        ai->DoAction(ACTION_CLEAR_SPIKE_IMMUNITIES);
             }
 
             void CountTargets(std::list<WorldObject*>& targets)
