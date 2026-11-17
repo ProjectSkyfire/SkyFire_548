@@ -604,8 +604,17 @@ bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
             switch (obj->GetTypeId())
             {
                 case TypeID::TYPEID_UNIT:
-                    obj->ToCreature()->FarTeleportTo(newMap, destX, destY, destZ, destO);
+                {
+                    Creature* creature = obj->ToCreature();
+                    // A pet stays in its owner's controlled list until the owner leaves the map, so the owner's
+                    // teleport has to unsummon and resummon it. Far teleporting it here trips the assert in
+                    // Unit::RemoveFromWorld.
+                    if (creature->IsPet())
+                        RemovePassenger(creature);
+                    else
+                        creature->FarTeleportTo(newMap, destX, destY, destZ, destO);
                     break;
+                }
                 case TypeID::TYPEID_GAMEOBJECT:
                 {
                     GameObject* go = obj->ToGameObject();
@@ -616,7 +625,7 @@ bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
                     break;
                 }
                 case TypeID::TYPEID_PLAYER:
-                    if (!obj->ToPlayer()->TeleportTo(newMapid, destX, destY, destZ, destO, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_UNSUMMON_PET))
+                    if (!obj->ToPlayer()->TeleportTo(newMapid, destX, destY, destZ, destO, TELE_TO_NOT_LEAVE_TRANSPORT))
                         _passengers.erase(obj);
                     break;
                 default:
