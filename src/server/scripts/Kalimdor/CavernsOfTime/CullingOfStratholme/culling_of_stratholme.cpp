@@ -103,6 +103,7 @@ enum NPCs
     NPC_ZOMBIE                                 = 27737,
     NPC_GHOUL                                  = 28249,
     NPC_NECROMANCER                            = 28200,
+    NPC_ACOLYTE                                = 27731,
     NPC_STALKER                                = 28199,
     NPC_FIEND                                  = 27734,
     NPC_GOLEM                                  = 28201,
@@ -141,7 +142,7 @@ enum GossipMenuArthas
 enum EncounterData
 {
     ENCOUNTER_WAVES_NUMBER                      = 8,
-    ENCOUNTER_WAVES_MAX_SPAWNS                  = 5,
+    ENCOUNTER_WAVES_MAX_SPAWNS                  = 6,
     ENCOUNTER_DRACONIAN_NUMBER                  = 4,
     ENCOUNTER_CHRONO_SPAWNS                     = 19
 };
@@ -203,6 +204,75 @@ float WavesLocations[ENCOUNTER_WAVES_NUMBER][ENCOUNTER_WAVES_MAX_SPAWNS][5]=
         {NPC_FIEND, 2177.649170f, 1256.061157f, 135.096512f, 1.849572f},
         {NPC_CONSTRUCT, 2170.782959f, 1253.594849f, 134.973022f, 1.849572f},
         {NPC_NECROMANCER, 2175.595703f, 1249.041992f, 135.603531f, 1.849572f},
+        {0, 0, 0, 0, 0}
+    }
+};
+
+// Heroic waves: the same eight groups with the heroic creature mix, at the Scourge wave spawn points nearest to each normal group
+float HeroicWavesLocations[ENCOUNTER_WAVES_NUMBER][ENCOUNTER_WAVES_MAX_SPAWNS][5]=
+{
+    {
+        {NPC_GHOUL, 2183.596f, 1238.823f, 136.551f, 2.16377f},
+        {NPC_GHOUL, 2181.420f, 1237.357f, 136.565f, 2.16377f},
+        {NPC_GHOUL, 2178.692f, 1237.446f, 136.694f, 1.99098f},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    },
+    {
+        {NPC_GHOUL, 2267.003f, 1168.055f, 137.821f, 2.79050f},
+        {NPC_EGHOUL, 2264.392f, 1162.145f, 137.910f, 2.39937f},
+        {NPC_NECROMANCER, 2262.785f, 1166.648f, 138.053f, 2.71353f},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    },
+    {
+        {NPC_GHOUL, 2351.656f, 1218.682f, 130.062f, 4.63383f},
+        {NPC_EGHOUL, 2354.921f, 1218.425f, 130.280f, 4.63383f},
+        {NPC_NECROMANCER, 2347.516f, 1216.976f, 130.491f, 5.02496f},
+        {NPC_FIEND, 2356.508f, 1216.656f, 130.445f, 4.29061f},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    },
+    {
+        {NPC_NECROMANCER, 2131.474f, 1352.615f, 131.372f, 6.10960f},
+        {NPC_FIEND, 2131.463f, 1357.127f, 131.587f, 5.95173f},
+        {NPC_ACOLYTE, 2129.795f, 1345.093f, 131.194f, 0.17905f},
+        {NPC_ACOLYTE, 2136.235f, 1347.894f, 131.628f, 0.20262f},
+        {NPC_ACOLYTE, 2138.219f, 1356.240f, 132.169f, 5.95173f},
+        {NPC_ACOLYTE, 2140.584f, 1351.624f, 132.142f, 6.08525f}
+    },
+    {
+        {NPC_GHOUL, 2267.003f, 1168.055f, 137.821f, 2.79050f},
+        {NPC_NECROMANCER, 2264.392f, 1162.145f, 137.910f, 2.39937f},
+        {NPC_FIEND, 2262.785f, 1166.648f, 138.053f, 2.71353f},
+        {NPC_STALKER, 2265.214f, 1170.771f, 137.972f, 2.80385f},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    },
+    {
+        {NPC_GHOUL, 2351.656f, 1218.682f, 130.062f, 4.63383f},
+        {NPC_EGHOUL, 2354.921f, 1218.425f, 130.280f, 4.63383f},
+        {NPC_EGHOUL, 2347.516f, 1216.976f, 130.491f, 5.02496f},
+        {NPC_CONSTRUCT, 2356.508f, 1216.656f, 130.445f, 4.29061f},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    },
+    {
+        {NPC_GHOUL, 2131.474f, 1352.615f, 131.372f, 6.10960f},
+        {NPC_EGHOUL, 2131.463f, 1357.127f, 131.587f, 5.95173f},
+        {NPC_NECROMANCER, 2129.795f, 1345.093f, 131.194f, 0.17905f},
+        {NPC_CONSTRUCT, 2136.235f, 1347.894f, 131.628f, 0.20262f},
+        {0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0}
+    },
+    {
+        {NPC_GHOUL, 2183.596f, 1238.823f, 136.551f, 2.16377f},
+        {NPC_NECROMANCER, 2181.420f, 1237.357f, 136.565f, 2.16377f},
+        {NPC_FIEND, 2178.692f, 1237.446f, 136.694f, 1.99098f},
+        {NPC_CONSTRUCT, 2184.980f, 1242.458f, 136.772f, 2.59181f},
+        {0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0}
     }
 };
@@ -437,10 +507,12 @@ public:
 
         void SpawnWaveGroup(uint32 waveID, uint64* guidVector)
         {
+            float const (*wave)[5] = IsHeroic() ? HeroicWavesLocations[waveID] : WavesLocations[waveID];
+
             for (uint32 i = 0; i < ENCOUNTER_WAVES_MAX_SPAWNS; ++i)
             {
-                if ((uint32)WavesLocations[waveID][i][0] == 0) break;
-                if (Creature* temp = me->SummonCreature((uint32)WavesLocations[waveID][i][0], WavesLocations[waveID][i][1], WavesLocations[waveID][i][2], WavesLocations[waveID][i][3], WavesLocations[waveID][i][4], TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 900000))
+                if ((uint32)wave[i][0] == 0) break;
+                if (Creature* temp = me->SummonCreature((uint32)wave[i][0], wave[i][1], wave[i][2], wave[i][3], wave[i][4], TempSummonType::TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 900000))
                 {
                     guidVector[i] = temp->GetGUID();
                 }
