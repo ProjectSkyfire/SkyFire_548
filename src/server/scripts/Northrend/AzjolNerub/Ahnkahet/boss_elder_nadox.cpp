@@ -20,6 +20,7 @@ enum Yells
 enum Spells
 {
     SPELL_BROOD_PLAGUE          = 56130,
+    SPELL_BROOD_PLAGUE_H        = 59467,
     H_SPELL_BROOD_RAGE          = 59465,
     SPELL_ENRAGE                = 26662, // Enraged if too far away from home
     SPELL_SUMMON_SWARMERS       = 56119, // 2x 30178  -- 2x every 10secs
@@ -108,7 +109,7 @@ class boss_elder_nadox : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_PLAGUE:
-                            DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), SPELL_BROOD_PLAGUE, true);
+                            DoCast(SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true), DUNGEON_MODE(SPELL_BROOD_PLAGUE, SPELL_BROOD_PLAGUE_H), true);
                             events.ScheduleEvent(EVENT_PLAGUE, 15 * IN_MILLISECONDS);
                             break;
                         case EVENT_RAGE:

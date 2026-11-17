@@ -21,6 +21,7 @@ enum Spells
     SPELL_FLAME_SPHERE_DEATH_EFFECT               = 55947,
     SPELL_BEAM_VISUAL                             = 60342,
     SPELL_EMBRACE_OF_THE_VAMPYR                   = 55959,
+    SPELL_EMBRACE_OF_THE_VAMPYR_H                 = 59513,
     SPELL_VANISH                                  = 55964,
     SPELL_SHADOWSTEP                              = 55966,
     CREATURE_FLAME_SPHERE                         = 30106,
@@ -209,7 +210,7 @@ class boss_taldaram : public CreatureScript
                             if (Unit* embraceTarget = GetEmbraceTarget())
                             {
                                 DoCast(embraceTarget, SPELL_SHADOWSTEP);
-                                DoCast(embraceTarget, SPELL_EMBRACE_OF_THE_VAMPYR);
+                                DoCast(embraceTarget, DUNGEON_MODE(SPELL_EMBRACE_OF_THE_VAMPYR, SPELL_EMBRACE_OF_THE_VAMPYR_H));
                             }
                             Talk(SAY_FEED);
                             me->GetMotionMaster()->Clear();
