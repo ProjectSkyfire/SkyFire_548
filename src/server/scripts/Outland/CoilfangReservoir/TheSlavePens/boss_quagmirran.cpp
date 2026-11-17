@@ -29,7 +29,8 @@ enum Spells
     SPELL_ACID_SPRAY         = 38153,
     SPELL_CLEAVE             = 40504,
     SPELL_UPPERCUT           = 32055,
-    SPELL_POISON_BOLT_VOLLEY = 34780
+    SPELL_POISON_BOLT_VOLLEY = 34780,
+    SPELL_POISON_BOLT_VOLLEY_H = 39340
 };
 
 enum Events
@@ -81,7 +82,7 @@ class boss_quagmirran : public CreatureScript
                         events.ScheduleEvent(EVENT_UPPERCUT, urand(20000, 30000));
                         break;
                     case EVENT_POISON_BOLT_VOLLEY:
-                        DoCast(me, SPELL_POISON_BOLT_VOLLEY);
+                        DoCast(me, DUNGEON_MODE(SPELL_POISON_BOLT_VOLLEY, SPELL_POISON_BOLT_VOLLEY_H));
                         events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, urand(20000, 35000));
                         break;
                     default:

@@ -27,6 +27,7 @@ EndScriptData */
 enum Spells
 {
     SPELL_GRIEVOUS_WOUND     = 31956,
+    SPELL_GRIEVOUS_WOUND_H   = 38801,
     SPELL_ENSNARING_MOSS     = 31948,
     SPELL_WATER_SPIT         = 35008,
     SPELL_FRENZY             = 34970
@@ -72,7 +73,7 @@ class boss_rokmar_the_crackler : public CreatureScript
                 switch (eventId)
                 {
                     case EVENT_GRIEVOUS_WOUND:
-                        DoCastVictim(SPELL_GRIEVOUS_WOUND);
+                        DoCastVictim(DUNGEON_MODE(SPELL_GRIEVOUS_WOUND, SPELL_GRIEVOUS_WOUND_H));
                         events.ScheduleEvent(EVENT_GRIEVOUS_WOUND, urand(20000, 30000));
                         break;
                     case EVENT_ENSNARING_MOSS:
