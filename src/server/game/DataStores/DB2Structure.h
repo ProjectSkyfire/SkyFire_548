@@ -318,6 +318,7 @@ struct BattlePetStateEntry
 };
 */
 typedef std::map<uint32, uint16> BattlePetItemXSpeciesStore;
+typedef std::map<uint32, uint16> BattlePetSpellXSpeciesStore;
 
 struct ItemToBattlePetEntry
 {

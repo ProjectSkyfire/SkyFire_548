@@ -27,6 +27,7 @@ extern DB2Storage<ItemToBattlePetEntry> sItemToBattlePetStore;
 
 extern BattlePetBreedSet sBattlePetBreedSet;
 extern BattlePetItemXSpeciesStore sBattlePetItemXSpeciesStore;
+extern BattlePetSpellXSpeciesStore sBattlePetSpellXSpeciesStore;
 
 typedef std::multimap<uint32, std::pair<uint32, uint8>> BattlePetAbilityTurnByAbilityStore;
 extern BattlePetAbilityTurnByAbilityStore sBattlePetAbilityTurnByAbilityStore;
@@ -56,6 +57,7 @@ float BattlePetSpeciesMainStat(uint16 stateId, uint16 speciesId);
 float BattlePetBreedMainStatModifier(uint16 stateId, uint8 breedId);
 float BattlePetQualityMultiplier(uint8 quality);
 uint32 BattlePetGetSummonSpell(uint16 speciesId);
+uint16 BattlePetGetSpeciesBySummonSpell(uint32 spellId);
 bool BattlePetSpeciesHasFlag(uint16 speciesId, uint16 flag);
 bool BattlePetHasSpeciesAbility(uint16 speciesId, uint8 abilitySlot, bool alternateAbility, uint8 level);
 uint32 BattlePetGetSpeciesAbility(uint16 speciesId, uint8 abilitySlot, uint16 flags, uint8 level);

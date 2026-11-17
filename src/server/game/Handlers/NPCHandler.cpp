@@ -3,12 +3,14 @@
 * See LICENSE.md file for Copyright information
 */
 
+#include "BattlePetMgr.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
 #include "BlackMarketMgr.h"
 #include "Common.h"
 #include "Creature.h"
 #include "CreatureAI.h"
+#include "DB2Stores.h"
 #include "DatabaseEnv.h"
 #include "GossipDef.h"
 #include "Language.h"
@@ -250,6 +252,14 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
         return;
     }
 
+    // starter battle pets go into the journal, the check above is disabled for other trainer spells
+    uint16 battlePetSpeciesId = BattlePetGetSpeciesBySummonSpell(spellId);
+    if (battlePetSpeciesId && _player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
+    {
+        SendTrainerBuyFailed(guid, spellId, 0);
+        return;
+    }
+
     // can't be learn, cheat? Or double learn with lags...
     //if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
      //   SendTrainerBuyFailed(guid, spellId, 0);
@@ -266,10 +276,25 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
         return;
     }
 
+    // create the pet before charging, so a refused pet costs nothing
+    if (battlePetSpeciesId)
+    {
+        if (!_player->GetBattlePetMgr()->Create(battlePetSpeciesId))
+        {
+            SendTrainerBuyFailed(guid, spellId, 0);
+            return;
+        }
+
+        _player->GetBattlePetMgr()->SaveToDb();
+    }
+
     _player->ModifyMoney(-int64(nSpellCost));
 
     unit->SendPlaySpellVisualKit(179, 0, 0);       // 53 SpellCastDirected
     _player->SendPlaySpellVisualKit(362, 1, 0);    // 113 EmoteSalute
+
+    if (battlePetSpeciesId)
+        return;
 
     // learn explicitly or cast explicitly
     if (trainer_spell->IsCastable())

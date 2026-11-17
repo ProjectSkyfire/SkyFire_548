@@ -4858,6 +4858,21 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (!trainer_spell)
         return TRAINER_SPELL_RED;
 
+    // battle pet trainers list starter pets by their summon spell, buying one adds the pet to the journal
+    if (uint16 speciesId = BattlePetGetSpeciesBySummonSpell(trainer_spell->spell))
+    {
+        if (!HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET_ENABLED))
+            return TRAINER_SPELL_RED;
+
+        if (m_battlePetMgr->GetBattlePetCount(speciesId))
+            return TRAINER_SPELL_GRAY;
+
+        if (getLevel() < trainer_spell->reqLevel || !m_battlePetMgr->CanCreateBattlePet(speciesId))
+            return TRAINER_SPELL_RED;
+
+        return TRAINER_SPELL_GREEN;
+    }
+
     bool hasSpell = true;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
     {
