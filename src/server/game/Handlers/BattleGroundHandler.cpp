@@ -21,6 +21,7 @@
 #include "Object.h"
 #include "Opcodes.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
 {
@@ -198,6 +199,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             return;
 
         err = grp->CanJoinBattlegroundQueue(bg, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), false, 0);
+        if (err == GroupJoinBattlegroundResult::ERR_BATTLEGROUND_NONE && !sScriptMgr->CanJoinBG(_player, grp))
+            err = GroupJoinBattlegroundResult::ERR_BATTLEGROUND_JOIN_FAILED;
         isPremade = (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam());
 
         BattlegroundQueue& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);

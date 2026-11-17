@@ -383,6 +383,7 @@ public:
     /// Relocate all players in ReviveQueue to the closest graveyard
     void RelocateDeadPlayers(uint64 queueIndex);
 
+    bool ChangePlayerTeam(Player* player, uint32 team);
     void StartBattleground();
 
     GameObject* GetBGObject(uint32 type);
