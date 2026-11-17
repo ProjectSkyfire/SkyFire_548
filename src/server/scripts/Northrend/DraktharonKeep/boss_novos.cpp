@@ -30,9 +30,13 @@ enum Spells
     SPELL_SUMMON_COPY_OF_MINIONS    = 59933,
 
     SPELL_ARCANE_BLAST              = 49198,
+    SPELL_ARCANE_BLAST_H            = 59909,
     SPELL_BLIZZARD                  = 49034,
+    SPELL_BLIZZARD_H                = 59854,
     SPELL_FROSTBOLT                 = 49037,
+    SPELL_FROSTBOLT_H               = 59855,
     SPELL_WRATH_OF_MISERY           = 50089,
+    SPELL_WRATH_OF_MISERY_H         = 59856,
     SPELL_SUMMON_MINIONS            = 59910
 };
 
@@ -132,7 +136,10 @@ public:
                         break;
                     case EVENT_ATTACK:
                         if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM))
-                            DoCast(victim, RAND(SPELL_ARCANE_BLAST, SPELL_BLIZZARD, SPELL_FROSTBOLT, SPELL_WRATH_OF_MISERY));
+                            DoCast(victim, RAND(DUNGEON_MODE(SPELL_ARCANE_BLAST, SPELL_ARCANE_BLAST_H),
+                                DUNGEON_MODE(SPELL_BLIZZARD, SPELL_BLIZZARD_H),
+                                DUNGEON_MODE(SPELL_FROSTBOLT, SPELL_FROSTBOLT_H),
+                                DUNGEON_MODE(SPELL_WRATH_OF_MISERY, SPELL_WRATH_OF_MISERY_H)));
                         events.ScheduleEvent(EVENT_ATTACK, 3000);
                         break;
                     default:
