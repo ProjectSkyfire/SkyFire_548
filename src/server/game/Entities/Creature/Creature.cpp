@@ -146,7 +146,7 @@ lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGrou
 m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemoveTime(0), m_respawnTime(0),
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
-m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
+m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_cannotReachTarget(false), m_cannotReachTimer(0), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL), m_inhabitType(INHABIT_GROUND)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
@@ -611,6 +611,13 @@ void Creature::Update(uint32 diff)
             // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
             if (!IsAlive())
                 break;
+
+            if (m_cannotReachTarget && !IsInEvadeMode() && !GetMap()->IsRaid() && !GetCharmerOrOwnerGUID())
+            {
+                m_cannotReachTimer += diff;
+                if (m_cannotReachTimer >= CREATURE_NOPATH_EVADE_TIME && IsAIEnabled)
+                    AI()->EnterEvadeMode();
+            }
 
             if (m_regenTimer > 0)
             {
@@ -2159,6 +2166,15 @@ void Creature::SaveRespawnTime()
         return;
 
     GetMap()->SaveCreatureRespawnTime(m_DBTableGuid, m_respawnTime);
+}
+
+void Creature::SetCannotReachTarget(bool cannotReach)
+{
+    if (cannotReach == m_cannotReachTarget)
+        return;
+
+    m_cannotReachTarget = cannotReach;
+    m_cannotReachTimer = 0;
 }
 
 // this should not be called by petAI or

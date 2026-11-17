@@ -55,6 +55,7 @@ enum CreatureFlagsExtra
 #define MAX_KILL_CREDIT 2
 #define CREATURE_REGEN_INTERVAL 2 * IN_MILLISECONDS
 #define CREATURE_BYSTANDER_THREAT_TIMEOUT 10 * IN_MILLISECONDS
+#define CREATURE_NOPATH_EVADE_TIME (5 * IN_MILLISECONDS)
 
 #define MAX_CREATURE_QUEST_ITEMS 6
 
@@ -494,6 +495,8 @@ public:
 
     bool IsInEvadeMode() const { return HasUnitState(UNIT_STATE_EVADE); }
 
+    void SetCannotReachTarget(bool cannotReach);
+
     bool AIM_Initialize(CreatureAI* ai = NULL);
     void Motion_Initialize();
 
@@ -723,6 +726,8 @@ protected:
     bool m_AlreadySearchedAssistance;
     bool m_regenHealth;
     bool m_AI_locked;
+    bool m_cannotReachTarget;
+    uint32 m_cannotReachTimer;
 
     SpellSchoolMask m_meleeDamageSchoolMask;
     uint32 m_originalEntry;
