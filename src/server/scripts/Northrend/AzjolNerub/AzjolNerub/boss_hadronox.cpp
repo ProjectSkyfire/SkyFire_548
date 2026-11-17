@@ -167,26 +167,6 @@ enum Movements
     MOVE_HADRONOX_REAL   // while this one will always make us movechase
 };
 
-static uint32 RandTimeMs(uint32 minSeconds, uint32 maxSeconds)
-{
-    return urand(minSeconds * IN_MILLISECONDS, maxSeconds * IN_MILLISECONDS);
-}
-
-// Creatures are removed on evade and come back after a fixed delay, the way BossAI::_DespawnAtEvade does it for the boss.
-static void DespawnAtEvade(Creature* creature, uint32 respawnDelay)
-{
-    uint32 corpseDelay = creature->GetCorpseDelay();
-    uint32 oldRespawnDelay = creature->GetRespawnDelay();
-
-    creature->SetCorpseDelay(1);
-    creature->SetRespawnDelay(respawnDelay);
-
-    creature->DespawnOrUnsummon();
-
-    creature->SetCorpseDelay(corpseDelay);
-    creature->SetRespawnDelay(oldRespawnDelay);
-}
-
 static Creature* GetHadronox(Creature* me, InstanceScript* instance)
 {
     if (!instance)
@@ -319,7 +299,7 @@ struct boss_hadronox : public BossAI
         me->GetCreatureListWithEntryInGrid(triggers, NPC_WORLDTRIGGER_LARGE, 150.0f);
         for (std::list<Creature*>::iterator itr = triggers.begin(); itr != triggers.end(); ++itr)
             if ((*itr)->HasAura(SPELL_SUMMON_CHAMPION_PERIODIC) || (*itr)->HasAura(SPELL_WEB_FRONT_DOORS) || (*itr)->HasAura(SPELL_WEB_SIDE_DOORS))
-                DespawnAtEvade(*itr, EVADE_RESPAWN_DELAY);
+                _DespawnAtEvade(EVADE_RESPAWN_DELAY, *itr);
 
         instance->SetBossState(DATA_HADRONOX, FAIL);
         summons.DespawnAll();
@@ -328,7 +308,7 @@ struct boss_hadronox : public BossAI
                 nerubian->DespawnOrUnsummon();
         _anubar.clear();
 
-        DespawnAtEvade(me, EVADE_RESPAWN_DELAY);
+        _DespawnAtEvade(EVADE_RESPAWN_DELAY);
     }
 
     void SetGUID(uint64 guid, int32 /*id*/ = 0) OVERRIDE

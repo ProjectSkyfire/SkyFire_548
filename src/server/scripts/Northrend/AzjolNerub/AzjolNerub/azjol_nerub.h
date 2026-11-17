@@ -50,4 +50,9 @@ AI* GetAzjolNerubAI(Creature* creature)
     return GetInstanceAI<AI>(creature, AzjolNerubScriptName);
 }
 
+inline uint32 RandTimeMs(uint32 minSeconds, uint32 maxSeconds)
+{
+    return urand(minSeconds * IN_MILLISECONDS, maxSeconds * IN_MILLISECONDS);
+}
+
 #endif // AZJOL_NERUB_H_

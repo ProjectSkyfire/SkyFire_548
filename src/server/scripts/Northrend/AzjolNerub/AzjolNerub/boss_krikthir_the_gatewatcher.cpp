@@ -149,11 +149,6 @@ enum Yells
 static uint32 const PET_ASSIST_RANGE = 40;  // yards
 static uint32 const SEND_GROUP_TIMER = 70;  // seconds
 
-static uint32 RandTimeMs(uint32 minSeconds, uint32 maxSeconds)
-{
-    return urand(minSeconds * IN_MILLISECONDS, maxSeconds * IN_MILLISECONDS);
-}
-
 static Creature* GetGatewatcher(Creature* me, InstanceScript* instance)
 {
     if (!instance)

@@ -16,18 +16,18 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `position_x`, `positio
 (8306010, 29349, 601, 6, 555.247, 519.084, 328.507, 1.21519, 7200, 10, 1),
 (8306011, 29349, 601, 6, 550.508, 568.013, 331.526, 1.16499, 7200, 10, 1);
 
--- Anub'ar Prime Guard and Anub'ar Webspinner SmartAI (TrinityCore 3.3.5; no combat-move cast flag here)
+-- Anub'ar Prime Guard and Anub'ar Webspinner SmartAI (TrinityCore 3.3.5; no combat-move cast flag here; event flags are the 5.4.8 difficulty bits, 4 normal and 8 heroic)
 UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (29128, 29335) AND `AIName` = '' AND `ScriptName` = '';
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (29128, 29335) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(29128, 0, 0, 0, 0, 0, 100, 2, 0, 0, 10000, 13000, 0, 11, 54309, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Prime Guard - Combat CMC - Cast \'Mark of Darkness\' (Normal Dungeon)'),
-(29128, 0, 1, 0, 0, 0, 100, 4, 0, 0, 10000, 13000, 0, 11, 59352, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Prime Guard - Combat CMC - Cast \'Mark of Darkness\' (Heroic Dungeon)'),
-(29128, 0, 2, 0, 9, 0, 100, 7, 0, 5, 0, 0, 0, 11, 54314, 33, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Prime Guard - 0-5 Range - Cast \'Drain Power\' (No Repeat) (Dungeon)'),
-(29335, 0, 0, 0, 0, 0, 100, 2, 4000, 7000, 9000, 12000, 0, 11, 54290, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Webspinner - In Combat - Cast \'Web Shot\' (Phase 1) (No Repeat)'),
-(29335, 0, 1, 0, 0, 0, 100, 4, 4000, 7000, 9000, 12000, 0, 11, 59362, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Webspinner - In Combat - Cast \'Web Shot\' (Phase 1) (No Repeat)'),
-(29335, 0, 2, 0, 0, 0, 100, 6, 10000, 13000, 19000, 22000, 0, 11, 52086, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Webspinner - In Combat - Cast \'Web Wrap\' (Phase 1) (No Repeat)');
+(29128, 0, 0, 0, 0, 0, 100, 4, 0, 0, 10000, 13000, 0, 11, 54309, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Prime Guard - Combat CMC - Cast \'Mark of Darkness\' (Normal Dungeon)'),
+(29128, 0, 1, 0, 0, 0, 100, 8, 0, 0, 10000, 13000, 0, 11, 59352, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Prime Guard - Combat CMC - Cast \'Mark of Darkness\' (Heroic Dungeon)'),
+(29128, 0, 2, 0, 9, 0, 100, 13, 0, 5, 0, 0, 0, 11, 54314, 33, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Prime Guard - 0-5 Range - Cast \'Drain Power\' (No Repeat) (Dungeon)'),
+(29335, 0, 0, 0, 0, 0, 100, 4, 4000, 7000, 9000, 12000, 0, 11, 54290, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Webspinner - In Combat - Cast \'Web Shot\' (Phase 1) (No Repeat)'),
+(29335, 0, 1, 0, 0, 0, 100, 8, 4000, 7000, 9000, 12000, 0, 11, 59362, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Webspinner - In Combat - Cast \'Web Shot\' (Phase 1) (No Repeat)'),
+(29335, 0, 2, 0, 0, 0, 100, 12, 10000, 13000, 19000, 22000, 0, 11, 52086, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 'Anub\'ar Webspinner - In Combat - Cast \'Web Wrap\' (Phase 1) (No Repeat)');
 
 -- Heroic Anub'arak: Design: Glinting Twilight Opal
 DELETE FROM `creature_loot_template` WHERE `entry` = 31610 AND `item` = 41796;
 INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) VALUES
-(31610, 41796, 17, 1, 1, 1, 1);
+(31610, 41796, 17, 1, 0, 1, 1);
