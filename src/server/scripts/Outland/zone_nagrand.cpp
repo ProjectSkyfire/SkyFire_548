@@ -615,6 +615,8 @@ public:
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            npc_escortAI::UpdateAI(diff);
+
             if (!UpdateVictim())
                 return;
 
