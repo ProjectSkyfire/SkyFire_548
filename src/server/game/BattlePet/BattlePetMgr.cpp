@@ -1455,6 +1455,12 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
         uint8 const finalLevel = battlePet ? battlePet->GetLevel() : initialLevel;
         uint16 const finalXp = battlePet ? battlePet->GetXp() : 0;
 
+        // A level-up restores the pet to its new max health. The battle copy has to follow it, or the
+        // health write-back in ClearActivePetBattle and SaveToDb restores the health from before the level-up.
+        if (battlePet && finalLevel != initialLevel)
+            m_activePetBattle.SetAllyPet(i, battlePet->GetId(), battlePet->GetMaxHealth(),
+                battlePet->GetCurrentHealth());
+
         if (battlePet)
             UpdateBattlePetLevelAchievement(*battlePet, initialLevel, finalLevel);
 
