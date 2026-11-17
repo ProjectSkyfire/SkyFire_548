@@ -300,6 +300,8 @@ public:
                 // Achievements related to the 4-horsemen are given through spell 59450 which does not exist.
                 // There is thus no way it can be given by casting the spell on the players.
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 59450);
+                // The encounter has no credit spell either; its row names Highlord Mograine, whom nobody kills.
+                instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, NPC_MOGRAINE, me);
             }
 
             Talk(SAY_DEATH);
