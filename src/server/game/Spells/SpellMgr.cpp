@@ -460,7 +460,17 @@ SpellInfo const* SpellMgr::GetSpellForDifficultyFromSpell(SpellInfo const* spell
     }
 
     SF_LOG_DEBUG("spells", "SpellMgr::GetSpellForDifficultyFromSpell: Spell id for instance mode is %u (original %u)", newSpell->Id, spell->Id);
-    return newSpell;
+
+    if (!caster || !caster->GetMap() || !caster->GetMap()->IsInstance())
+        return newSpell;
+
+    // Effects with rows of their own for the difficulty
+    uint32 difficulty = caster->GetMap()->GetDifficulty();
+    SpellInfoDifficultyMap::const_iterator itr = mSpellInfoDifficultyMap.find(std::make_pair(newSpell->Id, difficulty));
+    if (itr == mSpellInfoDifficultyMap.end() && difficulty == DIFFICULTY_25MAN_HEROIC)
+        itr = mSpellInfoDifficultyMap.find(std::make_pair(newSpell->Id, uint32(DIFFICULTY_25MAN_NORMAL)));
+
+    return itr != mSpellInfoDifficultyMap.end() ? itr->second : newSpell;
 }
 
 SpellChainNode const* SpellMgr::GetSpellChainNode(uint32 spell_id) const
@@ -2687,6 +2697,7 @@ void SpellMgr::LoadSpellInfoStore()
     mSpellInfoMap.resize(sSpellStore.GetNumRows(), NULL);
 
     std::map<uint32, SpellEffectArray> effectsBySpell;
+    std::map<uint32, std::map<uint32, SpellEffectArray> > effectsByDifficulty;
 
     for (uint32 i = 0; i < sSpellEffectStore.GetNumRows(); ++i)
     {
@@ -2694,25 +2705,74 @@ void SpellMgr::LoadSpellInfoStore()
         if (!effect)
             continue;
 
-        // SpellInfo is not per difficulty: the default row wins, difficulty rows only fill slots without one
+        // The default SpellInfo takes the default row, difficulty rows only fill slots without one
         SpellEffectEntry const*& slot = effectsBySpell[effect->EffectSpellId].effects[effect->EffectIndex];
         if (!slot || (!effect->EffectDifficulty && slot->EffectDifficulty))
             slot = effect;
+
+        if (effect->EffectDifficulty)
+            effectsByDifficulty[effect->EffectSpellId][effect->EffectDifficulty].effects[effect->EffectIndex] = effect;
     }
 
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); ++i)
         if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(i))
             mSpellInfoMap[i] = new SpellInfo(spellEntry, effectsBySpell[i].effects);
 
+    // A spell with effect rows for a difficulty gets its own SpellInfo for it, the other effects stay the default ones
+    for (std::map<uint32, std::map<uint32, SpellEffectArray> >::const_iterator spellItr = effectsByDifficulty.begin(); spellItr != effectsByDifficulty.end(); ++spellItr)
+    {
+        SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellItr->first);
+        if (!spellEntry)
+            continue;
+
+        for (std::map<uint32, SpellEffectArray>::const_iterator diffItr = spellItr->second.begin(); diffItr != spellItr->second.end(); ++diffItr)
+        {
+            SpellEffectEntry const* effects[MAX_SPELL_EFFECTS];
+            for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            {
+                effects[j] = diffItr->second.effects[j];
+
+                // Heroic 25 player uses the normal 25 player rows where it has none
+                if (!effects[j] && diffItr->first == DIFFICULTY_25MAN_HEROIC)
+                {
+                    std::map<uint32, SpellEffectArray>::const_iterator normalItr = spellItr->second.find(DIFFICULTY_25MAN_NORMAL);
+                    if (normalItr != spellItr->second.end())
+                        effects[j] = normalItr->second.effects[j];
+                }
+
+                if (!effects[j])
+                {
+                    effects[j] = effectsBySpell[spellItr->first].effects[j];
+                    if (effects[j] && effects[j]->EffectDifficulty)
+                        effects[j] = NULL;
+                }
+            }
+
+            SpellInfo* spellInfo = new SpellInfo(spellEntry, effects);
+            mSpellInfoDifficulties.push_back(spellInfo);
+            mSpellInfoDifficultyMap[std::make_pair(spellItr->first, diffItr->first)] = spellInfo;
+        }
+    }
+
     SF_LOG_INFO("server.loading", ">> Loaded SpellInfo store in %u ms", GetMSTimeDiffToNow(oldMSTime));
 }
 
 void SpellMgr::UnloadSpellInfoStore()
 {
+    // The difficulty spell infos only share the condition lists of the default ones
+    for (uint32 i = 0; i < mSpellInfoDifficulties.size(); ++i)
+        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            mSpellInfoDifficulties[i]->Effects[j].ImplicitTargetConditions = NULL;
+
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
         delete mSpellInfoMap[i];
 
+    for (uint32 i = 0; i < mSpellInfoDifficulties.size(); ++i)
+        delete mSpellInfoDifficulties[i];
+
     mSpellInfoMap.clear();
+    mSpellInfoDifficulties.clear();
+    mSpellInfoDifficultyMap.clear();
 }
 
 void SpellMgr::UnloadSpellInfoImplicitTargetConditionLists()
@@ -2720,6 +2780,20 @@ void SpellMgr::UnloadSpellInfoImplicitTargetConditionLists()
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
         if (mSpellInfoMap[i])
             mSpellInfoMap[i]->_UnloadImplicitTargetConditionLists();
+
+    for (uint32 i = 0; i < mSpellInfoDifficulties.size(); ++i)
+        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            mSpellInfoDifficulties[i]->Effects[j].ImplicitTargetConditions = NULL;
+}
+
+void SpellMgr::UpdateSpellInfoDifficultyConditions()
+{
+    for (uint32 i = 0; i < mSpellInfoDifficulties.size(); ++i)
+    {
+        SpellInfo const* spellInfo = GetSpellInfo(mSpellInfoDifficulties[i]->Id);
+        for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
+            mSpellInfoDifficulties[i]->Effects[j].ImplicitTargetConditions = spellInfo->Effects[j].ImplicitTargetConditions;
+    }
 }
 
 void SpellMgr::LoadSpellInfoCustomAttributes()
@@ -2727,9 +2801,9 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
     uint32 oldMSTime = getMSTime();
 
     SpellInfo* spellInfo = NULL;
-    for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
+    for (uint32 i = 0; i < _GetSpellInfoCount(); ++i)
     {
-        spellInfo = mSpellInfoMap[i];
+        spellInfo = _GetSpellInfoAt(i);
         if (!spellInfo)
             continue;
 
@@ -2795,7 +2869,7 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
                 case SPELL_EFFECT_ENCHANT_HELD_ITEM:
                 {
                     // only enchanting profession enchantments procs can stack
-                    if (IsPartOfSkillLine(SKILL_ENCHANTING, i))
+                    if (IsPartOfSkillLine(SKILL_ENCHANTING, spellInfo->Id))
                     {
                         uint32 enchantId = spellInfo->Effects[j].MiscValue;
                         SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
@@ -2966,9 +3040,9 @@ void SpellMgr::LoadSpellInfoCorrections()
     uint32 oldMSTime = getMSTime();
 
     SpellInfo* spellInfo = NULL;
-    for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
+    for (uint32 i = 0; i < _GetSpellInfoCount(); ++i)
     {
-        spellInfo = (SpellInfo*)mSpellInfoMap[i];
+        spellInfo = _GetSpellInfoAt(i);
         if (!spellInfo)
             continue;
 

@@ -560,6 +560,8 @@ typedef std::vector<uint32> SpellCustomAttribute;
 typedef std::vector<bool> EnchantCustomAttribute;
 
 typedef std::vector<SpellInfo*> SpellInfoMap;
+// Spell infos with effect rows of their own for a difficulty, by spell id and difficulty
+typedef std::map<std::pair<uint32, uint32>, SpellInfo const*> SpellInfoDifficultyMap;
 
 typedef std::map<int32, std::vector<int32> > SpellLinkedMap;
 
@@ -678,6 +680,9 @@ public:
 
 private:
     SpellInfo* _GetSpellInfo(uint32 spellId) { return spellId < GetSpellInfoStoreSize() ? mSpellInfoMap[spellId] : NULL; }
+    // Spell infos of the store followed by the ones of the difficulties, for the loaders that adjust all of them
+    uint32 _GetSpellInfoCount() const { return mSpellInfoMap.size() + mSpellInfoDifficulties.size(); }
+    SpellInfo* _GetSpellInfoAt(uint32 index) { return index < GetSpellInfoStoreSize() ? mSpellInfoMap[index] : mSpellInfoDifficulties[index - GetSpellInfoStoreSize()]; }
 
     // Modifiers
 public:
@@ -707,6 +712,7 @@ public:
     void LoadSpellInfoStore();
     void UnloadSpellInfoStore();
     void UnloadSpellInfoImplicitTargetConditionLists();
+    void UpdateSpellInfoDifficultyConditions();
     void LoadSpellInfoCustomAttributes();
     void LoadSpellInfoCorrections();
 
@@ -738,6 +744,8 @@ private:
     PetLevelupSpellMap         mPetLevelupSpellMap;
     PetDefaultSpellsMap        mPetDefaultSpellsMap;           // only spells not listed in related mPetLevelupSpellMap entry
     SpellInfoMap               mSpellInfoMap;
+    SpellInfoMap               mSpellInfoDifficulties;
+    SpellInfoDifficultyMap     mSpellInfoDifficultyMap;
 };
 
 #define sSpellMgr Skyfire::Singleton<SpellMgr, Skyfire::NullMutex>::instance()

@@ -2171,6 +2171,10 @@ SpellInfo const* SpellInfo::GetAuraRankForLevel(uint8 level) const
 
 bool SpellInfo::IsRankOf(SpellInfo const* spellInfo) const
 {
+    // The default and the difficulty infos of a spell are not ranks of different spells
+    if (Id == spellInfo->Id)
+        return true;
+
     return GetFirstRankSpell() == spellInfo->GetFirstRankSpell();
 }
 
