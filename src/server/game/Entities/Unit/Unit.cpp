@@ -430,8 +430,7 @@ void Unit::UpdateSplinePosition()
     if (Skyfire::PetTransport::ShouldApplySplineGroundClamp(hasTransport, GetTypeId() == TypeID::TYPEID_UNIT, movespline->isFalling()))
     {
         Creature const* creature = ToCreature();
-        CreatureTemplate const* cInfo = creature->GetCreatureTemplate();
-        if (cInfo && !(cInfo->InhabitType & INHABIT_AIR) && !creature->CanFly()
+        if (!creature->CanFly()
             && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER | MOVEMENTFLAG_DISABLE_GRAVITY | MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY))
         {
             float ground = GetMap()->GetHeight(GetPhaseMask(), loc.x, loc.y, loc.z + 5.0f, true);
@@ -1628,8 +1627,12 @@ bool Unit::isInAccessiblePlaceFor(Creature const* c) const
 {
     if (IsInWater())
         return c->CanSwim();
-    else
-        return c->CanWalk() || c->CanFly();
+
+    // Creatures that can neither fly nor attack from range give up on players flying out of melee reach.
+    if (GetTypeId() == TypeID::TYPEID_PLAYER && IsFlying() && !c->CanFly() && !c->IsWithinMeleeRange(this) && !c->HasRangedAttack())
+        return false;
+
+    return c->CanWalk() || c->CanFly();
 }
 
 bool Unit::IsInWater() const
@@ -3425,6 +3428,10 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                             if (victim->HasAuraWithMechanic((1 << MECHANIC_STUN) | (1 << MECHANIC_KNOCKOUT)))
                                 if (AuraEffect const* aurEff = GetAuraEffect(56369, EFFECT_0))
                                     crit_chance += aurEff->GetAmount();
+
+                        // Inferno Blast is guaranteed to critically strike
+                        if (spellProto->Id == 108853)
+                            return true;
                         break;
                     }
                     case SPELLFAMILY_DRUID:
@@ -3487,13 +3494,15 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                     }
                     case SPELLFAMILY_SHAMAN:
                     {
-                        // Lava Burst
-                        if (spellProto->SpellFamilyFlags[1] & 0x00001000)
+                        switch (spellProto->Id)
                         {
-                            if (victim->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, 0x10000000, 0, 0, GetGUID()))
+                            case 51505: // Lava Burst
+                            case 77451: // Lava Burst (Elemental Overload)
                                 if (victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
                                     return true;
-                            break;
+                                break;
+                            default:
+                                break;
                         }
                         break;
                     }
@@ -5565,7 +5574,7 @@ void Unit::SetPower(Powers power, int32 val)
         data.WriteByteSeq(guid[2]);
         data.WriteByteSeq(guid[4]);
 
-        data << uint8(powerIndex);
+        data << uint8(power);
         data << int32(val);
 
         data.WriteByteSeq(guid[6]);
@@ -5628,6 +5637,12 @@ uint32 Unit::GetPowerIndex(uint32 powerType) const
     uint32 classId = getClass();
     //if (ToPet() && ToPet()->getPetType() == HUNTER_PET)
     //    classId = CLASS_HUNTER;
+
+    // The client shows the energy of energy-using vehicles from the first power slot.
+    if (classId == CLASS_ROGUE)
+        if (Creature const* creature = ToCreature())
+            if (creature->GetCreatureTemplate()->VehicleId)
+                return powerType == POWER_ENERGY ? 0 : (powerType == POWER_MANA ? MAX_POWERS : GetPowerIndexByClass(powerType, classId));
 
     return GetPowerIndexByClass(powerType, classId);
 }
@@ -10000,7 +10015,14 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
                                     break;
                                 }
 
-                    if (cinfo->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER)
+                    // Triggers show players their invisible display and GMs the stand-in model, so GMs can find them.
+                    uint32 invisibleDisplay, visibleDisplay;
+                    if (ObjectMgr::GetTriggerDisplays(cinfo, invisibleDisplay, visibleDisplay))
+                    {
+                        if (target->IsGameMaster() && displayId == invisibleDisplay)
+                            displayId = visibleDisplay ? visibleDisplay : 17519;    // world visible trigger's model
+                    }
+                    else if (cinfo->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER)
                     {
                         if (target->IsGameMaster())
                         {

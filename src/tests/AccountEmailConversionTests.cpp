@@ -43,7 +43,7 @@ int main()
     std::string const accountMgrHeader =
         ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/game/Accounts/AccountMgr.h");
     std::string const accountMgr =
-        ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/game/Accounts/AccountMgr.cpp");
+        ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/shared/Auth/AccountIdentity.cpp");
     std::string const accountCommands =
         ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/scripts/Commands/cs_account.cpp");
     std::string const worldSession =
@@ -51,7 +51,7 @@ int main()
     std::string const characterHandler =
         ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/game/Handlers/CharacterHandler.cpp");
     std::string const pendingSql =
-        ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/sql/pending_updates/auth/2026_08_04_02_auth_email_login_conversion.sql");
+        ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/sql/updates/auth/2026_08_04_auth_02.sql");
 
     bool passed = true;
     passed &= Expect(Contains(accountMgrHeader, "ConvertToEmailLogin"),

@@ -11,6 +11,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "ThreatManager.h"
+#include "Timer.h"
 #include "Unit.h"
 #include "UnitEvents.h"
 
@@ -70,6 +71,10 @@ bool ThreatCalcHelper::isValidProcess(Unit* hatedUnit, Unit* hatingUnit, SpellIn
     if (hatedUnit->GetTypeId() == TypeID::TYPEID_PLAYER && hatedUnit->ToPlayer()->IsGameMaster())
         return false;
 
+    // not to a player in a pet battle; creatures must not pull them into combat
+    if (hatedUnit->GetTypeId() == TypeID::TYPEID_PLAYER && hatedUnit->ToPlayer()->IsShieldedByPetBattleFrom(hatingUnit))
+        return false;
+
     // not to dead and not for dead
     if (!hatedUnit->IsAlive() || !hatingUnit->IsAlive())
         return false;
@@ -97,8 +102,14 @@ HostileReference::HostileReference(Unit* refUnit, ThreatManager* threatManager, 
     iTempThreatModifier = 0.0f;
     link(refUnit, threatManager);
     iUnitGuid = refUnit->GetGUID();
+    iLastDirectThreatTime = getMSTime();
     iOnline = true;
     iAccessible = true;
+}
+
+void HostileReference::updateLastDirectThreatTime()
+{
+    iLastDirectThreatTime = getMSTime();
 }
 
 //============================================================
@@ -424,6 +435,11 @@ void ThreatManager::addThreat(Unit* victim, float threat, SpellSchoolMask school
         return;
 
     doAddThreat(victim, ThreatCalcHelper::calcThreat(victim, iOwner, threat, schoolMask, threatSpell));
+
+    if (HostileReference* ref = iThreatContainer.getReferenceByTarget(victim))
+        ref->updateLastDirectThreatTime();
+    else if (HostileReference* offlineRef = iThreatOfflineContainer.getReferenceByTarget(victim))
+        offlineRef->updateLastDirectThreatTime();
 }
 
 void ThreatManager::doAddThreat(Unit* victim, float threat)

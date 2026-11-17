@@ -58,6 +58,10 @@ namespace MMAP
         dtNavMesh* GetNavMesh(TerrainSet swaps);
         // Forget terrain swaps applied to a tile that is being unloaded.
         void DropSwapsOnTile(uint32 packedXY);
+        // True while a terrain swap tile, owned by MMapManager's phase tiles, sits in the navmesh at this position.
+        bool HasSwapOnTile(uint32 packedXY) const;
+        // Frees the data of a tile that was removed from the navmesh for good, and the base copy kept for its swaps.
+        void ReleaseTileData(uint32 packedXY, unsigned char* removedData, bool removedIsSwap);
 
         // we have to use single dtNavMeshQuery for every instance, since those are not thread safe
         NavMeshQuerySet navMeshQueries;     // instanceId to query
@@ -109,6 +113,8 @@ namespace MMAP
         uint32 loadedTiles;
 
         PhasedTile* LoadTile(uint32 mapId, int32 x, int32 y);
+        // True when the buffer is the data of a phase tile loaded for this root map and grid position.
+        bool IsPhaseTileData(uint32 rootMapId, uint32 packedGridPos, unsigned char const* data) const;
         PhaseTileMap _phaseTiles;
     };
 }

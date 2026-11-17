@@ -953,6 +953,12 @@ public:
 
         // handler->getSession() == NULL only for console
         targetAccountId = (isAccountNameGiven) ? AccountMgr::GetId(targetAccountName) : handler->getSelectedPlayer()->GetSession()->GetAccountId();
+        if (!targetAccountId)
+        {
+            handler->PSendSysMessage(LANG_ACCOUNT_NOT_EXIST, targetAccountName.c_str());
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
         int32 gmRealmID = (isAccountNameGiven) ? atoi(arg3) : atoi(arg2);
         AccountTypes playerSecurity;
         if (handler->GetSession())

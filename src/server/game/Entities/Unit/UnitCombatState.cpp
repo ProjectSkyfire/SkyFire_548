@@ -92,6 +92,14 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     {
         if (victim->ToPlayer()->IsGameMaster())
             return false;
+
+        // scripted pulls and assistance reach here without the immune-to-NPC check of normal aggro
+        if (victim->ToPlayer()->IsShieldedByPetBattleFrom(this))
+        {
+            SF_LOG_INFO("entities.unit", "Creature %u (guid %u) tried to attack player %s during a pet battle; refused.",
+                GetEntry(), GetGUIDLow(), victim->GetName().c_str());
+            return false;
+        }
     }
     else
     {

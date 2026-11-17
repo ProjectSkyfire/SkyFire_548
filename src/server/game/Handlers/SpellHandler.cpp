@@ -215,7 +215,9 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
         if (hasMovementFlags2)
             movementInfo.flags2 = recvPacket.ReadBits(13);
 
-        if (hasMovement)
+        // Only present when the flags bit says so: reading it unconditionally misaligns the rest of the packet
+        // whenever the item is used while moving or swimming without movement flags.
+        if (hasMovementFlags)
             movementInfo.flags = recvPacket.ReadBits(30);
     }
 
@@ -349,10 +351,10 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
             recvPacket >> movementInfo.jump.fallTime;
         }
 
-        recvPacket.ReadByteSeq(movementTransportGuid[3]);
-        recvPacket.ReadByteSeq(movementTransportGuid[7]);
-        recvPacket.ReadByteSeq(movementTransportGuid[6]);
-        recvPacket.ReadByteSeq(movementTransportGuid[1]);
+        recvPacket.ReadByteSeq(movementGuid[3]);
+        recvPacket.ReadByteSeq(movementGuid[7]);
+        recvPacket.ReadByteSeq(movementGuid[6]);
+        recvPacket.ReadByteSeq(movementGuid[1]);
         recvPacket >> movementInfo.pos.m_positionY;
 
         if (hasSplineElevation)
@@ -364,20 +366,20 @@ UseItemRequest ReadUseItemRequest(WorldPacket& recvPacket, Unit* caster)
         if (hasOrientation)
             movementInfo.pos.SetOrientation(recvPacket.read<float>());
 
-        recvPacket.ReadByteSeq(movementTransportGuid[2]);
+        recvPacket.ReadByteSeq(movementGuid[2]);
         recvPacket >> movementInfo.pos.m_positionZ;
 
         if (hasTimestamp)
             recvPacket >> movementInfo.time;
 
         recvPacket >> movementInfo.pos.m_positionX;
-        recvPacket.ReadByteSeq(movementTransportGuid[5]);
-        recvPacket.ReadByteSeq(movementTransportGuid[0]);
+        recvPacket.ReadByteSeq(movementGuid[5]);
+        recvPacket.ReadByteSeq(movementGuid[0]);
 
         if (hasPitch)
             movementInfo.pitch = G3D::wrap(recvPacket.read<float>(), float(-M_PI), float(M_PI));
 
-        recvPacket.ReadByteSeq(movementTransportGuid[4]);
+        recvPacket.ReadByteSeq(movementGuid[4]);
     }
 
     if (hasDestLocation)
@@ -1527,43 +1529,11 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     if (!ValidateCastSource(recvPacket, _player, caster, spellInfo, spellId, request.targetGuid))
         return;
 
-    // Aura Overriden Spells
-    Unit::AuraEffectList swaps = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
-    Unit::AuraEffectList const& swaps2 = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
-    if (!swaps2.empty())
-        swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
-
-    if (!swaps.empty())
-    {
-        for (Unit::AuraEffectList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
-        {
-            // Prefer MiscValue as the overridden spell id when set (modern cores);
-            // otherwise match by SpellClassMask via IsAffectingSpell.
-            bool matches = (*itr)->GetMiscValue()
-                ? uint32((*itr)->GetMiscValue()) == spellInfo->Id
-                : (*itr)->IsAffectingSpell(spellInfo);
-            if (!matches)
-                continue;
-
-            if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo((*itr)->GetAmount()))
-            {
-                if (caster->ToPlayer()->getLevel() < spellInfo->SpellLevel ||
-                    caster->ToPlayer()->getLevel() < spellInfo->BaseLevel)
-                    continue;
-
-                if (caster->ToPlayer()->getLevel() < newInfo->SpellLevel ||
-                    caster->ToPlayer()->getLevel() < newInfo->BaseLevel)
-                    continue;
-
-                spellInfo = newInfo;
-                spellId = newInfo->Id;
-            }
-            break;
-        }
-    }
+    // A vehicle or another controlled unit can be the caster; the overrides below only apply to a player's own spells
+    Player* casterPlayer = caster->ToPlayer();
 
     // Specialization Overriden Spells
-    uint32 SpecializationID = caster->ToPlayer()->GetTalentSpecialization(caster->ToPlayer()->GetActiveSpec());
+    uint32 SpecializationID = casterPlayer ? casterPlayer->GetTalentSpecialization(casterPlayer->GetActiveSpec()) : 0;
     if (SpecializationID)
     {
         for (uint32 i = 0; i < sSpecializationSpellsStore.GetNumRows(); i++)
@@ -1596,7 +1566,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     // Talent Overriden Spells
-    uint32 ClassID = caster->ToPlayer()->getClass();
+    uint32 ClassID = casterPlayer ? casterPlayer->getClass() : 0;
     if (ClassID)
     {
         for (uint32 i = 0; i < sTalentStore.GetNumRows(); i++)
@@ -1644,6 +1614,42 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                 }
                 break;
             }
+        }
+    }
+
+    // Aura Overriden Spells, applied to the spell the specialization and talents resolved: the client sends the
+    // replaced spell (Shadow Bolt for a Destruction Incinerate), and Fire and Brimstone overrides Incinerate.
+    Unit::AuraEffectList swaps = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
+    Unit::AuraEffectList const& swaps2 = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
+    if (!swaps2.empty())
+        swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
+
+    if (!swaps.empty())
+    {
+        for (Unit::AuraEffectList::const_iterator itr = swaps.begin(); itr != swaps.end(); ++itr)
+        {
+            // Prefer MiscValue as the overridden spell id when set (modern cores);
+            // otherwise match by SpellClassMask via IsAffectingSpell.
+            bool matches = (*itr)->GetMiscValue()
+                ? uint32((*itr)->GetMiscValue()) == spellInfo->Id
+                : (*itr)->IsAffectingSpell(spellInfo);
+            if (!matches)
+                continue;
+
+            if (SpellInfo const* newInfo = sSpellMgr->GetSpellInfo((*itr)->GetAmount()))
+            {
+                if (caster->getLevel() < spellInfo->SpellLevel ||
+                    caster->getLevel() < spellInfo->BaseLevel)
+                    continue;
+
+                if (caster->getLevel() < newInfo->SpellLevel ||
+                    caster->getLevel() < newInfo->BaseLevel)
+                    continue;
+
+                spellInfo = newInfo;
+                spellId = newInfo->Id;
+            }
+            break;
         }
     }
 

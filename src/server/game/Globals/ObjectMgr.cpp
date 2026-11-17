@@ -46,6 +46,7 @@
 #include "WaypointManager.h"
 #include "World.h"
 #include "DBCStores.h"
+#include <algorithm>
 
 ScriptMapMap sSpellScripts;
 ScriptMapMap sEventScripts;
@@ -1181,11 +1182,80 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelId)
     return NULL;
 }
 
+static std::string CreatureDisplayModelPath(CreatureDisplayInfoEntry const* display)
+{
+    CreatureModelDataEntry const* model = sCreatureModelDataStore.LookupEntry(display->ModelId);
+    if (!model || !model->ModelPath)
+        return std::string();
+
+    std::string path = model->ModelPath;
+    std::transform(path.begin(), path.end(), path.begin(), ::tolower);
+    return path;
+}
+
+// A display players never see: fully transparent, or drawn with the invisible stalker model.
+static bool IsInvisibleCreatureDisplay(uint32 displayId)
+{
+    CreatureDisplayInfoEntry const* display = sCreatureDisplayInfoStore.LookupEntry(displayId);
+    if (!display)
+        return false;
+
+    return !display->ModelAlpha || CreatureDisplayModelPath(display).find("invisiblestalker") != std::string::npos;
+}
+
+// The stand-in models triggers carry next to their invisible display.
+static bool IsPlaceholderCreatureDisplay(uint32 displayId)
+{
+    CreatureDisplayInfoEntry const* display = sCreatureDisplayInfoStore.LookupEntry(displayId);
+    if (!display)
+        return false;
+
+    std::string const path = CreatureDisplayModelPath(display);
+    for (char const* placeholder : { "\\infernal\\infernal.m2", "\\imp\\imp.m2", "\\rabbit\\rabbit.m2", "\\rocketchicken\\rocketchicken.m2", "\\pug\\pug.m2" })
+        if (path.size() >= strlen(placeholder) && path.compare(path.size() - strlen(placeholder), std::string::npos, placeholder) == 0)
+            return true;
+
+    return false;
+}
+
+// Triggers list a visible stand-in (an infernal, an imp, a rabbit...) next to their invisible display. A trigger, or a
+// template whose only visible displays are stand-ins, counts as one: players get its invisible display, GMs the stand-in.
+bool ObjectMgr::GetTriggerDisplays(CreatureTemplate const* cinfo, uint32& invisibleDisplay, uint32& visibleDisplay)
+{
+    invisibleDisplay = 0;
+    visibleDisplay = 0;
+    bool onlyPlaceholders = true;
+    for (uint32 displayId : { cinfo->Modelid1, cinfo->Modelid2, cinfo->Modelid3, cinfo->Modelid4 })
+    {
+        if (!displayId)
+            continue;
+
+        if (IsInvisibleCreatureDisplay(displayId))
+        {
+            if (!invisibleDisplay)
+                invisibleDisplay = displayId;
+            continue;
+        }
+
+        if (!visibleDisplay)
+            visibleDisplay = displayId;
+        if (!IsPlaceholderCreatureDisplay(displayId))
+            onlyPlaceholders = false;
+    }
+
+    return invisibleDisplay && (onlyPlaceholders || (cinfo->flags_extra & CREATURE_FLAG_EXTRA_TRIGGER));
+}
+
 uint32 ObjectMgr::ChooseDisplayId(CreatureTemplate const* cinfo, CreatureData const* data /*= NULL*/)
 {
     // Load creature model (display id)
     if (data && data->displayid)
         return data->displayid;
+
+    // A random pick would show a trigger's stand-in on half its spawns.
+    uint32 invisibleDisplay, visibleDisplay;
+    if (GetTriggerDisplays(cinfo, invisibleDisplay, visibleDisplay))
+        return invisibleDisplay;
 
     return cinfo->GetRandomValidModelId();
 }

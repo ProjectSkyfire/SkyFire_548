@@ -13,6 +13,7 @@
 #include "DB2Stores.h"
 #include "DB2Enums.h"
 #include "DBCEnums.h"
+#include "Formulas.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -29,6 +30,15 @@
 
 namespace
 {
+    // Kill credit creatures of the trainer tutorial quests Learning the Ropes
+    // and Level Up!. Retail grants them through client spells 127966 and
+    // 129584; nothing casts those here, so credit them directly. Got one! is
+    // credited where a capture is stored.
+    uint32 const BATTLE_PET_QUEST_CREDIT_WIN     = 65355;
+    uint32 const BATTLE_PET_QUEST_CREDIT_LEVEL_3 = 65876;
+
+    uint8 const BATTLE_PET_QUEST_CREDIT_LEVEL = 3;
+
     CreatureTemplate const* GetBattlePetCreatureTemplate(BattlePet const* battlePet)
     {
         if (!battlePet)
@@ -779,6 +789,20 @@ void BattlePetMgr::ApplyActivePetBattlePlayerState(float faceX, float faceY)
 void BattlePetMgr::ClearActivePetBattle()
 {
     PersistActivePetBattleHealth();
+
+    // the journal keeps the pre-battle xp, level and health until a pet update arrives
+    if (m_activePetBattle.IsActive() && m_owner && m_owner->GetSession())
+    {
+        for (uint8 i = 0; i < ActivePetBattle::BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++i)
+        {
+            if (!m_activePetBattle.HasAllyPet(i))
+                continue;
+
+            if (BattlePet* battlePet = GetBattlePet(m_activePetBattle.AllyTeam[i].PetID))
+                SendBattlePetUpdate(battlePet, false);
+        }
+    }
+
     DespawnResolvedWildPetBattleWorldObject();
     ClearActivePetBattleWorldObjectState();
     m_activePetBattle = ActivePetBattle();
@@ -1313,6 +1337,21 @@ uint16 BattlePetMgr::RewardActivePetBattlePet(BattlePet* battlePet, bool awardEx
     return battlePet->AddExperience(reward);
 }
 
+// A won wild pet battle pays the character the experience of one creature kill at its own level.
+// The amount is not published for 5.4.8; players reported about one mob kill per win.
+void BattlePetMgr::RewardPlayerExperience(uint8 highestAllyLevel)
+{
+    uint8 const highestEnemyLevel = m_activePetBattle.EnemyLevel;
+
+    if (!BattlePetBattlePaysPlayerExperience(highestAllyLevel, highestEnemyLevel))
+        return;
+
+    uint8 const playerLevel = m_owner->getLevel();
+    uint32 const baseGain = Skyfire::XP::BaseGain(playerLevel, playerLevel,
+        GetContentLevelsForMapAndZone(m_owner->GetMapId(), m_owner->GetZoneId()));
+    m_owner->GiveXP(uint32(baseGain * sWorld->getRate(Rates::RATE_XP_PET_BATTLE_PLAYER)), NULL);
+}
+
 uint32 BattlePetMgr::GetUniqueBattlePetSpeciesCount() const
 {
     std::set<uint16> species;
@@ -1409,6 +1448,9 @@ void BattlePetMgr::UpdateBattlePetLevelAchievement(BattlePet const& battlePet, u
     uint32 const familyMask = BattlePetSpeciesFamilyMask(battlePet.GetSpecies());
     for (uint8 level = initialLevel + 1; level <= finalLevel; ++level)
         m_owner->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_BATTLE_PET_LEVEL, level, familyMask);
+
+    if (initialLevel < BATTLE_PET_QUEST_CREDIT_LEVEL && finalLevel >= BATTLE_PET_QUEST_CREDIT_LEVEL)
+        m_owner->KilledMonsterCredit(BATTLE_PET_QUEST_CREDIT_LEVEL_3);
 }
 
 void BattlePetMgr::UpdateFinishedPetBattleAchievements()
@@ -1420,6 +1462,8 @@ void BattlePetMgr::UpdateFinishedPetBattleAchievements()
 
     if (m_activePetBattle.Winner != PET_BATTLE_WINNER_ALLY)
         return;
+
+    m_owner->KilledMonsterCredit(BATTLE_PET_QUEST_CREDIT_WIN);
 
     BattlePetAchievementContext const context = BuildActivePetBattleAchievementContext(
         m_activePetBattle.EnemySpecies, m_activePetBattle.EnemyQuality, true, false);
@@ -1440,6 +1484,7 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
         && !m_activePetBattle.RewardsApplied && m_activePetBattle.Winner == PET_BATTLE_WINNER_ALLY;
 
     std::vector<Skyfire::BattlePetPackets::BattlePetFinalRoundPet> pets;
+    uint8 highestAllyLevel = 0;
     for (uint8 i = 0; i < ActivePetBattle::BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++i)
     {
         if (!m_activePetBattle.HasAllyPet(i))
@@ -1448,12 +1493,19 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
         Skyfire::BattlePetPackets::BattlePetFinalRoundPet allyPet;
         BattlePet* battlePet = GetBattlePet(m_activePetBattle.AllyTeam[i].PetID);
         uint8 const initialLevel = battlePet ? battlePet->GetLevel() : 0;
+        highestAllyLevel = std::max(highestAllyLevel, initialLevel);
         bool const petEarnedExperience = awardExperience && i == m_activePetBattle.AllyFrontPet
             && m_activePetBattle.AllyTeam[i].Health != 0;
         uint16 const awardedXp = RewardActivePetBattlePet(
             battlePet, petEarnedExperience);
         uint8 const finalLevel = battlePet ? battlePet->GetLevel() : initialLevel;
         uint16 const finalXp = battlePet ? battlePet->GetXp() : 0;
+
+        // A level-up restores the pet to its new max health. The battle copy has to follow it, or the
+        // health write-back in ClearActivePetBattle and SaveToDb restores the health from before the level-up.
+        if (battlePet && finalLevel != initialLevel)
+            m_activePetBattle.SetAllyPet(i, battlePet->GetId(), battlePet->GetMaxHealth(),
+                battlePet->GetCurrentHealth());
 
         if (battlePet)
             UpdateBattlePetLevelAchievement(*battlePet, initialLevel, finalLevel);
@@ -1470,7 +1522,10 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
     }
 
     if (awardExperience)
+    {
+        RewardPlayerExperience(highestAllyLevel);
         m_activePetBattle.RewardsApplied = true;
+    }
 
     UpdateFinishedPetBattleAchievements();
 

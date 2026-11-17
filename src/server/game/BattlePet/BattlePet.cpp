@@ -213,6 +213,17 @@ uint16 BattlePetExperienceReward(uint8 petLevel, uint8 enemyLevel, uint8 partici
     return uint16(std::min<uint32>(reward / participatingPetCount, 0xFFFF));
 }
 
+// A won PvE battle pays the owner character experience unless the team's highest-level pet outlevels the
+// highest-level enemy pet by more than 5 levels (Wowpedia, Pet Battle System: a win against a team within
+// 5 levels of the player's highest-level pet).
+bool BattlePetBattlePaysPlayerExperience(uint8 highestAllyLevel, uint8 highestEnemyLevel)
+{
+    if (!highestAllyLevel || !highestEnemyLevel)
+        return false;
+
+    return uint32(highestAllyLevel) <= uint32(highestEnemyLevel) + 5;
+}
+
 uint8 BattlePetNormalizeWildLevel(uint8 level)
 {
     if (!level)

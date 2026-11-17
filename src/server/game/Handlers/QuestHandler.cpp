@@ -181,7 +181,19 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (Player* playerQuestObject = object->ToPlayer())
+    if (object == _player)
+    {
+        // Follow-up offered by a remote (popup) turn-in: the quest giver is the player itself.
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        Quest const* prevQuest = quest && quest->GetPrevQuestId() > 0 ? sObjectMgr->GetQuestTemplate(quest->GetPrevQuestId()) : NULL;
+        if (!prevQuest || prevQuest->GetNextQuestInChain() != questId || !_player->IsQuestRewarded(prevQuest->GetQuestId())
+            || !(prevQuest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE) || prevQuest->HasFlag(QUEST_FLAGS_PLAYER_CAST_COMPLETE)))
+        {
+            CLOSE_GOSSIP_CLEAR_DIVIDER();
+            return;
+        }
+    }
+    else if (Player* playerQuestObject = object->ToPlayer())
     {
         if ((_player->GetDivider() && _player->GetDivider() != guid) || !playerQuestObject->CanShareQuest(questId))
         {
@@ -253,11 +265,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvData)
             if (_player->CanCompleteQuest(questId))
                 _player->CompleteQuest(questId);
 
+            // Player::AddQuest already told the creature's AI (sQuestAccept); a second call restarted escorts.
             switch (object->GetTypeId())
             {
-                case TypeID::TYPEID_UNIT:
-                    object->ToCreature()->AI()->sQuestAccept(_player, quest);
-                    break;
                 case TypeID::TYPEID_ITEM:
                 case TypeID::TYPEID_CONTAINER:
                 {
@@ -350,7 +360,8 @@ void WorldSession::HandleQuestgiverQueryQuestOpcode(WorldPacket& recvData)
                 _player->CompleteQuest(questId);
         }
 
-        if (quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
+        // QUEST_FLAGS_AUTOCOMPLETE only adds the remote turn-in popup; a quest not yet taken still needs its details.
+        if (quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE) && _player->GetQuestStatus(questId) != QUEST_STATUS_NONE)
             _player->PlayerTalkClass->SendQuestGiverRequestItems(quest, object->GetGUID(), _player->CanCompleteQuest(quest->GetQuestId()), true);
         else
             _player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, object->GetGUID(), true);
@@ -795,7 +806,8 @@ void WorldSession::HandlePushQuestToParty(WorldPacket& recvPacket)
                 receiver->CompleteQuest(questId);
         }
 
-        if ((quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly()) || quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
+        if ((quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly())
+            || (quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE) && receiver->GetQuestStatus(questId) != QUEST_STATUS_NONE))
             receiver->PlayerTalkClass->SendQuestGiverRequestItems(quest, sender->GetGUID(), receiver->CanCompleteRepeatableQuest(quest), true);
         else
         {

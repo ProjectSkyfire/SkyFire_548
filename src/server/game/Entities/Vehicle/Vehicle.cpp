@@ -818,12 +818,16 @@ bool VehicleJoinEvent::Execute(uint64, uint32)
     Passenger->m_movementInfo.transport.seat = Seat->first;
     Passenger->m_movementInfo.transport.guid = Target->GetBase()->GetGUID();
 
+    // A player in the control seat hands movement to the vehicle. Disabling gravity after that goes out as the
+    // spline variant, which the player-movement enable sent on exit does not undo: the player would keep walking
+    // on air at the exit height until relogging. The control seat needs no gravity change at all.
     if (Target->GetBase()->GetTypeId() == TypeID::TYPEID_UNIT && Passenger->GetTypeId() == TypeID::TYPEID_PLAYER &&
         Seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
         ASSERT(Target->GetBase()->SetCharmedBy(Passenger, CHARM_TYPE_VEHICLE));  // SMSG_CLIENT_CONTROL
+    else
+        Passenger->SetDisableGravity(true);                  // SMSG_MOVE_GRAVITY_DISABLE
 
     Passenger->SendClearTarget();                            // SMSG_BREAK_TARGET
-    Passenger->SetDisableGravity(true);                      // SMSG_MOVE_GRAVITY_DISABLE
     Passenger->SetControlled(true, UNIT_STATE_ROOT);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
     // also adds MOVEMENTFLAG_ROOT
 

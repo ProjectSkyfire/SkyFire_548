@@ -34,6 +34,7 @@
 #include "Player.h"
 #include "PoolMgr.h"
 #include "QuestDef.h"
+#include "SmartScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
@@ -146,7 +147,7 @@ m_PlayerDamageReq(0), m_lootRecipient(0), m_lootRecipientGroup(0), m_corpseRemov
 m_respawnDelay(300), m_corpseDelay(60), m_respawnradius(0.0f), m_reactState(REACT_AGGRESSIVE),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_originalEquipmentId(0), m_AlreadyCallAssistance(false),
 m_AlreadySearchedAssistance(false), m_regenHealth(true), m_AI_locked(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
-m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL)
+m_creatureInfo(NULL), m_creatureData(NULL), m_path_id(0), m_formation(NULL), m_inhabitType(INHABIT_GROUND)
 {
     m_regenTimer = CREATURE_REGEN_INTERVAL;
     m_valuesCount = UNIT_END;
@@ -296,6 +297,7 @@ bool Creature::InitEntry(uint32 entry, uint32 /*team*/, const CreatureData* data
 
     SetEntry(entry);                                        // normal entry always
     m_creatureInfo = cinfo;                                 // map mode related always
+    m_inhabitType = cinfo->InhabitType;
 
     // equal to player Race field, but creature does not have race
     SetRace(0);
@@ -447,6 +449,63 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
     return true;
 }
 
+namespace
+{
+    // Out-of-combat scan so hostile creatures that are already standing in range
+    // start fighting. MoveInLineOfSight only runs when one of them moves.
+    class NearestStandingHostileCheck
+    {
+    public:
+        explicit NearestStandingHostileCheck(Creature const* creature, float range) : me(creature), m_range(range) { }
+
+        bool operator()(Unit* unit)
+        {
+            if (!me->IsWithinDistInMap(unit, m_range))
+                return false;
+
+            if (!me->CanStartAttack(unit, false))
+                return false;
+
+            m_range = me->GetDistance(unit);
+            return true;
+        }
+
+    private:
+        Creature const* me;
+        float m_range;
+    };
+}
+
+static void EngageNearestStandingHostile(Creature* creature)
+{
+    if (!creature->IsAIEnabled || creature->IsInCombat() || creature->IsInEvadeMode() || !creature->IsAlive())
+        return;
+
+    if (!creature->HasReactState(REACT_AGGRESSIVE) || creature->IsCivilian() || creature->IsPet() || creature->IsTotem()
+        || creature->IsTrigger() || creature->IsCharmed() || creature->IsVehicle() || creature->isWorldBoss() || creature->IsDungeonBoss())
+        return;
+
+    if (creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+        return;
+
+    if (creature->HasUnitState(UNIT_STATE_STUNNED | UNIT_STATE_FLEEING | UNIT_STATE_CONFUSED | UNIT_STATE_EVADE))
+        return;
+
+    float range = creature->GetCreatureTemplate()->DetectionRange;
+    if (range < ATTACK_DISTANCE)
+        range = ATTACK_DISTANCE;
+    if (range > MAX_AGGRO_RADIUS)
+        range = MAX_AGGRO_RADIUS;
+
+    Unit* target = NULL;
+    NearestStandingHostileCheck check(creature, range);
+    Skyfire::UnitLastSearcher<NearestStandingHostileCheck> searcher(creature, target, check);
+    creature->VisitNearbyObject(range, searcher);
+
+    if (target)
+        creature->AI()->AttackStart(target);
+}
+
 void Creature::Update(uint32 diff)
 {
     if (IsAIEnabled && TriggerJustRespawned)
@@ -596,6 +655,11 @@ void Creature::Update(uint32 diff)
                 if (!bIsPolymorphed) // if polymorphed, skip the timer
                     m_regenTimer -= diff;*/
             m_regenTimer = CREATURE_REGEN_INTERVAL;
+
+            if (!IsInCombat() && !IsInEvadeMode())
+                EngageNearestStandingHostile(this);
+            else if (IsInCombat())
+                DropIdleBystanders();
             break;
         }
         default:
@@ -1085,6 +1149,8 @@ void Creature::SelectLevel(const CreatureTemplate* cinfo)
             break;
         case CLASS_ROGUE:
             setPowerType(POWER_ENERGY);
+            SetModifierValue(UNIT_MOD_ENERGY, BASE_VALUE, float(GetCreatePowers(POWER_ENERGY)));
+            SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
             break;
         case CLASS_MONK:
             setPowerType(POWER_CHI);
@@ -1519,17 +1585,19 @@ void Creature::setDeathState(DeathState s)
         SetLootRecipient(NULL);
         ResetPlayerDamageReq();
 
+        m_inhabitType = GetCreatureTemplate()->InhabitType;
         UpdateMovementFlags();
 
         CreatureTemplate const* cinfo = GetCreatureTemplate();
         SetUInt32Value(UNIT_FIELD_NPC_FLAGS, cinfo->npcflag);
         ClearUnitState(uint32(UNIT_STATE_ALL_STATE));
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
-        LoadCreaturesAddon(true);
         Motion_Initialize();
         //if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
         //    SetPhaseMask(GetCreatureData()->phaseMask, false);
         Unit::setDeathState(DeathState::ALIVE);
+        // After ALIVE: AddAura skips units that are not alive, so the addon's auras would be lost on every respawn.
+        LoadCreaturesAddon(true);
     }
 }
 
@@ -1608,8 +1676,13 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
         return;
     }
 
+    // A living creature leaves the clients first, so players see it vanish instead of dying on the spot before the
+    // corpse is removed.
     if (IsAlive())
+    {
+        DestroyForNearbyPlayers();
         setDeathState(DeathState::JUST_DIED);
+    }
 
     RemoveCorpse(false);
 }
@@ -1772,6 +1845,78 @@ SpellInfo const* Creature::reachWithSpellCure(Unit* victim)
         return spellInfo;
     }
     return NULL;
+}
+
+// Whether the creature can hit a target out of melee reach (template spells or SmartAI casts).
+// C++ scripted creatures are assumed to have one, since their spells are not known here.
+bool Creature::HasRangedAttack() const
+{
+    if (m_hasRangedAttack >= 0)
+        return m_hasRangedAttack != 0;
+
+    auto isRangedSpell = [](uint32 spellId)
+    {
+        SpellInfo const* spellInfo = spellId ? sSpellMgr->GetSpellInfo(spellId) : nullptr;
+        return spellInfo && !spellInfo->IsPositive() && spellInfo->GetMaxRange(false) > NOMINAL_MELEE_RANGE;
+    };
+
+    bool ranged = false;
+    for (uint32 i = 0; i < CREATURE_MAX_SPELLS && !ranged; ++i)
+        ranged = isRangedSpell(m_spells[i]);
+
+    if (!ranged)
+    {
+        if (GetAIName() == "SmartAI")
+        {
+            for (int32 id : { -int32(m_DBTableGuid), int32(GetEntry()) })
+            {
+                if (!id)
+                    continue;
+                for (SmartScriptHolder const& e : sSmartScriptMgr->GetScript(id, SMART_SCRIPT_TYPE_CREATURE))
+                {
+                    if (e.GetActionType() == SMART_ACTION_CAST && isRangedSpell(e.action.cast.spell))
+                    {
+                        ranged = true;
+                        break;
+                    }
+                }
+                if (ranged)
+                    break;
+            }
+        }
+        else if (!GetScriptName().empty())
+            ranged = true;
+    }
+
+    m_hasRangedAttack = ranged ? 1 : 0;
+    return ranged;
+}
+
+// While fighting another NPC, forget players and pets that only got pulled in (an area spell, healing or buffing
+// a unit in the fight) and have not hurt this creature for a while, so they can leave combat.
+void Creature::DropIdleBystanders()
+{
+    Unit* victim = GetVictim();
+    if (!victim || victim->IsControlledByPlayer() || !CanHaveThreatList())
+        return;
+
+    std::vector<HostileReference*> idle;
+    for (ThreatContainer::StorageType const* list : { &getThreatManager().getThreatList(), &getThreatManager().getOfflineThreatList() })
+    {
+        for (HostileReference* ref : *list)
+        {
+            Unit* target = ref->getTarget();
+            if (target && target != victim && target->IsControlledByPlayer()
+                && GetMSTimeDiffToNow(ref->getLastDirectThreatTime()) > CREATURE_BYSTANDER_THREAT_TIMEOUT)
+                idle.push_back(ref);
+        }
+    }
+
+    for (HostileReference* ref : idle)
+    {
+        ref->removeReference();
+        delete ref;
+    }
 }
 
 // select nearest hostile unit within the given distance (regardless of threat list).
@@ -2067,7 +2212,7 @@ CreatureAddon const* Creature::GetCreatureAddon() const
 }
 
 //creature_addon table
-bool Creature::LoadCreaturesAddon(bool reload)
+bool Creature::LoadCreaturesAddon(bool reload, bool evading)
 {
     CreatureAddon const* cainfo = GetCreatureAddon();
     if (!cainfo)
@@ -2094,7 +2239,7 @@ bool Creature::LoadCreaturesAddon(bool reload)
         //! Check using InhabitType as movement flags are assigned dynamically
         //! basing on whether the creature is in air or not
         //! Set MovementFlag_Hover. Otherwise do nothing.
-        if (GetByteValue(UNIT_FIELD_ANIM_TIER, 3) & UNIT_BYTE1_FLAG_HOVER && !(GetCreatureTemplate()->InhabitType & INHABIT_AIR))
+        if (GetByteValue(UNIT_FIELD_ANIM_TIER, 3) & UNIT_BYTE1_FLAG_HOVER && !(m_inhabitType & INHABIT_AIR))
             AddUnitMovementFlag(MOVEMENTFLAG_HOVER);
     }
 
@@ -2130,6 +2275,11 @@ bool Creature::LoadCreaturesAddon(bool reload)
                 SF_LOG_ERROR("sql.sql", "Creature (GUID: %u Entry: %u) has wrong spell %u defined in `auras` field.", GetGUIDLow(), GetEntry(), *itr);
                 continue;
             }
+
+            // An evading creature walks home first. An aura that holds it in place (a sleep stun, a root) would keep it
+            // where it left combat, evading for good; it comes back when the creature reaches home.
+            if (evading && (AdditionalSpellInfo->HasAura(SPELL_AURA_MOD_STUN) || AdditionalSpellInfo->HasAura(SPELL_AURA_MOD_ROOT)))
+                continue;
 
             // skip already applied aura
             if (HasAura(*itr))
@@ -2607,7 +2757,7 @@ void Creature::UpdateMovementFlags()
     if (m_movedPlayer)
         return;
 
-    uint32 inhabitType = GetCreatureTemplate()->InhabitType;
+    uint32 inhabitType = m_inhabitType;
 
     if (CanFly() && !IsFalling())
     {
@@ -2626,14 +2776,12 @@ void Creature::UpdateMovementFlags()
     if (!(inhabitType & INHABIT_AIR) && !HasUnitMovementFlag(MOVEMENTFLAG_HOVER))
     {
         MovementGeneratorType const curMove = GetMotionMaster()->GetCurrentMovementGeneratorType();
-        if (curMove == CHASE_MOTION_TYPE)
+        if (curMove == CHASE_MOTION_TYPE || (!IsInCombat() && (curMove == IDLE_MOTION_TYPE || curMove == RANDOM_MOTION_TYPE)))
         {
             if (inhabitType & INHABIT_WATER)
                 SetSwim(IsInWater());
             return;
         }
-        if (!IsInCombat() && (curMove == IDLE_MOTION_TYPE || curMove == RANDOM_MOTION_TYPE))
-            return;
     }
 
     // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)

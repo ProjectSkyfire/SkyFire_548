@@ -81,6 +81,9 @@ void WorldRunnable::Run()
 #endif
     }
 
+    // Release SOAP/RA waiters before scripts, sessions and maps are torn down.
+    sWorld->CloseCliCommands();
+
     Skyfire::WorldShutdown::WorldShutdownStep shutdownStep = Skyfire::WorldShutdown::WORLD_SHUTDOWN_START;
 
     AdvanceShutdownStep(shutdownStep, Skyfire::WorldShutdown::WORLD_SHUTDOWN_SCRIPT_SHUTDOWN);

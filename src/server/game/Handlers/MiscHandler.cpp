@@ -809,7 +809,8 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 
     //bool allowTwoSideWhoList = sWorld->GetBoolConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
     uint32 gmLevelInWhoList = sWorld->getIntConfig(WorldIntConfigs::CONFIG_GM_LEVEL_IN_WHO_LIST);
-    uint8 displaycount = 0, matchcount = 0;
+    uint8 displaycount = 0;
+    uint32 const maxResults = sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_WHO);
 
     ByteBuffer bytesData;
     WorldPacket data(SMSG_WHO);
@@ -819,7 +820,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
 
     SF_SHARED_GUARD readGuard(*HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType const& m = sObjectAccessor->GetPlayers();
-    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end() && displaycount < maxResults; ++itr)
     {
         Player* target = itr->second;
         // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
@@ -908,11 +909,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recvData)
             }
         }
         if (!s_show)
-            continue;
-
-        // 49 is maximum player count sent to client - can be overridden
-        // through config, but is unstable
-        if ((matchcount++) >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MAX_WHO))
             continue;
 
         ObjectGuid playerGuid = target->GetGUID();

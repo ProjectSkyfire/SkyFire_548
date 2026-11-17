@@ -131,9 +131,7 @@ World::~World()
         m_sessions.erase(m_sessions.begin());
     }
 
-    CliCommandHolder* command = NULL;
-    while (cliCmdQueue.next(command))
-        delete command;
+    CloseCliCommands();
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
@@ -500,6 +498,7 @@ void World::LoadConfigSettings(bool reload)
     setRate(Rates::RATE_XP_KILL, sConfigMgr->GetFloatDefault("Rate.XP.Kill", 1.0f));
     setRate(Rates::RATE_XP_QUEST, sConfigMgr->GetFloatDefault("Rate.XP.Quest", 1.0f));
     setRate(Rates::RATE_XP_EXPLORE, sConfigMgr->GetFloatDefault("Rate.XP.Explore", 1.0f));
+    setRate(Rates::RATE_XP_PET_BATTLE_PLAYER, sConfigMgr->GetFloatDefault("Rate.XP.PetBattlePlayer", 1.0f));
     setRate(Rates::RATE_REPAIRCOST, sConfigMgr->GetFloatDefault("Rate.RepairCost", 1.0f));
     if (getRate(Rates::RATE_REPAIRCOST) < 0.0f)
     {
@@ -1247,7 +1246,13 @@ void World::LoadConfigSettings(bool reload)
     SF_LOG_INFO("server.loading", "VMap support included. LineOfSight: %i, getHeight: %i, indoorCheck: %i", enableLOS, enableHeight, enableIndoor);
     SF_LOG_INFO("server.loading", "VMap data directory is: %svmaps", m_dataPath.c_str());
 
-    setIntConfig(WorldIntConfigs::CONFIG_MAX_WHO, sConfigMgr->GetIntDefault("MaxWhoListReturns", 49));
+    int32 maxWhoListReturns = sConfigMgr->GetIntDefault("MaxWhoListReturns", 49);
+    if (maxWhoListReturns < 0 || maxWhoListReturns > 50)
+    {
+        SF_LOG_ERROR("server.loading", "MaxWhoListReturns (%i) must be between 0 and 50. Using 49.", maxWhoListReturns);
+        maxWhoListReturns = 49;
+    }
+    setIntConfig(WorldIntConfigs::CONFIG_MAX_WHO, maxWhoListReturns);
     SetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_SPELLS, sConfigMgr->GetBoolDefault("PlayerStart.AllSpells", false));
     if (GetBoolConfig(WorldBoolConfigs::CONFIG_START_ALL_SPELLS))
         SF_LOG_WARN("server.loading", "PlayerStart.AllSpells enabled - may not function as intended!");
@@ -2879,12 +2884,40 @@ void World::UpdateSessions(uint32 diff)
 }
 
 // This handles the issued and queued CLI commands
+namespace
+{
+    void RejectCliCommand(CliCommandHolder* command)
+    {
+        if (command->m_print)
+            command->m_print(command->m_callbackArg, "Server is shutting down; command was not executed.\n");
+        if (command->m_commandFinished)
+            command->m_commandFinished(command->m_callbackArg, false);
+        delete command;
+    }
+}
+
+void World::QueueCliCommand(CliCommandHolder* command)
+{
+    if (!cliCmdQueue.try_add(command))
+        RejectCliCommand(command);
+}
+
+void World::CloseCliCommands()
+{
+    // Producers either enqueue before cancel (and are drained below), or are
+    // rejected by try_add. No callback can be stranded after the world exits.
+    cliCmdQueue.cancel();
+    CliCommandHolder* command = nullptr;
+    while (cliCmdQueue.next(command))
+        RejectCliCommand(command);
+}
+
 void World::ProcessCliCommands()
 {
     CliCommandHolder::Print* zprint = NULL;
     void* callbackArg = NULL;
     CliCommandHolder* command = NULL;
-    while (cliCmdQueue.next(command))
+    while (!IsStopped() && cliCmdQueue.next(command))
     {
         SF_LOG_INFO("misc", "CLI command under processing...");
         zprint = command->m_print;

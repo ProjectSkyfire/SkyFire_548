@@ -397,6 +397,7 @@ enum class Rates
     RATE_XP_QUEST,
     RATE_XP_GUILD_MODIFIER,
     RATE_XP_EXPLORE,
+    RATE_XP_PET_BATTLE_PLAYER,
     RATE_REPAIRCOST,
     RATE_REPUTATION_GAIN,
     RATE_REPUTATION_LFG_BONUS,
@@ -762,7 +763,9 @@ public:
     static int32 GetVisibilityNotifyPeriodInBGArenas() { return m_visibility_notify_periodInBGArenas; }
 
     void ProcessCliCommands();
-    void QueueCliCommand(CliCommandHolder* commandHolder) { cliCmdQueue.add(commandHolder); }
+    void QueueCliCommand(CliCommandHolder* commandHolder);
+    // World thread only, before teardown. Completes pending requests without executing them.
+    void CloseCliCommands();
 
     void ForceGameEventUpdate();
 

@@ -72,6 +72,22 @@ namespace
         return passed;
     }
 
+    bool TestServerErrorAndCombatOpcodeMappings()
+    {
+        std::string const source = ReadFile("src/server/game/Server/Protocol/Opcodes.cpp");
+        bool passed = true;
+        passed &= Expect(Contains(source,
+            "DEFINE_OPCODE_HANDLER(SMSG_DISPLAY_GAME_ERROR,                             0x181F, STATUS_NEVER"),
+            "Display game error should use the enabled 5.4.8 server opcode");
+        passed &= Expect(Contains(source,
+            "DEFINE_OPCODE_HANDLER(SMSG_CANCEL_COMBAT,                                  0x0E8B, STATUS_NEVER"),
+            "Cancel combat should use the verified 5.4.8 server opcode");
+        passed &= Expect(Contains(source,
+            "DEFINE_OPCODE_HANDLER(SMSG_READ_ITEM_RESULT_FAILED,                        0x0000, STATUS_UNHANDLED"),
+            "Read item failure should remain unhandled until its opcode is verified");
+        return passed;
+    }
+
     bool TestCollisionHeightUpdateOpcodeMapping()
     {
         std::string const opcodesSource = ReadFile("src/server/game/Server/Protocol/Opcodes.cpp");
@@ -86,8 +102,8 @@ namespace
             "case SMSG_MOVE_UPDATE_COLLISION_HEIGHT:\n            return MovementUpdateCollisionHeight;"),
             "Collision height update packet should have a movement sequence");
         passed &= Expect(Contains(playerSource,
-            "SMSG_MOVE_SET_COLLISION_HEIGHT, SMSG_MOVE_UPDATE_COLLISION_HEIGHT"),
-            "Collision height updates should use the broadcast opcode from the player sender");
+            "SMSG_MOVE_SET_COLLISION_HEIGHT, NULL_OPCODE, &extra"),
+            "Collision height updates should avoid broadcasting the incomplete MoP packet layout");
 
         return passed;
     }
@@ -220,6 +236,7 @@ namespace
 int main()
 {
     bool const passed = TestTransitionSwimFlyOpcodeMappings()
+        && TestServerErrorAndCombatOpcodeMappings()
         && TestCollisionHeightUpdateOpcodeMapping()
         && TestCompoundStateOpcodeMapping()
         && TestUpdateApplyMovementForceOpcodeMapping()

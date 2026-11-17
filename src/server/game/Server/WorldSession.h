@@ -14,6 +14,7 @@
 #include "Authentication/AuthDefines.h"
 #include "AddonMgr.h"
 #include <atomic>
+#include <functional>
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Object.h"
@@ -314,6 +315,10 @@ public:
     // tracked in World::m_sessions and have no network socket.
     void SetBot(bool on) { m_isBot = on; }
     bool IsBot() const { return m_isBot; }
+
+    // Sees every packet sent to this session, including socketless ones.
+    typedef std::function<void(WorldPacket const&)> PacketObserver;
+    void SetPacketObserver(PacketObserver observer) { m_packetObserver = std::move(observer); }
 
     // How much of the map update a socket bot should pay for. The playerbots
     // module sets this; Map::Update skips creature-cell visits (and, when
@@ -1283,6 +1288,7 @@ private:
     bool m_playerRecentlyLogout;
     bool m_playerSave;
     bool m_isBot;                                       // socketless session owned by a module
+    PacketObserver m_packetObserver;
     BotActivity m_botActivity;
     uint32 m_botSlowAccumulator;
     uint32 m_botSlowInterval;

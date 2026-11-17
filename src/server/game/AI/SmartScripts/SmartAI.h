@@ -53,6 +53,7 @@ public:
 
     void SetScript9(SmartScriptHolder& e, uint32 entry, Unit* invoker);
     SmartScript* GetScript() { return &mScript; }
+    uint32 GetPhase() { return GetScript()->GetPhase(); }
     bool IsEscortInvokerInRange();
 
     // Called when creature is spawned or respawned
@@ -235,6 +236,7 @@ public:
     void InitializeAI() OVERRIDE;
     void Reset() OVERRIDE;
     SmartScript* GetScript() { return &mScript; }
+    uint32 GetPhase() { return GetScript()->GetPhase(); }
     static int Permissible(const GameObject* g);
 
     bool GossipHello(Player* player) OVERRIDE;

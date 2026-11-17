@@ -847,7 +847,8 @@ MinPetName = 2
 #
 #    MaxWhoListReturns
 #        Description: Set the max number of players returned in the /who list and interface.
-#        Default:     49 - (stable)
+#                     Allowed range: 0-50. Invalid values use the default.
+#        Default:     49
 
 MaxWhoListReturns = 49
 
@@ -2021,6 +2022,15 @@ Rate.Drop.Item.ReferencedAmount = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
+
+#
+#    Rate.XP.PetBattlePlayer
+#        Description: Multiplier for the character experience a won wild pet battle pays.
+#                     1 pays the experience of one creature kill at the character's own level.
+#        Default:     1
+#
+
+Rate.XP.PetBattlePlayer = 1
 
 #
 #    Rate.RepairCost

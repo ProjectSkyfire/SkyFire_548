@@ -1249,6 +1249,12 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
 
 SpellCastResult SpellInfo::CheckLocation(uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player) const
 {
+    // Into the Nightmare: Thessera's flight out of Earthshatter Cavern leaves the cave's area early; her script removes it.
+    if (Id == 65409 && player)
+        if (Creature const* vehicle = player->GetVehicleCreatureBase())
+            if (vehicle->GetEntry() == 34400)
+                return SpellCastResult::SPELL_CAST_OK;
+
     // normal case
     if (AreaGroupId > 0)
     {

@@ -87,6 +87,10 @@ public:
 
     uint64 getUnitGuid() const { return iUnitGuid; }
 
+    // last time the target caused threat itself (damage, hostile spells), not through healing or buffing others
+    uint32 getLastDirectThreatTime() const { return iLastDirectThreatTime; }
+    void updateLastDirectThreatTime();
+
     //=================================================
     // reference is not needed anymore. realy delete it !
 
@@ -115,6 +119,7 @@ private:
     float iThreat;
     float iTempThreatModifier;                          // used for taunt
     uint64 iUnitGuid;
+    uint32 iLastDirectThreatTime;
     bool iOnline;
     bool iAccessible;
 };

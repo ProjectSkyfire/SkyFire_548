@@ -43,7 +43,7 @@ int main()
     std::string const hunterScript =
         ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/src/server/scripts/Spells/spell_hunter.cpp");
     std::string pendingSql =
-        ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/sql/pending_updates/world/2026_08_07_00_world_hunter_improved_serpent_sting.sql");
+        ReadFile(std::string(SKYFIRE_SOURCE_DIR) + "/sql/old/5.4.8/world/SFDB_release_25.000_to_26.001/2026_08_07_world_12.sql");
 
     for (std::string::iterator ch = pendingSql.begin(); ch != pendingSql.end(); ++ch)
         if (*ch == '`')

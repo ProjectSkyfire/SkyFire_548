@@ -328,12 +328,13 @@ public:
         {
             if (tSeek <= diff)
             {
-                if ((me->IsAlive()) && (!me->IsInCombat() && (me->GetDistance2d(me->GetHomePosition().GetPositionX(), me->GetHomePosition().GetPositionY()) <= 1.0f)))
-                    if (Creature* enemy = me->FindNearestCreature(NPC_STORMWIND_INFANTRY,1.0f, true))
+                tSeek = urand(1000, 2000);
+                // Paired spawns stand a few yards apart, and the worg wanders, so the old 1-yard home check never connected.
+                if (me->IsAlive() && !me->IsInCombat())
+                    if (Creature* enemy = me->FindNearestCreature(NPC_STORMWIND_INFANTRY, 8.0f, true))
                     {
                         me->setFaction(WORG_FIGHTING_FACTION);//We must change our faction to one which is able to attack Stormwind Infantry (Faction 232 works well)
                         me->AI()->AttackStart(enemy);
-                        tSeek = urand(1000,2000);
                     }
             }
             else

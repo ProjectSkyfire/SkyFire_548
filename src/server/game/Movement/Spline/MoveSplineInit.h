@@ -144,7 +144,7 @@ namespace Movement
     };
 
     inline void MoveSplineInit::SetFly() { args.flags.EnableFlying(); }
-    inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable; }
+    inline void MoveSplineInit::SetWalk(bool enable) { args.walk = enable; }
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom(); }
     inline void MoveSplineInit::SetUncompressed() { args.flags.uncompressedPath = true; }
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true; }

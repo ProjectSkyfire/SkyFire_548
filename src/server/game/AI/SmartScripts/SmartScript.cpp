@@ -2058,6 +2058,14 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
         }
         case SMART_ACTION_SET_HOME_POS:
         {
+            // A position target yields no target objects: it sets the home of the creature running the script.
+            if (e.GetTargetType() == SMART_TARGET_POSITION)
+            {
+                if (me)
+                    me->SetHomePosition(e.target.x, e.target.y, e.target.z, e.target.o);
+                break;
+            }
+
             ObjectList* targets = GetTargets(e, unit);
             if (!targets)
                 break;
@@ -2266,6 +2274,27 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     }
                 }
             }
+            delete targets;
+            break;
+        }
+        case SMART_ACTION_MOVE_OFFSET:
+        {
+            ObjectList* targets = GetTargets(e, unit);
+            if (!targets)
+                break;
+
+            for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
+            {
+                if (!IsCreature(*itr))
+                    continue;
+
+                float o = (*itr)->GetOrientation();
+                float x = (*itr)->GetPositionX() + std::cos(o - float(M_PI) / 2) * e.target.x + std::cos(o) * e.target.y;
+                float y = (*itr)->GetPositionY() + std::sin(o - float(M_PI) / 2) * e.target.x + std::sin(o) * e.target.y;
+                float z = (*itr)->GetPositionZ() + e.target.z;
+                (*itr)->ToCreature()->GetMotionMaster()->MovePoint(SMART_RANDOM_POINT, x, y, z);
+            }
+
             delete targets;
             break;
         }

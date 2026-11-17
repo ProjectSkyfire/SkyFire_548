@@ -159,6 +159,7 @@ public:
     uint64 mLastInvoker;
 
     uint32 GetEventPhase() const { return mEventPhase; }
+    uint32 GetPhase() const { return mEventPhase; }
     void SetEventPhase(uint32 phase) { SetPhase(phase); }
     bool IsEventPhase(uint32 phaseMask) const { return IsInPhase(phaseMask); }
 

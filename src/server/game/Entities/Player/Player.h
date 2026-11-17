@@ -2632,6 +2632,9 @@ public:
 
     SceneMgr& GetSceneMgr() { return m_sceneMgr; }
 
+    // True while this player is in a pet battle and the attacker is a creature no player controls.
+    bool IsShieldedByPetBattleFrom(Unit const* attacker) const;
+
     /*********************************************************/
     /***                  PVP SYSTEM                       ***/
     /*********************************************************/
@@ -3644,6 +3647,7 @@ private:
     uint8 m_MirrorTimerFlags;
     uint8 m_MirrorTimerFlagsLast;
     bool m_isInWater;
+    bool m_isFlyingInCombat;
 
     // Guid of player who invited player to guild as last
     uint64 m_lastGuildInviterGUID;

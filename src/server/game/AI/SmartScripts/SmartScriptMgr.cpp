@@ -1037,6 +1037,7 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
         case SMART_ACTION_REMOVE_GO_FLAG:
         case SMART_ACTION_SUMMON_CREATURE_GROUP:
         case SMART_ACTION_SET_HEALTH:
+        case SMART_ACTION_MOVE_OFFSET:
         case SMART_ACTION_COMBAT_STOP:
             break;
         default:

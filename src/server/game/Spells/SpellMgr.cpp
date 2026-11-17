@@ -2891,6 +2891,12 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
             case 72293: // Mark of the Fallen Champion (Deathbringer Saurfang)
                 spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
                 break;
+            case 65409: // Into the Nightmare (shown as a debuff)
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1;
+                break;
+            case 65063: // Emerald Barrage (any-unit target, so it would count as positive and never start combat)
+                spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+                break;
             default:
                 break;
         }

@@ -509,7 +509,7 @@ enum SMART_ACTION
     SMART_ACTION_GAME_EVENT_STOP = 111,    // GameEventId
     SMART_ACTION_GAME_EVENT_START = 112,    // GameEventId
     SMART_ACTION_SET_HEALTH = 113,    // HealthMode, value.
-    SMART_ACTION_UNUSED = 114,
+    SMART_ACTION_MOVE_OFFSET = 114,    // target x = right, target y = forward, target z = up (relative to the target's facing)
     SMART_ACTION_RANDOM_SOUND = 115,    // soundId1, soundId2, soundId3, soundId4, soundId5, onlySelf
 
     SMART_ACTION_END = 116

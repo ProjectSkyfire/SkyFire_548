@@ -47,6 +47,17 @@ namespace Skyfire
             return _queue.size();
         }
 
+        // Unlike add(), this opt-in operation rejects items after cancellation.
+        // Checking the flag and enqueueing under one lock closes the shutdown race.
+        bool try_add(const T& item)
+        {
+            std::lock_guard<LockType> g(this->_lock);
+            if (_canceled)
+                return false;
+            _queue.push_back(item);
+            return true;
+        }
+
         //! Gets the next result in the queue, if any.
         bool next(T& result)
         {

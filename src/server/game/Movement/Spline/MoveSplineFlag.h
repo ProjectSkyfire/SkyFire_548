@@ -42,7 +42,7 @@ namespace Movement
             Unknown4 = 0x00040000,           // NOT VERIFIED
             OrientationInversed = 0x00080000,
             SmoothGroundPath = 0x00100000,
-            Walkmode = 0x00200000,
+            CanSwim = 0x00200000,            // Lets the client move the unit off the ground in water; walk or run comes from spline length and duration
             UncompressedPath = 0x00400000,
             Unknown6 = 0x00800000,           // NOT VERIFIED
             Animation = 0x01000000,           // Plays animation after some time passed
@@ -90,7 +90,8 @@ namespace Movement
         void operator |= (uint32 f) { raw() |= f; }
 
         void EnableAnimation(uint8 anim) { raw() = (raw() & ~(Mask_Animations | Falling | Parabolic | FallingSlow)) | Animation | (anim & Mask_Animations); }
-        void EnableParabolic() { raw() = (raw() & ~(Mask_Animations | Falling | Animation | FallingSlow)) | Parabolic; }
+        // A jump arcs under gravity: like falling, it drops the flying (catmullrom) mode a flying unit starts with.
+        void EnableParabolic() { raw() = (raw() & ~(Mask_Animations | Falling | Animation | FallingSlow | Flying)) | Parabolic; }
         void EnableFlying() { raw() = (raw() & ~(Falling)) | Flying; }
         void EnableFalling() { raw() = (raw() & ~(Mask_Animations | Parabolic | Animation | Flying)) | Falling; }
         void EnableCatmullRom() { raw() = (raw() & ~SmoothGroundPath) | Catmullrom; }
@@ -119,7 +120,7 @@ namespace Movement
         bool unknown4 : 1;
         bool orientationInversed : 1;
         bool smoothGroundPath : 1;
-        bool walkmode : 1;
+        bool canSwim : 1;
         bool uncompressedPath : 1;
         bool unknown6 : 1;
         bool animation : 1;

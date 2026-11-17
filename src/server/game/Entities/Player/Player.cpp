@@ -609,6 +609,7 @@ Player::Player(WorldSession* session) : Unit(true), m_sceneMgr(this)
     m_MirrorTimerFlags = UNDERWATER_NONE;
     m_MirrorTimerFlagsLast = UNDERWATER_NONE;
     m_isInWater = false;
+    m_isFlyingInCombat = false;
     m_drunkTimer = 0;
     m_restTime = 0;
     m_deathTimer = 0;
@@ -1632,6 +1633,13 @@ void Player::Update(uint32 p_time)
             }
 
             UpdateRestAreaState();
+
+            // Creatures recheck whether they can still reach the player while it flies, and once after it lands
+            bool flyingInCombat = IsFlying() && IsInCombat();
+            if (flyingInCombat || m_isFlyingInCombat)
+                getHostileRefManager().updateThreatTables();
+            m_isFlyingInCombat = flyingInCombat;
+
             m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
         }
         else
@@ -4849,6 +4857,21 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
 {
     if (!trainer_spell)
         return TRAINER_SPELL_RED;
+
+    // battle pet trainers list starter pets by their summon spell, buying one adds the pet to the journal
+    if (uint16 speciesId = BattlePetGetSpeciesBySummonSpell(trainer_spell->spell))
+    {
+        if (!HasFlag(PLAYER_FIELD_PLAYER_FLAGS, PLAYER_FLAGS_BATTLE_PET_ENABLED))
+            return TRAINER_SPELL_RED;
+
+        if (m_battlePetMgr->GetBattlePetCount(speciesId))
+            return TRAINER_SPELL_GRAY;
+
+        if (getLevel() < trainer_spell->reqLevel || !m_battlePetMgr->CanCreateBattlePet(speciesId))
+            return TRAINER_SPELL_RED;
+
+        return TRAINER_SPELL_GREEN;
+    }
 
     bool hasSpell = true;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -11424,7 +11447,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
     if (!ignore_condition && pEnchant->EnchantmentCondition && !EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
-    if ((pEnchant->requiredMinLevel > getLevel()) || (pEnchant->requiredMaxLevel < getLevel()))
+    // requiredMaxLevel is where the enchant's scaling stops, not a limit on who can use it, and most weapon and proc
+    // enchants leave it at 0
+    if (pEnchant->requiredMinLevel > getLevel())
         return;
 
     if (pEnchant->requiredSkill > 0 && pEnchant->requiredSkillValue > GetSkillValue(pEnchant->requiredSkill))
@@ -24751,4 +24776,11 @@ void Player::UpdatePhasing()
     RebuildTerrainSwaps(); // to set default map swaps
 
     GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
+}
+
+bool Player::IsShieldedByPetBattleFrom(Unit const* attacker) const
+{
+    // Creatures leave a player in a pet battle alone; other players may still attack.
+    return attacker && attacker != this && !attacker->IsControlledByPlayer()
+        && m_battlePetMgr && m_battlePetMgr->HasActivePetBattle();
 }

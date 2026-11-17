@@ -115,7 +115,7 @@ public:
 
         if (data.raw)
             return *reinterpret_cast<uint32*>(data.value);
-        return static_cast<uint32>(atol((char*)data.value));
+        return static_cast<uint32>(strtoul((char*)data.value, nullptr, 10));
     }
 
     [[nodiscard]] int32 GetInt32() const
@@ -151,7 +151,7 @@ public:
 
         if (data.raw)
             return *reinterpret_cast<uint64*>(data.value);
-        return static_cast<uint64>(atol((char*)data.value));
+        return static_cast<uint64>(strtoull((char*)data.value, nullptr, 10));
     }
 
     [[nodiscard]] int64 GetInt64() const
@@ -169,7 +169,7 @@ public:
 
         if (data.raw)
             return *reinterpret_cast<int64*>(data.value);
-        return static_cast<int64>(strtol((char*)data.value, nullptr, 10));
+        return static_cast<int64>(strtoll((char*)data.value, nullptr, 10));
     }
 
     [[nodiscard]] float GetFloat() const
