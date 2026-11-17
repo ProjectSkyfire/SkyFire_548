@@ -2624,6 +2624,9 @@ public:
         return m_battlePetMgr;
     }
 
+    // True while this player is in a pet battle and the attacker is a creature no player controls.
+    bool IsShieldedByPetBattleFrom(Unit const* attacker) const;
+
     /*********************************************************/
     /***                  PVP SYSTEM                       ***/
     /*********************************************************/

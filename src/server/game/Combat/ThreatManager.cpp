@@ -71,6 +71,10 @@ bool ThreatCalcHelper::isValidProcess(Unit* hatedUnit, Unit* hatingUnit, SpellIn
     if (hatedUnit->GetTypeId() == TypeID::TYPEID_PLAYER && hatedUnit->ToPlayer()->IsGameMaster())
         return false;
 
+    // not to a player in a pet battle; creatures must not pull them into combat
+    if (hatedUnit->GetTypeId() == TypeID::TYPEID_PLAYER && hatedUnit->ToPlayer()->IsShieldedByPetBattleFrom(hatingUnit))
+        return false;
+
     // not to dead and not for dead
     if (!hatedUnit->IsAlive() || !hatingUnit->IsAlive())
         return false;
