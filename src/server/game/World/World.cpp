@@ -1469,6 +1469,9 @@ void World::SetInitialWorldSettings()
     SF_LOG_INFO("server.loading", "Loading SpellInfo store...");
     sSpellMgr->LoadSpellInfoStore();
 
+    SF_LOG_INFO("server.loading", "Loading spell difficulties...");
+    sSpellMgr->LoadSpellDifficulties();
+
     SF_LOG_INFO("server.loading", "Loading SpellInfo corrections...");
     sSpellMgr->LoadSpellInfoCorrections();
 

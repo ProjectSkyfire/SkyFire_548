@@ -142,9 +142,6 @@ char const SpellTargetRestrictionsEntryfmt[] = "dxxxxixii";
 char const SpellTotemsEntryfmt[] = "diiii";
 
 //
-char const SpellDifficultyfmt[] = "niiii";
-const std::string CustomSpellDifficultyfmt = "ppppp";
-const std::string CustomSpellDifficultyIndex = "id";
 //                                             0         10        20
 char const SpellEffectEntryfmt[] = "niifiiiffiiiiiifiifiiiiixiiiix";
 const std::string CustomSpellEffectEntryfmt = "papppppppppapppappppppapapppp";

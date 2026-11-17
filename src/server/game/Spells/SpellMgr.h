@@ -546,7 +546,7 @@ typedef std::pair<SkillLineAbilityMap::const_iterator, SkillLineAbilityMap::cons
 typedef std::multimap<uint32, uint32> PetLevelupSpellSet;
 typedef std::map<uint32, PetLevelupSpellSet> PetLevelupSpellMap;
 
-typedef std::map<uint32, uint32> SpellDifficultySearcherMap;
+typedef std::map<uint32, SpellDifficultyEntry> SpellDifficultyMap;
 
 struct PetDefaultSpellsEntry
 {
@@ -600,8 +600,6 @@ public:
     static bool IsSpellValid(SpellInfo const* spellInfo, Player* player = NULL, bool msg = true);
 
     // Spell difficulty
-    uint32 GetSpellDifficultyId(uint32 spellId) const;
-    void SetSpellDifficultyId(uint32 spellId, uint32 id);
     uint32 GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const;
     SpellInfo const* GetSpellForDifficultyFromSpell(SpellInfo const* spell, Unit const* caster) const;
 
@@ -705,6 +703,7 @@ public:
     void LoadPetLevelupSpellMap();
     void LoadPetDefaultSpells();
     void LoadSpellAreas();
+    void LoadSpellDifficulties();
     void LoadSpellInfoStore();
     void UnloadSpellInfoStore();
     void UnloadSpellInfoImplicitTargetConditionLists();
@@ -712,7 +711,7 @@ public:
     void LoadSpellInfoCorrections();
 
 private:
-    SpellDifficultySearcherMap mSpellDifficultySearcherMap;
+    SpellDifficultyMap         mSpellDifficultyMap;
     SpellChainMap              mSpellChains;
     SpellsRequiringSpellMap    mSpellsReqSpell;
     SpellRequiredMap           mSpellReq;

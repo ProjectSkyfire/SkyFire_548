@@ -407,57 +407,43 @@ bool SpellMgr::IsSpellValid(SpellInfo const* spellInfo, Player* player, bool msg
     return true;
 }
 
-uint32 SpellMgr::GetSpellDifficultyId(uint32 spellId) const
-{
-    SpellDifficultySearcherMap::const_iterator i = mSpellDifficultySearcherMap.find(spellId);
-    return i == mSpellDifficultySearcherMap.end() ? 0 : i->second;
-}
-
-void SpellMgr::SetSpellDifficultyId(uint32 spellId, uint32 id)
-{
-    mSpellDifficultySearcherMap[spellId] = id;
-}
-
 uint32 SpellMgr::GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const
 {
-    if (!GetSpellInfo(spellId))
-        return spellId;
-
     if (!caster || !caster->GetMap() || !caster->GetMap()->IsInstance())
         return spellId;
 
-    uint32 mode = uint32(caster->GetMap()->GetSpawnMode());
-    if (mode >= 14)
-    {
-        SF_LOG_ERROR("spells", "SpellMgr::GetSpellIdForDifficulty: Incorrect DifficultyID for spell %u.", spellId);
-        return spellId; //return source spell
-    }
-
-    uint32 difficultyId = GetSpellDifficultyId(spellId);
-    if (!difficultyId)
-        return spellId; //return source spell, it has only REGULAR_DIFFICULTY
-
-    SpellDifficultyEntry const* difficultyEntry = sSpellDifficultyStore.LookupEntry(difficultyId);
-    if (!difficultyEntry)
-    {
-        SF_LOG_DEBUG("spells", "SpellMgr::GetSpellIdForDifficulty: SpellDifficultyEntry not found for spell %u. This should never happen.", spellId);
-        return spellId; //return source spell
-    }
-
-    if (difficultyEntry->SpellID[mode] <= 0 && mode > DIFFICULTY_HEROIC)
-    {
-        SF_LOG_DEBUG("spells", "SpellMgr::GetSpellIdForDifficulty: spell %u mode %u spell is NULL, using mode %u", spellId, mode, mode - 2);
-        mode -= 2;
-    }
-
-    if (difficultyEntry->SpellID[mode] <= 0)
-    {
-        SF_LOG_ERROR("sql.sql", "SpellMgr::GetSpellIdForDifficulty: spell %u mode %u spell is 0. Check spelldifficulty_dbc!", spellId, mode);
+    // Rows are found by their first spell only, so a script that already passes a later one keeps it
+    SpellDifficultyMap::const_iterator itr = mSpellDifficultyMap.find(spellId);
+    if (itr == mSpellDifficultyMap.end())
         return spellId;
+
+    // Dungeon rows hold normal and heroic, raid rows 10N, 25N, 10H and 25H
+    uint8 slot;
+    switch (caster->GetMap()->GetDifficulty())
+    {
+        case DIFFICULTY_NORMAL:
+        case DIFFICULTY_10MAN_NORMAL:
+            slot = 0;
+            break;
+        case DIFFICULTY_HEROIC:
+        case DIFFICULTY_25MAN_NORMAL:
+            slot = 1;
+            break;
+        case DIFFICULTY_10MAN_HEROIC:
+            slot = 2;
+            break;
+        case DIFFICULTY_25MAN_HEROIC:
+            slot = 3;
+            break;
+        default:
+            return spellId;
     }
 
-    SF_LOG_DEBUG("spells", "SpellMgr::GetSpellIdForDifficulty: spellid for spell %u in mode %u is %d", spellId, mode, difficultyEntry->SpellID[mode]);
-    return uint32(difficultyEntry->SpellID[mode]);
+    // A heroic raid column left empty uses its normal one
+    if (slot > 1 && !itr->second.SpellID[slot])
+        slot -= 2;
+
+    return uint32(itr->second.SpellID[slot]);
 }
 
 SpellInfo const* SpellMgr::GetSpellForDifficultyFromSpell(SpellInfo const* spell, Unit const* caster) const
@@ -2627,6 +2613,58 @@ void SpellMgr::LoadSpellAreas()
     } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u spell area requirements in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void SpellMgr::LoadSpellDifficulties()
+{
+    uint32 oldMSTime = getMSTime();
+
+    mSpellDifficultyMap.clear();
+
+    //                                                0   1         2         3         4
+    QueryResult result = WorldDatabase.Query("SELECT id, spellid0, spellid1, spellid2, spellid3 FROM spelldifficulty_dbc");
+    if (!result)
+    {
+        SF_LOG_INFO("server.loading", ">> Loaded 0 spell difficulty rows. DB table `spelldifficulty_dbc` is empty.");
+        return;
+    }
+
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        SpellDifficultyEntry entry;
+        entry.ID = fields[0].GetUInt32();
+        for (uint8 i = 0; i < 4; ++i)
+        {
+            uint32 spellId = fields[1 + i].GetUInt32();
+            if (spellId && !GetSpellInfo(spellId))
+            {
+                SF_LOG_ERROR("sql.sql", "Table `spelldifficulty_dbc` row %u has non-existing spell %u in spellid%u, ignoring it.", entry.ID, spellId, uint32(i));
+                spellId = 0;
+            }
+
+            entry.SpellID[i] = spellId;
+        }
+
+        // The normal and the heroic or 25 player spell must always be set
+        if (!entry.SpellID[0] || !entry.SpellID[1])
+        {
+            SF_LOG_ERROR("sql.sql", "Table `spelldifficulty_dbc` row %u misses spellid0 or spellid1, ignoring it.", entry.ID);
+            continue;
+        }
+
+        if (!mSpellDifficultyMap.insert(SpellDifficultyMap::value_type(entry.SpellID[0], entry)).second)
+        {
+            SF_LOG_ERROR("sql.sql", "Table `spelldifficulty_dbc` row %u repeats spell %u of another row, ignoring it.", entry.ID, uint32(entry.SpellID[0]));
+            continue;
+        }
+
+        ++count;
+    } while (result->NextRow());
+
+    SF_LOG_INFO("server.loading", ">> Loaded %u spell difficulty rows in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
 // Temporary structure to hold spell effect entries for faster loading
