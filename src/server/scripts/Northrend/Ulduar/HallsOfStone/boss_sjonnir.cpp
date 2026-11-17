@@ -18,6 +18,7 @@ enum Spells
     SPELL_CHAIN_LIGHTING                              = 50830,
     SPELL_LIGHTING_SHIELD                             = 50831,
     SPELL_FRENZY                                      = 28747,
+    SPELL_TOXIC_VOLLEY                                = 50838,
 
     // Each periodic dummy aura summons its creature at a random pipe
     SPELL_SUMMON_IRON_DWARF_PERIODIC                  = 50789,
@@ -304,11 +305,33 @@ class npc_iron_sludge : public CreatureScript
             }
 
             InstanceScript* instance;
+            uint32 _toxicVolleyTimer;
+
+            void Reset() OVERRIDE
+            {
+                _toxicVolleyTimer = urand(3000, 6000);
+            }
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 if (Creature* sjonnir = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SJONNIR)))
                     sjonnir->AI()->DoAction(ACTION_OOZE_DEAD);
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (_toxicVolleyTimer <= diff)
+                {
+                    DoCast(me, SPELL_TOXIC_VOLLEY);
+                    _toxicVolleyTimer = urand(3000, 6000);
+                }
+                else
+                    _toxicVolleyTimer -= diff;
+
+                DoMeleeAttackIfReady();
             }
         };
 
