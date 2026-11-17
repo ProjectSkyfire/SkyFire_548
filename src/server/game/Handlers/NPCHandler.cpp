@@ -252,19 +252,15 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
         return;
     }
 
-    // starter battle pets go into the journal, the check above is disabled for other trainer spells
-    uint16 battlePetSpeciesId = BattlePetGetSpeciesBySummonSpell(spellId);
-    if (battlePetSpeciesId && _player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
+    // can't be learned (level, skill, class, previous rank, profession limit), cheat? Or double learn with lags...
+    if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
     {
         SendTrainerBuyFailed(guid, spellId, 0);
         return;
     }
 
-    // can't be learn, cheat? Or double learn with lags...
-    //if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
-     //   SendTrainerBuyFailed(guid, spellId, 0);
-     //   return;
-    //}
+    // starter battle pets go into the journal instead of being learned
+    uint16 const battlePetSpeciesId = BattlePetGetSpeciesBySummonSpell(spellId);
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
