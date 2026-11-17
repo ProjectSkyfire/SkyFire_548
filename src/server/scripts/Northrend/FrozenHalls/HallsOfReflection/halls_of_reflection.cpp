@@ -772,6 +772,16 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
             }
         }
 
+        // The Lich King stalls behind the walls he has already passed, and the undead he summons appear around him
+        void BringLichKing()
+        {
+            if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
+            {
+                Position pos = me->GetNearPosition(8.0f, float(M_PI));
+                lichking->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+            }
+        }
+
         void ArmIceWall()
         {
             _wallArmed = true;
@@ -952,6 +962,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         break;
                     case EVENT_ESCAPE_17:// ICEWALL BROKEN
                         me->GetMotionMaster()->MoveIdle();
+                        BringLichKing();
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                         {
                             lichking->StopMoving();
@@ -974,6 +985,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         _events.ScheduleEvent(EVENT_ESCAPE_19, 6000);
                         break;
                     case EVENT_ESCAPE_19:
+                        BringLichKing();
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                         {
                             if (_icewall && _icewall < 4)
