@@ -589,6 +589,8 @@ class boss_freya : public CreatureScript
                 me->DespawnOrUnsummon(7500);
                 // The credit spell is not in the 5.4.8 client; Freya's kill criteria name it as their spell target.
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KNOCK_ON_WOOD_CREDIT);
+                // Freya never really dies (DamageTaken), so no kill credits her encounter.
+                instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
 
                 Creature* Elder[3];
                 for (uint8 n = 0; n < 3; ++n)
