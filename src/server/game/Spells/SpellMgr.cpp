@@ -2689,6 +2689,14 @@ struct SpellEffectArray
     SpellEffectEntry const* effects[MAX_SPELL_EFFECTS];
 };
 
+// Rows of a spell that only apply to one difficulty
+struct SpellDifficultyRows : SpellEffectArray
+{
+    SpellDifficultyRows() : targetRestrictionsId(0) { }
+
+    uint32 targetRestrictionsId;
+};
+
 void SpellMgr::LoadSpellInfoStore()
 {
     uint32 oldMSTime = getMSTime();
@@ -2697,7 +2705,7 @@ void SpellMgr::LoadSpellInfoStore()
     mSpellInfoMap.resize(sSpellStore.GetNumRows(), NULL);
 
     std::map<uint32, SpellEffectArray> effectsBySpell;
-    std::map<uint32, std::map<uint32, SpellEffectArray> > effectsByDifficulty;
+    std::map<uint32, std::map<uint32, SpellDifficultyRows> > rowsByDifficulty;
 
     for (uint32 i = 0; i < sSpellEffectStore.GetNumRows(); ++i)
     {
@@ -2711,34 +2719,42 @@ void SpellMgr::LoadSpellInfoStore()
             slot = effect;
 
         if (effect->EffectDifficulty)
-            effectsByDifficulty[effect->EffectSpellId][effect->EffectDifficulty].effects[effect->EffectIndex] = effect;
+            rowsByDifficulty[effect->EffectSpellId][effect->EffectDifficulty].effects[effect->EffectIndex] = effect;
     }
+
+    for (uint32 i = 0; i < sSpellTargetRestrictionsStore.GetNumRows(); ++i)
+        if (SpellTargetRestrictionsEntry const* restrictions = sSpellTargetRestrictionsStore.LookupEntry(i))
+            if (restrictions->Difficulty)
+                rowsByDifficulty[restrictions->SpellId][restrictions->Difficulty].targetRestrictionsId = i;
 
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); ++i)
         if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(i))
             mSpellInfoMap[i] = new SpellInfo(spellEntry, effectsBySpell[i].effects);
 
-    // A spell with effect rows for a difficulty gets its own SpellInfo for it, the other effects stay the default ones
-    for (std::map<uint32, std::map<uint32, SpellEffectArray> >::const_iterator spellItr = effectsByDifficulty.begin(); spellItr != effectsByDifficulty.end(); ++spellItr)
+    // A spell with rows for a difficulty gets its own SpellInfo for it, the rest stays the default one
+    for (std::map<uint32, std::map<uint32, SpellDifficultyRows> >::const_iterator spellItr = rowsByDifficulty.begin(); spellItr != rowsByDifficulty.end(); ++spellItr)
     {
         SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellItr->first);
         if (!spellEntry)
             continue;
 
-        for (std::map<uint32, SpellEffectArray>::const_iterator diffItr = spellItr->second.begin(); diffItr != spellItr->second.end(); ++diffItr)
+        for (std::map<uint32, SpellDifficultyRows>::const_iterator diffItr = spellItr->second.begin(); diffItr != spellItr->second.end(); ++diffItr)
         {
+            // Heroic 25 player uses the normal 25 player rows where it has none
+            SpellDifficultyRows const* normalRows = NULL;
+            if (diffItr->first == DIFFICULTY_25MAN_HEROIC)
+            {
+                std::map<uint32, SpellDifficultyRows>::const_iterator normalItr = spellItr->second.find(DIFFICULTY_25MAN_NORMAL);
+                if (normalItr != spellItr->second.end())
+                    normalRows = &normalItr->second;
+            }
+
             SpellEffectEntry const* effects[MAX_SPELL_EFFECTS];
             for (uint8 j = 0; j < MAX_SPELL_EFFECTS; ++j)
             {
                 effects[j] = diffItr->second.effects[j];
-
-                // Heroic 25 player uses the normal 25 player rows where it has none
-                if (!effects[j] && diffItr->first == DIFFICULTY_25MAN_HEROIC)
-                {
-                    std::map<uint32, SpellEffectArray>::const_iterator normalItr = spellItr->second.find(DIFFICULTY_25MAN_NORMAL);
-                    if (normalItr != spellItr->second.end())
-                        effects[j] = normalItr->second.effects[j];
-                }
+                if (!effects[j] && normalRows)
+                    effects[j] = normalRows->effects[j];
 
                 if (!effects[j])
                 {
@@ -2748,7 +2764,11 @@ void SpellMgr::LoadSpellInfoStore()
                 }
             }
 
-            SpellInfo* spellInfo = new SpellInfo(spellEntry, effects);
+            uint32 targetRestrictionsId = diffItr->second.targetRestrictionsId;
+            if (!targetRestrictionsId && normalRows)
+                targetRestrictionsId = normalRows->targetRestrictionsId;
+
+            SpellInfo* spellInfo = new SpellInfo(spellEntry, effects, targetRestrictionsId);
             mSpellInfoDifficulties.push_back(spellInfo);
             mSpellInfoDifficultyMap[std::make_pair(spellItr->first, diffItr->first)] = spellInfo;
         }

@@ -138,7 +138,7 @@ char const SpellMiscfmt[] = "dxxiiiiiiiiiixxxxiiifiiiii";
 char const SpellRangefmt[] = "nffffixx";
 char const SpellScalingEntryfmt[] = "diiiifiii";
 char const SpellShapeshiftEntryfmt[] = "dixixx";
-char const SpellTargetRestrictionsEntryfmt[] = "dxxxxixii";
+char const SpellTargetRestrictionsEntryfmt[] = "diixxixii";
 char const SpellTotemsEntryfmt[] = "diiii";
 
 //

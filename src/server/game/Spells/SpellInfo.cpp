@@ -558,7 +558,7 @@ SpellEffectInfo::StaticData SpellEffectInfo::_data[TOTAL_SPELL_EFFECTS] =
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_UNIT}, // 182 SPELL_EFFECT_182
 };
 
-SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effects)
+SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effects, uint32 targetRestrictionsId)
 {
     Id = spellEntry->Id;
 
@@ -612,7 +612,7 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effe
     SpellLevelsId = spellEntry->SpellLevelsId;
     SpellReagentsId = spellEntry->SpellReagentsId;
     SpellShapeshiftId = spellEntry->SpellShapeshiftId;
-    SpellTargetRestrictionsId = spellEntry->SpellTargetRestrictionsId;
+    SpellTargetRestrictionsId = targetRestrictionsId ? targetRestrictionsId : spellEntry->SpellTargetRestrictionsId;
     SpellTotemsId = spellEntry->SpellTotemsId;
     ResearchProject = spellEntry->ResearchProject;
 
