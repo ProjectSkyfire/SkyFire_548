@@ -31,7 +31,39 @@ enum Yells
     SAY_DRAKE_BREATH                    = 6
 };
 
-static Position SpawnLoc = {468.931f, -513.555f, 104.723f, 0};
+enum Gauntlet
+{
+    FIRST_WAVE_MAX_WARRIORS     = 10,
+    FIRST_WAVE_SIZE             = 13,
+    GAUNTLET_WAVE_SIZE          = 2,
+    GAUNTLET_ROTATION_SIZE      = 8,
+    GAUNTLET_WAVE_INTERVAL      = 25000,
+
+    // Points the Ymirjar of the later waves walk to, the second one is handled by their SmartAI
+    POINT_FIRST_WAVE            = 0,
+    POINT_SECOND_WAVE_START     = 1
+};
+
+// The gauntlet spawns at the breach, the waves appear to the left and to the right of this point
+static Position SpawnLoc = {477.5808f, -484.5591f, 104.8221f, 4.677482f};
+static float const WaveSideOffset = 10.0f;
+static Position const SecondaryWavesInitialPoint = { 478.7434f, -505.5758f, 104.7237f, 0 };
+static Position const FirstWaveLocations[FIRST_WAVE_SIZE] =
+{
+    { 458.5323f, -516.2537f, 104.617f, 0 },
+    { 429.4242f, -517.5624f, 104.8936f, 0 },
+    { 394.4955f, -514.6144f, 104.7235f, 0 },
+    { 362.2862f, -515.8771f, 104.7539f, 0 },
+    { 333.5374f, -514.7942f, 104.4779f, 0 },
+    { 457.6105f, -508.8362f, 104.4013f, 0 },
+    { 427.4026f, -510.7716f, 104.8802f, 0 },
+    { 392.5114f, -507.9429f, 104.7433f, 0 },
+    { 362.9511f, -508.4115f, 104.7218f, 0 },
+    { 333.536f,  -506.0805f, 104.4258f, 0 },
+    { 478.31f,   -511.049f,  104.7242f, 0 },
+    { 482.25f,   -514.1273f, 104.7234f, 0 },
+    { 481.3883f, -507.1089f, 104.7241f, 0 }
+};
 static Position Location[]=
 {
     // Boss
@@ -143,6 +175,19 @@ enum Creatures
     DATA_MOUNT                     = 27043,
 };
 
+// Order of the Ymirjar of the gauntlet waves: creature entry and side (false: left, true: right)
+static std::pair<uint32, bool> const GauntletRotation[GAUNTLET_ROTATION_SIZE] =
+{
+    { NPC_YMIRJAR_WARRIOR, true },
+    { NPC_YMIRJAR_HARPOONER, false },
+    { NPC_YMIRJAR_WARRIOR, false },
+    { NPC_YMIRJAR_HARPOONER, true },
+    { NPC_YMIRJAR_WARRIOR, false },
+    { NPC_YMIRJAR_WITCH_DOCTOR, true },
+    { NPC_YMIRJAR_WARRIOR, true },
+    { NPC_YMIRJAR_WITCH_DOCTOR, false }
+};
+
 enum Achievments
 {
     ACHIEV_TIMED_START_EVENT                      = 17726,
@@ -178,7 +223,9 @@ public:
         uint32 m_uiMovementTimer;
         uint32 m_uiMountTimer;
         uint32 m_uiSummonTimer;
+        uint8  m_uiWaveIndex;
         uint8  m_uiSpellHitCount;
+        bool   m_bFirstWaveSummoned;
         bool   m_bSaidEmote;
 
         CombatPhase Phase;
@@ -192,6 +239,8 @@ public:
             m_uiWhirlwindTimer = 20000;
             m_uiMountTimer = 3000;
             m_uiWaypointId = 0;
+            m_uiWaveIndex = 0;
+            m_bFirstWaveSummoned = false;
             m_bSaidEmote = false;
             m_uiSpellHitCount = 0;
 
@@ -226,8 +275,9 @@ public:
             Phase = FLYING;
 
             m_uiMovementTimer = 1000;
-            m_uiSummonTimer = 10000;
+            m_uiSummonTimer = GAUNTLET_WAVE_INTERVAL;
             me->SetInCombatWithZone();
+            SpawnFirstWave();
             if (instance)
             {
                 instance->SetData(DATA_SKADI_THE_RUTHLESS_EVENT, IN_PROGRESS);
@@ -249,10 +299,8 @@ public:
                 case NPC_YMIRJAR_WARRIOR:
                 case NPC_YMIRJAR_WITCH_DOCTOR:
                 case NPC_YMIRJAR_HARPOONER:
-                    summoned->setActive(true);
-                    summoned->SetInCombatWithZone();
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        summoned->AI()->AttackStart(target);
+                    if (m_bFirstWaveSummoned)
+                        summoned->GetMotionMaster()->MovePoint(POINT_SECOND_WAVE_START, SecondaryWavesInitialPoint);
                     break;
                 case NPC_TRIGGER:
                     summoned->CastSpell((Unit*)NULL, SPELL_FREEZING_CLOUD, true);
@@ -327,8 +375,8 @@ public:
 
                     if (m_uiSummonTimer <= diff)
                     {
-                        SpawnMobs();
-                        m_uiSummonTimer = 25000;
+                        SpawnWave();
+                        m_uiSummonTimer = GAUNTLET_WAVE_INTERVAL;
                     } else m_uiSummonTimer -= diff;
 
                     if (m_uiMovementTimer <= diff)
@@ -413,25 +461,35 @@ public:
             Talk(SAY_KILL);
         }
 
-        void SpawnMobs()
+        void SpawnFirstWave()
         {
-            for (uint8 i = 0; i < DUNGEON_MODE(5, 6); ++i)
+            for (uint8 i = 0; i < FIRST_WAVE_MAX_WARRIORS; ++i)
+                if (Creature* summon = me->SummonCreature(NPC_YMIRJAR_WARRIOR, SpawnLoc, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
+                    summon->GetMotionMaster()->MovePoint(POINT_FIRST_WAVE, FirstWaveLocations[i]);
+
+            if (Creature* summon = me->SummonCreature(NPC_YMIRJAR_WITCH_DOCTOR, SpawnLoc, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
+                summon->GetMotionMaster()->MovePoint(POINT_FIRST_WAVE, FirstWaveLocations[FIRST_WAVE_MAX_WARRIORS]);
+
+            for (uint8 i = FIRST_WAVE_MAX_WARRIORS + 1; i < FIRST_WAVE_SIZE; ++i)
+                if (Creature* summon = me->SummonCreature(NPC_YMIRJAR_HARPOONER, SpawnLoc, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000))
+                    summon->GetMotionMaster()->MovePoint(POINT_FIRST_WAVE, FirstWaveLocations[i]);
+
+            m_bFirstWaveSummoned = true;
+        }
+
+        // Two Ymirjar of the rotation appear on the sides of the breach, the next wave takes the pair after the skipped one
+        void SpawnWave()
+        {
+            uint8 first = (m_uiWaveIndex + (urand(0, 1) ? 0 : 2)) % GAUNTLET_ROTATION_SIZE;
+            for (uint8 i = 0; i < GAUNTLET_WAVE_SIZE; ++i)
             {
-                switch (urand(0, 2))
-                {
-                    case 0:
-                        me->SummonCreature(NPC_YMIRJAR_WARRIOR, SpawnLoc.GetPositionX()+rand()%5, SpawnLoc.GetPositionY()+rand()%5, SpawnLoc.GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        break;
-
-                    case 1:
-                        me->SummonCreature(NPC_YMIRJAR_WITCH_DOCTOR, SpawnLoc.GetPositionX()+rand()%5, SpawnLoc.GetPositionY()+rand()%5, SpawnLoc.GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        break;
-
-                    case 2:
-                        me->SummonCreature(NPC_YMIRJAR_HARPOONER, SpawnLoc.GetPositionX()+rand()%5, SpawnLoc.GetPositionY()+rand()%5, SpawnLoc.GetPositionZ(), 0, TempSummonType::TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
-                        break;
-                }
+                std::pair<uint32, bool> const& ymirjar = GauntletRotation[(first + i) % GAUNTLET_ROTATION_SIZE];
+                Position pos = SpawnLoc;
+                pos.m_positionX += ymirjar.second ? -WaveSideOffset : WaveSideOffset;
+                me->SummonCreature(ymirjar.first, pos, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 5000);
             }
+
+            m_uiWaveIndex = (m_uiWaveIndex + 2 * GAUNTLET_WAVE_SIZE) % GAUNTLET_ROTATION_SIZE;
         }
 
         void SpawnTrigger()
