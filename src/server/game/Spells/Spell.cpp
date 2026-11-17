@@ -3081,7 +3081,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
     if (m_caster->GetTypeId() == TypeID::TYPEID_PLAYER)
         m_caster->ToPlayer()->SetSpellModTakingSpell(this, true);
 
-    uint32 tmpPowerCost = 0;
+    int32 tmpPowerCost = 0;
     uint32 tmpPeriodicPowerCost = 0;
     bool foundSpellPower = false;
     for (uint32 i = 0; i < sSpellPowerStore.GetNumRows(); ++i)
@@ -3121,7 +3121,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             maxPowerForCost
         };
         Skyfire::Spells::SpellPowerCostCalculationResult costResult = Skyfire::Spells::CalculateSpellPowerCosts(costData);
-        tmpPowerCost = costResult.PowerCost;
+        tmpPowerCost = int32(costResult.PowerCost);
         tmpPeriodicPowerCost = costResult.PeriodicPowerCost;
 
         switch (costResult.Status)
@@ -3148,7 +3148,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
                 GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(m_spellInfo->SpellLevel - 1);
                 GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(m_caster->getLevel() - 1);
                 if (spellScaler && casterScaler)
-                    tmpPowerCost = Skyfire::Spells::ScaleNpcSpellPowerCost(tmpPowerCost, casterScaler->ratio, spellScaler->ratio);
+                    tmpPowerCost = int32(Skyfire::Spells::ScaleNpcSpellPowerCost(uint32(std::max(0, tmpPowerCost)), casterScaler->ratio, spellScaler->ratio));
             }
         }
 
@@ -3183,7 +3183,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         {
             // If power type - health drain all
             if (m_powerType == POWER_HEALTH)
-                tmpPowerCost = m_caster->GetHealth();
+                tmpPowerCost = int32(m_caster->GetHealth());
             // Else drain all power
             if (spellPower->powerType < MAX_POWERS)
             {
@@ -3204,7 +3204,8 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         m_powerType = m_caster->getPowerType();
 
     // Fill cost data (not use power for item casts)
-    m_powerCost = (m_CastItem || m_darkSimulacrum) ? 0 : tmpPowerCost;
+    // Percent cost mods add up, so two big reductions together (Berserk and Clearcasting) go below zero
+    m_powerCost = (m_CastItem || m_darkSimulacrum) ? 0 : std::max(0, tmpPowerCost);
     m_periodicPowerCost = m_darkSimulacrum ? 0 : tmpPeriodicPowerCost;
 
 
