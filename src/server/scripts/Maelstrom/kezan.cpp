@@ -5,7 +5,6 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "ScriptedGossip.h"
 #include "Player.h"
 
 /*####
@@ -15,7 +14,7 @@
 enum DefiantTrollEnum
 {
     DEFFIANT_KILL_CREDIT               = 34830,
-    SPELL_LIGHTNING_VISUAL             = 45870,
+    SPELL_BELT_SHOCKER                 = 66306,
     SPELL_ENRAGE                       = 45111,
     QUEST_GOOD_HELP_IS_HARD_TO_FIND    = 14069,
     GO_DEPOSIT                         = 195489,
@@ -38,12 +37,33 @@ public:
 
         uint32 rebuffTimer;
         bool work;
+        bool shocked;
 
         void Reset () OVERRIDE
         {
             rebuffTimer = 0;
             work = false;
+            shocked = false;
             me->CastSpell(me, SPELL_ENRAGE, true);
+        }
+
+        // The player's spellclick casts the shocker on the troll
+        void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
+        {
+            if (spell->Id != SPELL_BELT_SHOCKER || shocked)
+                return;
+
+            Player* player = caster->ToPlayer();
+            if (!player || player->GetQuestStatus(QUEST_GOOD_HELP_IS_HARD_TO_FIND) != QUEST_STATUS_INCOMPLETE)
+                return;
+
+            shocked = true;
+            player->KilledMonsterCredit(DEFFIANT_KILL_CREDIT, me->GetGUID());
+            Talk(SAY_WORK);
+            me->RemoveAllAuras();
+
+            if (GameObject* deposit = me->FindNearestGameObject(GO_DEPOSIT, 25.0f))
+                me->GetMotionMaster()->MovePoint(1, deposit->GetPositionX() - 1.0f, deposit->GetPositionY(), deposit->GetPositionZ());
         }
 
         void MovementInform(uint32 /*type*/, uint32 id) OVERRIDE
@@ -86,31 +106,6 @@ public:
             //DoMeleeAttackIfReady();
         }
     };
-
-    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
-    {
-        if (player->GetQuestStatus(QUEST_GOOD_HELP_IS_HARD_TO_FIND) == QUEST_STATUS_INCOMPLETE && !CAST_AI(npc_defiant_troll::npc_defiant_trollAI, creature->AI())->IsWorking())
-        {
-            player->CastSpell(creature, SPELL_LIGHTNING_VISUAL, true);
-            player->KilledMonsterCredit(DEFFIANT_KILL_CREDIT, creature->GetGUID());
-            creature->AI()->Talk(SAY_WORK);
-            creature->RemoveAllAuras();
-
-            if (GameObject* deposit = creature->FindNearestGameObject(GO_DEPOSIT, 20))
-                creature->GetMotionMaster()->MovePoint(1, deposit->GetPositionX() - 1.0f, deposit->GetPositionY(), deposit->GetPositionZ());
-
-            if (player->GetQuestStatus(QUEST_GOOD_HELP_IS_HARD_TO_FIND) == QUEST_STATUS_COMPLETE)
-                player->RemoveAura(SPELL_LIGHTNING_VISUAL);
-
-            player->CLOSE_GOSSIP_MENU();
-
-            return true;
-        }
-
-        player->CLOSE_GOSSIP_MENU();
-
-        return false;
-    }
 };
 
 void AddSC_kezan()
