@@ -101,7 +101,10 @@ Targets SpellImplicitTargetInfo::GetTarget() const
 uint32 SpellImplicitTargetInfo::GetExplicitTargetMask(bool& srcSet, bool& dstSet) const
 {
     uint32 targetMask = 0;
-    if (GetTarget() == TARGET_DEST_TRAJ)
+    // Raid buffs take any friendly unit as explicit target: its group or the unit alone gets the buff
+    if (GetTarget() == TARGET_UNIT_TARGET_PARTY_TARGET_RAID)
+        targetMask = TARGET_FLAG_UNIT_ALLY;
+    else if (GetTarget() == TARGET_DEST_TRAJ)
     {
         if (!srcSet)
             targetMask = TARGET_FLAG_SOURCE_LOCATION;

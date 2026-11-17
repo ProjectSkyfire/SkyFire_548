@@ -1174,6 +1174,19 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
     if (!referer)
         return;
 
+    // Raid buffs: a target outside the caster's party or raid gets the buff alone
+    if (targetType.GetTarget() == TARGET_UNIT_TARGET_PARTY_TARGET_RAID)
+    {
+        if (Unit* explicitTarget = m_targets.GetUnitTarget())
+        {
+            if (explicitTarget != m_caster && !m_caster->IsInRaidWith(explicitTarget))
+            {
+                AddUnitTarget(explicitTarget, effMask, false);
+                return;
+            }
+        }
+    }
+
     Position const* center = NULL;
     switch (targetType.GetReferenceType())
     {
