@@ -19,6 +19,7 @@ EndScriptData */
 enum KelsethEncounter
 {
     SPELL_SHADOWBOLT                         = 43667,
+    SPELL_SHADOWBOLT_H                       = 59389,
     SPELL_FROST_TOMB                         = 48400,
     SPELL_FROST_TOMB_STUN                    = 42672,
     SPELL_FROST_TOMB_SUMMON                  = 42714,
@@ -26,6 +27,7 @@ enum KelsethEncounter
     SPELL_SHADOW_FISSURE                     = 50657,
     SPELL_FULL_HEAL                          = 17683,
     SPELL_DECREPIFY                          = 42702,
+    SPELL_DECREPIFY_H                        = 59397,
     SPELL_BONE_ARMOR                         = 59386,
 
     NPC_FROSTTOMB                            = 23965,
@@ -175,7 +177,7 @@ class boss_keleseth : public CreatureScript
                             SummonSkeletons();
                             break;
                         case EVENT_SHADOWBOLT:
-                            DoCastVictim(SPELL_SHADOWBOLT);
+                            DoCastVictim(DUNGEON_MODE(SPELL_SHADOWBOLT, SPELL_SHADOWBOLT_H));
                             events.ScheduleEvent(EVENT_SHADOWBOLT, urand(2, 3) * IN_MILLISECONDS);
                             break;
                         case EVENT_FROST_TOMB:
@@ -268,8 +270,8 @@ class npc_vrykul_skeleton : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_DECREPIFY:
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_DECREPIFY))
-                                DoCast(target, SPELL_DECREPIFY);
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -DUNGEON_MODE(SPELL_DECREPIFY, SPELL_DECREPIFY_H)))
+                                DoCast(target, DUNGEON_MODE(SPELL_DECREPIFY, SPELL_DECREPIFY_H));
                             events.ScheduleEvent(EVENT_DECREPIFY, urand(1, 5)*IN_MILLISECONDS);
                             break;
                         case EVENT_RESURRECT:

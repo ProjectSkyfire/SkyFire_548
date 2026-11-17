@@ -62,8 +62,11 @@ enum Spells
     // Ingvar Spells human form
     SPELL_CLEAVE                                = 42724,
     SPELL_SMASH                                 = 42669,
+    SPELL_SMASH_H                               = 59706,
     SPELL_STAGGERING_ROAR                       = 42708,
+    SPELL_STAGGERING_ROAR_H                     = 59708,
     SPELL_ENRAGE                                = 42705,
+    SPELL_ENRAGE_H                              = 59707,
 
     SPELL_INGVAR_FEIGN_DEATH                    = 42795,
     SPELL_SUMMON_BANSHEE                        = 42912,
@@ -71,7 +74,9 @@ enum Spells
 
     // Ingvar Spells undead form
     SPELL_DARK_SMASH                            = 42723,
+    SPELL_DARK_SMASH_H                          = 59709,
     SPELL_DREADFUL_ROAR                         = 42729,
+    SPELL_DREADFUL_ROAR_H                       = 59734,
     SPELL_WOE_STRIKE                            = 42730,
 
     SPELL_SHADOW_AXE_SUMMON                     = 42748,
@@ -199,15 +204,15 @@ class boss_ingvar_the_plunderer : public CreatureScript
                             events.ScheduleEvent(EVENT_CLEAVE, urand(6, 12)*IN_MILLISECONDS, 0, PHASE_HUMAN);
                             break;
                         case EVENT_STAGGERING_ROAR:
-                            DoCast(me, SPELL_STAGGERING_ROAR);
+                            DoCast(me, DUNGEON_MODE(SPELL_STAGGERING_ROAR, SPELL_STAGGERING_ROAR_H));
                             events.ScheduleEvent(EVENT_STAGGERING_ROAR, urand(18, 22)*IN_MILLISECONDS, 0, PHASE_HUMAN);
                             break;
                         case EVENT_ENRAGE:
-                            DoCast(me, SPELL_ENRAGE);
+                            DoCast(me, DUNGEON_MODE(SPELL_ENRAGE, SPELL_ENRAGE_H));
                             events.ScheduleEvent(EVENT_ENRAGE, urand(7, 14)*IN_MILLISECONDS, 0, PHASE_HUMAN);
                             break;
                         case EVENT_SMASH:
-                            DoCastAOE(SPELL_SMASH);
+                            DoCastAOE(DUNGEON_MODE(SPELL_SMASH, SPELL_SMASH_H));
                             events.ScheduleEvent(EVENT_SMASH, urand(12, 16)*IN_MILLISECONDS, 0, PHASE_HUMAN);
                             break;
                         case EVENT_JUST_TRANSFORMED:
@@ -220,11 +225,11 @@ class boss_ingvar_the_plunderer : public CreatureScript
                             return;
                         // PHASE TWO
                         case EVENT_DARK_SMASH:
-                            DoCastVictim(SPELL_DARK_SMASH);
+                            DoCastVictim(DUNGEON_MODE(SPELL_DARK_SMASH, SPELL_DARK_SMASH_H));
                             events.ScheduleEvent(EVENT_DARK_SMASH, urand(12, 16)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
                             break;
                         case EVENT_DREADFUL_ROAR:
-                            DoCast(me, SPELL_DREADFUL_ROAR);
+                            DoCast(me, DUNGEON_MODE(SPELL_DREADFUL_ROAR, SPELL_DREADFUL_ROAR_H));
                             events.ScheduleEvent(EVENT_DREADFUL_ROAR, urand(18, 22)*IN_MILLISECONDS, 0, PHASE_UNDEAD);
                             break;
                         case EVENT_WOE_STRIKE:
