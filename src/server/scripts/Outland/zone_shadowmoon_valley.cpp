@@ -6,7 +6,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 100
-SDComment: Quest support: 10519, 10583, 10601, 10804, 10854, 10458, 10481, 10480, 11082, 10781, 10451. Vendor Drake Dealer Hurlunk.
+SDComment: Quest support: 10519, 10583, 10601, 10804, 10854, 10458, 10481, 10480, 11082, 10781, 10451, 11064, 11067, 11068, 11069, 11070, 11071. Vendor Drake Dealer Hurlunk.
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -25,6 +25,8 @@ npc_illidari_spawn
 npc_lord_illidan_stormrage
 go_crystal_prison
 npc_enraged_spirit
+npc_dragonmaw_racer
+npc_dragonmaw_race_target
 EndContentData */
 
 #include "ScriptMgr.h"
@@ -35,6 +37,7 @@ EndContentData */
 #include "SpellScript.h"
 #include "Player.h"
 #include "WorldSession.h"
+#include "WaypointManager.h"
 
 /*#####
 # npc_mature_netherwing_drake
@@ -1906,6 +1909,289 @@ class spell_unlocking_zuluheds_chains : public SpellScriptLoader
         }
 };
 
+/*#####
+# npc_dragonmaw_racer
+#####*/
+
+#define GOSSIP_START_RACE "I am ready. Let the race begin!"
+
+enum DragonmawRace
+{
+    RACE_START_DELAY            = 5000,
+    RACE_CHECK_INTERVAL         = 1000,
+    RACE_BOMB_INTERVAL          = 6000,
+    RACE_BOMB_FLIGHT_TIME       = 1500,
+    RACE_BOMB_DESPAWN_TIME      = 3000,
+    RACE_MAX_MISSED_CHECKS      = 4,
+
+    POINT_RACE_HOME             = 1
+};
+
+float const RaceMaxDistance = 100.0f;
+
+struct DragonmawRacerData
+{
+    uint32 RacerEntry;
+    uint32 QuestId;
+    uint32 BombSpell;
+    uint32 TargetEntry;
+    uint32 KnockdownSpell;
+};
+
+// Trope and Captain Skyshatter have no knockdown spell of their own in the client data, they use the first one.
+DragonmawRacerData const DragonmawRacers[] =
+{
+    { 23340, 11064, 40890, 23356, 40905 },  // Murg "Oldie" Muckjaw
+    { 23342, 11067, 40909, 23357, 40905 },  // Trope the Filth-Belcher
+    { 23344, 11068, 40894, 23358, 40900 },  // Corlok the Vet
+    { 23345, 11069, 40928, 23359, 40929 },  // Wing Commander Ichman
+    { 23346, 11070, 40930, 23360, 40931 },  // Wing Commander Mulverick
+    { 23348, 11071, 0,     23361, 40905 }   // Captain Skyshatter
+};
+
+DragonmawRacerData const* GetDragonmawRacer(uint32 entry)
+{
+    for (DragonmawRacerData const& racer : DragonmawRacers)
+        if (racer.RacerEntry == entry)
+            return &racer;
+
+    return NULL;
+}
+
+class npc_dragonmaw_racer : public CreatureScript
+{
+public:
+    npc_dragonmaw_racer() : CreatureScript("npc_dragonmaw_racer") { }
+
+    bool OnGossipHello(Player* player, Creature* creature) OVERRIDE
+    {
+        if (creature->IsQuestGiver())
+            player->PrepareQuestMenu(creature->GetGUID());
+
+        DragonmawRacerData const* racer = GetDragonmawRacer(creature->GetEntry());
+        npc_dragonmaw_racerAI* ai = CAST_AI(npc_dragonmaw_racer::npc_dragonmaw_racerAI, creature->AI());
+        if (racer && ai && !ai->IsBusy() && player->GetQuestStatus(racer->QuestId) == QUEST_STATUS_INCOMPLETE)
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_START_RACE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (action == GOSSIP_ACTION_INFO_DEF)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            if (npc_dragonmaw_racerAI* ai = CAST_AI(npc_dragonmaw_racer::npc_dragonmaw_racerAI, creature->AI()))
+                if (!ai->IsBusy())
+                    ai->StartRace(player);
+        }
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_dragonmaw_racerAI(creature);
+    }
+
+    struct npc_dragonmaw_racerAI : public ScriptedAI
+    {
+        npc_dragonmaw_racerAI(Creature* creature) : ScriptedAI(creature), Racer(GetDragonmawRacer(creature->GetEntry())), StartPosition(creature->GetHomePosition())
+        {
+            Reset();
+        }
+
+        DragonmawRacerData const* Racer;
+        Position StartPosition;
+        uint64 PlayerGUID;
+        uint32 StartTimer;
+        uint32 CheckTimer;
+        uint32 BombTimer;
+        uint32 MissedChecks;
+        bool Racing;
+        bool Finished;
+        bool Returning;
+
+        void Reset() OVERRIDE
+        {
+            PlayerGUID = 0;
+            StartTimer = 0;
+            CheckTimer = 0;
+            BombTimer = 0;
+            MissedChecks = 0;
+            Racing = false;
+            Finished = false;
+            Returning = false;
+        }
+
+        bool IsBusy() const
+        {
+            return Racing || Returning;
+        }
+
+        void StartRace(Player* player)
+        {
+            Reset();
+            PlayerGUID = player->GetGUID();
+            Racing = true;
+            StartTimer = RACE_START_DELAY;
+
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
+        }
+
+        void EndRace()
+        {
+            Racing = false;
+            Returning = true;
+            me->GetMotionMaster()->Clear();
+            me->GetMotionMaster()->MovePoint(POINT_RACE_HOME, StartPosition, false);
+        }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type == POINT_MOTION_TYPE && id == POINT_RACE_HOME)
+            {
+                me->SetCanFly(false);
+                me->SetDisableGravity(false);
+                me->SetHomePosition(StartPosition);
+                me->SetFacingTo(StartPosition.GetOrientation());
+                Reset();
+            }
+            else if (type == WAYPOINT_MOTION_TYPE && Racing)
+            {
+                WaypointPath const* path = sWaypointMgr->GetPath(Racer->RacerEntry * 100);
+                if (path && id + 1 >= path->size())
+                    Finished = true;
+            }
+        }
+
+        void ThrowBomb(Player* player)
+        {
+            float distance = player->isMoving() ? player->GetSpeed(MOVE_FLIGHT) * float(RACE_BOMB_FLIGHT_TIME) / 1000.0f : 0.0f;
+            Position pos;
+            player->GetPosition(&pos);
+            pos.m_positionX += distance * std::cos(player->GetOrientation()) + frand(-5.0f, 5.0f);
+            pos.m_positionY += distance * std::sin(player->GetOrientation()) + frand(-5.0f, 5.0f);
+
+            if (Creature* target = me->SummonCreature(Racer->TargetEntry, pos, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, RACE_BOMB_DESPAWN_TIME))
+                if (Racer->BombSpell)
+                    DoCast(target, Racer->BombSpell, true);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!Racing)
+                return;
+
+            if (StartTimer)
+            {
+                if (StartTimer > diff)
+                {
+                    StartTimer -= diff;
+                    return;
+                }
+
+                StartTimer = 0;
+                CheckTimer = RACE_CHECK_INTERVAL;
+                BombTimer = RACE_BOMB_INTERVAL;
+
+                // The racers are never faster than the rider's own mount, so every flying mount can keep up.
+                Player* rider = ObjectAccessor::GetPlayer(*me, PlayerGUID);
+                float rate = me->GetCreatureTemplate()->speed_run;
+                if (rider)
+                    rate = std::min(rate, rider->GetSpeedRate(MOVE_FLIGHT));
+
+                me->SetSpeed(MOVE_FLIGHT, rate);
+                me->GetMotionMaster()->MovePath(Racer->RacerEntry * 100, false);
+                return;
+            }
+
+            Player* player = ObjectAccessor::GetPlayer(*me, PlayerGUID);
+
+            if (Finished)
+            {
+                if (player && player->GetQuestStatus(Racer->QuestId) == QUEST_STATUS_INCOMPLETE && me->GetDistance(player) <= RaceMaxDistance)
+                    player->AreaExploredOrEventHappens(Racer->QuestId);
+
+                EndRace();
+                return;
+            }
+
+            if (BombTimer <= diff)
+            {
+                BombTimer = RACE_BOMB_INTERVAL;
+                if (player)
+                    ThrowBomb(player);
+            }
+            else
+                BombTimer -= diff;
+
+            if (CheckTimer > diff)
+            {
+                CheckTimer -= diff;
+                return;
+            }
+
+            CheckTimer = RACE_CHECK_INTERVAL;
+
+            // The rider must stay in the air within reach of the racer, a bomb knocks the mount off.
+            if (player && player->IsAlive() && player->IsFlying() && me->GetDistance(player) <= RaceMaxDistance)
+                MissedChecks = 0;
+            else if (++MissedChecks >= RACE_MAX_MISSED_CHECKS)
+                EndRace();
+        }
+    };
+};
+
+/*#####
+# npc_dragonmaw_race_target
+#####*/
+
+class npc_dragonmaw_race_target : public CreatureScript
+{
+public:
+    npc_dragonmaw_race_target() : CreatureScript("npc_dragonmaw_race_target") { }
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_dragonmaw_race_targetAI(creature);
+    }
+
+    struct npc_dragonmaw_race_targetAI : public ScriptedAI
+    {
+        npc_dragonmaw_race_targetAI(Creature* creature) : ScriptedAI(creature)
+        {
+            Reset();
+        }
+
+        uint32 ExplodeTimer;
+
+        void Reset() OVERRIDE
+        {
+            ExplodeTimer = RACE_BOMB_FLIGHT_TIME;
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            if (!ExplodeTimer)
+                return;
+
+            if (ExplodeTimer > diff)
+            {
+                ExplodeTimer -= diff;
+                return;
+            }
+
+            ExplodeTimer = 0;
+            for (DragonmawRacerData const& racer : DragonmawRacers)
+                if (racer.TargetEntry == me->GetEntry())
+                    DoCast(me, racer.KnockdownSpell, true);
+        }
+    };
+};
+
 enum ShadowMoonTuberEnum
 {
     SPELL_WHISTLE               = 36652,
@@ -2015,4 +2301,6 @@ void AddSC_shadowmoon_valley()
     new npc_enraged_spirit();
     new spell_unlocking_zuluheds_chains();
     new npc_shadowmoon_tuber_node();
+    new npc_dragonmaw_racer();
+    new npc_dragonmaw_race_target();
 }
