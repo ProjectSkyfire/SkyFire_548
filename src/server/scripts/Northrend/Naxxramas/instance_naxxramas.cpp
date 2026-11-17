@@ -116,8 +116,6 @@ class instance_naxxramas : public InstanceMapScript
                 HeiganGUID              = 0;
                 FeugenGUID              = 0;
                 StalaggGUID             = 0;
-                TeslaCoilGUID[0]        = 0;
-                TeslaCoilGUID[1]        = 0;
                 FeugenCoilGOGUID        = 0;
                 StalaggCoilGOGUID       = 0;
                 SapphironGUID           = 0;
@@ -163,15 +161,6 @@ class instance_naxxramas : public InstanceMapScript
                     case NPC_STALAGG:
                         StalaggGUID = creature->GetGUID();
                         break;
-                    case NPC_TESLA:
-                        if (TeslaCoilGUID[0] != creature->GetGUID() && TeslaCoilGUID[1] != creature->GetGUID())
-                        {
-                            if (!TeslaCoilGUID[0])
-                                TeslaCoilGUID[0] = creature->GetGUID();
-                            else if (!TeslaCoilGUID[1])
-                                TeslaCoilGUID[1] = creature->GetGUID();
-                        }
-                        break;
                     case NPC_SAPPHIRON:
                         SapphironGUID = creature->GetGUID();
                         break;
@@ -187,10 +176,6 @@ class instance_naxxramas : public InstanceMapScript
 
             void OnCreatureRemove(Creature* creature) OVERRIDE
             {
-                if (creature->GetEntry() == NPC_TESLA)
-                    for (uint8 i = 0; i < 2; ++i)
-                        if (TeslaCoilGUID[i] == creature->GetGUID())
-                            TeslaCoilGUID[i] = 0;
                 AddMinion(creature, false);
             }
 
@@ -371,10 +356,6 @@ class instance_naxxramas : public InstanceMapScript
                         return FeugenGUID;
                     case DATA_STALAGG:
                         return StalaggGUID;
-                    case DATA_TESLA_COIL_1:
-                        return TeslaCoilGUID[0];
-                    case DATA_TESLA_COIL_2:
-                        return TeslaCoilGUID[1];
                     case DATA_FEUGEN_COIL_GO:
                         return FeugenCoilGOGUID;
                     case DATA_STALAGG_COIL_GO:
@@ -600,7 +581,6 @@ class instance_naxxramas : public InstanceMapScript
             uint64 ThaddiusGUID;
             uint64 FeugenGUID;
             uint64 StalaggGUID;
-            uint64 TeslaCoilGUID[2];
             uint64 FeugenCoilGOGUID;
             uint64 StalaggCoilGOGUID;
 

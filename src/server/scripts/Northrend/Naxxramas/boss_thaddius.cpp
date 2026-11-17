@@ -57,16 +57,15 @@ enum TeslaSpells
     SPELL_FEUGEN_CHAIN  = 28111,
     SPELL_TESLA_SHOCK   = 28099,
     SPELL_SHOCK_VISUAL  = 28159,
-    SPELL_SPARK_VISUAL  = 28136,
-    SPELL_INACTIVE_VISUAL = 28160
+    SPELL_SPARK_VISUAL  = 28136
 };
 
-Creature* GetTeslaCoil(Creature* add)
+static Creature* GetTeslaCoil(Creature* add)
 {
     return add->FindNearestCreature(NPC_TESLA, 1000.0f, true);
 }
 
-GameObject* GetTeslaCoilGO(Creature* add, uint32 entry)
+static GameObject* GetTeslaCoilGO(Creature* add, uint32 entry)
 {
     return add->FindNearestGameObject(entry, 1000.0f);
 }
@@ -271,7 +270,6 @@ public:
                     {
                         transitionStage = 0;
                         transitionTimer = 0;
-                        me->RemoveAurasDueToSpell(SPELL_INACTIVE_VISUAL);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_STUNNED);
                         DoZoneInCombat();
                     }
