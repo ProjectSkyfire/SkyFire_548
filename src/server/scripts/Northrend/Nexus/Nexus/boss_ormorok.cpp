@@ -12,7 +12,9 @@ enum Spells
 {
     SPELL_SPELL_REFLECTION                      = 47981,
     SPELL_TRAMPLE                               = 48016,
+    SPELL_TRAMPLE_H                             = 57066,
     SPELL_FRENZY                                = 48017,
+    SPELL_FRENZY_H                              = 57086,
     SPELL_SUMMON_CRYSTALLINE_TANGLER            = 61564,
     SPELL_CRYSTAL_SPIKES                        = 47958,
 };
@@ -82,7 +84,7 @@ public:
         {
             if (!frenzy && HealthBelowPct(25))
             {
-                DoCast(me, SPELL_FRENZY);
+                DoCast(me, DUNGEON_MODE(SPELL_FRENZY, SPELL_FRENZY_H));
                 frenzy = true;
             }
         }
@@ -117,7 +119,7 @@ public:
                 switch (eventId)
                 {
                 case EVENT_TRAMPLE:
-                    DoCast(me, SPELL_TRAMPLE);
+                    DoCast(me, DUNGEON_MODE(SPELL_TRAMPLE, SPELL_TRAMPLE_H));
                     events.ScheduleEvent(EVENT_TRAMPLE, 10000);
                     break;
                 case EVENT_SPELL_REFLECTION:
