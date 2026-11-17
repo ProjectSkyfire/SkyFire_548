@@ -221,6 +221,7 @@ enum Spells
     SPELL_SUMMON_RISE_WITCH_DOCTOR     = 69836,
     SPELL_SUMMON_LUMBERING_ABOMINATION = 69835,
     SPELL_SUMMON_ICE_WALL              = 69768, // Visual effect and icewall summoning
+    SPELL_ACHIEV_CHECK                 = 72830, // Escaped from Arthas encounter credit
 
     // Raging Ghoul
     SPELL_EMERGE_VISUAL                = 50142,
@@ -732,6 +733,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
         void JustDied(Unit* /*Killer*/) OVERRIDE
         {
             _instance->SetData(DATA_ESCAPE_EVENT, FAIL);
+            _instance->SetBossState(DATA_LICHKING_EVENT, FAIL);
         }
 
         void DoAction(int32 actionId) OVERRIDE
@@ -802,6 +804,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         break;
                     case EVENT_ESCAPE_1:
                         _instance->SetData(DATA_ESCAPE_EVENT, IN_PROGRESS);
+                        _instance->SetBossState(DATA_LICHKING_EVENT, IN_PROGRESS);
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                         {
                             if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
@@ -1083,6 +1086,9 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         me->SummonGameObject(GO_PORTAL, FinalPortalPos.GetPositionX(), FinalPortalPos.GetPositionY(), FinalPortalPos.GetPositionZ(), FinalPortalPos.GetOrientation(), 0, 0, 0, 0, 720000);
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                             lichking->DespawnOrUnsummon(1);
+                        _instance->SetData(DATA_ESCAPE_EVENT, DONE);
+                        _instance->SetBossState(DATA_LICHKING_EVENT, DONE);
+                        _instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_CAST_SPELL, SPELL_ACHIEV_CHECK, me);
                         break;
                     }
                 }
