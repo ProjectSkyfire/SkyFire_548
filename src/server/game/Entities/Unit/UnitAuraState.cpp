@@ -64,12 +64,13 @@ Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint3
 {
     ASSERT(casterGUID || caster);
 
+    // Spellsteal passes only the caster's GUID, so caster can be null here.
     // Player-controlled stacked auras must remain caster-bound. Otherwise raid members
     // can repeatedly refresh the same owned aura and inflate its stack count.
     bool bindStackToCaster = Skyfire::Spells::ShouldBindStackingAuraToCaster(
         newAura->IsStackableOnOneSlotWithDifferentCasters(),
-        caster->GetTypeId() == TypeID::TYPEID_UNIT,
-        caster->IsSummon(),
+        caster && caster->GetTypeId() == TypeID::TYPEID_UNIT,
+        caster && caster->IsSummon(),
         IsSummon());
 
     if (!casterGUID && bindStackToCaster)
@@ -653,7 +654,8 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit*
                         newAura->UnregisterSingleTarget();
                         // bring back single target aura status to the old aura
                         aura->SetIsSingleTarget(true);
-                        caster->GetSingleCastAuras().push_back(aura);
+                        if (caster)
+                            caster->GetSingleCastAuras().push_back(aura);
                     }
                     // FIXME: using aura->GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
                     newAura->SetLoadedState(aura->GetMaxDuration(), int32(dur), stealCharge ? 1 : aura->GetCharges(), 1, recalculateMask, &damage[0]);
