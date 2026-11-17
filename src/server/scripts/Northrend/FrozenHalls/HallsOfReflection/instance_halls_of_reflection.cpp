@@ -172,7 +172,7 @@ public:
                 case GO_ARTHAS_DOOR:
                     _arthasDoorGUID = go->GetGUID();
                     go->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
-                    if (GetBossState(DATA_FROSWORN_EVENT) == DONE)
+                    if (GetData(DATA_FROSWORN_EVENT) == DONE)
                         HandleGameObject(0, true, go);
                     else
                         HandleGameObject(0, false, go);
@@ -499,7 +499,7 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "H R " << GetBossSaveData() << _introEvent << ' ' << _frostwornGeneral << _escapeevent;
+            saveStream << "H R " << GetBossSaveData() << _introEvent << ' ' << _frostwornGeneral << ' ' << _escapeevent;
 
             OUT_SAVE_INST_DATA_COMPLETE;
             return saveStream.str();

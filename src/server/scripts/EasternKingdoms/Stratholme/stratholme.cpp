@@ -23,6 +23,7 @@ EndContentData */
 #include "Group.h"
 #include "Player.h"
 #include "SpellInfo.h"
+#include "MoveSplineInit.h"
 
 /*######
 ## go_gauntlet_gate (this is the _first_ of the gauntlet gates, two exist)
@@ -292,10 +293,116 @@ public:
     }
 };
 
+/*######
+## npc_argent_crusader
+######*/
+
+class npc_argent_crusader : public CreatureScript
+{
+public:
+    npc_argent_crusader() : CreatureScript("npc_argent_crusader") { }
+
+    struct npc_argent_crusaderAI : public ScriptedAI
+    {
+        npc_argent_crusaderAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() OVERRIDE
+        {
+            // staged fights against the undead: the crusaders must not kill them
+            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MINDAMAGE, 0);
+            me->SetBaseWeaponDamage(WeaponAttackType::BASE_ATTACK, WeaponDamageRange::MAXDAMAGE, 0);
+            me->UpdateDamagePhysical(WeaponAttackType::BASE_ATTACK);
+
+            for (uint32 entry : CitizenType)
+            {
+                if (Creature* citizen = me->FindNearestCreature(entry, 30.0f, true))
+                {
+                    me->Attack(citizen, true);
+                    me->GetMotionMaster()->MoveChase(citizen);
+                    break;
+                }
+            }
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage) OVERRIDE
+        {
+            if (attacker->GetTypeId() != TypeID::TYPEID_PLAYER && HealthBelowPct(40))
+                damage = 0;
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_argent_crusaderAI(creature);
+    }
+};
+
+/*######
+## npc_brotherhood_of_the_light_quester
+######*/
+
+enum BrotherhoodQuester
+{
+    EVENT_BALNAZZAR_QUEST = 1,
+};
+
+class npc_brotherhood_of_the_light_quester : public CreatureScript
+{
+public:
+    npc_brotherhood_of_the_light_quester() : CreatureScript("npc_brotherhood_of_the_light_quester") { }
+
+    struct npc_brotherhood_of_the_light_questerAI : public ScriptedAI
+    {
+        npc_brotherhood_of_the_light_questerAI(Creature* creature) : ScriptedAI(creature) { }
+
+        EventMap nonCombatEvents;
+
+        void DoAction(int32 actionId) OVERRIDE
+        {
+            if (actionId != ACTION_BALNAZZAR)
+                return;
+
+            me->SetVisible(true);
+
+            Movement::MoveSplineInit init(me);
+            if (me->GetEntry() == NPC_COMMANDER_ELIGOR)
+                init.MoveTo(EligorPath.GetPositionX(), EligorPath.GetPositionY(), EligorPath.GetPositionZ());
+            else
+            {
+                for (Position const& pos : StoneBruiserPath)
+                    init.Path().push_back(G3D::Vector3(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()));
+            }
+
+            init.SetSmooth();
+            init.SetUncompressed();
+            init.Launch();
+            nonCombatEvents.ScheduleEvent(EVENT_BALNAZZAR_QUEST, me->GetSplineDuration());
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            nonCombatEvents.Update(diff);
+
+            while (uint32 eventId = nonCombatEvents.ExecuteEvent())
+            {
+                if (eventId == EVENT_BALNAZZAR_QUEST)
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_brotherhood_of_the_light_questerAI(creature);
+    }
+};
+
 void AddSC_stratholme()
 {
     new go_gauntlet_gate();
     new npc_freed_soul();
     new npc_restless_soul();
     new npc_spectral_ghostly_citizen();
+    new npc_argent_crusader();
+    new npc_brotherhood_of_the_light_quester();
 }

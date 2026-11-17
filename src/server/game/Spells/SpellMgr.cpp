@@ -3628,6 +3628,65 @@ void SpellMgr::LoadSpellInfoCorrections()
                     if (spellInfo->Effects[i].Effect == SPELL_EFFECT_SUMMON)
                         spellInfo->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ANY);
                 break;
+            // Terrace of Endless Spring
+            case 107145: // Light Wall Active
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_SRC_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(TARGET_UNIT_SRC_AREA_ENTRY);
+                break;
+            case 117052: // Corruption Sha
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    spellInfo->Effects[i].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                    spellInfo->Effects[i].TargetB = SpellImplicitTargetInfo(0);
+                }
+                break;
+            case 127731: // Corruption Sha (triggered)
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(0);
+                break;
+            case 117187: // Lightning Bolt
+            case 118312: // Water Bolt
+            case 122881: // Unstable Bolt
+                spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+                break;
+            case 117519: // Touch of Sha
+            case 120629: // Huddle in Terror
+                spellInfo->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
+                break;
+            case 119312: // Conjure Terror Spawn
+            case 119370:
+            case 119371:
+            case 119372:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(0);
+                break;
+            case 119414: // Breath of Fear
+                spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
+            case 120285: // Transfer Light
+                spellInfo->TargetAuraState = 0;
+                break;
+            case 120453: // Conjure Dread Spawn
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_DEST);
+                break;
+            case 123244: // Hide
+                spellInfo->Effects[EFFECT_0].Effect = 0;
+                spellInfo->Effects[EFFECT_2].Effect = 0;
+                break;
+            case 123620: // Clouded Reflection
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+                break;
+            case 125706:
+            case 130022:
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+                break;
+            case 125713: // Channeling Corruption (triggered)
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+                break;
+            case 126848: // Ritual of Purification
+                spellInfo->Effects[EFFECT_0].BasePoints = -10;
+                spellInfo->Effects[EFFECT_1].BasePoints = -10;
+                break;
             default:
                 break;
         }

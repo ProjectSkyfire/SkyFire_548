@@ -217,6 +217,9 @@ public:
                         pAnnouncer->SummonGameObject(instance->IsHeroic()? GO_PALETRESS_LOOT_H : GO_PALETRESS_LOOT, 746.59f, 618.49f, 411.09f, 1.42f, 0, 0, 0, 0, 90000000);
                     }
                     break;
+                case BOSS_BLACK_KNIGHT:
+                    m_auiEncounter[3] = uiData;
+                    break;
             }
 
             if (uiData == DONE)
