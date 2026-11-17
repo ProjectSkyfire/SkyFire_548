@@ -13,6 +13,7 @@
 #include "DB2Stores.h"
 #include "DB2Enums.h"
 #include "DBCEnums.h"
+#include "Formulas.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -1336,6 +1337,21 @@ uint16 BattlePetMgr::RewardActivePetBattlePet(BattlePet* battlePet, bool awardEx
     return battlePet->AddExperience(reward);
 }
 
+// A won wild pet battle pays the character the experience of one creature kill at its own level.
+// The amount is not published for 5.4.8; players reported about one mob kill per win.
+void BattlePetMgr::RewardPlayerExperience(uint8 highestAllyLevel)
+{
+    uint8 const highestEnemyLevel = m_activePetBattle.EnemyLevel;
+
+    if (!BattlePetBattlePaysPlayerExperience(highestAllyLevel, highestEnemyLevel))
+        return;
+
+    uint8 const playerLevel = m_owner->getLevel();
+    uint32 const baseGain = Skyfire::XP::BaseGain(playerLevel, playerLevel,
+        GetContentLevelsForMapAndZone(m_owner->GetMapId(), m_owner->GetZoneId()));
+    m_owner->GiveXP(uint32(baseGain * sWorld->getRate(Rates::RATE_XP_PET_BATTLE_PLAYER)), NULL);
+}
+
 uint32 BattlePetMgr::GetUniqueBattlePetSpeciesCount() const
 {
     std::set<uint16> species;
@@ -1468,6 +1484,7 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
         && !m_activePetBattle.RewardsApplied && m_activePetBattle.Winner == PET_BATTLE_WINNER_ALLY;
 
     std::vector<Skyfire::BattlePetPackets::BattlePetFinalRoundPet> pets;
+    uint8 highestAllyLevel = 0;
     for (uint8 i = 0; i < ActivePetBattle::BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++i)
     {
         if (!m_activePetBattle.HasAllyPet(i))
@@ -1476,6 +1493,7 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
         Skyfire::BattlePetPackets::BattlePetFinalRoundPet allyPet;
         BattlePet* battlePet = GetBattlePet(m_activePetBattle.AllyTeam[i].PetID);
         uint8 const initialLevel = battlePet ? battlePet->GetLevel() : 0;
+        highestAllyLevel = std::max(highestAllyLevel, initialLevel);
         bool const petEarnedExperience = awardExperience && i == m_activePetBattle.AllyFrontPet
             && m_activePetBattle.AllyTeam[i].Health != 0;
         uint16 const awardedXp = RewardActivePetBattlePet(
@@ -1504,7 +1522,10 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
     }
 
     if (awardExperience)
+    {
+        RewardPlayerExperience(highestAllyLevel);
         m_activePetBattle.RewardsApplied = true;
+    }
 
     UpdateFinishedPetBattleAchievements();
 

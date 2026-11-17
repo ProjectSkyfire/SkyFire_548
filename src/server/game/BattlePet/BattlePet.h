@@ -223,6 +223,7 @@ inline uint8 BattlePetAbilitySlotForJournalFlag(uint32 flag)
 uint16 BattlePetHealthFromPercent(uint16 maxHealth, uint8 percent);
 uint16 BattlePetExperienceForNextLevel(uint8 level);
 uint16 BattlePetExperienceReward(uint8 petLevel, uint8 enemyLevel, uint8 participatingPetCount = 1);
+bool BattlePetBattlePaysPlayerExperience(uint8 highestAllyLevel, uint8 highestEnemyLevel);
 uint8 BattlePetNormalizeWildLevel(uint8 level);
 bool BattlePetSpeciesFlagsAllowWildCapture(uint32 flags);
 
