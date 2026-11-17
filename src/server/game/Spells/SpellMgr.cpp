@@ -407,9 +407,28 @@ bool SpellMgr::IsSpellValid(SpellInfo const* spellInfo, Player* player, bool msg
     return true;
 }
 
-uint32 SpellMgr::GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const
+// Instances of this expansion and later keep the default spells, their difficulty data is not checked yet
+static uint32 const SPELL_DIFFICULTY_FIRST_UNUSED_EXPANSION = 4;
+
+// Pandaria remakes of old dungeons, their map entry still has the old expansion: Scarlet Halls, Scarlet Monastery, Scholomance
+static uint32 const SPELL_DIFFICULTY_MOP_REMADE_MAPS[] = { 1001, 1004, 1007 };
+
+static bool UsesSpellDifficulty(Unit const* caster)
 {
     if (!caster || !caster->GetMap() || !caster->GetMap()->IsInstance())
+        return false;
+
+    Map const* map = caster->GetMap();
+    for (uint32 mapId : SPELL_DIFFICULTY_MOP_REMADE_MAPS)
+        if (map->GetId() == mapId)
+            return false;
+
+    return map->GetEntry()->Expansion() < SPELL_DIFFICULTY_FIRST_UNUSED_EXPANSION;
+}
+
+uint32 SpellMgr::GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const
+{
+    if (!UsesSpellDifficulty(caster))
         return spellId;
 
     // Rows are found by their first spell only, so a script that already passes a later one keeps it
@@ -461,7 +480,7 @@ SpellInfo const* SpellMgr::GetSpellForDifficultyFromSpell(SpellInfo const* spell
 
     SF_LOG_DEBUG("spells", "SpellMgr::GetSpellForDifficultyFromSpell: Spell id for instance mode is %u (original %u)", newSpell->Id, spell->Id);
 
-    if (!caster || !caster->GetMap() || !caster->GetMap()->IsInstance())
+    if (!UsesSpellDifficulty(caster))
         return newSpell;
 
     // Effects with rows of their own for the difficulty
