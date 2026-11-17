@@ -13,6 +13,7 @@ enum Spells
     SPELL_MAGIC_PULL                              = 51336,
     SPELL_MAGIC_PULL_EFFECT                       = 50770,
     SPELL_THUNDERING_STOMP                        = 50774,
+    SPELL_THUNDERING_STOMP_H                      = 59370,
     SPELL_UNSTABLE_SPHERE_PASSIVE                 = 50756,
     SPELL_UNSTABLE_SPHERE_PULSE                   = 50757,
     SPELL_UNSTABLE_SPHERE_TIMER                   = 50758,
@@ -106,7 +107,7 @@ public:
                         break;
                     case EVENT_STOMP:
                         Talk(SAY_STOMP);
-                        DoCast(SPELL_THUNDERING_STOMP);
+                        DoCast(DUNGEON_MODE(SPELL_THUNDERING_STOMP, SPELL_THUNDERING_STOMP_H));
                         events.ScheduleEvent(EVENT_STOMP, 17000);
                         break;
                 }
