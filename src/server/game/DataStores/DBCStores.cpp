@@ -1225,7 +1225,7 @@ std::vector<uint32> const* GetSpecializationSpells(uint32 specializationId)
     return NULL;
 }
 
-MapDifficulty const* GetDefaultMapDifficulty(uint32 mapId)
+MapDifficulty const* GetDefaultMapDifficulty(uint32 mapId, DifficultyID* difficulty /*= nullptr*/)
 {
     auto itr = sMapDifficultyMap.find(mapId);
     if (itr == sMapDifficultyMap.end())
@@ -1236,14 +1236,20 @@ MapDifficulty const* GetDefaultMapDifficulty(uint32 mapId)
 
     for (auto& p : itr->second)
     {
-        DifficultyEntry const* difficulty = sDifficultyStore.LookupEntry(p.first);
-        if (!difficulty)
+        DifficultyEntry const* difficultyEntry = sDifficultyStore.LookupEntry(p.first);
+        if (!difficultyEntry)
             continue;
 
-        if (difficulty->flags & 0x02)
+        if (difficultyEntry->flags & 0x02)
+        {
+            if (difficulty)
+                *difficulty = DifficultyID(p.first);
             return &p.second;
+        }
     }
 
+    if (difficulty)
+        *difficulty = DifficultyID(itr->second.begin()->first);
     return &itr->second.begin()->second;
 }
 
@@ -1279,12 +1285,12 @@ MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, DifficultyID& 
         if (MapDifficulty const* mapDiff = GetMapDifficultyData(mapId, difficulty))
             return mapDiff;
 
-        return GetDefaultMapDifficulty(mapId);
+        return GetDefaultMapDifficulty(mapId, &difficulty);
     }
 
     DifficultyEntry const* diffEntry = sDifficultyStore.LookupEntry(difficulty);
     if (!diffEntry)
-        return GetDefaultMapDifficulty(mapId);
+        return GetDefaultMapDifficulty(mapId, &difficulty);
 
     uint32 tmpDiff = difficulty;
     MapDifficulty const* mapDiff = GetMapDifficultyData(mapId, DifficultyID(tmpDiff));
@@ -1293,7 +1299,7 @@ MapDifficulty const* GetDownscaledMapDifficultyData(uint32 mapId, DifficultyID& 
         tmpDiff = diffEntry->DownscaleID;
         diffEntry = sDifficultyStore.LookupEntry(tmpDiff);
         if (!diffEntry)
-            return GetDefaultMapDifficulty(mapId);
+            return GetDefaultMapDifficulty(mapId, &difficulty);
 
         // pull new data
         mapDiff = GetMapDifficultyData(mapId, DifficultyID(tmpDiff));
