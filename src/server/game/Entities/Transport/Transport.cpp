@@ -593,9 +593,13 @@ bool Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
             }
         }
 
-        for (std::set<WorldObject*>::iterator itr = _passengers.begin(); itr != _passengers.end();)
+        // Teleporting a player unsummons its pet, which removes the pet from _passengers. Walk a copy and skip
+        // what was removed meanwhile, otherwise the advanced iterator points at an erased node.
+        std::set<WorldObject*> passengers = _passengers;
+        for (WorldObject* obj : passengers)
         {
-            WorldObject* obj = (*itr++);
+            if (!_passengers.contains(obj))
+                continue;
 
             float destX, destY, destZ, destO;
             obj->m_movementInfo.transport.pos.GetPosition(destX, destY, destZ, destO);

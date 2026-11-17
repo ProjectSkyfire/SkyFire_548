@@ -857,8 +857,12 @@ public:
         {
             GetTarget()->CastSpell(GetTarget(), SPELL_PRIEST_WEAKENED_SOUL, true);
 
-            // body and soul
-            if (AuraEffect const* bodyandsoul = GetCaster()->GetAuraEffectOfRankedSpell(64129, EFFECT_0))
+            // body and soul; the caster is not in the world yet when the aura is restored at login
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            if (AuraEffect const* bodyandsoul = caster->GetAuraEffectOfRankedSpell(64129, EFFECT_0))
             {
                 int32 bp = bodyandsoul->GetAmount();
                 GetTarget()->CastCustomSpell(SPELL_PRIEST_BODY_AND_SOUL_SPEED, SPELLVALUE_BASE_POINT0, bp, NULL, true, NULL, aurEff);
