@@ -503,6 +503,7 @@ class boss_toc_champion_controller : public CreatureScript
                                 else if (_championsKilled >= _summons.size())
                                 {
                                     _instance->SetBossState(BOSS_CRUSADERS, DONE);
+                                    _instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, NPC_CHAMPIONS_CONTROLLER, me);
                                     _summons.DespawnAll();
                                     me->DespawnOrUnsummon();
                                 }
