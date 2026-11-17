@@ -29,14 +29,11 @@ DELETE FROM `creature_questender` WHERE `id` = 9298 AND `quest` = 28462;
 INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (9298, 28462);
 
--- Quest NPCs that were never spawned, 5.4.8 positions: Nafien (Timbermaw Hold, starts "Speak to Salfa" and
--- "Winterspring!"), Gorn One Eye (Timbermaw Hold, starts and ends "The Root of All Evil") and the Kaldorei, Quel'dorei
--- and Sin'dorei Spirits at Lake Kel'Theril (give and end "Pride of the Highborne" and the rest of the Kel'Theril
--- chain). 4.3.4 has the same positions for Nafien and Gorn One Eye and no spawn for the spirits.
-DELETE FROM `creature` WHERE `guid` BETWEEN 8331800 AND 8331804;
+-- The Kaldorei, Quel'dorei and Sin'dorei Spirits at Lake Kel'Theril give and end "Pride of the Highborne" and the rest
+-- of the Kel'Theril chain and were never spawned. 5.4.8 positions; 4.3.4 has no spawn for them. Nafien and Gorn One
+-- Eye of Timbermaw Hold are already spawned by the Felwood update.
+DELETE FROM `creature` WHERE `guid` BETWEEN 8331802 AND 8331804;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
-(8331800, 15395, 1, 1, 0, 0, 0, 0, 6821.85, -2082.51, 623.27, 3.15905, 300, 0, 0, 0, 0, 0, 0, 0, 0), -- Nafien
-(8331801, 11555, 1, 1, 0, 0, 0, 0, 7030.72, -2106.32, 589.056, 4.34587, 300, 0, 0, 0, 0, 0, 0, 0, 0), -- Gorn One Eye
 (8331802, 48658, 1, 1, 0, 0, 0, 0, 6543.91, -4110.53, 663.446, 0.366519, 300, 0, 0, 0, 0, 0, 0, 0, 0), -- Kaldorei Spirit
 (8331803, 48659, 1, 1, 0, 0, 0, 0, 6538.57, -4115.86, 664.659, 4.50295, 300, 0, 0, 0, 0, 0, 0, 0, 0), -- Quel'dorei Spirit
 (8331804, 48660, 1, 1, 0, 0, 0, 0, 6535.74, -4109.19, 662.943, 2.67035, 300, 0, 0, 0, 0, 0, 0, 0, 0); -- Sin'dorei Spirit
