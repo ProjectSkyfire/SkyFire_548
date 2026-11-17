@@ -20,7 +20,9 @@ enum DataTypes
     // Additional Data
     DATA_WATCHER_GASHRA             = 3,
     DATA_WATCHER_SILTHIK            = 4,
-    DATA_WATCHER_NARJIL             = 5
+    DATA_WATCHER_NARJIL             = 5,
+    DATA_ANUBARAK_WALL              = 6,
+    DATA_ANUBARAK_WALL_2            = 7
 };
 
 enum CreatureIds
@@ -46,6 +48,11 @@ template<class AI>
 AI* GetAzjolNerubAI(Creature* creature)
 {
     return GetInstanceAI<AI>(creature, AzjolNerubScriptName);
+}
+
+inline uint32 RandTimeMs(uint32 minSeconds, uint32 maxSeconds)
+{
+    return urand(minSeconds * IN_MILLISECONDS, maxSeconds * IN_MILLISECONDS);
 }
 
 #endif // AZJOL_NERUB_H_

@@ -588,18 +588,21 @@ void BossAI::UpdateAI(uint32 diff)
     DoMeleeAttackIfReady();
 }
 
-void BossAI::_DespawnAtEvade()
+void BossAI::_DespawnAtEvade(uint32 delayToRespawn, Creature* who)
 {
-    uint32 corpseDelay = me->GetCorpseDelay();
-    uint32 respawnDelay = me->GetRespawnDelay();
+    if (!who)
+        who = me;
 
-    me->SetCorpseDelay(1);
-    me->SetRespawnDelay(29);
+    uint32 corpseDelay = who->GetCorpseDelay();
+    uint32 respawnDelay = who->GetRespawnDelay();
 
-    me->DespawnOrUnsummon();
+    who->SetCorpseDelay(1);
+    who->SetRespawnDelay(delayToRespawn - 1);
 
-    me->SetCorpseDelay(corpseDelay);
-    me->SetRespawnDelay(respawnDelay);
+    who->DespawnOrUnsummon();
+
+    who->SetCorpseDelay(corpseDelay);
+    who->SetRespawnDelay(respawnDelay);
 }
 
 // WorldBossAI - for non-instanced bosses

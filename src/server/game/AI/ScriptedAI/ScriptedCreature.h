@@ -423,7 +423,7 @@ protected:
     {
         me->setActive(false);
     }
-    void _DespawnAtEvade();
+    void _DespawnAtEvade(uint32 delayToRespawn = 30, Creature* who = NULL);
 
     bool CheckInRoom()
     {
