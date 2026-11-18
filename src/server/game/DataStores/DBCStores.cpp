@@ -138,6 +138,8 @@ DBCStorage <ItemLimitCategoryEntry> sItemLimitCategoryStore(ItemLimitCategoryEnt
 DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
 DBCStorage <ItemRandomSuffixEntry> sItemRandomSuffixStore(ItemRandomSuffixfmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
+DBCStorage <ItemSpecEntry> sItemSpecStore(ItemSpecEntryfmt);
+DBCStorage <ItemSpecOverrideEntry> sItemSpecOverrideStore(ItemSpecOverrideEntryfmt);
 
 DBCStorage <LFGDungeonEntry> sLFGDungeonStore(LFGDungeonEntryfmt);
 DBCStorage <LiquidTypeEntry> sLiquidTypeStore(LiquidTypefmt);
@@ -456,6 +458,8 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemRandomPropertiesStore, dbcPath, "ItemRandomProperties.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemRandomSuffixStore, dbcPath, "ItemRandomSuffix.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemSetStore, dbcPath, "ItemSet.dbc");//15595
+    LoadDBC(availableDbcLocales, bad_dbc_files, sItemSpecStore, dbcPath, "ItemSpec.dbc");//18414
+    LoadDBC(availableDbcLocales, bad_dbc_files, sItemSpecOverrideStore, dbcPath, "ItemSpecOverride.dbc");//18414
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemArmorQualityStore, dbcPath, "ItemArmorQuality.dbc");//15595
     LoadDBC(availableDbcLocales, bad_dbc_files, sItemArmorShieldStore, dbcPath, "ItemArmorShield.dbc");//15595
