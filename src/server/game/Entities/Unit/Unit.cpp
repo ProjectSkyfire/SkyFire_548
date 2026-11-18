@@ -21,6 +21,7 @@
 #include "GridNotifiersImpl.h"
 #include "Group.h"
 #include "InstanceSaveMgr.h"
+#include "InstanceScenario.h"
 #include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
@@ -6826,6 +6827,13 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
         SF_LOG_DEBUG("entities.unit", "SET JUST_DIED");
         victim->setDeathState(DeathState::JUST_DIED);
     }
+
+    // Counted here and not in setDeathState, which also runs when a living creature is despawned or force-respawned.
+    // Player pets, guardians and totems are not kill objectives.
+    if (victim->GetTypeId() == TypeID::TYPEID_UNIT && !victim->IsControlledByPlayer())
+        if (InstanceMap* instanceMap = victim->GetMap()->ToInstanceMap())
+            if (InstanceScenario* scenario = instanceMap->GetScenario())
+                scenario->OnCreatureKilled(victim->GetEntry());
 
     // Inform pets (if any) when player kills target)
     // MUST come after victim->setDeathState(JUST_DIED); or pet next target
