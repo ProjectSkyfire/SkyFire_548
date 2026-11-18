@@ -877,3 +877,13 @@ target_include_directories(game_domain_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE
 target_include_directories(battle_pet_packet_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE_DIRS})
 
 add_test(NAME game_domain_tests COMMAND game_domain_tests)
+
+add_executable(bonus_loot_rules_tests
+  BonusLootRulesTests.cpp
+)
+
+target_include_directories(bonus_loot_rules_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/game/Loot
+)
+
+add_test(NAME bonus_loot_rules_tests COMMAND bonus_loot_rules_tests)
