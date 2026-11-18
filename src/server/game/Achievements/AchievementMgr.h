@@ -59,10 +59,12 @@ enum AchievementCriteriaDataType
     ACHIEVEMENT_CRITERIA_DATA_TYPE_BG_LOSS_TEAM_SCORE = 17, // min_score      max_score     player's team win bg and opposition team have team score in range
     ACHIEVEMENT_CRITERIA_DATA_INSTANCE_SCRIPT = 18, // 0              0             maker instance script call for check current criteria requirements fit
     ACHIEVEMENT_CRITERIA_DATA_TYPE_S_EQUIPED_ITEM = 19, // item_level     item_quality  for equipped item in slot to check item level and quality
-    ACHIEVEMENT_CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE = 21  // class_id       race_id
+    ACHIEVEMENT_CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE = 21, // class_id       race_id
+    ACHIEVEMENT_CRITERIA_DATA_TYPE_S_KNOWN_TITLE = 23, // title_id                     known title, id from CharTitles.dbc
+    ACHIEVEMENT_CRITERIA_DATA_TYPE_GAME_EVENT = 24  // game_event_id  0             game event is active
 };
 
-#define MAX_ACHIEVEMENT_CRITERIA_DATA_TYPE               22 // maximum value in AchievementCriteriaDataType enum
+#define MAX_ACHIEVEMENT_CRITERIA_DATA_TYPE               25 // maximum value in AchievementCriteriaDataType enum
 
 struct AchievementCriteriaData
 {
@@ -149,6 +151,16 @@ struct AchievementCriteriaData
             uint32 item_level;
             uint32 item_quality;
         } equipped_item;
+        // ACHIEVEMENT_CRITERIA_DATA_TYPE_S_KNOWN_TITLE     = 23
+        struct
+        {
+            uint32 title_id;
+        } known_title;
+        // ACHIEVEMENT_CRITERIA_DATA_TYPE_GAME_EVENT        = 24
+        struct
+        {
+            uint32 id;
+        } game_event;
         // raw
         struct
         {
