@@ -40,6 +40,7 @@
 #include "GuildMgr.h"
 #include "InstanceSaveMgr.h"
 #include "ItemEnchantmentMgr.h"
+#include "KillReward.h"
 #include "Language.h"
 #include "LegacyTransportSupport.h"
 #include "LFGMgr.h"
@@ -1734,6 +1735,9 @@ void World::SetInitialWorldSettings()
 
     // Loot tables
     LoadLootTables();
+
+    SF_LOG_INFO("server.loading", "Loading creature kill currency...");
+    Skyfire::KillReward::LoadCreatureLootCurrency();          // must be after LoadCreatureTemplates()
 
     SF_LOG_INFO("server.loading", "Loading Skill Discovery Table...");
     LoadSkillDiscoveryTable();

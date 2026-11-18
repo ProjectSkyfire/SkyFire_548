@@ -23,6 +23,7 @@
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
 #include "Player.h"
+#include "KillReward.h"
 //#include "DBCStructure.h"
 #include "DB2Stores.h"
 #include "DisableMgr.h"
@@ -20406,6 +20407,11 @@ bool Player::GetsRecruitAFriendBonus(bool forXP)
 
 void Player::RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround)
 {
+    // isBattleGround is only set for player kills; a creature kill on a battleground map is caught by the map
+    if (!isBattleGround && !GetMap()->IsBattlegroundOrArena())
+        if (Creature* creature = victim->ToCreature())
+            Skyfire::KillReward::Reward(this, creature);
+
     KillRewarder(this, victim, isBattleGround).Reward();
 }
 
