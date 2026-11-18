@@ -6,6 +6,7 @@
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   Maelstrom/kezan.cpp
+  Maelstrom/zone_deepholm.cpp
 )
 
 message("  -> Prepared: The Maelstrom")
