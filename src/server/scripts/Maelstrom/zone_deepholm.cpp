@@ -45,6 +45,9 @@ enum RealmOfEarth
     TALK_SPECIAL_10                 = 10
 };
 
+float const MAELSTROM_FLIGHT_SPEED = 21.7f;
+float const DEEPHOLM_FLIGHT_SPEED = 18.2f;
+
 Position const WyvernMaelstromPath[10] =
 {
     { 810.61f, 1009.42f, 17.96f, 0.0f },
@@ -80,10 +83,11 @@ struct npc_deepholm_wyvern_ride : public ScriptedAI
     uint64 targetGUID;
     uint64 aggraGUID;
 
-    void StartPath(Position const* path, uint32 count)
+    void StartPath(Position const* path, uint32 count, float velocity)
     {
         me->StopMoving();
         Movement::MoveSplineInit init(me);
+        init.SetVelocity(velocity);
         for (uint32 i = 0; i < count; ++i)
             init.Path().push_back(G3D::Vector3(path[i].GetPositionX(), path[i].GetPositionY(), path[i].GetPositionZ()));
 
@@ -107,13 +111,11 @@ struct npc_deepholm_wyvern_ride : public ScriptedAI
         me->SetCanFly(true);
         me->SetDisableGravity(true);
         me->SetAnimTier(ANIM_TIER_FLY);
-        me->SetSpeed(MOVE_FLIGHT, 2.5f);
 
         if (me->GetMapId() != MAP_DEEPHOLM)
         {
-            me->SetSpeed(MOVE_FLIGHT, 3.1f);
             SummonAggra();
-            StartPath(WyvernMaelstromPath, 10);
+            StartPath(WyvernMaelstromPath, 10, MAELSTROM_FLIGHT_SPEED);
 
             scheduler.Schedule(Milliseconds(me->GetSplineDuration()), [this](TaskContext /*context*/)
             {
@@ -131,12 +133,10 @@ struct npc_deepholm_wyvern_ride : public ScriptedAI
         }
         else
         {
-            me->SetSpeed(MOVE_FLIGHT, 2.6f);
-
             scheduler.Schedule(Milliseconds(4000), [this](TaskContext /*context*/)
             {
                 SummonAggra();
-                StartPath(WyvernDeepholmPath, 8);
+                StartPath(WyvernDeepholmPath, 8, DEEPHOLM_FLIGHT_SPEED);
 
                 scheduler.Schedule(Milliseconds(me->GetSplineDuration()), [this](TaskContext /*context*/)
                 {
