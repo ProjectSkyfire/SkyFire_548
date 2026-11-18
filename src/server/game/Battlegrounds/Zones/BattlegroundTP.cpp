@@ -60,7 +60,7 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
 {
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
-        if (GetElapsedTime() >= 30 * MINUTE * IN_MILLISECONDS)
+        if (GetElapsedTime() >= 27 * MINUTE * IN_MILLISECONDS)
         {
             if (GetTeamScore(TEAM_ALLIANCE) == 0)
             {
@@ -82,7 +82,7 @@ void BattlegroundTP::PostUpdateImpl(uint32 diff)
         else if (GetElapsedTime() > uint32(_minutesElapsed * MINUTE * IN_MILLISECONDS) + 3 * MINUTE * IN_MILLISECONDS)
         {
             ++_minutesElapsed;
-            UpdateWorldState(BG_TP_STATE_TIMER, 28 - _minutesElapsed);
+            UpdateWorldState(BG_TP_STATE_TIMER, 25 - _minutesElapsed);
         }
 
 
