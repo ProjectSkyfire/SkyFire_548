@@ -154,6 +154,10 @@ class boss_siamat : public CreatureScript
             {
                 _EnterCombat();
 
+                // A sequence break (the instance refuses the fight) has sent him back to evade
+                if (instance && instance->GetBossState(DATA_SIAMAT) != IN_PROGRESS)
+                    return;
+
                 if (instance)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 

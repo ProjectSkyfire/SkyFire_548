@@ -124,6 +124,7 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_felwood.cpp
   Kalimdor/LostCityOfTheTolvir/lost_city_of_the_tolvir.h
   Kalimdor/LostCityOfTheTolvir/instance_lost_city_of_the_tolvir.cpp
+  Kalimdor/LostCityOfTheTolvir/lost_city_of_the_tolvir.cpp
   Kalimdor/LostCityOfTheTolvir/boss_general_husam.cpp
   Kalimdor/LostCityOfTheTolvir/boss_lockmaw_augh.cpp
   Kalimdor/LostCityOfTheTolvir/boss_high_prophet_barim.cpp

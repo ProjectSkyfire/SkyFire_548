@@ -332,6 +332,7 @@ void AddSC_boss_temple_guardian_anhuur();
 void AddSC_boss_earthrager_ptah();
 void AddSC_boss_anraphet();
 void AddSC_instance_lost_city_of_the_tolvir();
+void AddSC_lost_city_of_the_tolvir();
 void AddSC_boss_general_husam();
 void AddSC_boss_lockmaw_augh();
 void AddSC_boss_high_prophet_barim();
@@ -1096,6 +1097,7 @@ void AddKalimdorScripts()
     AddSC_boss_earthrager_ptah();
     AddSC_boss_anraphet();
     AddSC_instance_lost_city_of_the_tolvir();
+    AddSC_lost_city_of_the_tolvir();
     AddSC_boss_general_husam();
     AddSC_boss_lockmaw_augh();
     AddSC_boss_high_prophet_barim();

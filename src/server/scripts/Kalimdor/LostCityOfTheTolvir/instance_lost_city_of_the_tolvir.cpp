@@ -64,6 +64,15 @@ class instance_lost_city_of_the_tolvir : public InstanceMapScript
                 }
             }
 
+            // Siamat does not fight before the three other bosses are dead
+            bool CheckRequiredBosses(uint32 bossId, Player const* /*player*/ = NULL) const OVERRIDE
+            {
+                if (bossId != DATA_SIAMAT)
+                    return true;
+
+                return GetBossState(DATA_GENERAL_HUSAM) == DONE && GetBossState(DATA_LOCKMAW) == DONE && GetBossState(DATA_HIGH_PROPHET_BARIM) == DONE;
+            }
+
             void SetData64(uint32 type, uint64 data) OVERRIDE
             {
                 // Barim's Harbinger of Darkness and Blaze of the Heavens register themselves while they exist
