@@ -454,7 +454,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNULL,                                      //402 SPELL_AURA_402
     &AuraEffect::HandleNULL,                                      //403 SPELL_AURA_403
     &AuraEffect::HandleOverrideAttackPowerBySpellPower,           //404 SPELL_AURA_OVERRIDE_AP_BY_SPELL_POWER_PCT (used in spell 115070) (5.4.2)
-    &AuraEffect::HandleNULL,                                      //405 SPELL_AURA_405
+    &AuraEffect::HandleModRatingPct,                              //405 SPELL_AURA_MOD_RATING_PCT
     &AuraEffect::HandleNULL,                                      //406 SPELL_AURA_406
     &AuraEffect::HandleModFear,                                   //407 SPELL_MOD_FEAR_2
     &AuraEffect::HandleNULL,                                      //408 SPELL_AURA_408

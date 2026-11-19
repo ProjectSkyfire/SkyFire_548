@@ -2401,6 +2401,8 @@ public:
     float OCTRegenMPPerSpirit();
     float GetRatingMultiplier(CombatRating cr) const;
     float GetRatingBonusValue(CombatRating cr) const;
+    float GetRatingPctMultiplier(CombatRating cr) const;
+    void UpdateHasteFromRating(CombatRating cr, int32 rating);
 
     /// Returns base spellpower bonus from spellpower stat on items, without spellpower from intellect stat
     uint32 GetBaseSpellPowerBonus() const
@@ -3480,6 +3482,7 @@ protected:
 
     float m_auraBaseMod[BASEMOD_END][MOD_END];
     int16 m_baseRatingValue[MAX_COMBAT_RATING];
+    float m_appliedHastePct[3];                         // melee, ranged and spell haste applied from the ratings
     uint32 m_baseSpellPower;
     uint32 m_baseManaRegen;
     uint32 m_baseHealthRegen;
