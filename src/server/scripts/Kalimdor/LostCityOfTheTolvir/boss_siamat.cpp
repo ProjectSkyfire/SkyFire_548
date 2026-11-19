@@ -58,6 +58,8 @@ enum eSpells
 enum eCreatures
 {
     NPC_TEMPEST_STORM                = 44713,
+    NPC_SERVANT_OF_SIAMAT_1          = 45259,
+    NPC_SERVANT_OF_SIAMAT_2          = 45268,
     NPC_SETVANT_OF_SIAMAT            = 45269,
 };
 
@@ -111,6 +113,14 @@ const uint32 StaticShock[3]=
 
 #define    FLOR_COORD_Z    36.0f
 
+enum SiamatMisc
+{
+    SERVANTS_OF_SIAMAT          = 3,
+    SERVANT_INTERVAL            = 45000,    // the next servant comes after this long if the one before has not died
+    SERVANT_AFTER_DEATH         = 500,
+    CLOUD_BURST_DELAY           = 3000
+};
+
 class boss_siamat : public CreatureScript
 {
     public:
@@ -126,10 +136,12 @@ class boss_siamat : public CreatureScript
             }
 
             uint8 uiStaticShockId;
+            uint8 uiServantsDead;
 
             void Reset() OVERRIDE
             {
                 _Reset();
+                uiServantsDead = 0;
 
                 if (instance)
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_DISENGAGE, me);
@@ -156,7 +168,17 @@ class boss_siamat : public CreatureScript
 
             void DoAction(int32 action) OVERRIDE
             {
-                if (action == ACTION_SERVANT_DEATH)
+                if (action != ACTION_SERVANT_DEATH)
+                    return;
+
+                ++uiServantsDead;
+
+                // The next servant does not wait for its time once the one before has died
+                if (uiServantsDead < SERVANTS_OF_SIAMAT && uiStaticShockId < SERVANTS_OF_SIAMAT && uiStaticShockId == uiServantsDead)
+                    events.RescheduleEvent(EVENT_STATIC_SHOCK, SERVANT_AFTER_DEATH, 0, PHASE_DEFLECTING_WINDS);
+
+                // The winds that deflect his enemies fall with the third of his servants
+                if (uiServantsDead == SERVANTS_OF_SIAMAT)
                 {
                     Talk(SAY_WAILING_WINDS);
                     me->RemoveAura(SPELL_DEFLECTING_WINDS);
@@ -208,8 +230,9 @@ class boss_siamat : public CreatureScript
                                 me->CastSpell(x, y, FLOR_COORD_Z, StaticShock[uiStaticShockId], false);
                                 ++uiStaticShockId;
 
-                                if (uiStaticShockId < 3)
-                                    events.ScheduleEvent(EVENT_STATIC_SHOCK, 32000, 0, PHASE_DEFLECTING_WINDS);
+                                // One servant at a time: the next one comes in 45 seconds or as soon as this one dies
+                                if (uiStaticShockId < SERVANTS_OF_SIAMAT)
+                                    events.ScheduleEvent(EVENT_STATIC_SHOCK, SERVANT_INTERVAL, 0, PHASE_DEFLECTING_WINDS);
                             }
                             break;
                         case EVENT_DEFLECTING_WINDS:
@@ -241,12 +264,9 @@ class boss_siamat : public CreatureScript
                             {
                                 me->CastSpell(me, SPELL_WAILING_WINDS, false);
 
-                                if (Spell* spell = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                                {
-                                    if (const SpellInfo* spellInfo = spell->GetSpellInfo())
-                                        if (spellInfo->Id == SPELL_WAILING_WINDS_AURA)
-                                            events.ScheduleEvent(EVENT_WAILING_WINDS, 1000, 0, PHASE_WAILING_WINDS);
-                                }
+                                // The phase goes on for as long as he channels anything (the channel is the aura or the winds themselves)
+                                if (me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                                    events.ScheduleEvent(EVENT_WAILING_WINDS, 1000, 0, PHASE_WAILING_WINDS);
                                 else
                                 {
                                     events.SetPhase(PHASE_SIAMAT);
@@ -272,7 +292,14 @@ class boss_siamat : public CreatureScript
                         case EVENT_STORM_BOLT_S:
                             {
                                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                    me->CastSpell(target, SPELL_STORM_BOLT_PHASE_S, false);
+                                {
+                                    // In the second stage the bolt hits for twice what it hit for in the first
+                                    if (SpellInfo const* firstStage = sSpellMgr->GetSpellInfo(SPELL_STORM_BOLT_PHASE_DW))
+                                    {
+                                        int32 damage = 2 * firstStage->Effects[EFFECT_0].CalcValue(me);
+                                        me->CastCustomSpell(target, SPELL_STORM_BOLT_PHASE_S, &damage, NULL, NULL, false);
+                                    }
+                                }
 
                                 events.ScheduleEvent(EVENT_STORM_BOLT_S, urand(10000, 25000), 0, PHASE_SIAMAT);
                             }
@@ -335,7 +362,7 @@ class npc_servant_of_siamat : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
             {
-                if (!IsHeroic())
+                if (!IsHeroic() || !instance)
                     return;
 
                 if (damage >= me->GetHealth())
@@ -358,13 +385,23 @@ class npc_servant_of_siamat : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
-                if (me->GetEntry() == NPC_SETVANT_OF_SIAMAT)
+                if (me->GetEntry() == NPC_SERVANT_OF_SIAMAT_1 || me->GetEntry() == NPC_SERVANT_OF_SIAMAT_2 || me->GetEntry() == NPC_SETVANT_OF_SIAMAT)
                     if (Creature* siamat = me->FindNearestCreature(BOSS_SIAMAT, 300.0f))
-                        siamat->AI()->DoAction(ACTION_SERVANT_DEATH);
+                        if (siamat->IsAIEnabled)
+                            siamat->AI()->DoAction(ACTION_SERVANT_DEATH);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
             {
+                // Once the heroic servant has stopped fighting it has no victim, but it still has to die
+                if (LightningCharge)
+                {
+                    events.Update(diff);
+                    if (events.ExecuteEvent() == EVENT_SERVANT_DIED)
+                        me->Kill(me);
+                    return;
+                }
+
                 if (!UpdateVictim())
                     return;
 
@@ -435,8 +472,10 @@ class npc_siamat_minion : public CreatureScript
                     summon->GetMotionMaster()->MoveRandom(25.0f);
                     InstanceScript* instance = me->GetInstanceScript();
 
-                    if (Creature* siamat = Unit::GetCreature(*me, instance->GetData64(DATA_SIAMAT)))
-                        siamat->AI()->JustSummoned(summon);
+                    if (instance)
+                        if (Creature* siamat = Unit::GetCreature(*me, instance->GetData64(DATA_SIAMAT)))
+                            if (siamat->IsAIEnabled)
+                                siamat->AI()->JustSummoned(summon);
                 }
             }
 
@@ -502,27 +541,21 @@ class npc_cloud_burst : public CreatureScript
         {
             npc_cloud_burstAI(Creature* creature) : ScriptedAI(creature)
             {
-                uiTickCount = 0;
                 me->SetInCombatWithZone();
-                events.ScheduleEvent(EVENT_PERIODIC_CAST, 1000);
+                events.ScheduleEvent(EVENT_PERIODIC_CAST, CLOUD_BURST_DELAY);
             }
 
             EventMap events;
-            uint8 uiTickCount;
 
             void UpdateAI(uint32 diff) OVERRIDE
             {
                 events.Update(diff);
 
+                // The cloud bursts once, three seconds after it has formed
                 if (events.ExecuteEvent() == EVENT_PERIODIC_CAST)
                 {
-                    ++uiTickCount;
                     me->CastSpell(me, SPELL_CLOUD_BURST, false);
-
-                    if (uiTickCount < 3)
-                        events.ScheduleEvent(EVENT_PERIODIC_CAST, 1000);
-                    else
-                        me->DespawnOrUnsummon(500);
+                    me->DespawnOrUnsummon(500);
                 }
             }
         };
