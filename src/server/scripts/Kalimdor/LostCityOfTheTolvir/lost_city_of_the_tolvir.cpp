@@ -81,8 +81,12 @@ struct npc_wind_tunnel : public ScriptedAI
                 continue;
             }
 
+            // The entry leaves the list first: ExitVehicle() calls PassengerBoarded(), which removes it from the list too
+            uint64 passengerGuid = itr->first;
+            itr = _passengers.erase(itr);
+
             // Only a player who still sits in this tunnel is taken on, and one that finds no landing zone gets out
-            Player* player = Unit::GetPlayer(*me, itr->first);
+            Player* player = Unit::GetPlayer(*me, passengerGuid);
             if (player && player->GetVehicleBase() == me)
             {
                 Creature* landing = me->FindNearestCreature(NPC_WIND_TUNNEL_LANDING_ZONE, float(LANDING_ZONE_RANGE));
@@ -96,8 +100,6 @@ struct npc_wind_tunnel : public ScriptedAI
                         aura->SetDuration(LANDING_RIDE_TIME);
                 }
             }
-
-            itr = _passengers.erase(itr);
         }
     }
 
