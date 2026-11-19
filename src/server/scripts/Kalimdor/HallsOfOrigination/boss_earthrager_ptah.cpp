@@ -50,8 +50,8 @@ enum Phases
     PHASE_NORMAL                    = 1,
     PHASE_DISPERSE                  = 2,
 
-    PHASE_MASK_DISPERSE             = (1 << PHASE_DISPERSE),
-    PHASE_MASK_NORMAL               = (1 << PHASE_NORMAL),
+    PHASE_MASK_DISPERSE             = (1 << (PHASE_DISPERSE - 1)),
+    PHASE_MASK_NORMAL               = (1 << (PHASE_NORMAL - 1)),
 };
 
 enum PtahData
