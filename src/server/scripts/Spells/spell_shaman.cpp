@@ -3132,9 +3132,9 @@ public:
             {
                 switch (player->GetTalentSpecialization(player->GetActiveSpec()))
                 {
-                case TALENT_TREE_SHAMAN_ENHANCEMENT:
-                case TALENT_TREE_SHAMAN_ELEMENTAL:
-                case TALENT_TREE_SHAMAN_RESTORATION:
+                case SPEC_SHAMAN_ENHANCEMENT:
+                case SPEC_SHAMAN_ELEMENTAL:
+                case SPEC_SHAMAN_RESTORATION:
                     return SpellCastResult::SPELL_CAST_OK;
                 default:
                     return SpellCastResult::SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
@@ -3150,16 +3150,16 @@ public:
             {
                 switch (player->GetTalentSpecialization(player->GetActiveSpec()))
                 {
-                case TALENT_TREE_SHAMAN_ENHANCEMENT:
+                case SPEC_SHAMAN_ENHANCEMENT:
                     player->RemoveSpellCooldown(SPELL_SHAMAN_STORMSTRIKE, true);
                     player->RemoveSpellCooldown(SPELL_SHAMAN_STORMBLAST, true);
                     player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_ENHANCEMENT, true);
                     break;
-                case TALENT_TREE_SHAMAN_ELEMENTAL:
+                case SPEC_SHAMAN_ELEMENTAL:
                     player->RemoveSpellCooldown(SPELL_SHAMAN_LAVA_BURST, true);
                     player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_ELEMENTAL, true);
                     break;
-                case TALENT_TREE_SHAMAN_RESTORATION:
+                case SPEC_SHAMAN_RESTORATION:
                     player->CastSpell(player, SPELL_SHAMAN_ASCENDANCE_RESTORATION, true);
                     break;
                 default:
