@@ -33,9 +33,8 @@ enum Spells
     // Rajh
     SPELL_SUN_STRIKE                    = 73872,
     SPELL_SUN_STRIKE_DMG                = 73874,
-    //SPELL_INFERNO_LEAP                = 87647, // Value: 32375 to 37625
-    //SPELL_INFERNO_LEAP_2              = 89876, // Value: 120250 to 139750
-    //SPELL_SUMMON_SUN_ORB              = 80352,
+    SPELL_INFERNO_LEAP                  = 87647, // the damage and the knock back where he lands
+    //SPELL_SUMMON_SUN_ORB              = 80352, // needs the meteor spell 76374, which the 5.4.8 client data does not have
     SPELL_BLESSING_OF_THE_SUN           = 76352,
     SPELL_BLESSING_OF_THE_SUN_AURA      = 76355,
     SPELL_ZERO_POWER                    = 72242,
@@ -61,6 +60,14 @@ enum Events
 {
     EVENT_SUN_STRIKE           = 1,
     EVENT_SUMMON_SOLAR_WINDS   = 2,
+    EVENT_INFERNO_LEAP         = 3,
+};
+
+enum Points
+{
+    POINT_INFERNO_LEAP         = 2,
+    INFERNO_LEAP_SPEED_XY      = 30,
+    INFERNO_LEAP_SPEED_Z       = 15,
 };
 
 enum Adds
@@ -145,6 +152,7 @@ class boss_rajh : public CreatureScript
                 Talk(SAY_AGGRO);
                 events.ScheduleEvent(EVENT_SUN_STRIKE, urand(5000, 10000));
                 events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS, urand(10000, 15000));
+                events.ScheduleEvent(EVENT_INFERNO_LEAP, 14000);
 
                 DoZoneInCombat();
             }
@@ -194,6 +202,7 @@ class boss_rajh : public CreatureScript
                     me->SetReactState(REACT_AGGRESSIVE);
                     events.ScheduleEvent(EVENT_SUN_STRIKE, urand(5000, 10000));
                     events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS, urand(6000, 11000));
+                    events.ScheduleEvent(EVENT_INFERNO_LEAP, 14000);
                     me->GetMotionMaster()->MoveChase(me->GetVictim());
                     return;
                 }
@@ -211,6 +220,12 @@ class boss_rajh : public CreatureScript
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                                 DoCast(target, SPELL_SUMMON_SOLAR_WINDS);
                             events.ScheduleEvent(EVENT_SUMMON_SOLAR_WINDS, urand(20000, 25000));
+                            break;
+                        case EVENT_INFERNO_LEAP:
+                            // He lands on a player and the spell burns and throws back whoever stands around
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                                me->GetMotionMaster()->MoveJump(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), float(INFERNO_LEAP_SPEED_XY), float(INFERNO_LEAP_SPEED_Z), POINT_INFERNO_LEAP, SPELL_INFERNO_LEAP);
+                            events.ScheduleEvent(EVENT_INFERNO_LEAP, urand(59000, 60000));
                             break;
                     }
                 }
