@@ -17,6 +17,7 @@ enum ShamanSpells
     SPELL_SHAMAN_FIREBLAST              = 57984,
     SPELL_SHAMAN_FIRENOVA               = 12470,
     SPELL_SHAMAN_FIRESHIELD             = 13376,
+    SPELL_SHAMAN_GLYPH_OF_CAPACITOR_TOTEM = 55442,
     SPELL_SHAMAN_SEARING_FLAMES         = 77661,
     SPELL_SHAMAN_SEARING_FLAMES_PASSIVE = 77657,
     SPELL_SHAMAN_STATIC_CHARGE          = 118905
@@ -155,19 +156,33 @@ class npc_capacitor_totem : public CreatureScript
 
         struct npc_capacitor_totemAI : public ScriptedAI
         {
-            npc_capacitor_totemAI(Creature* creature) : ScriptedAI(creature), _chargeStarted(false)
+            npc_capacitor_totemAI(Creature* creature) : ScriptedAI(creature), _chargeStarted(false), _glyphDelay(GLYPH_CHARGE_DELAY)
             {
                 me->SetReactState(REACT_PASSIVE);
             }
 
-            void UpdateAI(uint32 /*diff*/) OVERRIDE
+            void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
                 if (!_chargeStarted)
                 {
-                    me->CastSpell(me, SPELL_SHAMAN_STATIC_CHARGE, false);
+                    // The glyph shortens the totem's life to 4 seconds, less than the cast time of Static Charge
+                    Unit* owner = me->GetOwner();
+                    if (owner && owner->HasAura(SPELL_SHAMAN_GLYPH_OF_CAPACITOR_TOTEM))
+                    {
+                        if (_glyphDelay > diff)
+                        {
+                            _glyphDelay -= diff;
+                            return;
+                        }
+
+                        me->CastSpell(me, SPELL_SHAMAN_STATIC_CHARGE, true);
+                    }
+                    else
+                        me->CastSpell(me, SPELL_SHAMAN_STATIC_CHARGE, false);
+
                     _chargeStarted = true;
                 }
                 else
@@ -175,7 +190,10 @@ class npc_capacitor_totem : public CreatureScript
             }
 
         private:
+            static uint32 const GLYPH_CHARGE_DELAY = 3000;
+
             bool _chargeStarted;
+            uint32 _glyphDelay;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
