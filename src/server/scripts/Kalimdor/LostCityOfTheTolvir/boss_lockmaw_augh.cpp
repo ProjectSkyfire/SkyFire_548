@@ -377,23 +377,29 @@ class npc_augh_intro : public CreatureScript
 
             bool Active;
 
+            // The hit that takes him below 90% sends him away, however hard it is, and he never dies in the intro
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+            {
+                if (!Active || !me->HealthBelowPctDamaged(90, damage))
+                    return;
+
+                if (damage >= me->GetHealth())
+                    damage = me->GetHealth() - 1;
+
+                Active = false;
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                me->SetReactState(REACT_PASSIVE);
+                me->CombatStop();
+                me->SetControlled(true, UNIT_STATE_ROOT);
+                me->CastSpell(me, SPELL_SMOKE_BOMB, false);
+                Talk(AUGH_SAY_INTRO);
+                me->DespawnOrUnsummon(2000);
+            }
+
             void UpdateAI(uint32 /*diff*/)
             {
                 if (!UpdateVictim())
                     return;
-
-                if (Active)
-                    if (me->GetHealthPct() <= 90)
-                    {
-                        Active = false;
-                        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        me->SetReactState(REACT_PASSIVE);
-                        me->CombatStop();
-                        me->SetControlled(true, UNIT_STATE_ROOT);
-                        me->CastSpell(me, SPELL_SMOKE_BOMB, false);
-                        Talk(AUGH_SAY_INTRO);
-                        me->DespawnOrUnsummon(2000);
-                    }
 
                 DoMeleeAttackIfReady();
             }
