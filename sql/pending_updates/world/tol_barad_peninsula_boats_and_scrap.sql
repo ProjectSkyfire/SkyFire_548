@@ -5,10 +5,10 @@
 -- scrap piles in the zone; three of the boats stand within a yard of another boat on the same path and are left out, which
 -- leaves 15. Based on Legends of Azeroth 5.4.8.
 
-DELETE FROM `creature_addon` WHERE `guid` BETWEEN 9290000 AND 9299999;
-DELETE FROM `waypoint_data` WHERE `id` BETWEEN 92900000 AND 92999999;
-DELETE FROM `creature` WHERE `guid` BETWEEN 9290000 AND 9299999;
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 1066000 AND 1066999;
+DELETE FROM `creature_addon` WHERE `guid` BETWEEN 9290000 AND 9290999;
+DELETE FROM `waypoint_data` WHERE `id` BETWEEN 92900000 AND 92909999;
+DELETE FROM `creature` WHERE `guid` BETWEEN 9290000 AND 9290999;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 1066000 AND 1066099;
 
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
 (9290629, 48286, 732, 1, 0, 0, 0, 0, -260.389, 1987.58, 0.0872561, 0.50674, 300, 0, 0, 30951, 0, 2, 0, 0, 0),
