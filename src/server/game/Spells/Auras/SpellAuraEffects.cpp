@@ -401,7 +401,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNULL,                                      //351 SPELL_AURA_351
     &AuraEffect::HandleNoImmediateEffect,                         //352 SPELL_AURA_ENABLE_WORGER_ALTERED_FORM
     &AuraEffect::HandleNULL,                                      //353 SPELL_AURA_MOD_CAMOUFLAGE
-    &AuraEffect::HandleNULL,                                      //354 SPELL_AURA_354
+    &AuraEffect::HandleNULL,                                      //354 SPELL_AURA_MOD_HEALING_PCT_BY_TARGET_HEALTH_PCT implemented in Unit::SpellHealingBonusTaken
     &AuraEffect::HandleUnused,                                    //355 unused (4.3.4)
     &AuraEffect::HandleNoImmediateEffect,                         //356 SPELL_AURA_MOD_DAMAGE_DONE_BY_MANA_PCT implemented in Unit::SpellDamageBonusDone
     &AuraEffect::HandleNULL,                                      //357 SPELL_AURA_ENABLE_BOSS1_UNIT_FRAME

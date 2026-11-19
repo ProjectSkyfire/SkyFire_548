@@ -530,6 +530,10 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellInfo const* spellProto, u
     if (AuraEffect const* Tenacity = GetAuraEffect(58549, 0))
         AddPct(TakenTotalMod, Tenacity->GetAmount());
 
+    // Mastery: Deep Healing, lower health targets are healed for more
+    if (int32 deepHealing = caster->GetCharmerOrOwnerOrSelf()->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT_BY_TARGET_HEALTH_PCT))
+        AddPct(TakenTotalMod, deepHealing * (100.0f - std::floor(GetHealthPct())) / 100.0f);
+
     // Healing Done
     int32 TakenTotal = 0;
 
