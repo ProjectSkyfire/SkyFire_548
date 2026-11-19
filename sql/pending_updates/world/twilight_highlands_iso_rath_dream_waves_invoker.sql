@@ -1,0 +1,56 @@
+-- Twilight Highlands, "Devoured" 27377 and "The Worldbreaker" 27378: the dream scripts of the two files before this one cast the
+-- death prevention and the fake death with "Cast" (action 11), so the creature that runs the script is the caster, and all four
+-- spells have the caster as their target: Earthcaller Yevaa and Thrall wore the auras and the player had neither. The four casts
+-- are now made by the invoker (action 85), who is the player that took the quest. The Blood of Iso'rath that attack the
+-- invoker are summoned around the invoker instead of around Yevaa, because the "attack the invoker" flag of a summon applies
+-- to the unit the summon is placed at.
+
+DELETE FROM `smart_scripts` WHERE `source_type` = 9 AND `entryorguid` IN (4799100, 4805100);
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(4799100, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 85, 89444, 2, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Script - Cast Iso''rath Death Prevention Aura on Invoker'),
+(4799100, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 18, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Set IMMUNE_TO_NPC, the Blood of Iso''rath leave her alone'),
+(4799100, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, -12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 3, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 4, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, -12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 5, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48244, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 2, every 10 s from 20 s)'),
+(4799100, 9, 6, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, 12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 7, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48244, 3, 10000, 1, 0, 0, 7, 0, 0, 0, -12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 2, every 10 s from 20 s)'),
+(4799100, 9, 8, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, -12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 9, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48244, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, 12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 2, every 10 s from 20 s)'),
+(4799100, 9, 10, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 11, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48244, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, -12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 2, every 10 s from 20 s)'),
+(4799100, 9, 12, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 12, 48245, 3, 10000, 1, 0, 0, 7, 0, 0, 0, -12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 3, every 10 s from 55 s)'),
+(4799100, 9, 13, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, -12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 14, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48244, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 2, every 10 s from 20 s)'),
+(4799100, 9, 15, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 12, 48245, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, 12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 3, every 10 s from 55 s)'),
+(4799100, 9, 16, 0, 0, 0, 100, 0, 5000, 5000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, 12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 17, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48244, 3, 10000, 1, 0, 0, 7, 0, 0, 0, -12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 2, every 10 s from 20 s)'),
+(4799100, 9, 18, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 12, 48247, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, -12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 4, every 5 s from 73 s)'),
+(4799100, 9, 19, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 12, 48245, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, -12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 3, every 10 s from 55 s)'),
+(4799100, 9, 20, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 12, 48247, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 4, every 5 s from 73 s)'),
+(4799100, 9, 21, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 12, 48243, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, -12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Summon Blood of Iso''rath Aura 1, every 10 s)'),
+(4799100, 9, 22, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48244, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, 12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 2, every 10 s from 20 s)'),
+(4799100, 9, 23, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 12, 48247, 3, 10000, 1, 0, 0, 7, 0, 0, 0, -12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 4, every 5 s from 73 s)'),
+(4799100, 9, 24, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 12, 48245, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 12.0, 0.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 3, every 10 s from 55 s)'),
+(4799100, 9, 25, 0, 0, 0, 100, 0, 3000, 3000, 0, 0, 0, 12, 48247, 3, 10000, 1, 0, 0, 7, 0, 0, 0, 0.0, 12.0, 0.0, 0.0, 'Script - Summon Blood of Iso''rath (Aura 4, every 5 s from 73 s)'),
+(4799100, 9, 26, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 28, 89444, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Script - Remove Iso''rath Death Prevention Aura from Invoker'),
+(4799100, 9, 27, 0, 0, 0, 100, 0, 100, 100, 0, 0, 0, 85, 89458, 34, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Script - Cast Iso''rath Fake Death Aura on Invoker (the summoning is finished)'),
+(4799100, 9, 28, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 19, 512, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Remove IMMUNE_TO_NPC'),
+(4805100, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 85, 89655, 2, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Script - Cast Maelstrom Death Prevention Aura on Invoker'),
+(4805100, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48005, 3, 60000, 0, 0, 0, 8, 0, 0, 0, 928.285, 826.519, 52.9494, 1.9337, 'Script - Summon Deathwing at the target of Deathwing Teleport 89651'),
+(4805100, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48084, 3, 60000, 0, 0, 0, 8, 0, 0, 0, 721.634, 822.92, 129.037, 0.0174, 'Script - Summon Muln Earthfury at the target of Muln Teleport 89647'),
+(4805100, 9, 3, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48076, 3, 60000, 0, 0, 0, 8, 0, 0, 0, 1089.45, 776.464, 72.7129, 2.8405, 'Script - Summon Aggra at the target of Aggra Teleport 89649'),
+(4805100, 9, 4, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 12, 48079, 3, 60000, 0, 0, 0, 8, 0, 0, 0, 822.359, 653.179, -8.43734, 1.0223, 'Script - Summon Farseer Nobundo at the target of Nobundo Teleport 89650'),
+(4805100, 9, 5, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Say Text 2 (You will die this day, Earthwarder!)'),
+(4805100, 9, 6, 0, 0, 0, 100, 0, 8000, 8000, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Say Text 1 (NOBUNDO! NOOO!)'),
+(4805100, 9, 7, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 9, 48079, 0, 800, 0, 0, 0, 0, 'Script - Kill Farseer Nobundo'),
+(4805100, 9, 8, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 1, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Say Text 3 (Aggra...)'),
+(4805100, 9, 9, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 9, 48076, 0, 800, 0, 0, 0, 0, 'Script - Kill Aggra'),
+(4805100, 9, 10, 0, 0, 0, 100, 0, 10000, 10000, 0, 0, 0, 1, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Say Text 4 (Do something)'),
+(4805100, 9, 11, 0, 0, 0, 100, 0, 8000, 8000, 0, 0, 0, 1, 5, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Say Text 5 (Muln falls)'),
+(4805100, 9, 12, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 9, 48084, 0, 800, 0, 0, 0, 0, 'Script - Kill Muln Earthfury'),
+(4805100, 9, 13, 0, 0, 0, 100, 0, 8000, 8000, 0, 0, 0, 1, 6, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Say Text 6 (You have failed us all)'),
+(4805100, 9, 14, 0, 0, 0, 100, 0, 6000, 6000, 0, 0, 0, 1, 7, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 'Script - Say Text 7 (Wake up!)'),
+(4805100, 9, 15, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 28, 89655, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Script - Remove Maelstrom Death Prevention Aura from Invoker'),
+(4805100, 9, 16, 0, 0, 0, 100, 0, 100, 100, 0, 0, 0, 85, 89656, 34, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Script - Cast Maelstrom Fake Death Aura on Invoker'),
+(4805100, 9, 17, 0, 0, 0, 100, 0, 3900, 3900, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 9, 48005, 0, 800, 0, 0, 0, 0, 'Script - Despawn Deathwing');
