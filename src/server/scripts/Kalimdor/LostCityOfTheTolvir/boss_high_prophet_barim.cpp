@@ -241,6 +241,7 @@ class boss_high_prophet_barim : public CreatureScript
                 if (!Repentance && me->GetHealthPct() <= 50.0f)
                 {
                     Repentance = true;
+                    uiEventPhase = 0; // the steps of Repentance count from the start, the Blaze of the Heavens has used it before
                     events.Reset();
                     events.SetPhase(PHASE_REPENTANCE);
                     me->SetReactState(REACT_PASSIVE);
