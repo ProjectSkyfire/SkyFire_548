@@ -208,7 +208,9 @@ void BattlegroundEY::UpdatePointStatuses()
         if (m_PlayersNearPoint[point].empty())
             continue;
         //count new point bar status:
-        m_PointBarStatus[point] += (m_CurrentPointPlayersCount[2 * point] - m_CurrentPointPlayersCount[2 * point + 1] < BG_EY_POINT_MAX_CAPTURERS_COUNT) ? m_CurrentPointPlayersCount[2 * point] - m_CurrentPointPlayersCount[2 * point + 1] : BG_EY_POINT_MAX_CAPTURERS_COUNT;
+        // The bar moves by the net number of players near the point, at most five in either direction.
+        int32 netCapturers = int32(m_CurrentPointPlayersCount[2 * point]) - int32(m_CurrentPointPlayersCount[2 * point + 1]);
+        m_PointBarStatus[point] += std::max(-int32(BG_EY_POINT_MAX_CAPTURERS_COUNT), std::min(netCapturers, int32(BG_EY_POINT_MAX_CAPTURERS_COUNT)));
 
         if (m_PointBarStatus[point] > BG_EY_PROGRESS_BAR_ALI_CONTROLLED)
             //point is fully alliance's
@@ -689,7 +691,12 @@ void BattlegroundEY::EventTeamLostPoint(Player* player, uint32 Point)
 
     //remove bonus honor aura trigger creature when node is lost
     if (Point < EY_POINTS_MAX)
+    {
         DelCreature(Point + 6);//NULL checks are in DelCreature! 0-5 spirit guides
+        // The lost point's spirit guide belongs to the old owner; remove it as Arathi Basin does.
+        RelocateDeadPlayers(BgCreatures[Point]);
+        DelCreature(Point);
+    }
 }
 
 void BattlegroundEY::EventTeamCapturedPoint(Player* player, uint32 Point)
