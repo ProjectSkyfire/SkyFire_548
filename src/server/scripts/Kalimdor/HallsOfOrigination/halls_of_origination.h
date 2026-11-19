@@ -61,6 +61,7 @@ enum Creatures
     NPC_AIR_WARDEN                  = 39803,
 
     WARDEN_ENTRY_DATA_DELTA         = NPC_FIRE_WARDEN - DATA_FIRE_WARDEN,
+    WARDEN_COUNT                    = 4,
 
     NPC_BRANN_BRONZEBEARD_0         = 39908,
     NPC_OMEGA_STANCE                = 41194,
