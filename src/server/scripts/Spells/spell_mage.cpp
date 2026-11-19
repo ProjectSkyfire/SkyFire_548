@@ -2400,6 +2400,35 @@ public:
     }
 };
 
+// 11426 - Ice Barrier
+class spell_mage_ice_barrier : public SpellScriptLoader
+{
+public:
+    spell_mage_ice_barrier() : SpellScriptLoader("spell_mage_ice_barrier") { }
+
+    class spell_mage_ice_barrier_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_mage_ice_barrier_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = false;
+            if (Unit* caster = GetCaster())
+                amount += int32(caster->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 3.3f);
+        }
+
+        void Register() OVERRIDE
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_ice_barrier_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_mage_ice_barrier_AuraScript();
+    }
+};
+
 // 1463 - Incanter's Ward
 class spell_mage_incanters_ward : public SpellScriptLoader
 {
@@ -2420,6 +2449,13 @@ public:
             _absorbTotal = 0.0f;
             _absorbMax = 0.0f;
             return true;
+        }
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            canBeRecalculated = false;
+            if (Unit* caster = GetCaster())
+                amount += int32(caster->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 1.0f);
         }
 
         void HandleApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
@@ -2458,6 +2494,7 @@ public:
 
         void Register() OVERRIDE
         {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_incanters_ward_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
             AfterEffectApply += AuraEffectApplyFn(spell_mage_incanters_ward_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
             OnEffectAbsorb += AuraEffectAbsorbFn(spell_mage_incanters_ward_AuraScript::HandleAbsorb, EFFECT_0);
             OnEffectRemove += AuraEffectRemoveFn(spell_mage_incanters_ward_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB, AURA_EFFECT_HANDLE_REAL);
@@ -4197,6 +4234,7 @@ void AddSC_mage_spell_scripts()
     new spell_mage_arcane_charge();
     new spell_mage_arcane_explosion();
     new spell_mage_evocation();
+    new spell_mage_ice_barrier();
     new spell_mage_incanters_ward();
     new spell_mage_incanters_ward_cooldown();
     new spell_mage_rune_of_power();
