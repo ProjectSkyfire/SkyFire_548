@@ -431,7 +431,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNULL,                                      //379 SPELL_AURA_379
     &AuraEffect::HandleUnused,                                    //380 unused (5.4.2)
     &AuraEffect::HandleNULL,                                      //381 SPELL_AURA_381 (used in spell 21741) (5.4.2)
-    &AuraEffect::HandleNULL,                                      //382 SPELL_AURA_382
+    &AuraEffect::HandleAuraModPetStat,                            //382 SPELL_AURA_MOD_PET_STAT implemented in Guardian::UpdateMaxHealth
     &AuraEffect::HandleNoImmediateEffect,                         //383 SPELL_AURA_IGNORE_SPELL_COOLDOWN implemented in Player::HasSpellCooldown / AddSpellAndCategoryCooldowns
     &AuraEffect::HandleUnused,                                    //384 unused (5.4.2)
     &AuraEffect::HandleNULL,                                      //385 SPELL_AURA_385

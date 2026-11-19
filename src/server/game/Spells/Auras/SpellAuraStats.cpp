@@ -920,6 +920,19 @@ void AuraEffect::HandleAuraModRangedHaste(AuraApplication const* aurApp, uint8 m
     target->ApplyAttackTimePercentMod(WeaponAttackType::RANGED_ATTACK, (float)GetAmount(), apply);
 }
 
+void AuraEffect::HandleAuraModPetStat(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Player* player = aurApp->GetTarget()->ToPlayer();
+    if (!player)
+        return;
+
+    if (Pet* pet = player->GetPet())
+        pet->UpdateMaxHealth();
+}
+
 /********************************/
 /***       COMBAT RATING      ***/
 /********************************/

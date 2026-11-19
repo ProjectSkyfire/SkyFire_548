@@ -427,7 +427,7 @@ enum AuraType
     SPELL_AURA_379 = 379,
     // 380 unused
     SPELL_AURA_381 = 381,
-    SPELL_AURA_382 = 382,
+    SPELL_AURA_MOD_PET_STAT = 382,                          // Percent of a stat of the pets of the owner, misc is the stat, misc B limits it to a pet entry
     SPELL_AURA_IGNORE_SPELL_COOLDOWN = 383,
     // 384 unused
     SPELL_AURA_385 = 385,
