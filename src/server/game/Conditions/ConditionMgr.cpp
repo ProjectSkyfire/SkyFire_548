@@ -1588,7 +1588,9 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
                 if (!((1 << i) & cond->SourceGroup))
                     continue;
 
-                switch (spellInfo->Effects[i].TargetA.GetSelectionCategory())
+                SpellInfo const* effectInfo = sSpellMgr->GetSpellInfoWithEffect(cond->SourceEntry, i);
+
+                switch (effectInfo->Effects[i].TargetA.GetSelectionCategory())
                 {
                     case TARGET_SELECT_CATEGORY_NEARBY:
                     case TARGET_SELECT_CATEGORY_CONE:
@@ -1598,7 +1600,7 @@ bool ConditionMgr::isSourceTypeValid(Condition* cond)
                         break;
                 }
 
-                switch (spellInfo->Effects[i].TargetB.GetSelectionCategory())
+                switch (effectInfo->Effects[i].TargetB.GetSelectionCategory())
                 {
                     case TARGET_SELECT_CATEGORY_NEARBY:
                     case TARGET_SELECT_CATEGORY_CONE:

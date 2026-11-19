@@ -604,6 +604,7 @@ public:
     // Spell difficulty
     uint32 GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const;
     SpellInfo const* GetSpellForDifficultyFromSpell(SpellInfo const* spell, Unit const* caster) const;
+    SpellInfo const* GetSpellInfoWithEffect(uint32 spellId, uint8 effIndex) const;
 
     // Spell Ranks table
     SpellChainNode const* GetSpellChainNode(uint32 spell_id) const;

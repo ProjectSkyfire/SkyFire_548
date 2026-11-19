@@ -492,6 +492,20 @@ SpellInfo const* SpellMgr::GetSpellForDifficultyFromSpell(SpellInfo const* spell
     return itr != mSpellInfoDifficultyMap.end() ? itr->second : newSpell;
 }
 
+// The default SpellInfo lacks the effects that only some difficulties have, the loaders check those on the SpellInfo of a difficulty
+SpellInfo const* SpellMgr::GetSpellInfoWithEffect(uint32 spellId, uint8 effIndex) const
+{
+    SpellInfo const* spellInfo = GetSpellInfo(spellId);
+    if (!spellInfo || spellInfo->Effects[effIndex].IsEffect())
+        return spellInfo;
+
+    for (SpellInfoDifficultyMap::const_iterator itr = mSpellInfoDifficultyMap.lower_bound(std::make_pair(spellId, 0u)); itr != mSpellInfoDifficultyMap.end() && itr->first.first == spellId; ++itr)
+        if (itr->second->Effects[effIndex].IsEffect())
+            return itr->second;
+
+    return spellInfo;
+}
+
 SpellChainNode const* SpellMgr::GetSpellChainNode(uint32 spell_id) const
 {
     SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
@@ -1575,7 +1589,7 @@ void SpellMgr::LoadSpellTargetPositions()
             continue;
         }
 
-        SpellInfo const* spellInfo = GetSpellInfo(Spell_ID);
+        SpellInfo const* spellInfo = GetSpellInfoWithEffect(Spell_ID, effIndex);
         if (!spellInfo)
         {
             SF_LOG_ERROR("sql.sql", "Spell (Id: %u) listed in `spell_target_position` does not exist.", Spell_ID);
@@ -2732,13 +2746,16 @@ void SpellMgr::LoadSpellInfoStore()
         if (!effect)
             continue;
 
-        // The default SpellInfo takes the default row, difficulty rows only fill slots without one
-        SpellEffectEntry const*& slot = effectsBySpell[effect->EffectSpellId].effects[effect->EffectIndex];
-        if (!slot || (!effect->EffectDifficulty && slot->EffectDifficulty))
-            slot = effect;
-
+        // The default SpellInfo only takes default rows, an effect that exists for some difficulties only is not part of it
         if (effect->EffectDifficulty)
+        {
             rowsByDifficulty[effect->EffectSpellId][effect->EffectDifficulty].effects[effect->EffectIndex] = effect;
+            continue;
+        }
+
+        SpellEffectEntry const*& slot = effectsBySpell[effect->EffectSpellId].effects[effect->EffectIndex];
+        if (!slot)
+            slot = effect;
     }
 
     for (uint32 i = 0; i < sSpellTargetRestrictionsStore.GetNumRows(); ++i)
@@ -2776,11 +2793,7 @@ void SpellMgr::LoadSpellInfoStore()
                     effects[j] = normalRows->effects[j];
 
                 if (!effects[j])
-                {
                     effects[j] = effectsBySpell[spellItr->first].effects[j];
-                    if (effects[j] && effects[j]->EffectDifficulty)
-                        effects[j] = NULL;
-                }
             }
 
             uint32 targetRestrictionsId = diffItr->second.targetRestrictionsId;
