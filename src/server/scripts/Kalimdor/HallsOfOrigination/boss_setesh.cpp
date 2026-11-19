@@ -355,6 +355,12 @@ class npc_setesh_void_sentinel : public CreatureScript
                 events.Reset();
             }
 
+            // The sentinel never scheduled its abilities, so Charged Fists could not be cast
+            void EnterCombat(Unit* /*who*/) OVERRIDE
+            {
+                events.ScheduleEvent(EVENT_CHARGED_FISTS, urand(5000, 8000));
+            }
+
             void UpdateAI(uint32 diff) OVERRIDE
             {
                 if (!UpdateVictim())
