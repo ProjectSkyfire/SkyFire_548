@@ -428,6 +428,12 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
 
         addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
+        // Earth Shield: the caster's direct heals on the shielded target are 20 percent stronger
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && !m_caster->IsTotem())
+            if (!IsTriggered() || m_spellInfo->Id == 73921 || m_spellInfo->Id == 73685) // Healing Rain, Unleash Life
+                if (AuraEffect const* earthShield = unitTarget->GetAuraEffect(974, EFFECT_1, caster->GetGUID()))
+                    AddPct(addhealth, earthShield->GetAmount());
+
         // Remove Grievious bite if fully healed
         if (unitTarget->HasAura(48920) && (unitTarget->GetHealth() + addhealth >= unitTarget->GetMaxHealth()))
             unitTarget->RemoveAura(48920);
