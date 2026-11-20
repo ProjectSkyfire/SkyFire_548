@@ -957,6 +957,9 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
             if (owner->GetAura(56249))
                 owner->CastCustomSpell(owner, 19658, &heal_amount, NULL, NULL, true);
     }
+    // Remove Curse with Glyph of Remove Curse
+    else if (m_spellInfo->Id == 475 && m_caster->HasAura(115700))
+        m_caster->CastSpell(m_caster, 115701, true);
 }
 
 void Spell::EffectDualWield(SpellEffIndex /*effIndex*/)
