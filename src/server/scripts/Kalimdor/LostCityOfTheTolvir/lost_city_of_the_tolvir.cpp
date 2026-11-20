@@ -32,7 +32,7 @@ enum WindTunnelMisc
 
     WIND_TUNNEL_RIDE_TIME       = 2000,
     LANDING_RIDE_TIME           = 1000,
-    LANDING_ZONE_RANGE          = 100,
+    LANDING_ZONE_RANGE          = 130,
     UNLOCK_CHECK_TIME           = 1000
 };
 
