@@ -38,6 +38,7 @@ enum Spells
     SPELL_SANDSTORM                 = 75491,
 
     SPELL_SUMMON_QUICKSAND          = 75550, // Spell not in DBC, no SMSG_SPELL_START/GO for it
+    SPELL_QUICKSAND_DAMAGE          = 89396,
 
     SPELL_BEETLE_BURROW             = 75463,
 
@@ -85,7 +86,11 @@ public:
 
     struct boss_earthrager_ptahAI : public BossAI
     {
-        boss_earthrager_ptahAI(Creature* creature) : BossAI(creature, DATA_EARTHRAGER_PTAH), _summonDeaths(0), _hasDispersed(false) { }
+        boss_earthrager_ptahAI(Creature* creature) : BossAI(creature, DATA_EARTHRAGER_PTAH), _summonDeaths(0), _hasDispersed(false)
+        {
+            // The quicksand burst hits everything near it, Ptah included
+            me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_QUICKSAND_DAMAGE, true);
+        }
 
         void Cleanup()
         {
