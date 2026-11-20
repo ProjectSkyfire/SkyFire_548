@@ -5456,18 +5456,6 @@ void Unit::SetHealth(uint32 val)
 
     SetUInt32Value(UNIT_FIELD_HEALTH, val);
 
-    if (IsInWorld())
-    {
-        ObjectGuid guid = GetGUID();
-
-        WorldPacket data(SMSG_HEALTH_UPDATE, 8 + 4);
-        data.WriteGuidMask(guid, 4, 3, 0, 2, 7, 5, 1, 6);
-        data.WriteGuidBytes(guid, 3, 1, 2, 4, 6);
-        data << int32(val);
-        data.WriteGuidBytes(guid, 7, 5, 0);
-        SendMessageToSet(&data, GetTypeId() == TypeID::TYPEID_PLAYER);
-    }
-
     // group update
     if (Player* player = ToPlayer())
     {
