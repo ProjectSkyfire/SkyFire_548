@@ -541,6 +541,11 @@ Player* Item::GetOwner()const
 
 uint32 Item::GetSkill()
 {
+    return GetSkill(GetTemplate());
+}
+
+uint32 Item::GetSkill(ItemTemplate const* proto)
+{
     const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
     {
         SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
@@ -554,8 +559,6 @@ uint32 Item::GetSkill()
     {
         0, SKILL_CLOTH, SKILL_LEATHER, SKILL_MAIL, SKILL_PLATE_MAIL, 0, SKILL_SHIELD, 0, 0, 0, 0
     };
-
-    ItemTemplate const* proto = GetTemplate();
 
     switch (proto->Class)
     {

@@ -1623,7 +1623,9 @@ public:
 
     void SetLootSpecialization(uint32 specialization);
     uint32 GetLootSpecialization() const { return GetUInt32Value(PLAYER_FIELD_LOOT_SPEC_ID); }
-    uint32 GetLootSpecOrClassSpec() const;
+    // Personal loot filter: faction, class, race, the class's armor type from level 40, the weapon or
+    // armor skill, then the loot specialization (else the active one) against the item's specializations.
+    bool IsItemFitToSpecialization(ItemTemplate const* proto) const;
 
     /// send initialization of new currency for client
     void SendNewCurrency(uint32 id) const;

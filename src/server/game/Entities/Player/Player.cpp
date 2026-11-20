@@ -23,6 +23,7 @@
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
 #include "Player.h"
+#include "ItemSpec.h"
 //#include "DBCStructure.h"
 #include "DB2Stores.h"
 #include "DisableMgr.h"
@@ -24726,6 +24727,65 @@ void Player::SendDeclineGuildInvitation(std::string declinerName, bool autoDecli
     data.WriteString(declinerName);
     data << (int32)0;
     GetSession()->SendPacket(&data);
+}
+
+bool Player::IsItemFitToSpecialization(ItemTemplate const* proto) const
+{
+    if (!proto)
+        return false;
+
+    if ((proto->Flags2 & ITEM_FLAGS_EXTRA_HORDE_ONLY) && GetTeam() != HORDE)
+        return false;
+
+    if ((proto->Flags2 & ITEM_FLAGS_EXTRA_ALLIANCE_ONLY) && GetTeam() != ALLIANCE)
+        return false;
+
+    if (!(proto->AllowableClass & getClassMask()) || !(proto->AllowableRace & getRaceMask()))
+        return false;
+
+    // armor type only: a necklace or shirt in the same slot range has no armor type to match
+    if (proto->Class == ITEM_CLASS_ARMOR && proto->SubClass >= ITEM_SUBCLASS_ARMOR_CLOTH && proto->SubClass <= ITEM_SUBCLASS_ARMOR_PLATE
+        && ((proto->InventoryType >= INVTYPE_HEAD && proto->InventoryType <= INVTYPE_HANDS) || proto->InventoryType == INVTYPE_ROBE) && getLevel() >= 40)
+    {
+        uint32 armor = ITEM_SUBCLASS_ARMOR_CLOTH;
+        switch (getClass())
+        {
+            case CLASS_WARRIOR:
+            case CLASS_PALADIN:
+            case CLASS_DEATH_KNIGHT:    armor = ITEM_SUBCLASS_ARMOR_PLATE; break;
+            case CLASS_HUNTER:
+            case CLASS_SHAMAN:          armor = ITEM_SUBCLASS_ARMOR_MAIL; break;
+            case CLASS_ROGUE:
+            case CLASS_MONK:
+            case CLASS_DRUID:           armor = ITEM_SUBCLASS_ARMOR_LEATHER; break;
+            default:                    break;
+        }
+
+        if (proto->SubClass != armor)
+            return false;
+    }
+
+    if (uint32 skill = Item::GetSkill(proto))
+        if (!HasSkill(skill))
+            return false;
+
+    // alexkulya lets this flag through every spec, after the client's Lua check; its meaning is unverified
+    if (proto->Flags & ITEM_FLAG_UNK22)
+        return true;
+
+    std::set<uint32> specs = Skyfire::ItemSpec::GetItemSpecializations(proto, getLevel());
+    if (specs.empty())
+        return true;
+
+    uint32 spec = GetLootSpecialization();
+    if (!spec)
+        spec = GetTalentSpecialization(GetActiveSpec());
+
+    // no specialization chosen yet (below level 10, or just reset): nothing to restrict by
+    if (!spec)
+        return true;
+
+    return specs.count(spec) != 0;
 }
 
 void Player::SetLootSpecialization(uint32 specialization)

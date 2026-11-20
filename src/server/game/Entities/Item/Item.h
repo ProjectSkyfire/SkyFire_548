@@ -273,6 +273,7 @@ public:
     bool IsEquipped() const;
 
     uint32 GetSkill();
+    static uint32 GetSkill(ItemTemplate const* proto);  // weapon or armor skill the item needs, 0 = none
 
     // RandomPropertyId (signed but stored as unsigned)
     int32 GetItemRandomPropertyId() const { return GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); }
