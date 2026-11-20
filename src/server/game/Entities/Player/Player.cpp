@@ -17703,7 +17703,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
             SF_LOG_ERROR("entities.player", "Player %s tried to buy %u item id %u, causing overflow", GetName().c_str(), (uint32)count, pProto->ItemId);
             count = (uint8)maxCount;
         }
-        price = pProto->BuyPrice * count; //it should not exceed MAX_MONEY_AMOUNT
+        price = uint32(uint64(pProto->BuyPrice) * count / pProto->BuyCount); //it should not exceed MAX_MONEY_AMOUNT
 
         // reputation discount
         price = uint32(floor(price * GetReputationPriceDiscount(creature)));
