@@ -824,6 +824,11 @@ void LoadDBCStores(const std::string& dataPath)
                 if (sInfo->Effect == SPELL_EFFECT_SEND_TAXI)
                     spellPaths.insert(sInfo->EffectMiscValue);
 
+        std::set<uint32> pathDestinations;
+        for (TaxiPathSetBySource::const_iterator src_i = sTaxiPathSetBySource.begin(); src_i != sTaxiPathSetBySource.end(); ++src_i)
+            for (TaxiPathSetForSource::const_iterator dest_i = src_i->second.begin(); dest_i != src_i->second.end(); ++dest_i)
+                pathDestinations.insert(dest_i->first);
+
         memset(sTaxiNodesMask, 0, sizeof(sTaxiNodesMask));
         memset(sOldContinentsNodesMask, 0, sizeof(sOldContinentsNodesMask));
         memset(sHordeTaxiNodesMask, 0, sizeof(sHordeTaxiNodesMask));
@@ -839,6 +844,11 @@ void LoadDBCStores(const std::string& dataPath)
             // lets it win the nearest node search over the real flight master next to it.
             TaxiPathSetBySource::const_iterator src_i = sTaxiPathSetBySource.find(i);
             if (src_i == sTaxiPathSetBySource.end() || src_i->second.empty())
+                continue;
+
+            // A node of neither faction that no flight leads to starts a quest flight. Keeping it in the network
+            // lets it win the nearest node search over the flight master standing next to it.
+            if (!node->Flags && pathDestinations.find(i) == pathDestinations.end())
                 continue;
 
             bool ok = false;

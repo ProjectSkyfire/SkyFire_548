@@ -2750,7 +2750,7 @@ struct TaxiNodesEntry
     char* name;                                             // 5        m_Name_lang
     uint32    MountCreatureID[2];                           // 6-7      m_MountCreatureID[2]
     //uint32 conditionId                                    // 8 - Pandaria
-    //uint32 Flags;                                         // 9        m_Flags
+    uint32    Flags;                                        // 9        m_Flags
     //float mapOffset[2];                                   // 10-11
 };
 
