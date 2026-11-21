@@ -92,9 +92,12 @@ void AuraApplication::_InitFlags(Unit* caster, uint32 effMask)
     // OVERRIDE_ACTIONBAR amount is the replacement spell id. Without it the client keeps
     // the old action-bar button (e.g. Faerie Fire) while the server remaps casts correctly.
     // Bear Form Passive3 has SPELL_ATTR8_AURA_SEND_AMOUNT in DBC; Faerie Swarm (106707) does not.
+    // Archimonde's Darkness (108505) lacks it too, and without the amount the client never shows
+    // the second Dark Soul charge.
     if ((GetBase()->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
         || GetBase()->HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS)
-        || GetBase()->HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2))
+        || GetBase()->HasEffectType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2)
+        || GetBase()->HasEffectType(SPELL_AURA_MOD_CHARGES))
         _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
 }
 
