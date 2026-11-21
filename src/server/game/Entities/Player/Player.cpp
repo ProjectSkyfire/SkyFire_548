@@ -3971,6 +3971,11 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
             if (HasSkill(pSkill->id))
                 continue;
 
+            // Spells such as Player Damage Reduction are also listed under the pet families' skill lines. A player
+            // given such a line learns the pet passives of the whole line on login and runs them on itself.
+            if (IsPetFamilySkillLine(pSkill->id))
+                continue;
+
             if (_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
                 // runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 (pSkill->id == SKILL_RUNEFORGING && (_spell_idx->second->max_value == 0 || _spell_idx->second->max_value == 1)))

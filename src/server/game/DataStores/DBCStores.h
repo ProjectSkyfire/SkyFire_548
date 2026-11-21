@@ -200,6 +200,7 @@ extern DBCStorage <SpellItemEnchantmentEntry>    sSpellItemEnchantmentStore;
 extern DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore;
 extern SpellCategoryStore                        sSpellsByCategoryStore;
 extern PetFamilySpellsStore                      sPetFamilySpellsStore;
+bool IsPetFamilySkillLine(uint32 skillId);
 extern SpellsPerClassStore                       sSpellsPerClassStore;
 extern ClassBySkillIdStore                       sClassBySkillIdStore;
 extern SpellEffectScallingByEffectId             sSpellEffectScallingByEffectId;
