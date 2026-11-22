@@ -1245,7 +1245,7 @@ public:
         if (creature->IsQuestGiver())
             player->PrepareQuestMenu(creature->GetGUID());
 
-        if (creature->IsTrainer())
+        if (creature->IsTrainer() && player->getClass() == CLASS_ROGUE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_TEXT_TRAIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_TRAIN);
 
         if (player->getClass() == CLASS_ROGUE)
@@ -1254,7 +1254,7 @@ public:
         if (player->getClass() == CLASS_ROGUE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_HELLO_ROGUE4, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_UNLEARN_SPEC);
 
-        if (player->GetSpecsCount() == 1 && player->getLevel() >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_DUALSPEC_LEVEL))
+        if (player->getClass() == CLASS_ROGUE && player->GetSpecsCount() == 1 && player->getLevel() >= sWorld->getIntConfig(WorldIntConfigs::CONFIG_MIN_DUALSPEC_LEVEL))
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, GOSSIP_HELLO_ROGUE3, GOSSIP_SENDER_MAIN, GOSSIP_OPTION_LEARNDUALSPEC);
 
         if (player->getClass() == CLASS_ROGUE && player->getLevel() >= 24 && !player->HasItemCount(17126) && !player->GetQuestRewardStatus(6681))
@@ -1270,6 +1270,12 @@ public:
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) OVERRIDE
     {
         player->PlayerTalkClass->ClearMenus();
+        if (player->getClass() != CLASS_ROGUE)
+        {
+            player->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+
         switch (action)
         {
             case GOSSIP_ACTION_INFO_DEF + 1:

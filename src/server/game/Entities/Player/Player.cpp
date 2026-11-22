@@ -12019,11 +12019,19 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                     canTalk = false;
                     break;
                 case GOSSIP_OPTION_TRAINER:
-                    if (getClass() != creature->GetCreatureTemplate()->trainer_class && creature->GetCreatureTemplate()->trainer_type == TRAINER_TYPE_CLASS)
-                        SF_LOG_ERROR("sql.sql", "GOSSIP_OPTION_TRAINER:: Player %s (GUID: %u) request wrong gossip menu: %u with wrong class: %u at Creature: %s (Entry: %u, Trainer Class: %u)",
-                            GetName().c_str(), GetGUIDLow(), menu->GetGossipMenu().GetMenuId(), getClass(), creature->GetName().c_str(), creature->GetEntry(), creature->GetCreatureTemplate()->trainer_class);
-                    // no break;
+                    if (creature->GetCreatureTemplate()->trainer_type == TRAINER_TYPE_CLASS
+                        && creature->GetCreatureTemplate()->trainer_class != 0
+                        && getClass() != creature->GetCreatureTemplate()->trainer_class)
+                        canTalk = false;
+                    break;
                 case GOSSIP_OPTION_GOSSIP:
+                    // Class-service explanations use plain gossip: dual
+                    // specialization and the death knight talent-reset prompt.
+                    if ((itr->second.ActionMenuID == 10371 || itr->second.ActionMenuID == 9791)
+                        && (creature->GetCreatureTemplate()->trainer_type != TRAINER_TYPE_CLASS
+                            || getClass() != creature->GetCreatureTemplate()->trainer_class))
+                        canTalk = false;
+                    break;
                 case GOSSIP_OPTION_SPIRITGUIDE:
                 case GOSSIP_OPTION_INNKEEPER:
                 case GOSSIP_OPTION_BANKER:
