@@ -144,6 +144,9 @@ bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
     if (node->orientation && node->delay)
         init.SetFacing(node->orientation);
 
+    // Keep the unit's walk state in sync with the spline so formation members
+    // inherit the same gait instead of running ahead of a walking leader.
+    creature->SetWalk(!node->run);
     init.SetWalk(!node->run);
     init.Launch();
 

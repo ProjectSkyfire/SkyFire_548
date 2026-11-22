@@ -23,6 +23,11 @@ EndContentData */
 #include "CombatAI.h"
 #include "Vehicle.h"
 #include "Player.h"
+#include "CreatureGroups.h"
+#include "GuardAI.h"
+#include "Log.h"
+#include "MotionMaster.h"
+#include "WaypointManager.h"
 
 enum Northshire
 {
@@ -762,8 +767,110 @@ public:
     }
 };
 
+class npc_stormwind_royal_patrol : public CreatureScript
+{
+public:
+    npc_stormwind_royal_patrol() : CreatureScript("npc_stormwind_royal_patrol") { }
+
+    struct PatrolAI : public GuardAI
+    {
+        PatrolAI(Creature* creature) : GuardAI(creature), arrivalTimer(0) { }
+
+        uint32 arrivalTimer;
+
+        void Reset() override
+        {
+            // Only formation members participate; other royal guards stay ordinary guards.
+            if (me->GetFormation())
+                me->setActive(true);
+        }
+
+        void JustReachedHome() override
+        {
+            CreatureGroup* group = me->GetFormation();
+            if (group && group->getLeader() != me && group->isFormed())
+                me->GetMotionMaster()->MoveIdle();
+            // The leader retains its waypoint generator and resumes its current node.
+        }
+
+        void JustRespawned() override
+        {
+            arrivalTimer = 0;
+            Reset();
+        }
+
+        void MovementInform(uint32 type, uint32 point) override
+        {
+            CreatureGroup* group = me->GetFormation();
+            if (type != WAYPOINT_MOTION_TYPE || !group || group->getLeader() != me)
+                return;
+
+            WaypointPath const* path = sWaypointMgr->GetPath(me->GetWaypointPath());
+            if (!path || path->empty())
+                return;
+
+            SF_LOG_DEBUG("scripts.royalpatrol", "Royal patrol %u reached point %u of %u at %.2f %.2f %.2f with %u members",
+                group->GetId(), point + 1, uint32(path->size()), me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), uint32(group->GetMembers().size()));
+            for (auto const& member : group->GetMembers())
+                SF_LOG_DEBUG("scripts.royalpatrol", "Royal patrol member %u alive=%u combat=%u position %.2f %.2f %.2f",
+                    member.first->GetDBTableGUIDLow(), uint32(member.first->IsAlive()), uint32(member.first->IsInCombat()),
+                    member.first->GetPositionX(), member.first->GetPositionY(), member.first->GetPositionZ());
+
+            if (point == path->size() - 1)
+                arrivalTimer = 5000; // Allow the rear rank to arrive before departing.
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            CreatureGroup* group = me->GetFormation();
+            if (group)
+                me->setActive(true);
+
+            if (arrivalTimer && group && group->getLeader() == me)
+            {
+                for (auto const& member : group->GetMembers())
+                    if (member.first->IsInCombat())
+                    {
+                        if (UpdateVictim())
+                            DoMeleeAttackIfReady();
+                        return;
+                    }
+
+                if (arrivalTimer > diff)
+                    arrivalTimer -= diff;
+                else
+                {
+                    arrivalTimer = 0;
+                    SF_LOG_INFO("scripts.royalpatrol", "Royal patrol %u completed its route; %u members return in 60 seconds",
+                        group->GetId(), uint32(group->GetMembers().size()));
+                    // Despawning relocates each member to its own DB home. Override
+                    // corpse decay so the patrol returns after one minute, not several.
+                    std::vector<Creature*> members;
+                    for (auto const& member : group->GetMembers())
+                        members.push_back(member.first);
+                    for (Creature* member : members)
+                    {
+                        member->DespawnOrUnsummon();
+                        member->SetRespawnTime(60);
+                        member->SaveRespawnTime();
+                        // Death clears active status; keep the respawn grid ticking.
+                        member->setActive(true);
+                    }
+                    return;
+                }
+            }
+
+            if (UpdateVictim())
+                DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const override { return new PatrolAI(creature); }
+};
+
 void AddSC_elwynn_forest()
 {
+    new npc_stormwind_royal_patrol();
     new npc_hogger_elwynn();
     new npc_blackrock_spy();
     new npc_goblin_assassin();

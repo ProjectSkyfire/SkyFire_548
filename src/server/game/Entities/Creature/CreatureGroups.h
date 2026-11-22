@@ -57,6 +57,7 @@ public:
     uint32 GetId() const { return m_groupID; }
     bool isEmpty() const { return m_members.empty(); }
     bool isFormed() const { return m_Formed; }
+    CreatureGroupMemberType const& GetMembers() const { return m_members; }
 
     void AddMember(Creature* member);
     void RemoveMember(Creature* member);
