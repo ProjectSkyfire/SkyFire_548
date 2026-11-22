@@ -425,6 +425,11 @@ void BattlePetWildZonePool::SpawnReplacement(uint64 originalGuid, BattlePetWildP
 
     Creature* replacement = new Creature();
     replacement->m_isTempWorldObject = true;
+    // Create selects the template's movement generator and rejects random movement
+    // with a zero radius. Preserve the source's range, with a small fallback for
+    // stationary sources; templates configured to idle still remain stationary.
+    float const wanderRadius = original->GetRespawnRadius();
+    replacement->SetRespawnRadius(wanderRadius > 0.0f ? wanderRadius : 5.0f);
 
     if (!replacement->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), original->GetMap(),
         speciesEntry->NpcId, 0, 0, original->GetPositionX(), original->GetPositionY(),
@@ -434,6 +439,9 @@ void BattlePetWildZonePool::SpawnReplacement(uint64 originalGuid, BattlePetWildP
         spawnTemplate.ReadyForReplacement.erase(originalGuid);
         return;
     }
+
+    // Random movement needs a home before AddToMap initializes the creature AI.
+    replacement->SetHomePosition(original->GetHomePosition());
 
     uint8 const level = BattlePetWildPoolLevel(*original, spawnTemplate.MinLevel, spawnTemplate.MaxLevel);
     replacement->SetLevel(level);
