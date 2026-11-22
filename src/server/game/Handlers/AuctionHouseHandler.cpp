@@ -392,6 +392,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
         auctionHouse->AddAuction(AH);
 
         _player->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
+        _player->ModifyMoney(-int64(deposit));
 
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
         item->DeleteFromInventoryDB(trans);
@@ -468,6 +469,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
             }
         }
 
+        _player->ModifyMoney(-int64(deposit));
+
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
         newItem->SaveToDB(trans);
         AH->SaveToDB(trans);
@@ -478,8 +481,6 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
         GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
     }
-
-    _player->ModifyMoney(-int32(deposit));
 }
 
 // this function is called when client bids or buys out auction
