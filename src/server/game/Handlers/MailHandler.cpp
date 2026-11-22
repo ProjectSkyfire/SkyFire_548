@@ -776,7 +776,11 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
     if (!ValidateMailCODPayment(player, mailId, m))
         return;
 
-    Item* it = player->GetMItem(itemId);
+    // GetMItem finds the items of all the player's mails, so check that this mail holds the item
+    Item* it = nullptr;
+    for (MailItemInfo const& info : m->items)
+        if (info.item_guid == itemId)
+            it = player->GetMItem(itemId);
 
     ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, it, false);
