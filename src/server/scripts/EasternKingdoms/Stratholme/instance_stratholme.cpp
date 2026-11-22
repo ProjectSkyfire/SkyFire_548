@@ -18,7 +18,9 @@ EndScriptData */
 
 enum Misc
 {
-    MAX_ENCOUNTER           = 6
+    MAX_ENCOUNTER           = 6,
+    MAX_POSTBOXES           = 6,
+    POSTBOXES_FOR_MALOWN    = 3
 };
 
 enum InstanceEvents
@@ -54,7 +56,10 @@ class instance_stratholme : public InstanceMapScript
             uint64 portElderGUID;
 
             uint64 baronGUID;
+            uint64 malownGUID;
             uint64 ysidaTriggerGUID;
+            uint32 postboxMask;
+            uint8 postboxCount;
             std::set<uint64> crystalsGUID;
             std::set<uint64> abomnationGUID;
             std::set<uint64> qBrotherhoodGUID;
@@ -80,7 +85,10 @@ class instance_stratholme : public InstanceMapScript
                 portElderGUID = 0;
 
                 baronGUID = 0;
+                malownGUID = 0;
                 ysidaTriggerGUID = 0;
+                postboxMask = 0;
+                postboxCount = 0;
                 crystalsGUID.clear();
                 abomnationGUID.clear();
                 qBrotherhoodGUID.clear();
@@ -121,6 +129,9 @@ class instance_stratholme : public InstanceMapScript
                 {
                     case NPC_BARON:
                         baronGUID = creature->GetGUID();
+                        break;
+                    case NPC_POSTMASTER_MALOWN:
+                        malownGUID = creature->GetGUID();
                         break;
                     case NPC_YSIDA_TRIGGER:
                         ysidaTriggerGUID = creature->GetGUID();
@@ -351,6 +362,15 @@ class instance_stratholme : public InstanceMapScript
                         if (data == DONE)
                             HandleGameObject(portGauntletGUID, true);
                         EncounterState[5] = data;
+                        break;
+                    case TYPE_POSTBOX:
+                        // data is the number of the postbox that was opened, 1 to 6, each counts once
+                        if (data < 1 || data > MAX_POSTBOXES || (postboxMask & (1u << data)))
+                            break;
+
+                        postboxMask |= 1u << data;
+                        if (++postboxCount == POSTBOXES_FOR_MALOWN && !malownGUID)
+                            instance->SummonCreature(NPC_POSTMASTER_MALOWN, MalownSpawnPos);
                         break;
                     case TYPE_SH_AELMAR:
                         IsSilverHandDead[0] = (data) ? true : false;
