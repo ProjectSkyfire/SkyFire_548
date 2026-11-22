@@ -30,6 +30,40 @@
 
 #define RAGAMUFFINTEXT "Does she have boots? Get'em!"
 
+enum WestfallStew
+{
+    NPC_WESTFALL_STEW    = 42617,
+
+    SPELL_FULL_BELLY     = 79451,
+    SPELL_COSMETIC_SLEEP = 78677,
+
+    POINT_STEW           = 1,
+
+    SAY_STEW_THANKS      = 17,
+
+    EVENT_STEW_STAND     = 1,
+    EVENT_STEW_MOVE,
+    EVENT_STEW_RETURN
+};
+
+uint32 const StewEaters[] = { 42383, 42384, 42386, 42391 };
+
+struct npc_westfall_westfall_stew : public ScriptedAI
+{
+    npc_westfall_westfall_stew(Creature* creature) : ScriptedAI(creature) { }
+
+    void IsSummonedBy(Unit* /*summoner*/) OVERRIDE
+    {
+        std::list<Creature*> eaters;
+        for (uint32 entry : StewEaters)
+            me->GetCreatureListWithEntryInGridAppend(eaters, entry, 8.0f);
+
+        for (Creature* eater : eaters)
+            if (eater->IsAlive() && !eater->HasAura(SPELL_FULL_BELLY) && eater->IsAIEnabled)
+                eater->AI()->SetGUID(me->GetGUID());
+    }
+};
+
 class npc_transient : public CreatureScript
 {
 public:
@@ -88,6 +122,7 @@ public:
         {
             cooldown = 0;
             talkCooldown = 0;
+            stewGUID = 0;
         }
 
         void GiveClueCredit(Player* player)
@@ -141,6 +176,37 @@ public:
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             me->setFaction(14);
             AttackStart(player);
+            events.Reset();
+            stewGUID = 0;
+        }
+
+        void SetGUID(uint64 guid, int32 /*id*/) OVERRIDE
+        {
+            if (stewGUID || me->getFaction() == 14)
+                return;
+
+            stewGUID = guid;
+            events.ScheduleEvent(EVENT_STEW_STAND, 0);
+        }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE || id != POINT_STEW)
+                return;
+
+            me->CastSpell(me, SPELL_FULL_BELLY, true);
+
+            if (Creature* stew = ObjectAccessor::GetCreature(*me, stewGUID))
+            {
+                if (Unit* summoner = stew->ToTempSummon()->GetSummoner())
+                    if (Player* player = summoner->ToPlayer())
+                        player->KilledMonsterCredit(NPC_WESTFALL_STEW);
+
+                if (roll_chance_i(50))
+                    Talk(SAY_STEW_THANKS, stew);
+            }
+
+            events.ScheduleEvent(EVENT_STEW_RETURN, 5500);
         }
 
         void JustRespawned() OVERRIDE
@@ -242,6 +308,39 @@ public:
         
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_STEW_STAND:
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                        me->RemoveAurasDueToSpell(SPELL_COSMETIC_SLEEP);
+                        events.ScheduleEvent(EVENT_STEW_MOVE, 2000);
+                        break;
+                    case EVENT_STEW_MOVE:
+                        if (Creature* stew = ObjectAccessor::GetCreature(*me, stewGUID))
+                        {
+                            float x, y, z;
+                            stew->GetContactPoint(me, x, y, z, 0.2f);
+                            me->GetMotionMaster()->MovePoint(POINT_STEW, x, y, z);
+                        }
+                        else
+                        {
+                            stewGUID = 0;
+                            me->GetMotionMaster()->MoveTargetedHome();
+                        }
+                        break;
+                    case EVENT_STEW_RETURN:
+                        stewGUID = 0;
+                        me->GetMotionMaster()->MoveTargetedHome();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             if (cooldown)
             {
                 if (cooldown <= diff)
@@ -280,6 +379,8 @@ public:
     private:
         uint32 cooldown;
         uint32 talkCooldown;
+        uint64 stewGUID;
+        EventMap events;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -547,6 +648,7 @@ private:
 
 void AddSC_westfall()
 {
+    RegisterCreatureAI(npc_westfall_westfall_stew);
     new npc_transient();
     new at_westfall_two_shoed_lou_thugs();
     RegisterCreatureAI(npc_westfall_thug);
