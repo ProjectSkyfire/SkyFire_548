@@ -11,12 +11,21 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "CreatureAI.h"
 #include "uldaman.h"
 
 enum Spells
 {
     SPELL_ARCHAEDAS_AWAKEN      = 10347,
     SPELL_AWAKEN_VAULT_WALKER   = 10258,
+    SPELL_STONED                = 10255
+};
+
+enum Misc
+{
+    // Archaedas wakes two Vault Warders at 33 percent: the two inside the chamber (x 91 and 118). The other two stand in the
+    // corridor west of it (x about 50) and stay asleep.
+    VAULT_WARDER_CORRIDOR_MAX_X = 70
 };
 
 enum Events
@@ -51,6 +60,7 @@ public:
 
             ironayaSealDoorTimer = 27000; //animation time
             keystoneCheck = false;
+            archaedasActivated = false;
         }
 
         bool IsEncounterInProgress() const OVERRIDE
@@ -75,10 +85,12 @@ public:
 
         uint32 ironayaSealDoorTimer;
         bool keystoneCheck;
+        bool archaedasActivated;                      // the altar works once per attempt
 
         std::vector<uint64> stoneKeepers;
         std::vector<uint64> altarOfTheKeeperCounts;
         std::vector<uint64> vaultWalkers;
+        std::vector<uint64> chamberVaultWarders;
         std::vector<uint64> earthenGuardians;
         std::vector<uint64> archaedasWallMinions;    // minions lined up around the wall
 
@@ -178,6 +190,7 @@ public:
                     target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     target->setFaction(14);
                     target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    target->RemoveAurasDueToSpell(SPELL_STONED);
                     return;        // only want the first one we find
                 }
                 // if we get this far than all four are dead so open the door
@@ -201,6 +214,7 @@ public:
                 target->CastSpell(target, SPELL_ARCHAEDAS_AWAKEN, true);
                 target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                 target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                target->RemoveAurasDueToSpell(SPELL_STONED);
                 target->setFaction(14);
                 return;        // only want the first one we find
             }
@@ -242,12 +256,17 @@ public:
 
         void ActivateArchaedas(uint64 target)
         {
+            // A second click while the fight runs would start his awakening again
+            if (archaedasActivated)
+                return;
+
             Creature* archaedas = instance->GetCreature(archaedasGUID);
-            if (!archaedas)
+            if (!archaedas || !archaedas->IsAlive())
                 return;
 
             if (Unit::GetUnit(*archaedas, target))
             {
+                archaedasActivated = true;
                 archaedas->CastSpell(archaedas, SPELL_ARCHAEDAS_AWAKEN, false);
                 whoWokeuiArchaedasGUID = target;
             }
@@ -266,6 +285,12 @@ public:
 
         void RespawnMinions()
         {
+            // Archaedas has reset, so the fight is over: send the minions that are still awake back to sleep
+            archaedasActivated = false;
+            FreezeAwakeMinions(archaedasWallMinions);
+            FreezeAwakeMinions(vaultWalkers);
+            FreezeAwakeMinions(earthenGuardians);
+
             // first respawn any aggroed wall minions
             for (std::vector<uint64>::const_iterator i = archaedasWallMinions.begin(); i != archaedasWallMinions.end(); ++i)
             {
@@ -300,6 +325,17 @@ public:
                     target->GetMotionMaster()->MoveTargetedHome();
                     SetFrozenState(target);
                 }
+            }
+        }
+
+        // A minion that is awake but not fighting would otherwise stay awake until it is killed
+        void FreezeAwakeMinions(std::vector<uint64> const& minions)
+        {
+            for (std::vector<uint64>::const_iterator i = minions.begin(); i != minions.end(); ++i)
+            {
+                Creature* target = instance->GetCreature(*i);
+                if (target && target->IsAlive() && !target->IsInCombat() && target->getFaction() == 14 && target->AI())
+                    target->AI()->Reset();
             }
         }
 
@@ -404,10 +440,11 @@ public:
         void SetData64(uint32 type, uint64 data) OVERRIDE
         {
             // Archaedas
-            if (type == 0)
+            if (type == 0 && !archaedasActivated)
             {
                 ActivateArchaedas (data);
-                SetDoor(archaedasTempleDoor, false); //close when event is started
+                if (archaedasActivated)
+                    SetDoor(archaedasTempleDoor, false); //close when event is started
             }
         }
 
@@ -471,9 +508,11 @@ public:
                         SetFrozenState(creature);
                     break;
                 }
-                case 10120:    // Vault Walker
+                case 10120:    // Vault Warder
                 {
                     vaultWalkers.push_back(creature->GetGUID());
+                    if (creature->GetPositionX() >= VAULT_WARDER_CORRIDOR_MAX_X)
+                        chamberVaultWarders.push_back(creature->GetGUID());
                     break;
                 }
                 case 2748:    // Archaedas
@@ -484,6 +523,11 @@ public:
             }
         }
 
+        static uint64 GetGuidAt(std::vector<uint64> const& guids, size_t index)
+        {
+            return index < guids.size() ? guids[index] : 0;
+        }
+
         uint64 GetData64(uint32 identifier) const OVERRIDE
         {
             switch (identifier)
@@ -492,16 +536,14 @@ public:
                     return whoWokeuiArchaedasGUID;
                 case 1:
                 case 2:
-                case 3:
-                case 4:
-                    return vaultWalkers.at(identifier - 1);
+                    return GetGuidAt(chamberVaultWarders, identifier - 1);
                 case 5:
                 case 6:
                 case 7:
                 case 8:
                 case 9:
                 case 10:
-                    return earthenGuardians.at(identifier - 5);
+                    return GetGuidAt(earthenGuardians, identifier - 5);
                 default:
                     break;
             }
