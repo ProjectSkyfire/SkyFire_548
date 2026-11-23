@@ -8,6 +8,7 @@
 #include "ScriptedGossip.h"
 #include "SpellScript.h"
 #include "Player.h"
+#include "Vehicle.h"
 
 class npc_zuni_bridge : public CreatureScript
 {
@@ -298,6 +299,88 @@ public:
     };
 };
 
+
+/*######
+## Quest: Young and Vicious (24626)
+## npc_swiftclaw, npc_swiftclaw_vehicle
+######*/
+
+enum YoungAndVicious
+{
+    NPC_SWIFTCLAW                   = 37989,
+    NPC_SWIFTCLAW_VEHICLE           = 38002,
+    SPELL_RAPTOR_ROPE               = 70927,
+    SEAT_SWIFTCLAW_RIDER            = 1,
+    SAY_SWIFTCLAW_RUNS              = 0,
+    EVENT_CHECK_RAPTOR_PENS         = 1,
+};
+
+Position const RaptorPensPos = { -1291.9f, -5518.1f, 20.9f, 0.0f };
+
+struct npc_swiftclaw : public ScriptedAI
+{
+    npc_swiftclaw(Creature* creature) : ScriptedAI(creature) { }
+
+    void SpellHit(Unit* caster, SpellInfo const* spell) OVERRIDE
+    {
+        Player* player = caster->ToPlayer();
+        if (!player || spell->Id != SPELL_RAPTOR_ROPE)
+            return;
+
+        player->KilledMonsterCredit(NPC_SWIFTCLAW);
+        if (Creature* swiftclaw = player->SummonCreature(NPC_SWIFTCLAW_VEHICLE, *me, TempSummonType::TEMPSUMMON_MANUAL_DESPAWN))
+        {
+            player->RemoveAurasByType(SPELL_AURA_MOUNTED);
+            player->EnterVehicle(swiftclaw, SEAT_SWIFTCLAW_RIDER);
+        }
+        me->DespawnOrUnsummon();
+    }
+};
+
+struct npc_swiftclaw_vehicle : public ScriptedAI
+{
+    npc_swiftclaw_vehicle(Creature* creature) : ScriptedAI(creature) { }
+
+    // Keep this AI while the player steers, or the pens are never checked.
+    void OnCharmed(bool /*apply*/) OVERRIDE { }
+
+    void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) OVERRIDE
+    {
+        if (!apply)
+        {
+            me->DespawnOrUnsummon(1000);
+            return;
+        }
+
+        Talk(SAY_SWIFTCLAW_RUNS, passenger);
+        _events.ScheduleEvent(EVENT_CHECK_RAPTOR_PENS, 1000);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        if (_events.ExecuteEvent() != EVENT_CHECK_RAPTOR_PENS)
+            return;
+
+        if (me->GetDistance(RaptorPensPos) > 20.0f)
+        {
+            _events.ScheduleEvent(EVENT_CHECK_RAPTOR_PENS, 1000);
+            return;
+        }
+
+        if (Vehicle* vehicle = me->GetVehicleKit())
+        {
+            if (Unit* rider = vehicle->GetPassenger(SEAT_SWIFTCLAW_RIDER))
+                if (Player* player = rider->ToPlayer())
+                    player->KilledMonsterCredit(NPC_SWIFTCLAW_VEHICLE);
+            vehicle->RemoveAllPassengers();
+        }
+    }
+
+private:
+    EventMap _events;
+};
 
 enum darkspearshore
 {
@@ -952,7 +1035,7 @@ private:
 
 /*######
 ## Quest: An Ancient Enemy (24814)
-## npc_voljin_ancient_enemy, npc_zarjira, npc_fire_of_the_seas
+## npc_voljin_ancient_enemy, npc_vanira_ancient_enemy, npc_zarjira, npc_fire_of_the_seas
 ######*/
 
 enum AncientEnemy
@@ -963,6 +1046,7 @@ enum AncientEnemy
     NPC_ZARJIRA                         = 38306,
     NPC_FIRE_OF_THE_SEAS                = 38542,
     NPC_MANIFESTATION_OF_THE_SEA_WITCH  = 38302,
+    NPC_SEA_WITCH_CHANNEL_BUNNY         = 38452,
 
     SPELL_SHOOT                         = 20463,
     SPELL_SHADOW_SHOCK                  = 73087,
@@ -970,13 +1054,27 @@ enum AncientEnemy
     SPELL_FIRE_OF_THE_SEAS              = 72250,
     SPELL_FIRE_OF_THE_SEAS_BEAM         = 73294,
     SPELL_STAMP_OUT_FIRE_OF_THE_SEAS    = 73296,
+    SPELL_DELUGE_OF_SHADOW              = 72044,
+    SPELL_FROST_EXPLOSION               = 69252,
+    SPELL_PERMANENT_FEIGN_DEATH         = 114371,
 
     SAY_VOLJIN_INTRO                    = 0,
     SAY_VOLJIN_FIRES                    = 1,
+    SAY_VOLJIN_DEFEATED                 = 2,
+    SAY_VOLJIN_AVENGED                  = 3,
+    SAY_VOLJIN_LEAVING                  = 4,
     SAY_ZARJIRA_INTRO                   = 0,
     SAY_ZARJIRA_FIRE_STAMPED            = 1,
     SAY_ZARJIRA_FIRES_OUT               = 2,
+    SAY_ZARJIRA_DEATH                   = 3,
     SAY_VANIRA_ENGAGE                   = 0,
+    SAY_VANIRA_ZUNI                     = 1,
+    SAY_VANIRA_NO_HEALING               = 2,
+    SAY_VANIRA_WATCHERS                 = 3,
+    SAY_VANIRA_OFFER                    = 4,
+
+    POINT_VOLJIN_LEAVE_1                = 1,
+    POINT_VOLJIN_LEAVE_2                = 2,
 
     ACTION_START_ANCIENT_ENEMY          = 1,
     ACTION_ZARJIRA_INTRO                = 2,
@@ -984,6 +1082,7 @@ enum AncientEnemy
     ACTION_FIRES_OUT                    = 4,
     ACTION_LIGHT_FIRE                   = 5,
     ACTION_FIRE_STAMPED                 = 6,
+    ACTION_ZARJIRA_DEFEATED             = 7,
 };
 
 // Where Vanira, Zuni and Vol'jin stand to face Zar'jira.
@@ -994,6 +1093,14 @@ Position const AncientEnemyPos[3] =
     { -722.39f, -5597.65f, 25.50f, 0.89f }
 };
 
+Position const VoljinLeavePos[2] =
+{
+    { -749.814f, -5621.62f, 23.6901f, 0.0f },
+    { -774.014f, -5624.29f, 18.497f, 0.0f }
+};
+
+WorldLocation const DarkspearHoldPos(1, -1286.52f, -5566.91f, 20.9266f, 3.94092f);
+
 struct npc_voljin_ancient_enemy : public ScriptedAI
 {
     enum Events
@@ -1001,6 +1108,11 @@ struct npc_voljin_ancient_enemy : public ScriptedAI
         EVENT_INTRO = 1,
         EVENT_SHOOT,
         EVENT_SHADOW_SHOCK,
+        EVENT_DEFEATED,
+        EVENT_AVENGED,
+        EVENT_LEAVING,
+        EVENT_LEAVE,
+        EVENT_DESPAWN,
     };
 
     npc_voljin_ancient_enemy(Creature* creature) : ScriptedAI(creature), _inProgress(false), _firesLit(false) { }
@@ -1051,9 +1163,21 @@ struct npc_voljin_ancient_enemy : public ScriptedAI
             case ACTION_FIRES_LIT:
                 _firesLit = true;
                 Talk(SAY_VOLJIN_FIRES);
+                if (Creature* bunny = me->FindNearestCreature(NPC_SEA_WITCH_CHANNEL_BUNNY, 40.0f))
+                    DoCast(bunny, SPELL_DELUGE_OF_SHADOW);
                 break;
             case ACTION_FIRES_OUT:
                 _firesLit = false;
+                me->InterruptNonMeleeSpells(false);
+                break;
+            case ACTION_ZARJIRA_DEFEATED:
+                me->InterruptNonMeleeSpells(false);
+                me->CombatStop(true);
+                _events.Reset();
+                _events.ScheduleEvent(EVENT_DEFEATED, 7000);
+                _events.ScheduleEvent(EVENT_AVENGED, 12500);
+                _events.ScheduleEvent(EVENT_LEAVING, 20500);
+                _events.ScheduleEvent(EVENT_LEAVE, 29900);
                 break;
             default:
                 break;
@@ -1083,12 +1207,40 @@ struct npc_voljin_ancient_enemy : public ScriptedAI
                         DoCastVictim(SPELL_SHADOW_SHOCK);
                     _events.ScheduleEvent(EVENT_SHADOW_SHOCK, urand(20000, 30000));
                     break;
+                case EVENT_DEFEATED:
+                    Talk(SAY_VOLJIN_DEFEATED);
+                    break;
+                case EVENT_AVENGED:
+                    Talk(SAY_VOLJIN_AVENGED);
+                    break;
+                case EVENT_LEAVING:
+                    Talk(SAY_VOLJIN_LEAVING);
+                    break;
+                case EVENT_LEAVE:
+                    me->SetWalk(false);
+                    me->GetMotionMaster()->MovePoint(POINT_VOLJIN_LEAVE_1, VoljinLeavePos[0]);
+                    _events.ScheduleEvent(EVENT_DESPAWN, 15000);
+                    break;
+                case EVENT_DESPAWN:
+                    me->DespawnOrUnsummon();
+                    break;
                 default:
                     break;
             }
         }
 
         UpdateVictim();
+    }
+
+    void MovementInform(uint32 type, uint32 id) OVERRIDE
+    {
+        if (type != POINT_MOTION_TYPE)
+            return;
+
+        if (id == POINT_VOLJIN_LEAVE_1)
+            me->GetMotionMaster()->MovePoint(POINT_VOLJIN_LEAVE_2, VoljinLeavePos[1]);
+        else if (id == POINT_VOLJIN_LEAVE_2)
+            me->DespawnOrUnsummon(1000);
     }
 
     void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
@@ -1102,6 +1254,87 @@ private:
     EventMap _events;
     bool _inProgress;
     bool _firesLit;
+};
+
+struct npc_vanira_ancient_enemy : public ScriptedAI
+{
+    enum Events
+    {
+        EVENT_MOURN = 1,
+        EVENT_KNEEL,
+        EVENT_NO_HEALING,
+        EVENT_STAND,
+        EVENT_WATCHERS,
+        EVENT_OFFER,
+    };
+
+    npc_vanira_ancient_enemy(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() OVERRIDE
+    {
+        _events.Reset();
+    }
+
+    void DoAction(int32 action) OVERRIDE
+    {
+        if (action != ACTION_ZARJIRA_DEFEATED)
+            return;
+
+        _events.ScheduleEvent(EVENT_MOURN, 3000);
+        _events.ScheduleEvent(EVENT_KNEEL, 8000);
+        _events.ScheduleEvent(EVENT_NO_HEALING, 37900);
+        _events.ScheduleEvent(EVENT_STAND, 41900);
+        _events.ScheduleEvent(EVENT_WATCHERS, 45900);
+        _events.ScheduleEvent(EVENT_OFFER, 53500);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_MOURN:
+                    Talk(SAY_VANIRA_ZUNI);
+                    if (Creature* zuni = me->FindNearestCreature(NPC_ZUNI_SPITESCALE_COVE, 40.0f))
+                    {
+                        me->SetWalk(false);
+                        me->GetMotionMaster()->MovePoint(0, zuni->GetNearPosition(2.0f, zuni->GetAngle(me)));
+                    }
+                    break;
+                case EVENT_KNEEL:
+                    me->SetStandState(UNIT_STAND_STATE_KNEEL);
+                    break;
+                case EVENT_NO_HEALING:
+                    Talk(SAY_VANIRA_NO_HEALING);
+                    break;
+                case EVENT_STAND:
+                    me->SetStandState(UNIT_STAND_STATE_STAND);
+                    break;
+                case EVENT_WATCHERS:
+                    Talk(SAY_VANIRA_WATCHERS);
+                    break;
+                case EVENT_OFFER:
+                    Talk(SAY_VANIRA_OFFER);
+                    me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    me->DespawnOrUnsummon(60000);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    void sGossipSelect(Player* player, uint32 /*sender*/, uint32 /*action*/) OVERRIDE
+    {
+        player->CLOSE_GOSSIP_MENU();
+        player->TeleportTo(DarkspearHoldPos);
+    }
+
+private:
+    EventMap _events;
 };
 
 struct npc_zarjira : public ScriptedAI
@@ -1134,6 +1367,12 @@ struct npc_zarjira : public ScriptedAI
     void EnterEvadeMode() OVERRIDE
     {
         EndEvent();
+
+        uint32 const allies[3] = { NPC_VOLJIN_SPITESCALE_COVE, NPC_VANIRA, NPC_ZUNI_SPITESCALE_COVE };
+        for (uint32 entry : allies)
+            if (Creature* ally = me->FindNearestCreature(entry, 60.0f))
+                ally->AI()->EnterEvadeMode();
+
         ScriptedAI::EnterEvadeMode();
     }
 
@@ -1199,6 +1438,20 @@ struct npc_zarjira : public ScriptedAI
             player->KilledMonsterCredit(NPC_ZARJIRA);
 
         EndEvent();
+        Talk(SAY_ZARJIRA_DEATH);
+
+        if (Creature* zuni = me->FindNearestCreature(NPC_ZUNI_SPITESCALE_COVE, 60.0f))
+        {
+            zuni->CastSpell(zuni, SPELL_FROST_EXPLOSION, true);
+            zuni->CastSpell(zuni, SPELL_PERMANENT_FEIGN_DEATH, true);
+            zuni->DespawnOrUnsummon(40000);
+        }
+
+        if (Creature* vanira = me->FindNearestCreature(NPC_VANIRA, 60.0f))
+            vanira->AI()->DoAction(ACTION_ZARJIRA_DEFEATED);
+
+        if (Creature* voljin = me->FindNearestCreature(NPC_VOLJIN_SPITESCALE_COVE, 60.0f))
+            voljin->AI()->DoAction(ACTION_ZARJIRA_DEFEATED);
     }
 
     void UpdateAI(uint32 diff) OVERRIDE
@@ -1269,11 +1522,6 @@ private:
         me->GetCreatureListWithEntryInGrid(fires, NPC_FIRE_OF_THE_SEAS, 30.0f);
         for (Creature* fire : fires)
             fire->AI()->EnterEvadeMode();
-
-        uint32 const allies[3] = { NPC_VOLJIN_SPITESCALE_COVE, NPC_VANIRA, NPC_ZUNI_SPITESCALE_COVE };
-        for (uint32 entry : allies)
-            if (Creature* ally = me->FindNearestCreature(entry, 60.0f))
-                ally->AI()->EnterEvadeMode();
     }
 
     EventMap _events;
@@ -1315,10 +1563,55 @@ struct npc_fire_of_the_seas : public ScriptedAI
     }
 };
 
+enum ThonksSpyglass
+{
+    SPELL_TELESCOPE_RAGGARAN  = 73741,
+    SPELL_TELESCOPE_TEKLA     = 73763,
+    SPELL_TELESCOPE_MISHA     = 73764,
+    SPELL_TELESCOPE_ZEN_TAJI  = 73765,
+
+    OBJECTIVE_RAGGARAN        = 256157,
+    OBJECTIVE_FLOODED_HUT     = 256158,
+    OBJECTIVE_MISHA           = 256159,
+    OBJECTIVE_ZEN_TAJI        = 256160,
+
+    QUEST_LOST_IN_THE_FLOODS  = 25187
+};
+
+// 73817 - Thonk's Spyglass
+class spell_thonks_spyglass : public SpellScript
+{
+    PrepareSpellScript(spell_thonks_spyglass);
+
+    void HandleAfterCast()
+    {
+        Player* player = GetCaster()->ToPlayer();
+        if (!player || player->GetQuestStatus(QUEST_LOST_IN_THE_FLOODS) != QUEST_STATUS_INCOMPLETE)
+            return;
+
+        // Each use shows the first place that has not been seen yet
+        if (!player->GetQuestObjectiveCounter(OBJECTIVE_RAGGARAN))
+            player->CastSpell(player, SPELL_TELESCOPE_RAGGARAN, true);
+        else if (!player->GetQuestObjectiveCounter(OBJECTIVE_FLOODED_HUT))
+            player->CastSpell(player, SPELL_TELESCOPE_TEKLA, true);
+        else if (!player->GetQuestObjectiveCounter(OBJECTIVE_MISHA))
+            player->CastSpell(player, SPELL_TELESCOPE_MISHA, true);
+        else if (!player->GetQuestObjectiveCounter(OBJECTIVE_ZEN_TAJI))
+            player->CastSpell(player, SPELL_TELESCOPE_ZEN_TAJI, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        AfterCast += SpellCastFn(spell_thonks_spyglass::HandleAfterCast);
+    }
+};
+
 void AddSC_durotar()
 {
     new npc_zuni_bridge();
     new npc_voljin_darkspear_hold();
+    RegisterCreatureAI(npc_swiftclaw);
+    RegisterCreatureAI(npc_swiftclaw_vehicle);
     new npc_zuni();
     new npc_jinthala();
     RegisterCreatureAI(npc_darkspear_jailor);
@@ -1329,6 +1622,8 @@ void AddSC_durotar()
     RegisterCreatureAI(npc_injured_razor_hill_grunt);
     RegisterSpellScript(spell_injured_razor_hill_grunt_cancel_feign_death);
     RegisterCreatureAI(npc_voljin_ancient_enemy);
+    RegisterCreatureAI(npc_vanira_ancient_enemy);
     RegisterCreatureAI(npc_zarjira);
     RegisterCreatureAI(npc_fire_of_the_seas);
+    RegisterSpellScript(spell_thonks_spyglass);
 }
