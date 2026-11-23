@@ -133,6 +133,7 @@ class boss_warp_splinter : public CreatureScript
 
             void Reset() OVERRIDE
             {
+                _Reset();
                 War_Stomp_Timer = urand(25000, 40000);
                 Summon_Treants_Timer = 45000;
                 Arcane_Volley_Timer = urand(8000, 20000);
@@ -142,6 +143,7 @@ class boss_warp_splinter : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
+                _EnterCombat();
                 Talk(SAY_AGGRO);
             }
 
@@ -152,6 +154,7 @@ class boss_warp_splinter : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
+                _JustDied();
                 Talk(SAY_DEATH);
             }
 

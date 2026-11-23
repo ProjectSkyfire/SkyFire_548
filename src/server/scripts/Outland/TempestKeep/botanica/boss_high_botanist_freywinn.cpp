@@ -59,6 +59,7 @@ class boss_high_botanist_freywinn : public CreatureScript
 
             void Reset() OVERRIDE
             {
+                _Reset();
                 Adds_List.clear();
 
                 SummonSeedling_Timer = 6000;
@@ -70,6 +71,7 @@ class boss_high_botanist_freywinn : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
+                _EnterCombat();
                 Talk(SAY_AGGRO);
             }
 
@@ -97,6 +99,7 @@ class boss_high_botanist_freywinn : public CreatureScript
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
+                _JustDied();
                 Talk(SAY_DEATH);
             }
 

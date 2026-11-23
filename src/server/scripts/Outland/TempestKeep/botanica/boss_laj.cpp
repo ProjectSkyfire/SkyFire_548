@@ -55,6 +55,7 @@ class boss_laj : public CreatureScript
 
             void Reset() OVERRIDE
             {
+                _Reset();
                 me->SetDisplayId(MODEL_DEFAULT);
                 me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, true);
                 me->ApplySpellImmune(0, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, false);
@@ -142,6 +143,12 @@ class boss_laj : public CreatureScript
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
+                _EnterCombat();
+            }
+
+            void JustDied(Unit* /*killer*/) OVERRIDE
+            {
+                _JustDied();
             }
 
             void JustSummoned(Creature* summon) OVERRIDE
