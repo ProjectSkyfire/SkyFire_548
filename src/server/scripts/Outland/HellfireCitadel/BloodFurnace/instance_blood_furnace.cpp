@@ -229,9 +229,9 @@ class instance_blood_furnace : public InstanceMapScript
                 return 0;
             }
 
-            const char* Save()
+            std::string GetSaveData() OVERRIDE
             {
-                return str_data.c_str();
+                return str_data;
             }
 
             void Load(const char* in) OVERRIDE
