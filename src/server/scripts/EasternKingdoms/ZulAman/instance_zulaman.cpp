@@ -8,6 +8,16 @@
 #include "ScriptedCreature.h"
 #include "zulaman.h"
 
+DoorData const doorData[] =
+{
+    { GO_AKILZON_EXIT,     DATA_AKILZON, DOOR_TYPE_ROOM,    BOUNDARY_NONE },
+    { GO_HALAZZI_ENTRANCE, DATA_HALAZZI, DOOR_TYPE_ROOM,    BOUNDARY_NONE },
+    { GO_HALAZZI_EXIT,     DATA_HALAZZI, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { GO_MALACRASS_EXIT,   DATA_HEXLORD, DOOR_TYPE_PASSAGE, BOUNDARY_NONE },
+    { GO_DAAKARA_EXIT,     DATA_DAAKARA, DOOR_TYPE_ROOM,    BOUNDARY_NONE },
+    { 0,                   0,            DOOR_TYPE_ROOM,    BOUNDARY_NONE }
+};
+
 class instance_zulaman : public InstanceMapScript
 {
     public:
@@ -18,6 +28,7 @@ class instance_zulaman : public InstanceMapScript
             instance_zulaman_InstanceScript(InstanceMap* map) : InstanceScript(map)
             {
                 SetBossNumber(EncounterCount);
+                LoadDoorData(doorData);
 
                 AkilzonGUID             = 0;
                 NalorakkGUID            = 0;
@@ -27,6 +38,7 @@ class instance_zulaman : public InstanceMapScript
                 DaakaraGUID             = 0;
                 VoljinGUID              = 0;
                 HexLordTriggerGUID      = 0;
+                MalacrassGateGUID       = 0;
                 SpeedRunTimer           = 16;
                 ZulAmanState            = NOT_STARTED;
                 ZulAmanBossCount        = 0;
@@ -82,7 +94,19 @@ class instance_zulaman : public InstanceMapScript
                         MasiveGateGUID = go->GetGUID();
                         AddDoor(go, true);
                         if (ZulAmanState != NOT_STARTED)
-                            go->SetGoState(GO_STATE_ACTIVE);
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
+                        break;
+                    case GO_AKILZON_EXIT:
+                    case GO_HALAZZI_ENTRANCE:
+                    case GO_HALAZZI_EXIT:
+                    case GO_MALACRASS_EXIT:
+                    case GO_DAAKARA_EXIT:
+                        AddDoor(go, true);
+                        break;
+                    case GO_MALACRASS_ENTRANCE:
+                        MalacrassGateGUID = go->GetGUID();
+                        if (GetBossesDone() >= 2)
+                            HandleGameObject(0, true, go);
                         break;
                     default:
                         break;
@@ -94,6 +118,11 @@ class instance_zulaman : public InstanceMapScript
                 switch (go->GetEntry())
                 {
                     case GO_MASSIVE_GATE:
+                    case GO_AKILZON_EXIT:
+                    case GO_HALAZZI_ENTRANCE:
+                    case GO_HALAZZI_EXIT:
+                    case GO_MALACRASS_EXIT:
+                    case GO_DAAKARA_EXIT:
                         AddDoor(go, false);
                         break;
                     default:
@@ -143,6 +172,7 @@ class instance_zulaman : public InstanceMapScript
                             events.ScheduleEvent(EVENT_UPDATE_ZULAMAN_TIMER, 60000);
                             SpeedRunTimer = 15;
                             ZulAmanState = data;
+                            HandleGameObject(MasiveGateGUID, true);
                             SaveToDB();
                         }
                         break;
@@ -190,21 +220,9 @@ class instance_zulaman : public InstanceMapScript
                     }
                 }
 
-                switch (type)
-                {
-                    case DATA_AKILZON:
-                        break;
-                    case DATA_NALORAKK:
-                        break;
-                    case DATA_JANALAI:
-                        break;
-                    case DATA_HALAZZI:
-                    case DATA_HEXLORD:
-                    case DATA_DAAKARA:
-                        break;
-                    default:
-                        break;
-                }
+                // The Hex Lord's gate opens once two of the first four bosses are down
+                if (state == DONE && type <= DATA_HALAZZI && GetBossesDone() >= 2)
+                    HandleGameObject(MalacrassGateGUID, true);
 
                 return true;
             }
@@ -311,7 +329,17 @@ class instance_zulaman : public InstanceMapScript
             }
 
         protected:
+            uint8 GetBossesDone() const
+            {
+                uint8 done = 0;
+                for (uint8 i = DATA_AKILZON; i <= DATA_HALAZZI; ++i)
+                    if (GetBossState(i) == DONE)
+                        ++done;
+                return done;
+            }
+
             EventMap events;
+            uint64 MalacrassGateGUID;
             uint64 AkilzonGUID;
             uint64 NalorakkGUID;
             uint64 JanalaiGUID;
