@@ -46,6 +46,12 @@ enum GameObjectIds
 {
     GO_STRANGE_GONG             = 187359,
     GO_MASSIVE_GATE             = 186728,
+    GO_AKILZON_EXIT             = 186858,
+    GO_HALAZZI_ENTRANCE         = 186304,
+    GO_HALAZZI_EXIT             = 186303,
+    GO_MALACRASS_ENTRANCE       = 186305,
+    GO_MALACRASS_EXIT           = 186306,
+    GO_DAAKARA_EXIT             = 186859,
 };
 
 enum ZulAmanEvents
@@ -63,6 +69,7 @@ enum ZulAmanWorldStates
 {
     WORLD_STATE_ZULAMAN_TIMER_ENABLED   = 3104,
     WORLD_STATE_ZULAMAN_TIMER           = 3106,
+    WORLDSTATE_TUNNEL_VISION            = 9165
 };
 
 template<class AI>
