@@ -352,6 +352,10 @@ void AddSC_teldrassil();
 void AddSC_the_barrens();
 void AddSC_thunder_bluff();
 void AddSC_winterspring();
+void AddSC_instance_throne_of_the_four_winds();
+void AddSC_throne_of_the_four_winds();
+void AddSC_boss_conclave_of_wind();
+void AddSC_boss_alakir();
 
 // Northrend
 
@@ -1096,6 +1100,10 @@ void AddKalimdorScripts()
     AddSC_mount_hyjal();
     AddSC_feralas();
     AddSC_felwood();
+    AddSC_instance_throne_of_the_four_winds();
+    AddSC_throne_of_the_four_winds();
+    AddSC_boss_conclave_of_wind();
+    AddSC_boss_alakir();
 #endif
 }
 

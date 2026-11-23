@@ -122,6 +122,11 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_mount_hyjal.cpp
   Kalimdor/zone_feralas.cpp
   Kalimdor/zone_felwood.cpp
+  Kalimdor/ThroneOfTheFourWinds/throne_of_the_four_winds.h
+  Kalimdor/ThroneOfTheFourWinds/instance_throne_of_the_four_winds.cpp
+  Kalimdor/ThroneOfTheFourWinds/throne_of_the_four_winds.cpp
+  Kalimdor/ThroneOfTheFourWinds/boss_conclave_of_wind.cpp
+  Kalimdor/ThroneOfTheFourWinds/boss_alakir.cpp
 )
 
 message("  -> Prepared: Kalimdor")
