@@ -125,7 +125,7 @@ class boss_lord_valden : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
             {
-                if (me->HealthBelowPct(30) && !bRed && IsHeroic())
+                if (me->HealthBelowPct(35) && !bRed && IsHeroic())
                 {
                     bRed = true;
                     DoCast(me, SPELL_CONJURE_MYSTERY_TOXIN_2);
@@ -167,7 +167,7 @@ class boss_lord_valden : public CreatureScript
                             events.ScheduleEvent(EVENT_CONJURE_FROST_MIXTURE, urand(8000, 14000));
                             break;
                         case EVENT_CONJURE_MYSTERY_TOXIN:
-                            DoCast(me, SPELL_CONJURE_MYSTERY_TOXIN_1);
+                            DoCast(me, bRed ? SPELL_CONJURE_MYSTERY_TOXIN_2 : SPELL_CONJURE_MYSTERY_TOXIN_1);
                             events.ScheduleEvent(EVENT_CONJURE_MYSTERY_TOXIN, 25000);
                             break;
                     }
