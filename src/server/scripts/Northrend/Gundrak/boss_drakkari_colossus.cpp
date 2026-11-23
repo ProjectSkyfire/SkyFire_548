@@ -23,7 +23,9 @@ enum Spells
     SPELL_SURGE                                   = 54801,
     SPELL_FREEZE_ANIM                             = 16245,
     SPELL_MOJO_PUDDLE                             = 55627,
+    SPELL_MOJO_PUDDLE_H                           = 58994,
     SPELL_MOJO_WAVE                               = 55626,
+    SPELL_MOJO_WAVE_H                             = 58993,
 };
 
 enum ColossusEvents
@@ -461,13 +463,13 @@ public:
 
             if (mojoWaveTimer <= diff)
             {
-                DoCastVictim(SPELL_MOJO_WAVE);
+                DoCastVictim(DUNGEON_MODE(SPELL_MOJO_WAVE, SPELL_MOJO_WAVE_H));
                 mojoWaveTimer = 15*IN_MILLISECONDS;
             } else mojoWaveTimer -= diff;
 
             if (mojoPuddleTimer <= diff)
             {
-                DoCastVictim(SPELL_MOJO_PUDDLE);
+                DoCastVictim(DUNGEON_MODE(SPELL_MOJO_PUDDLE, SPELL_MOJO_PUDDLE_H));
                 mojoPuddleTimer = 18*IN_MILLISECONDS;
             } else mojoPuddleTimer -= diff;
 
