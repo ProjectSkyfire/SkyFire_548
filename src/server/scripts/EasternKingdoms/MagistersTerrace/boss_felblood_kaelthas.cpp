@@ -13,8 +13,7 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "magisters_terrace.h"
-#include "WorldPacket.h"
-#include "Opcodes.h"
+#include "SpellInfo.h"
 
 enum Says
 {
@@ -47,11 +46,13 @@ enum Spells
     SPELL_PYROBLAST               = 36819,                 // Heroic only; 45-55k fire damage
 
 // Phase 2 spells
-    SPELL_GRAVITY_LAPSE_INITIAL   = 44224,                 // Cast at the beginning of every Gravity Lapse
+    SPELL_GRAVITY_LAPSE_INITIAL   = 44224,                 // Cast at the beginning of every Gravity Lapse, hits every enemy in 30 yards
     SPELL_GRAVITY_LAPSE_CHANNEL   = 44251,                 // Channeled; blue beam animation to every enemy in range
-    SPELL_TELEPORT_CENTER         = 44218,                 // Should teleport people to the center. Requires DB entry in spell_target_position.
-    SPELL_GRAVITY_LAPSE_FLY       = 44227,                 // Hastens flyspeed and allows flying for 1 minute. For some reason removes 44226.
-    SPELL_GRAVITY_LAPSE_DOT       = 44226,                 // Knocks up in the air and applies a 300 DPS DoT.
+    SPELL_TELEPORT_CENTER         = 44218,                 // Teleports Kael'thas to the center (spell_target_position)
+    SPELL_GRAVITY_LAPSE_FLY       = 44227,                 // Allows flying and hastens the flight speed
+    SPELL_GRAVITY_LAPSE_DOT       = 44226,                 // Heroic: knocks up in the air and applies a 300 DPS DoT
+    SPELL_GRAVITY_LAPSE_DOT_N     = 49887,                 // Normal: the same with 150 DPS
+    SPELL_CLEAR_FLIGHT            = 44232,                 // Takes the flight away from everyone in 28 yards
     SPELL_ARCANE_SPHERE_PASSIVE   = 44263,                 // Passive auras on Arcane Spheres
     SPELL_POWER_FEEDBACK          = 44233                 // Stuns him, making him take 50% more damage for 10 seconds. Cast after Gravity Lapse
 };
@@ -65,6 +66,20 @@ enum Creatures
     CREATURE_ARCANE_SPHERE        = 24708
 };
 
+
+// The five spells that place a player around Kael'thas (the offsets are in their spell data), one per target
+uint32 const GravityLapseTeleportSpells[5] = { 44219, 44220, 44221, 44222, 44223 };
+
+enum GravityLapseTimes
+{
+    GRAVITY_LAPSE_PREPARE         = 1000,
+    GRAVITY_LAPSE_CENTER          = 1000,
+    GRAVITY_LAPSE_HIT_DELAY       = 400,                   // between the teleport and the knock up
+    GRAVITY_LAPSE_TO_SPHERES      = 3600,
+    GRAVITY_LAPSE_TO_BEAM         = 1000,
+    GRAVITY_LAPSE_DURATION        = 30000,                 // 35 seconds after the first hit
+    GRAVITY_LAPSE_POWER_FEEDBACK  = 11000
+};
 
 /** Locations **/
 float KaelLocations[3][2]=
@@ -106,10 +121,15 @@ public:
         uint32 GravityLapseTimer;
         uint32 GravityLapsePhase;
         // 0 = No Gravity Lapse
-        // 1 = Casting Gravity Lapse visual
-        // 2 = Teleported people to self
-        // 3 = Knocked people up in the air
-        // 4 = Applied an aura that allows them to fly, channeling visual, relased Arcane Orbs.
+        // 1 = Talked, waiting to go to the center
+        // 2 = Teleported to the center
+        // 3 = Gravity Lapse hit every enemy and placed it around Kael'thas
+        // 4 = Knocked the targets up and gave them flight
+        // 5 = Released the Arcane Spheres
+        // 6 = Channeling the visual until Power Feedback
+
+        std::vector<uint64> GravityLapseTargets;
+        uint8 GravityLapseTargetCount;
 
         bool FirstGravityLapse;
         bool HasTaunted;
@@ -121,16 +141,19 @@ public:
 
         void Reset() OVERRIDE
         {
-            /// @todo Timers
+            RemoveGravityLapse();
+
             FireballTimer = 0;
-            PhoenixTimer = 10000;
-            FlameStrikeTimer = 25000;
+            PhoenixTimer = 12000;
+            FlameStrikeTimer = 44000;
             CombatPulseTimer = 0;
 
-            PyroblastTimer = 60000;
+            PyroblastTimer = 61000;
 
             GravityLapseTimer = 0;
             GravityLapsePhase = 0;
+            GravityLapseTargets.clear();
+            GravityLapseTargetCount = 0;
 
             FirstGravityLapse = true;
             HasTaunted = false;
@@ -199,73 +222,43 @@ public:
             }
         }
 
-        void TeleportPlayersToSelf()
+        // Every target of the Gravity Lapse is placed around Kael'thas by its own teleport spell
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) OVERRIDE
         {
-            float x = KaelLocations[0][0];
-            float y = KaelLocations[0][1];
-            me->SetPosition(x, y, LOCATION_Z, 0.0f);
-            ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
-            ThreatContainer::StorageType::const_iterator i = threatlist.begin();
-            for (i = threatlist.begin(); i != threatlist.end(); ++i)
-            {
-                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                if (unit && (unit->GetTypeId() == TypeID::TYPEID_PLAYER))
-                    unit->CastSpell(unit, SPELL_TELEPORT_CENTER, true);
-            }
-            DoCast(me, SPELL_TELEPORT_CENTER, true);
+            if (spell->Id != SPELL_GRAVITY_LAPSE_INITIAL || target->GetTypeId() != TypeID::TYPEID_PLAYER)
+                return;
+
+            DoCast(target, GravityLapseTeleportSpells[GravityLapseTargetCount % 5], true);
+            GravityLapseTargets.push_back(target->GetGUID());
+            ++GravityLapseTargetCount;
         }
 
-        void CastGravityLapseKnockUp()
+        // The knock up and the flight come from Kael'thas as the original caster, so they are not
+        // refused where players may not fly
+        void CastGravityLapseKnockUpAndFly()
         {
-            ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
-            ThreatContainer::StorageType::const_iterator i = threatlist.begin();
-            for (i = threatlist.begin(); i != threatlist.end(); ++i)
-            {
-                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                if (unit && (unit->GetTypeId() == TypeID::TYPEID_PLAYER))
-                    // Knockback into the air
-                    unit->CastSpell(unit, SPELL_GRAVITY_LAPSE_DOT, true, 0, 0, me->GetGUID());
-            }
-        }
-
-        void CastGravityLapseFly()                              // Use Fly Packet hack for now as players can't cast "fly" spells unless in map 530. Has to be done a while after they get knocked into the air...
-        {
-            ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
-            ThreatContainer::StorageType::const_iterator i = threatlist.begin();
-            for (i = threatlist.begin(); i != threatlist.end(); ++i)
-            {
-                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                if (unit && (unit->GetTypeId() == TypeID::TYPEID_PLAYER))
-                {
-                    // Also needs an exception in spell system.
-                    unit->CastSpell(unit, SPELL_GRAVITY_LAPSE_FLY, true, 0, 0, me->GetGUID());
-                    // Use packet hack
-                    WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                    data.append(unit->GetPackGUID());
-                    data << uint32(0);
-                    unit->SendMessageToSet(&data, true);
-                }
-            }
+            for (std::vector<uint64>::const_iterator itr = GravityLapseTargets.begin(); itr != GravityLapseTargets.end(); ++itr)
+                if (Unit* unit = Unit::GetUnit(*me, *itr))
+                    if (unit->IsAlive())
+                    {
+                        unit->CastSpell(unit, DUNGEON_MODE(uint32(SPELL_GRAVITY_LAPSE_DOT_N), uint32(SPELL_GRAVITY_LAPSE_DOT)), true, NULL, NULL, me->GetGUID());
+                        unit->CastSpell(unit, SPELL_GRAVITY_LAPSE_FLY, true, NULL, NULL, me->GetGUID());
+                    }
         }
 
         void RemoveGravityLapse()
         {
-            ThreatContainer::StorageType threatlist = me->getThreatManager().getThreatList();
-            ThreatContainer::StorageType::const_iterator i = threatlist.begin();
-            for (i = threatlist.begin(); i != threatlist.end(); ++i)
-            {
-                Unit* unit = Unit::GetUnit(*me, (*i)->getUnitGuid());
-                if (unit && (unit->GetTypeId() == TypeID::TYPEID_PLAYER))
+            DoCastAOE(SPELL_CLEAR_FLIGHT, true);
+
+            for (std::vector<uint64>::const_iterator itr = GravityLapseTargets.begin(); itr != GravityLapseTargets.end(); ++itr)
+                if (Unit* unit = Unit::GetUnit(*me, *itr))
                 {
                     unit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_FLY);
                     unit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_DOT);
-
-                    WorldPacket data(SMSG_MOVE_UNSET_CAN_FLY, 12);
-                    data.append(unit->GetPackGUID());
-                    data << uint32(0);
-                    unit->SendMessageToSet(&data, true);
+                    unit->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_DOT_N);
                 }
-            }
+
+            GravityLapseTargets.clear();
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -294,7 +287,7 @@ public:
                     if (FireballTimer <= diff)
                     {
                         DoCastVictim(SPELL_FIREBALL_NORMAL);
-                        FireballTimer = urand(2000, 6000);
+                        FireballTimer = 2500;
                     } else FireballTimer -= diff;
 
                     if (PhoenixTimer <= diff)
@@ -315,7 +308,7 @@ public:
 
                         Talk(SAY_PHOENIX);
 
-                        PhoenixTimer = 60000;
+                        PhoenixTimer = 45000;
                     } else PhoenixTimer -= diff;
 
                     if (FlameStrikeTimer <= diff)
@@ -327,7 +320,7 @@ public:
                             DoCast(target, SPELL_FLAMESTRIKE3, true);
                             Talk(SAY_FLAMESTRIKE);
                         }
-                        FlameStrikeTimer = urand(15000, 25000);
+                        FlameStrikeTimer = 44000;
                     } else FlameStrikeTimer -= diff;
 
                     // Below 50%
@@ -364,28 +357,32 @@ public:
                                 else
                                     Talk(SAY_RECAST_GRAVITY);
 
-                                DoCast(me, SPELL_GRAVITY_LAPSE_INITIAL);
-                                GravityLapseTimer = 2000 + diff;// Don't interrupt the visual spell
+                                me->InterruptNonMeleeSpells(false);
+                                GravityLapseTimer = GRAVITY_LAPSE_PREPARE;
                                 GravityLapsePhase = 1;
                                 break;
 
                             case 1:
-                                TeleportPlayersToSelf();
-                                GravityLapseTimer = 1000;
+                                DoCast(me, SPELL_TELEPORT_CENTER, true);
+                                GravityLapseTimer = GRAVITY_LAPSE_CENTER;
                                 GravityLapsePhase = 2;
                                 break;
 
                             case 2:
-                                CastGravityLapseKnockUp();
-                                GravityLapseTimer = 1000;
+                                GravityLapseTargets.clear();
+                                GravityLapseTargetCount = 0;
+                                DoCastAOE(SPELL_GRAVITY_LAPSE_INITIAL);
+                                GravityLapseTimer = GRAVITY_LAPSE_HIT_DELAY;
                                 GravityLapsePhase = 3;
                                 break;
 
                             case 3:
-                                CastGravityLapseFly();
-                                GravityLapseTimer = 30000;
+                                CastGravityLapseKnockUpAndFly();
+                                GravityLapseTimer = GRAVITY_LAPSE_TO_SPHERES;
                                 GravityLapsePhase = 4;
+                                break;
 
+                            case 4:
                                 for (uint8 i = 0; i < 3; ++i)
                                 {
                                     Unit* target = NULL;
@@ -400,15 +397,22 @@ public:
                                     }
                                 }
 
-                                DoCast(me, SPELL_GRAVITY_LAPSE_CHANNEL);
+                                GravityLapseTimer = GRAVITY_LAPSE_TO_BEAM;
+                                GravityLapsePhase = 5;
                                 break;
 
-                            case 4:
+                            case 5:
+                                DoCast(me, SPELL_GRAVITY_LAPSE_CHANNEL);
+                                GravityLapseTimer = GRAVITY_LAPSE_DURATION;
+                                GravityLapsePhase = 6;
+                                break;
+
+                            case 6:
                                 me->InterruptNonMeleeSpells(false);
                                 Talk(SAY_TIRED);
                                 DoCast(me, SPELL_POWER_FEEDBACK);
                                 RemoveGravityLapse();
-                                GravityLapseTimer = 10000;
+                                GravityLapseTimer = GRAVITY_LAPSE_POWER_FEEDBACK;
                                 GravityLapsePhase = 0;
                                 break;
                         }
