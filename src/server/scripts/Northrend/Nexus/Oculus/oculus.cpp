@@ -40,7 +40,8 @@ enum GossipNPCs
     ITEM_AMBER_ESSENCE                            = 37859,
     ITEM_RUBY_ESSENCE                             = 37860,
 
-    SPELL_SHOCK_CHARGE                            = 49836
+    SPELL_SHOCK_CHARGE                            = 49836,
+    SPELL_RUBY_EVASIVE_CHARGES                    = 50241
 };
 
 enum Drakes
@@ -565,6 +566,49 @@ class spell_oculus_dream_funnel: public SpellScriptLoader
         }
 };
 
+// 49840 - Shock Lance
+class spell_oculus_shock_lance : public SpellScript
+{
+    PrepareSpellScript(spell_oculus_shock_lance);
+
+    void CalcDamage(SpellEffIndex /*effIndex*/)
+    {
+        int32 damage = GetEffectValue();
+        if (Unit* target = GetHitUnit())
+            if (AuraEffect const* shockCharges = target->GetAuraEffect(SPELL_SHOCK_CHARGE, EFFECT_0, GetCaster()->GetGUID()))
+            {
+                damage += shockCharges->GetAmount();
+                shockCharges->GetBase()->Remove(AURA_REMOVE_BY_ENEMY_SPELL);
+            }
+
+        SetEffectValue(damage);
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectLaunchTarget += SpellEffectFn(spell_oculus_shock_lance::CalcDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
+// 50240 - Evasive Maneuvers
+class spell_oculus_evasive_maneuvers : public AuraScript
+{
+    PrepareAuraScript(spell_oculus_evasive_maneuvers);
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    {
+        PreventDefaultAction();
+        GetTarget()->RemoveAuraFromStack(SPELL_RUBY_EVASIVE_CHARGES);
+        if (!GetTarget()->HasAura(SPELL_RUBY_EVASIVE_CHARGES))
+            Remove();
+    }
+
+    void Register() OVERRIDE
+    {
+        OnEffectProc += AuraEffectProcFn(spell_oculus_evasive_maneuvers::HandleProc, EFFECT_2, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
 void AddSC_oculus()
 {
     new npc_verdisa_beglaristrasz_eternos();
@@ -574,4 +618,6 @@ void AddSC_oculus()
     new spell_call_ruby_emerald_amber_drake();
     new spell_oculus_touch_the_nightmare();
     new spell_oculus_dream_funnel();
+    RegisterSpellScript(spell_oculus_shock_lance);
+    RegisterAuraScript(spell_oculus_evasive_maneuvers);
 }
