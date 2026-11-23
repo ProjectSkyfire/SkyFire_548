@@ -1,0 +1,74 @@
+-- Gilneas, By the Skin of His Teeth (14154): 52 static Worgen Runts (35456) stand on the rooftops and on Lord Darius
+-- Crowley's platform all day, within reach of Crowley and of the player outside the event, and Crowley dies during
+-- the quest while too many worgen show up.
+-- The entry is summoned by the quest script: npc_sean_dempsey::SummonNextWave (gilneas.cpp) summons 35456 on the SW
+-- roof (-1732.81 1526.34 55.39 and -1737.49 1526.11 55.51) and its sibling Worgen Runt 35188 on the NW roof
+-- (-1618.86 1505.68 70.24), and the runts run the script's waypoints and jump down onto the platform next to Crowley.
+-- These static rows are the same runts recorded as spawns: they sit along the roof runs and at the landing spots, 36
+-- of them in stacks of 2 to 4 on one spot, all with the 120 second respawn, all in phase 170. Neither the Cataclysm
+-- Preservation Project 4.3.4 nor Legends of Azeroth 5.4.8 has a single static spawn of 35456 (or of 35167, 35170 and
+-- 35188), and LoA gives all four the same summon script.
+-- None is pooled or in a game event, none has an addon, formation, linked respawn, waypoint or SmartAI row.
+-- The event keeps working because it summons the runts itself; the summons are not affected by this file.
+-- Per guid (position, copies of 35456 within 1 yard in the same phase, area):
+--   236499 (-1630.40, 1481.66, 71.42): 3 other copies on the spot, NW roof run
+--   236500 (-1611.76, 1493.90, 67.44): 2 other copies on the spot, NW roof run
+--   236502 (-1625.62, 1487.03, 71.28): 2 other copies on the spot, NW roof run
+--   236503 (-1720.65, 1526.71, 55.91): 2 other copies on the spot, SW roof
+--   236504 (-1638.57, 1489.74, 68.55): 2 other copies on the spot, NW roof run
+--   236505 (-1622.67, 1489.82, 71.04): 2 other copies on the spot, NW roof run
+--   236506 (-1630.40, 1481.66, 71.42): 3 other copies on the spot, NW roof run
+--   236507 (-1622.42, 1483.88, 67.67): 2 other copies on the spot, NW roof run
+--   236508 (-1634.34, 1491.30, 70.10): 2 other copies on the spot, NW roof run
+--   236509 (-1631.98, 1491.58, 71.11): 2 other copies on the spot, NW roof run
+--   236510 (-1618.05, 1489.64, 68.45): 2 other copies on the spot, NW roof run
+--   236511 (-1627.27, 1499.69, 68.89): 2 other copies on the spot, NW roof run
+--   236512 (-1713.97, 1526.62, 56.22): no copy on the spot, SW roof
+--   236513 (-1718.10, 1524.07, 55.82): no copy on the spot, SW roof
+--   236514 (-1718.26, 1518.56, 55.56): no copy on the spot, SW roof
+--   236515 (-1729.34, 1526.49, 55.48): no copy on the spot, SW roof
+--   236516 (-1709.63, 1527.46, 56.86): no copy on the spot, SW roof
+--   236517 (-1717.75, 1513.73, 55.48): no copy on the spot, SW roof
+--   236518 (-1724.72, 1526.73, 55.66): no copy on the spot, SW roof
+--   236519 (-1625.62, 1487.03, 71.28): 2 other copies on the spot, NW roof run
+--   236520 (-1720.65, 1526.71, 55.91): 2 other copies on the spot, SW roof
+--   236521 (-1638.57, 1489.74, 68.55): 2 other copies on the spot, NW roof run
+--   236522 (-1622.67, 1489.82, 71.04): 2 other copies on the spot, NW roof run
+--   236523 (-1630.40, 1481.66, 71.42): 3 other copies on the spot, NW roof run
+--   236524 (-1622.42, 1483.88, 67.67): 2 other copies on the spot, NW roof run
+--   236525 (-1634.34, 1491.30, 70.10): 2 other copies on the spot, NW roof run
+--   236526 (-1631.98, 1491.58, 71.11): 2 other copies on the spot, NW roof run
+--   236527 (-1618.05, 1489.64, 68.45): 2 other copies on the spot, NW roof run
+--   236528 (-1627.27, 1499.69, 68.89): 2 other copies on the spot, NW roof run
+--   236546 (-1694.03, 1466.33, 52.29): no copy on the spot, Crowley platform
+--   236547 (-1699.38, 1470.32, 56.50): no copy on the spot, Crowley platform
+--   236548 (-1697.73, 1469.52, 52.29): no copy on the spot, Crowley platform
+--   236549 (-1701.65, 1470.94, 52.29): no copy on the spot, Crowley platform
+--   236550 (-1697.83, 1473.17, 54.11): no copy on the spot, Crowley platform
+--   236551 (-1699.09, 1467.08, 53.23): no copy on the spot, Crowley platform
+--   236552 (-1700.02, 1469.25, 52.60): no copy on the spot, Crowley platform
+--   236562 (-1678.20, 1447.44, 52.29): 1 other copy on the spot, Crowley platform
+--   236563 (-1677.28, 1444.85, 52.29): no copy on the spot, Crowley platform
+--   236564 (-1638.57, 1489.74, 68.55): 2 other copies on the spot, NW roof run
+--   236565 (-1622.67, 1489.82, 71.04): 2 other copies on the spot, NW roof run
+--   236566 (-1630.40, 1481.66, 71.42): 3 other copies on the spot, NW roof run
+--   236567 (-1622.42, 1483.88, 67.67): 2 other copies on the spot, NW roof run
+--   236568 (-1634.34, 1491.30, 70.10): 2 other copies on the spot, NW roof run
+--   236569 (-1631.98, 1491.58, 71.11): 2 other copies on the spot, NW roof run
+--   236570 (-1618.05, 1489.64, 68.45): 2 other copies on the spot, NW roof run
+--   236571 (-1627.27, 1499.69, 68.89): 2 other copies on the spot, NW roof run
+--   236572 (-1625.62, 1487.03, 71.28): 2 other copies on the spot, NW roof run
+--   236573 (-1720.65, 1526.71, 55.91): 2 other copies on the spot, SW roof
+--   236575 (-1611.76, 1493.90, 67.44): 2 other copies on the spot, NW roof run
+--   236720 (-1677.78, 1446.56, 52.29): 1 other copy on the spot, Crowley platform
+--   236721 (-1671.27, 1396.83, 52.29): no copy on the spot, platform edge, random mover 10 yd
+--   236732 (-1611.76, 1493.90, 67.44): 2 other copies on the spot, NW roof run
+-- Count check: 35456 has no static spawn in either reference; the summon script supplies every runt of the event.
+-- Based on Legends of Azeroth 5.4.8 and the Cataclysm Preservation Project 4.3.4.
+
+DELETE FROM `creature` WHERE `id` = 35456 AND `map` = 654 AND `guid` IN (
+  236499, 236500, 236502, 236503, 236504, 236505, 236506, 236507, 236508, 236509, 236510, 236511,
+  236512, 236513, 236514, 236515, 236516, 236517, 236518, 236519, 236520, 236521, 236522, 236523,
+  236524, 236525, 236526, 236527, 236528, 236546, 236547, 236548, 236549, 236550, 236551, 236552,
+  236562, 236563, 236564, 236565, 236566, 236567, 236568, 236569, 236570, 236571, 236572, 236573,
+  236575, 236720, 236721, 236732);
