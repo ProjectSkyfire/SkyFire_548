@@ -168,6 +168,9 @@ public:
         {
             Talk(SAY_DEATH);
 
+            // Also here: a kill that skipped DamageTaken must not leave players in the air
+            RemoveGravityLapse();
+
             if (!instance)
                 return;
 
@@ -180,7 +183,7 @@ public:
 
         void DamageTaken(Unit* /*done_by*/, uint32 &damage) OVERRIDE
         {
-            if (damage > me->GetHealth())
+            if (damage >= me->GetHealth())
                 RemoveGravityLapse(); // Remove Gravity Lapse so that players fall to ground if they kill him when in air.
         }
 
