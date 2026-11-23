@@ -19,6 +19,7 @@ enum Spells
     SPELL_INHIBITMAGIC          = 32264,
     SPELL_ATTRACTMAGIC          = 32265,
     SPELL_CARNIVOROUSBITE       = 36383,
+    SPELL_CARNIVOROUSBITE_H     = 39382,
 
     SPELL_FIERY_BLAST           = 32302,
 
@@ -123,7 +124,7 @@ public:
             //Carnivorousbite_Timer
             if (Carnivorousbite_Timer <= diff)
             {
-                DoCast(me, SPELL_CARNIVOROUSBITE);
+                DoCast(me, DUNGEON_MODE(SPELL_CARNIVOROUSBITE, SPELL_CARNIVOROUSBITE_H));
                 Carnivorousbite_Timer = 10000;
             } else Carnivorousbite_Timer -= diff;
 
