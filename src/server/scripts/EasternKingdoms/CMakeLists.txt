@@ -201,6 +201,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ZulGurub/instance_zulgurub.cpp
   EasternKingdoms/ZulGurub/zulgurub.cpp
   EasternKingdoms/ZulGurub/zulgurub.h
+  EasternKingdoms/ZulGurub/boss_venoxis.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")

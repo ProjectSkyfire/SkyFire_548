@@ -245,6 +245,7 @@ void AddSC_instance_the_stockade();          //The Stockade
 //void AddSC_zulaman();
 void AddSC_instance_zulgurub();
 void AddSC_zulgurub();
+void AddSC_boss_venoxis();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_duskwood();
@@ -984,6 +985,7 @@ void AddEasternKingdomsScripts()
     //AddSC_zulaman();
     AddSC_instance_zulgurub();
     AddSC_zulgurub();
+    AddSC_boss_venoxis();
 
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
