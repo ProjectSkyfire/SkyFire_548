@@ -19,7 +19,15 @@ enum DataTypes
     TYPE_WARDEN_5          = 9,
     DATA_MELLICHAR         = 10,
     TYPE_SHIELD_OPEN       = 11,
-    DATA_SPHERE_SHIELD     = 12
+    DATA_SPHERE_SHIELD     = 12,
+    DATA_DALLIAH           = 13,
+    DATA_SOCCOTHRATES      = 14
+};
+
+enum CreatureIds
+{
+    NPC_DALLIAH_THE_DOOMSAYER = 20885,
+    NPC_WRATH_SCRYER_SOCCOTHRATES = 20886
 };
 
 #endif // ARCATRAZ_H_

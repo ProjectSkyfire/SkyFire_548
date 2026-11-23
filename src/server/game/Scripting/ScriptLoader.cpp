@@ -599,6 +599,8 @@ void AddSC_boss_vazruden_the_herald();
 void AddSC_instance_ramparts();
 void AddSC_arcatraz();                       //TK Arcatraz
 void AddSC_boss_harbinger_skyriss();
+void AddSC_boss_dalliah_the_doomsayer();
+void AddSC_boss_wrath_scryer_soccothrates();
 void AddSC_instance_arcatraz();
 void AddSC_boss_high_botanist_freywinn();    //TK Botanica
 void AddSC_boss_laj();
@@ -1170,6 +1172,8 @@ void AddOutlandScripts()
     AddSC_instance_ramparts();
     AddSC_arcatraz();                       //TK Arcatraz
     AddSC_boss_harbinger_skyriss();
+    AddSC_boss_dalliah_the_doomsayer();
+    AddSC_boss_wrath_scryer_soccothrates();
     AddSC_instance_arcatraz();
     AddSC_boss_high_botanist_freywinn();    //TK Botanica
     AddSC_boss_laj();
