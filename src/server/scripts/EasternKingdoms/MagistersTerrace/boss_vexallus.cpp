@@ -52,7 +52,8 @@ enum Creatures
 enum Misc
 {
     INTERVAL_MODIFIER               = 15,
-    INTERVAL_SWITCH                 = 6
+    INTERVAL_SWITCH                 = 6,
+    OVERLOAD_HEALTH_PCT             = 20
 };
 
 class boss_vexallus : public CreatureScript
@@ -130,16 +131,18 @@ public:
             if (!Enraged)
             {
                 //used for check, when Vexallus cast adds 85%, 70%, 55%, 40%, 25%
-                if (!HealthAbovePct(100 - INTERVAL_MODIFIER * IntervalHealthAmount))
+                if (IntervalHealthAmount == INTERVAL_SWITCH)
                 {
-                    //increase amount, unless we're at 10%, then we switch and return
-                    if (IntervalHealthAmount == INTERVAL_SWITCH)
+                    //after the last add Vexallus overloads at 20%
+                    if (!HealthAbovePct(OVERLOAD_HEALTH_PCT))
                     {
                         Enraged = true;
                         return;
                     }
-                    else
-                        ++IntervalHealthAmount;
+                }
+                else if (!HealthAbovePct(100 - INTERVAL_MODIFIER * IntervalHealthAmount))
+                {
+                    ++IntervalHealthAmount;
 
                     Talk(SAY_ENERGY);
                     Talk(EMOTE_DISCHARGE_ENERGY);
