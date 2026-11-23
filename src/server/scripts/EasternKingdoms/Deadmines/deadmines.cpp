@@ -9,6 +9,7 @@
 #include "InstanceScript.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
+#include "SpellMgr.h"
 #include "Player.h"
 #include "deadmines.h"
 
@@ -22,18 +23,120 @@ Position const deadmines_locs[] =
     { -129.915f, -788.898f, 17.3409f, 0.366518f },
 };
 
+enum DefiasWatcher
+{
+    SPELL_ON_FIRE           = 91737,
+    SPELL_EXPLOSIVE_SUICIDE = 91738,
+    SPELL_ENERGIZE          = 89132,
+    SPELL_WATCHER_CLEAVE    = 90980,
+    FACTION_CONTROLLABLE    = 1816,
+    EVENT_WATCHER_CLEAVE    = 1
+};
+
+// Defias Watcher 47404: below 30% health it stops fighting, burns and energizes the players around it,
+// then blows up when the fire goes out
+struct npc_deadmines_defias_watcher : public ScriptedAI
+{
+    npc_deadmines_defias_watcher(Creature* creature) : ScriptedAI(creature), isOnFire(false) { }
+
+    void EnterCombat(Unit* /*who*/) OVERRIDE
+    {
+        events.ScheduleEvent(EVENT_WATCHER_CLEAVE, 3500);
+    }
+
+    void Reset() OVERRIDE
+    {
+        events.Reset();
+        me->SetFullHealth();
+    }
+
+    void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+    {
+        if (isOnFire || !me->HealthBelowPctDamaged(30, damage))
+            return;
+
+        isOnFire = true;
+        me->DeleteThreatList();
+        me->CombatStop(true);
+        me->setFaction(FACTION_CONTROLLABLE);
+        DoCast(me, SPELL_ON_FIRE);
+        DoCastAOE(SPELL_ENERGIZE);
+        me->setRegeneratingHealth(false);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        if (!UpdateVictim())
+            return;
+
+        events.Update(diff);
+
+        while (uint32 eventId = events.ExecuteEvent())
+        {
+            if (eventId == EVENT_WATCHER_CLEAVE)
+            {
+                DoCastVictim(SPELL_WATCHER_CLEAVE);
+                events.ScheduleEvent(EVENT_WATCHER_CLEAVE, urand(4000, 5000));
+            }
+        }
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    bool isOnFire;
+    EventMap events;
+};
+
+// 91737 - On Fire!
+class spell_deadmines_on_fire : public AuraScript
+{
+    PrepareAuraScript(spell_deadmines_on_fire);
+
+    bool Validate(SpellInfo const* /*spellInfo*/) OVERRIDE
+    {
+        return sSpellMgr->GetSpellInfo(SPELL_EXPLOSIVE_SUICIDE) != NULL;
+    }
+
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->CastSpell(GetTarget(), SPELL_EXPLOSIVE_SUICIDE, true);
+    }
+
+    void Register() OVERRIDE
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_deadmines_on_fire::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE_PERCENT, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 // Prototype Reaper 49208
 struct npc_deadmines_prototype_reaper : public ScriptedAI
 {
     npc_deadmines_prototype_reaper(Creature* creature) : ScriptedAI(creature) { }
 
-    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+    void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
     {
-        if (HealthBelowPct(90) && me->GetMap()->GetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY))
+        if (me->HealthBelowPctDamaged(90, damage) && me->GetMap()->GetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY))
             me->GetMap()->SetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY, 0);
     }
 
     void UpdateAI(uint32 /*diff*/) OVERRIDE { }
+};
+
+// Steam Valve 49457: each of the four valves of Vanessa's trap counts once
+struct npc_deadmines_steam_valve : public ScriptedAI
+{
+    npc_deadmines_steam_valve(Creature* creature) : ScriptedAI(creature) { }
+
+    void OnSpellClick(Unit* /*clicker*/, bool& /*result*/) OVERRIDE
+    {
+        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            return;
+
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        if (InstanceScript* instance = me->GetInstanceScript())
+            instance->SetData(DATA_ACTIVATED_VALVE, DONE);
+    }
 };
 
 class go_defias_cannon : public GameObjectScript
@@ -110,8 +213,9 @@ class spell_deadmines_off_line : public SpellScriptLoader
 
             void OnAuraEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
+                // The template keeps Foe Reaper 5000 immune to players until he comes on-line
                 if (Creature* m_caster = GetOwner()->ToCreature())
-                    m_caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED | UNIT_FLAG_NON_ATTACKABLE);
+                    m_caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             }
 
             void Register() OVERRIDE
@@ -133,4 +237,7 @@ void AddSC_deadmines()
     new go_defias_cannon();
     new go_deadmines_teleport();
     new spell_deadmines_off_line();
+    RegisterCreatureAI(npc_deadmines_defias_watcher);
+    RegisterCreatureAI(npc_deadmines_steam_valve);
+    RegisterAuraScript(spell_deadmines_on_fire);
 }

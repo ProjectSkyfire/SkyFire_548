@@ -715,35 +715,6 @@ class spell_glubtok_blink : public SpellScriptLoader
         }
 };
 
-// 88129 - Fire Blossom, 88169 - Frost Blossom
-// The add summon effect only has heroic SpellEffect rows, which SpellInfo also loads for normal
-class spell_glubtok_blossom : public SpellScriptLoader
-{
-    public:
-        spell_glubtok_blossom() : SpellScriptLoader("spell_glubtok_blossom") { }
-
-        class spell_glubtok_blossom_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_glubtok_blossom_SpellScript);
-
-            void HandleSummonMissile(SpellEffIndex effIndex)
-            {
-                if (!GetCaster()->GetMap()->IsHeroic())
-                    PreventHitDefaultEffect(effIndex);
-            }
-
-            void Register() OVERRIDE
-            {
-                OnEffectHit += SpellEffectFn(spell_glubtok_blossom_SpellScript::HandleSummonMissile, EFFECT_1, SPELL_EFFECT_TRIGGER_MISSILE);
-            }
-        };
-
-        SpellScript* GetSpellScript() const OVERRIDE
-        {
-            return new spell_glubtok_blossom_SpellScript();
-        }
-};
-
 void AddSC_boss_glubtok()
 {
     new boss_glubtok();
@@ -751,5 +722,4 @@ void AddSC_boss_glubtok()
     new spell_glubtok_fire_wall();
     new spell_glubtok_fire_wall_periodic();
     new spell_glubtok_blink();
-    new spell_glubtok_blossom();
 }
