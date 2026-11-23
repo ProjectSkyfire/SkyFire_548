@@ -14,6 +14,8 @@ const Position StoneBruiserPath[2] =
 
 const Position EligorPath = { 3429.58f, -3064.53f, 136.49f, 2.19f };
 
+const Position MalownSpawnPos = { 3639.30f, -3201.80f, 128.879f, 1.88496f };
+
 enum DataTypes
 {
     TYPE_BARON_RUN                      = 1,
@@ -24,6 +26,7 @@ enum DataTypes
     TYPE_BARON                          = 6,
 
     TYPE_MALOWN                         = 7,
+    TYPE_POSTBOX                        = 8,
 
     DATA_BARON                          = 10,
     DATA_YSIDA_TRIGGER                  = 11,
@@ -49,6 +52,7 @@ enum CreatureIds
     NPC_YSIDA                           = 16031,
     NPC_BALNAZZAR                       = 10813,
     NPC_WILHELM                         = 45201,
+    NPC_POSTMASTER_MALOWN               = 11143,
 
     // Trash
     NPC_SKELETAL_GUARDIAN               = 10390,
