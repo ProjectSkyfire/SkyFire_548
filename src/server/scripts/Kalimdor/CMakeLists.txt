@@ -122,6 +122,12 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_mount_hyjal.cpp
   Kalimdor/zone_feralas.cpp
   Kalimdor/zone_felwood.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/boss_archbishop_benedictus.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/boss_arcurion.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/boss_asira_dawnslayer.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.h
+  Kalimdor/CavernsOfTime/HourOfTwilight/instance_hour_of_twilight.cpp
+  Kalimdor/CavernsOfTime/HourOfTwilight/hour_of_twilight.cpp
 )
 
 message("  -> Prepared: Kalimdor")
