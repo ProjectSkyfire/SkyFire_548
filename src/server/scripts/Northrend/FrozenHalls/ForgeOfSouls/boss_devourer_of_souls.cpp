@@ -116,7 +116,7 @@ class boss_devourer_of_souls : public CreatureScript
 
         struct boss_devourer_of_soulsAI : public BossAI
         {
-            boss_devourer_of_soulsAI(Creature* creature) : BossAI(creature, DATA_DEVOURER_EVENT)
+            boss_devourer_of_soulsAI(Creature* creature) : BossAI(creature, DATA_DEVOURER)
             {
             }
 
@@ -139,7 +139,7 @@ class boss_devourer_of_souls : public CreatureScript
 
                 threeFaced = true;
 
-                instance->SetData(DATA_DEVOURER_EVENT, NOT_STARTED);
+                instance->SetBossState(DATA_DEVOURER, NOT_STARTED);
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -154,7 +154,7 @@ class boss_devourer_of_souls : public CreatureScript
                 events.ScheduleEvent(EVENT_UNLEASHED_SOULS, 20000);
                 events.ScheduleEvent(EVENT_WAILING_SOULS, urand(60000, 70000));
 
-                instance->SetData(DATA_DEVOURER_EVENT, IN_PROGRESS);
+                instance->SetBossState(DATA_DEVOURER, IN_PROGRESS);
             }
 
             void KilledUnit(Unit* victim) OVERRIDE
@@ -190,7 +190,7 @@ class boss_devourer_of_souls : public CreatureScript
 
                 Talk(SAY_FACE_DEATH);
 
-                instance->SetData(DATA_DEVOURER_EVENT, DONE);
+                instance->SetBossState(DATA_DEVOURER, DONE);
 
                 int32 entryIndex;
                 if (instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
