@@ -265,6 +265,12 @@ void AddSC_boss_gelihast();
 void AddSC_boss_kelris();
 void AddSC_boss_aku_mai();
 void AddSC_instance_blackfathom_deeps();
+void AddSC_boss_echo_of_baine();
+void AddSC_boss_echo_of_jaina();
+void AddSC_boss_murozond();
+void AddSC_instance_end_time();                    //CoT End Time
+void AddSC_end_time();
+void AddSC_end_time_teleport();
 void AddSC_hyjal();                          //CoT Battle for Mt. Hyjal
 void AddSC_boss_archimonde();
 void AddSC_instance_mount_hyjal();
@@ -1007,6 +1013,12 @@ void AddKalimdorScripts()
     AddSC_boss_kelris();
     AddSC_boss_aku_mai();
     AddSC_instance_blackfathom_deeps();
+    AddSC_boss_echo_of_baine();
+    AddSC_boss_echo_of_jaina();
+    AddSC_boss_murozond();
+    AddSC_instance_end_time();                    //CoT End Time
+    AddSC_end_time();
+    AddSC_end_time_teleport();
     AddSC_hyjal();                          //CoT Battle for Mt. Hyjal
     AddSC_boss_archimonde();
     AddSC_instance_mount_hyjal();
