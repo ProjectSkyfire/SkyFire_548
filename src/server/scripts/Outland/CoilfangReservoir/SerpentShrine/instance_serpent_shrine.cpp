@@ -277,8 +277,8 @@ class instance_serpent_shrine : public InstanceMapScript
                         if (data == DONE)
                         {
                             HandleGameObject(BridgePart[0], true);
-                            HandleGameObject(BridgePart[0], true);
-                            HandleGameObject(BridgePart[0], true);
+                            HandleGameObject(BridgePart[1], true);
+                            HandleGameObject(BridgePart[2], true);
                         }
                         ControlConsole = data;
                         break;
