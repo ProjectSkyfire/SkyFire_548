@@ -1,0 +1,26 @@
+-- Trollgore: Corpse Explode, Consume and Invader Taunt Trigger target only the Drakkari Invaders (and Trollgore)
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (49555,59807,49618,59809,49405,49380,59803);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorType`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
+(13,1,49555,0,0,31,0,3,27709,0,0,0,0,'','Trollgore - Corpse Explode'),
+(13,1,49555,0,1,31,0,3,27753,0,0,0,0,'','Trollgore - Corpse Explode'),
+(13,1,49555,0,2,31,0,3,27754,0,0,0,0,'','Trollgore - Corpse Explode'),
+(13,1,59807,0,0,31,0,3,27709,0,0,0,0,'','Trollgore - Corpse Explode'),
+(13,1,59807,0,1,31,0,3,27753,0,0,0,0,'','Trollgore - Corpse Explode'),
+(13,1,59807,0,2,31,0,3,27754,0,0,0,0,'','Trollgore - Corpse Explode'),
+(13,1,49618,0,0,31,0,3,27709,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,49618,0,1,31,0,3,27753,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,49618,0,2,31,0,3,27754,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,49618,0,3,31,0,4,0,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,59809,0,0,31,0,3,27709,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,59809,0,1,31,0,3,27753,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,59809,0,2,31,0,3,27754,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,59809,0,3,31,0,4,0,0,0,0,0,'','Trollgore - Corpse Explode Damage'),
+(13,1,49405,0,0,31,0,3,26630,0,0,0,0,'','Trollgore - Invader Taunt Trigger'),
+(13,3,49380,0,0,31,0,3,27709,0,0,0,0,'','Trollgore - Consume'),
+(13,3,49380,0,1,31,0,3,27753,0,0,0,0,'','Trollgore - Consume'),
+(13,3,49380,0,2,31,0,3,27754,0,0,0,0,'','Trollgore - Consume'),
+(13,3,49380,0,3,31,0,4,0,0,0,0,0,'','Trollgore - Consume'),
+(13,3,59803,0,0,31,0,3,27709,0,0,0,0,'','Trollgore - Consume'),
+(13,3,59803,0,1,31,0,3,27753,0,0,0,0,'','Trollgore - Consume'),
+(13,3,59803,0,2,31,0,3,27754,0,0,0,0,'','Trollgore - Consume'),
+(13,3,59803,0,3,31,0,4,0,0,0,0,0,'','Trollgore - Consume');

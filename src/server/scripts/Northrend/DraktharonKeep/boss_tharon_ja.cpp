@@ -18,15 +18,21 @@ enum Spells
 {
     // Skeletal Spells (phase 1)
     SPELL_CURSE_OF_LIFE                           = 49527,
+    SPELL_CURSE_OF_LIFE_H                         = 59972,
     SPELL_RAIN_OF_FIRE                            = 49518,
+    SPELL_RAIN_OF_FIRE_H                          = 59971,
     SPELL_SHADOW_VOLLEY                           = 49528,
+    SPELL_SHADOW_VOLLEY_H                         = 59973,
     SPELL_DECAY_FLESH                             = 49356, // casted at end of phase 1, starts phase 2
     // Flesh Spells (phase 2)
     SPELL_GIFT_OF_THARON_JA                       = 52509,
     SPELL_CLEAR_GIFT_OF_THARON_JA                 = 53242,
     SPELL_EYE_BEAM                                = 49544,
+    SPELL_EYE_BEAM_H                              = 59965,
     SPELL_LIGHTNING_BREATH                        = 49537,
+    SPELL_LIGHTNING_BREATH_H                      = 59963,
     SPELL_POISON_CLOUD                            = 49548,
+    SPELL_POISON_CLOUD_H                          = 59969,
     SPELL_RETURN_FLESH                            = 53463, // Channeled spell ending phase two and returning to phase 1. This ability will stun the party for 6 seconds.
     SPELL_ACHIEVEMENT_CHECK                       = 61863,
     SPELL_FLESH_VISUAL                            = 52582,
@@ -120,30 +126,30 @@ class boss_tharon_ja : public CreatureScript
                     {
                         case EVENT_CURSE_OF_LIFE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                DoCast(target, SPELL_CURSE_OF_LIFE);
+                                DoCast(target, DUNGEON_MODE(SPELL_CURSE_OF_LIFE, SPELL_CURSE_OF_LIFE_H));
                             events.ScheduleEvent(EVENT_CURSE_OF_LIFE, urand(10000, 15000));
                             return;
                         case EVENT_SHADOW_VOLLEY:
-                            DoCastVictim(SPELL_SHADOW_VOLLEY);
+                            DoCastVictim(DUNGEON_MODE(SPELL_SHADOW_VOLLEY, SPELL_SHADOW_VOLLEY_H));
                             events.ScheduleEvent(EVENT_SHADOW_VOLLEY, urand(8000, 10000));
                             return;
                         case EVENT_RAIN_OF_FIRE:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                DoCast(target, SPELL_RAIN_OF_FIRE);
+                                DoCast(target, DUNGEON_MODE(SPELL_RAIN_OF_FIRE, SPELL_RAIN_OF_FIRE_H));
                             events.ScheduleEvent(EVENT_RAIN_OF_FIRE, urand(14000, 18000));
                             return;
                         case EVENT_LIGHTNING_BREATH:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                DoCast(target, SPELL_LIGHTNING_BREATH);
+                                DoCast(target, DUNGEON_MODE(SPELL_LIGHTNING_BREATH, SPELL_LIGHTNING_BREATH_H));
                             events.ScheduleEvent(EVENT_LIGHTNING_BREATH, urand(6000, 7000));
                             return;
                         case EVENT_EYE_BEAM:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
-                                DoCast(target, SPELL_EYE_BEAM);
+                                DoCast(target, DUNGEON_MODE(SPELL_EYE_BEAM, SPELL_EYE_BEAM_H));
                             events.ScheduleEvent(EVENT_EYE_BEAM, urand(4000, 6000));
                             return;
                         case EVENT_POISON_CLOUD:
-                            DoCastAOE(SPELL_POISON_CLOUD);
+                            DoCastAOE(DUNGEON_MODE(SPELL_POISON_CLOUD, SPELL_POISON_CLOUD_H));
                             events.ScheduleEvent(EVENT_POISON_CLOUD, urand(10000, 12000));
                             return;
                         case EVENT_DECAY_FLESH:
