@@ -84,9 +84,6 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
-
-            if (instance)
-                instance->SetData(TYPE_RIFT, SPECIAL);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

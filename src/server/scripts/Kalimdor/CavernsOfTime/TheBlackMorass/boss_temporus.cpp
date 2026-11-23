@@ -67,9 +67,6 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
-
-            if (instance)
-                instance->SetData(TYPE_RIFT, SPECIAL);
         }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE

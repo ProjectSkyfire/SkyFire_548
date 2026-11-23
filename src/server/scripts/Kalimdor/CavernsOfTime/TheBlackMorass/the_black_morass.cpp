@@ -47,7 +47,43 @@ enum MedivhBm
     SPELL_CORRUPT           = 31326,
     SPELL_CORRUPT_AEONUS    = 37853,
 
-    C_COUNCIL_ENFORCER      = 17023
+    C_COUNCIL_ENFORCER      = 17023,
+
+    GO_DARK_PORTAL          = 185103
+};
+
+enum MedivhEvents
+{
+    EVENT_EPILOGUE_1        = 1,
+    EVENT_EPILOGUE_2,
+    EVENT_EPILOGUE_3,
+    EVENT_EPILOGUE_4,
+    EVENT_EPILOGUE_5,
+    EVENT_EPILOGUE_6,
+    EVENT_EPILOGUE_7,
+    EVENT_EPILOGUE_8
+};
+
+// The Shadow Council Enforcers come through the portal in four rows of six
+// (sniffed positions of TrinityCore 3.3.5, one row per spawn group)
+float const EnforcerRows[4][6][4] =
+{
+    {
+        {-2086.85f, 7132.72f, 34.67f, 6.126f}, {-2087.19f, 7129.97f, 34.67f, 6.144f}, {-2087.48f, 7127.27f, 34.67f, 6.161f},
+        {-2087.80f, 7124.51f, 34.67f, 6.178f}, {-2088.08f, 7121.89f, 34.67f, 6.196f}, {-2088.39f, 7119.38f, 34.67f, 6.213f}
+    },
+    {
+        {-2086.57f, 7132.63f, 34.67f, 6.126f}, {-2086.98f, 7129.97f, 34.67f, 6.144f}, {-2087.41f, 7127.20f, 34.67f, 6.161f},
+        {-2087.88f, 7124.38f, 34.67f, 6.178f}, {-2088.22f, 7121.99f, 34.67f, 6.196f}, {-2088.60f, 7119.24f, 34.67f, 6.213f}
+    },
+    {
+        {-2086.51f, 7132.68f, 34.67f, 6.126f}, {-2086.95f, 7129.99f, 34.67f, 6.144f}, {-2087.31f, 7127.19f, 34.67f, 6.161f},
+        {-2087.65f, 7124.36f, 34.67f, 6.178f}, {-2088.01f, 7121.87f, 34.67f, 6.196f}, {-2088.50f, 7119.22f, 34.67f, 6.213f}
+    },
+    {
+        {-2086.46f, 7132.61f, 34.67f, 6.150f}, {-2086.88f, 7129.97f, 34.67f, 6.097f}, {-2087.15f, 7127.20f, 34.67f, 6.089f},
+        {-2087.49f, 7124.41f, 34.67f, 6.144f}, {-2087.89f, 7121.92f, 34.67f, 6.139f}, {-2088.39f, 7119.20f, 34.67f, 6.178f}
+    }
 };
 
 class npc_medivh_bm : public CreatureScript
@@ -75,6 +111,9 @@ public:
         bool Life75;
         bool Life50;
         bool Life25;
+        bool silentDeath;
+
+        EventMap events;
 
         void Reset() OVERRIDE
         {
@@ -83,6 +122,8 @@ public:
             Life75 = true;
             Life50 = true;
             Life25 = true;
+            silentDeath = false;
+            events.Reset();
 
             if (!instance)
                 return;
@@ -152,12 +193,32 @@ public:
                 SpellCorrupt_Timer = 3000;
         }
 
-        void JustDied(Unit* killer) OVERRIDE
+        // Everything the event left behind goes when it ends
+        void DoDespawnSpawns()
         {
-            if (killer->GetEntry() == me->GetEntry())
-                return;
+            static uint32 const entries[] =
+            {
+                NPC_TIME_RIFT, NPC_RIFT_LORD, NPC_RIFT_KEEPER, NPC_CRONO_LORD_DEJA, NPC_TEMPORUS, NPC_AEONUS,
+                NPC_INFINITE_ASSASIN, NPC_INFINITE_WHELP, NPC_INFINITE_CRONOMANCER, NPC_INFINITE_EXECUTIONER, NPC_INFINITE_VANQUISHER
+            };
 
-            Talk(SAY_DEATH);
+            for (uint32 entry : entries)
+            {
+                std::list<Creature*> spawns;
+                me->GetCreatureListWithEntryInGrid(spawns, entry, 500.0f);
+                for (Creature* spawn : spawns)
+                    if (spawn->IsAlive())
+                        spawn->DespawnOrUnsummon();
+            }
+        }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            DoDespawnSpawns();
+
+            // the shield ran out; the silent death is the reset of an abandoned event
+            if (!silentDeath)
+                Talk(SAY_DEATH);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
@@ -207,6 +268,7 @@ public:
                     //if we reach this it means event was running but at some point reset.
                     if (instance->GetData(TYPE_MEDIVH) == NOT_STARTED)
                     {
+                        silentDeath = true;
                         me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                         me->RemoveCorpse();
                         me->Respawn();
@@ -221,16 +283,54 @@ public:
                         if (me->HasAura(SPELL_CHANNEL))
                             me->RemoveAura(SPELL_CHANNEL);
 
-                        /// @todo start the post-event here
                         instance->SetData(TYPE_MEDIVH, DONE);
+                        events.ScheduleEvent(EVENT_EPILOGUE_1, 1);
                     }
                 } else Check_Timer -= diff;
             }
 
-            //if (!UpdateVictim())
-            //return;
+            events.Update(diff);
 
-            //DoMeleeAttackIfReady();
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_EPILOGUE_1:
+                        DoDespawnSpawns();
+                        events.ScheduleEvent(EVENT_EPILOGUE_2, 10000);
+                        break;
+                    case EVENT_EPILOGUE_2:
+                        me->SetFacingTo(6.2657318f);
+                        Talk(SAY_WIN);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_TALK);
+                        me->SummonGameObject(GO_DARK_PORTAL, -2087.3372f, 7125.657f, 29.942312f, 6.143561f, 0.0f, 0.0f, -0.069755554f, 0.99756414f, 0);
+                        events.ScheduleEvent(EVENT_EPILOGUE_3, 18000);
+                        break;
+                    case EVENT_EPILOGUE_3:
+                        me->SetFacingTo(3.0019662f);
+                        me->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, 0);
+                        me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                        events.ScheduleEvent(EVENT_EPILOGUE_4, 1000);
+                        break;
+                    case EVENT_EPILOGUE_4:
+                    case EVENT_EPILOGUE_5:
+                    case EVENT_EPILOGUE_6:
+                    case EVENT_EPILOGUE_7:
+                        for (uint8 i = 0; i < 6; ++i)
+                        {
+                            float const* pos = EnforcerRows[eventId - EVENT_EPILOGUE_4][i];
+                            me->SummonCreature(C_COUNCIL_ENFORCER, pos[0], pos[1], pos[2], pos[3], TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 600000);
+                        }
+                        events.ScheduleEvent(eventId + 1, eventId == EVENT_EPILOGUE_4 ? 2000 : (eventId == EVENT_EPILOGUE_7 ? 8000 : 2400));
+                        break;
+                    case EVENT_EPILOGUE_8:
+                        Talk(SAY_ORCS_ENTER);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     };
 };
@@ -348,9 +448,6 @@ public:
 
             SF_LOG_DEBUG("scripts", "npc_time_rift: not casting anylonger, i need to die.");
             me->setDeathState(DeathState::JUST_DIED);
-
-            if (instance->GetData(TYPE_RIFT) == IN_PROGRESS)
-                instance->SetData(TYPE_RIFT, SPECIAL);
         }
     };
 };
