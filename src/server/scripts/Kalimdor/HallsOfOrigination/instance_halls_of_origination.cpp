@@ -50,8 +50,11 @@ class instance_halls_of_origination : public InstanceMapScript
                 AnhuurLeftBeaconGUID = 0;
                 BrannBronzebeardGUID = 0;
                 AnraphetGUID = 0;
+                SeteshGUID = 0;
+                RajhGUID = 0;
                 AnraphetDoorGUID = 0;
                 SunMirrorGUID = 0;
+                LiftOfTheMakersGUID = 0;
                 _deadElementals = 0;
             }
 
@@ -85,9 +88,13 @@ class instance_halls_of_origination : public InstanceMapScript
                         break;
                     case GO_SUN_MIRROR:
                         SunMirrorGUID = go->GetGUID();
+                        if (_deadElementals >= WARDEN_COUNT)
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                         break;
                     case GO_ANRAPHET_DOOR:
                         AnraphetDoorGUID = go->GetGUID();
+                        if (_deadElementals >= WARDEN_COUNT)
+                            go->SetGoState(GOState::GO_STATE_ACTIVE);
                         break;
                 }
             }
@@ -126,6 +133,12 @@ class instance_halls_of_origination : public InstanceMapScript
                     case BOSS_ANRAPHET:
                         AnraphetGUID = creature->GetGUID();
                         break;
+                    case BOSS_SETESH:
+                        SeteshGUID = creature->GetGUID();
+                        break;
+                    case BOSS_RAJH:
+                        RajhGUID = creature->GetGUID();
+                        break;
                 }
             }
 
@@ -140,6 +153,12 @@ class instance_halls_of_origination : public InstanceMapScript
                 }
 
                 return 0;
+            }
+
+            void SetData64(uint32 index, uint64 data) OVERRIDE
+            {
+                if (index == DATA_LIFT_OF_THE_MAKERS_GUID)
+                    LiftOfTheMakersGUID = data;
             }
 
             uint64 GetData64(uint32 index) const OVERRIDE
@@ -160,6 +179,12 @@ class instance_halls_of_origination : public InstanceMapScript
                         return BrannBronzebeardGUID;
                     case DATA_ANRAPHET_GUID:
                         return AnraphetGUID;
+                    case DATA_SETESH:
+                        return SeteshGUID;
+                    case DATA_RAJH:
+                        return RajhGUID;
+                    case DATA_LIFT_OF_THE_MAKERS_GUID:
+                        return LiftOfTheMakersGUID;
                 }
 
                 return 0;
@@ -168,7 +193,7 @@ class instance_halls_of_origination : public InstanceMapScript
             void IncreaseDeadElementals(uint32 inc)
             {
                 _deadElementals += inc;
-                if (_deadElementals == 4)
+                if (_deadElementals == WARDEN_COUNT)
                 {
                     if (GameObject* mirror = instance->GetGameObject(SunMirrorGUID))
                         mirror->SetGoState(GOState::GO_STATE_ACTIVE);
@@ -190,9 +215,14 @@ class instance_halls_of_origination : public InstanceMapScript
                     case NPC_WATER_WARDEN:
                     case NPC_AIR_WARDEN:
                         uint32 data = creature->GetEntry() - WARDEN_ENTRY_DATA_DELTA;
+                        // A warden that was killed before and stands again does not count twice
+                        if (GetBossState(data) == DONE)
+                            break;
+
+                        // The count goes up before the state is saved, or a restart brings back the count of the warden before
+                        IncreaseDeadElementals(1);
                         SetBossState(data, IN_PROGRESS); // Needs to be set to IN_PROGRESS or else the gameobjects state won't be updated
                         SetBossState(data, DONE);
-                        IncreaseDeadElementals(1);
                         if (Creature* brann = instance->GetCreature(BrannBronzebeardGUID))
                             brann->AI()->DoAction(ACTION_ELEMENTAL_DIED);
                         break;
@@ -235,9 +265,13 @@ class instance_halls_of_origination : public InstanceMapScript
                             tmpState = NOT_STARTED;
                         SetBossState(i, EncounterState(tmpState));
                     }
-                    uint32 tmp;
-                    loadStream >> tmp;
-                    IncreaseDeadElementals(tmp);
+
+                    // The wardens that are dead are the ones saved as done (the saved count can be one behind, and the doors
+                    // are opened when they are created)
+                    _deadElementals = 0;
+                    for (uint32 i = DATA_FIRE_WARDEN; i <= DATA_AIR_WARDEN; ++i)
+                        if (GetBossState(i) == DONE)
+                            ++_deadElementals;
                 }
                 else
                     OUT_LOAD_INST_DATA_FAIL;
@@ -253,8 +287,11 @@ class instance_halls_of_origination : public InstanceMapScript
             uint64 AnhuurLeftBeaconGUID;
             uint64 BrannBronzebeardGUID;
             uint64 AnraphetGUID;
+            uint64 SeteshGUID;
+            uint64 RajhGUID;
             uint64 AnraphetDoorGUID;
             uint64 SunMirrorGUID;
+            uint64 LiftOfTheMakersGUID;
             uint32 _deadElementals;
         };
 

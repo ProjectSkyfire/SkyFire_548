@@ -81,7 +81,7 @@ enum Phases
     PHASE_INTRO         = 1,
     PHASE_COMBAT        = 2,
 
-    PHASE_MASK_COMBAT   = (1 << PHASE_COMBAT),
+    PHASE_MASK_COMBAT   = (1 << (PHASE_COMBAT - 1)),
 };
 
 enum Points

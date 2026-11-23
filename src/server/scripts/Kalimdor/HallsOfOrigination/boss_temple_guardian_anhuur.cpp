@@ -89,6 +89,7 @@ public:
             _Reset();
             CleanStalkers();
             me->RemoveAurasDueToSpell(SPELL_SHIELD_OF_LIGHT);
+            me->RemoveFlag(UNIT_FIELD_FLAGS, uint32(UNIT_FLAG_UNK_31));
             events.ScheduleEvent(EVENT_DIVINE_RECKONING, urand(10000, 12000));
             events.ScheduleEvent(EVENT_BURNING_LIGHT, 12000);
         }
@@ -115,7 +116,8 @@ public:
 
                 std::list<Creature*> stalkers;
                 GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ANHUUR_DOOR));
-                GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
+                if (door)
+                    GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
 
                 stalkers.remove_if(Skyfire::HeightDifferenceCheck(door, 0.0f, false)); // Target only the bottom ones
                 for (std::list<Creature*>::iterator itr = stalkers.begin(); itr != stalkers.end(); ++itr)
@@ -141,12 +143,13 @@ public:
 
         void DoAction(int32 action) OVERRIDE
         {
-            if (action == ACTION_DISABLE_BEACON)
+            if (action == ACTION_DISABLE_BEACON && _beacons)
             {
                 --_beacons;
                 if (!_beacons)
                 {
                     me->RemoveAurasDueToSpell(SPELL_SHIELD_OF_LIGHT);
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, uint32(UNIT_FLAG_UNK_31));
                     Talk(EMOTE_UNSHIELD);
                     _phase = _oldPhase;
                 }
@@ -214,11 +217,16 @@ public:
                         if (!target)
                             break;
 
+                        GameObject* door = ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ANHUUR_DOOR));
+                        if (!door)
+                            break;
+
                         std::list<Creature*> stalkers;
                         GetCreatureListWithEntryInGrid(stalkers, me, NPC_CAVE_IN_STALKER, 100.0f);
-                        stalkers.remove_if(Skyfire::HeightDifferenceCheck(ObjectAccessor::GetGameObject(*me, instance->GetData64(DATA_ANHUUR_DOOR)), 5.0f, true));
+                        stalkers.remove_if(Skyfire::HeightDifferenceCheck(door, 5.0f, true));
 
-                        if (stalkers.empty())
+                        // One eye is not a face
+                        if (stalkers.size() < 2)
                             break;
 
                         stalkers.sort(Skyfire::ObjectDistanceOrderPred(target));
@@ -271,7 +279,8 @@ class spell_anhuur_shield_of_light : public SpellScriptLoader
                             targets.remove_if(Skyfire::HeightDifferenceCheck(go, 5.0f, false));
                             targets.remove(GetCaster());
                             targets.sort(Skyfire::ObjectDistanceOrderPred(GetCaster()));
-                            targets.resize(2);
+                            if (targets.size() > 2)
+                                targets.resize(2);
                         }
                     }
                 }

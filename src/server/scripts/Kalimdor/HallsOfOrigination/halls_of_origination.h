@@ -37,6 +37,9 @@ enum Data
     DATA_BRANN_0_GUID,
     DATA_DEAD_ELEMENTALS,
     DATA_ANRAPHET_GUID,
+
+    // Lift of the Makers
+    DATA_LIFT_OF_THE_MAKERS_GUID,
 };
 
 enum Creatures
@@ -58,9 +61,12 @@ enum Creatures
     NPC_AIR_WARDEN                  = 39803,
 
     WARDEN_ENTRY_DATA_DELTA         = NPC_FIRE_WARDEN - DATA_FIRE_WARDEN,
+    WARDEN_COUNT                    = 4,
 
     NPC_BRANN_BRONZEBEARD_0         = 39908,
     NPC_OMEGA_STANCE                = 41194,
+    BOSS_SETESH                     = 39732,
+    BOSS_RAJH                       = 39378,
 };
 
 enum GameObjects
@@ -70,6 +76,8 @@ enum GameObjects
     GO_ANHUURS_DOOR                 = 202307,
     GO_ANHUURS_RIGHT_BEACON         = 203136,
     GO_ANHUURS_LEFT_BEACON          = 203133,
+
+    GO_LIFT_OF_THE_MAKERS           = 207547,
 
     GO_VAULT_OF_LIGHTS_DOOR         = 202313,
     GO_SUN_MIRROR                   = 207726,
@@ -91,6 +99,7 @@ enum Misc
     AREA_TOMB_OF_THE_EARTHRAGER     = 5610,
     ACHIEV_VAULT_OF_LIGHTS_EVENT    = 24212, // Faster Than The Speed Of Light
     SPELL_VAULT_OF_LIGHTS_CREDIT    = 94067, // Not in DBC
+    WORLDSTATE_SUN_OF_A             = 8783,
 };
 
 enum GlobalActions
