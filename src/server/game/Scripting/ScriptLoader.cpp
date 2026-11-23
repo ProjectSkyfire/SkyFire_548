@@ -93,11 +93,8 @@ void AddSC_boss_pit_lord_argaloth();
 void AddSC_instance_baradin_hold();
 void AddSC_blackrock_depths();               //Blackrock Depths
 void AddSC_boss_ambassador_flamelash();
-void AddSC_boss_anubshiah();
 void AddSC_boss_draganthaurissan();
 void AddSC_boss_general_angerforge();
-void AddSC_boss_gorosh_the_dervish();
-void AddSC_boss_grizzle();
 void AddSC_boss_high_interrogator_gerstahn();
 void AddSC_boss_magmus();
 void AddSC_boss_moira_bronzebeard();
@@ -830,11 +827,8 @@ void AddEasternKingdomsScripts()
     AddSC_instance_baradin_hold();
     AddSC_blackrock_depths();               //Blackrock Depths
     AddSC_boss_ambassador_flamelash();
-    AddSC_boss_anubshiah();
     AddSC_boss_draganthaurissan();
     AddSC_boss_general_angerforge();
-    AddSC_boss_gorosh_the_dervish();
-    AddSC_boss_grizzle();
     AddSC_boss_high_interrogator_gerstahn();
     AddSC_boss_magmus();
     AddSC_boss_moira_bronzebeard();

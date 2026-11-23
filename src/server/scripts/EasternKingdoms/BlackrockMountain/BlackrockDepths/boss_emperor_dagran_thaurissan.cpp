@@ -10,7 +10,8 @@
 enum Yells
 {
     SAY_AGGRO                                              = 0,
-    SAY_SLAY                                               = 1
+    SAY_SLAY                                               = 1,
+    EMOTE_SHAKEN                                           = 0  // Moira
 };
 
 enum Spells
@@ -54,9 +55,10 @@ public:
             me->CallForHelp(VISIBLE_RANGE);
         }
 
-        void KilledUnit(Unit* /*victim*/) OVERRIDE
+        void KilledUnit(Unit* victim) OVERRIDE
         {
-            Talk(SAY_SLAY);
+            if (victim->GetTypeId() == TypeID::TYPEID_PLAYER)
+                Talk(SAY_SLAY);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -65,6 +67,7 @@ public:
             {
                 Moira->AI()->EnterEvadeMode();
                 Moira->setFaction(35);
+                Moira->AI()->Talk(EMOTE_SHAKEN);
             }
         }
 
