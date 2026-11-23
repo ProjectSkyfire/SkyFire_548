@@ -221,6 +221,7 @@ enum Spells
     SPELL_SUMMON_RISE_WITCH_DOCTOR     = 69836,
     SPELL_SUMMON_LUMBERING_ABOMINATION = 69835,
     SPELL_SUMMON_ICE_WALL              = 69768, // Visual effect and icewall summoning
+    SPELL_ACHIEV_CHECK                 = 72830, // Escaped from Arthas encounter credit
 
     // Raging Ghoul
     SPELL_EMERGE_VISUAL                = 50142,
@@ -705,7 +706,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
     {
         npc_jaina_or_sylvanas_escape_horAI(Creature* creature) : ScriptedAI(creature),
             _instance(creature->GetInstanceScript()), _lichkingGUID(0), _walltargetGUID(0),
-            _icewallGUID(0), _icewall(0)
+            _icewallGUID(0), _icewall(0), _wallArmed(false)
         {
         }
 
@@ -714,6 +715,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
         uint64 _walltargetGUID; // dummy
         uint64 _icewallGUID; // object
         uint32 _icewall; // icewall number
+        bool _wallArmed; // the undead of the wall are all summoned, so their death can break it
 
         EventMap _events;
 
@@ -726,12 +728,14 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
             _walltargetGUID = 0;
             _icewallGUID = 0;
             _icewall = 0;
+            _wallArmed = false;
             _events.ScheduleEvent(EVENT_ESCAPE, 0);
         }
 
         void JustDied(Unit* /*Killer*/) OVERRIDE
         {
             _instance->SetData(DATA_ESCAPE_EVENT, FAIL);
+            _instance->SetBossState(DATA_LICHKING_EVENT, FAIL);
         }
 
         void DoAction(int32 actionId) OVERRIDE
@@ -742,6 +746,10 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                     _events.ScheduleEvent(EVENT_ESCAPE_1, 1000);
                     break;
                 case ACTION_WALL_BROKEN:
+                    // The count of living undead also reaches zero between two waves of one wall
+                    if (!_wallArmed)
+                        break;
+                    _wallArmed = false;
                     _icewall++;
                     if (_icewall != 4)
                         _events.ScheduleEvent(EVENT_ESCAPE_17, 3000);
@@ -762,6 +770,23 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                     _events.ScheduleEvent(EVENT_ESCAPE_7, 0);
                     break;
             }
+        }
+
+        // The Lich King stalls behind the walls he has already passed, and the undead he summons appear around him
+        void BringLichKing()
+        {
+            if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
+            {
+                Position pos = me->GetNearPosition(8.0f, float(M_PI));
+                lichking->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+            }
+        }
+
+        void ArmIceWall()
+        {
+            _wallArmed = true;
+            if (!_instance->GetData(DATA_SUMMONS))
+                DoAction(ACTION_WALL_BROKEN);
         }
 
         void DestroyIceWall()
@@ -799,9 +824,12 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                                 DoCast(me, SPELL_SYLVANAS_CLOAKOFDARKNESS);
                         }
                         me->SetHealth(252000);
+                        // Talking to her before the escape starts leaves the event without a state, so the undead despawn
+                        me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP|UNIT_NPC_FLAG_QUESTGIVER);
                         break;
                     case EVENT_ESCAPE_1:
                         _instance->SetData(DATA_ESCAPE_EVENT, IN_PROGRESS);
+                        _instance->SetBossState(DATA_LICHKING_EVENT, IN_PROGRESS);
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                         {
                             if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
@@ -930,9 +958,11 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                             DoCast(me, SPELL_JAINA_DESTROY_ICE_WALL, true);
                         else
                             DoCast(me, SPELL_SYLVANAS_DESTROY_ICE_WALL, true);
+                        ArmIceWall();
                         break;
                     case EVENT_ESCAPE_17:// ICEWALL BROKEN
                         me->GetMotionMaster()->MoveIdle();
+                        BringLichKing();
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                         {
                             lichking->StopMoving();
@@ -955,6 +985,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         _events.ScheduleEvent(EVENT_ESCAPE_19, 6000);
                         break;
                     case EVENT_ESCAPE_19:
+                        BringLichKing();
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                         {
                             if (_icewall && _icewall < 4)
@@ -1032,6 +1063,8 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                                 _events.ScheduleEvent(EVENT_ESCAPE_22, 1000);
                             }
                         }
+                        if (_icewall == 1)
+                            ArmIceWall();
                         break;
                     case EVENT_ESCAPE_22:
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
@@ -1039,6 +1072,7 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                             if (_icewall >= 2 && _icewall < 4)
                                 lichking->AI()->DoCast(lichking, SPELL_SUMMON_LUMBERING_ABOMINATION);
                         }
+                        ArmIceWall();
                         break;
                     case EVENT_ESCAPE_23: // FINAL PART
                         DestroyIceWall();
@@ -1077,12 +1111,15 @@ class npc_jaina_or_sylvanas_escape_hor : public CreatureScript
                         break;
                     case EVENT_ESCAPE_27:
                         if (_instance->GetData(DATA_TEAM_IN_INSTANCE) == ALLIANCE)
-                            me->SummonGameObject(GO_CAPTAIN_CHEST_1, ChestPos.GetPositionX(), ChestPos.GetPositionY(), ChestPos.GetPositionZ(), ChestPos.GetOrientation(), 0, 0, 0, 0, 720000);
+                            me->SummonGameObject(me->GetMap()->IsHeroic() ? GO_CAPTAIN_CHEST_4 : GO_CAPTAIN_CHEST_2, ChestPos.GetPositionX(), ChestPos.GetPositionY(), ChestPos.GetPositionZ(), ChestPos.GetOrientation(), 0, 0, 0, 0, 720000);
                         else
-                            me->SummonGameObject(GO_CAPTAIN_CHEST_3, ChestPos.GetPositionX(), ChestPos.GetPositionY(), ChestPos.GetPositionZ(), ChestPos.GetOrientation(), 0, 0, 0, 0, 720000);
+                            me->SummonGameObject(me->GetMap()->IsHeroic() ? GO_CAPTAIN_CHEST_3 : GO_CAPTAIN_CHEST_1, ChestPos.GetPositionX(), ChestPos.GetPositionY(), ChestPos.GetPositionZ(), ChestPos.GetOrientation(), 0, 0, 0, 0, 720000);
                         me->SummonGameObject(GO_PORTAL, FinalPortalPos.GetPositionX(), FinalPortalPos.GetPositionY(), FinalPortalPos.GetPositionZ(), FinalPortalPos.GetOrientation(), 0, 0, 0, 0, 720000);
                         if (Creature* lichking = ObjectAccessor::GetCreature(*me, _lichkingGUID))
                             lichking->DespawnOrUnsummon(1);
+                        _instance->SetData(DATA_ESCAPE_EVENT, DONE);
+                        _instance->SetBossState(DATA_LICHKING_EVENT, DONE);
+                        _instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_CAST_SPELL, SPELL_ACHIEV_CHECK, me);
                         break;
                     }
                 }
@@ -1808,12 +1845,13 @@ public:
             _emergeTimer = 4000;
             _doEmerge = false;
             _doJump = false;
-            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
-                _instance->SetData(DATA_SUMMONS, 1);
         }
 
         void IsSummonedBy(Unit*) OVERRIDE
         {
+            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
+                _instance->SetData(DATA_SUMMONS, 1);
+
             DoCast(me, SPELL_EMERGE_VISUAL);
             DoZoneInCombat(me, 100.00f);
         }
@@ -1909,13 +1947,13 @@ public:
             _boltVolleyTimer = 15000;
             _curseTimer = 7000;
             _doEmerge = false;
-            if (_instance)
-                if (_instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
-                    _instance->SetData(DATA_SUMMONS, 1);
         }
 
         void IsSummonedBy(Unit*) OVERRIDE
         {
+            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
+                _instance->SetData(DATA_SUMMONS, 1);
+
             DoCast(me, SPELL_EMERGE_VISUAL);
             DoZoneInCombat(me, 100.00f);
         }
@@ -2025,13 +2063,13 @@ public:
             _doWalk = false;
             _vomitTimer = 15000;
             _strikeTimer = 6000;
-            if (_instance)
-                if (_instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
-                    _instance->SetData(DATA_SUMMONS, 1);
         }
 
         void IsSummonedBy(Unit*) OVERRIDE
         {
+            if (_instance && _instance->GetData(DATA_ESCAPE_EVENT) == IN_PROGRESS)
+                _instance->SetData(DATA_SUMMONS, 1);
+
             DoCast(me, SPELL_EMERGE_VISUAL);
             DoZoneInCombat(me, 100.00f);
         }
