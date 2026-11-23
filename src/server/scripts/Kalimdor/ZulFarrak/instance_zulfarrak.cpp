@@ -4,10 +4,13 @@
 */
 
 #include "ScriptMgr.h"
+#include "GameObject.h"
 #include "InstanceScript.h"
-#include "zulfarrak.h"
+#include "Map.h"
+#include "MotionMaster.h"
 #include "Player.h"
 #include "TemporarySummon.h"
+#include "zulfarrak.h"
 
 enum Misc
 {
@@ -18,10 +21,10 @@ enum Misc
     PATH_ADDS           = 81553
 };
 
-int const pyramidSpawnTotal = 54;
+static int const pyramidSpawnTotal = 54;
 /* list of wave spawns: 0 = wave ID, 1 = creature id, 2 = x, 3 = y
 no z coordinat b/c they're all the same */
-float pyramidSpawns [pyramidSpawnTotal][4] = {
+static float const pyramidSpawns[pyramidSpawnTotal][4] = {
     {1, 7789, 1894.64f, 1206.29f},
     {1, 7787, 1890.08f, 1218.68f},
     {1, 8876, 1883.76f, 1222.3f},
@@ -76,12 +79,6 @@ float pyramidSpawns [pyramidSpawnTotal][4] = {
     {3, 7788, 1889.94f, 1212.21f},
     {3, 7275, 1889.23f, 1207.72f},
     {3, 7796, 1879.77f, 1207.96f}
-};
-
-float Spawnsway[2][3] =
-{
-    {1884.86f, 1228.62f, 9},
-    {1887.53f, 1263, 41}
 };
 
 class instance_zulfarrak : public InstanceMapScript
@@ -217,7 +214,7 @@ public:
             };
         }
 
-        virtual void Update(uint32 diff)
+        void Update(uint32 diff) OVERRIDE
         {
             switch (PyramidPhase)
             {
@@ -325,6 +322,9 @@ public:
                 {
                     Position pos = {pyramidSpawns[i][2], pyramidSpawns[i][3], 8.87f, 0};
                     TempSummon* ts = instance->SummonCreature(uint32(pyramidSpawns[i][1]), pos);
+                    if (!ts)
+                        continue;
+
                     ts->GetMotionMaster()->MoveRandom(10);
                     addsAtBase.push_back(ts->GetGUID());
                 }
@@ -359,7 +359,9 @@ public:
             {
                 if (Creature* add = instance->GetCreature(*addsAtBase.begin()))
                 {
-                    add->GetMotionMaster()->MovePath(PATH_ADDS, false);
+                    if (add->IsAlive())
+                        add->GetMotionMaster()->MovePath(PATH_ADDS, false);
+
                     movedadds.push_back(add->GetGUID());
                 }
                 addsAtBase.erase(addsAtBase.begin());

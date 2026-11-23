@@ -5,20 +5,27 @@
 
 /* ScriptData
 SDName: Zulfarrak
-SD%Complete: 50
-SDComment: Consider it temporary, no instance script made for this instance yet.
+SD%Complete: 100
+SDComment: Pyramid event (Sergeant Bly, Weegli Blastfuse, troll cages), shallow graves and Zum'rah's area trigger. The wave logic is in instance_zulfarrak.cpp.
 SDCategory: Zul'Farrak
 EndScriptData */
 
 /* ContentData
 npc_sergeant_bly
+go_troll_cage
 npc_weegli_blastfuse
+go_shallow_grave
+at_zumrah
 EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "zulfarrak.h"
+#include "GameObject.h"
+#include "InstanceScript.h"
+#include "MotionMaster.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 
 /*######
@@ -44,7 +51,8 @@ enum blySpells
     SPELL_REVENGE              = 12170
 };
 
-#define GOSSIP_BLY                  "[PH] In that case, I will take my reward!"
+// Option text of gossip menu 941 (option 1)
+#define GOSSIP_BLY                  "That's it!  I'm tired of helping you out.  It's time we settled things on the battlefield!"
 
 class npc_sergeant_bly : public CreatureScript
 {
@@ -93,6 +101,8 @@ public:
         {
             instance = creature->GetInstanceScript();
             postGossipStep = 0;
+            Text_Timer = 0;
+            PlayerGUID = 0;
         }
 
         InstanceScript* instance;
@@ -185,8 +195,8 @@ public:
 };
 
 /*######
-+## go_troll_cage
-+######*/
+## go_troll_cage
+######*/
 
 class go_troll_cage : public GameObjectScript
 {
@@ -197,6 +207,9 @@ public:
     {
         if (InstanceScript* instance = go->GetInstanceScript())
         {
+            if (instance->GetData(EVENT_PYRAMID) != PYRAMID_NOT_STARTED)
+                return false;
+
             instance->SetData(EVENT_PYRAMID, PYRAMID_CAGES_OPEN);
             //set bly & co to aggressive & start moving to top of stairs
             initBlyCrewMember(instance, ENTRY_BLY, 1884.99f, 1263, 41.52f);
@@ -240,7 +253,8 @@ enum weegliSays
     SAY_WEEGLI_OK_I_GO          = 1
 };
 
-#define GOSSIP_WEEGLI               "[PH] Please blow up the door."
+// Option text of gossip menu 940 (option 0)
+#define GOSSIP_WEEGLI               "Will you blow up that door now?"
 
 class npc_weegli_blastfuse : public CreatureScript
 {
@@ -405,10 +419,10 @@ public:
         {
             uint32 randomchance = urand(0, 100);
             if (randomchance < CHANCE_ZOMBIE)
-                go->SummonCreature(NPC_ZOMBIE, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                go->SummonCreature(NPC_ZOMBIE, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
             else
                 if ((randomchance - CHANCE_ZOMBIE) < CHANCE_DEAD_HERO)
-                    go->SummonCreature(NPC_DEAD_HERO, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+                    go->SummonCreature(NPC_DEAD_HERO, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
         }
         go->AddUse();
         return false;
