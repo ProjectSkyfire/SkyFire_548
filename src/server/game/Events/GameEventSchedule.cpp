@@ -73,6 +73,56 @@ bool GameEventSchedule::GetMonthlyFirstWeekdayWindow(time_t currentTime, int wee
     return AddLocalMinutes(window.Start, durationMinutes, window.End);
 }
 
+bool GameEventSchedule::GetPilgrimsBountyWindow(time_t currentTime, EventWindow& window)
+{
+    tm date;
+    if (!Skyfire::LocalTime(currentTime, date))
+        return false;
+
+    date.tm_mon = 10;
+    date.tm_mday = 1;
+    date.tm_hour = date.tm_min = date.tm_sec = 0;
+    date.tm_isdst = -1;
+    time_t november = mktime(&date);
+    if (november == time_t(-1) || !Skyfire::LocalTime(november, date))
+        return false;
+
+    date.tm_mday += (4 - date.tm_wday + 7) % 7 + 21 - 4;
+    date.tm_isdst = -1;
+    window.Start = mktime(&date);
+    return window.Start != time_t(-1) && AddLocalMinutes(window.Start, 7 * 24 * 60, window.End);
+}
+
+bool GameEventSchedule::IsPilgrimsBountyActive(time_t currentTime)
+{
+    EventWindow window;
+    return GetPilgrimsBountyWindow(currentTime, window)
+        && window.Start <= currentTime && currentTime < window.End;
+}
+
+uint32 GameEventSchedule::GetSecondsUntilPilgrimsBountyTransition(time_t currentTime)
+{
+    EventWindow window;
+    if (!GetPilgrimsBountyWindow(currentTime, window))
+        return 0;
+    if (currentTime < window.Start)
+        return GetSecondsUntil(currentTime, window.Start);
+    if (currentTime < window.End)
+        return GetSecondsUntil(currentTime, window.End);
+
+    tm nextYear;
+    if (!Skyfire::LocalTime(currentTime, nextYear))
+        return 0;
+    ++nextYear.tm_year;
+    nextYear.tm_mon = 0;
+    nextYear.tm_mday = 1;
+    nextYear.tm_isdst = -1;
+    time_t reference = mktime(&nextYear);
+    if (reference == time_t(-1) || !GetPilgrimsBountyWindow(reference, window))
+        return 0;
+    return GetSecondsUntil(currentTime, window.Start);
+}
+
 bool GameEventSchedule::IsMonthlyFirstWeekdayActive(time_t currentTime, int weekday, uint32 durationMinutes)
 {
     EventWindow window;

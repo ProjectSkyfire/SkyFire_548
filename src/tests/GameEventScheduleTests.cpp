@@ -43,6 +43,36 @@ namespace
             && localTime.tm_hour == hour;
     }
 
+    bool TestPilgrimsBounty()
+    {
+        bool passed = true;
+        GameEventSchedule::EventWindow window;
+        for (int year = 2024; year <= 2036; ++year)
+        {
+            time_t reference = MakeLocalTime(year, 1, 1);
+            passed &= Expect(GameEventSchedule::GetPilgrimsBountyWindow(reference, window), "Pilgrim window must be valid");
+            tm start;
+            Skyfire::LocalTime(window.Start, start);
+            passed &= Expect(start.tm_mon == 10 && start.tm_wday == 0 && start.tm_mday >= 18 && start.tm_mday <= 24,
+                "Pilgrim start must be the Sunday before the fourth Thursday of November");
+            passed &= Expect(!GameEventSchedule::IsPilgrimsBountyActive(window.Start - 1)
+                && GameEventSchedule::IsPilgrimsBountyActive(window.Start)
+                && GameEventSchedule::IsPilgrimsBountyActive(window.End - 1)
+                && !GameEventSchedule::IsPilgrimsBountyActive(window.End), "Pilgrim start/end boundaries failed");
+            passed &= Expect(GameEventSchedule::GetSecondsUntilPilgrimsBountyTransition(window.Start - 1) == 1
+                && GameEventSchedule::GetSecondsUntilPilgrimsBountyTransition(window.End - 1) == 1,
+                "Pilgrim transition must occur at the exact boundary");
+            time_t next = window.End + GameEventSchedule::GetSecondsUntilPilgrimsBountyTransition(window.End);
+            GameEventSchedule::EventWindow nextWindow;
+            passed &= Expect(GameEventSchedule::GetPilgrimsBountyWindow(MakeLocalTime(year + 1, 1, 1), nextWindow)
+                && next == nextWindow.Start, "Pilgrim next-year transition failed");
+        }
+        passed &= Expect(GameEventSchedule::GetPilgrimsBountyWindow(MakeLocalTime(2026, 11, 22), window)
+            && HasLocalDate(window.Start, 2026, 11, 22) && HasLocalDate(window.End, 2026, 11, 29),
+            "Pilgrim 2026 window should be November 22 through November 28");
+        return passed;
+    }
+
     bool TestSeptemberBoundaries()
     {
         bool passed = true;
@@ -94,6 +124,7 @@ namespace
 int main()
 {
     bool passed = true;
+    passed &= TestPilgrimsBounty();
     passed &= TestSeptemberBoundaries();
     passed &= TestMonthlyTransitions();
     return passed ? 0 : 1;
