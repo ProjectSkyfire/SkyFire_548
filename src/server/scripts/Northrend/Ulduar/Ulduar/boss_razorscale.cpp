@@ -186,6 +186,16 @@ class boss_razorscale_controller : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
             }
 
+            // A repaired gun must not belong to the controller: players could not use a gun the controller owned.
+            GameObject* SummonRepairedHarpoon(uint32 entry, Position const& pos, float orientation)
+            {
+                GameObject* harpoon = me->SummonGameObject(entry, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(),
+                    orientation, 0.0f, 0.0f, 0.0f, 0.0f, uint32(me->GetRespawnTime()));
+                if (harpoon)
+                    me->RemoveGameObject(harpoon, false);
+                return harpoon;
+            }
+
             void SpellHit(Unit* /*caster*/, SpellInfo const* spell) OVERRIDE
             {
                 switch (spell->Id)
@@ -245,7 +255,7 @@ class boss_razorscale_controller : public CreatureScript
                     {
                         case EVENT_BUILD_HARPOON_1:
                             Talk(EMOTE_HARPOON);
-                            if (GameObject* Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_1, PosHarpoon[0].GetPositionX(), PosHarpoon[0].GetPositionY(), PosHarpoon[0].GetPositionZ(), 4.790f, 0.0f, 0.0f, 0.0f, 0.0f, uint32(me->GetRespawnTime())))
+                            if (GameObject* Harpoon = SummonRepairedHarpoon(GO_RAZOR_HARPOON_1, PosHarpoon[0], 4.790f))
                             {
                                 if (GameObject* BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f)) //only nearest broken harpoon
                                     BrokenHarpoon->RemoveFromWorld();
@@ -255,7 +265,7 @@ class boss_razorscale_controller : public CreatureScript
                             return;
                         case EVENT_BUILD_HARPOON_2:
                             Talk(EMOTE_HARPOON);
-                            if (GameObject* Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_2, PosHarpoon[1].GetPositionX(), PosHarpoon[1].GetPositionY(), PosHarpoon[1].GetPositionZ(), 4.659f, 0, 0, 0, 0, uint32(me->GetRespawnTime())))
+                            if (GameObject* Harpoon = SummonRepairedHarpoon(GO_RAZOR_HARPOON_2, PosHarpoon[1], 4.659f))
                             {
                                 if (GameObject* BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
                                     BrokenHarpoon->RemoveFromWorld();
@@ -264,7 +274,7 @@ class boss_razorscale_controller : public CreatureScript
                             return;
                         case EVENT_BUILD_HARPOON_3:
                             Talk(EMOTE_HARPOON);
-                            if (GameObject* Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_3, PosHarpoon[2].GetPositionX(), PosHarpoon[2].GetPositionY(), PosHarpoon[2].GetPositionZ(), 5.382f, 0, 0, 0, 0, uint32(me->GetRespawnTime())))
+                            if (GameObject* Harpoon = SummonRepairedHarpoon(GO_RAZOR_HARPOON_3, PosHarpoon[2], 5.382f))
                             {
                                 if (GameObject* BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
                                     BrokenHarpoon->RemoveFromWorld();
@@ -274,7 +284,7 @@ class boss_razorscale_controller : public CreatureScript
                             return;
                         case EVENT_BUILD_HARPOON_4:
                             Talk(EMOTE_HARPOON);
-                            if (GameObject* Harpoon = me->SummonGameObject(GO_RAZOR_HARPOON_4, PosHarpoon[3].GetPositionX(), PosHarpoon[3].GetPositionY(), PosHarpoon[3].GetPositionZ(), 4.266f, 0, 0, 0, 0, uint32(me->GetRespawnTime())))
+                            if (GameObject* Harpoon = SummonRepairedHarpoon(GO_RAZOR_HARPOON_4, PosHarpoon[3], 4.266f))
                             {
                                 if (GameObject* BrokenHarpoon = Harpoon->FindNearestGameObject(GO_RAZOR_BROKEN_HARPOON, 5.0f))
                                     BrokenHarpoon->RemoveFromWorld();
@@ -369,6 +379,10 @@ class boss_razorscale : public CreatureScript
 
             void MovementInform(uint32 type, uint32 id) OVERRIDE
             {
+                // takeoff finished: face the arena; the takeoff movement keeps only the position's coordinates
+                if (type == EFFECT_MOTION_TYPE && id == 0)
+                    me->SetFacingTo(RazorFlight.GetOrientation());
+
                 if (type == EFFECT_MOTION_TYPE && id == 1)
                 {
                     phase = PHASE_GROUND;
