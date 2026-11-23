@@ -104,19 +104,19 @@ public:
             Dish const* dish = FindDish(GetSpellInfo()->Id);
             Unit* chair = GetChair(GetCaster());
             if (!dish || !chair || !GetDiner(chair))
-                return SPELL_FAILED_CASTER_AURASTATE;
+                return SpellCastResult::SPELL_FAILED_CASTER_AURASTATE;
 
             if (GetSpellInfo()->Id == dish->Pass)
             {
                 Unit* recipient = GetChair(GetExplTargetUnit());
                 if (!recipient || recipient == chair || GetTable(recipient) != GetTable(chair)
                     || chair->GetEntry() != dish->Chair)
-                    return SPELL_FAILED_BAD_TARGETS;
+                    return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
             }
             else if (!chair->HasAura(dish->Server) && !chair->HasAura(dish->Serving))
-                return SPELL_FAILED_CASTER_AURASTATE;
+                return SpellCastResult::SPELL_FAILED_CASTER_AURASTATE;
 
-            return SPELL_CAST_OK;
+            return SpellCastResult::SPELL_CAST_OK;
         }
         void Handle(SpellEffIndex)
         {
