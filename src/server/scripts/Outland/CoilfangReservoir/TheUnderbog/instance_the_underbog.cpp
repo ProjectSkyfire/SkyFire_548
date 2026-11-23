@@ -12,6 +12,7 @@ gets instead the deserter debuff.
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "the_underbog.h"
 
 class instance_the_underbog : public InstanceMapScript
 {
@@ -25,7 +26,17 @@ public:
 
     struct instance_the_underbog_InstanceMapScript : public InstanceScript
     {
-        instance_the_underbog_InstanceMapScript(Map* map) : InstanceScript(map) { }
+        instance_the_underbog_InstanceMapScript(Map* map) : InstanceScript(map)
+        {
+            SetBossNumber(EncounterCount);
+        }
+
+        void SetData(uint32 type, uint32 data) OVERRIDE
+        {
+            // Ghaz'an and Swamplord Musel'ek are SmartAI creatures, which can only set instance data
+            if (type == DATA_GHAZAN || type == DATA_SWAMPLORD_MUSELEK)
+                SetBossState(type, EncounterState(data));
+        }
     };
 };
 

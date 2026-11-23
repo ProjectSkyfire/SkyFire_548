@@ -12,6 +12,9 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "GridNotifiers.h"
+#include "the_underbog.h"
 
 enum Spells
 {
@@ -32,6 +35,7 @@ public:
     {
         boss_hungarfenAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = creature->GetInstanceScript();
             Root = false;
             Mushroom_Timer = 0;
             AcidGeyser_Timer = 0;
@@ -42,9 +46,22 @@ public:
             Root = false;
             Mushroom_Timer = 5000;                              // 1 mushroom after 5s, then one per 10s. This should be different in heroic mode
             AcidGeyser_Timer = 10000;
+
+            if (instance)
+                instance->SetBossState(DATA_HUNGARFEN, NOT_STARTED);
         }
 
-        void EnterCombat(Unit* /*who*/) OVERRIDE { }
+        void EnterCombat(Unit* /*who*/) OVERRIDE
+        {
+            if (instance)
+                instance->SetBossState(DATA_HUNGARFEN, IN_PROGRESS);
+        }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            if (instance)
+                instance->SetBossState(DATA_HUNGARFEN, DONE);
+        }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -70,16 +87,20 @@ public:
                 Mushroom_Timer = 10000;
             } else Mushroom_Timer -= diff;
 
-            if (AcidGeyser_Timer <= diff)
+            if (IsHeroic())
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_ACID_GEYSER);
-                AcidGeyser_Timer = 10000+rand()%7500;
-            } else AcidGeyser_Timer -= diff;
+                if (AcidGeyser_Timer <= diff)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(target, SPELL_ACID_GEYSER);
+                    AcidGeyser_Timer = 10000+rand()%7500;
+                } else AcidGeyser_Timer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }
     private:
+        InstanceScript* instance;
         bool Root;
         uint32 Mushroom_Timer;
         uint32 AcidGeyser_Timer;
@@ -151,8 +172,37 @@ public:
     }
 };
 
+// 31689 - Spore Cloud
+class spell_hungarfen_spore_cloud : public SpellScriptLoader
+{
+public:
+    spell_hungarfen_spore_cloud() : SpellScriptLoader("spell_hungarfen_spore_cloud") { }
+
+    class spell_hungarfen_spore_cloud_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_hungarfen_spore_cloud_SpellScript);
+
+        // Triggered by the players standing in the cloud, so the enemies it finds are Hungarfen and the mushrooms
+        void FilterTargets(std::list<WorldObject*>& targets)
+        {
+            targets.remove_if(Skyfire::ObjectTypeIdCheck(TypeID::TYPEID_PLAYER, false));
+        }
+
+        void Register() OVERRIDE
+        {
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_hungarfen_spore_cloud_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const OVERRIDE
+    {
+        return new spell_hungarfen_spore_cloud_SpellScript();
+    }
+};
+
 void AddSC_boss_hungarfen()
 {
     new boss_hungarfen();
     new npc_underbog_mushroom();
+    new spell_hungarfen_spore_cloud();
 }
