@@ -236,7 +236,7 @@ void AddSC_boss_lord_overheat();
 void AddSC_boss_randolph_moloch();
 void AddSC_instance_the_stockade();          //The Stockade
 void AddSC_boss_akilzon();                   //Zul'Aman
-//void AddSC_boss_halazzi();
+void AddSC_boss_halazzi();
 //void AddSC_boss_hex_lord_malacrass();
 //void AddSC_boss_janalai();
 void AddSC_boss_nalorakk();
@@ -973,7 +973,7 @@ void AddEasternKingdomsScripts()
     AddSC_uldaman();
     AddSC_instance_uldaman();
     AddSC_boss_akilzon();                   //Zul'Aman
-    //AddSC_boss_halazzi();
+    AddSC_boss_halazzi();
     //AddSC_boss_hex_lord_malacrass();
     //AddSC_boss_janalai();
     AddSC_boss_nalorakk();

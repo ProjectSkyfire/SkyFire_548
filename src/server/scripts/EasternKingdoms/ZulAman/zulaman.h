@@ -69,6 +69,7 @@ enum ZulAmanWorldStates
 {
     WORLD_STATE_ZULAMAN_TIMER_ENABLED   = 3104,
     WORLD_STATE_ZULAMAN_TIMER           = 3106,
+    WORLDSTATE_TUNNEL_VISION            = 9165
 };
 
 template<class AI>

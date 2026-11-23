@@ -156,7 +156,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ShadowfangKeep/boss_lord_valden.cpp
   EasternKingdoms/ShadowfangKeep/boss_lord_godfrey.cpp
   #REWORKED IN CATACLYSM
-  #EasternKingdoms/ZulAman/boss_halazzi.cpp
+  EasternKingdoms/ZulAman/boss_halazzi.cpp
   #EasternKingdoms/ZulAman/boss_hexlord.cpp
   #EasternKingdoms/ZulAman/boss_daakara.cpp
   EasternKingdoms/ZulAman/boss_akilzon.cpp
