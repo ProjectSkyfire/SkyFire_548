@@ -62,6 +62,7 @@ enum Data64
 enum CreaturesIds
 {
     NPC_FAERLINA                = 15953,
+    NPC_MOGRAINE                = 16062,
     NPC_THANE                   = 16064,
     NPC_LADY                    = 16065,
     NPC_BARON                   = 30549,
