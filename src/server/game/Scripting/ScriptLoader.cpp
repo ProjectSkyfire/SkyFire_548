@@ -577,6 +577,9 @@ void AddSC_boss_mekgineer_steamrigger();
 void AddSC_boss_warlord_kalithresh();
 void AddSC_instance_steam_vault();
 void AddSC_instance_the_slave_pens();            //The Slave Pens
+void AddSC_boss_mennu_the_betrayer();
+void AddSC_boss_rokmar_the_crackler();
+void AddSC_boss_quagmirran();
 void AddSC_boss_hungarfen();                 //CR Underbog
 void AddSC_boss_the_black_stalker();
 void AddSC_instance_the_underbog();
@@ -1148,6 +1151,9 @@ void AddOutlandScripts()
     AddSC_boss_warlord_kalithresh();
     AddSC_instance_steam_vault();
     AddSC_instance_the_slave_pens();            //The Slave Pens
+    AddSC_boss_mennu_the_betrayer();
+    AddSC_boss_rokmar_the_crackler();
+    AddSC_boss_quagmirran();
     AddSC_boss_hungarfen();                 //CR Underbog
     AddSC_boss_the_black_stalker();
     AddSC_instance_the_underbog();
