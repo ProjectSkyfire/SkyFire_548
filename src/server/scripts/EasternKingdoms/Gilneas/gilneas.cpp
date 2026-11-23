@@ -4,6 +4,7 @@
 */
 
 #include "ScriptMgr.h"
+#include "CombatAI.h"
 #include "ScriptedCreature.h"
 #include "GameObjectAI.h"
 #include "GridNotifiers.h"
@@ -13,6 +14,7 @@
 #include "SharedDefines.h"
 #include "TemporarySummon.h"
 #include "Util.h"
+#include "Vehicle.h"
 #include <unordered_set>
 
 enum GilneasMerchantSquare
@@ -1142,6 +1144,126 @@ public:
     }
 };
 
+/*######
+## npc_crowleys_horse - Sacrifices (14212): the player rides to round up
+## Bloodfang Stalkers, the horse runs the route and jumps both barricades
+######*/
+
+enum CrowleysHorse
+{
+    PATH_CROWLEYS_HORSE_1       = 352310,
+    PATH_CROWLEYS_HORSE_2       = 352311,
+    POINT_CROWLEYS_HORSE_1_END  = 14,
+    POINT_CROWLEYS_HORSE_2_END  = 15,
+
+    EVENT_JUMP_BARRICADE_1      = 1,
+    EVENT_MOVE_PATH_1,
+    EVENT_JUMP_BARRICADE_2,
+    EVENT_MOVE_PATH_2,
+    EVENT_DISMOUNT_PLAYER,
+
+    DELAY_CROWLEYS_HORSE_START  = 2000,
+    DESPAWN_CROWLEYS_HORSE      = 5000,
+};
+
+Position const CrowleysHorseJumpPos1 = { -1714.762f, 1673.16f, 20.49182f, 0.0f };
+Position const CrowleysHorseJumpPos2 = { -1566.71f, 1708.04f, 20.4849f, 0.0f };
+
+class npc_crowleys_horse : public CreatureScript
+{
+public:
+    npc_crowleys_horse() : CreatureScript("npc_crowleys_horse") { }
+
+    struct npc_crowleys_horseAI : public VehicleAI
+    {
+        npc_crowleys_horseAI(Creature* creature) : VehicleAI(creature), _currentPath(0) { }
+
+        void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) OVERRIDE
+        {
+            if (!apply)
+                return;
+
+            // The core counts only Crowley's seat as enterable, so his boarding clears the spell click
+            // flag although the rider's seat is still free
+            if (passenger->GetTypeId() != TypeID::TYPEID_PLAYER)
+            {
+                me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+                return;
+            }
+
+            // The player controls the seat, so the horse is held until the route starts
+            me->RemoveFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            _events.ScheduleEvent(EVENT_JUMP_BARRICADE_1, DELAY_CROWLEYS_HORSE_START);
+        }
+
+        void MovementInform(uint32 type, uint32 pointId) OVERRIDE
+        {
+            if (type != WAYPOINT_MOTION_TYPE)
+                return;
+
+            if (_currentPath == PATH_CROWLEYS_HORSE_1 && pointId == POINT_CROWLEYS_HORSE_1_END)
+                _events.ScheduleEvent(EVENT_JUMP_BARRICADE_2, 1000);
+            else if (_currentPath == PATH_CROWLEYS_HORSE_2 && pointId == POINT_CROWLEYS_HORSE_2_END)
+                _events.ScheduleEvent(EVENT_DISMOUNT_PLAYER, 1);
+        }
+
+        void UpdateAI(uint32 diff) OVERRIDE
+        {
+            VehicleAI::UpdateAI(diff);
+            _events.Update(diff);
+
+            while (uint32 eventId = _events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_JUMP_BARRICADE_1:
+                        me->SetControlled(false, UNIT_STATE_ROOT);
+                        me->GetMotionMaster()->MoveJump(CrowleysHorseJumpPos1, 16.0f, 18.56182f);
+                        _events.ScheduleEvent(EVENT_MOVE_PATH_1, 2000);
+                        break;
+                    case EVENT_MOVE_PATH_1:
+                        _currentPath = PATH_CROWLEYS_HORSE_1;
+                        me->GetMotionMaster()->MovePath(PATH_CROWLEYS_HORSE_1, false);
+                        break;
+                    case EVENT_JUMP_BARRICADE_2:
+                        me->GetMotionMaster()->MoveJump(CrowleysHorseJumpPos2, 16.0f, 18.56182f);
+                        _events.ScheduleEvent(EVENT_MOVE_PATH_2, 2000);
+                        break;
+                    case EVENT_MOVE_PATH_2:
+                        _currentPath = PATH_CROWLEYS_HORSE_2;
+                        me->GetMotionMaster()->MovePath(PATH_CROWLEYS_HORSE_2, false);
+                        break;
+                    case EVENT_DISMOUNT_PLAYER:
+                    {
+                        // Stalkers chasing the horse would keep attacking the player once he is off
+                        std::set<Unit*> attackers = me->getAttackers();
+                        for (Unit* attacker : attackers)
+                            if (Creature* creature = attacker->ToCreature())
+                                if (creature->IsAIEnabled)
+                                    creature->AI()->EnterEvadeMode();
+
+                        me->RemoveAurasDueToSpell(VEHICLE_SPELL_RIDE_HARDCODED);
+                        me->DespawnOrUnsummon(DESPAWN_CROWLEYS_HORSE);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
+        }
+
+    private:
+        EventMap _events;
+        uint32 _currentPath;
+    };
+
+    CreatureAI* GetAI(Creature* creature) const OVERRIDE
+    {
+        return new npc_crowleys_horseAI(creature);
+    }
+};
+
 void AddSC_gilneas()
 {
     new go_merchant_square_door();
@@ -1158,4 +1280,5 @@ void AddSC_gilneas()
     new item_gilnean_mastiff_collar();
     new npc_gilnean_mastiff_recall_trigger();
     new npc_bloodfang_lurker();
+    new npc_crowleys_horse();
 }
