@@ -203,6 +203,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ScarletMonasteryMop/scarlet_monastery_mop.cpp
   EasternKingdoms/ScarletMonasteryMop/boss_thalnos_the_soulrender.cpp
   EasternKingdoms/ScarletMonasteryMop/boss_brother_korloff.cpp
+  EasternKingdoms/ScarletMonasteryMop/boss_high_inquisitor_whitemane.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")

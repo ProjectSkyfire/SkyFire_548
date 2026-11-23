@@ -66,7 +66,11 @@ public:
                 case NPC_THALNOS_THE_SOULRENDER: bossGuids[BOSS_THALNOS_THE_SOULRENDER] = creature->GetGUID(); break;
                 case NPC_BROTHER_KORLOFF: bossGuids[BOSS_BROTHER_KORLOFF] = creature->GetGUID(); break;
                 case NPC_HIGH_INQUISITOR_WHITEMANE: bossGuids[BOSS_WHITEMANE] = creature->GetGUID(); break;
-                case NPC_COMMANDER_DURAND: bossGuids[BOSS_DURAND] = creature->GetGUID(); break;
+                case NPC_COMMANDER_DURAND:
+                    bossGuids[BOSS_DURAND] = creature->GetGUID();
+                    if (GetBossState(BOSS_WHITEMANE) != DONE && GetBossState(BOSS_DURAND) == NOT_STARTED && !creature->IsAlive())
+                        creature->Respawn();
+                    break;
                 case NPC_HOODED_CRUSADER_OUTRO:
                     hoodedGuid = creature->GetGUID();
                     creature->SetVisible(false);
@@ -85,6 +89,8 @@ public:
                 case GO_WHITEMANE_ENTRANCE:
                     whitemaneDoor = go->GetGUID();
                     AddDoor(go, true);
+                    if (GetBossState(BOSS_WHITEMANE) == DONE)
+                        HandleGameObject(whitemaneDoor, true);
                     break;
             }
         }
@@ -117,6 +123,9 @@ public:
         {
             if (!InstanceScript::SetBossState(type, state))
                 return false;
+
+            if (type == BOSS_WHITEMANE && state == DONE)
+                HandleGameObject(whitemaneDoor, true);
 
             if (type == BOSS_DURAND && state == SPECIAL)
                 if (Creature* durand = instance->GetCreature(bossGuids[BOSS_DURAND]))
@@ -151,6 +160,11 @@ public:
             for (uint8 i = 0; i < ENCOUNTER_COUNT; ++i)
                 if (!(in >> states[i]))
                     return;
+            // A wipe or restart before Whitemane dies resets the paired fight.
+            if (states[BOSS_WHITEMANE] != DONE)
+                states[BOSS_DURAND] = NOT_STARTED;
+            else if (states[BOSS_DURAND] == SPECIAL)
+                states[BOSS_DURAND] = NOT_STARTED;
             for (uint8 i = 0; i < ENCOUNTER_COUNT; ++i)
             {
                 if (states[i] == IN_PROGRESS || states[i] > SPECIAL)
