@@ -71,6 +71,36 @@ enum UlduarNPCs
     NPC_LEVIATHAN_MKII                      = 33432,
     NPC_VX_001                              = 33651,
     NPC_AERIAL_COMMAND_UNIT                 = 33670,
+    NPC_ASSAULT_BOT                         = 34057,
+    NPC_JUNK_BOT                            = 33855,
+    NPC_BURST_TARGET                        = 34211,
+    NPC_WORLD_TRIGGER_MIMIRON               = 21252,
+    NPC_COMPUTER                            = 34143,
+
+    // Thorim
+    NPC_THORIM_INVISIBLE_STALKER            = 32780,
+    NPC_JORMUNGAR_BEHEMOTH                  = 32882,
+    NPC_MERCENARY_CAPTAIN_A                 = 32908,
+    NPC_MERCENARY_CAPTAIN_H                 = 32907,
+    NPC_MERCENARY_SOLDIER_A                 = 32885,
+    NPC_MERCENARY_SOLDIER_H                 = 32883,
+    NPC_DARK_RUNE_ACOLYTE_PRE               = 32886,
+    NPC_RUNIC_COLOSSUS                      = 32872,
+    NPC_RUNE_GIANT                          = 32873,
+    NPC_IRON_RING_GUARD                     = 32874,
+    NPC_IRON_HONOR_GUARD                    = 32875,
+    NPC_DARK_RUNE_CHAMPION                  = 32876,
+    NPC_DARK_RUNE_WARBRINGER                = 32877,
+    NPC_DARK_RUNE_EVOKER                    = 32878,
+    NPC_DARK_RUNE_COMMONER                  = 32904,
+    NPC_DARK_RUNE_ACOLYTE                   = 33110,
+    NPC_THORIM_EVENT_BUNNY                  = 32892,
+    NPC_GOLEM_RIGHT_HAND_BUNNY              = 33140,
+    NPC_GOLEM_LEFT_HAND_BUNNY               = 33141,
+    NPC_SIF                                 = 33196,
+    NPC_THUNDER_ORB                         = 33378,
+    NPC_LIGHTNING_ORB                       = 33138,
+    NPC_THORIM_CONTROLLER                   = 32879,
 
     // Freya's Keepers
     NPC_IRONBRANCH                          = 32913,
@@ -189,8 +219,28 @@ enum UlduarGameObjects
     GO_HODIR_CHEST                          = 194307,
 
     // Thorim
-    GO_THORIM_CHEST_HERO                    = 194315,
-    GO_THORIM_CHEST                         = 194314,
+    GO_CACHE_OF_STORMS_10                   = 194312,
+    GO_CACHE_OF_STORMS_HARDMODE_10          = 194313,
+    GO_CACHE_OF_STORMS_25                   = 194315,
+    GO_CACHE_OF_STORMS_HARDMODE_25          = 194314,
+    GO_THORIM_RUNIC_DOOR                    = 194557,
+    GO_THORIM_STONE_DOOR                    = 194558,
+    GO_THORIM_ENCOUNTER_DOOR                = 194559,
+    GO_THORIM_LEVER                         = 194264,
+    GO_THORIM_DARK_IRON_PORTCULLIS          = 194560,
+
+    // Mimiron
+    GO_MIMIRON_ELEVATOR                     = 194749,
+    GO_MIMIRON_BUTTON                       = 194739,
+    GO_MIMIRON_DOOR_1                       = 194774,
+    GO_MIMIRON_DOOR_2                       = 194775,
+    GO_MIMIRON_DOOR_3                       = 194776,
+    GO_CACHE_OF_INNOVATION                  = 194789,
+    GO_CACHE_OF_INNOVATION_FIREFIGHTER      = 194957,
+    GO_CACHE_OF_INNOVATION_HERO             = 194956,
+    GO_CACHE_OF_INNOVATION_FIREFIGHTER_HERO = 194958,
+
+    GO_ANCIENT_GATE_OF_THE_KEEPERS          = 194255,
 
     // Vezax
     GO_VEZAX_DOOR                           = 194750,
@@ -277,6 +327,15 @@ enum UlduarData
     DATA_MOLGEIM,
     DATA_BRUNDIR,
 
+    // Mimiron
+    DATA_LEVIATHAN_MK_II,
+    DATA_VX_001,
+    DATA_AERIAL_COMMAND_UNIT,
+    DATA_COMPUTER,
+    DATA_MIMIRON_WORLD_TRIGGER,
+    DATA_MIMIRON_ELEVATOR,
+    DATA_MIMIRON_BUTTON,
+
     // Hodir
     DATA_HODIR_RARE_CACHE,
 
@@ -302,6 +361,16 @@ enum UlduarData
     DATA_UNIVERSE_GLOBE,
     DATA_ALGALON_TRAPDOOR,
     DATA_BRANN_BRONZEBEARD_ALG,
+
+    // Thorim
+    DATA_SIF,
+    DATA_THORIM_LEVER,
+    DATA_RUNIC_COLOSSUS,
+    DATA_RUNE_GIANT,
+    DATA_RUNIC_DOOR,
+    DATA_STONE_DOOR,
+    DATA_THORIM_HARDMODE,
+    DATA_THORIM_CONTROLLER,
 };
 
 enum UlduarWorldStates

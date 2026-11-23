@@ -447,6 +447,7 @@ void AddSC_boss_general_vezax();
 void AddSC_ulduar_teleporter();
 void AddSC_boss_mimiron();
 void AddSC_boss_hodir();
+void AddSC_boss_thorim();
 void AddSC_boss_freya();
 void AddSC_boss_yogg_saron();
 void AddSC_boss_algalon_the_observer();
@@ -1298,6 +1299,7 @@ void AddNorthrendScripts()
     AddSC_ulduar_teleporter();
     AddSC_boss_mimiron();
     AddSC_boss_hodir();
+    AddSC_boss_thorim();
     AddSC_boss_freya();
     AddSC_boss_yogg_saron();
     AddSC_boss_algalon_the_observer();
