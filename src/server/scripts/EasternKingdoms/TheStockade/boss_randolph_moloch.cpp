@@ -26,13 +26,22 @@ enum Spells
 {
     SPELL_SWEEP = 86729,
     SPELL_VANISH = 55964,
+    SPELL_SHADOWSTEP = 55966,
     SPELL_WILDLY_STABBING = 86726
 };
+enum Misc
+{
+    VANISH_FIRST_HEALTH_PCT = 70,
+    VANISH_SECOND_HEALTH_PCT = 40,
+    SWEEP_RANGE = 5
+};
+
 enum Events
 {
     EVENT_SWEEP = 1,
-    EVENT_VANISH = 2,
-    EVENT_WILDLY_STABBING = 3
+    EVENT_WILDLY_STABBING = 2,
+    EVENT_VANISH = 3,
+    EVENT_SHADOWSTEP = 4
 };
 
 class boss_randolph_moloch : public CreatureScript
@@ -42,14 +51,25 @@ public:
 
     struct boss_randolph_molochAI : public BossAI
     {
-        boss_randolph_molochAI(Creature* creature) : BossAI(creature, DATA_RANDOLPH_MOLOCH) { }
+        boss_randolph_molochAI(Creature* creature) : BossAI(creature, DATA_RANDOLPH_MOLOCH), _vanishCount(0) { }
 
         void Reset() OVERRIDE
         {
             BossAI::Reset();
-            events.ScheduleEvent(EVENT_SWEEP, 5000);
-            events.ScheduleEvent(EVENT_VANISH, 10000);
-            events.ScheduleEvent(EVENT_WILDLY_STABBING, 6000);
+            _vanishCount = 0;
+            me->SetReactState(REACT_AGGRESSIVE);
+            events.ScheduleEvent(EVENT_SWEEP, 1000);
+            events.ScheduleEvent(EVENT_WILDLY_STABBING, urand(3000, 5000));
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+        {
+            if ((_vanishCount == 0 && HealthBelowPct(VANISH_FIRST_HEALTH_PCT)) ||
+                (_vanishCount == 1 && HealthBelowPct(VANISH_SECOND_HEALTH_PCT)))
+            {
+                ++_vanishCount;
+                events.ScheduleEvent(EVENT_VANISH, 1000);
+            }
         }
 
         void EnterCombat(Unit* victim) OVERRIDE
@@ -85,23 +105,35 @@ public:
                 {
                 case EVENT_SWEEP:
                 {
-                    DoCastVictim(SPELL_SWEEP);
-                    events.ScheduleEvent(EVENT_SWEEP, 5000);
-                    break;
-                }
-                case EVENT_VANISH:
-                {
-                    //TODO: vanish should be cast at 35% and 65% HP and not reset boss
-                    //if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        //DoCast(target, SPELL_VANISH);
-                    Talk(SAY_VANISH);
-                    events.ScheduleEvent(EVENT_VANISH, 10000);
+                    if (me->IsInRange(me->GetVictim(), 0.0f, SWEEP_RANGE))
+                    {
+                        DoCastVictim(SPELL_SWEEP);
+                        events.ScheduleEvent(EVENT_SWEEP, urand(8000, 9000));
+                    }
+                    else
+                        events.ScheduleEvent(EVENT_SWEEP, 1000);
                     break;
                 }
                 case EVENT_WILDLY_STABBING:
                 {
                     DoCastVictim(SPELL_WILDLY_STABBING);
-                    events.ScheduleEvent(EVENT_WILDLY_STABBING, 6000);
+                    events.ScheduleEvent(EVENT_WILDLY_STABBING, urand(11000, 14000));
+                    break;
+                }
+                case EVENT_VANISH:
+                {
+                    Talk(SAY_VANISH);
+                    me->RemoveAllAuras();
+                    DoCast(me, SPELL_VANISH);
+                    me->SetReactState(REACT_PASSIVE);
+                    events.ScheduleEvent(EVENT_SHADOWSTEP, 2000);
+                    break;
+                }
+                case EVENT_SHADOWSTEP:
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        DoCast(target, SPELL_SHADOWSTEP);
+                    me->SetReactState(REACT_AGGRESSIVE);
                     break;
                 }
                 default:
@@ -110,6 +142,9 @@ public:
             }
             BossAI::DoMeleeAttackIfReady();
         };
+
+    private:
+        uint8 _vanishCount;
     };
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {

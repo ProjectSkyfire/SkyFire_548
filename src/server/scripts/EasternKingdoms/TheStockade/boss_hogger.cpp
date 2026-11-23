@@ -27,11 +27,16 @@ enum Spells
     SPELL_MADDENING_CALL = 86620,
     SPELL_VICIOUS_SLICE = 86604
 };
+
+enum Misc
+{
+    ENRAGE_HEALTH_PCT = 30
+};
+
 enum Events
 {
     EVENT_VICIOUS_SLICE = 1,
-    EVENT_MADDENING_CALL = 2,
-    EVENT_ENRAGE = 3
+    EVENT_MADDENING_CALL = 2
 };
 
 class boss_hogger : public CreatureScript
@@ -41,14 +46,24 @@ public:
 
     struct boss_hoggerAI : public BossAI
     {
-        boss_hoggerAI(Creature* creature) : BossAI(creature, DATA_HOGGER) { }
+        boss_hoggerAI(Creature* creature) : BossAI(creature, DATA_HOGGER), _enraged(false) { }
 
         void Reset() OVERRIDE
         {
             BossAI::Reset();
-            events.ScheduleEvent(EVENT_VICIOUS_SLICE, 4000);
-            events.ScheduleEvent(EVENT_MADDENING_CALL, 9000);
-            events.ScheduleEvent(EVENT_ENRAGE, 60000);
+            _enraged = false;
+            events.ScheduleEvent(EVENT_VICIOUS_SLICE, urand(3000, 4000));
+            events.ScheduleEvent(EVENT_MADDENING_CALL, urand(6000, 8000));
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+        {
+            if (!_enraged && HealthBelowPct(ENRAGE_HEALTH_PCT))
+            {
+                _enraged = true;
+                Talk(SAY_ENRAGE);
+                DoCast(me, SPELL_ENRAGE);
+            }
         }
 
         void EnterCombat(Unit* victim) OVERRIDE
@@ -87,20 +102,13 @@ public:
                 case EVENT_VICIOUS_SLICE:
                 {
                     DoCastVictim(SPELL_VICIOUS_SLICE);
-                    events.ScheduleEvent(EVENT_VICIOUS_SLICE, 8000);
+                    events.ScheduleEvent(EVENT_VICIOUS_SLICE, urand(8000, 12000));
                     break;
                 }
                 case EVENT_MADDENING_CALL:
                 {
                     DoCastAOE(SPELL_MADDENING_CALL);
-                    events.ScheduleEvent(EVENT_MADDENING_CALL, 18000);
-                    break;
-                }
-                case EVENT_ENRAGE:
-                {
-                    DoCast(me, SPELL_ENRAGE);
-                    Talk(SAY_ENRAGE);
-                    events.ScheduleEvent(EVENT_MADDENING_CALL, 60000);
+                    events.ScheduleEvent(EVENT_MADDENING_CALL, urand(19000, 20000));
                     break;
                 }
                 default:
@@ -109,6 +117,9 @@ public:
             }
             BossAI::DoMeleeAttackIfReady();
         };
+
+    private:
+        bool _enraged;
     };
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
     {
