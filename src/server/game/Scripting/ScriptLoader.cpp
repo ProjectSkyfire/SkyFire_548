@@ -382,6 +382,7 @@ void AddSC_boss_novos();
 void AddSC_boss_king_dred();
 void AddSC_boss_tharon_ja();
 void AddSC_instance_drak_tharon_keep();
+void AddSC_drak_tharon_keep();
 
 void AddSC_boss_argent_challenge();      //Trial of the Champion
 void AddSC_boss_black_knight();
@@ -1233,6 +1234,7 @@ void AddNorthrendScripts()
     AddSC_boss_king_dred();
     AddSC_boss_tharon_ja();
     AddSC_instance_drak_tharon_keep();
+    AddSC_drak_tharon_keep();
 
     AddSC_boss_argent_challenge();      //Trial of the Champion
     AddSC_boss_black_knight();
