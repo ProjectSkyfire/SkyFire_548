@@ -7,6 +7,8 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "Player.h"
+#include "Group.h"
+#include "ObjectAccessor.h"
 
 #define BOXTEXT "Are you sure you want to give this hobo money?"
 
@@ -28,6 +30,40 @@
 
 #define RAGAMUFFINTEXT "Does she have boots? Get'em!"
 
+enum WestfallStew
+{
+    NPC_WESTFALL_STEW    = 42617,
+
+    SPELL_FULL_BELLY     = 79451,
+    SPELL_COSMETIC_SLEEP = 78677,
+
+    POINT_STEW           = 1,
+
+    SAY_STEW_THANKS      = 17,
+
+    EVENT_STEW_STAND     = 1,
+    EVENT_STEW_MOVE,
+    EVENT_STEW_RETURN
+};
+
+uint32 const StewEaters[] = { 42383, 42384, 42386, 42391 };
+
+struct npc_westfall_westfall_stew : public ScriptedAI
+{
+    npc_westfall_westfall_stew(Creature* creature) : ScriptedAI(creature) { }
+
+    void IsSummonedBy(Unit* /*summoner*/) OVERRIDE
+    {
+        std::list<Creature*> eaters;
+        for (uint32 entry : StewEaters)
+            me->GetCreatureListWithEntryInGridAppend(eaters, entry, 8.0f);
+
+        for (Creature* eater : eaters)
+            if (eater->IsAlive() && !eater->HasAura(SPELL_FULL_BELLY) && eater->IsAIEnabled)
+                eater->AI()->SetGUID(me->GetGUID());
+    }
+};
+
 class npc_transient : public CreatureScript
 {
 public:
@@ -40,8 +76,7 @@ public:
         {
             if ((std::rand() % 2) == 1)
             {
-                creature->setFaction(14);
-                CAST_AI(npc_transient::npc_transientAI, creature->AI())->AttackStart(player);
+                CAST_AI(npc_transient::npc_transientAI, creature->AI())->TurnHostile(player);
             }
             else
             {
@@ -53,8 +88,7 @@ public:
         {
             if ((std::rand() % 2) == 1)
             {
-                creature->setFaction(14);
-                CAST_AI(npc_transient::npc_transientAI, creature->AI())->AttackStart(player);
+                CAST_AI(npc_transient::npc_transientAI, creature->AI())->TurnHostile(player);
             }
             else
             {
@@ -88,6 +122,7 @@ public:
         {
             cooldown = 0;
             talkCooldown = 0;
+            stewGUID = 0;
         }
 
         void GiveClueCredit(Player* player)
@@ -132,6 +167,46 @@ public:
             talkCooldown = urand(60000, 120000);
             me->setFaction(7);
             me->SetFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        // The spawn is immune to players while friendly; without clearing that the player could not fight back.
+        void TurnHostile(Player* player)
+        {
+            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            me->setFaction(14);
+            AttackStart(player);
+            events.Reset();
+            stewGUID = 0;
+        }
+
+        void SetGUID(uint64 guid, int32 /*id*/) OVERRIDE
+        {
+            if (stewGUID || me->getFaction() == 14)
+                return;
+
+            stewGUID = guid;
+            events.ScheduleEvent(EVENT_STEW_STAND, 0);
+        }
+
+        void MovementInform(uint32 type, uint32 id) OVERRIDE
+        {
+            if (type != POINT_MOTION_TYPE || id != POINT_STEW)
+                return;
+
+            me->CastSpell(me, SPELL_FULL_BELLY, true);
+
+            if (Creature* stew = ObjectAccessor::GetCreature(*me, stewGUID))
+            {
+                if (Unit* summoner = stew->ToTempSummon()->GetSummoner())
+                    if (Player* player = summoner->ToPlayer())
+                        player->KilledMonsterCredit(NPC_WESTFALL_STEW);
+
+                if (roll_chance_i(50))
+                    Talk(SAY_STEW_THANKS, stew);
+            }
+
+            events.ScheduleEvent(EVENT_STEW_RETURN, 5500);
         }
 
         void JustRespawned() OVERRIDE
@@ -233,6 +308,39 @@ public:
         
         void UpdateAI(uint32 diff) OVERRIDE
         {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_STEW_STAND:
+                        me->SetStandState(UNIT_STAND_STATE_STAND);
+                        me->RemoveAurasDueToSpell(SPELL_COSMETIC_SLEEP);
+                        events.ScheduleEvent(EVENT_STEW_MOVE, 2000);
+                        break;
+                    case EVENT_STEW_MOVE:
+                        if (Creature* stew = ObjectAccessor::GetCreature(*me, stewGUID))
+                        {
+                            float x, y, z;
+                            stew->GetContactPoint(me, x, y, z, 0.2f);
+                            me->GetMotionMaster()->MovePoint(POINT_STEW, x, y, z);
+                        }
+                        else
+                        {
+                            stewGUID = 0;
+                            me->GetMotionMaster()->MoveTargetedHome();
+                        }
+                        break;
+                    case EVENT_STEW_RETURN:
+                        stewGUID = 0;
+                        me->GetMotionMaster()->MoveTargetedHome();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             if (cooldown)
             {
                 if (cooldown <= diff)
@@ -254,12 +362,25 @@ public:
                     talkCooldown -= diff;
             }
 
-            if (me->getFaction() == 14)
-                DoMeleeAttackIfReady();
+            if (me->getFaction() != 14)
+                return;
+
+            // Evading once the player is dead or gone calls Reset, which makes the transient friendly again. UpdateVictim
+            // does not evade a creature that already left combat, so do it here.
+            if (!UpdateVictim())
+            {
+                if (!me->GetVictim() && !me->IsInCombat())
+                    EnterEvadeMode();
+                return;
+            }
+
+            DoMeleeAttackIfReady();
         }
     private:
         uint32 cooldown;
         uint32 talkCooldown;
+        uint64 stewGUID;
+        EventMap events;
     };
 
     CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -268,8 +389,268 @@ public:
     }
 };
 
+enum LousPartingThoughts
+{
+    QUEST_LOUS_PARTING_THOUGHTS = 26232,
+
+    NPC_THUG                    = 42387,
+    NPC_LOUS_THOUGHTS_TRIGGER   = 42562,
+    NPC_THUGS_EAVESDROPPED      = 42417,
+
+    SAY_WARNING                 = 0,
+
+    DATA_THUG_DEATH             = 1,
+    DATA_THUG_EVADE             = 2,
+
+    SOUND_SHOOTING              = 15071,
+    SOUND_SCREAM                = 17852
+};
+
+enum LousPartingThoughtsEvents
+{
+    EVENT_THUG1_SAY_0 = 1,
+    EVENT_THUG2_SAY_1,
+    EVENT_THUG2_SAY_2,
+    EVENT_THUG3_SAY_3,
+    EVENT_THUG1_SAY_4,
+    EVENT_THUG1_SAY_5,
+    EVENT_THUG1_SAY_6,
+    EVENT_THUG_CREDIT,
+    EVENT_THUG_SHOOT_1,
+    EVENT_THUG_SHOOT_2,
+    EVENT_THUG_SCREAM,
+    EVENT_THUG_WARNING
+};
+
+class at_westfall_two_shoed_lou_thugs : public AreaTriggerScript
+{
+public:
+    at_westfall_two_shoed_lou_thugs() : AreaTriggerScript("at_westfall_two_shoed_lou_thugs") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*trigger*/) OVERRIDE
+    {
+        if (player->IsAlive() && player->GetQuestStatus(QUEST_LOUS_PARTING_THOUGHTS) == QUEST_STATUS_INCOMPLETE)
+            if (Creature* trigger = player->FindNearestCreature(NPC_LOUS_THOUGHTS_TRIGGER, 50.0f))
+                if (trigger->IsAIEnabled)
+                    trigger->AI()->SetGUID(player->GetGUID());
+
+        return true;
+    }
+};
+
+struct npc_westfall_thug : public ScriptedAI
+{
+    npc_westfall_thug(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() OVERRIDE
+    {
+        // The spawn is immune to players until the trigger lets the thugs attack.
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+    }
+
+    void EnterEvadeMode() OVERRIDE
+    {
+        ScriptedAI::EnterEvadeMode();
+        NotifyTrigger(DATA_THUG_EVADE);
+    }
+
+    void JustDied(Unit* /*killer*/) OVERRIDE
+    {
+        NotifyTrigger(DATA_THUG_DEATH);
+    }
+
+    void UpdateAI(uint32 /*diff*/) OVERRIDE
+    {
+        if (!UpdateVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    void NotifyTrigger(uint32 data)
+    {
+        if (Creature* trigger = me->FindNearestCreature(NPC_LOUS_THOUGHTS_TRIGGER, 50.0f))
+            if (trigger->IsAIEnabled)
+                trigger->AI()->SetData(data, 0);
+    }
+};
+
+struct npc_westfall_lous_parting_thoughts_trigger : public ScriptedAI
+{
+    npc_westfall_lous_parting_thoughts_trigger(Creature* creature) : ScriptedAI(creature)
+    {
+        Initialize();
+    }
+
+    void SetGUID(uint64 guid, int32 /*id*/) OVERRIDE
+    {
+        if (_invokerGUID)
+            return;
+
+        // The thugs are static spawns: wait until all four are alive and idle again.
+        std::list<Creature*> thugs;
+        me->GetCreatureListWithEntryInGrid(thugs, NPC_THUG, 20.0f);
+        if (thugs.size() != 4)
+            return;
+
+        uint8 index = 0;
+        for (Creature* thug : thugs)
+        {
+            if (!thug->IsAlive() || thug->IsInCombat())
+                return;
+
+            _thugs[index++] = thug->GetGUID();
+        }
+
+        _invokerGUID = guid;
+        _events.ScheduleEvent(EVENT_THUG1_SAY_0, 0);
+    }
+
+    void SetData(uint32 type, uint32 /*data*/) OVERRIDE
+    {
+        if (type == DATA_THUG_EVADE)
+        {
+            _events.Reset();
+            Initialize();
+        }
+        else if (type == DATA_THUG_DEATH && _invokerGUID && ++_thugDeathCount == 4)
+            _events.ScheduleEvent(EVENT_THUG_CREDIT, 0);
+    }
+
+    void UpdateAI(uint32 diff) OVERRIDE
+    {
+        _events.Update(diff);
+
+        while (uint32 eventId = _events.ExecuteEvent())
+        {
+            switch (eventId)
+            {
+                case EVENT_THUG1_SAY_0:
+                    ThugTalk(0, 0);
+                    _events.ScheduleEvent(EVENT_THUG2_SAY_1, 5000);
+                    break;
+                case EVENT_THUG2_SAY_1:
+                    ThugTalk(1, 1);
+                    _events.ScheduleEvent(EVENT_THUG2_SAY_2, 5000);
+                    break;
+                case EVENT_THUG2_SAY_2:
+                    ThugTalk(1, 2);
+                    _events.ScheduleEvent(EVENT_THUG3_SAY_3, 8500);
+                    break;
+                case EVENT_THUG3_SAY_3:
+                    ThugTalk(2, 3);
+                    _events.ScheduleEvent(EVENT_THUG1_SAY_4, 5000);
+                    break;
+                case EVENT_THUG1_SAY_4:
+                {
+                    ThugTalk(0, 4);
+                    if (Player* invoker = ObjectAccessor::GetPlayer(*me, _invokerGUID))
+                        for (uint8 i = 0; i < 4; ++i)
+                            if (Creature* thug = ObjectAccessor::GetCreature(*me, _thugs[i]))
+                                thug->SetFacingToObject(invoker);
+
+                    _events.ScheduleEvent(EVENT_THUG1_SAY_5, 8500);
+                    break;
+                }
+                case EVENT_THUG1_SAY_5:
+                    ThugTalk(0, 5);
+                    _events.ScheduleEvent(EVENT_THUG1_SAY_6, 5000);
+                    break;
+                case EVENT_THUG1_SAY_6:
+                {
+                    Player* invoker = ObjectAccessor::GetPlayer(*me, _invokerGUID);
+                    if (!invoker)
+                    {
+                        Initialize();
+                        break;
+                    }
+
+                    ThugTalk(0, 6);
+                    for (uint8 i = 0; i < 4; ++i)
+                    {
+                        if (Creature* thug = ObjectAccessor::GetCreature(*me, _thugs[i]))
+                        {
+                            thug->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            thug->AI()->AttackStart(invoker);
+                        }
+                    }
+                    break;
+                }
+                case EVENT_THUG_CREDIT:
+                    GiveCredit();
+                    _events.ScheduleEvent(EVENT_THUG_SHOOT_1, 1500);
+                    break;
+                case EVENT_THUG_SHOOT_1:
+                    PlaySound(SOUND_SHOOTING);
+                    _events.ScheduleEvent(EVENT_THUG_SHOOT_2, 1200);
+                    break;
+                case EVENT_THUG_SHOOT_2:
+                    PlaySound(SOUND_SHOOTING);
+                    _events.ScheduleEvent(EVENT_THUG_SCREAM, 1200);
+                    break;
+                case EVENT_THUG_SCREAM:
+                    PlaySound(SOUND_SCREAM);
+                    _events.ScheduleEvent(EVENT_THUG_WARNING, 2500);
+                    break;
+                case EVENT_THUG_WARNING:
+                    if (Player* invoker = ObjectAccessor::GetPlayer(*me, _invokerGUID))
+                        Talk(SAY_WARNING, invoker);
+                    Initialize();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+private:
+    void Initialize()
+    {
+        _invokerGUID = 0;
+        _thugDeathCount = 0;
+    }
+
+    void ThugTalk(uint8 thug, uint8 text)
+    {
+        Player* invoker = ObjectAccessor::GetPlayer(*me, _invokerGUID);
+        Creature* speaker = ObjectAccessor::GetCreature(*me, _thugs[thug]);
+        if (invoker && speaker)
+            speaker->AI()->Talk(text, invoker);
+    }
+
+    void PlaySound(uint32 sound)
+    {
+        if (Player* invoker = ObjectAccessor::GetPlayer(*me, _invokerGUID))
+            me->PlayDistanceSound(sound, invoker);
+    }
+
+    void GiveCredit()
+    {
+        Player* invoker = ObjectAccessor::GetPlayer(*me, _invokerGUID);
+        if (!invoker)
+            return;
+
+        invoker->KilledMonsterCredit(NPC_THUGS_EAVESDROPPED);
+
+        if (Group* group = invoker->GetGroup())
+            for (GroupReference* itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
+                if (Player* member = itr->GetSource())
+                    if (member->IsInMap(invoker) && member->GetQuestStatus(QUEST_LOUS_PARTING_THOUGHTS) == QUEST_STATUS_INCOMPLETE && member->GetDistance(me) <= 75.0f)
+                        member->KilledMonsterCredit(NPC_THUGS_EAVESDROPPED);
+    }
+
+    EventMap _events;
+    uint64 _invokerGUID;
+    uint64 _thugs[4];
+    uint8 _thugDeathCount;
+};
 
 void AddSC_westfall()
 {
+    RegisterCreatureAI(npc_westfall_westfall_stew);
     new npc_transient();
+    new at_westfall_two_shoed_lou_thugs();
+    RegisterCreatureAI(npc_westfall_thug);
+    RegisterCreatureAI(npc_westfall_lous_parting_thoughts_trigger);
 }
