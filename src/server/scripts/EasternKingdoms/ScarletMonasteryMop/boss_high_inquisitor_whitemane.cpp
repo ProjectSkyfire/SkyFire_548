@@ -15,7 +15,6 @@ enum WhitemaneSpells
     SPELL_DASHING_STRIKE = 115739,
     SPELL_DASHING_TARGET = 122519,
     SPELL_DASHING_INVISIBLE = 115676,
-    SPELL_DASHING_AURA = 115704,
     SPELL_POWER_WORD_SHIELD = 22187,
     SPELL_SMITE = 114848,
     SPELL_HEAL = 36678,
@@ -101,6 +100,14 @@ public:
             {
                 awaitingRevival = false;
                 dashCount = flashCount = 0;
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetReactState(REACT_AGGRESSIVE);
+                me->SetStandState(UNIT_STAND_STATE_STAND);
+                me->SetFullHealth();
+                // The fake death left no attack target, so put the whole group back on the threat list
+                DoZoneInCombat();
+                if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 150.0f, true))
+                    AttackStart(target);
                 events.ScheduleEvent(EVENT_FLASH, 9000);
                 events.ScheduleEvent(EVENT_DASH, urand(24000, 25000));
                 if (instance)
@@ -167,7 +174,6 @@ public:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                             {
                                 DoCastAOE(SPELL_DASHING_TARGET, true);
-                                me->CastSpell(me, SPELL_DASHING_AURA, true);
                                 me->CastSpell(target, SPELL_DASHING_STRIKE, false);
                             }
                             events.ScheduleEvent(EVENT_DASH, urand(500, 1000));

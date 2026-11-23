@@ -126,18 +126,6 @@ public:
 
             if (type == BOSS_WHITEMANE && state == DONE)
                 HandleGameObject(whitemaneDoor, true);
-
-            if (type == BOSS_DURAND && state == SPECIAL)
-                if (Creature* durand = instance->GetCreature(bossGuids[BOSS_DURAND]))
-                {
-                    durand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    durand->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    durand->SetReactState(REACT_AGGRESSIVE);
-                    durand->SetStandState(UNIT_STAND_STATE_STAND);
-                    durand->SetFullHealth();
-                    if (Player* player = durand->FindNearestPlayer(VISIBLE_RANGE))
-                        durand->AI()->AttackStart(player);
-                }
             return true;
         }
 
