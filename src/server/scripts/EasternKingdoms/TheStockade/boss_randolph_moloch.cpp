@@ -26,19 +26,22 @@ enum Spells
 {
     SPELL_SWEEP = 86729,
     SPELL_VANISH = 55964,
+    SPELL_SHADOWSTEP = 55966,
     SPELL_WILDLY_STABBING = 86726
 };
 enum Misc
 {
-    VANISH_FIRST_HEALTH_PCT = 50,
-    VANISH_SECOND_HEALTH_PCT = 30,
+    VANISH_FIRST_HEALTH_PCT = 70,
+    VANISH_SECOND_HEALTH_PCT = 40,
     SWEEP_RANGE = 5
 };
 
 enum Events
 {
     EVENT_SWEEP = 1,
-    EVENT_WILDLY_STABBING = 2
+    EVENT_WILDLY_STABBING = 2,
+    EVENT_VANISH = 3,
+    EVENT_SHADOWSTEP = 4
 };
 
 class boss_randolph_moloch : public CreatureScript
@@ -54,6 +57,7 @@ public:
         {
             BossAI::Reset();
             _vanishCount = 0;
+            me->SetReactState(REACT_AGGRESSIVE);
             events.ScheduleEvent(EVENT_SWEEP, 1000);
             events.ScheduleEvent(EVENT_WILDLY_STABBING, urand(3000, 5000));
         }
@@ -64,8 +68,7 @@ public:
                 (_vanishCount == 1 && HealthBelowPct(VANISH_SECOND_HEALTH_PCT)))
             {
                 ++_vanishCount;
-                Talk(SAY_VANISH);
-                DoCast(me, SPELL_VANISH);
+                events.ScheduleEvent(EVENT_VANISH, 1000);
             }
         }
 
@@ -115,6 +118,22 @@ public:
                 {
                     DoCastVictim(SPELL_WILDLY_STABBING);
                     events.ScheduleEvent(EVENT_WILDLY_STABBING, urand(11000, 14000));
+                    break;
+                }
+                case EVENT_VANISH:
+                {
+                    Talk(SAY_VANISH);
+                    me->RemoveAllAuras();
+                    DoCast(me, SPELL_VANISH);
+                    me->SetReactState(REACT_PASSIVE);
+                    events.ScheduleEvent(EVENT_SHADOWSTEP, 2000);
+                    break;
+                }
+                case EVENT_SHADOWSTEP:
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        DoCast(target, SPELL_SHADOWSTEP);
+                    me->SetReactState(REACT_AGGRESSIVE);
                     break;
                 }
                 default:
