@@ -20,7 +20,9 @@ enum Says
 
 enum Spells
 {
-    SPELL_RAVENOUSCLAW          = 17470
+    SPELL_RAVENOUSCLAW          = 17470,
+    SPELL_THRASH                = 12787,
+    SPELL_ENRAGE                = 8599
 };
 
 class boss_timmy_the_cruel : public CreatureScript
@@ -39,11 +41,14 @@ public:
 
         uint32 RavenousClaw_Timer;
         bool HasYelled;
+        bool Enraged;
 
         void Reset() OVERRIDE
         {
-            RavenousClaw_Timer = 10000;
+            RavenousClaw_Timer = 14000;
             HasYelled = false;
+            Enraged = false;
+            DoCast(me, SPELL_THRASH);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -52,6 +57,15 @@ public:
             {
                 Talk(SAY_SPAWN);
                 HasYelled = true;
+            }
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+        {
+            if (!Enraged && me->HealthBelowPctDamaged(25, damage))
+            {
+                Enraged = true;
+                DoCast(me, SPELL_ENRAGE, true);
             }
         }
 
@@ -66,8 +80,7 @@ public:
             {
                 //Cast
                 DoCastVictim(SPELL_RAVENOUSCLAW);
-                //15 seconds until we should cast this again
-                RavenousClaw_Timer = 15000;
+                RavenousClaw_Timer = urand(5000, 8000);
             } else RavenousClaw_Timer -= diff;
 
             DoMeleeAttackIfReady();
