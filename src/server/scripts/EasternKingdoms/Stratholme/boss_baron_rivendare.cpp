@@ -14,39 +14,33 @@ EndScriptData */
 #include "ScriptedCreature.h"
 #include "stratholme.h"
 
-enum Says
+enum Texts
 {
-    SAY_BARON_RUN_START         = 0,
-    SAY_BARON_RUN_BOSS_KILL     = 1,
-    SAY_BARON_RUN_FAIL          = 2,
-    SAY_EVENT_RAMSTEIN          = 3,
-    SAY_EVENT_BARON             = 4
+    EMOTE_RAISE_DEAD            = 0,
+    EMOTE_DEATH_PACT            = 1
 };
 
 enum Spells
 {
     SPELL_SHADOWBOLT            = 17393,
-    SPELL_CLEAVE                = 15284,
-    SPELL_MORTALSTRIKE          = 15708,
+    SPELL_CLEAVE                = 845,
+    SPELL_MORTALSTRIKE          = 16856,
 
-    SPELL_UNHOLY_AURA           = 15284,
-    SPELL_RAISEDEAD             = 15708,  //triggers death pact (17471)
+    SPELL_RAISE_DEAD            = 17473,  // triggers Death Pact after 12 seconds
 
     SPELL_RAISE_DEAD1           = 17475,
     SPELL_RAISE_DEAD2           = 17476,
     SPELL_RAISE_DEAD3           = 17477,
     SPELL_RAISE_DEAD4           = 17478,
     SPELL_RAISE_DEAD5           = 17479,
-    SPELL_RAISE_DEAD6           = 17480,
+    SPELL_RAISE_DEAD6           = 17480
 };
 
-// Define Add positions
-Position const ADD_POS_1 = {4017.403809f, -3339.703369f, 115.057655f, 5.487860f};
-Position const ADD_POS_2 = {4013.189209f, -3351.808350f, 115.052254f, 0.134280f};
-Position const ADD_POS_3 = {4017.738037f, -3363.478016f, 115.057274f, 0.723313f};
-Position const ADD_POS_4 = {4048.877197f, -3363.223633f, 115.054253f, 3.627735f};
-Position const ADD_POS_5 = {4051.777588f, -3350.893311f, 115.055351f, 3.066176f};
-Position const ADD_POS_6 = {4048.375977f, -3339.966309f, 115.055222f, 2.457497f};
+uint32 const RaiseDeadSkeletons[6] =
+{
+    SPELL_RAISE_DEAD1, SPELL_RAISE_DEAD2, SPELL_RAISE_DEAD3,
+    SPELL_RAISE_DEAD4, SPELL_RAISE_DEAD5, SPELL_RAISE_DEAD6
+};
 
 class boss_baron_rivendare : public CreatureScript
 {
@@ -60,26 +54,30 @@ public:
 
     struct boss_baron_rivendareAI : public ScriptedAI
     {
-        boss_baron_rivendareAI(Creature* creature) : ScriptedAI(creature)
+        boss_baron_rivendareAI(Creature* creature) : ScriptedAI(creature), summons(me)
         {
             instance = me->GetInstanceScript();
         }
 
         InstanceScript* instance;
+        SummonList summons;
 
         uint32 ShadowBolt_Timer;
         uint32 Cleave_Timer;
         uint32 MortalStrike_Timer;
-        //    uint32 RaiseDead_Timer;
+        uint32 RaiseDead_Timer;
         uint32 SummonSkeletons_Timer;
+        uint32 DeathPact_Timer;
 
         void Reset() OVERRIDE
         {
+            summons.DespawnAll();
             ShadowBolt_Timer = 5000;
             Cleave_Timer = 8000;
             MortalStrike_Timer = 12000;
-            //        RaiseDead_Timer = 30000;
-            SummonSkeletons_Timer = 34000;
+            RaiseDead_Timer = 10000;
+            SummonSkeletons_Timer = 0;
+            DeathPact_Timer = 0;
             if (instance && instance->GetData(TYPE_RAMSTEIN) == DONE)
                 instance->SetData(TYPE_BARON, NOT_STARTED);
         }
@@ -93,15 +91,17 @@ public:
 
         void JustSummoned(Creature* summoned) OVERRIDE
         {
+            summons.Summon(summoned);
             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                 summoned->AI()->AttackStart(target);
         }
 
-         void JustDied(Unit* /*killer*/) OVERRIDE
-         {
-             if (instance)
-                 instance->SetData(TYPE_BARON, DONE);
-         }
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            summons.DespawnAll();
+            if (instance)
+                instance->SetData(TYPE_BARON, DONE);
+        }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -133,25 +133,36 @@ public:
             } else MortalStrike_Timer -= diff;
 
             //RaiseDead
-            //            if (RaiseDead_Timer <= diff)
-            //          {
-            //      DoCast(me, SPELL_RAISEDEAD);
-            //                RaiseDead_Timer = 45000;
-            //            } else RaiseDead_Timer -= diff;
+            if (RaiseDead_Timer <= diff)
+            {
+                Talk(EMOTE_RAISE_DEAD);
+                DoCast(me, SPELL_RAISE_DEAD);
+                SummonSkeletons_Timer = 1000;
+                DeathPact_Timer = 12000;
+                RaiseDead_Timer = 20000;
+            } else RaiseDead_Timer -= diff;
 
             //SummonSkeletons
-            if (SummonSkeletons_Timer <= diff)
+            if (SummonSkeletons_Timer)
             {
-                me->SummonCreature(11197, ADD_POS_1, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_POS_2, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_POS_3, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_POS_4, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_POS_5, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 29000);
-                me->SummonCreature(11197, ADD_POS_6, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 29000);
+                if (SummonSkeletons_Timer <= diff)
+                {
+                    for (uint32 spellId : RaiseDeadSkeletons)
+                        DoCast(me, spellId, true);
 
-                //34 seconds until we should cast this again
-                SummonSkeletons_Timer = 40000;
-            } else SummonSkeletons_Timer -= diff;
+                    SummonSkeletons_Timer = 0;
+                } else SummonSkeletons_Timer -= diff;
+            }
+
+            //DeathPact
+            if (DeathPact_Timer)
+            {
+                if (DeathPact_Timer <= diff)
+                {
+                    Talk(EMOTE_DEATH_PACT);
+                    DeathPact_Timer = 0;
+                } else DeathPact_Timer -= diff;
+            }
 
             DoMeleeAttackIfReady();
         }
