@@ -116,6 +116,8 @@ set(scripts_STAT_SRCS
   Kalimdor/HallsOfOrigination/boss_temple_guardian_anhuur.cpp
   Kalimdor/HallsOfOrigination/boss_earthrager_ptah.cpp
   Kalimdor/HallsOfOrigination/boss_anraphet.cpp
+  Kalimdor/VortexPinnacle/vortex_pinnacle.h
+  Kalimdor/VortexPinnacle/instance_vortex_pinnacle.cpp
   Kalimdor/Firelands/instance_firelands.cpp
   Kalimdor/Firelands/firelands.h
   Kalimdor/Firelands/boss_alysrazor.cpp
