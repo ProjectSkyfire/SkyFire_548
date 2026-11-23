@@ -46,9 +46,9 @@ public:
         void Reset() OVERRIDE
         {
             BossAI::Reset();
-            events.ScheduleEvent(EVENT_FIREBALL, 1000);
-            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, 15000);
-            events.ScheduleEvent(EVENT_OVERHEAT, 5000);
+            events.ScheduleEvent(EVENT_FIREBALL, 3000);
+            events.ScheduleEvent(EVENT_RAIN_OF_FIRE, urand(6000, 8000));
+            events.ScheduleEvent(EVENT_OVERHEAT, urand(4000, 5000));
         }
 
         void EnterCombat(Unit* victim) OVERRIDE
@@ -84,19 +84,19 @@ public:
                 case EVENT_FIREBALL:
                 {
                     DoCastVictim(SPELL_FIREBALL);
-                    events.ScheduleEvent(EVENT_FIREBALL, 4000);
+                    events.ScheduleEvent(EVENT_FIREBALL, urand(3400, 4700));
                     break;
                 }
                 case EVENT_RAIN_OF_FIRE:
                 {
                     DoCastVictim(SPELL_RAIN_OF_FIRE);
-                    events.ScheduleEvent(EVENT_RAIN_OF_FIRE, 15000);
+                    events.ScheduleEvent(EVENT_RAIN_OF_FIRE, urand(15000, 16000));
                     break;
                 }
                 case EVENT_OVERHEAT:
                 {
                     DoCastVictim(SPELL_OVERHEAT);
-                    events.ScheduleEvent(EVENT_OVERHEAT, 10000);
+                    events.ScheduleEvent(EVENT_OVERHEAT, urand(10000, 12000));
                     break;
                 }
                 default:
