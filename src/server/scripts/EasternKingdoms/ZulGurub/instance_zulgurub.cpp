@@ -150,6 +150,13 @@ class instance_zulgurub : public InstanceMapScript
                 if (state == DONE)
                 {
                     ++bossesDone;
+
+                    // Jin'do stays immune and unselectable until two other bosses are dead
+                    if (bossesDone >= 2)
+                        if (Creature* jindo = instance->GetCreature(jindoGUID))
+                            if (jindo->IsAlive() && !jindo->IsInCombat())
+                                jindo->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_NOT_SELECTABLE);
+
                     SaveToDB();
                 }
 

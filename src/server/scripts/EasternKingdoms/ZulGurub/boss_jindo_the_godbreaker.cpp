@@ -144,7 +144,8 @@ class boss_jindo_the_godbreaker : public CreatureScript
                 shadowsSaid = false;
                 chains = 0;
                 me->SetReactState(REACT_AGGRESSIVE);
-                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                if (instance->GetData(DATA_BOSSES) >= 2)
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
                 me->GetMap()->SetWorldState(WORLDSTATE_SPIRIT_TWISTER, 1); // by default, controlled by inner timer
             }
 
