@@ -7,6 +7,8 @@
 #include "ScriptedCreature.h"
 #include "InstanceScript.h"
 #include "blackrock_depths.h"
+#include <set>
+#include <vector>
 
 #define TIMER_TOMBOFTHESEVEN    15000
 #define MAX_ENCOUNTER           6
@@ -23,8 +25,23 @@ enum Creatures
     NPC_GLOOMREL            = 9037,
     NPC_DOOMREL             = 9039,
     NPC_MAGMUS              = 9938,
-    NPC_MOIRA               = 8929
+    NPC_MOIRA               = 8929,
+    NPC_WARBRINGER_CONSTRUCT = 8905,
+    NPC_WATCHMAN_DOOMGRIP   = 9476,
+    NPC_PLUGGER_SPAZZRING   = 9499
 };
+
+enum Misc
+{
+    VAULT_COFFER_COUNT      = 12,
+    ALE_THEFTS_TO_ATTACK    = 3,
+    // SmartAI data fields of the constructs and Plugger
+    DATA_CONSTRUCTS_WAKE    = 1,
+    DATA_PLUGGER_ATTACK     = 2
+};
+
+Position const DoomgripSummonPos = { 813.738f, -347.55f, -50.578f, 0.670515f };
+
 
 enum GameObjects
 {
@@ -102,6 +119,12 @@ public:
         uint32 TombTimer;
         uint32 TombEventCounter;
 
+        // SkyFire's SmartAI has no counters, so the Vault's coffer doors and the Grim Guzzler's ale thefts are counted here
+        std::set<uint64> OpenedCofferDoors;
+        std::vector<uint64> ConstructGUIDs;
+        uint64 PluggerGUID;
+        uint32 AleTheftCount;
+
         void Initialize() OVERRIDE
         {
             memset(&encounter, 0, sizeof(encounter));
@@ -141,6 +164,9 @@ public:
 
             for (uint8 i = 0; i < 7; ++i)
                 TombBossGUIDs[i] = 0;
+
+            PluggerGUID = 0;
+            AleTheftCount = 0;
         }
 
         void OnCreatureCreate(Creature* creature) OVERRIDE
@@ -157,6 +183,8 @@ public:
             case NPC_SEETHREL: TombBossGUIDs[4] = creature->GetGUID(); break;
             case NPC_GLOOMREL: TombBossGUIDs[5] = creature->GetGUID(); break;
             case NPC_ANGERREL: TombBossGUIDs[6] = creature->GetGUID(); break;
+            case NPC_WARBRINGER_CONSTRUCT: ConstructGUIDs.push_back(creature->GetGUID()); break;
+            case NPC_PLUGGER_SPAZZRING: PluggerGUID = creature->GetGUID(); break;
             case NPC_MAGMUS:
                 MagmusGUID = creature->GetGUID();
                 if (!creature->IsAlive())
@@ -212,6 +240,11 @@ public:
                 else
                     TombOfSevenStart();//start
                 break;
+            case DATA_VAULT_COFFER:
+                // A door counts once even if it is opened again
+                if (encounter[1] != DONE && OpenedCofferDoors.insert(data).second && OpenedCofferDoors.size() == VAULT_COFFER_COUNT)
+                    OpenVault();
+                break;
             }
         }
 
@@ -245,6 +278,15 @@ public:
             case DATA_GHOSTKILL:
                 GhostKillCount += data;
                 break;
+            case DATA_ALE_THEFT:
+                if (++AleTheftCount >= ALE_THEFTS_TO_ATTACK)
+                {
+                    AleTheftCount = 0;
+                    if (Creature* plugger = instance->GetCreature(PluggerGUID))
+                        if (plugger->IsAlive() && plugger->IsAIEnabled)
+                            plugger->AI()->SetData(DATA_PLUGGER_ATTACK, 1);
+                }
+                return;
             }
 
             if (data == DONE || GhostKillCount >= 7)
@@ -357,6 +399,18 @@ public:
                 GhostKillCount = 7;
 
             OUT_LOAD_INST_DATA_COMPLETE;
+        }
+
+        // The last coffer wakes the Warbringer Constructs and calls Watchman Doomgrip
+        void OpenVault()
+        {
+            for (uint64 guid : ConstructGUIDs)
+                if (Creature* construct = instance->GetCreature(guid))
+                    if (construct->IsAlive() && construct->IsAIEnabled)
+                        construct->AI()->SetData(DATA_CONSTRUCTS_WAKE, 1);
+
+            instance->SummonCreature(NPC_WATCHMAN_DOOMGRIP, DoomgripSummonPos);
+            SetData(TYPE_VAULT, DONE);
         }
 
         void TombOfSevenEvent()
