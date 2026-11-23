@@ -116,6 +116,10 @@ bool GameEventMgr::CheckOneGameEvent(uint16 entry) const
             time_t currenttime = time(NULL);
             GameEventData const& event = mGameEvent[entry];
 
+            if (event.holiday_id == HolidayIds::HOLIDAY_PILGRIMS_BOUNTY)
+                return event.start <= currenttime && currenttime < event.end
+                    && GameEventSchedule::IsPilgrimsBountyActive(currenttime);
+
             if (event.holiday_id == HolidayIds::HOLIDAY_DARKMOON_FAIRE_TEROKKAR)
                 return event.start <= currenttime
                     && currenttime < event.end
@@ -175,6 +179,16 @@ uint32 GameEventMgr::NextCheck(uint16 entry) const
     // never started event, we return delay before start
     if (mGameEvent[entry].start > currenttime)
         return uint32(mGameEvent[entry].start - currenttime);
+
+    if (mGameEvent[entry].holiday_id == HolidayIds::HOLIDAY_PILGRIMS_BOUNTY)
+    {
+        uint32 delay = GameEventSchedule::GetSecondsUntilPilgrimsBountyTransition(currenttime);
+        if (!delay)
+            return max_ge_check_delay;
+        if (mGameEvent[entry].end < time_t(currenttime + delay))
+            return uint32(mGameEvent[entry].end - currenttime);
+        return delay;
+    }
 
     if (mGameEvent[entry].holiday_id == HolidayIds::HOLIDAY_DARKMOON_FAIRE_TEROKKAR)
     {

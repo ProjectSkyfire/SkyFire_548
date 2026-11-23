@@ -621,6 +621,7 @@ void AddSC_kezan();
 
 // Events
 void AddSC_event_childrens_week();
+void AddSC_event_pilgrims_bounty();
 void AddSC_event_darkmoon_faire();
 
 // Pandaria
@@ -1335,6 +1336,7 @@ void AddEventScripts()
 {
 #ifdef SCRIPTS
     AddSC_event_childrens_week();
+    AddSC_event_pilgrims_bounty();
     AddSC_event_darkmoon_faire();
 #endif
 }

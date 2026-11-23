@@ -21,6 +21,11 @@ namespace GameEventSchedule
     bool GetMonthlyFirstWeekdayWindow(time_t currentTime, int weekday, uint32 durationMinutes, EventWindow& window);
     bool IsMonthlyFirstWeekdayActive(time_t currentTime, int weekday, uint32 durationMinutes);
     uint32 GetSecondsUntilMonthlyFirstWeekdayTransition(time_t currentTime, int weekday, uint32 durationMinutes);
+
+    // Seven local calendar days, starting the Sunday before November's fourth Thursday.
+    bool GetPilgrimsBountyWindow(time_t currentTime, EventWindow& window);
+    bool IsPilgrimsBountyActive(time_t currentTime);
+    uint32 GetSecondsUntilPilgrimsBountyTransition(time_t currentTime);
 }
 
 #endif

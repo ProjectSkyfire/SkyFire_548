@@ -6,6 +6,7 @@
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
   Events/childrens_week.cpp
+  Events/pilgrims_bounty.cpp
 )
 
 include(Events/darkmoonfaire/CMakeLists.txt)
