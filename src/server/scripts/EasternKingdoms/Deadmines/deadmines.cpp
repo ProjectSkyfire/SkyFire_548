@@ -123,6 +123,22 @@ struct npc_deadmines_prototype_reaper : public ScriptedAI
     void UpdateAI(uint32 /*diff*/) OVERRIDE { }
 };
 
+// Steam Valve 49457: each of the four valves of Vanessa's trap counts once
+struct npc_deadmines_steam_valve : public ScriptedAI
+{
+    npc_deadmines_steam_valve(Creature* creature) : ScriptedAI(creature) { }
+
+    void OnSpellClick(Unit* /*clicker*/, bool& /*result*/) OVERRIDE
+    {
+        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            return;
+
+        me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        if (InstanceScript* instance = me->GetInstanceScript())
+            instance->SetData(DATA_ACTIVATED_VALVE, DONE);
+    }
+};
+
 class go_defias_cannon : public GameObjectScript
 {
     public:
@@ -222,5 +238,6 @@ void AddSC_deadmines()
     new go_deadmines_teleport();
     new spell_deadmines_off_line();
     RegisterCreatureAI(npc_deadmines_defias_watcher);
+    RegisterCreatureAI(npc_deadmines_steam_valve);
     RegisterAuraScript(spell_deadmines_on_fire);
 }

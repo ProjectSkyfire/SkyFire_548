@@ -29,6 +29,7 @@ enum ScriptedTexts
 
     // Vanessa VanCleef 49429 (sitting; groups 8 to 12 repeat 1 to 5)
     SAY_NOISE_FROM_ABOVE      = 0,
+    SAY_ANNOUNCE_ELIXIR       = 6,
     SAY_INTRO_1               = 8,
     SAY_INTRO_2               = 9,
     SAY_INTRO_3               = 10,
@@ -103,8 +104,6 @@ enum Events
 
     EVENT_START_SWING,
 };
-
-#define ACHIEVEMENT_EVENT 27527
 
 const Position addsPos[3] =
 {
@@ -695,13 +694,11 @@ class npc_vanessa_vancleef_vanessa_sitting : public CreatureScript
                             events.ScheduleEvent(EVENT_INTRO_7, 5000);
                             break;
                         case EVENT_INTRO_7:
+                            DoCastAOE(SPELL_NIGHTMARE_ELIXIR);
+                            DoCastAOE(SPELL_VANESSAS_BLACKOUT, true);
+                            Talk(SAY_ANNOUNCE_ELIXIR);
                             if (instance)
-                            {
-                                instance->SetData(DATA_VANESSA_EVENT, DONE);
-                                instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEVEMENT_EVENT);
-                            }
-                            if (Creature* pVanessa = me->FindNearestCreature(NPC_VANESSA_VANCLEEF, 40.0f))
-                                pVanessa->SetVisible(true);
+                                instance->SetData(DATA_VANESSA_EVENT, NIGHTMARE_STAGE_TRAP);
                             me->DespawnOrUnsummon(1000);
                             break;
                     }
