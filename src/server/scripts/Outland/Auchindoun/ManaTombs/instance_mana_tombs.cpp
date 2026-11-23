@@ -18,6 +18,13 @@ class instance_mana_tombs : public InstanceMapScript
             {
                 SetBossNumber(EncounterCount);
             }
+
+            void SetData(uint32 type, uint32 data) OVERRIDE
+            {
+                // Tavarok is a SmartAI creature, which can only set instance data
+                if (type == DATA_TAVAROK)
+                    SetBossState(DATA_TAVAROK, EncounterState(data));
+            }
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE

@@ -18,6 +18,7 @@ EndContentData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "auchenai_crypts.h"
 
 enum Spells
 {
@@ -151,8 +152,11 @@ public:
     {
         boss_exarch_maladaarAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = creature->GetInstanceScript();
             HasTaunted = false;
         }
+
+        InstanceScript* instance;
 
         uint32 soulmodel;
         uint64 soulholder;
@@ -176,6 +180,9 @@ public:
             StolenSoul_Timer = 25000 + rand()% 10000;
 
             Avatar_summoned = false;
+
+            if (instance)
+                instance->SetBossState(DATA_EXARCH_MALADAAR, NOT_STARTED);
         }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE
@@ -193,6 +200,9 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
+
+            if (instance)
+                instance->SetBossState(DATA_EXARCH_MALADAAR, IN_PROGRESS);
         }
 
         void JustSummoned(Creature* summoned) OVERRIDE
@@ -225,6 +235,9 @@ public:
             Talk(SAY_DEATH);
             //When Exarch Maladar is defeated D'ore appear.
             me->SummonCreature(19412, 0.0f, 0.0f, 0.0f, 0.0f, TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 600000);
+
+            if (instance)
+                instance->SetBossState(DATA_EXARCH_MALADAAR, DONE);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE

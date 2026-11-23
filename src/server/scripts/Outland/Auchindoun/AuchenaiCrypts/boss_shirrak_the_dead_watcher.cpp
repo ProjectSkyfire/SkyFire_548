@@ -13,6 +13,7 @@ EndScriptData */
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Player.h"
+#include "auchenai_crypts.h"
 
 enum Spells
 {
@@ -49,7 +50,10 @@ public:
     {
         boss_shirrak_the_dead_watcherAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = creature->GetInstanceScript();
         }
+
+        InstanceScript* instance;
 
         uint32 Inhibitmagic_Timer;
         uint32 Attractmagic_Timer;
@@ -65,10 +69,22 @@ public:
             Carnivorousbite_Timer = 10000;
             FocusFire_Timer = 17000;
             FocusedTargetGUID = 0;
+
+            if (instance)
+                instance->SetBossState(DATA_SHIRRAK_THE_DEAD_WATCHER, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
-        { }
+        {
+            if (instance)
+                instance->SetBossState(DATA_SHIRRAK_THE_DEAD_WATCHER, IN_PROGRESS);
+        }
+
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            if (instance)
+                instance->SetBossState(DATA_SHIRRAK_THE_DEAD_WATCHER, DONE);
+        }
 
         void JustSummoned(Creature* summoned) OVERRIDE
         {

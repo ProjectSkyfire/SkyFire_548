@@ -12,6 +12,7 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "mana_tombs.h"
 
 enum Pandemonius
 {
@@ -40,7 +41,10 @@ public:
     {
         boss_pandemoniusAI(Creature* creature) : ScriptedAI(creature)
         {
+            instance = creature->GetInstanceScript();
         }
+
+        InstanceScript* instance;
 
         uint32 VoidBlast_Timer;
         uint32 DarkShell_Timer;
@@ -51,11 +55,17 @@ public:
             VoidBlast_Timer = 8000+rand()%15000;
             DarkShell_Timer = 20000;
             VoidBlast_Counter = 0;
+
+            if (instance)
+                instance->SetBossState(DATA_PANDEMONIUS, NOT_STARTED);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
+
+            if (instance)
+                instance->SetBossState(DATA_PANDEMONIUS, DONE);
         }
 
         void KilledUnit(Unit* /*victim*/) OVERRIDE
@@ -66,6 +76,9 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             Talk(SAY_AGGRO);
+
+            if (instance)
+                instance->SetBossState(DATA_PANDEMONIUS, IN_PROGRESS);
         }
 
         void UpdateAI(uint32 diff) OVERRIDE
