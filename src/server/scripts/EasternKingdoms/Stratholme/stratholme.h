@@ -39,7 +39,7 @@ enum DataTypes
 enum CreatureIds
 {
     NPC_CRYSTAL                         = 10415, // ziggurat crystal
-    NPC_BARON                           = 10440, // ziggurat crystal
+    NPC_BARON                           = 45412, // Lord Aurius Rivendare
     NPC_YSIDA_TRIGGER                   = 16100, // ziggurat crystal
 
     NPC_RAMSTEIN                        = 10439,
