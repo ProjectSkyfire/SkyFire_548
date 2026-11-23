@@ -95,7 +95,8 @@ public:
                 }
                 case EVENT_OVERHEAT:
                 {
-                    DoCastVictim(SPELL_OVERHEAT);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                        DoCast(target, SPELL_OVERHEAT);
                     events.ScheduleEvent(EVENT_OVERHEAT, urand(10000, 12000));
                     break;
                 }
