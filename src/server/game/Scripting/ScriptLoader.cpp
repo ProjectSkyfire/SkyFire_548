@@ -632,6 +632,7 @@ void AddSC_zangarmarsh();
 
 // Maelstrom
 void AddSC_kezan();
+void AddSC_deepholm();
 
 // Events
 void AddSC_event_childrens_week();
@@ -1387,6 +1388,7 @@ void AddMaelstromScripts()
 {
 #ifdef SCRIPTS
     AddSC_kezan();
+    AddSC_deepholm();
 #endif
 }
 
