@@ -122,6 +122,9 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_mount_hyjal.cpp
   Kalimdor/zone_feralas.cpp
   Kalimdor/zone_felwood.cpp
+  Kalimdor/LostCityOfTheTolvir/lost_city_of_the_tolvir.h
+  Kalimdor/LostCityOfTheTolvir/instance_lost_city_of_the_tolvir.cpp
+  Kalimdor/LostCityOfTheTolvir/boss_general_husam.cpp
 )
 
 message("  -> Prepared: Kalimdor")
