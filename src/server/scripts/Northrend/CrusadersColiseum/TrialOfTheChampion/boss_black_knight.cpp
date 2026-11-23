@@ -38,8 +38,7 @@ enum Spells
     //phase 3
     SPELL_DEATH_BITE_H      = 67875,
     SPELL_DEATH_BITE        = 67808,
-    SPELL_MARKED_DEATH      = 67882,
-    SPELL_MARKED_DEATH_2    = 67823,
+    SPELL_MARKED_DEATH      = 67823,
 
     SPELL_BLACK_KNIGHT_RES  = 67693,
 
