@@ -10,7 +10,7 @@
 enum Spells
 {
     SPELL_SNAPKICK                  = 15618,
-    SPELL_CLEAVE                    = 15579,
+    SPELL_CLEAVE                    = 15284,
     SPELL_UPPERCUT                  = 10966,
     SPELL_MORTALSTRIKE              = 16856,
     SPELL_PUMMEL                    = 15615,

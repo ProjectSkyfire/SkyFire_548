@@ -9,18 +9,20 @@
 
 enum Spells
 {
-    SPELL_FIRENOVA                  = 23462,
-    SPELL_CLEAVE                    = 20691,
+    SPELL_CLEAVE                    = 845,
     SPELL_CONFLIGURATION            = 16805,
-    SPELL_THUNDERCLAP               = 15548, //Not sure if right ID. 23931 would be a harder possibility.
+    SPELL_FLAMESTRIKE               = 16419,
+    SPELL_PIERCE_ARMOR              = 6016,
+    SPELL_RAGE                      = 16789
 };
 
 enum Events
 {
-    EVENT_FIRE_NOVA                = 1,
-    EVENT_CLEAVE                   = 2,
-    EVENT_CONFLIGURATION           = 3,
-    EVENT_THUNDERCLAP              = 4,
+    EVENT_CLEAVE                   = 1,
+    EVENT_CONFLIGURATION           = 2,
+    EVENT_FLAMESTRIKE              = 3,
+    EVENT_PIERCE_ARMOR             = 4,
+    EVENT_RAGE                     = 5
 };
 
 class boss_drakkisath : public CreatureScript
@@ -40,10 +42,11 @@ public:
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             _EnterCombat();
-            events.ScheduleEvent(EVENT_FIRE_NOVA, 6000);
             events.ScheduleEvent(EVENT_CLEAVE,    8000);
             events.ScheduleEvent(EVENT_CONFLIGURATION, 15000);
-            events.ScheduleEvent(EVENT_THUNDERCLAP,    17000);
+            events.ScheduleEvent(EVENT_FLAMESTRIKE, 12000);
+            events.ScheduleEvent(EVENT_PIERCE_ARMOR, 10000);
+            events.ScheduleEvent(EVENT_RAGE, 30000);
         }
 
         void JustDied(Unit* /*killer*/) OVERRIDE
@@ -65,10 +68,6 @@ public:
             {
                 switch (eventId)
                 {
-                    case EVENT_FIRE_NOVA:
-                        DoCastVictim(SPELL_FIRENOVA);
-                        events.ScheduleEvent(EVENT_FIRE_NOVA, 10000);
-                        break;
                     case EVENT_CLEAVE:
                         DoCastVictim(SPELL_CLEAVE);
                         events.ScheduleEvent(EVENT_CLEAVE, 8000);
@@ -77,9 +76,18 @@ public:
                         DoCastVictim(SPELL_CONFLIGURATION);
                         events.ScheduleEvent(EVENT_CONFLIGURATION, 18000);
                         break;
-                    case EVENT_THUNDERCLAP:
-                        DoCastVictim(SPELL_THUNDERCLAP);
-                        events.ScheduleEvent(EVENT_THUNDERCLAP, 20000);
+                    case EVENT_FLAMESTRIKE:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                            DoCast(target, SPELL_FLAMESTRIKE);
+                        events.ScheduleEvent(EVENT_FLAMESTRIKE, 20000);
+                        break;
+                    case EVENT_PIERCE_ARMOR:
+                        DoCastVictim(SPELL_PIERCE_ARMOR);
+                        events.ScheduleEvent(EVENT_PIERCE_ARMOR, 12000);
+                        break;
+                    case EVENT_RAGE:
+                        DoCast(me, SPELL_RAGE);
+                        events.ScheduleEvent(EVENT_RAGE, 45000);
                         break;
                 }
             }
