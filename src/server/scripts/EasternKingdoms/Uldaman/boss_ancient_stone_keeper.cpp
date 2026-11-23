@@ -15,7 +15,13 @@ EndScriptData */
 
 enum AncientStoneKeeper
 {
-    SPELL_SAND_STORM = 10094
+    NPC_SAND_STORM              = 7226,
+    SPELL_SAND_STORM            = 10092,
+
+    // First storm 5 seconds into the fight, second one 15 seconds later, each repeating every 45 seconds
+    TIMER_FIRST_STORM           = 5000,
+    TIMER_SECOND_STORM          = 20000,
+    TIMER_STORM_REPEAT          = 45000
 };
 
 class boss_ancient_stone_keeper : public CreatureScript
@@ -25,13 +31,30 @@ public:
 
     struct boss_ancient_stone_keeperAI : public ScriptedAI
     {
-        uint32 uiSandStormTimer;
+        uint32 uiFirstStormTimer;
+        uint32 uiSecondStormTimer;
 
         boss_ancient_stone_keeperAI(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() OVERRIDE
         {
-            uiSandStormTimer = 10000;
+            uiFirstStormTimer = TIMER_FIRST_STORM;
+            uiSecondStormTimer = TIMER_SECOND_STORM;
+        }
+
+        // The storm gets its aura and a slow walk towards a nearby player here, the summon spells only create it
+        void SummonSandStorm()
+        {
+            float x = 0.0f, y = 0.0f;
+            GetPositionWithDistInOrientation(me, 10.0f, me->GetOrientation() + frand(-M_PI, M_PI), x, y);
+            Creature* sandStorm = me->SummonCreature(NPC_SAND_STORM, x, y, me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 10000);
+            if (!sandStorm)
+                return;
+
+            sandStorm->CastSpell(sandStorm, SPELL_SAND_STORM, true);
+            sandStorm->SetSpeed(UnitMoveType::MOVE_RUN, 0.1f, true);
+            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10.0f, true))
+                sandStorm->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
         }
 
         void UpdateAI(uint32 uiDiff) OVERRIDE
@@ -40,35 +63,21 @@ public:
             if (!UpdateVictim())
                 return;
 
-            //uiSandStormTimer
-            if (uiSandStormTimer <= uiDiff)
+            if (uiFirstStormTimer <= uiDiff)
             {
-                float x = 0.0f, y = 0.0f;
-                GetPositionWithDistInOrientation(me, 10.0f, me->GetOrientation() + frand(-M_PI, M_PI), x, y);
-
-                if (Creature* sandStorm = me->SummonCreature(7226, x, y, me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 10000))
-                {
-                    sandStorm->CastSpell(sandStorm, 10092, true);
-                    sandStorm->SetSpeed(UnitMoveType::MOVE_RUN, 0.1f, true);
-
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10.0f, true))
-                        sandStorm->GetMotionMaster()->MoveChase(target, 1.0f, 1.0f);
-                }
-
-                GetPositionWithDistInOrientation(me, 10.0f, me->GetOrientation() - frand(-M_PI, M_PI), x, y);
-
-                if (Creature* sandStorm2 = me->SummonCreature(7226, x, y, me->GetPositionZ(), me->GetOrientation(), TempSummonType::TEMPSUMMON_TIMED_DESPAWN, 10000))
-                {
-                    sandStorm2->CastSpell(sandStorm2, 10092, true);
-                    sandStorm2->SetSpeed(UnitMoveType::MOVE_RUN, 0.1f, true);
-
-                    if (Unit* target2 = SelectTarget(SELECT_TARGET_RANDOM, 0, 10.0f, true))
-                        sandStorm2->GetMotionMaster()->MoveChase(target2, 1.0f, 1.0f);
-                }
-
-                uiSandStormTimer = 11000;
+                SummonSandStorm();
+                uiFirstStormTimer = TIMER_STORM_REPEAT;
             }
-            else uiSandStormTimer -= uiDiff;
+            else
+                uiFirstStormTimer -= uiDiff;
+
+            if (uiSecondStormTimer <= uiDiff)
+            {
+                SummonSandStorm();
+                uiSecondStormTimer = TIMER_STORM_REPEAT;
+            }
+            else
+                uiSecondStormTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }

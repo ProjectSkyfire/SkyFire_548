@@ -35,7 +35,26 @@ enum Spells
     SPELL_SUB_BOSS_AGGRO             = 11568,
     SPELL_AWAKEN_VAULT_WALKER        = 10258,
     SPELL_AWAKEN_EARTHEN_GUARDIAN    = 10252,
-    SPELL_SELF_DESTRUCT              = 9874
+    SPELL_SELF_DESTRUCT              = 9874,
+    SPELL_FREEZE_ANIM                = 16245,
+    SPELL_STONED                     = 10255,
+    SPELL_WHIRLWIND                  = 17207,
+    SPELL_TRAMPLE                    = 5568
+};
+
+enum Creatures
+{
+    NPC_EARTHEN_GUARDIAN             = 7076,
+    NPC_VAULT_WARDER                 = 10120
+};
+
+enum Misc
+{
+    TIMER_NO_ABILITY                 = 0xFFFFFFFF,
+    TIMER_WHIRLWIND_MIN              = 15000,
+    TIMER_WHIRLWIND_MAX              = 25000,
+    TIMER_TRAMPLE_MIN                = 10000,
+    TIMER_TRAMPLE_MAX                = 15000
 };
 
 class boss_archaedas : public CreatureScript
@@ -70,10 +89,11 @@ public:
             bVaultWalkersAwake = false;
 
             if (instance)
-                instance->SetData(0, 5);    // respawn any dead minions
+                instance->SetData(DATA_MINIONS, NOT_STARTED);    // respawn any dead minions and reopen the door
             me->setFaction(35);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->AddAura(SPELL_FREEZE_ANIM, me);
         }
 
         void ActivateMinion(uint64 uiGuid, bool flag)
@@ -86,6 +106,7 @@ public:
                 minion->CastSpell(minion, SPELL_ARCHAEDAS_AWAKEN, true);
                 minion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 minion->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+                minion->RemoveAurasDueToSpell(SPELL_STONED);
                 minion->setFaction(14);
             }
         }
@@ -103,6 +124,7 @@ public:
             if (spell == sSpellMgr->GetSpellInfo(SPELL_ARCHAEDAS_AWAKEN))
             {
                 Talk(SAY_AGGRO);
+                me->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
                 iAwakenTimer = 4000;
                 bWakingUp = true;
             }
@@ -125,7 +147,13 @@ public:
             } else if (bWakingUp && iAwakenTimer <= 0)
             {
                 bWakingUp = false;
-                AttackStart(Unit::GetUnit(*me, instance->GetData64(0)));
+
+                // Whoever clicked the altar may have died or left in the meantime, then go back to sleep
+                Unit* waker = Unit::GetUnit(*me, instance->GetData64(0));
+                if (waker && waker->IsAlive())
+                    AttackStart(waker);
+                else
+                    EnterEvadeMode();
                 return;     // dont want to continue until we finish the AttackStart method
             }
 
@@ -158,9 +186,7 @@ public:
             if (!bVaultWalkersAwake && !HealthAbovePct(33))
             {
                 ActivateMinion(instance->GetData64(1), true);    // VaultWalker1
-                ActivateMinion(instance->GetData64(2), true);    // VaultWalker2
-                ActivateMinion(instance->GetData64(3), true);    // VaultWalker3
-                ActivateMinion(instance->GetData64(4), false);    // VaultWalker4
+                ActivateMinion(instance->GetData64(2), false);    // VaultWalker2
                 Talk(SAY_SUMMON_VAULT_WALKERS);
                 bVaultWalkersAwake = true;
             }
@@ -214,6 +240,7 @@ public:
 
         uint32 uiArcing_Timer;
         int32 iAwakenTimer;
+        uint32 uiAbilityTimer;
         bool bWakingUp;
 
         bool bAmIAwake;
@@ -223,6 +250,7 @@ public:
         {
             uiArcing_Timer = 3000;
             iAwakenTimer = 0;
+            uiAbilityTimer = TIMER_NO_ABILITY;
 
             bWakingUp = false;
             bAmIAwake = false;
@@ -231,6 +259,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->RemoveAllAuras();
+            me->AddAura(SPELL_STONED, me);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -240,6 +269,19 @@ public:
             me->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             bAmIAwake = true;
+
+            // Only the Earthen Guardians and the Vault Warders have an ability of their own
+            switch (me->GetEntry())
+            {
+                case NPC_EARTHEN_GUARDIAN:
+                    uiAbilityTimer = urand(TIMER_WHIRLWIND_MIN, TIMER_WHIRLWIND_MAX);
+                    break;
+                case NPC_VAULT_WARDER:
+                    uiAbilityTimer = urand(TIMER_TRAMPLE_MIN, TIMER_TRAMPLE_MAX);
+                    break;
+                default:
+                    break;
+            }
         }
 
         void SpellHit(Unit * /*caster*/, const SpellInfo* spell) OVERRIDE
@@ -278,6 +320,22 @@ public:
             if (!UpdateVictim())
                 return;
 
+            if (uiAbilityTimer <= uiDiff)
+            {
+                if (me->GetEntry() == NPC_EARTHEN_GUARDIAN)
+                {
+                    DoCast(me, SPELL_WHIRLWIND);
+                    uiAbilityTimer = urand(TIMER_WHIRLWIND_MIN, TIMER_WHIRLWIND_MAX);
+                }
+                else
+                {
+                    DoCast(me, SPELL_TRAMPLE);
+                    uiAbilityTimer = urand(TIMER_TRAMPLE_MIN, TIMER_TRAMPLE_MAX);
+                }
+            }
+            else if (uiAbilityTimer != TIMER_NO_ABILITY)
+                uiAbilityTimer -= uiDiff;
+
             DoMeleeAttackIfReady();
         }
     };
@@ -315,6 +373,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
             me->RemoveAllAuras();
+            me->AddAura(SPELL_STONED, me);
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
@@ -322,6 +381,7 @@ public:
             me->setFaction(14);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
+            me->RemoveAurasDueToSpell(SPELL_STONED);
         }
 
         void UpdateAI(uint32 /*diff*/) OVERRIDE

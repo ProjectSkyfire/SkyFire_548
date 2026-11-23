@@ -28,6 +28,11 @@ EndContentData */
 enum Spells
 {
     SPELL_CRYSTALLINE_SLUMBER   = 3636,
+    SPELL_REFLECTION            = 9906,
+
+    // No timer is known for the reflection (it lasts 5 seconds), so it is raised now and then
+    TIMER_REFLECTION_FIRST      = 8000,
+    TIMER_REFLECTION_REPEAT     = 30000
 };
 
 class npc_jadespine_basilisk : public CreatureScript
@@ -41,10 +46,12 @@ public:
         npc_jadespine_basiliskAI(Creature* creature) : ScriptedAI(creature) { }
 
         uint32 uiCslumberTimer;
+        uint32 uiReflectionTimer;
 
         void Reset() OVERRIDE
         {
             uiCslumberTimer = 2000;
+            uiReflectionTimer = TIMER_REFLECTION_FIRST;
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE { }
@@ -73,6 +80,12 @@ public:
                     me->TauntApply(target);
 
             } else uiCslumberTimer -= uiDiff;
+
+            if (uiReflectionTimer <= uiDiff)
+            {
+                DoCast(me, SPELL_REFLECTION);
+                uiReflectionTimer = TIMER_REFLECTION_REPEAT;
+            } else uiReflectionTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }
