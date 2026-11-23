@@ -245,6 +245,7 @@ void AddSC_instance_the_stockade();          //The Stockade
 //void AddSC_zulaman();
 void AddSC_instance_scarlet_monastery_mop();
 void AddSC_scarlet_monastery_mop();
+void AddSC_boss_thalnos_the_soulrender();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_duskwood();
@@ -984,6 +985,7 @@ void AddEasternKingdomsScripts()
     //AddSC_zulaman();
     AddSC_instance_scarlet_monastery_mop();
     AddSC_scarlet_monastery_mop();
+    AddSC_boss_thalnos_the_soulrender();
 
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
