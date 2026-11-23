@@ -25,6 +25,7 @@ enum DataTypes
 enum CreatureIds
 {
     NPC_AMBASSADOR_HELLMAW              = 18731,
+    NPC_BLACKHEART_THE_INCITER          = 18667,
     NPC_GRANDMASTER_VORPIL              = 18732,
     NPC_FEL_OVERSEER                    = 18796
 };
