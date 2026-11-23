@@ -21,7 +21,7 @@ enum Spells
     SPELL_EXPLODE_GHOUL                         = 52480,
     H_SPELL_EXPLODE_GHOUL                       = 58825,
     SPELL_SHADOW_BOLT                           = 57725,
-    H_SPELL_SHADOW_BOLT                         = 58828,
+    H_SPELL_SHADOW_BOLT                         = 58827,
     SPELL_STEAL_FLESH                           = 52708,
     SPELL_SUMMON_GHOULS                         = 52451
 };
@@ -91,17 +91,20 @@ public:
                 return;
 
             //Curse of twisted flesh timer
-            if (uiCurseFleshTimer <= diff)
+            if (IsHeroic())
             {
-                DoCastVictim(SPELL_CURSE_OF_TWISTED_FLESH);
-                uiCurseFleshTimer = 37000;
-            } else uiCurseFleshTimer -= diff;
+                if (uiCurseFleshTimer <= diff)
+                {
+                    DoCastVictim(SPELL_CURSE_OF_TWISTED_FLESH);
+                    uiCurseFleshTimer = 37000;
+                } else uiCurseFleshTimer -= diff;
+            }
 
             //Shadow bolt timer
             if (uiShadowBoltTimer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_SHADOW_BOLT);
+                    DoCast(target, DUNGEON_MODE(SPELL_SHADOW_BOLT, H_SPELL_SHADOW_BOLT));
                 uiShadowBoltTimer = urand(8000, 12000);
             } else uiShadowBoltTimer -= diff;
 

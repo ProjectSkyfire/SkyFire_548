@@ -29,7 +29,9 @@ enum Data64
     DATA_MAL_GANIS_GATE_1,
     DATA_MAL_GANIS_GATE_2,
     DATA_EXIT_GATE,
-    DATA_MAL_GANIS_CHEST
+    DATA_MAL_GANIS_CHEST,
+    DATA_GUARDIAN_OF_TIME,
+    DATA_TIME_RIFT
 };
 
 enum Creatures
@@ -42,7 +44,9 @@ enum Creatures
     NPC_ARTHAS          = 26499,
     NPC_JAINA           = 26497,
     NPC_UTHER           = 26528,
+    NPC_CHROMIE_1       = 26527,
     NPC_CHROMIE_2       = 27915,
+    NPC_GUARDIAN_OF_TIME = 32281,
     NPC_GENERIC_BUNNY   = 28960,
 };
 
@@ -65,6 +69,11 @@ enum WorldStatesCoT
     WORLDSTATE_WAVE_COUNT           = 3504,
     WORLDSTATE_TIME_GUARDIAN        = 3931,
     WORLDSTATE_TIME_GUARDIAN_SHOW   = 3932,
+};
+
+enum CorruptorActions
+{
+    ACTION_CORRUPTOR_LEAVE  = 1,
 };
 
 enum CrateSpells

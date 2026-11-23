@@ -91,11 +91,14 @@ public:
                 uiWoundingStrikeTimer = 5300;
             } else uiWoundingStrikeTimer -= diff;
 
-            if (uiTimeStopTimer < diff)
+            if (IsHeroic())
             {
-                DoCastAOE(SPELL_TIME_STOP);
-                uiTimeStopTimer = 21300;
-            } else uiTimeStopTimer -= diff;
+                if (uiTimeStopTimer < diff)
+                {
+                    DoCastAOE(SPELL_TIME_STOP);
+                    uiTimeStopTimer = 21300;
+                } else uiTimeStopTimer -= diff;
+            }
 
             if (uiTimeWarpTimer < diff)
             {
