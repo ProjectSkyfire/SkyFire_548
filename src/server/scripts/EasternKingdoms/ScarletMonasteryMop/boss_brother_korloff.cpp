@@ -317,7 +317,7 @@ void AddSC_boss_brother_korloff()
 {
     new boss_brother_korloff();
     new creature_script<npc_trigger_scorched_flame>("npc_trigger_scorched_flame");
-    new aura_script<spell_scorched_earth>("spell_scorched_earth");
-    new aura_script<spell_firestorm_kick>("spell_firestorm_kick");
-    new aura_script<spell_korloff_burning_man>("spell_korloff_burning_man");
+    RegisterAuraScript(spell_scorched_earth);
+    RegisterAuraScript(spell_firestorm_kick);
+    RegisterAuraScript(spell_korloff_burning_man);
 }

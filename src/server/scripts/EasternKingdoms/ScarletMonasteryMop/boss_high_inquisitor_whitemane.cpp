@@ -464,7 +464,7 @@ void AddSC_boss_whitemane_and_durand()
 {
     new boss_commander_durand();
     new boss_high_inqusitior_whitemane();
-    new spell_script<spell_sc_scarlet_ressurection>("spell_sc_scarlet_ressurection");
-    new spell_script<spell_sc_mass_ressurection>("spell_sc_mass_ressurection");
+    RegisterSpellScript(spell_sc_scarlet_ressurection);
+    RegisterSpellScript(spell_sc_mass_ressurection);
     new creature_script<npc_hooded_crusader_c64842>("npc_hooded_crusader_c64842");
 }
