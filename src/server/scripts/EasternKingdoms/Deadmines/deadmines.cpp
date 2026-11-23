@@ -114,9 +114,9 @@ struct npc_deadmines_prototype_reaper : public ScriptedAI
 {
     npc_deadmines_prototype_reaper(Creature* creature) : ScriptedAI(creature) { }
 
-    void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
+    void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
     {
-        if (HealthBelowPct(90) && me->GetMap()->GetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY))
+        if (me->HealthBelowPctDamaged(90, damage) && me->GetMap()->GetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY))
             me->GetMap()->SetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY, 0);
     }
 

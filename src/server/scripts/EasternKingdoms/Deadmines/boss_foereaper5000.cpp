@@ -132,6 +132,7 @@ class boss_foereaper5000 : public CreatureScript
                 bEnrage = false;
                 bOverdrive = false;
                 harvestTargetGuid = 0;
+                me->GetMap()->SetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY, 1);
                 me->SetReactState(REACT_AGGRESSIVE);
 
                 // Leaving combat restores the template's immunity to players; once on-line he must stay attackable
