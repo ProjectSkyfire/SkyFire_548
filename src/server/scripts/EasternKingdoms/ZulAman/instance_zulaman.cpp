@@ -172,6 +172,7 @@ class instance_zulaman : public InstanceMapScript
                             events.ScheduleEvent(EVENT_UPDATE_ZULAMAN_TIMER, 60000);
                             SpeedRunTimer = 15;
                             ZulAmanState = data;
+                            HandleGameObject(MasiveGateGUID, true);
                             SaveToDB();
                         }
                         break;

@@ -163,7 +163,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ZulAman/instance_zulaman.cpp
   #EasternKingdoms/ZulAman/boss_janalai.cpp
   EasternKingdoms/ZulAman/boss_nalorakk.cpp
-  #EasternKingdoms/ZulAman/zulaman.cpp
+  EasternKingdoms/ZulAman/zulaman.cpp
   EasternKingdoms/ZulAman/zulaman.h
   EasternKingdoms/Karazhan/instance_karazhan.cpp
   EasternKingdoms/Karazhan/boss_nightbane.cpp
