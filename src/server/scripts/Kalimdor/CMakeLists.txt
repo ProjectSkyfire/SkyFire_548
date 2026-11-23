@@ -101,6 +101,7 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_ashenvale.cpp
   Kalimdor/zone_darkshore.cpp
   Kalimdor/zone_teldrassil.cpp
+  Kalimdor/zone_uldum.cpp
   Kalimdor/OnyxiasLair/boss_onyxia.cpp
   Kalimdor/OnyxiasLair/onyxias_lair.h
   Kalimdor/OnyxiasLair/instance_onyxias_lair.cpp
