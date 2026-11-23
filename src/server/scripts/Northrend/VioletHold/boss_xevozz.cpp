@@ -196,7 +196,7 @@ public:
                 }
                 else if (instance->GetData(DATA_WAVE_COUNT) == 12)
                 {
-                    instance->SetData(DATA_2ND_BOSS_EVENT, NOT_STARTED);
+                    instance->SetData(DATA_2ND_BOSS_EVENT, DONE);
                     instance->SetData(DATA_WAVE_COUNT, 13);
                 }
             }

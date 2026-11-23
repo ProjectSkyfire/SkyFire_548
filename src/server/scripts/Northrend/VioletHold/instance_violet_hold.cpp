@@ -303,16 +303,20 @@ public:
             switch (type)
             {
                 case DATA_1ST_BOSS_EVENT:
-                    UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, CREATURE_EREKEM, NULL);
                     m_auiEncounter[0] = data;
                     if (data == DONE)
+                    {
+                        UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, CREATURE_EREKEM, NULL);
                         SaveToDB();
+                    }
                     break;
                 case DATA_2ND_BOSS_EVENT:
-                    UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, CREATURE_MORAGG, NULL);
                     m_auiEncounter[1] = data;
                     if (data == DONE)
+                    {
+                        UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, CREATURE_MORAGG, NULL);
                         SaveToDB();
+                    }
                     break;
                 case DATA_CYANIGOSA_EVENT:
                     m_auiEncounter[2] = data;
