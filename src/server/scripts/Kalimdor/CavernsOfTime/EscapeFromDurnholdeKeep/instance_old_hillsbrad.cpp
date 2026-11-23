@@ -44,6 +44,7 @@ public:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 mBarrelCount;
         uint32 mThrallEventCount;
+        bool skarlocDefeated;
 
         uint64 ThrallGUID;
         uint64 TarethaGUID;
@@ -55,6 +56,7 @@ public:
 
             mBarrelCount        = 0;
             mThrallEventCount   = 0;
+            skarlocDefeated     = false;
             ThrallGUID          = 0;
             TarethaGUID         = 0;
             EpochGUID        = 0;
@@ -105,6 +107,15 @@ public:
             EpochGUID = creature->GetGUID();
             break;
             }
+        }
+
+        void OnCreatureRemove(Creature* creature) OVERRIDE
+        {
+            InstanceScript::OnCreatureRemove(creature);
+
+            // Taretha only summons Epoch Hunter while this is empty, so a stale guid left a second attempt without a boss.
+            if (creature->GetEntry() == EPOCH_ENTRY)
+                EpochGUID = 0;
         }
 
         void SetData(uint32 type, uint32 data) OVERRIDE
@@ -172,6 +183,9 @@ public:
                     break;
                 }
                 case TYPE_THRALL_PART1:
+                    // Remembered through a wipe, the boss is not fought again
+                    if (data == DONE)
+                        skarlocDefeated = true;
                     m_auiEncounter[2] = data;
                     SF_LOG_DEBUG("scripts", "Instance Old Hillsbrad: Thrall event part I adjusted to data %u.", data);
                     break;
@@ -206,6 +220,8 @@ public:
                     return m_auiEncounter[4];
                 case TYPE_THRALL_PART4:
                     return m_auiEncounter[5];
+                case DATA_SKARLOC_DEFEATED:
+                    return skarlocDefeated ? 1 : 0;
             }
             return 0;
         }

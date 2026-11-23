@@ -29,7 +29,8 @@ enum EpochHunter
     SPELL_SAND_BREATH           = 31914,
     SPELL_IMPENDING_DEATH       = 31916,
     SPELL_MAGIC_DISRUPTION_AURA = 33834,
-    SPELL_WING_BUFFET           = 31475
+    SPELL_WING_BUFFET           = 31475,
+    SPELL_WING_BUFFET_H         = 38593
 };
 
 class boss_epoch_hunter : public CreatureScript
@@ -110,7 +111,7 @@ public:
             if (WingBuffet_Timer <= diff)
             {
                 if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                    DoCast(target, SPELL_WING_BUFFET);
+                    DoCast(target, DUNGEON_MODE(SPELL_WING_BUFFET, SPELL_WING_BUFFET_H));
                 WingBuffet_Timer = 25000+rand()%10000;
             } else WingBuffet_Timer -= diff;
 

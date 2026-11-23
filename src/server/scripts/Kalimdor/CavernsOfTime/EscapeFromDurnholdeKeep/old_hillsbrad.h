@@ -17,8 +17,8 @@ enum DataTypes
 
     DATA_THRALL             = 7,
     DATA_TARETHA            = 8,
-    DATA_EPOCH              = 9
-
+    DATA_EPOCH              = 9,
+    DATA_SKARLOC_DEFEATED   = 10
 };
 
 enum WorldStateIds

@@ -134,7 +134,7 @@ public:
             //Consecration
             if (Consecration_Timer <= diff)
             {
-                //DoCastVictim(SPELL_CONSECRATION);
+                DoCast(me, SPELL_CONSECRATION);
                 Consecration_Timer = urand(5000, 10000);
             } else Consecration_Timer -= diff;
 
