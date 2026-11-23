@@ -14,6 +14,8 @@
 
 namespace
 {
+    uint8 const FullServing = 5;
+
     struct Dish
     {
         uint32 Chair, Server, Serving, CanEat, Feast, Helpings, WellFed, Pass, Credit, FoodFight, Plate;
@@ -97,6 +99,25 @@ public:
     {
         PrepareSpellScript(Action);
         bool Validate(SpellInfo const* info) override { return FindDish(info->Id) && ValidateDishes(); }
+        SpellCastResult CheckCast()
+        {
+            Dish const* dish = FindDish(GetSpellInfo()->Id);
+            Unit* chair = GetChair(GetCaster());
+            if (!dish || !chair || !GetDiner(chair))
+                return SPELL_FAILED_CASTER_AURASTATE;
+
+            if (GetSpellInfo()->Id == dish->Pass)
+            {
+                Unit* recipient = GetChair(GetExplTargetUnit());
+                if (!recipient || recipient == chair || GetTable(recipient) != GetTable(chair)
+                    || chair->GetEntry() != dish->Chair)
+                    return SPELL_FAILED_BAD_TARGETS;
+            }
+            else if (!chair->HasAura(dish->Server) && !chair->HasAura(dish->Serving))
+                return SPELL_FAILED_CASTER_AURASTATE;
+
+            return SPELL_CAST_OK;
+        }
         void Handle(SpellEffIndex)
         {
             Dish const* dish = FindDish(GetSpellInfo()->Id);
@@ -113,10 +134,21 @@ public:
                 if (!recipient || recipient == chair || GetTable(recipient) != GetTable(chair)
                     || chair->GetEntry() != dish->Chair)
                     return;
-                chair->CastSpell(recipient, dish->Serving, true);
+                // A pass refills the plate with five helpings. Only an already
+                // full plate bounces food, regardless of whether the player
+                // selected the chair or its passenger.
+                Aura* previous = recipient->GetAura(dish->Serving);
+                bool full = recipient->HasAura(dish->Server)
+                    || (previous && previous->GetStackAmount() >= FullServing);
+                recipient->CastSpell(recipient, dish->Serving, true);
+                Aura* serving = recipient->GetAura(dish->Serving);
+                if (!serving)
+                    return;
+                serving->SetStackAmount(FullServing);
                 diner->CastSpell(diner, dish->Credit, true);
-                if (Player* target = GetHitPlayer())
-                    diner->CastSpell(target, dish->FoodFight, true);
+                if (full)
+                    if (Player* target = GetDiner(recipient))
+                        diner->CastSpell(target, dish->FoodFight, true);
                 return;
             }
 
@@ -125,7 +157,7 @@ public:
             diner->CastSpell(diner, 61826, true);
             diner->CastSpell(diner, dish->Helpings, true);
             if (Aura* helpings = diner->GetAura(dish->Helpings))
-                if (helpings->GetStackAmount() >= 5)
+                if (helpings->GetStackAmount() >= FullServing)
                     diner->CastSpell(diner, dish->WellFed, true);
             if (!chair->HasAura(dish->Server))
                 if (Aura* serving = chair->GetAura(dish->Serving))
@@ -134,7 +166,7 @@ public:
             for (Dish const& food : Dishes)
             {
                 Aura* helpings = diner->GetAura(food.Helpings);
-                if (!helpings || helpings->GetStackAmount() < 5)
+                if (!helpings || helpings->GetStackAmount() < FullServing)
                     return;
             }
             diner->CastSpell(diner, 61849, true);
@@ -143,6 +175,7 @@ public:
         }
         void Register() override
         {
+            OnCheckCast += SpellCheckCastFn(Action::CheckCast);
             OnEffectHitTarget += SpellEffectFn(Action::Handle, EFFECT_0, SPELL_EFFECT_DUMMY);
         }
     };
