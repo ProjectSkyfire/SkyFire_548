@@ -104,7 +104,8 @@ public:
 
         if (instance)
         {
-            creature->CastSpell(player, SPELL_MARK_OF_THE_WILD, true);
+            // Mark of the Wild buffs the caster's own group, so cast at the player it would only reach the Disciple
+            creature->AddAura(SPELL_MARK_OF_THE_WILD, player);
             if (instance->GetData(TYPE_NARALEX_EVENT) != IN_PROGRESS && instance->GetData(TYPE_NARALEX_EVENT) != DONE &&
                 (instance->GetData(TYPE_LORD_COBRAHN) == DONE) && (instance->GetData(TYPE_LORD_PYTHAS) == DONE) &&
                 (instance->GetData(TYPE_LADY_ANACONDRA) == DONE) && (instance->GetData(TYPE_LORD_SERPENTIS) == DONE))
