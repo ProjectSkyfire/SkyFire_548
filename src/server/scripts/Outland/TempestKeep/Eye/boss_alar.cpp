@@ -512,9 +512,11 @@ class npc_ember_of_alar : public CreatureScript
                     DoCast(me, SPELL_EMBER_BLAST, true);
                     me->SetDisplayId(11686);
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    if (instance && instance->GetData(DATA_ALAREVENT) == 2)
+                    if (instance && instance->GetData(DATA_ALAREVENT) == IN_PROGRESS)
                     {
-                        if (Unit* Alar = Unit::GetUnit(*me, instance->GetData64(DATA_ALAR)))
+                        Creature* Alar = Unit::GetCreature(*me, instance->GetData64(DATA_ALAR));
+                        boss_alar::boss_alarAI* alarAI = Alar ? CAST_AI(boss_alar::boss_alarAI, Alar->AI()) : NULL;
+                        if (alarAI && !alarAI->Phase1)
                         {
                             int32 AlarHealth = int32(Alar->GetHealth()) - int32(Alar->CountPctFromMaxHealth(3));
                             if (AlarHealth > 0)
