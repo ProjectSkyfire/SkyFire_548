@@ -89,9 +89,9 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Stratholme/stratholme.h
   EasternKingdoms/Stratholme/stratholme.cpp
   #REWORKED IN CATACLYSM
-  #EasternKingdoms/SunkenTemple/sunken_temple.cpp
-  #EasternKingdoms/SunkenTemple/sunken_temple.h
-  #EasternKingdoms/SunkenTemple/instance_sunken_temple.cpp
+  EasternKingdoms/SunkenTemple/sunken_temple.cpp
+  EasternKingdoms/SunkenTemple/sunken_temple.h
+  EasternKingdoms/SunkenTemple/instance_sunken_temple.cpp
   EasternKingdoms/MagistersTerrace/boss_felblood_kaelthas.cpp
   EasternKingdoms/MagistersTerrace/magisters_terrace.h
   EasternKingdoms/MagistersTerrace/boss_priestess_delrissa.cpp

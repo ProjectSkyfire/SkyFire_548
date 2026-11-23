@@ -213,8 +213,8 @@ void AddSC_boss_dathrohan_balnazzar();
 void AddSC_boss_order_of_silver_hand();
 void AddSC_instance_stratholme();
 void AddSC_stratholme();
-//void AddSC_sunken_temple();                  // Sunken Temple
-//void AddSC_instance_sunken_temple();
+void AddSC_sunken_temple();                  // Sunken Temple
+void AddSC_instance_sunken_temple();
 void AddSC_instance_sunwell_plateau();       //Sunwell Plateau
 void AddSC_boss_kalecgos();
 void AddSC_boss_brutallus();
@@ -950,8 +950,8 @@ void AddEasternKingdomsScripts()
     AddSC_boss_order_of_silver_hand();
     AddSC_instance_stratholme();
     AddSC_stratholme();
-    //AddSC_sunken_temple();                  // Sunken Temple
-    //AddSC_instance_sunken_temple();
+    AddSC_sunken_temple();                  // Sunken Temple
+    AddSC_instance_sunken_temple();
     AddSC_instance_sunwell_plateau();       //Sunwell Plateau
     AddSC_boss_kalecgos();
     AddSC_boss_brutallus();
