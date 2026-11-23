@@ -1,0 +1,175 @@
+-- Zangarmarsh: the Balance Must Be Preserved steam pump credits, the Fhwoor Smash! escort (Fhwoor, Ssslith, the
+-- Bloodscale Enchantress and Slavedriver he meets, and the Ark of Ssslith) and the four Baby Murlocs of
+-- Have You Ever Seen One of These?, which were not spawned.
+
+-- Balance Must Be Preserved: steam pump credit markers
+DELETE FROM `smart_scripts` WHERE `source_type` = 0 AND `entryorguid` IN (17998,17999,18000,18002);
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`event_param5`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(17998,0,0,0,8,0,100,0,31736,0,0,0,0,33,17998,0,0,0,0,0,7,0,0,0,0,0,0,0,'Umbrafen Steam Pump Credit Marker - On Spellhit ''Ironvine Seeds'' - Quest Credit ''Balance Must Be Preserved'' (No Repeat) (Dungeon)'),
+(17999,0,0,0,8,0,100,0,31736,0,0,0,0,33,17999,0,0,0,0,0,7,0,0,0,0,0,0,0,'Lagoon Steam Pump Credit Marker - On Spellhit ''Ironvine Seeds'' - Quest Credit ''Balance Must Be Preserved'' (No Repeat) (Dungeon)'),
+(18000,0,0,0,8,0,100,0,31736,0,0,0,0,33,18000,0,0,0,0,0,7,0,0,0,0,0,0,0,'Serpent Steam Pump Credit Marker - On Spellhit ''Ironvine Seeds'' - Quest Credit ''Balance Must Be Preserved'' (No Repeat) (Dungeon)'),
+(18002,0,0,0,8,0,100,0,31736,0,0,0,0,33,18002,0,0,0,0,0,7,0,0,0,0,0,0,0,'Marshlight Steam Pump Credit Marker - On Spellhit ''Ironvine Seeds'' - Quest Credit ''Balance Must Be Preserved'' (No Repeat) (Dungeon)');
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (17998,17999,18000,18002) AND `AIName` = '' AND `ScriptName` = '';
+
+-- Fhwoor Smash!
+DELETE FROM `smart_scripts` WHERE `source_type` = 0 AND `entryorguid` IN (17877,18088,18089,18154);
+DELETE FROM `smart_scripts` WHERE `source_type` = 9 AND `entryorguid` IN (1787700,1787701);
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`event_param5`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(17877,0,0,1,19,0,100,0,9729,0,0,0,0,64,1,0,0,0,0,0,7,0,0,0,0,0,0,0,'Fhwoor - On Accepted Quest - Store Target List'),
+(17877,0,1,2,61,0,100,0,0,0,0,0,0,1,0,0,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - Linked To Id 0 - Say Line 0'),
+(17877,0,2,0,61,0,100,0,0,0,0,0,0,80,1787700,2,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 1 - Run Script'),
+(17877,0,3,0,6,0,100,0,0,0,0,0,0,6,9729,0,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - On Death - Fail Quest'),
+(17877,0,4,5,40,0,100,0,11,17877,0,0,0,1,1,20000,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - On Waypoint Reached - Say Line 1'),
+(17877,0,5,0,61,0,100,0,0,0,0,0,0,54,20000,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 4 - Waypoint Pause'),
+(17877,0,6,7,52,0,100,0,1,17877,0,0,0,1,2,0,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - On Text Over 5 - Say Line 2'),
+(17877,0,7,0,61,0,100,0,0,0,0,0,0,59,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 6 - Set Run 1'),
+(17877,0,8,9,40,0,100,0,27,17877,0,0,0,1,3,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Waypoint Reached - Say Line 3'),
+(17877,0,9,10,61,0,100,0,0,0,0,0,0,54,10000,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 8 - Waypoint Pause'),
+(17877,0,10,0,61,0,100,0,0,0,0,0,0,45,0,1,0,0,0,0,20,182082,10,0,0,0,0,0,'Fhwoor - Linked To Id 9 - Set Data 0 1'),
+(17877,0,11,12,40,0,100,0,43,17877,0,0,0,1,4,0,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - On Waypoint Reached - Say Line 4'),
+(17877,0,12,13,61,0,100,0,0,0,0,0,0,54,10000,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 11 - Waypoint Pause'),
+(17877,0,13,14,61,0,100,0,0,0,0,0,0,12,18154,1,120000,0,0,0,8,0,0,0,168.547,8207.52,22.9772,4.46765,'Fhwoor - Linked To Id 12 - Summon Creature Ssslith'),
+(17877,0,14,15,61,0,100,0,0,0,0,0,0,12,18088,1,120000,0,0,0,8,0,0,0,172.866,8214.89,22.3114,4.19824,'Fhwoor - Linked To Id 13 - Summon Creature Bloodscale Enchantress'),
+(17877,0,15,0,61,0,100,0,0,0,0,0,0,12,18089,1,120000,0,0,0,8,0,0,0,166.766,8215.02,22.6331,4.60475,'Fhwoor - Linked To Id 14 - Summon Creature Bloodscale Slavedriver'),
+(17877,0,16,0,38,0,100,0,1,1,0,0,0,67,17877,8000,8000,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Data Set 1 1 - Create Timed Event'),
+(17877,0,17,18,59,0,100,0,17877,0,0,0,0,1,5,0,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - On Timed Event Triggered - Say Line 5'),
+(17877,0,18,0,61,0,100,0,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 17 - Set Run 1'),
+(17877,0,19,0,40,0,100,0,60,17877,0,0,0,80,1787701,2,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Waypoint Reached - Run Script'),
+(17877,0,20,21,40,0,100,0,61,17877,0,0,0,66,0,0,0,0,0,0,8,0,0,0,0,0,0,2.04204,'Fhwoor - On Waypoint Reached - Set Orientation'),
+(17877,0,21,22,61,0,100,0,0,0,0,0,0,81,3,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 20 - Set NpcFlag 3'),
+(17877,0,22,23,61,0,100,0,0,0,0,0,0,1,7,0,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - Linked To Id 21 - Say Line 7'),
+(17877,0,23,24,61,0,100,0,0,0,0,0,0,2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - Linked To Id 22 - Set Faction Default'),
+(17877,0,24,0,61,0,100,0,0,0,0,0,0,15,9729,0,0,0,0,0,12,1,0,0,0,0,0,0,'Fhwoor - Linked To Id 23 - Quest Complete'),
+(17877,0,25,0,9,0,100,0,0,10,20000,30000,0,11,31277,2,0,0,0,0,7,0,0,0,0,0,0,0,'Fhwoor - On Range - Cast Stomp'),
+(18088,0,0,0,0,0,100,0,0,0,2400,3800,0,11,34447,64,0,0,0,0,2,0,0,0,0,0,0,0,'Bloodscale Enchantress - In Combat CMC - Cast ''Arcane Missiles'''),
+(18088,0,1,0,0,0,100,0,6000,8000,16000,22000,0,11,34787,1,0,0,0,0,1,0,0,0,0,0,0,0,'Bloodscale Enchantress - In Combat - Cast ''Freezing Circle'''),
+(18088,0,2,0,54,0,100,0,0,0,0,0,0,53,1,18088,0,0,0,2,1,0,0,0,0,0,0,0,'Bloodscale Enchantress - On Summoned - Waypoint Start'),
+(18088,0,3,0,40,0,100,0,6,18088,0,0,0,66,0,0,0,0,0,0,19,17877,50,0,0,0,0,0,'Bloodscale Enchantress - On Waypoint Reached - Set Orientation'),
+(18089,0,0,0,4,0,100,1,0,0,0,0,0,11,32064,0,0,0,0,0,1,0,0,0,0,0,0,0,'Bloodscale Slavedriver - On Aggro - Cast ''Battle Shout'' (No Repeat)'),
+(18089,0,1,0,54,0,100,0,0,0,0,0,0,53,1,18089,0,0,0,2,1,0,0,0,0,0,0,0,'Bloodscale Slavedriver - On Summoned - Waypoint Start'),
+(18089,0,2,0,40,0,100,0,8,18089,0,0,0,66,0,0,0,0,0,0,19,17877,50,0,0,0,0,0,'Bloodscale Slavedriver - On Waypoint Reached - Set Orientation'),
+(18154,0,0,0,54,0,100,0,0,0,0,0,0,53,1,18154,0,0,0,2,1,0,0,0,0,0,0,0,'Ssslith - On Summoned - Waypoint Start'),
+(18154,0,1,0,40,0,100,0,12,18154,0,0,0,66,0,0,0,0,0,0,19,17877,50,0,0,0,0,0,'Ssslith - On Waypoint Reached - Set Orientation'),
+(18154,0,2,0,6,0,100,0,0,0,0,0,0,45,1,1,0,0,0,0,19,17877,50,0,0,0,0,0,'Ssslith - On Death - Set Data 1 1'),
+(1787700,9,0,0,0,0,100,0,0,0,0,0,0,83,3,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Script - Remove NpcFlag 3'),
+(1787700,9,1,0,0,0,100,0,0,0,0,0,0,2,250,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Script - Set Faction 250'),
+(1787700,9,2,0,0,0,100,0,10000,10000,0,0,0,53,1,17877,0,0,0,2,1,0,0,0,0,0,0,0,'Fhwoor - On Script - Waypoint Start'),
+(1787701,9,0,0,0,0,100,0,0,0,0,0,0,59,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Script - Set Run 0'),
+(1787701,9,1,0,0,0,100,0,0,0,0,0,0,54,10000,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Script - Waypoint Pause'),
+(1787701,9,2,0,0,0,100,0,0,0,0,0,0,1,6,0,0,0,0,0,1,0,0,0,0,0,0,0,'Fhwoor - On Script - Say Line 6'),
+(1787701,9,3,0,0,0,100,0,0,0,0,0,0,50,182082,180,0,0,0,0,8,0,0,0,249.717,8482.18,22.9652,3.15906,'Fhwoor - On Script - Summon Object The Ark of Ssslith');
+DELETE FROM `creature_text` WHERE `entry` IN (17877);
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(17877,0,0,'Fhwoor go now, $n.  Get ark, come back.',12,0,100,0,0,0,'Fhwoor'),
+(17877,1,0,'Take moment... get ready.',12,0,100,0,0,0,'Fhwoor'),
+(17877,2,0,'We go!',12,0,100,0,0,0,'Fhwoor'),
+(17877,3,0,'%s lifts the Ark of Ssslith with ease.',16,0,100,0,0,0,'Fhwoor'),
+(17877,4,0,'Uh oh...',12,0,100,0,0,0,'Fhwoor'),
+(17877,5,0,'Ha ha, squishy naga!',12,0,100,0,0,0,'Fhwoor'),
+(17877,6,0,'%s places the Ark of Ssslith on the ground.',16,0,100,0,0,0,'Fhwoor'),
+(17877,7,0,'Fhwoor do good!',16,0,100,0,0,0,'Fhwoor');
+DELETE FROM `waypoints` WHERE `entry` IN (17877,18088,18089,18154);
+INSERT INTO `waypoints` (`entry`,`pointid`,`position_x`,`position_y`,`position_z`,`point_comment`) VALUES
+(17877,1,213.642,8469.28,23.5278,'Fhwoor'),
+(17877,2,194.821,8448.55,24.4872,'Fhwoor'),
+(17877,3,181.917,8416.95,23.3925,'Fhwoor'),
+(17877,4,162.977,8387.25,22.2801,'Fhwoor'),
+(17877,5,169.117,8353.97,21.0783,'Fhwoor'),
+(17877,6,179.16,8325.87,20.8309,'Fhwoor'),
+(17877,7,170.356,8302.86,21.0235,'Fhwoor'),
+(17877,8,182.719,8270.85,18.9108,'Fhwoor'),
+(17877,9,220.46,8241.91,20.7286,'Fhwoor'),
+(17877,10,248.363,8210.22,19.5462,'Fhwoor'),
+(17877,11,283.827,8203.19,22.1506,'Fhwoor'),
+(17877,12,299.867,8188.26,21.4257,'Fhwoor'),
+(17877,13,318.496,8184.51,18.0551,'Fhwoor'),
+(17877,14,333.967,8178.85,17.6631,'Fhwoor'),
+(17877,15,349.538,8179.19,18.4509,'Fhwoor'),
+(17877,16,366.436,8187.58,21.9099,'Fhwoor'),
+(17877,17,378.754,8190.38,23.3031,'Fhwoor'),
+(17877,18,396.719,8184.86,19.3816,'Fhwoor'),
+(17877,19,416.523,8164.17,18.3545,'Fhwoor'),
+(17877,20,436.71,8153.25,21.5964,'Fhwoor'),
+(17877,21,451.941,8151.88,23.7673,'Fhwoor'),
+(17877,22,467.415,8152.1,22.1049,'Fhwoor'),
+(17877,23,485.093,8148.36,20.2071,'Fhwoor'),
+(17877,24,500.46,8146.72,20.1837,'Fhwoor'),
+(17877,25,517.511,8156.08,22.1492,'Fhwoor'),
+(17877,26,536.433,8157.97,23.6155,'Fhwoor'),
+(17877,27,558.975,8159.83,23.8382,'Fhwoor'),
+(17877,28,522.196,8135.45,21.1537,'Fhwoor'),
+(17877,29,498.076,8136.04,20.9041,'Fhwoor'),
+(17877,30,477.842,8127.26,22.5633,'Fhwoor'),
+(17877,31,450.433,8131.17,21.5014,'Fhwoor'),
+(17877,32,431.755,8121.7,18.242,'Fhwoor'),
+(17877,33,416.21,8120.5,17.5965,'Fhwoor'),
+(17877,34,394.626,8120.14,17.9471,'Fhwoor'),
+(17877,35,379.741,8113.29,17.774,'Fhwoor'),
+(17877,36,364.444,8105.48,18.1743,'Fhwoor'),
+(17877,37,350.215,8106.76,17.748,'Fhwoor'),
+(17877,38,335.095,8119.2,17.4991,'Fhwoor'),
+(17877,39,328.111,8135.52,18.3164,'Fhwoor'),
+(17877,40,305.751,8149.81,20.0491,'Fhwoor'),
+(17877,41,275.408,8161.03,17.7491,'Fhwoor'),
+(17877,42,247.405,8177.39,17.7227,'Fhwoor'),
+(17877,43,220.589,8180.78,19.7876,'Fhwoor'),
+(17877,44,205.792,8183.32,23.0822,'Fhwoor'),
+(17877,45,203.911,8206.52,22.3767,'Fhwoor'),
+(17877,46,200.251,8229.31,24.9692,'Fhwoor'),
+(17877,47,201.189,8251.09,21.1095,'Fhwoor'),
+(17877,48,190.496,8267.6,18.4776,'Fhwoor'),
+(17877,49,175.074,8288.41,18.5856,'Fhwoor'),
+(17877,50,182.415,8311.77,21.2936,'Fhwoor'),
+(17877,51,182.52,8333.07,19.8769,'Fhwoor'),
+(17877,52,175.531,8357.18,18.4684,'Fhwoor'),
+(17877,53,183.554,8381.03,16.2447,'Fhwoor'),
+(17877,54,195.299,8399.36,16.5095,'Fhwoor'),
+(17877,55,208.594,8413.65,18.8942,'Fhwoor'),
+(17877,56,221.34,8432.1,20.1757,'Fhwoor'),
+(17877,57,230.968,8446.42,21.9916,'Fhwoor'),
+(17877,58,227.129,8465.45,19.6453,'Fhwoor'),
+(17877,59,231.528,8479.36,17.8781,'Fhwoor'),
+(17877,60,246.948,8481.8,22.1418,'Fhwoor'),
+(17877,61,231.403,8479.94,18.0338,'Fhwoor'),
+(18088,1,172.85,8215.89,22.3028,'Bloodscale Enchantress'),
+(18088,2,172.867,8214.89,22.3028,'Bloodscale Enchantress'),
+(18088,3,172.046,8213.43,22.3516,'Bloodscale Enchantress'),
+(18088,4,176.939,8193.83,23.0931,'Bloodscale Enchantress'),
+(18088,5,181.468,8187.23,23.0042,'Bloodscale Enchantress'),
+(18088,6,185.697,8186.56,23.3263,'Bloodscale Enchantress'),
+(18089,1,166.696,8216.02,22.5528,'Bloodscale Slavedriver'),
+(18089,2,166.766,8215.02,22.5528,'Bloodscale Slavedriver'),
+(18089,3,165.906,8207.06,23.1018,'Bloodscale Slavedriver'),
+(18089,4,165.691,8205.08,23.7268,'Bloodscale Slavedriver'),
+(18089,5,164.922,8197.82,23.5067,'Bloodscale Slavedriver'),
+(18089,6,172.093,8188.69,22.4752,'Bloodscale Slavedriver'),
+(18089,7,180.361,8180.24,24.056,'Bloodscale Slavedriver'),
+(18089,8,184.59,8179.57,24.4752,'Bloodscale Slavedriver'),
+(18154,1,169.43,8210.07,22.5148,'Ssslith'),
+(18154,2,169.587,8209.08,22.5148,'Ssslith'),
+(18154,3,168.75,8208.33,22.8028,'Ssslith'),
+(18154,4,168.023,8205.42,23.4278,'Ssslith'),
+(18154,5,167.709,8204.17,23.8028,'Ssslith'),
+(18154,6,167.709,8202.08,23.8028,'Ssslith'),
+(18154,7,167.709,8200,23.6002,'Ssslith'),
+(18154,8,170.311,8196.96,22.9752,'Ssslith'),
+(18154,9,170.834,8196.35,22.8502,'Ssslith'),
+(18154,10,171.231,8194.35,22.4849,'Ssslith'),
+(18154,11,182.838,8183.43,23.9041,'Ssslith'),
+(18154,12,188.635,8182.51,23.8638,'Ssslith');
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` IN (17877,18088,18089,18154) AND `AIName` = '' AND `ScriptName` = '';
+
+-- The Ark of Ssslith
+DELETE FROM `smart_scripts` WHERE `source_type` = 1 AND `entryorguid` IN (182082);
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`event_param5`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(182082,1,0,0,38,0,100,0,0,1,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'The Ark of Ssslith - On Data Set 0 1 - Despawn');
+UPDATE `gameobject_template` SET `AIName` = 'SmartGameObjectAI' WHERE `entry` IN (182082) AND `AIName` = '' AND `ScriptName` = '';
+
+-- Baby Murlocs (Have You Ever Seen One of These?), same spots in both 3.3.5 databases
+
+DELETE FROM `creature` WHERE `guid` IN (8317002,8317003,8317004,8317005);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseId`, `phaseGroup`, `modelid`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`) VALUES
+(8317002, 18152, 530, 1, 0, 0, 0, 0, 1177.67000, 8130.76000, 19.62190, 1.151920, 120, 0, 0, 0, 0, 0, 0, 0, 0),
+(8317003, 18152, 530, 1, 0, 0, 0, 0, 1178.13000, 8130.46000, 19.65680, 1.117010, 120, 0, 0, 0, 0, 0, 0, 0, 0),
+(8317004, 18152, 530, 1, 0, 0, 0, 0, 1178.69000, 8130.18000, 19.68920, 1.082100, 120, 0, 0, 0, 0, 0, 0, 0, 0),
+(8317005, 18152, 530, 1, 0, 0, 0, 0, 1179.36000, 8129.97000, 19.69080, 1.012290, 120, 0, 0, 0, 0, 0, 0, 0, 0);
