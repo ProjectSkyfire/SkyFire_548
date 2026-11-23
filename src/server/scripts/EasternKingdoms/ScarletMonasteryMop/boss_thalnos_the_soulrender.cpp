@@ -45,6 +45,11 @@ enum Spells
     SPELL_CLONE_ME                  = 45204, // get ur vision
 };
 
+enum ThalnosData
+{
+    WIPE_CHECK_INTERVAL             = 2000
+};
+
 enum Events
 {
     EVENT_SPIRIT_GALE               = 1,
@@ -75,6 +80,8 @@ class boss_thalnos_the_soulrender : public CreatureScript
 
             uint64 victimGUID;
             std::set<uint64> livingZombies;
+            bool engaged;
+            uint32 wipeCheckTimer;
 
             void InitializeAI() OVERRIDE
             {
@@ -91,6 +98,8 @@ class boss_thalnos_the_soulrender : public CreatureScript
                 me->SetReactState(REACT_AGGRESSIVE);
                 victimGUID = 0;
                 livingZombies.clear();
+                engaged = false;
+                wipeCheckTimer = WIPE_CHECK_INTERVAL;
                 me->GetMap()->SetWorldState(WORLDSTATE_EMPOWERED_SPIRITUALIST, 0);
 
                 if (instance)
@@ -175,6 +184,7 @@ class boss_thalnos_the_soulrender : public CreatureScript
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
                 _EnterCombat();
+                engaged = true;
                 Talk(TALK_INTO);
                 if (instance)
                 {
@@ -192,8 +202,41 @@ class boss_thalnos_the_soulrender : public CreatureScript
                     me->RemoveChanneledCast(victimGUID);
             }
 
+            void DamageTaken(Unit* attacker, uint32& damage) OVERRIDE
+            {
+                // Nothing in this fight is meant to hurt Thalnos except the group
+                if (attacker == me)
+                    damage = 0;
+            }
+
+            // True while somebody who could still fight him is alive in the dungeon
+            bool HasLivingPlayer() const
+            {
+                for (MapReference const& ref : me->GetMap()->GetPlayers())
+                    if (Player* player = ref.GetSource())
+                        if (player->IsAlive() && !player->IsGameMaster())
+                            return true;
+                return false;
+            }
+
             void UpdateAI(uint32 diff) OVERRIDE
             {
+                // After a wipe a stray attacker, such as a pet of a dead player, can keep him from evading
+                if (engaged)
+                {
+                    if (wipeCheckTimer <= diff)
+                    {
+                        wipeCheckTimer = WIPE_CHECK_INTERVAL;
+                        if (!HasLivingPlayer())
+                        {
+                            EnterEvadeMode();
+                            return;
+                        }
+                    }
+                    else
+                        wipeCheckTimer -= diff;
+                }
+
                 if (!UpdateVictim())
                     return;
 
@@ -403,18 +446,23 @@ class sat_spirit_gale : public IAreaTriggerAura
         return triggering->ToPlayer() && triggering->ToPlayer()->IsAlive();
     }
 
+    // The aura targets its caster, so the player casts it on himself for Thalnos; cast by Thalnos it would burn him
+    void ApplyGale(Player* player)
+    {
+        if (m_caster && !player->HasAura(SPELL_SPIRIT_GALE_AURA))
+            player->CastSpell(player, SPELL_SPIRIT_GALE_AURA, true, NULL, NULL, m_caster->GetGUID());
+    }
+
     void OnTriggeringApply(WorldObject* triggering) OVERRIDE
     {
-        if (Player* pItr = triggering->ToPlayer())
-            if (m_caster && !pItr->HasAura(SPELL_SPIRIT_GALE_AURA))
-                m_caster->CastSpell(pItr, SPELL_SPIRIT_GALE_AURA, true);
+        if (Player* player = triggering->ToPlayer())
+            ApplyGale(player);
     }
 
     void OnTriggeringUpdate(WorldObject* triggering) OVERRIDE
     {
         if (Player* player = triggering->ToPlayer())
-            if (!player->HasAura(SPELL_SPIRIT_GALE_AURA) && m_caster)
-                m_caster->CastSpell(player, SPELL_SPIRIT_GALE_AURA, true);
+            ApplyGale(player);
     }
 
     void OnTriggeringRemove(WorldObject* triggering) OVERRIDE
