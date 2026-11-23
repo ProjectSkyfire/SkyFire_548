@@ -776,6 +776,7 @@ void AddSC_azuremyst_isle()
     new npc_engineer_spark_overgrind();
     new npc_injured_draenei();
     new npc_magwin();
+    new npc_geezle();
     new npc_death_ravager();
     new go_ravager_cage();
     new npc_stillpine_capitive();
