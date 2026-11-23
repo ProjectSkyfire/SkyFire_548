@@ -576,7 +576,7 @@ class boss_freya : public CreatureScript
                     /* 25N */    {62952, 62954, 62956, 62958}
                 };
 
-                me->CastSpell((Unit*)NULL, summonSpell[me->GetMap()->GetDifficulty()][elderCount], true);
+                me->CastSpell((Unit*)NULL, summonSpell[me->GetMap()->Is25ManRaid() ? 1 : 0][elderCount], true);
 
                 Talk(SAY_DEATH);
                 me->SetReactState(REACT_PASSIVE);
@@ -587,7 +587,10 @@ class boss_freya : public CreatureScript
                 me->DeleteThreatList();
                 me->CombatStop(true);
                 me->DespawnOrUnsummon(7500);
-                me->CastSpell(me, SPELL_KNOCK_ON_WOOD_CREDIT, true);
+                // The credit spell is not in the 5.4.8 client; Freya's kill criteria name it as their spell target.
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KNOCK_ON_WOOD_CREDIT);
+                // Freya never really dies (DamageTaken), so no kill credits her encounter.
+                instance->UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
 
                 Creature* Elder[3];
                 for (uint8 n = 0; n < 3; ++n)

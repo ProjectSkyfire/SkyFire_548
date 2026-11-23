@@ -21,7 +21,7 @@ enum AssemblySpells
     // General
     SPELL_SUPERCHARGE                            = 61920,
     SPELL_BERSERK                                = 47008, // Hard enrage, don't know the correct ID.
-    SPELL_KILL_CREDIT                            = 65195, // spell_dbc
+    SPELL_KILL_CREDIT                            = 65195, // Not in the 5.4.8 client, only the criteria name it
 
     // Steelbreaker
     SPELL_HIGH_VOLTAGE                           = 61890,
@@ -182,7 +182,7 @@ class boss_steelbreaker : public CreatureScript
 
                 if (instance->GetBossState(BOSS_ASSEMBLY_OF_IRON) == DONE)
                 {
-                    DoCastAOE(SPELL_KILL_CREDIT, true);
+                    instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KILL_CREDIT);
                     Talk(SAY_STEELBREAKER_ENCOUNTER_DEFEATED);
                 }
                 else
@@ -319,7 +319,7 @@ class boss_runemaster_molgeim : public CreatureScript
 
                 if (instance->GetBossState(BOSS_ASSEMBLY_OF_IRON) == DONE)
                 {
-                    DoCastAOE(SPELL_KILL_CREDIT, true);
+                    instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KILL_CREDIT);
                     Talk(SAY_MOLGEIM_ENCOUNTER_DEFEATED);
                 }
                 else
@@ -484,7 +484,7 @@ class boss_stormcaller_brundir : public CreatureScript
 
                 if (instance->GetBossState(BOSS_ASSEMBLY_OF_IRON) == DONE)
                 {
-                    DoCastAOE(SPELL_KILL_CREDIT, true);
+                    instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, SPELL_KILL_CREDIT);
                     Talk(SAY_BRUNDIR_ENCOUNTER_DEFEATED);
                 }
                 else
