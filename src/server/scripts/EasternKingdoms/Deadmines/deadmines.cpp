@@ -197,8 +197,9 @@ class spell_deadmines_off_line : public SpellScriptLoader
 
             void OnAuraEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
+                // The template keeps Foe Reaper 5000 immune to players until he comes on-line
                 if (Creature* m_caster = GetOwner()->ToCreature())
-                    m_caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED | UNIT_FLAG_NON_ATTACKABLE);
+                    m_caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC);
             }
 
             void Register() OVERRIDE
