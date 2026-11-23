@@ -112,7 +112,7 @@ class boss_nazan : public CreatureScript
                 if (flight) // phase 1 - the flight
                 {
                     Creature* Vazruden = Unit::GetCreature(*me, VazrudenGUID);
-                    if (Fly_Timer < diff || !(Vazruden && Vazruden->IsAlive() && Vazruden->HealthAbovePct(20)))
+                    if (Fly_Timer < diff || !(Vazruden && Vazruden->IsAlive() && Vazruden->HealthAbovePct(40)))
                     {
                         flight = false;
                         BellowingRoar_Timer = 6000;
@@ -344,7 +344,7 @@ class boss_vazruden_the_herald : public CreatureScript
                     summoned->SetDisableGravity(true);
                     summoned->SetSpeed(MOVE_FLIGHT, 2.5f);
                     if (victim)
-                        AttackStartNoMove(victim);
+                        summoned->Attack(victim, true);
                 }
                 else
                     if (victim)
