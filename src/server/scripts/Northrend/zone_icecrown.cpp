@@ -6,6 +6,7 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "SpellAuras.h"
+#include "SpellScript.h"
 #include "Player.h"
 #include "TemporarySummon.h"
 #include "CombatAI.h"
@@ -1128,6 +1129,42 @@ class npc_morbidus : public CreatureScript
         }
 };
 
+/*######
+## spell_icecrown_bested_trigger
+######*/
+
+class spell_icecrown_bested_trigger : public SpellScriptLoader
+{
+    public:
+        spell_icecrown_bested_trigger() : SpellScriptLoader("spell_icecrown_bested_trigger") { }
+
+        class spell_icecrown_bested_trigger_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_icecrown_bested_trigger_SpellScript);
+
+            bool Validate(SpellInfo const* spellInfo) OVERRIDE
+            {
+                return sSpellMgr->GetSpellInfo(spellInfo->Effects[EFFECT_0].CalcValue()) != NULL;
+            }
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                Unit* target = GetHitUnit()->GetCharmerOrOwnerOrSelf();
+                target->CastSpell(target, GetEffectValue(), true);
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_icecrown_bested_trigger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const OVERRIDE
+        {
+            return new spell_icecrown_bested_trigger_SpellScript();
+        }
+};
+
 void AddSC_icecrown()
 {
     new npc_arete;
@@ -1140,4 +1177,5 @@ void AddSC_icecrown()
     new npc_frostbrood_skytalon();
     new npc_margrave_dhakar();
     new npc_morbidus();
+    new spell_icecrown_bested_trigger();
 }
