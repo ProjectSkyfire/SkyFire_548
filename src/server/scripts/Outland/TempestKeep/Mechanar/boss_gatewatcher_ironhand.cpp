@@ -35,9 +35,10 @@ enum Spells
 
 enum Events
 {
-    EVENT_STREAM_OF_MACHINE_FLUID   = 0,
-    EVENT_JACKHAMMER                = 1,
-    EVENT_SHADOW_POWER              = 2
+    EVENT_STREAM_OF_MACHINE_FLUID   = 1,
+    EVENT_JACKHAMMER                = 2,
+    EVENT_SHADOW_POWER              = 3,
+    EVENT_HAMMER_PUNCH              = 4
 };
 
 class boss_gatewatcher_iron_hand : public CreatureScript
@@ -55,6 +56,7 @@ class boss_gatewatcher_iron_hand : public CreatureScript
                 events.ScheduleEvent(EVENT_STREAM_OF_MACHINE_FLUID, 55000);
                 events.ScheduleEvent(EVENT_JACKHAMMER, 45000);
                 events.ScheduleEvent(EVENT_SHADOW_POWER, 25000);
+                events.ScheduleEvent(EVENT_HAMMER_PUNCH, urand(15000, 25000));
                 Talk(SAY_AGGRO);
             }
 
@@ -99,6 +101,10 @@ class boss_gatewatcher_iron_hand : public CreatureScript
                         case EVENT_SHADOW_POWER:
                             DoCast(me, SPELL_SHADOW_POWER);
                             events.ScheduleEvent(EVENT_SHADOW_POWER, urand(20000, 28000));
+                            break;
+                        case EVENT_HAMMER_PUNCH:
+                            DoCastVictim(SPELL_HAMMER_PUNCH);
+                            events.ScheduleEvent(EVENT_HAMMER_PUNCH, urand(25000, 35000));
                             break;
                         default:
                             break;

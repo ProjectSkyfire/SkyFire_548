@@ -92,7 +92,7 @@ class boss_gatewatcher_gyrokill : public CreatureScript
                             break;
                         case EVENT_SHADOW_POWER:
                             DoCast(me, SPELL_SHADOW_POWER);
-                            events.ScheduleEvent(EVENT_SAW_BLADE, urand(25000, 35000));
+                            events.ScheduleEvent(EVENT_SHADOW_POWER, urand(25000, 35000));
                             break;
                         default:
                             break;
