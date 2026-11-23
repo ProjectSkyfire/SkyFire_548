@@ -51,6 +51,7 @@ enum Spells
     SPELL_SHIELD                = 44291,
     SPELL_RENEW_NORMAL          = 44174,
     SPELL_RENEW_HEROIC          = 46192,
+    SPELL_PSYCHIC_SCREAM        = 27610,
 
     // Apoko
     SPELL_WINDFURY_TOTEM        = 27621,
@@ -121,6 +122,7 @@ public:
         uint32 ShieldTimer;
         uint32 SWPainTimer;
         uint32 DispelTimer;
+        uint32 PsychicScreamTimer;
         uint32 ResetTimer;
 
         void Reset() OVERRIDE
@@ -132,6 +134,7 @@ public:
             ShieldTimer = 2000;
             SWPainTimer = 5000;
             DispelTimer = 7500;
+            PsychicScreamTimer = 20000;
             ResetTimer = 5000;
 
             InitializeLackeys();
@@ -330,6 +333,12 @@ public:
                 SWPainTimer = 10000;
             } else SWPainTimer -= diff;
 
+            if (PsychicScreamTimer <= diff)
+            {
+                DoCast(me, SPELL_PSYCHIC_SCREAM);
+                PsychicScreamTimer = 30000;
+            } else PsychicScreamTimer -= diff;
+
             DoMeleeAttackIfReady();
         }
     };
@@ -481,7 +490,8 @@ enum RogueSpells
     SPELL_KICK              = 27613,
     SPELL_VANISH            = 44290,
     SPELL_BACKSTAB          = 15657,
-    SPELL_EVISCERATE        = 27611
+    SPELL_EVISCERATE        = 27611,
+    SPELL_CRIPPLING_POISON  = 44289
 };
 
 class boss_kagani_nightstrike : public CreatureScript
@@ -503,6 +513,7 @@ public:
         uint32 Kick_Timer;
         uint32 Vanish_Timer;
         uint32 Eviscerate_Timer;
+        uint32 Crippling_Poison_Timer;
         uint32 Wait_Timer;
         bool InVanish;
 
@@ -512,6 +523,7 @@ public:
             Kick_Timer = 7000;
             Vanish_Timer = 2000;
             Eviscerate_Timer = 6000;
+            Crippling_Poison_Timer = 3000;
             Wait_Timer = 5000;
             InVanish = false;
             me->SetVisible(true);
@@ -571,6 +583,12 @@ public:
                 Eviscerate_Timer = 4000;
             } else Eviscerate_Timer -= diff;
 
+            if (Crippling_Poison_Timer <= diff)
+            {
+                DoCastVictim(SPELL_CRIPPLING_POISON);
+                Crippling_Poison_Timer = 12000;
+            } else Crippling_Poison_Timer -= diff;
+
             if (!InVanish)
                 DoMeleeAttackIfReady();
         }
@@ -585,7 +603,8 @@ enum WarlockSpells
     SPELL_CURSE_OF_AGONY        = 14875,
     SPELL_FEAR                  = 38595,
     SPELL_IMP_FIREBALL          = 44164,
-    SPELL_SUMMON_IMP            = 44163
+    SPELL_SUMMON_IMP            = 44163,
+    SPELL_DEATH_COIL            = 44142
 };
 
 class boss_ellris_duskhallow : public CreatureScript
@@ -608,6 +627,7 @@ public:
         uint32 Seed_of_Corruption_Timer;
         uint32 Curse_of_Agony_Timer;
         uint32 Fear_Timer;
+        uint32 Death_Coil_Timer;
 
         void Reset() OVERRIDE
         {
@@ -616,6 +636,7 @@ public:
             Seed_of_Corruption_Timer = 2000;
             Curse_of_Agony_Timer = 1000;
             Fear_Timer = 10000;
+            Death_Coil_Timer = 12000;
 
             boss_priestess_lackey_commonAI::Reset();
         }
@@ -668,6 +689,14 @@ public:
                 Fear_Timer = 10000;
             } else Fear_Timer -= diff;
 
+            if (Death_Coil_Timer <= diff)
+            {
+                if (Unit* unit = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    DoCast(unit, SPELL_DEATH_COIL);
+
+                Death_Coil_Timer = 20000;
+            } else Death_Coil_Timer -= diff;
+
             DoMeleeAttackIfReady();
         }
     };
@@ -676,7 +705,8 @@ public:
 enum KickDown
 {
     SPELL_KNOCKDOWN     = 11428,
-    SPELL_SNAP_KICK     = 46182
+    SPELL_SNAP_KICK     = 46182,
+    SPELL_FISTS_OF_ARCANE_FURY = 44120
 };
 
 class boss_eramas_brightblaze : public CreatureScript
@@ -696,11 +726,13 @@ public:
 
         uint32 Knockdown_Timer;
         uint32 Snap_Kick_Timer;
+        uint32 Fists_Timer;
 
         void Reset() OVERRIDE
         {
             Knockdown_Timer = 6000;
             Snap_Kick_Timer = 4500;
+            Fists_Timer = 8000;
 
             boss_priestess_lackey_commonAI::Reset();
         }
@@ -724,6 +756,12 @@ public:
                 Snap_Kick_Timer  = 4500;
             } else Snap_Kick_Timer -= diff;
 
+            if (Fists_Timer <= diff)
+            {
+                DoCastVictim(SPELL_FISTS_OF_ARCANE_FURY);
+                Fists_Timer = 12000;
+            } else Fists_Timer -= diff;
+
             DoMeleeAttackIfReady();
         }
     };
@@ -737,7 +775,8 @@ enum MageSpells
     SPELL_ICE_LANCE         = 46194,
     SPELL_CONE_OF_COLD      = 38384,
     SPELL_FROSTBOLT         = 15043,
-    SPELL_BLINK             = 14514
+    SPELL_BLINK             = 14514,
+    SPELL_FROST_NOVA        = 44177
 };
 
 class boss_yazzai : public CreatureScript
@@ -765,6 +804,7 @@ public:
         uint32 Cone_of_Cold_Timer;
         uint32 Frostbolt_Timer;
         uint32 Blink_Timer;
+        uint32 Frost_Nova_Timer;
 
         void Reset() OVERRIDE
         {
@@ -778,6 +818,7 @@ public:
             Cone_of_Cold_Timer = 10000;
             Frostbolt_Timer = 3000;
             Blink_Timer = 8000;
+            Frost_Nova_Timer = 10000;
 
             boss_priestess_lackey_commonAI::Reset();
         }
@@ -823,6 +864,12 @@ public:
                 DoCastVictim(SPELL_CONE_OF_COLD);
                 Cone_of_Cold_Timer = 10000;
             } else Cone_of_Cold_Timer -= diff;
+
+            if (Frost_Nova_Timer <= diff)
+            {
+                DoCast(me, SPELL_FROST_NOVA);
+                Frost_Nova_Timer = 15000;
+            } else Frost_Nova_Timer -= diff;
 
             if (Frostbolt_Timer <= diff)
             {
