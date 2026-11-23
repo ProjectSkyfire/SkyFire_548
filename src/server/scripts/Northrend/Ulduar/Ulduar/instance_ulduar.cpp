@@ -16,6 +16,9 @@ static DoorData const doorData[] =
     { GO_XT_002_DOOR,                   BOSS_XT002,             DOOR_TYPE_ROOM,         BOUNDARY_S      },
     { GO_IRON_COUNCIL_DOOR,             BOSS_ASSEMBLY_OF_IRON,  DOOR_TYPE_ROOM,         BOUNDARY_N      },
     { GO_ARCHIVUM_DOOR,                 BOSS_ASSEMBLY_OF_IRON,  DOOR_TYPE_PASSAGE,      BOUNDARY_S      },
+    { GO_MIMIRON_DOOR_1,                BOSS_MIMIRON,           DOOR_TYPE_ROOM,         BOUNDARY_NONE   },
+    { GO_MIMIRON_DOOR_2,                BOSS_MIMIRON,           DOOR_TYPE_ROOM,         BOUNDARY_NONE   },
+    { GO_MIMIRON_DOOR_3,                BOSS_MIMIRON,           DOOR_TYPE_ROOM,         BOUNDARY_NONE   },
     { GO_HODIR_ENTRANCE,                BOSS_HODIR,             DOOR_TYPE_ROOM,         BOUNDARY_E      },
     { GO_HODIR_DOOR,                    BOSS_HODIR,             DOOR_TYPE_PASSAGE,      BOUNDARY_NONE   },
     { GO_HODIR_ICE_DOOR,                BOSS_HODIR,             DOOR_TYPE_PASSAGE,      BOUNDARY_W      },
@@ -58,6 +61,9 @@ class instance_ulduar : public InstanceMapScript
             uint64 KologarnGUID;
             uint64 AuriayaGUID;
             uint64 MimironGUID;
+            uint64 MimironVehicleGUIDs[3];
+            uint64 ComputerGUID;
+            uint64 MimironWorldTriggerGUID;
             uint64 HodirGUID;
             uint64 ThorimGUID;
             uint64 FreyaGUID;
@@ -79,6 +85,8 @@ class instance_ulduar : public InstanceMapScript
             uint64 ThorimChestGUID;
             uint64 HodirRareCacheGUID;
             uint64 HodirChestGUID;
+            uint64 MimironElevatorGUID;
+            uint64 MimironButtonGUID;
             uint64 BrainRoomDoorGUIDs[3];
             uint64 AlgalonSigilDoorGUID[3];
             uint64 AlgalonFloorGUID[2];
@@ -112,6 +120,8 @@ class instance_ulduar : public InstanceMapScript
                 KologarnGUID                     = 0;
                 AuriayaGUID                      = 0;
                 MimironGUID                      = 0;
+                ComputerGUID                     = 0;
+                MimironWorldTriggerGUID          = 0;
                 HodirGUID                        = 0;
                 ThorimGUID                       = 0;
                 FreyaGUID                        = 0;
@@ -126,6 +136,8 @@ class instance_ulduar : public InstanceMapScript
                 ThorimChestGUID                  = 0;
                 HodirRareCacheGUID               = 0;
                 HodirChestGUID                   = 0;
+                MimironElevatorGUID              = 0;
+                MimironButtonGUID                = 0;
                 LeviathanGateGUID                = 0;
                 AlgalonUniverseGUID              = 0;
                 AlgalonTrapdoorGUID              = 0;
@@ -149,6 +161,7 @@ class instance_ulduar : public InstanceMapScript
                 memset(AlgalonFloorGUID, 0, sizeof(AlgalonFloorGUID));
                 memset(XTToyPileGUIDs, 0, sizeof(XTToyPileGUIDs));
                 memset(AssemblyGUIDs, 0, sizeof(AssemblyGUIDs));
+                memset(MimironVehicleGUIDs, 0, sizeof(MimironVehicleGUIDs));
                 memset(RazorHarpoonGUIDs, 0, sizeof(RazorHarpoonGUIDs));
                 memset(ElderGUIDs, 0, sizeof(ElderGUIDs));
                 memset(BrainRoomDoorGUIDs, 0, sizeof(BrainRoomDoorGUIDs));
@@ -276,6 +289,21 @@ class instance_ulduar : public InstanceMapScript
                         break;
                     case NPC_MIMIRON:
                         MimironGUID = creature->GetGUID();
+                        break;
+                    case NPC_LEVIATHAN_MKII:
+                        MimironVehicleGUIDs[0] = creature->GetGUID();
+                        break;
+                    case NPC_VX_001:
+                        MimironVehicleGUIDs[1] = creature->GetGUID();
+                        break;
+                    case NPC_AERIAL_COMMAND_UNIT:
+                        MimironVehicleGUIDs[2] = creature->GetGUID();
+                        break;
+                    case NPC_COMPUTER:
+                        ComputerGUID = creature->GetGUID();
+                        break;
+                    case NPC_WORLD_TRIGGER_MIMIRON:
+                        MimironWorldTriggerGUID = creature->GetGUID();
                         break;
 
                     // Hodir
@@ -455,6 +483,12 @@ class instance_ulduar : public InstanceMapScript
                     case GO_HODIR_CHEST:
                         HodirChestGUID = gameObject->GetGUID();
                         break;
+                    case GO_MIMIRON_ELEVATOR:
+                        MimironElevatorGUID = gameObject->GetGUID();
+                        break;
+                    case GO_MIMIRON_BUTTON:
+                        MimironButtonGUID = gameObject->GetGUID();
+                        break;
                     case GO_LEVIATHAN_GATE:
                         LeviathanGateGUID = gameObject->GetGUID();
                         if (GetBossState(BOSS_LEVIATHAN) == DONE)
@@ -469,6 +503,9 @@ class instance_ulduar : public InstanceMapScript
                     case GO_HODIR_ICE_DOOR:
                     case GO_VEZAX_DOOR:
                     case GO_YOGG_SARON_DOOR:
+                    case GO_MIMIRON_DOOR_1:
+                    case GO_MIMIRON_DOOR_2:
+                    case GO_MIMIRON_DOOR_3:
                         AddDoor(gameObject, true);
                         break;
                     case GO_RAZOR_HARPOON_1:
@@ -553,6 +590,9 @@ class instance_ulduar : public InstanceMapScript
                     case GO_HODIR_ICE_DOOR:
                     case GO_VEZAX_DOOR:
                     case GO_YOGG_SARON_DOOR:
+                    case GO_MIMIRON_DOOR_1:
+                    case GO_MIMIRON_DOOR_2:
+                    case GO_MIMIRON_DOOR_3:
                     case GO_DOODAD_UL_SIGILDOOR_03:
                     case GO_DOODAD_UL_UNIVERSEFLOOR_01:
                     case GO_DOODAD_UL_UNIVERSEFLOOR_02:
@@ -833,6 +873,20 @@ class instance_ulduar : public InstanceMapScript
                         return AuriayaGUID;
                     case BOSS_MIMIRON:
                         return MimironGUID;
+                    case DATA_LEVIATHAN_MK_II:
+                        return MimironVehicleGUIDs[0];
+                    case DATA_VX_001:
+                        return MimironVehicleGUIDs[1];
+                    case DATA_AERIAL_COMMAND_UNIT:
+                        return MimironVehicleGUIDs[2];
+                    case DATA_COMPUTER:
+                        return ComputerGUID;
+                    case DATA_MIMIRON_WORLD_TRIGGER:
+                        return MimironWorldTriggerGUID;
+                    case DATA_MIMIRON_ELEVATOR:
+                        return MimironElevatorGUID;
+                    case DATA_MIMIRON_BUTTON:
+                        return MimironButtonGUID;
                     case BOSS_HODIR:
                         return HodirGUID;
                     case BOSS_THORIM:
