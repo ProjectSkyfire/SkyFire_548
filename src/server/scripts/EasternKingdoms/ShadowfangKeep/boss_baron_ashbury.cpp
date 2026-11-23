@@ -126,7 +126,13 @@ class boss_baron_ashbury : public CreatureScript
                 if (!UpdateVictim())
                     return;
 
-                if (IsHeroic() && !HealthAbovePct(20) && !bArchangel)
+                events.Update(diff);
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                // Checked after the casting state so a channeled Stay of Execution cannot swallow the form
+                if (IsHeroic() && !HealthAbovePct(25) && !bArchangel)
                 {
                     events.Reset();
                     bArchangel = true;
@@ -134,11 +140,6 @@ class boss_baron_ashbury : public CreatureScript
                     DoCast(me, SPELL_DARK_ARCHANGEL_FORM);
                     events.ScheduleEvent(EVENT_CALAMITY, 3000);
                 }
-
-                events.Update(diff);
-
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
@@ -159,7 +160,7 @@ class boss_baron_ashbury : public CreatureScript
                             break;
                         case EVENT_STAY_OF_EXECUTION:
                             Talk(SAY_STAY_OF_EXECUTION);
-                            DoCast(SelectTarget(SELECT_TARGET_NEAREST), SPELL_STAY_OF_EXECUTION);
+                            DoCast(me, SPELL_STAY_OF_EXECUTION);
                             bCombo = false;
                             break;
                         case EVENT_CALAMITY:
