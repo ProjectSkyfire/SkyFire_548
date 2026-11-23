@@ -10,6 +10,9 @@ set(scripts_STAT_SRCS
   Kalimdor/RazorfenDowns/razorfen_downs.cpp
   Kalimdor/RazorfenDowns/instance_razorfen_downs.cpp
   Kalimdor/RazorfenDowns/boss_amnennar_the_coldbringer.cpp
+  Kalimdor/RazorfenDowns/boss_tuten_kash.cpp
+  Kalimdor/RazorfenDowns/boss_mordresh_fire_eye.cpp
+  Kalimdor/RazorfenDowns/boss_glutton.cpp
   Kalimdor/RazorfenDowns/razorfen_downs.h
   #REWORKED IN CATACLYSM
   #Kalimdor/ZulFarrak/zulfarrak.h
