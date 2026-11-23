@@ -1,0 +1,13 @@
+-- Ulduar: the Winter Jormungars (34137) ride out of the Snow Mounds as vehicle passengers in the 5.4.8 data, so each of
+-- these static spawns doubled one that the Snow Mound seats. Spawns removed (guid: x y z on map 603, normal 10 player mask):
+-- 136282: 1847.27 -262.982 413.15
+-- 136288: 1921.84 -166.264 410.243
+-- 136296: 1883.92 -202.018 408.454
+-- 136300: 1940 -345.904 417.956
+-- 136306: 1785.64 -349.025 407.647
+-- 136312: 1865.86 -147.47 408.727
+-- 136317: 1842.28 -344.044 408.305
+-- 136325: 1944.57 -390.783 422.564
+-- 136333: 1866.67 -382.491 408.028
+-- 136341: 1892.89 -345.69 408.066
+DELETE FROM `creature` WHERE `guid` IN (136282,136288,136296,136300,136306,136312,136317,136325,136333,136341) AND `id` = 34137;
