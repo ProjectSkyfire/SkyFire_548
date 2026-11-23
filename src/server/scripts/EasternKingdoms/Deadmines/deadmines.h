@@ -46,6 +46,10 @@ enum NPCs
     // Misc
     NPC_FROST_BLOSSOM_BUNNY  = 47284,
     NPC_FIRE_BLOSSOM_BUNNY   = 47282,
+
+    // Vanessa VanCleef (heroic)
+    NPC_GENERAL_PURPOSE_DUMMY_JMF    = 45979,
+    NPC_GLUBTOK_NIGHTMARE_FIRE_BUNNY = 51594,
 };
 
 enum eSpells
