@@ -9,6 +9,7 @@
 #include "SpellMgr.h"
 #include "Player.h"
 #include "Creature.h"
+#include "GameObject.h"
 #include "PassiveAI.h"
 #include "Vehicle.h"
 
@@ -219,6 +220,79 @@ public:
     AuraScript* GetAuraScript() const override { return new Serving(); }
 };
 
+// Public camp feasts have no player owner. Player-created feasts retain the
+// template's normal party/raid checks and charge handling in GameObject::Use.
+class go_pilgrims_bountiful_feast : public GameObjectScript
+{
+public:
+    go_pilgrims_bountiful_feast() : GameObjectScript("go_pilgrims_bountiful_feast") { }
+
+    bool OnGossipHello(Player* player, GameObject* feast) override
+    {
+        if (!feast->GetDBTableGUIDLow() || feast->GetOwnerGUID())
+            return false;
+
+        player->RemoveAurasByType(SPELL_AURA_MOUNTED);
+        player->CastSpell(player, 66477, false);
+        return true;
+    }
+};
+
+class spell_pilgrims_bountiful_feast : public SpellScriptLoader
+{
+public:
+    spell_pilgrims_bountiful_feast() : SpellScriptLoader("spell_pilgrims_bountiful_feast") { }
+
+    class Feast : public SpellScript
+    {
+        PrepareSpellScript(Feast);
+
+        bool Validate(SpellInfo const*) override
+        {
+            return sSpellMgr->GetSpellInfo(66478) && sSpellMgr->GetSpellInfo(66041)
+                && sSpellMgr->GetSpellInfo(66622) && sSpellMgr->GetSpellInfo(66623);
+        }
+
+        SpellCastResult CheckCast()
+        {
+            Player* player = GetCaster()->ToPlayer();
+            if (!player || player->GetVehicleBase())
+                return SpellCastResult::SPELL_FAILED_BAD_TARGETS;
+            if (player->isMoving())
+                return SpellCastResult::SPELL_FAILED_MOVING;
+            return SpellCastResult::SPELL_CAST_OK;
+        }
+
+        void Handle(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Player* player = GetHitPlayer();
+            if (!player)
+                return;
+
+            player->SetStandState(UNIT_STAND_STATE_SIT);
+            // These regeneration auras store amounts per five seconds:
+            // twenty percent per five seconds gives four percent per second.
+            player->CastCustomSpell(66478, SPELLVALUE_BASE_POINT0,
+                player->CountPctFromMaxHealth(20), player, true);
+            if (uint32 mana = player->GetMaxPower(POWER_MANA))
+                player->CastCustomSpell(66041, SPELLVALUE_BASE_POINT0,
+                    CalculatePct(mana, 20), player, true);
+            // Refreshment's client-data timer awards Well Fed after ten seconds.
+            // Standing up interrupts it, along with the food and drink auras.
+            player->CastSpell(player, 66622, true);
+        }
+
+        void Register() override
+        {
+            OnCheckCast += SpellCheckCastFn(Feast::CheckCast);
+            OnEffectHitTarget += SpellEffectFn(Feast::Handle, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override { return new Feast(); }
+};
+
 class npc_pilgrims_wild_turkey : public CreatureScript
 {
 public:
@@ -255,5 +329,7 @@ void AddSC_event_pilgrims_bounty()
 {
     new spell_pilgrims_table_action();
     new spell_pilgrims_serving();
+    new go_pilgrims_bountiful_feast();
+    new spell_pilgrims_bountiful_feast();
     new npc_pilgrims_wild_turkey();
 }
