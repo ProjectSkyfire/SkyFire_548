@@ -95,12 +95,15 @@ public:
                 uiBoulderTossTimer = urand(9000, 15000);
             } else uiBoulderTossTimer -= diff;
 
-            if (uiGroundSpikeTimer <= diff)
+            if (IsHeroic())
             {
-                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                    DoCast(target, SPELL_GROUND_SPIKE);
-                uiGroundSpikeTimer = urand(12000, 17000);
-            } else uiGroundSpikeTimer -= diff;
+                if (uiGroundSpikeTimer <= diff)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                        DoCast(target, SPELL_GROUND_SPIKE);
+                    uiGroundSpikeTimer = urand(12000, 17000);
+                } else uiGroundSpikeTimer -= diff;
+            }
 
             if (uiStompTimer <= diff)
             {

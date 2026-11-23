@@ -5,23 +5,40 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
+#include "SpellAuraEffects.h"
+#include "SpellMgr.h"
 #include "halls_of_stone.h"
 
 enum Spells
 {
     SPELL_LIGHTING_RING                               = 51849, // Periodic Trigger (interval 2s) spell = 50841
+    SPELL_LIGHTING_RING_H                             = 59861,
     SPELL_LIGHTING_RING_1                             = 50840, // Periodic Trigger (interval 2s) spell = 50841
     SPELL_STATIC_CHARGE                               = 50834, // Periodic Trigger 2s interval, spell =50835
+    SPELL_STATIC_CHARGE_H                             = 59846,
     SPELL_CHAIN_LIGHTING                              = 50830,
+    SPELL_CHAIN_LIGHTING_H                            = 59844,
     SPELL_LIGHTING_SHIELD                             = 50831,
-    SPELL_FRENZY                                      = 28747
+    SPELL_LIGHTING_SHIELD_H                           = 59845,
+    SPELL_FRENZY                                      = 28747,
+    SPELL_TOXIC_VOLLEY                                = 50838,
+
+    // Each periodic dummy aura summons its creature at a random pipe
+    SPELL_SUMMON_IRON_DWARF_PERIODIC                  = 50789,
+    SPELL_SUMMON_IRON_TROGG_PERIODIC                  = 50792,
+    SPELL_SUMMON_IRON_TROGG_PERIODIC_H                = 59859,
+    SPELL_SUMMON_MALFORMED_OOZE_PERIODIC              = 50801,
+    SPELL_SUMMON_MALFORMED_OOZE_PERIODIC_H            = 59858,
+    SPELL_SUMMON_EARTHEN_DWARF_PERIODIC               = 50824
 };
 
 enum Yells
 {
     SAY_AGGRO                                         = 0,
     SAY_SLAY                                          = 1,
-    SAY_DEATH                                         = 2
+    SAY_DEATH                                         = 2,
+    EMOTE_FRENZY                                      = 3
 };
 
 enum SjonnirCreatures
@@ -45,8 +62,8 @@ enum Events
     EVENT_LIGHTNING_SHIELD,
     EVENT_STATIC_CHARGE,
     EVENT_LIGHTNING_RING,
-    EVENT_SUMMON,
-    EVENT_FRENZY,
+    EVENT_LIGHTNING_RING_FRENZY,
+    EVENT_FRENZY
 };
 
 Position const PipeLocations[] =
@@ -70,6 +87,10 @@ class boss_sjonnir : public CreatureScript
             {
                 _Reset();
                 abuseTheOoze = 0;
+                summonsTroggs = false;
+                summonsOozes = false;
+                summonsDwarfs = false;
+                frenzied = false;
             }
 
             void EnterCombat(Unit* who) OVERRIDE
@@ -82,21 +103,64 @@ class boss_sjonnir : public CreatureScript
 
                 _EnterCombat();
                 Talk(SAY_AGGRO);
+                DoCast(me, SPELL_SUMMON_IRON_DWARF_PERIODIC, true);
 
                 events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(3000, 8000));
-                events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, urand(20000, 25000));
+                events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, urand(5000, 15000));
                 events.ScheduleEvent(EVENT_STATIC_CHARGE, urand(20000, 25000));
-                events.ScheduleEvent(EVENT_LIGHTNING_RING, urand(30000, 35000));
-                events.ScheduleEvent(EVENT_SUMMON, 5000);
-                events.ScheduleEvent(EVENT_FRENZY, 300000);
+                events.ScheduleEvent(EVENT_LIGHTNING_RING, 30000);
             }
 
             void JustSummoned(Creature* summon) OVERRIDE
             {
-                summon->GetMotionMaster()->MovePoint(0, CenterPoint);
-                /*if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                    summon->AI()->AttackStart(target);*/
+                switch (summon->GetEntry())
+                {
+                    case NPC_FORGED_IRON_DWARF:
+                    case NPC_FORGED_IRON_TROGG:
+                        if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, 0.0f, true))
+                            summon->AI()->AttackStart(target);
+                        break;
+                    case NPC_EARTHEN_DWARF:
+                        summon->AI()->AttackStart(me);
+                        break;
+                    default:
+                        summon->GetMotionMaster()->MovePoint(0, CenterPoint);
+                        break;
+                }
+
                 summons.Summon(summon);
+            }
+
+            void DamageTaken(Unit* /*attacker*/, uint32& damage) OVERRIDE
+            {
+                if (!summonsTroggs && me->HealthBelowPctDamaged(75, damage))
+                {
+                    summonsTroggs = true;
+                    me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_SUMMON_IRON_DWARF_PERIODIC, me));
+                    DoCast(me, SPELL_SUMMON_IRON_TROGG_PERIODIC, true);
+                }
+
+                if (!summonsOozes && me->HealthBelowPctDamaged(50, damage))
+                {
+                    summonsOozes = true;
+                    me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_SUMMON_IRON_TROGG_PERIODIC, me));
+                    DoCast(me, SPELL_SUMMON_MALFORMED_OOZE_PERIODIC, true);
+                }
+
+                if (!summonsDwarfs && me->HealthBelowPctDamaged(25, damage))
+                {
+                    summonsDwarfs = true;
+                    me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_SUMMON_MALFORMED_OOZE_PERIODIC, me));
+                    DoCast(me, SPELL_SUMMON_EARTHEN_DWARF_PERIODIC, true);
+                }
+
+                if (!frenzied && me->HealthBelowPctDamaged(20, damage))
+                {
+                    frenzied = true;
+                    events.CancelEvent(EVENT_LIGHTNING_RING);
+                    events.ScheduleEvent(EVENT_FRENZY, 0);
+                    events.ScheduleEvent(EVENT_LIGHTNING_RING_FRENZY, 0);
+                }
             }
 
             void JustDied(Unit* /*killer*/) OVERRIDE
@@ -141,37 +205,28 @@ class boss_sjonnir : public CreatureScript
                     {
                         case EVENT_CHAIN_LIGHTNING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                DoCast(target, SPELL_CHAIN_LIGHTING);
+                                DoCast(target, DUNGEON_MODE(SPELL_CHAIN_LIGHTING, SPELL_CHAIN_LIGHTING_H));
                             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(10000, 15000));
                             break;
                         case EVENT_LIGHTNING_SHIELD:
-                            DoCast(me, SPELL_LIGHTING_SHIELD);
+                            if (!me->HasAura(DUNGEON_MODE(SPELL_LIGHTING_SHIELD, SPELL_LIGHTING_SHIELD_H)))
+                                DoCast(me, DUNGEON_MODE(SPELL_LIGHTING_SHIELD, SPELL_LIGHTING_SHIELD_H));
+                            events.ScheduleEvent(EVENT_LIGHTNING_SHIELD, urand(5000, 15000));
                             break;
                         case EVENT_STATIC_CHARGE:
-                            DoCastVictim(SPELL_STATIC_CHARGE);
+                            DoCastVictim(DUNGEON_MODE(SPELL_STATIC_CHARGE, SPELL_STATIC_CHARGE_H));
                             events.ScheduleEvent(EVENT_STATIC_CHARGE, urand(20000, 25000));
                             break;
                         case EVENT_LIGHTNING_RING:
-                            DoCast(me, SPELL_LIGHTING_RING);
-                            events.ScheduleEvent(EVENT_LIGHTNING_RING, urand(30000, 35000));
+                            DoCast(me, SPELL_LIGHTING_RING_1);
+                            events.ScheduleEvent(EVENT_LIGHTNING_RING, 50000);
                             break;
-                        case EVENT_SUMMON:
-                        {
-                            uint8 summonPipe = urand(0, 1);
-                            if (HealthAbovePct(75))
-                                me->SummonCreature(NPC_FORGED_IRON_DWARF, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                            else if (HealthAbovePct(50))
-                                me->SummonCreature(NPC_FORGED_IRON_TROGG, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                            else if (HealthAbovePct(25))
-                                me->SummonCreature(NPC_MALFORMED_OOZE, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-                            else
-                                me->SummonCreature(NPC_EARTHEN_DWARF, PipeLocations[summonPipe], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
-
-                            events.ScheduleEvent(EVENT_SUMMON, 20000);
+                        case EVENT_LIGHTNING_RING_FRENZY:
+                            DoCast(me, DUNGEON_MODE(SPELL_LIGHTING_RING, SPELL_LIGHTING_RING_H));
+                            events.ScheduleEvent(EVENT_LIGHTNING_RING_FRENZY, 15000);
                             break;
-                        }
                         case EVENT_FRENZY:
-                            /// @todo: add emote
+                            Talk(EMOTE_FRENZY);
                             DoCast(me, SPELL_FRENZY, true);
                             break;
                         default:
@@ -184,6 +239,10 @@ class boss_sjonnir : public CreatureScript
 
             private:
                 uint8 abuseTheOoze;
+                bool summonsTroggs;
+                bool summonsOozes;
+                bool summonsDwarfs;
+                bool frenzied;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
@@ -250,11 +309,33 @@ class npc_iron_sludge : public CreatureScript
             }
 
             InstanceScript* instance;
+            uint32 _toxicVolleyTimer;
+
+            void Reset() OVERRIDE
+            {
+                _toxicVolleyTimer = urand(3000, 6000);
+            }
 
             void JustDied(Unit* /*killer*/) OVERRIDE
             {
                 if (Creature* sjonnir = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_SJONNIR)))
                     sjonnir->AI()->DoAction(ACTION_OOZE_DEAD);
+            }
+
+            void UpdateAI(uint32 diff) OVERRIDE
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (_toxicVolleyTimer <= diff)
+                {
+                    DoCast(me, SPELL_TOXIC_VOLLEY);
+                    _toxicVolleyTimer = urand(3000, 6000);
+                }
+                else
+                    _toxicVolleyTimer -= diff;
+
+                DoMeleeAttackIfReady();
             }
         };
 
@@ -284,10 +365,58 @@ class achievement_abuse_the_ooze : public AchievementCriteriaScript
         }
 };
 
+class spell_sjonnir_periodic_summon : public AuraScript
+{
+    PrepareAuraScript(spell_sjonnir_periodic_summon);
+
+    void SummonAtPipe()
+    {
+        uint32 entry = 0;
+        switch (GetId())
+        {
+            case SPELL_SUMMON_IRON_DWARF_PERIODIC:
+                entry = NPC_FORGED_IRON_DWARF;
+                break;
+            case SPELL_SUMMON_IRON_TROGG_PERIODIC:
+            case SPELL_SUMMON_IRON_TROGG_PERIODIC_H:
+                entry = NPC_FORGED_IRON_TROGG;
+                break;
+            case SPELL_SUMMON_MALFORMED_OOZE_PERIODIC:
+            case SPELL_SUMMON_MALFORMED_OOZE_PERIODIC_H:
+                entry = NPC_MALFORMED_OOZE;
+                break;
+            case SPELL_SUMMON_EARTHEN_DWARF_PERIODIC:
+                entry = NPC_EARTHEN_DWARF;
+                break;
+            default:
+                return;
+        }
+
+        GetTarget()->SummonCreature(entry, PipeLocations[urand(0, 1)], TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000);
+    }
+
+    void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        SummonAtPipe();
+    }
+
+    void HandlePeriodic(AuraEffect const* /*aurEff*/)
+    {
+        SummonAtPipe();
+    }
+
+    void Register() OVERRIDE
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_sjonnir_periodic_summon::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_sjonnir_periodic_summon::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+    }
+};
+
 void AddSC_boss_sjonnir()
 {
     new boss_sjonnir();
     new npc_malformed_ooze();
     new npc_iron_sludge();
     new achievement_abuse_the_ooze();
+    RegisterAuraScript(spell_sjonnir_periodic_summon);
 }

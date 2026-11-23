@@ -90,7 +90,7 @@ enum Spells
 
     // Kadrak
     SPELL_GLARE_OF_THE_TRIBUNAL         = 50988,
-    H_SPELL_GLARE_OF_THE_TRIBUNAL       = 59868,
+    H_SPELL_GLARE_OF_THE_TRIBUNAL       = 59870,
 
     // Marnak
     SPELL_DARK_MATTER                   = 51012,
