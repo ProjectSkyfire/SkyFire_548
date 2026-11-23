@@ -77,6 +77,7 @@ set(scripts_STAT_SRCS
   Kalimdor/RuinsOfAhnQiraj/boss_buru.cpp
   Kalimdor/RuinsOfAhnQiraj/instance_ruins_of_ahnqiraj.cpp
   Kalimdor/RuinsOfAhnQiraj/boss_rajaxx.cpp
+  Kalimdor/RuinsOfAhnQiraj/npc_andorov.cpp
   Kalimdor/RuinsOfAhnQiraj/boss_ossirian.cpp
   Kalimdor/RuinsOfAhnQiraj/boss_ayamiss.cpp
   Kalimdor/RuinsOfAhnQiraj/boss_moam.cpp

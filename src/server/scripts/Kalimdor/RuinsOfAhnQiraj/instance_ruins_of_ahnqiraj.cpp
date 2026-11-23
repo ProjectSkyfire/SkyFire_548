@@ -5,7 +5,41 @@
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "CreatureAI.h"
+#include "Map.h"
+#include "Player.h"
+#include <set>
 #include "ruins_of_ahnqiraj.h"
+
+enum RajaxxWaves
+{
+    RAJAXX_WAVE_COUNT = 7,
+    RAJAXX_WAVE_SIZE  = 7
+};
+
+// The seven waves of General Rajaxx's encounter, by spawn guid; each wave is a captain with his warriors and needlers
+uint32 const RajaxxWaveSpawns[RAJAXX_WAVE_COUNT][RAJAXX_WAVE_SIZE] =
+{
+    { 9200200, 9200221, 9200199, 9200224, 9200223, 9200222, 9200071 },
+    { 9200208, 9200206, 9200205, 9200228, 9200227, 9200226, 9200040 },
+    { 9200203, 9200202, 9200201, 9200207, 9200225, 9200204, 9200041 },
+    { 9200232, 9200230, 9200229, 9200215, 9200214, 9200212, 9200042 },
+    { 9200211, 9200210, 9200209, 9200231, 9200213, 9200248, 9200073 },
+    { 9200220, 9200237, 9200219, 9200249, 9200238, 9200236, 9200072 },
+    { 9200218, 9200217, 9200216, 9200235, 9200234, 9200233, 9200112 }
+};
+
+// Where each wave stands; their grids are loaded with the first player so every member is known before the event
+float const RajaxxWavePos[RAJAXX_WAVE_COUNT][2] =
+{
+    { -9007.4f, 1556.87f },
+    { -9041.36f, 1512.58f },
+    { -9033.17f, 1604.66f },
+    { -9087.01f, 1530.26f },
+    { -9085.03f, 1622.4f },
+    { -9127.98f, 1558.54f },
+    { -9108.29f, 1584.17f }
+};
 
 class instance_ruins_of_ahnqiraj : public InstanceMapScript
 {
@@ -25,6 +59,12 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                 _ayamissGUID    = 0;
                 _ossirianGUID   = 0;
                 _paralyzedGUID  = 0;
+                _rajaxxEvent    = NOT_STARTED;
+                _checkTimer     = 1000;
+                _currentWave    = 0;
+                _idleChecks     = 0;
+                _andorovGUID    = 0;
+                _wavesLoaded    = false;
             }
 
             void OnCreatureCreate(Creature* creature) OVERRIDE
@@ -49,6 +89,167 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
                     case NPC_OSSIRIAN:
                         _ossirianGUID = creature->GetGUID();
                         break;
+                    case NPC_ANDOROV:
+                        _andorovGUID = creature->GetGUID();
+                        break;
+                }
+
+                for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
+                    for (uint8 i = 0; i < RAJAXX_WAVE_SIZE; ++i)
+                        if (RajaxxWaveSpawns[wave][i] == creature->GetDBTableGUIDLow())
+                        {
+                            _waveMembers[wave].insert(creature->GetGUID());
+                            if (creature->IsAlive())
+                                _waveAlive[wave].insert(creature->GetGUID());
+                        }
+            }
+
+            void OnPlayerEnter(Player* /*player*/) OVERRIDE
+            {
+                if (_wavesLoaded)
+                    return;
+
+                _wavesLoaded = true;
+                for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
+                    instance->LoadGrid(RajaxxWavePos[wave][0], RajaxxWavePos[wave][1]);
+            }
+
+            void OnUnitDeath(Unit* unit) OVERRIDE
+            {
+                if (unit->GetTypeId() != TypeID::TYPEID_UNIT)
+                    return;
+
+                for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
+                    if (_waveAlive[wave].erase(unit->GetGUID()))
+                    {
+                        // only the wave being fought moves the event on, so a wave pulled early cannot skip ahead
+                        if (_rajaxxEvent == IN_PROGRESS && wave == _currentWave && _waveAlive[wave].empty())
+                            AdvanceFrom(wave);
+                        return;
+                    }
+            }
+
+            void AdvanceFrom(uint8 wave)
+            {
+                while (true)
+                {
+                    // Rajaxx announces waves 3 to 7 as the previous one falls, then joins after the last
+                    if (wave >= 1)
+                        if (Creature* rajaxx = instance->GetCreature(_rajaxxGUID))
+                            rajaxx->AI()->DoAction(ACTION_WAVE_STARTS_3 + wave - 1);
+
+                    if (wave + 1 >= RAJAXX_WAVE_COUNT)
+                        return;
+
+                    _currentWave = wave + 1;
+                    if (!_waveAlive[_currentWave].empty())
+                    {
+                        SendWave(_currentWave);
+                        return;
+                    }
+                    ++wave;
+                }
+            }
+
+            void SendWave(uint8 wave)
+            {
+                for (std::set<uint64>::const_iterator itr = _waveAlive[wave].begin(); itr != _waveAlive[wave].end(); ++itr)
+                    if (Creature* creature = instance->GetCreature(*itr))
+                        if (creature->IsAlive() && !creature->IsInCombat())
+                            creature->AI()->DoZoneInCombat(creature, 200.0f);
+            }
+
+            bool AnyPlayerFighting() const
+            {
+                Map::PlayerList const& players = instance->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    if (Player* player = itr->GetSource())
+                        if (player->IsAlive() && !player->IsGameMaster() && player->IsInCombat())
+                            return true;
+                return false;
+            }
+
+            void SetData(uint32 type, uint32 data) OVERRIDE
+            {
+                if (type != DATA_RAJAXX_EVENT || data == _rajaxxEvent)
+                    return;
+
+                _rajaxxEvent = data;
+                _idleChecks = 0;
+                if (data == IN_PROGRESS)
+                {
+                    _currentWave = 0;
+                    if (_waveAlive[0].empty())
+                        AdvanceFrom(0);
+                    else
+                        SendWave(0);
+                }
+                else if (data == NOT_STARTED)
+                {
+                    // a wipe: survivors go home and every wave comes back for the next attempt
+                    _currentWave = 0;
+                    for (uint8 wave = 0; wave < RAJAXX_WAVE_COUNT; ++wave)
+                    {
+                        _waveAlive[wave].clear();
+                        for (std::set<uint64>::const_iterator itr = _waveMembers[wave].begin(); itr != _waveMembers[wave].end(); ++itr)
+                            if (Creature* creature = instance->GetCreature(*itr))
+                            {
+                                if (!creature->IsAlive())
+                                    creature->Respawn();
+                                else if (creature->IsInCombat())
+                                    creature->AI()->EnterEvadeMode();
+                                _waveAlive[wave].insert(*itr);
+                            }
+                    }
+                    if (Creature* rajaxx = instance->GetCreature(_rajaxxGUID))
+                        if (rajaxx->IsAlive() && rajaxx->IsInCombat())
+                            rajaxx->AI()->EnterEvadeMode();
+
+                    // Andorov must be there for the next attempt
+                    if (Creature* andorov = instance->GetCreature(_andorovGUID))
+                        if (!andorov->IsAlive())
+                            andorov->Respawn();
+                }
+            }
+
+            uint32 GetData(uint32 type) const OVERRIDE
+            {
+                return type == DATA_RAJAXX_EVENT ? _rajaxxEvent : 0;
+            }
+
+            void Update(uint32 diff) OVERRIDE
+            {
+                if (_checkTimer > diff)
+                {
+                    _checkTimer -= diff;
+                    return;
+                }
+                _checkTimer = 1000;
+
+                if (GetBossState(DATA_RAJAXX) == DONE)
+                    return;
+
+                if (_rajaxxEvent == NOT_STARTED)
+                {
+                    // engaging the first wave starts the event; a wave 1 member already dead counts too
+                    bool engaged = !_waveMembers[0].empty() && _waveAlive[0].size() < _waveMembers[0].size();
+                    for (std::set<uint64>::const_iterator itr = _waveAlive[0].begin(); !engaged && itr != _waveAlive[0].end(); ++itr)
+                        if (Creature* creature = instance->GetCreature(*itr))
+                            if (creature->IsInCombat())
+                                engaged = true;
+                    if (engaged)
+                        SetData(DATA_RAJAXX_EVENT, IN_PROGRESS);
+                }
+                else if (_rajaxxEvent == IN_PROGRESS)
+                {
+                    // a wipe needs ten seconds without a living player in combat, so the pause between waves is not one
+                    // a wave sent while nobody was in reach is sent again
+                    SendWave(_currentWave);
+
+                    if (AnyPlayerFighting())
+                        _idleChecks = 0;
+                    else if (++_idleChecks >= 10)
+                        SetData(DATA_RAJAXX_EVENT, NOT_STARTED);
                 }
             }
 
@@ -56,6 +257,9 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
             {
                 if (!InstanceScript::SetBossState(bossId, state))
                     return false;
+
+                if (bossId == DATA_RAJAXX && state == DONE)
+                    _rajaxxEvent = DONE;
 
                 return true;
             }
@@ -140,6 +344,14 @@ class instance_ruins_of_ahnqiraj : public InstanceMapScript
             uint64 _ayamissGUID;
             uint64 _ossirianGUID;
             uint64 _paralyzedGUID;
+            uint32 _rajaxxEvent;
+            uint32 _checkTimer;
+            uint8 _currentWave;
+            uint8 _idleChecks;
+            uint64 _andorovGUID;
+            bool _wavesLoaded;
+            std::set<uint64> _waveMembers[RAJAXX_WAVE_COUNT];
+            std::set<uint64> _waveAlive[RAJAXX_WAVE_COUNT];
         };
 
         InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
