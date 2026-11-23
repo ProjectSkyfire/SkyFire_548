@@ -139,6 +139,9 @@ public:
                         if (GameObject* go = instance->GetGameObject(shrineOfGelihastGUID))
                             go->RemoveFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     break;
+                case TYPE_KELRIS:
+                    encounter[1] = data;
+                    break;
                 case TYPE_AKU_MAI:
                     encounter[3] = data;
                     if (data == DONE)
@@ -194,7 +197,10 @@ public:
                 case DATA_EVENT:
                     deathTimes = data;
                     if (deathTimes == 18)
+                    {
+                        encounter[2] = DONE;
                         HandleGameObject(mainDoorGUID, true);
+                    }
                     break;
             }
         }
