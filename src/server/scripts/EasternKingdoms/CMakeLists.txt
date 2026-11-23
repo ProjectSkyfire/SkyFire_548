@@ -160,11 +160,11 @@ set(scripts_STAT_SRCS
   #EasternKingdoms/ZulAman/boss_hexlord.cpp
   #EasternKingdoms/ZulAman/boss_daakara.cpp
   #EasternKingdoms/ZulAman/boss_akilzon.cpp
-  #EasternKingdoms/ZulAman/instance_zulaman.cpp
+  EasternKingdoms/ZulAman/instance_zulaman.cpp
   #EasternKingdoms/ZulAman/boss_janalai.cpp
-  #EasternKingdoms/ZulAman/boss_nalorakk.cpp
+  EasternKingdoms/ZulAman/boss_nalorakk.cpp
   #EasternKingdoms/ZulAman/zulaman.cpp
-  #EasternKingdoms/ZulAman/zulaman.h
+  EasternKingdoms/ZulAman/zulaman.h
   EasternKingdoms/Karazhan/instance_karazhan.cpp
   EasternKingdoms/Karazhan/boss_nightbane.cpp
   EasternKingdoms/Karazhan/karazhan.cpp
