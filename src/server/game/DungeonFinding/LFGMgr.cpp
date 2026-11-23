@@ -667,7 +667,7 @@ namespace lfg
                 // if we have lockmap then there are no compatible dungeons
                 GetCompatibleDungeons(dungeons, players, joinData.lockmap, isContinue);
                 if (dungeons.empty())
-                    joinData.result = grp ? LFG_JOIN_INTERNAL_ERROR : LFG_JOIN_NOT_MEET_REQS;
+                    joinData.result = LFG_JOIN_NOT_MEET_REQS;
             }
         }
 
@@ -2448,7 +2448,8 @@ namespace lfg
                 continue;
 
             uint32 lockStatus = 0;
-            uint32 requiredItemLevel = dungeon->requiredItemLevel;
+            bool const isFlexibleRaid = IsFlexibleRaidData(*dungeon);
+            uint32 requiredItemLevel = isFlexibleRaid ? 0 : dungeon->requiredItemLevel;
             bool bypassLfgRequirements = IsDebugRequirementOverrideEnabled();
 
             if (denyJoin)
@@ -2470,7 +2471,7 @@ namespace lfg
                     lockStatus = LFG_LOCKSTATUS_NOT_IN_SEASON;
                 else if (AccessRequirement const* ar = sObjectMgr->GetAccessRequirement(dungeon->map, DifficultyID(dungeon->difficulty)))
                 {
-                    if (!requiredItemLevel)
+                    if (!requiredItemLevel && !isFlexibleRaid)
                         requiredItemLevel = ar->iLvl;
 
                     if (requiredItemLevel && playerItemLevel < requiredItemLevel)

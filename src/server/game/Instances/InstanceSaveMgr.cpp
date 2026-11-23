@@ -71,9 +71,10 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
         return NULL;
     }
 
-    if (difficulty >= 14)
+    // Flexible raids use difficulty 14, the final supported 5.4.8 difficulty.
+    if (difficulty > DIFFICULTY_FLEX)
     {
-        SF_LOG_ERROR("misc", "InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d, wrong dificalty %u!", mapId, instanceId, difficulty);
+        SF_LOG_ERROR("misc", "InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d, invalid difficulty %u!", mapId, instanceId, difficulty);
         return NULL;
     }
 
