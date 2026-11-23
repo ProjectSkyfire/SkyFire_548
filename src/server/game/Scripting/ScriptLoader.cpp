@@ -352,6 +352,10 @@ void AddSC_teldrassil();
 void AddSC_the_barrens();
 void AddSC_thunder_bluff();
 void AddSC_winterspring();
+void AddSC_instance_hour_of_twilight();                    //CoT Hour of Twilight
+void AddSC_boss_arcurion();
+void AddSC_boss_asira_dawnslayer();
+void AddSC_boss_archbishop_benedictus();
 
 // Northrend
 
@@ -1096,6 +1100,10 @@ void AddKalimdorScripts()
     AddSC_mount_hyjal();
     AddSC_feralas();
     AddSC_felwood();
+    AddSC_instance_hour_of_twilight();                    //CoT Hour of Twilight
+    AddSC_boss_arcurion();
+    AddSC_boss_asira_dawnslayer();
+    AddSC_boss_archbishop_benedictus();
 #endif
 }
 
