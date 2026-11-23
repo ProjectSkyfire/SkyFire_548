@@ -46,6 +46,13 @@ namespace
         return sSpellMgr->GetSpellInfo(61849) && sSpellMgr->GetSpellInfo(61826);
     }
 
+    Unit* GetTable(Unit* chair)
+    {
+        // Dining chairs are independent vehicles. Boarding a vehicle accessory
+        // makes the client place the diner relative to the table instead.
+        return chair ? chair->FindNearestCreature(32823, 6.0f) : nullptr;
+    }
+
     Unit* GetChair(Unit* unit)
     {
         if (!unit)
@@ -56,9 +63,8 @@ namespace
             return nullptr;
         for (Dish const& dish : Dishes)
             if (unit->GetEntry() == dish.Chair)
-                if (Unit* table = unit->GetVehicleBase())
-                    if (table->GetEntry() == 32823)
-                        return unit;
+                if (GetTable(unit))
+                    return unit;
         return nullptr;
     }
 
@@ -70,11 +76,13 @@ namespace
 
     Unit* GetPlate(Unit* chair)
     {
-        Unit* table = chair->GetVehicleBase();
+        Unit* table = GetTable(chair);
         if (table && table->GetVehicleKit())
             if (Unit* holder = table->GetVehicleKit()->GetPassenger(6))
                 if (holder->GetVehicleKit())
-                    return holder->GetVehicleKit()->GetPassenger(chair->GetTransSeat());
+                    for (uint8 seat = 0; seat < 5; ++seat)
+                        if (Dishes[seat].Chair == chair->GetEntry())
+                            return holder->GetVehicleKit()->GetPassenger(seat);
         return nullptr;
     }
 }
@@ -102,7 +110,7 @@ public:
             if (GetSpellInfo()->Id == dish->Pass)
             {
                 Unit* recipient = GetChair(GetHitUnit());
-                if (!recipient || recipient == chair || recipient->GetVehicleBase() != chair->GetVehicleBase()
+                if (!recipient || recipient == chair || GetTable(recipient) != GetTable(chair)
                     || chair->GetEntry() != dish->Chair)
                     return;
                 chair->CastSpell(recipient, dish->Serving, true);

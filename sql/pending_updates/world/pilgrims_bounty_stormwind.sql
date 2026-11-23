@@ -4,7 +4,22 @@
 UPDATE `game_event` SET `start_time`='2013-01-01 00:00:00', `end_time`='2037-12-31 23:59:59',
  `length`=10080 WHERE `eventEntry`=26 AND `holiday`=404;
 
--- Chairs are summoned by their parent table's existing vehicle accessories.
+-- Chairs must be independent vehicles so diners attach to the seat, not a nested table vehicle.
+DELETE FROM `vehicle_template_accessory` WHERE `entry`=32823 AND `accessory_entry` IN (34812,34819,34822,34823,34824);
+-- Clear the earlier branch-only attached-chair script when updating an existing test install.
+UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=32823 AND `ScriptName`='npc_pilgrims_table';
+-- 29168 is an invisible stalker, not an alternative chair appearance.
+-- Random template model selection otherwise hides roughly half the seats.
+UPDATE `creature_template` SET `modelid1`=29205, `modelid2`=0, `modelid3`=0, `modelid4`=0
+ WHERE `entry` IN (34812,34819,34822,34823,34824);
+-- Rooting prevents travel; the separate turn lock preserves the seat's facing.
+UPDATE `creature_template` SET `unit_flags2`=`unit_flags2` | 32768
+ WHERE `entry` IN (34812,34819,34822,34823,34824);
+-- Keep the chair rooted when its occupant receives vehicle control for the food bar.
+-- Preserve the food auras and avoid duplicating the root on repeated imports.
+UPDATE `creature_template_addon` SET `auras`=TRIM(CONCAT(COALESCE(`auras`,''),' 18373'))
+ WHERE `entry` IN (34812,34819,34822,34823,34824)
+ AND CONCAT(' ',COALESCE(`auras`,''),' ') NOT LIKE '% 18373 %';
 -- The five eating abilities allow players to consume food passed to their seat.
 UPDATE `creature_template` SET `spell1`=66250, `spell2`=61784, `spell3`=61785, `spell4`=61786, `spell5`=61787, `spell6`=61788 WHERE `entry`=34812;
 UPDATE `creature_template` SET `spell1`=66261, `spell2`=61784, `spell3`=61785, `spell4`=61786, `spell5`=61787, `spell6`=61788 WHERE `entry`=34823;
@@ -37,8 +52,8 @@ INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_pilgrims_wild_turkey' WHERE `entry`=32820;
 
 -- Reserved spawn range for the Stormwind camp and initial Elwynn turkey population.
-DELETE FROM `game_event_creature` WHERE `eventEntry`=26 AND `guid` BETWEEN 9001000 AND 9001040;
-DELETE FROM `creature` WHERE `guid` BETWEEN 9001000 AND 9001040 AND `id` IN (32823,34653,34675,34682,34710,34744,35337,32820);
+DELETE FROM `game_event_creature` WHERE `eventEntry`=26 AND `guid` BETWEEN 9001000 AND 9001055;
+DELETE FROM `creature` WHERE `guid` BETWEEN 9001000 AND 9001055 AND `id` IN (32823,34653,34675,34682,34710,34744,35337,32820,34812,34819,34822,34823,34824);
 INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseId`,`phaseGroup`,`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`MovementType`) VALUES
 (9001000,32823,0,1,0,0,0,-9125.173828125,343.607635498046875,94.2982177734375,0,120,0,0),
 (9001001,32823,0,1,0,0,0,-9106.7939453125,326.197906494140625,93.49233245849609375,2.042035102844238281,120,0,0),
@@ -80,7 +95,22 @@ INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseId`,`phaseGroup`,`eq
 (9001037,32820,0,1,0,0,0,-9583.68,16.759,60.008,5.60584,120,10,1),
 (9001038,32820,0,1,0,0,0,-9563.28,63.7659,60.0421,3.02195,120,10,1),
 (9001039,32820,0,1,0,0,0,-9441.79,-40.5256,61.2046,4.82209,120,10,1),
-(9001040,32820,0,1,0,0,0,-9214.26,97.916,75.3098,3.14159,120,10,1);
+(9001040,32820,0,1,0,0,0,-9214.26,97.916,75.3098,3.14159,120,10,1),
+(9001041,34812,0,1,0,0,0,-9121.573828,345.407635,94.221298,3.141593,120,0,0),
+(9001042,34823,0,1,0,0,0,-9121.573828,341.807635,94.200674,3.141593,120,0,0),
+(9001043,34819,0,1,0,0,0,-9127.693828,343.607635,94.104451,0.000000,120,0,0),
+(9001044,34824,0,1,0,0,0,-9125.263828,340.367635,94.149248,1.570796,120,0,0),
+(9001045,34822,0,1,0,0,0,-9125.353828,346.847635,94.174757,4.712389,120,0,0),
+(9001046,34812,0,1,0,0,0,-9110.032123,328.588347,93.325572,5.183628,120,0,0),
+(9001047,34823,0,1,0,0,0,-9106.824499,330.222713,93.538823,5.183628,120,0,0),
+(9001048,34819,0,1,0,0,0,-9105.649890,323.952570,93.495320,2.042035,120,0,0),
+(9001049,34824,0,1,0,0,0,-9103.866225,327.588645,93.683032,3.612831,120,0,0),
+(9001050,34822,0,1,0,0,0,-9109.599088,324.566596,93.322580,0.471239,120,0,0),
+(9001051,34812,0,1,0,0,0,-9116.587755,338.307498,93.686577,4.415683,120,0,0),
+(9001052,34823,0,1,0,0,0,-9113.145058,337.254959,93.436416,4.415683,120,0,0),
+(9001053,34819,0,1,0,0,0,-9116.655722,331.928644,93.256076,1.274090,120,0,0),
+(9001054,34824,0,1,0,0,0,-9112.846831,333.305180,93.262120,2.844887,120,0,0),
+(9001055,34822,0,1,0,0,0,-9119.070000,335.113681,93.563791,5.986479,120,0,0);
 
 INSERT INTO `game_event_creature` (`eventEntry`,`guid`) VALUES
 (26,9001000),
@@ -123,7 +153,22 @@ INSERT INTO `game_event_creature` (`eventEntry`,`guid`) VALUES
 (26,9001037),
 (26,9001038),
 (26,9001039),
-(26,9001040);
+(26,9001040),
+(26,9001041),
+(26,9001042),
+(26,9001043),
+(26,9001044),
+(26,9001045),
+(26,9001046),
+(26,9001047),
+(26,9001048),
+(26,9001049),
+(26,9001050),
+(26,9001051),
+(26,9001052),
+(26,9001053),
+(26,9001054),
+(26,9001055);
 
 -- Turkey positions reuse existing Elwynn critter ground locations, with random roaming.
 -- They are a reconstructed initial population, not an exact retail spawn capture.
