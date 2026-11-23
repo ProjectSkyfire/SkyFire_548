@@ -11,6 +11,8 @@ SDCategory: Karazhan
 EndScriptData */
 
 #include "ScriptMgr.h"
+#include "ScriptedCreature.h"
+#include "Player.h"
 #include "InstanceScript.h"
 #include "karazhan.h"
 
@@ -41,7 +43,7 @@ public:
         return new instance_karazhan_InstanceMapScript(map);
     }
 
-    struct instance_karazhan_InstanceMapScript : public InstanceScript
+    struct instance_karazhan_InstanceMapScript : public InstanceScript, public karazhan_accessor
     {
         instance_karazhan_InstanceMapScript(Map* map) : InstanceScript(map) { }
 
@@ -66,6 +68,26 @@ public:
         uint64 MastersTerraceDoor[2];
         uint64 ImageGUID;
         uint64 DustCoveredChest;
+
+        uint32 teamInInstance = 0;                                  // Team of the first player to enter, used for the Chess event
+        uint32 chessResetTimer = 1;
+        uint32 chessKickTimer = 0;
+        uint8 allianceStalkerCount = 0;
+        uint8 hordeStalkerCount = 0;
+        bool friendlyGame = false;
+
+        uint64 hordeStatusGuid = 0;
+        uint64 allianceStatusGuid = 0;
+        uint64 echoOfMedivhGUID = 0;
+        uint64 chessVictoryControllerGUID = 0;
+
+        std::list<uint64> chessHordeStalkerList;
+        std::list<uint64> chessAllianceStalkerList;
+        std::list<uint64> chessPiecesAlliance;
+        std::list<uint64> chessPiecesHorde;
+        std::list<uint64> boardSquares;
+        std::vector<uint64> hordeStalkers;
+        std::vector<uint64> allianceStalkers;
 
         void Initialize() OVERRIDE
         {
@@ -104,6 +126,21 @@ public:
             return false;
         }
 
+        void OnPlayerEnter(Player* player) OVERRIDE
+        {
+            if (!teamInInstance)
+                teamInInstance = player->GetTeam();
+
+            player->RemoveAurasDueToSpell(SPELL_CONTROL_PIECE);
+        }
+
+        // A creature that was unloaded with its grid gets a new guid when it spawns again
+        void AddChessGuid(std::list<uint64>& guids, uint64 guid)
+        {
+            guids.remove_if([this](uint64 oldGuid) { return !instance->GetCreature(oldGuid); });
+            guids.push_back(guid);
+        }
+
         void OnCreatureCreate(Creature* creature) OVERRIDE
         {
             switch (creature->GetEntry())
@@ -111,6 +148,42 @@ public:
                 case 17229:   m_uiKilrekGUID = creature->GetGUID();      break;
                 case 15688:   m_uiTerestianGUID = creature->GetGUID();   break;
                 case 15687:   m_uiMoroesGUID = creature->GetGUID();      break;
+                case NPC_INVISIBLE_STALKER:
+                    AddChessGuid(creature->GetPositionY() < -1870.0f ? chessHordeStalkerList : chessAllianceStalkerList, creature->GetGUID());
+                    break;
+                case NPC_CHESS_STATUS_BAR:
+                    if (creature->GetPositionY() < -1870.0f)
+                        hordeStatusGuid = creature->GetGUID();
+                    else
+                        allianceStatusGuid = creature->GetGUID();
+                    break;
+                case NPC_HUMAN_CHARGER:
+                case NPC_HUMAN_CLERIC:
+                case NPC_HUMAN_CONJURER:
+                case NPC_HUMAN_FOOTMAN:
+                case NPC_CONJURED_WATER_ELEMENTAL:
+                case NPC_KING_LLANE:
+                    AddChessGuid(chessPiecesAlliance, creature->GetGUID());
+                    break;
+                case NPC_ORC_GRUNT:
+                case NPC_ORC_NECROLYTE:
+                case NPC_ORC_WARLOCK:
+                case NPC_ORC_WOLF:
+                case NPC_SUMMONED_DAEMON:
+                case NPC_WARCHIEF_BLACKHAND:
+                    AddChessGuid(chessPiecesHorde, creature->GetGUID());
+                    break;
+                case NPC_ECHO_MEDIVH:
+                    echoOfMedivhGUID = creature->GetGUID();
+                    break;
+                case NPC_CHESS_VICTORY_CONTROLLER:
+                    chessVictoryControllerGUID = creature->GetGUID();
+                    break;
+                case NPC_SQUARE_WHITE:
+                case NPC_SQUARE_BLACK:
+                    creature->SetFloatValue(UNIT_FIELD_COMBAT_REACH, 0.0f);
+                    AddChessGuid(boardSquares, creature->GetGUID());
+                    break;
             }
         }
 
@@ -137,8 +210,43 @@ public:
                 case TYPE_NETHERSPITE:          m_auiEncounter[8] = uiData; break;
                 case TYPE_CHESS:
                     if (uiData == DONE)
-                        DoRespawnGameObject(DustCoveredChest, DAY);
-                    m_auiEncounter[9]  = uiData;
+                    {
+                        // A friendly game (SPECIAL) gives neither the chest nor the credit again
+                        if (GetData(TYPE_CHESS) != SPECIAL)
+                        {
+                            HandleGameObject(m_uiGamesmansExitDoor, true);
+                            DoRespawnGameObject(DustCoveredChest, DAY);
+                            UpdateEncounterState(EncounterCreditType::ENCOUNTER_CREDIT_KILL_CREATURE, NPC_CHESS_STATUS_BAR, NULL);
+                        }
+
+                        if (Creature* medivh = instance->GetCreature(echoOfMedivhGUID))
+                        {
+                            medivh->CastSpell(medivh, SPELL_FORCE_KILL_BUNNY, true);
+                            medivh->CastSpell(medivh, SPELL_GAME_OVER, true);
+                            medivh->CastSpell(medivh, SPELL_CLEAR_BOARD, true);
+                        }
+                        if (Creature* controller = instance->GetCreature(chessVictoryControllerGUID))
+                            controller->CastSpell(controller, SPELL_VICTORY_VISUAL_CHESS, true);
+
+                        friendlyGame = false;
+                        chessResetTimer = GetData(TYPE_CHESS) != SPECIAL ? 35000 : 5000;
+                        chessKickTimer = chessResetTimer + 1 - 2500;
+                    }
+                    else if (uiData == FAIL)
+                    {
+                        if (Creature* medivh = instance->GetCreature(echoOfMedivhGUID))
+                        {
+                            medivh->CastSpell(medivh, SPELL_GAME_OVER, true);
+                            medivh->CastSpell(medivh, SPELL_CLEAR_BOARD, true);
+                        }
+
+                        chessResetTimer = 5000;
+                        chessKickTimer = chessResetTimer + 1 - 2500;
+                    }
+
+                    m_auiEncounter[9] = uiData;
+                    if (uiData == IN_PROGRESS || uiData == SPECIAL)
+                        DoPrepareChessEvent();
                     break;
                 case TYPE_MALCHEZZAR:           m_auiEncounter[10] = uiData; break;
                 case TYPE_NIGHTBANE:
@@ -195,7 +303,11 @@ public:
                 case 184517:   m_uiLibraryDoor          = go->GetGUID();         break;
                 case 185521:   m_uiMassiveDoor          = go->GetGUID();         break;
                 case 184276:   m_uiGamesmansDoor        = go->GetGUID();         break;
-                case 184277:   m_uiGamesmansExitDoor    = go->GetGUID();         break;
+                case 184277:
+                    m_uiGamesmansExitDoor = go->GetGUID();
+                    if (m_auiEncounter[9] == DONE || m_auiEncounter[9] == SPECIAL)
+                        HandleGameObject(m_uiGamesmansExitDoor, true, go);
+                    break;
                 case 185134:   m_uiNetherspaceDoor      = go->GetGUID();         break;
                 case 184274:    MastersTerraceDoor[0] = go->GetGUID();  break;
                 case 184280:    MastersTerraceDoor[1] = go->GetGUID();  break;
@@ -270,9 +382,196 @@ public:
                 case DATA_MASTERS_TERRACE_DOOR_1:   return MastersTerraceDoor[0];
                 case DATA_MASTERS_TERRACE_DOOR_2:   return MastersTerraceDoor[1];
                 case DATA_IMAGE_OF_MEDIVH:          return ImageGUID;
+                case NPC_ECHO_MEDIVH:               return echoOfMedivhGUID;
+                case NPC_CHESS_VICTORY_CONTROLLER:  return chessVictoryControllerGUID;
             }
 
             return 0;
+        }
+
+        bool SetChessPiecesToSquares(std::list<uint64> const& pieces)
+        {
+            for (uint64 guid : pieces)
+            {
+                Creature* chessPiece = instance->GetCreature(guid);
+                if (!chessPiece)
+                    continue;
+
+                chessPiece->RemoveAllAuras();
+
+                Creature* square = GetClosestCreatureWithEntry(chessPiece, NPC_SQUARE_BLACK, 2.0f);
+                if (!square)
+                    square = GetClosestCreatureWithEntry(chessPiece, NPC_SQUARE_WHITE, 2.0f);
+                if (!square)
+                {
+                    SF_LOG_ERROR("scripts", "Instance Karazhan: Failed to find the chess square for creature %u.", chessPiece->GetDBTableGUIDLow());
+                    return false;
+                }
+
+                // lets the piece prepare for the start position of its square
+                chessPiece->AI()->SetGUID(square->GetGUID());
+            }
+
+            return true;
+        }
+
+        void SortChessStalkers(std::list<uint64> const& stalkerGuids, uint64 statusGuid, std::vector<uint64>& sorted)
+        {
+            std::list<Creature*> stalkers;
+            for (uint64 guid : stalkerGuids)
+                if (Creature* stalker = instance->GetCreature(guid))
+                    stalkers.push_back(stalker);
+
+            if (stalkers.empty())
+            {
+                SF_LOG_ERROR("scripts", "Instance Karazhan: Failed to find the stalkers of one side for the Chess Event.");
+                return;
+            }
+
+            Creature* status = instance->GetCreature(statusGuid);
+            if (!status)
+                return;
+
+            stalkers.sort(Skyfire::ObjectDistanceOrderPred(status));
+            for (Creature* stalker : stalkers)
+                sorted.push_back(stalker->GetGUID());
+        }
+
+        void DoPrepareChessEvent() OVERRIDE
+        {
+            for (uint64 guid : boardSquares)
+                if (Creature* square = instance->GetCreature(guid))
+                    square->RemoveAllAuras();
+
+            if (!SetChessPiecesToSquares(chessPiecesAlliance) || !SetChessPiecesToSquares(chessPiecesHorde))
+                return;
+
+            allianceStalkerCount = 0;
+            hordeStalkerCount = 0;
+            hordeStalkers.clear();
+            allianceStalkers.clear();
+
+            // the dead pieces line up next to the board in the order of the stalkers from their status bar
+            SortChessStalkers(chessHordeStalkerList, hordeStatusGuid, hordeStalkers);
+            SortChessStalkers(chessAllianceStalkerList, allianceStatusGuid, allianceStalkers);
+        }
+
+        uint32 GetPlayerTeam() OVERRIDE
+        {
+            if (!teamInInstance)
+                if (!instance->GetPlayers().isEmpty())
+                    if (Player* player = instance->GetPlayers().begin()->GetSource())
+                        teamInInstance = player->GetTeam();
+
+            return teamInInstance;
+        }
+
+        bool IsFriendlyGameReady() const OVERRIDE { return friendlyGame; }
+
+        void DoMoveChessPieceToSides(uint32 spellId, uint32 faction) OVERRIDE
+        {
+            std::vector<uint64> const& stalkers = faction == FACTION_ID_CHESS_ALLIANCE ? allianceStalkers : hordeStalkers;
+            uint8& count = faction == FACTION_ID_CHESS_ALLIANCE ? allianceStalkerCount : hordeStalkerCount;
+
+            Creature* status = instance->GetCreature(faction == FACTION_ID_CHESS_ALLIANCE ? allianceStatusGuid : hordeStatusGuid);
+            if (!status || stalkers.size() < count + 1U)
+                return;
+
+            // the transform spell needs this exact stalker, or the pieces would not line up
+            if (Creature* stalker = instance->GetCreature(stalkers[count]))
+            {
+                status->CastSpell(stalker, spellId, true);
+                ++count;
+            }
+        }
+
+        void FinishChessEvent(uint32 faction) OVERRIDE
+        {
+            // the side of the lost king applauds the winner
+            for (uint64 guid : (faction == FACTION_ID_CHESS_ALLIANCE ? hordeStalkers : allianceStalkers))
+                if (Creature* stalker = instance->GetCreature(guid))
+                    stalker->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_APPLAUD);
+        }
+
+        std::list<uint64> const& GetChessPiecesByFaction(uint32 faction) const OVERRIDE
+        {
+            return faction == FACTION_ID_CHESS_ALLIANCE ? chessPiecesAlliance : chessPiecesHorde;
+        }
+
+        void ResetChessPieces(std::list<uint64> const& pieces)
+        {
+            for (uint64 guid : pieces)
+            {
+                if (Creature* piece = instance->GetCreature(guid))
+                {
+                    piece->StopMoving();
+                    piece->GetMotionMaster()->Clear();
+                    piece->GetMotionMaster()->MoveIdle();
+                    piece->RemoveAllAuras();
+                    piece->Respawn(true);
+                }
+            }
+        }
+
+        void ResetChessStalkers(std::list<uint64> const& stalkers)
+        {
+            for (uint64 guid : stalkers)
+            {
+                if (Creature* stalker = instance->GetCreature(guid))
+                {
+                    stalker->RemoveAllAuras();
+                    stalker->Respawn(true);
+                    stalker->SetUInt32Value(UNIT_FIELD_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                }
+            }
+        }
+
+        void Update(uint32 diff) OVERRIDE
+        {
+            if (chessKickTimer)
+            {
+                if (chessKickTimer <= diff)
+                {
+                    for (uint64 guid : chessPiecesAlliance)
+                        if (Creature* piece = instance->GetCreature(guid))
+                            piece->RemoveAurasByType(SPELL_AURA_MOD_CHARM);
+
+                    for (uint64 guid : chessPiecesHorde)
+                        if (Creature* piece = instance->GetCreature(guid))
+                            piece->RemoveAurasByType(SPELL_AURA_MOD_CHARM);
+
+                    chessKickTimer = 0;
+                }
+                else
+                    chessKickTimer -= diff;
+            }
+
+            if (chessResetTimer)
+            {
+                // the first reset waits until the board is completely loaded
+                if (chessPiecesAlliance.size() != 16 || chessPiecesHorde.size() != 16 || chessAllianceStalkerList.size() != 16 || chessHordeStalkerList.size() != 16)
+                    return;
+
+                if (chessResetTimer <= diff)
+                {
+                    ResetChessPieces(chessPiecesAlliance);
+                    ResetChessPieces(chessPiecesHorde);
+                    ResetChessStalkers(chessAllianceStalkerList);
+                    ResetChessStalkers(chessHordeStalkerList);
+
+                    if (Creature* controller = instance->GetCreature(chessVictoryControllerGUID))
+                        controller->RemoveAurasDueToSpell(SPELL_VICTORY_VISUAL_CHESS);
+
+                    if (GetData(TYPE_CHESS) == FAIL)
+                        SetData(TYPE_CHESS, NOT_STARTED);
+                    else if (GetData(TYPE_CHESS) == DONE)
+                        friendlyGame = true;
+
+                    chessResetTimer = 0;
+                }
+                else
+                    chessResetTimer -= diff;
+            }
         }
 
         void Load(char const* chrIn) OVERRIDE
@@ -292,6 +591,9 @@ public:
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                 if (m_auiEncounter[i] == IN_PROGRESS)                // Do not load an encounter as "In Progress" - reset it instead.
                     m_auiEncounter[i] = NOT_STARTED;
+
+            if (m_auiEncounter[9] == SPECIAL)
+                m_auiEncounter[9] = DONE;
             OUT_LOAD_INST_DATA_COMPLETE;
         }
     };
