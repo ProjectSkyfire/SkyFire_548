@@ -29,6 +29,7 @@ enum Spells
 
     SPELL_TOXIC_COAGULANT_AURA          = 93572,
     SPELL_TOXIC_COAGULANT_DMG           = 93617,
+    SPELL_FULLY_COAGULATED              = 93660,
 
     SPELL_TOXIC_CATALYST_AURA           = 93573,
     SPELL_TOXIC_CATALYST_DMG            = 93689,
@@ -124,7 +125,7 @@ class boss_lord_valden : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
             {
-                if (me->HealthBelowPct(30) && !bRed && IsHeroic())
+                if (me->HealthBelowPct(35) && !bRed && IsHeroic())
                 {
                     bRed = true;
                     DoCast(me, SPELL_CONJURE_MYSTERY_TOXIN_2);
@@ -166,7 +167,7 @@ class boss_lord_valden : public CreatureScript
                             events.ScheduleEvent(EVENT_CONJURE_FROST_MIXTURE, urand(8000, 14000));
                             break;
                         case EVENT_CONJURE_MYSTERY_TOXIN:
-                            DoCast(me, SPELL_CONJURE_MYSTERY_TOXIN_1);
+                            DoCast(me, bRed ? SPELL_CONJURE_MYSTERY_TOXIN_2 : SPELL_CONJURE_MYSTERY_TOXIN_1);
                             events.ScheduleEvent(EVENT_CONJURE_MYSTERY_TOXIN, 25000);
                             break;
                     }
@@ -232,8 +233,22 @@ class spell_valden_toxic_coagulant : public SpellScriptLoader
                         target->RemoveAuraFromStack(SPELL_TOXIC_COAGULANT_DMG);
             }
 
+            // the last stack coagulates the toxin and stuns the player
+            void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (GetStackAmount() < GetSpellInfo()->StackAmount)
+                    return;
+
+                if (Unit* target = GetTarget())
+                {
+                    target->CastSpell(target, SPELL_FULLY_COAGULATED, true);
+                    Remove();
+                }
+            }
+
             void Register() OVERRIDE
             {
+                AfterEffectApply += AuraEffectApplyFn(spell_valden_toxic_coagulant_AuraScript::HandleApply, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_valden_toxic_coagulant_AuraScript::HandleTick, EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
