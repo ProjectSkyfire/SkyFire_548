@@ -30,6 +30,8 @@ enum WhitemaneSpells
 
 enum WhitemaneEncounter
 {
+    QUEST_UNTO_DUST = 31514, QUEST_UNTO_DUST_HEROIC = 31516,
+    NPC_BLADES_CREDIT = 64835, NPC_BLADES_CREDIT_HEROIC = 64840,
     ACTION_INTRO = 1, ACTION_REVIVED, ACTION_LAST_PHASE, ACTION_RESET_PAIR, ACTION_OUTRO,
     EVENT_FLASH = 1, EVENT_DASH, EVENT_INTRO, EVENT_SMITE, EVENT_HEAL, EVENT_MASS_RESURRECTION,
     EVENT_REVIVE, EVENT_OUTRO_MOVE, EVENT_OUTRO_SAY, EVENT_OUTRO_CORPSE, EVENT_OUTRO_LINE,
@@ -310,6 +312,18 @@ public:
             me->CastSpell(me, SPELL_SOUL_MISSILE, true);
             if (Creature* hooded = instance->instance->GetCreature(instance->GetData64(NPC_HOODED_CRUSADER_OUTRO)))
                 hooded->AI()->DoAction(ACTION_OUTRO);
+            CreditBladesQuest();
+        }
+
+        // The quest's own credit spell does not exist in 5.4.8, so credit the blades objective directly.
+        void CreditBladesQuest()
+        {
+            uint32 const questId = IsHeroic() ? QUEST_UNTO_DUST_HEROIC : QUEST_UNTO_DUST;
+            uint32 const creditEntry = IsHeroic() ? NPC_BLADES_CREDIT_HEROIC : NPC_BLADES_CREDIT;
+            for (MapReference const& ref : me->GetMap()->GetPlayers())
+                if (Player* player = ref.GetSource())
+                    if (player->GetQuestStatus(questId) == QUEST_STATUS_INCOMPLETE)
+                        player->KilledMonsterCredit(creditEntry);
         }
         void UpdateAI(uint32 diff) OVERRIDE
         {
