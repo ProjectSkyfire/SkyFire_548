@@ -249,6 +249,7 @@ void AddSC_boss_venoxis();
 void AddSC_boss_kilnara();
 void AddSC_boss_zanzil();
 void AddSC_boss_mandokir();
+void AddSC_boss_jindo_the_godbreaker();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_duskwood();
@@ -992,6 +993,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_kilnara();
     AddSC_boss_zanzil();
     AddSC_boss_mandokir();
+    AddSC_boss_jindo_the_godbreaker();
 
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
