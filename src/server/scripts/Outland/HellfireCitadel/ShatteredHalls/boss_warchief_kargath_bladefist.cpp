@@ -22,7 +22,9 @@ enum Says
 {
     SAY_AGGRO                      = 0,
     SAY_SLAY                       = 1,
-    SAY_DEATH                      = 2
+    SAY_DEATH                      = 2,
+    SAY_CALL_EXECUTIONER_A         = 3,
+    SAY_CALL_EXECUTIONER_H         = 4
 };
 
 enum Spells
@@ -56,6 +58,7 @@ class boss_warchief_kargath_bladefist : public CreatureScript
 
             void Reset() OVERRIDE
             {
+                _Reset();
                 removeAdds();
 
                 me->SetSpeed(MOVE_RUN, 2);
@@ -76,14 +79,31 @@ class boss_warchief_kargath_bladefist : public CreatureScript
             {
                 Talk(SAY_DEATH);
                 removeAdds();
-
-                if (instance)
-                    instance->SetBossState(DATA_KARGATH, DONE);
+                _JustDied();
             }
 
             void EnterCombat(Unit* /*who*/) OVERRIDE
             {
+                _EnterCombat();
                 Talk(SAY_AGGRO);
+            }
+
+            void DoAction(int32 action) OVERRIDE
+            {
+                if (action != ACTION_EXECUTIONER_TAUNT || !instance)
+                    return;
+
+                switch (instance->GetData(DATA_TEAM_IN_INSTANCE))
+                {
+                    case ALLIANCE:
+                        Talk(SAY_CALL_EXECUTIONER_A);
+                        break;
+                    case HORDE:
+                        Talk(SAY_CALL_EXECUTIONER_H);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             void JustSummoned(Creature* summoned) OVERRIDE

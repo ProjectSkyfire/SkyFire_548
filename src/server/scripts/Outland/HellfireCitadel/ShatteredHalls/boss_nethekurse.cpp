@@ -81,7 +81,6 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                 IsMainEvent = false;
                 //HasTaunted = false;
                 SpinOnce = false;
-                Phase = false;
 
                 PeonEngagedCount = 0;
                 PeonKilledCount = 0;
@@ -89,7 +88,7 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                 IntroEvent_Timer = 90000;    // how long before getting bored and kills his minions?
                 DeathCoil_Timer = 20000;
                 ShadowFissure_Timer = 8000;
-                Cleave_Timer = 5000;
+                Cleave_Timer = urand(15000, 20000);
             }
 
             void JustDied(Unit* /*killer*/) OVERRIDE
@@ -151,12 +150,7 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                     return;
 
                 if (me->Attack(who, true))
-                {
-                    if (Phase)
-                        DoStartNoMovement(who);
-                    else
-                        DoStartMovement(who);
-                }
+                    DoStartMovement(who);
             }
 
             void MoveInLineOfSight(Unit* who) OVERRIDE
@@ -223,47 +217,39 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                 if (!IsMainEvent)
                     return;
 
-                if (Phase)
+                if (ShadowFissure_Timer <= diff)
                 {
-                    if (!SpinOnce)
-                    {
-                        DoCastVictim(SPELL_DARK_SPIN);
-                        SpinOnce = true;
-                    }
-
-                    if (Cleave_Timer <= diff)
-                    {
-                        DoCastVictim(SPELL_SHADOW_CLEAVE);
-                        Cleave_Timer = 6000+rand()%2500;
-                    }
-                    else
-                        Cleave_Timer -= diff;
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(target, SPELL_SHADOW_FISSURE);
+                    ShadowFissure_Timer = urand(7500, 15000);
                 }
                 else
+                    ShadowFissure_Timer -= diff;
+
+                if (DeathCoil_Timer <= diff)
                 {
-                    if (ShadowFissure_Timer <= diff)
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(target, SPELL_SHADOW_FISSURE);
-                        ShadowFissure_Timer = urand(7500, 15000);
-                    }
-                    else
-                        ShadowFissure_Timer -= diff;
-
-                    if (DeathCoil_Timer <= diff)
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            DoCast(target, SPELL_DEATH_COIL);
-                        DeathCoil_Timer = urand(15000, 20000);
-                    }
-                    else
-                        DeathCoil_Timer -= diff;
-
-                    if (!HealthAbovePct(20))
-                        Phase = true;
-
-                    DoMeleeAttackIfReady();
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        DoCast(target, SPELL_DEATH_COIL);
+                    DeathCoil_Timer = urand(15000, 20000);
                 }
+                else
+                    DeathCoil_Timer -= diff;
+
+                if (Cleave_Timer <= diff)
+                {
+                    DoCastVictim(DUNGEON_MODE(SPELL_SHADOW_CLEAVE, H_SPELL_SHADOW_SLAM));
+                    Cleave_Timer = urand(15000, 20000);
+                }
+                else
+                    Cleave_Timer -= diff;
+
+                if (!SpinOnce && !HealthAbovePct(25))
+                {
+                    DoCast(me, SPELL_DARK_SPIN);
+                    SpinOnce = true;
+                }
+
+                DoMeleeAttackIfReady();
             }
 
             private:
@@ -278,7 +264,6 @@ class boss_grand_warlock_nethekurse : public CreatureScript
                 bool IsMainEvent;
                 bool SpinOnce;
                 //bool HasTaunted;
-                bool Phase;
         };
 
         CreatureAI* GetAI(Creature* creature) const OVERRIDE
