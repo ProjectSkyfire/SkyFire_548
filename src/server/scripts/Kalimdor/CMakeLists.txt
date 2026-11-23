@@ -122,6 +122,12 @@ set(scripts_STAT_SRCS
   Kalimdor/zone_mount_hyjal.cpp
   Kalimdor/zone_feralas.cpp
   Kalimdor/zone_felwood.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/boss_mannoroth.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/boss_perotharn.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/boss_queen_azshara.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/instance_well_of_eternity.cpp
+  Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity.h
+  Kalimdor/CavernsOfTime/WellOfEternity/well_of_eternity_teleport.cpp
 )
 
 message("  -> Prepared: Kalimdor")
