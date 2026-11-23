@@ -86,7 +86,10 @@ class boss_baron_silverlaine : public CreatureScript
                     instance->SendEncounterUnit(ENCOUNTER_FRAME_ENGAGE, me);
 
                 Talk(SAY_AGGRO);
-                events.ScheduleEvent(EVENT_VEIL_OF_SHADOW, 12000);
+                if (IsHeroic())
+                    events.ScheduleEvent(EVENT_CURSED_VEIL_H, 5000);
+                else
+                    events.ScheduleEvent(EVENT_VEIL_OF_SHADOW, 12000);
                 DoZoneInCombat();
             }
 
@@ -110,15 +113,13 @@ class boss_baron_silverlaine : public CreatureScript
 
             void DamageTaken(Unit* /*attacker*/, uint32& /*damage*/) OVERRIDE
             {
-                if (HealthBelowPct(70) && phase == 0)
+                // Health percents of the spirits, normal and heroic; 0 ends the list
+                static uint8 const spiritHealthPct[2][4] = { { 70, 35, 0, 0 }, { 90, 60, 30, 0 } };
+
+                uint8 const healthPct = spiritHealthPct[IsHeroic() ? 1 : 0][phase];
+                if (healthPct && HealthBelowPct(healthPct) && !me->HasUnitState(UNIT_STATE_CASTING))
                 {
-                    phase = 1;
-                    DoCast(SPELL_SUMMON_WORGEN_SPIRIT);
-                    return;
-                }
-                if (HealthBelowPct(35) && phase == 1)
-                {
-                    phase = 2;
+                    ++phase;
                     DoCast(SPELL_SUMMON_WORGEN_SPIRIT);
                 }
             }
@@ -135,12 +136,18 @@ class boss_baron_silverlaine : public CreatureScript
 
                 while (uint32 eventId = events.ExecuteEvent())
                 {
-                    if (eventId == EVENT_VEIL_OF_SHADOW)
+                    switch (eventId)
                     {
-                        if (Unit* target = me->GetVictim())
-                            DoCast(target, SPELL_VEIL_OF_SHADOW);
+                        case EVENT_VEIL_OF_SHADOW:
+                            if (Unit* target = me->GetVictim())
+                                DoCast(target, SPELL_VEIL_OF_SHADOW);
 
-                        events.ScheduleEvent(EVENT_VEIL_OF_SHADOW, 12000);
+                            events.ScheduleEvent(EVENT_VEIL_OF_SHADOW, 12000);
+                            break;
+                        case EVENT_CURSED_VEIL_H:
+                            DoCast(me, SPELL_CURSED_VEIL_H);
+                            events.ScheduleEvent(EVENT_CURSED_VEIL_H, 27000);
+                            break;
                     }
                 }
 
