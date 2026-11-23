@@ -46,7 +46,10 @@ public:
     {
         boss_temporusAI(Creature* creature) : BossAI(creature, TYPE_TEMPORUS) { }
 
-        void Reset() OVERRIDE { }
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
@@ -67,9 +70,6 @@ public:
         void JustDied(Unit* /*killer*/) OVERRIDE
         {
             Talk(SAY_DEATH);
-
-            if (instance)
-                instance->SetData(TYPE_RIFT, SPECIAL);
         }
 
         void MoveInLineOfSight(Unit* who) OVERRIDE

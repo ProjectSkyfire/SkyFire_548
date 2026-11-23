@@ -34,7 +34,8 @@ enum Events
 {
     EVENT_SANDBREATH    = 1,
     EVENT_TIMESTOP      = 2,
-    EVENT_FRENZY        = 3
+    EVENT_FRENZY        = 3,
+    EVENT_CLEAVE        = 4
 };
 
 class boss_aeonus : public CreatureScript
@@ -46,13 +47,17 @@ public:
     {
         boss_aeonusAI(Creature* creature) : BossAI(creature, TYPE_AEONUS) { }
 
-        void Reset() OVERRIDE { }
+        void Reset() OVERRIDE
+        {
+            events.Reset();
+        }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
             events.ScheduleEvent(EVENT_SANDBREATH, urand(15000, 30000));
             events.ScheduleEvent(EVENT_TIMESTOP, urand(10000, 15000));
             events.ScheduleEvent(EVENT_FRENZY, urand(30000, 45000));
+            events.ScheduleEvent(EVENT_CLEAVE, urand(10000, 25000));
 
             Talk(SAY_AGGRO);
         }
@@ -111,6 +116,10 @@ public:
                     case EVENT_TIMESTOP:
                         DoCastVictim(SPELL_TIME_STOP);
                         events.ScheduleEvent(EVENT_TIMESTOP, urand(20000, 35000));
+                        break;
+                    case EVENT_CLEAVE:
+                        DoCastVictim(SPELL_CLEAVE);
+                        events.ScheduleEvent(EVENT_CLEAVE, urand(15000, 20000));
                         break;
                     case EVENT_FRENZY:
                         Talk(EMOTE_FRENZY);
