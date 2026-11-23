@@ -1,36 +1,33 @@
 /*
-* This file is part of Project SkyFire https://www.projectskyfire.org. 
-* See LICENSE.md file for Copyright information
-*/
-
-/* ScriptData
-SDName: Instance_Sunken_Temple
-SD%Complete: 100
-SDComment:Place Holder
-SDCategory: Sunken Temple
-EndScriptData */
+ * This file is part of Project SkyFire https://www.projectskyfire.org.
+ * See LICENSE.md file for Copyright information.
+ * Ported from The Cataclysm Preservation Project (TrinityCore 4.3.4).
+ */
 
 #include "ScriptMgr.h"
+#include "GameObject.h"
 #include "InstanceScript.h"
+#include "Map.h"
 #include "sunken_temple.h"
 
-enum Gameobject
+enum SunkenTempleObjects
 {
-    GO_ATALAI_STATUE1           = 148830,
-    GO_ATALAI_STATUE2           = 148831,
-    GO_ATALAI_STATUE3           = 148832,
-    GO_ATALAI_STATUE4           = 148833,
-    GO_ATALAI_STATUE5           = 148834,
-    GO_ATALAI_STATUE6           = 148835,
-    GO_ATALAI_IDOL              = 148836,
-    GO_ATALAI_LIGHT1            = 148883,
-    GO_ATALAI_LIGHT2            = 148937
-
+    GO_ATALAI_STATUE_FIRST = 148830,
+    GO_ATALAI_STATUE_LAST = 148835,
+    GO_ATALAI_LIGHT = 148883,
+    GO_ATALAI_FINAL_LIGHT = 148937,
+    NPC_ATALALARION = 8580
 };
 
-enum CreatureIds
+static Position const atalalarionPosition = { -466.5134f, 95.19822f, -189.6463f, 0.03490658f };
+static Position const statuePositions[] =
 {
-    NPC_MALFURION_STORMRAGE     = 15362
+    { -515.553f, 95.25821f, -173.707f, 0.0f },
+    { -419.8487f, 94.48368f, -173.707f, 0.0f },
+    { -491.4003f, 135.9698f, -173.707f, 0.0f },
+    { -491.4909f, 53.48179f, -173.707f, 0.0f },
+    { -443.8549f, 136.1007f, -173.707f, 0.0f },
+    { -443.4171f, 53.83124f, -173.707f, 0.0f }
 };
 
 class instance_sunken_temple : public InstanceMapScript
@@ -38,162 +35,48 @@ class instance_sunken_temple : public InstanceMapScript
 public:
     instance_sunken_temple() : InstanceMapScript("instance_sunken_temple", 109) { }
 
+    struct instance_sunken_temple_InstanceMapScript : public InstanceScript
+    {
+        instance_sunken_temple_InstanceMapScript(InstanceMap* map) : InstanceScript(map), nextStatue(0)
+        {
+            for (uint8 i = 0; i < 6; ++i)
+                statues[i] = 0;
+        }
+
+        uint64 statues[6];
+        uint8 nextStatue;
+
+        void OnGameObjectCreate(GameObject* go) OVERRIDE
+        {
+            if (go->GetEntry() >= GO_ATALAI_STATUE_FIRST && go->GetEntry() <= GO_ATALAI_STATUE_LAST)
+                statues[go->GetEntry() - GO_ATALAI_STATUE_FIRST] = go->GetGUID();
+        }
+
+        void SetData(uint32 type, uint32 data) OVERRIDE
+        {
+            if (type != EVENT_STATE || nextStatue >= 6 || data != GO_ATALAI_STATUE_FIRST + nextStatue)
+                return;
+
+            GameObject* statue = instance->GetGameObject(statues[nextStatue]);
+            if (!statue)
+                return;
+
+            statue->SummonGameObject(GO_ATALAI_LIGHT, statue->GetPositionX(), statue->GetPositionY(), statue->GetPositionZ(), 0, 0, 0, 0, 0, 0);
+            statue->SetFlag(GAMEOBJECT_FIELD_FLAGS, GO_FLAG_INTERACT_COND);
+            ++nextStatue;
+            if (nextStatue == 6)
+            {
+                for (uint8 i = 0; i < 6; ++i)
+                    statue->SummonGameObject(GO_ATALAI_FINAL_LIGHT, statuePositions[i].GetPositionX(), statuePositions[i].GetPositionY(), statuePositions[i].GetPositionZ(), 0, 0, 0, 0, 0, 0);
+                statue->SummonCreature(NPC_ATALALARION, atalalarionPosition, TempSummonType::TEMPSUMMON_CORPSE_TIMED_DESPAWN, 7200);
+            }
+        }
+    };
+
     InstanceScript* GetInstanceScript(InstanceMap* map) const OVERRIDE
     {
         return new instance_sunken_temple_InstanceMapScript(map);
     }
-
-    struct instance_sunken_temple_InstanceMapScript : public InstanceScript
-    {
-        instance_sunken_temple_InstanceMapScript(Map* map) : InstanceScript(map)
-        {
-        }
-
-        uint64 GOAtalaiStatue1;
-        uint64 GOAtalaiStatue2;
-        uint64 GOAtalaiStatue3;
-        uint64 GOAtalaiStatue4;
-        uint64 GOAtalaiStatue5;
-        uint64 GOAtalaiStatue6;
-        uint64 GOAtalaiIdol;
-
-        uint32 State;
-
-        bool s1;
-        bool s2;
-        bool s3;
-        bool s4;
-        bool s5;
-        bool s6;
-
-        void Initialize() OVERRIDE
-        {
-            GOAtalaiStatue1 = 0;
-            GOAtalaiStatue2 = 0;
-            GOAtalaiStatue3 = 0;
-            GOAtalaiStatue4 = 0;
-            GOAtalaiStatue5 = 0;
-            GOAtalaiStatue6 = 0;
-            GOAtalaiIdol = 0;
-
-            State = 0;
-
-            s1 = false;
-            s2 = false;
-            s3 = false;
-            s4 = false;
-            s5 = false;
-            s6 = false;
-        }
-
-        void OnGameObjectCreate(GameObject* go) OVERRIDE
-        {
-            switch (go->GetEntry())
-            {
-                case GO_ATALAI_STATUE1: GOAtalaiStatue1 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE2: GOAtalaiStatue2 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE3: GOAtalaiStatue3 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE4: GOAtalaiStatue4 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE5: GOAtalaiStatue5 = go->GetGUID();   break;
-                case GO_ATALAI_STATUE6: GOAtalaiStatue6 = go->GetGUID();   break;
-                case GO_ATALAI_IDOL:    GOAtalaiIdol = go->GetGUID();      break;
-            }
-        }
-
-         virtual void Update(uint32 /*diff*/) // correct order goes form 1-6
-         {
-             switch (State)
-             {
-             case GO_ATALAI_STATUE1:
-                if (!s1 && !s2 && !s3 && !s4 && !s5 && !s6)
-                {
-                    if (GameObject* pAtalaiStatue1 = instance->GetGameObject(GOAtalaiStatue1))
-                        UseStatue(pAtalaiStatue1);
-                    s1 = true;
-                    State = 0;
-                };
-                break;
-             case GO_ATALAI_STATUE2:
-                if (s1 && !s2 && !s3 && !s4 && !s5 && !s6)
-                {
-                    if (GameObject* pAtalaiStatue2 = instance->GetGameObject(GOAtalaiStatue2))
-                        UseStatue(pAtalaiStatue2);
-                    s2 = true;
-                    State = 0;
-                };
-                break;
-             case GO_ATALAI_STATUE3:
-                if (s1 && s2 && !s3 && !s4 && !s5 && !s6)
-                {
-                    if (GameObject* pAtalaiStatue3 = instance->GetGameObject(GOAtalaiStatue3))
-                        UseStatue(pAtalaiStatue3);
-                    s3 = true;
-                    State = 0;
-                };
-                break;
-             case GO_ATALAI_STATUE4:
-                if (s1 && s2 && s3 && !s4 && !s5 && !s6)
-                {
-                    if (GameObject* pAtalaiStatue4 = instance->GetGameObject(GOAtalaiStatue4))
-                        UseStatue(pAtalaiStatue4);
-                    s4 = true;
-                    State = 0;
-                }
-                break;
-             case GO_ATALAI_STATUE5:
-                if (s1 && s2 && s3 && s4 && !s5 && !s6)
-                {
-                    if (GameObject* pAtalaiStatue5 = instance->GetGameObject(GOAtalaiStatue5))
-                        UseStatue(pAtalaiStatue5);
-                    s5 = true;
-                    State = 0;
-                }
-                break;
-             case GO_ATALAI_STATUE6:
-                if (s1 && s2 && s3 && s4 && s5 && !s6)
-                {
-                    if (GameObject* pAtalaiStatue6 = instance->GetGameObject(GOAtalaiStatue6))
-                        UseStatue(pAtalaiStatue6);
-                    s6 = true;
-                    State = 0;
-                }
-                break;
-             }
-         };
-
-        void UseStatue(GameObject* go)
-        {
-            go->SummonGameObject(GO_ATALAI_LIGHT1, go->GetPositionX(), go->GetPositionY(), go->GetPositionZ(), 0, 0, 0, 0, 0, 0);
-            go->SetUInt32Value(GAMEOBJECT_FIELD_FLAGS, 4);
-        }
-
-         /*
-         void UseLastStatue(GameObject* go)
-         {
-             AtalaiStatue1->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue1->GetPositionX(), AtalaiStatue1->GetPositionY(), AtalaiStatue1->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue2->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue2->GetPositionX(), AtalaiStatue2->GetPositionY(), AtalaiStatue2->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue3->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue3->GetPositionX(), AtalaiStatue3->GetPositionY(), AtalaiStatue3->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue4->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue4->GetPositionX(), AtalaiStatue4->GetPositionY(), AtalaiStatue4->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue5->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue5->GetPositionX(), AtalaiStatue5->GetPositionY(), AtalaiStatue5->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             AtalaiStatue6->SummonGameObject(GO_ATALAI_LIGHT2, AtalaiStatue6->GetPositionX(), AtalaiStatue6->GetPositionY(), AtalaiStatue6->GetPositionZ(), 0, 0, 0, 0, 0, 100000);
-             go->SummonGameObject(148838, -488.997, 96.61, -189.019, -1.52, 0, 0, 0, 0, 100000);
-         }
-         */
-
-         void SetData(uint32 type, uint32 data) OVERRIDE
-         {
-            if (type == EVENT_STATE)
-                State = data;
-         }
-
-         uint32 GetData(uint32 type) const OVERRIDE
-         {
-            if (type == EVENT_STATE)
-                return State;
-            return 0;
-         }
-    };
-
 };
 
 void AddSC_instance_sunken_temple()
