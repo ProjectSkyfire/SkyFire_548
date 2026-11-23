@@ -6,7 +6,7 @@
 /* ScriptData
 SDName: Boss_Baroness_Anastari
 SD%Complete: 90
-SDComment: MC disabled
+SDComment: Possess is checked once a second
 SDCategory: Stratholme
 EndScriptData */
 
@@ -18,8 +18,15 @@ enum Spells
 {
     SPELL_BANSHEEWAIL       = 16565,
     SPELL_BANSHEECURSE      = 16867,
-    SPELL_SILENCE           = 18327
-    //SPELL_POSSESS           = 17244
+    SPELL_SILENCE           = 18327,
+    SPELL_POSSESS           = 17244,
+    SPELL_POSSESSED         = 17246
+};
+
+enum Misc
+{
+    // The possessed player is released at this health
+    POSSESS_RELEASE_HEALTH_PCT  = 50
 };
 
 class boss_baroness_anastari : public CreatureScript
@@ -34,7 +41,7 @@ public:
 
     struct boss_baroness_anastariAI : public ScriptedAI
     {
-        boss_baroness_anastariAI(Creature* creature) : ScriptedAI(creature)
+        boss_baroness_anastariAI(Creature* creature) : ScriptedAI(creature), PossessedGUID(0)
         {
             instance = me->GetInstanceScript();
         }
@@ -44,25 +51,41 @@ public:
         uint32 BansheeWail_Timer;
         uint32 BansheeCurse_Timer;
         uint32 Silence_Timer;
-        //uint32 Possess_Timer;
+        uint32 Possess_Timer;
+        uint32 PossessCheck_Timer;
+        uint64 PossessedGUID;
 
         void Reset() OVERRIDE
         {
             BansheeWail_Timer = 1000;
             BansheeCurse_Timer = 11000;
             Silence_Timer = 13000;
-            //Possess_Timer = 35000;
+            Possess_Timer = 35000;
+            PossessCheck_Timer = 1000;
+            ReleasePossessed();
         }
 
         void EnterCombat(Unit* /*who*/) OVERRIDE
         {
         }
 
-         void JustDied(Unit* /*killer*/) OVERRIDE
-         {
-             if (instance)
-                 instance->SetData(TYPE_BARONESS, IN_PROGRESS);
-         }
+        void JustDied(Unit* /*killer*/) OVERRIDE
+        {
+            ReleasePossessed();
+            if (instance)
+                instance->SetData(TYPE_BARONESS, IN_PROGRESS);
+        }
+
+        void ReleasePossessed()
+        {
+            if (Unit* possessed = ObjectAccessor::GetUnit(*me, PossessedGUID))
+            {
+                possessed->RemoveAurasDueToSpell(SPELL_POSSESS);
+                possessed->RemoveAurasDueToSpell(SPELL_POSSESSED);
+            }
+
+            PossessedGUID = 0;
+        }
 
         void UpdateAI(uint32 diff) OVERRIDE
         {
@@ -97,19 +120,30 @@ public:
             } else Silence_Timer -= diff;
 
             //Possess
-            /*            if (Possess_Timer <= diff)
+            if (Possess_Timer <= diff)
             {
-            //Cast
-              if (rand()%100 < 65)
-            {
-            Unit* target = NULL;
-            target = SelectUnit(SELECT_TARGET_RANDOM, 0);
-            if (target)DoCast(target, SPELL_POSSESS);
-            }
-            //50 seconds until we should cast this again
-            Possess_Timer = 50000;
+                if (rand()%100 < 65)
+                {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true))
+                    {
+                        DoCast(target, SPELL_POSSESS);
+                        DoCast(target, SPELL_POSSESSED, true);
+                        PossessedGUID = target->GetGUID();
+                    }
+                }
+                //50 seconds until we should cast this again
+                Possess_Timer = 50000;
             } else Possess_Timer -= diff;
-            */
+
+            //Release the possessed player at half health
+            if (PossessCheck_Timer <= diff)
+            {
+                if (Unit* possessed = ObjectAccessor::GetUnit(*me, PossessedGUID))
+                    if (possessed->HealthBelowPct(POSSESS_RELEASE_HEALTH_PCT))
+                        ReleasePossessed();
+
+                PossessCheck_Timer = 1000;
+            } else PossessCheck_Timer -= diff;
 
             DoMeleeAttackIfReady();
         }
