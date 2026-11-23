@@ -243,6 +243,7 @@ void AddSC_instance_the_stockade();          //The Stockade
 //void AddSC_boss_daakara();
 //void AddSC_instance_zulaman();
 //void AddSC_zulaman();
+void AddSC_instance_scarlet_monastery_mop();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_duskwood();
@@ -980,6 +981,7 @@ void AddEasternKingdomsScripts()
     //AddSC_boss_daakara();
     //AddSC_instance_zulaman();
     //AddSC_zulaman();
+    AddSC_instance_scarlet_monastery_mop();
 
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
