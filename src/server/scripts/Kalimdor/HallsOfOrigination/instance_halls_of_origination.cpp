@@ -50,6 +50,8 @@ class instance_halls_of_origination : public InstanceMapScript
                 AnhuurLeftBeaconGUID = 0;
                 BrannBronzebeardGUID = 0;
                 AnraphetGUID = 0;
+                SeteshGUID = 0;
+                RajhGUID = 0;
                 AnraphetDoorGUID = 0;
                 SunMirrorGUID = 0;
                 _deadElementals = 0;
@@ -126,6 +128,12 @@ class instance_halls_of_origination : public InstanceMapScript
                     case BOSS_ANRAPHET:
                         AnraphetGUID = creature->GetGUID();
                         break;
+                    case BOSS_SETESH:
+                        SeteshGUID = creature->GetGUID();
+                        break;
+                    case BOSS_RAJH:
+                        RajhGUID = creature->GetGUID();
+                        break;
                 }
             }
 
@@ -160,6 +168,10 @@ class instance_halls_of_origination : public InstanceMapScript
                         return BrannBronzebeardGUID;
                     case DATA_ANRAPHET_GUID:
                         return AnraphetGUID;
+                    case DATA_SETESH:
+                        return SeteshGUID;
+                    case DATA_RAJH:
+                        return RajhGUID;
                 }
 
                 return 0;
@@ -253,6 +265,8 @@ class instance_halls_of_origination : public InstanceMapScript
             uint64 AnhuurLeftBeaconGUID;
             uint64 BrannBronzebeardGUID;
             uint64 AnraphetGUID;
+            uint64 SeteshGUID;
+            uint64 RajhGUID;
             uint64 AnraphetDoorGUID;
             uint64 SunMirrorGUID;
             uint32 _deadElementals;
