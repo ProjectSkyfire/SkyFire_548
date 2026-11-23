@@ -1,0 +1,50 @@
+-- Disciple of Naralex escort path.
+DELETE FROM `script_waypoint` WHERE `entry` = 3678;
+INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES
+(3678, 0, -120.864, 132.825, -79.2972, 5000, 'TYPE_NARALEX_EVENT'),
+(3678, 1, -109.944, 155.417, -80.4659, 0, ''),
+(3678, 2, -106.104, 198.456, -80.5970, 0, ''),
+(3678, 3, -110.246, 214.763, -85.6669, 0, ''),
+(3678, 4, -105.609, 236.184, -92.1732, 0, 'TYPE_NARALEX_PART1'),
+(3678, 5, -93.5297, 227.956, -90.7522, 0, ''),
+(3678, 6, -85.3155, 226.976, -93.1286, 0, ''),
+(3678, 7, -62.1510, 206.673, -93.5510, 0, ''),
+(3678, 8, -45.0534, 205.580, -96.2435, 0, ''),
+(3678, 9, -31.1235, 234.225, -94.0841, 0, ''),
+(3678, 10, -49.2158, 269.141, -92.8442, 0, ''),
+(3678, 11, -54.1220, 274.717, -92.8442, 31000, 'TYPE_NARALEX_PART2'),
+(3678, 12, -58.9650, 282.274, -92.5380, 0, ''),
+(3678, 13, -38.3566, 306.239, -90.0192, 0, ''),
+(3678, 14, -28.8928, 312.842, -89.2155, 0, ''),
+(3678, 15, -1.58198, 296.127, -85.5984, 0, ''),
+(3678, 16, 9.89992, 272.008, -85.7759, 0, ''),
+(3678, 17, 26.8162, 259.218, -87.3938, 0, ''),
+(3678, 18, 49.1166, 227.259, -88.3379, 0, ''),
+(3678, 19, 54.4171, 209.316, -90.0000, 1500, 'SAY_BEYOND_THIS_CORRIDOR'),
+(3678, 20, 71.0380, 205.404, -93.0422, 0, ''),
+(3678, 21, 81.5941, 212.832, -93.0154, 0, ''),
+(3678, 22, 94.3376, 236.933, -95.8261, 0, ''),
+(3678, 23, 114.619, 235.908, -96.0495, 0, ''),
+(3678, 24, 114.777, 237.155, -96.0304, 2500, 'NARALEX_EVENT_FINISHED');
+
+-- Escort and Naralex dialogue.
+DELETE FROM `creature_text` WHERE `id` = 0 AND ((`entry` = 3678 AND `groupid` BETWEEN 0 AND 11) OR (`entry` = 3679 AND `groupid` BETWEEN 0 AND 5));
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(3678, 0, 0, 'At last! Naralex can be awakened! Come aid me, brave adventurers!', 14, 0, 100, 0, 0, 0, 'disciple SAY_AT_LAST'),
+(3678, 1, 0, 'I must make the necessary preparations before the awakening ritual can begin. You must protect me!', 12, 0, 100, 0, 0, 0, 'disciple SAY_MAKE_PREPARATIONS'),
+(3678, 2, 0, 'These caverns were once a temple of promise for regrowth in the Barrens. Now, they are the halls of nightmares.', 12, 0, 100, 0, 0, 0, 'disciple SAY_TEMPLE_OF_PROMISE'),
+(3678, 3, 0, 'Come. We must continue. There is much to be done before we can pull Naralex from his nightmare.', 12, 0, 100, 0, 0, 0, 'disciple SAY_MUST_CONTINUE'),
+(3678, 4, 0, 'Within this circle of fire I must cast the spell to banish the spirits of the slain Fanglords.', 12, 0, 100, 0, 0, 0, 'disciple SAY_BANISH_THE_SPIRITS'),
+(3678, 5, 0, 'The caverns have been purified. To Naralex''s chamber we go!', 12, 0, 100, 0, 0, 0, 'disciple SAY_CAVERNS_PURIFIED'),
+(3678, 6, 0, 'Beyond this corridor, Naralex lies in fitful sleep. Let us go awaken him before it is too late.', 12, 0, 100, 0, 0, 0, 'disciple SAY_BEYOND_THIS_CORRIDOR'),
+(3678, 7, 0, 'Protect me brave souls as I delve into this Emerald Dream to rescue Naralex and put an end to this corruption!', 12, 0, 100, 0, 0, 0, 'disciple SAY_EMERALD_DREAM'),
+(3678, 8, 0, '%s begins to perform the awakening ritual on Naralex.', 16, 0, 100, 0, 0, 0, 'disciple EMOTE_AWAKENING_RITUAL'),
+(3679, 0, 0, '%s tosses fitfully in troubled sleep.', 16, 0, 100, 0, 0, 0, 'naralex EMOTE_TROUBLED_SLEEP'),
+(3679, 1, 0, '%s writhes in agony. The Disciple seems to be breaking through.', 16, 0, 100, 0, 0, 0, 'naralex EMOTE_WRITHE_IN_AGONY'),
+(3679, 2, 0, '%s dreams up a horrendous vision. Something stirs beneath the murky waters.', 16, 0, 100, 0, 0, 0, 'naralex EMOTE_HORRENDOUS_VISION'),
+(3678, 9, 0, 'This Mutanus the Devourer is a minion from Naralex''s nightmare no doubt!', 12, 0, 100, 0, 0, 0, 'disciple SAY_MUTANUS_THE_DEVOURER'),
+(3679, 3, 0, 'I AM AWAKE, AT LAST!', 14, 0, 100, 0, 0, 0, 'naralex SAY_I_AM_AWAKE'),
+(3678, 10, 0, 'At last! Naralex awakes from the nightmare.', 12, 0, 100, 0, 0, 0, 'disciple SAY_NARALEX_AWAKES'),
+(3679, 4, 0, 'Ah, to be pulled from the dreaded nightmare! I thank you, my loyal Disciple, along with your brave companions.', 12, 0, 100, 0, 0, 0, 'naralex SAY_THANK_YOU'),
+(3679, 5, 0, 'We must go and gather with the other Disciples. There is much work to be done before I can make another attempt to restore the Barrens. Farewell, brave souls!', 12, 0, 100, 0, 0, 0, 'naralex SAY_FAREWELL'),
+(3678, 11, 0, 'Attacked! Help get this $N off of me!', 12, 0, 100, 0, 0, 0, 'disciple SAY_ATTACKED');

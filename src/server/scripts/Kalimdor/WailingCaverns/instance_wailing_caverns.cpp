@@ -12,6 +12,8 @@ EndScriptData */
 
 #include "ScriptMgr.h"
 #include "InstanceScript.h"
+#include "Creature.h"
+#include "Unit.h"
 #include "wailing_caverns.h"
 
 #define MAX_ENCOUNTER   9
@@ -49,45 +51,105 @@ public:
                 NaralexGUID = creature->GetGUID();
         }
 
+        void OnUnitDeath(Unit* unit) OVERRIDE
+        {
+            if (unit->GetTypeId() != TypeID::TYPEID_UNIT)
+                return;
+
+            switch (unit->GetEntry())
+            {
+                case NPC_LORD_COBRAHN:
+                    SetData(TYPE_LORD_COBRAHN, DONE);
+                    break;
+                case NPC_LORD_PYTHAS:
+                    SetData(TYPE_LORD_PYTHAS, DONE);
+                    break;
+                case NPC_LADY_ANACONDRA:
+                    SetData(TYPE_LADY_ANACONDRA, DONE);
+                    break;
+                case NPC_LORD_SERPENTIS:
+                    SetData(TYPE_LORD_SERPENTIS, DONE);
+                    break;
+                case NPC_MUTANUS_THE_DEVOURER:
+                    if (GetData(TYPE_MUTANUS_THE_DEVOURER) == IN_PROGRESS)
+                        SetData(TYPE_MUTANUS_THE_DEVOURER, DONE);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         void SetData(uint32 type, uint32 data) OVERRIDE
         {
             switch (type)
             {
-                case TYPE_LORD_COBRAHN:         m_auiEncounter[0] = data;break;
-                case TYPE_LORD_PYTHAS:          m_auiEncounter[1] = data;break;
-                case TYPE_LADY_ANACONDRA:       m_auiEncounter[2] = data;break;
-                case TYPE_LORD_SERPENTIS:       m_auiEncounter[3] = data;break;
-                case TYPE_NARALEX_EVENT:        m_auiEncounter[4] = data;break;
-                case TYPE_NARALEX_PART1:        m_auiEncounter[5] = data;break;
-                case TYPE_NARALEX_PART2:        m_auiEncounter[6] = data;break;
-                case TYPE_NARALEX_PART3:        m_auiEncounter[7] = data;break;
-                case TYPE_MUTANUS_THE_DEVOURER: m_auiEncounter[8] = data;break;
-                case TYPE_NARALEX_YELLED:       yelled = true;      break;
+                case TYPE_LORD_COBRAHN:
+                    m_auiEncounter[0] = data;
+                    break;
+                case TYPE_LORD_PYTHAS:
+                    m_auiEncounter[1] = data;
+                    break;
+                case TYPE_LADY_ANACONDRA:
+                    m_auiEncounter[2] = data;
+                    break;
+                case TYPE_LORD_SERPENTIS:
+                    m_auiEncounter[3] = data;
+                    break;
+                case TYPE_NARALEX_EVENT:
+                    m_auiEncounter[4] = data;
+                    break;
+                case TYPE_NARALEX_PART1:
+                    m_auiEncounter[5] = data;
+                    break;
+                case TYPE_NARALEX_PART2:
+                    m_auiEncounter[6] = data;
+                    break;
+                case TYPE_NARALEX_PART3:
+                    m_auiEncounter[7] = data;
+                    break;
+                case TYPE_MUTANUS_THE_DEVOURER:
+                    m_auiEncounter[8] = data;
+                    break;
+                case TYPE_NARALEX_YELLED:
+                    yelled = true;
+                    break;
             }
-            if (data == DONE)SaveToDB();
+            if (data == DONE)
+                SaveToDB();
         }
 
         uint32 GetData(uint32 type) const OVERRIDE
         {
             switch (type)
             {
-                case TYPE_LORD_COBRAHN:         return m_auiEncounter[0];
-                case TYPE_LORD_PYTHAS:          return m_auiEncounter[1];
-                case TYPE_LADY_ANACONDRA:       return m_auiEncounter[2];
-                case TYPE_LORD_SERPENTIS:       return m_auiEncounter[3];
-                case TYPE_NARALEX_EVENT:        return m_auiEncounter[4];
-                case TYPE_NARALEX_PART1:        return m_auiEncounter[5];
-                case TYPE_NARALEX_PART2:        return m_auiEncounter[6];
-                case TYPE_NARALEX_PART3:        return m_auiEncounter[7];
-                case TYPE_MUTANUS_THE_DEVOURER: return m_auiEncounter[8];
-                case TYPE_NARALEX_YELLED:       return yelled;
+                case TYPE_LORD_COBRAHN:
+                    return m_auiEncounter[0];
+                case TYPE_LORD_PYTHAS:
+                    return m_auiEncounter[1];
+                case TYPE_LADY_ANACONDRA:
+                    return m_auiEncounter[2];
+                case TYPE_LORD_SERPENTIS:
+                    return m_auiEncounter[3];
+                case TYPE_NARALEX_EVENT:
+                    return m_auiEncounter[4];
+                case TYPE_NARALEX_PART1:
+                    return m_auiEncounter[5];
+                case TYPE_NARALEX_PART2:
+                    return m_auiEncounter[6];
+                case TYPE_NARALEX_PART3:
+                    return m_auiEncounter[7];
+                case TYPE_MUTANUS_THE_DEVOURER:
+                    return m_auiEncounter[8];
+                case TYPE_NARALEX_YELLED:
+                    return yelled;
             }
             return 0;
         }
 
         uint64 GetData64(uint32 data) const OVERRIDE
         {
-            if (data == DATA_NARALEX)return NaralexGUID;
+            if (data == DATA_NARALEX)
+                return NaralexGUID;
             return 0;
         }
 

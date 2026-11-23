@@ -22,4 +22,13 @@ enum DataTypes
     DATA_NARALEX              = 3679,
 };
 
+enum WailingCavernsCreatures
+{
+    NPC_LORD_COBRAHN = 3669,
+    NPC_LORD_PYTHAS = 3670,
+    NPC_LADY_ANACONDRA = 3671,
+    NPC_LORD_SERPENTIS = 3673,
+    NPC_MUTANUS_THE_DEVOURER = 3654
+};
+
 #endif

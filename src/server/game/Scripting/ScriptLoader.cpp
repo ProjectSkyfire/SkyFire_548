@@ -322,8 +322,8 @@ void AddSC_boss_twinemperors();
 void AddSC_boss_ouro();
 void AddSC_npc_anubisath_sentinel();
 void AddSC_instance_temple_of_ahnqiraj();
-//void AddSC_wailing_caverns();                //Wailing caverns
-//void AddSC_instance_wailing_caverns();
+void AddSC_wailing_caverns();                //Wailing caverns
+void AddSC_instance_wailing_caverns();
 //void AddSC_boss_zum_rah();                   //Zul'Farrak
 //void AddSC_zulfarrak();
 //void AddSC_instance_zulfarrak();
@@ -1064,8 +1064,8 @@ void AddKalimdorScripts()
     AddSC_boss_ouro();
     AddSC_npc_anubisath_sentinel();
     AddSC_instance_temple_of_ahnqiraj();
-    //AddSC_wailing_caverns();                //Wailing caverns
-    //AddSC_instance_wailing_caverns();
+    AddSC_wailing_caverns();                //Wailing caverns
+    AddSC_instance_wailing_caverns();
     //AddSC_boss_zum_rah();                   //Zul'Farrak
     //AddSC_zulfarrak();
     //AddSC_instance_zulfarrak();
