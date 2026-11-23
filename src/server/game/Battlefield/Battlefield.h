@@ -229,6 +229,14 @@ public:
 
     /// Return true if battle is start, false if battle is not started
     bool IsWarTime() const { return m_isActive; }
+    uint32 GetMaxPlayersPerTeam() const { return m_MaxPlayer; }
+    GuidSet const& GetPlayersInWar(TeamId team) const { return m_PlayersInWar[team]; }
+    GuidSet const& GetPlayersInZone(TeamId team) const { return m_players[team]; }
+    GuidSet const& GetPlayersInQueue(TeamId team) const { return m_PlayersInQueue[team]; }
+    PlayerTimerMap const& GetInvitedPlayers(TeamId team) const { return m_InvitedPlayers[team]; }
+    bool HasWarVacancy(TeamId team, uint64 candidate = 0) const;
+    bool TransferPlayerTeam(Player* player, TeamId team);
+
 
     /// Enable or Disable battlefield
     void ToggleBattlefield(bool enable) { m_IsEnabled = enable; }

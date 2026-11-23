@@ -9,6 +9,7 @@
 
 #include "AchievementMgr.h"
 #include "BattlefieldWG.h"
+#include "ScriptMgr.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -615,6 +616,7 @@ void BattlefieldWG::OnGameObjectCreate(GameObject* go)
 // Called when player kill a unit in wg zone
 void BattlefieldWG::HandleKill(Player* killer, Unit* victim)
 {
+    sScriptMgr->OnBFKill(this, killer, victim);
     if (killer == victim)
         return;
 

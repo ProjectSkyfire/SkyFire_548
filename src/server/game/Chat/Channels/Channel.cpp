@@ -430,7 +430,7 @@ void Channel::SetMode(Player const* player, std::string const& p2n, bool mod, bo
     uint64 victim = newp ? newp->GetGUID() : 0;
 
     if (!victim || !IsOn(victim) ||
-        (player->GetTeam() != newp->GetTeam() &&
+        (player->GetNativeTeam() != newp->GetNativeTeam() &&
             (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
                 !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL))))
     {
@@ -478,7 +478,7 @@ void Channel::SetOwner(Player const* player, std::string const& newname)
     uint64 victim = newp ? newp->GetGUID() : 0;
 
     if (!victim || !IsOn(victim) ||
-        (player->GetTeam() != newp->GetTeam() &&
+        (player->GetNativeTeam() != newp->GetNativeTeam() &&
             (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
                 !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL))))
     {
@@ -651,7 +651,7 @@ void Channel::Invite(Player const* player, std::string const& newname)
         return;
     }
 
-    if (newp->GetTeam() != player->GetTeam() &&
+    if (newp->GetNativeTeam() != player->GetNativeTeam() &&
         (!player->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL) ||
             !newp->GetSession()->HasPermission(rbac::RBAC_PERM_TWO_SIDE_INTERACTION_CHANNEL)))
     {
