@@ -1101,7 +1101,7 @@ class spell_sindragosa_unchained_magic : public SpellScriptLoader
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
                 unitList.remove_if(UnchainedMagicTargetSelector());
-                uint32 maxSize = uint32(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 6 : 2);
+                uint32 maxSize = uint32(GetCaster()->GetMap()->Is25ManRaid() ? 6 : 2);
                 if (unitList.size() > maxSize)
                     Skyfire::Containers::RandomResizeList(unitList, maxSize);
             }

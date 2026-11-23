@@ -621,7 +621,7 @@ class spell_marrowgar_bone_spike_graveyard : public SpellScriptLoader
                 if (Creature* marrowgar = GetCaster()->ToCreature())
                 {
                     CreatureAI* marrowgarAI = marrowgar->AI();
-                    uint8 boneSpikeCount = uint8(GetCaster()->GetMap()->GetSpawnMode() & 1 ? 3 : 1);
+                    uint8 boneSpikeCount = uint8(GetCaster()->GetMap()->Is25ManRaid() ? 3 : 1);
 
                     std::list<Unit*> targets;
                     marrowgarAI->SelectTargetList(targets, BoneSpikeTargetSelector(marrowgarAI), boneSpikeCount, SELECT_TARGET_RANDOM);
@@ -695,7 +695,10 @@ class spell_marrowgar_bone_slice : public SpellScriptLoader
 
             void ClearSpikeImmunities()
             {
-                GetCaster()->GetAI()->DoAction(ACTION_CLEAR_SPIKE_IMMUNITIES);
+                // Only Marrowgar has an AI to tell; a player caster (a GM test cast) has none
+                if (Unit* caster = GetCaster())
+                    if (UnitAI* ai = caster->GetAI())
+                        ai->DoAction(ACTION_CLEAR_SPIKE_IMMUNITIES);
             }
 
             void CountTargets(std::list<WorldObject*>& targets)

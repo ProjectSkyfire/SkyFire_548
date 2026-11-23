@@ -66,18 +66,14 @@ enum Shadowmourne
     SPELL_THIRST_QUENCHED                   = 72154,
 };
 
-uint32 const vampireAuras[3][4] =
-{
-    {70867, 71473, 71532, 71533},
-    {70879, 71525, 71530, 71531},
-    {70877, 71474, 70877, 71474},
-};
+// The 5.4.8 client has one spell per ability for every raid size, the 25 player ids no longer exist
+#define ESSENCE_OF_BLOOD_QUEEN     70867
+#define ESSENCE_OF_BLOOD_QUEEN_PLR 70879
+#define FRENZIED_BLOODTHIRST       70877
+#define DELIRIOUS_SLASH            71623
+#define PRESENCE_OF_THE_DARKFALLEN 70994
 
-#define ESSENCE_OF_BLOOD_QUEEN     RAID_MODE<uint32>(70867, 71473, 71532, 71533)
-#define ESSENCE_OF_BLOOD_QUEEN_PLR RAID_MODE<uint32>(70879, 71525, 71530, 71531)
-#define FRENZIED_BLOODTHIRST       RAID_MODE<uint32>(70877, 71474, 70877, 71474)
-#define DELIRIOUS_SLASH            RAID_MODE<uint32>(71623, 71624, 71625, 71626)
-#define PRESENCE_OF_THE_DARKFALLEN RAID_MODE<uint32>(70994, 71962, 71963, 71964)
+uint32 const vampireAuras[3] = { ESSENCE_OF_BLOOD_QUEEN, ESSENCE_OF_BLOOD_QUEEN_PLR, FRENZIED_BLOODTHIRST };
 
 enum Events
 {
@@ -117,7 +113,7 @@ Position const mincharPos = {4629.3711f, 2782.6089f, 424.6390f, 0.000000f};
 bool IsVampire(Unit const* unit)
 {
     for (uint8 i = 0; i < 3; ++i)
-        if (unit->HasAura(vampireAuras[i][unit->GetMap()->GetSpawnMode()]))
+        if (unit->HasAura(vampireAuras[i]))
             return true;
     return false;
 }

@@ -98,7 +98,7 @@ enum Spells
     SPELL_UNHOLY_INFUSION_CREDIT            = 71518
 };
 
-#define SPELL_GASEOUS_BLOAT_HELPER RAID_MODE<uint32>(70672, 72455, 72832, 72833)
+#define SPELL_GASEOUS_BLOAT_HELPER 70672
 
 enum Events
 {
@@ -964,7 +964,7 @@ class spell_putricide_slime_puddle_aura : public SpellScriptLoader
             void ReplaceAura()
             {
                 if (Unit* target = GetHitUnit())
-                    GetCaster()->AddAura((GetCaster()->GetMap()->GetSpawnMode() & 1) ? 72456 : 70346, target);
+                    GetCaster()->AddAura(70346, target);
             }
 
             void Register() OVERRIDE
@@ -1245,7 +1245,7 @@ class spell_putricide_mutated_plague : public SpellScriptLoader
 
                 int32 damage = spell->Effects[EFFECT_0].CalcValue(caster);
                 float multiplier = 2.0f;
-                if (GetTarget()->GetMap()->GetSpawnMode() & 1)
+                if (GetTarget()->GetMap()->Is25ManRaid())
                     multiplier = 3.0f;
 
                 damage *= int32(pow(multiplier, GetStackAmount()));
@@ -1339,7 +1339,7 @@ class spell_putricide_mutation_init : public SpellScriptLoader
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
                 uint32 spellId = 70311;
-                if (GetTarget()->GetMap()->GetSpawnMode() & 1)
+                if (GetTarget()->GetMap()->Is25ManRaid())
                     spellId = 71503;
 
                 GetTarget()->CastSpell(GetTarget(), spellId, true);
