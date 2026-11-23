@@ -198,6 +198,12 @@ set(scripts_STAT_SRCS
   EasternKingdoms/zone_undercity.cpp
   EasternKingdoms/zone_westfall.cpp
   EasternKingdoms/zone_twilight_highlands.cpp
+  EasternKingdoms/ScarletMonasteryMop/instance_scarlet_monastery_mop.cpp
+  EasternKingdoms/ScarletMonasteryMop/scarlet_monastery_mop.h
+  EasternKingdoms/ScarletMonasteryMop/scarlet_monastery_mop.cpp
+  EasternKingdoms/ScarletMonasteryMop/boss_thalnos_the_soulrender.cpp
+  EasternKingdoms/ScarletMonasteryMop/boss_brother_korloff.cpp
+  EasternKingdoms/ScarletMonasteryMop/boss_high_inquisitor_whitemane.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")
