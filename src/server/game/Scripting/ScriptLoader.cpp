@@ -250,6 +250,10 @@ void AddSC_boss_kilnara();
 void AddSC_boss_zanzil();
 void AddSC_boss_mandokir();
 void AddSC_boss_jindo_the_godbreaker();
+void AddSC_boss_grilek();
+void AddSC_boss_hazzarah();
+void AddSC_boss_renataki();
+void AddSC_boss_wushoolay();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_duskwood();
@@ -994,6 +998,10 @@ void AddEasternKingdomsScripts()
     AddSC_boss_zanzil();
     AddSC_boss_mandokir();
     AddSC_boss_jindo_the_godbreaker();
+    AddSC_boss_grilek();
+    AddSC_boss_hazzarah();
+    AddSC_boss_renataki();
+    AddSC_boss_wushoolay();
 
     AddSC_arathi_highlands();
     AddSC_blasted_lands();

@@ -206,6 +206,10 @@ set(scripts_STAT_SRCS
   EasternKingdoms/ZulGurub/boss_zanzil.cpp
   EasternKingdoms/ZulGurub/boss_mandokir.cpp
   EasternKingdoms/ZulGurub/boss_jindo_the_godbreaker.cpp
+  EasternKingdoms/ZulGurub/boss_grilek.cpp
+  EasternKingdoms/ZulGurub/boss_hazzarah.cpp
+  EasternKingdoms/ZulGurub/boss_renataki.cpp
+  EasternKingdoms/ZulGurub/boss_wushoolay.cpp
 )
 
 message("  -> Prepared: Eastern Kingdoms")
