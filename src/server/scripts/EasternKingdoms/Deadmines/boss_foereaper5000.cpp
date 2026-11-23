@@ -30,6 +30,15 @@ enum Spells
     SPELL_OVERDRIVE            = 88481,
     SPELL_OVERDRIVE_DMG        = 88484,
     SPELL_TARGET_BUNNY         = 71371, // rocket artillery
+    SPELL_SUMMON_MOLTEN_SLAG_1 = 91839,
+    SPELL_SUMMON_MOLTEN_SLAG_2 = 91841,
+    SPELL_SUMMON_MOLTEN_SLAG_3 = 91842,
+    SPELL_SUMMON_MOLTEN_SLAG_4 = 91843
+};
+
+uint32 const MoltenSlagSpells[4] =
+{
+    SPELL_SUMMON_MOLTEN_SLAG_1, SPELL_SUMMON_MOLTEN_SLAG_2, SPELL_SUMMON_MOLTEN_SLAG_3, SPELL_SUMMON_MOLTEN_SLAG_4
 };
 
 enum Adds
@@ -47,6 +56,7 @@ enum Events
     EVENT_HARVEST           = 4,
     EVENT_HARVEST1          = 5,
     EVENT_OVERDRIVE_END     = 6,
+    EVENT_MOLTEN_SLAG       = 7
 };
 
 enum Points
@@ -122,7 +132,12 @@ class boss_foereaper5000 : public CreatureScript
                 bEnrage = false;
                 bOverdrive = false;
                 harvestTargetGuid = 0;
+                me->GetMap()->SetWorldState(WORLDSTATE_PROTOTYPE_PRODIGY, 1);
                 me->SetReactState(REACT_AGGRESSIVE);
+
+                // Leaving combat restores the template's immunity to players; once on-line he must stay attackable
+                if (!me->HasAura(SPELL_OFF_LINE))
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
@@ -195,6 +210,10 @@ class boss_foereaper5000 : public CreatureScript
                             }
                             events.ScheduleEvent(EVENT_HARVEST, urand(30000, 40000));
                             break;
+                        case EVENT_MOLTEN_SLAG:
+                            DoCast(me, MoltenSlagSpells[urand(0, 3)], true);
+                            events.ScheduleEvent(EVENT_MOLTEN_SLAG, urand(21000, 22000));
+                            break;
                     }
                 }
 
@@ -240,6 +259,8 @@ class boss_foereaper5000 : public CreatureScript
                 events.ScheduleEvent(EVENT_REAPER_STRIKE, urand(5000, 8000));
                 events.ScheduleEvent(EVENT_OVERDRIVE, urand(10000, 15000));
                 events.ScheduleEvent(EVENT_HARVEST, urand(25000, 30000));
+                if (IsHeroic())
+                    events.ScheduleEvent(EVENT_MOLTEN_SLAG, 17000);
                 DoZoneInCombat();
             }
 
