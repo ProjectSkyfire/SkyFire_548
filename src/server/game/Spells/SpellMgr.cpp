@@ -3116,6 +3116,10 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 44544: // Fingers of Frost
                 spellInfo->Effects[EFFECT_0].SpellClassMask = flag128(685904631, 1151048, 0, 0);
                 break;
+            case 124974: // Nature's Vigil
+                // The client data marks the talent Alliance only
+                spellInfo->AttributesEx7 &= ~SPELL_ATTR7_ALLIANCE_ONLY;
+                break;
 
             case 28200: // Ascendance (Talisman of Ascendance trinket)
                 spellInfo->ProcCharges = 6;
