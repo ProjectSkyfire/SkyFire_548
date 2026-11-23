@@ -133,6 +133,10 @@ class boss_foereaper5000 : public CreatureScript
                 bOverdrive = false;
                 harvestTargetGuid = 0;
                 me->SetReactState(REACT_AGGRESSIVE);
+
+                // Leaving combat restores the template's immunity to players; once on-line he must stay attackable
+                if (!me->HasAura(SPELL_OFF_LINE))
+                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             }
 
             void UpdateAI(uint32 diff) OVERRIDE
