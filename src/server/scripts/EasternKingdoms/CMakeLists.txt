@@ -178,6 +178,8 @@ set(scripts_STAT_SRCS
   EasternKingdoms/Karazhan/boss_moroes.cpp
   EasternKingdoms/Karazhan/boss_terestian_illhoof.cpp
   EasternKingdoms/Karazhan/karazhan.h
+  EasternKingdoms/Karazhan/chess_event.cpp
+  EasternKingdoms/Karazhan/chess_event_spells.cpp
   #REWORKED IN CATACLYSM
   EasternKingdoms/TheStockade/boss_hogger.cpp
   EasternKingdoms/TheStockade/boss_lord_overheat.cpp
