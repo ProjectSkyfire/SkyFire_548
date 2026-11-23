@@ -6,6 +6,8 @@
 #ifndef PIT_OF_SARON_H_
 #define PIT_OF_SARON_H_
 
+#include "EventProcessor.h"
+
 #define PoSScriptName "instance_pit_of_saron"
 
 uint32 const EncounterCount = 3;
@@ -23,7 +25,8 @@ enum DataTypes
     DATA_JAINA_SYLVANAS_1   = 5,    // GUID of either Jaina or Sylvanas part 1, depending on team, as it's the same spawn.
     DATA_JAINA_SYLVANAS_2   = 6,    // GUID of either Jaina or Sylvanas part 2, depending on team, as it's the same spawn.
     DATA_TYRANNUS_EVENT     = 7,
-    DATA_TEAM_IN_INSTANCE   = 8
+    DATA_TEAM_IN_INSTANCE   = 8,
+    DATA_CAVERN_ACTIVE      = 9
 };
 
 enum CreatureIds
@@ -73,7 +76,8 @@ enum CreatureIds
     NPC_FORGEMASTER_STALKER                     = 36495,
     NPC_EXPLODING_ORB                           = 36610,
     NPC_YMIRJAR_DEATHBRINGER                    = 36892,
-    NPC_ICY_BLAST                               = 36731
+    NPC_ICY_BLAST                               = 36731,
+    NPC_CAVERN_EVENT_TRIGGER                    = 32780
 };
 
 enum GameObjectIds
@@ -81,6 +85,26 @@ enum GameObjectIds
     GO_SARONITE_ROCK                            = 196485,
     GO_ICE_WALL                                 = 201885,
     GO_HALLS_OF_REFLECTION_PORTCULLIS           = 201848
+};
+
+enum CavernSpells
+{
+    SPELL_ICICLE_SUMMON                         = 69424,
+    SPELL_ICICLE_FALL_TRIGGER                   = 69426,
+    SPELL_ICICLE_FALL_VISUAL                    = 69428
+};
+
+class Creature;
+
+class ScheduledIcicleSummons : public BasicEvent
+{
+    public:
+        explicit ScheduledIcicleSummons(Creature* trigger) : _trigger(trigger) { }
+
+        bool Execute(uint64 /*time*/, uint32 /*diff*/) OVERRIDE;
+
+    private:
+        Creature* _trigger;
 };
 
 template<class AI>
