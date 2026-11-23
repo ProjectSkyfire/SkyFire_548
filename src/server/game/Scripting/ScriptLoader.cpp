@@ -248,6 +248,7 @@ void AddSC_zulgurub();
 void AddSC_boss_venoxis();
 void AddSC_boss_kilnara();
 void AddSC_boss_zanzil();
+void AddSC_boss_mandokir();
 void AddSC_arathi_highlands();
 void AddSC_blasted_lands();
 void AddSC_duskwood();
@@ -990,6 +991,7 @@ void AddEasternKingdomsScripts()
     AddSC_boss_venoxis();
     AddSC_boss_kilnara();
     AddSC_boss_zanzil();
+    AddSC_boss_mandokir();
 
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
