@@ -214,11 +214,11 @@ size_t CinematicSequenceMgr::Load()
         char* fileBuffer = 0;
         char    magicHeader[4];
 
-        // Check magic
-        fread(magicHeader, 1, sizeof(magicHeader), modelFile);
-
-        if (0 != memcmp(magicHeader, "MD20", sizeof(magicHeader)))
+        // Check magic; a short read leaves magicHeader uninitialised
+        if (fread(magicHeader, 1, sizeof(magicHeader), modelFile) != sizeof(magicHeader)
+            || 0 != memcmp(magicHeader, "MD20", sizeof(magicHeader)))
         {
+            fclose(modelFile);
             SF_LOG_INFO("server.loading", "Cinematic camera '%s': invalid magic header!", modelFileName.c_str());
             continue;
         }
@@ -230,8 +230,16 @@ size_t CinematicSequenceMgr::Load()
 
         // Map file into memory
         fileBuffer = (char*)malloc(fileSize);
-        fread(fileBuffer, 1, fileSize, modelFile);
+        size_t bytesRead = fileBuffer ? fread(fileBuffer, 1, fileSize, modelFile) : 0;
         fclose(modelFile);
+
+        // A short read would leave the rest of the buffer uninitialised for the parser below
+        if (bytesRead != fileSize)
+        {
+            free(fileBuffer);
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': read %u of %u bytes, skipped!", modelFileName.c_str(), uint32(bytesRead), uint32(fileSize));
+            continue;
+        }
 
         // Check number of cameras
         ModelHeader* modelHeader = (ModelHeader*)fileBuffer;
