@@ -288,6 +288,13 @@ namespace
             uint32(plan.BaselineUpdates.size()));
         return true;
     }
+
+    // Names the endpoint without the password, so a failed connect never writes credentials to the log
+    void LogDatabaseConnectError(char const* name, MySQLConnectionInfo const& info)
+    {
+        SF_LOG_ERROR("server.worldserver", "Cannot connect to %s database %s@%s:%s/%s", name,
+            info._user.c_str(), info._host.c_str(), info._port_or_socket.c_str(), info._database.c_str());
+    }
 }
 
 void WorldServerSignalHandler(int sigNum)
@@ -353,7 +360,7 @@ int Master::Run()
 {
     BigNumber seed1;
     seed1.SetRand(16 * 8);
-    SF_LOG_INFO("server.worldserver", "worldserver-daemon. revision: % s", SKYFIRE_VER_PRODUCTVERSION_STR);
+    SF_LOG_INFO("server.worldserver", "worldserver-daemon. revision: %s", SKYFIRE_VER_PRODUCTVERSION_STR);
     SF_LOG_INFO("server.worldserver", "<Ctrl-C> to stop.\n");
 
     SF_LOG_INFO("server.worldserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
@@ -545,7 +552,7 @@ int Master::Run()
         LoginDatabase.DirectPExecute("UPDATE realmlist SET flag = flag & ~%u, population = 0 WHERE id = '%u'", REALM_FLAG_INVALID, itr->first);
     }
 
-    SF_LOG_INFO("server.worldserver",  " % s (worldserver-daemon) ready...", SKYFIRE_VER_PRODUCTVERSION_STR);
+    SF_LOG_INFO("server.worldserver",  "%s (worldserver-daemon) ready...", SKYFIRE_VER_PRODUCTVERSION_STR);
 
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
@@ -668,7 +675,7 @@ bool Master::_StartDB()
         ///- Initialize the world database
         if (!WorldDatabase.Open(dbString, asyncThreads, synchThreads))
         {
-            SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s", dbString.c_str());
+            LogDatabaseConnectError("world", MySQLConnectionInfo(dbString));
             return false;
         }
     }
@@ -676,7 +683,7 @@ bool Master::_StartDB()
     {
         if (!WorldDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _worldDB, asyncThreads, synchThreads))
         {
-            SF_LOG_ERROR("server.worldserver", "Cannot connect to world database %s, %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _worldDB);
+            LogDatabaseConnectError("world", MySQLConnectionInfo(_dbHost, _dbPort, _dbUser, _dbPassword, _worldDB));
             return false;
         }
     }
@@ -715,7 +722,7 @@ bool Master::_StartDB()
         ///- Initialize the Character database
         if (!CharacterDatabase.Open(dbString, asyncThreads, synchThreads))
         {
-            SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database%s, %s", dbString.c_str());
+            LogDatabaseConnectError("character", MySQLConnectionInfo(dbString));
             return false;
         }
     }
@@ -724,7 +731,7 @@ bool Master::_StartDB()
         ///- Initialize the Character database
         if (!CharacterDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB, asyncThreads, synchThreads))
         {
-            SF_LOG_ERROR("server.worldserver", "Cannot connect to Character database%s, %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB);
+            LogDatabaseConnectError("character", MySQLConnectionInfo(_dbHost, _dbPort, _dbUser, _dbPassword, _charactersDB));
             return false;
         }
     }
@@ -755,7 +762,7 @@ bool Master::_StartDB()
         ///- Initialise the login database
         if (!LoginDatabase.Open(dbString, asyncThreads, synchThreads))
         {
-            SF_LOG_ERROR("server.worldserver", "Cannot connect to login database %s", dbString.c_str());
+            LogDatabaseConnectError("login", MySQLConnectionInfo(dbString));
             return false;
         }
     }
@@ -763,7 +770,7 @@ bool Master::_StartDB()
     {
         if (!LoginDatabase.Open(_dbHost, _dbPort, _dbUser, _dbPassword, _authDB, asyncThreads, synchThreads))
         {
-            SF_LOG_ERROR("server.worldserver", "Cannot connect to database%s %s, %s, %s, %s", _dbHost, _dbPort, _dbUser, _dbPassword, _authDB);
+            LogDatabaseConnectError("login", MySQLConnectionInfo(_dbHost, _dbPort, _dbUser, _dbPassword, _authDB));
             return false;
         }
     }

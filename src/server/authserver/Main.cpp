@@ -318,7 +318,7 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
-    SF_LOG_INFO("server.authserver", "authserver-daemon. revision: % s", SKYFIRE_VER_PRODUCTVERSION_STR);
+    SF_LOG_INFO("server.authserver", "authserver-daemon. revision: %s", SKYFIRE_VER_PRODUCTVERSION_STR);
     SF_LOG_INFO("server.authserver", "<Ctrl-C> to stop.\n");
 
     SF_LOG_INFO("server.authserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
