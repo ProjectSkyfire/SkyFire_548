@@ -772,11 +772,25 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
     if (!m)
         return;
 
+    // Mail items are cached across all of the player's mail. The requested
+    // attachment must belong to this message before its COD can be used.
+    Item* it = nullptr;
+    for (MailItemInfo const& info : m->items)
+        if (info.item_guid == itemId)
+        {
+            it = player->GetMItem(itemId);
+            break;
+        }
+
+    if (!it)
+    {
+        player->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_EQUIP_ERROR, EQUIP_ERR_ITEM_NOT_FOUND);
+        return;
+    }
+
     // prevent cheating with skip client money check
     if (!ValidateMailCODPayment(player, mailId, m))
         return;
-
-    Item* it = player->GetMItem(itemId);
 
     ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, it, false);
