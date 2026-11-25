@@ -11947,6 +11947,61 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 /***                    GOSSIP SYSTEM                  ***/
 /*********************************************************/
 
+namespace
+{
+    struct StableCompanionRecovery
+    {
+        uint32 Item;
+        uint32 Spell;
+        uint32 Quest;
+        uint32 AlternateQuest;
+    };
+
+    // Option order in the shared lost-companion menu (9820).
+    StableCompanionRecovery const StableCompanions[] =
+    {
+        { 31760, 39181, 10898, 0 }, // Miniwing
+        { 19450, 23811, 7946, 0 },  // Jubling
+        { 11474, 15067, 4298, 0 },  // Sprite Darter Hatchling
+        { 12264, 15999, 4729, 0 },  // Worg Pup
+        { 12529, 16450, 4862, 0 },  // Smolderweb Hatchling
+        { 11110, 13548, 3861, 0 },  // Prairie Chicken
+        { 32233, 39709, 11117, 11431 } // Wolpertinger
+    };
+
+    bool CanRecoverStableCompanion(Player* player, uint32 option)
+    {
+        // Inventory counts exclude offered trade items; never recover while trading.
+        if (player->GetTradeData())
+            return false;
+        if (option >= sizeof(StableCompanions) / sizeof(StableCompanions[0]))
+            return false;
+
+        StableCompanionRecovery const& pet = StableCompanions[option];
+        if (!player->GetQuestRewardStatus(pet.Quest) &&
+            (!pet.AlternateQuest || !player->GetQuestRewardStatus(pet.AlternateQuest)))
+            return false;
+
+        if (player->HasItemCount(pet.Item, 1, true) || player->HasSpell(pet.Spell))
+            return false;
+        // Jubling's original reward takes seven days to hatch.
+        if (pet.Item == 19450 && player->HasItemCount(19462, 1, true))
+            return false;
+
+        uint16 species = BattlePetGetSpeciesBySummonSpell(pet.Spell);
+        // Fail closed if client data cannot identify the pet's journal entry.
+        if (!species || player->GetBattlePetMgr()->GetBattlePetCount(species))
+            return false;
+
+        std::string query = "SELECT 1 FROM mail_items mi JOIN item_instance ii ON ii.guid = mi.item_guid WHERE mi.receiver = " +
+            std::to_string(player->GetGUIDLow()) + " AND ii.itemEntry IN (" + std::to_string(pet.Item);
+        if (pet.Item == 19450)
+            query += ",19462";
+        query += ") LIMIT 1";
+        return !CharacterDatabase.Query(query.c_str());
+    }
+}
+
 void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool showQuests /*= false*/)
 {
     PlayerMenu* menu = PlayerTalkClass;
@@ -11974,6 +12029,26 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
 
     for (GossipMenuItemsContainer::const_iterator itr = menuItemBounds.first; itr != menuItemBounds.second; ++itr)
     {
+        if (Creature* stableMaster = source->ToCreature())
+        {
+            if (stableMaster->HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_STABLEMASTER))
+            {
+                if (menuId == 9820 && !CanRecoverStableCompanion(this, itr->second.OptionID))
+                    continue;
+                if (menuId == 9821 && itr->second.ActionMenuID == 9820)
+                {
+                    bool eligible = false;
+                    for (uint32 option = 0; option < sizeof(StableCompanions) / sizeof(StableCompanions[0]); ++option)
+                        if (CanRecoverStableCompanion(this, option))
+                        {
+                            eligible = true;
+                            break;
+                        }
+                    if (!eligible)
+                        continue;
+                }
+            }
+        }
         bool canTalk = true;
         if (!sConditionMgr->IsObjectMeetToConditions(this, source, itr->second.Conditions))
             continue;
@@ -12157,6 +12232,19 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
     GossipMenuItem const* item = gossipMenu.GetItem(gossipListId);
     if (!item)
         return;
+
+    if (menuId == 9820)
+    {
+        Creature* stableMaster = source->ToCreature();
+        if (!stableMaster || !stableMaster->HasFlag(UNIT_FIELD_NPC_FLAGS, UNIT_NPC_FLAG_STABLEMASTER))
+            return;
+        // Recheck on selection; another choice may already have restored this pet.
+        if (CanRecoverStableCompanion(this, gossipListId) && AddItem(StableCompanions[gossipListId].Item, 1))
+            SaveToDB();
+        PrepareGossipMenu(source, 9820);
+        SendPreparedGossip(source);
+        return;
+    }
 
     uint32 gossipOptionId = item->OptionType;
     uint64 guid = source->GetGUID();
