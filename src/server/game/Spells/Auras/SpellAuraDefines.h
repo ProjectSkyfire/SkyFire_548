@@ -439,7 +439,7 @@ enum AuraType
     // 391 unused
     // 392 unused
     SPELL_AURA_393 = 393,
-    SPELL_AURA_394 = 394,
+    SPELL_AURA_BONUS_ROLL_TRIGGER = 394, // bonus roll prompt; TriggerSpell is the roll the client casts on accept
     SPELL_AURA_AREA_TRIGGER = 395,
     SPELL_AURA_396 = 396,
     SPELL_AURA_397 = 397,
