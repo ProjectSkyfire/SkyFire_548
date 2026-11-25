@@ -816,7 +816,7 @@ void LoadDBCStores(const std::string& dataPath)
             sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
 
     // Initialize global taxinodes mask
-    // include existed nodes that have at least single not spell base (scripted) path
+    // Include faction-visible nodes that have at least one non-scripted path.
     {
         std::set<uint32> spellPaths;
         for (uint32 i = 1; i < sSpellEffectStore.GetNumRows(); ++i)
@@ -833,6 +833,11 @@ void LoadDBCStores(const std::string& dataPath)
         {
             TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
             if (!node)
+                continue;
+
+            // Retired and script-only nodes remain available for explicit taxi paths,
+            // but must not appear in the flight network, even with taxi cheat enabled.
+            if (!(node->Flags & 0x3))
                 continue;
 
             TaxiPathSetBySource::const_iterator src_i = sTaxiPathSetBySource.find(i);

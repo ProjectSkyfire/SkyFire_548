@@ -162,7 +162,7 @@ char const SpellShapeshiftFormfmt[] = "nxxiixiiixxiiiiiiiiix";
 
 char const SummonPropertiesfmt[] = "niiiii";
 char const TalentEntryfmt[] = "nxixixxxiix";
-char const TaxiNodesEntryfmt[] = "difffsiixxxx";
+char const TaxiNodesEntryfmt[] = "difffsiixixx";
 char const TaxiPathEntryfmt[] = "niii";
 char const TaxiPathNodeEntryfmt[] = "diiifffiiii";
 char const TotemCategoryEntryfmt[] = "dxii";
