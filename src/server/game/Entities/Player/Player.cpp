@@ -12834,9 +12834,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
     SetMap(map);
     //StoreRaidMapDifficulty();
 
-    // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
-    // this must help in case next save after mass player load after server startup
-    m_nextSave = urand(m_nextSave / 2, m_nextSave * 3 / 2);
+    // Spread the first autosave across the interval after login, including mass logins.
+    // A zero interval keeps periodic saves disabled.
+    m_nextSave = m_nextSave ? urand(1, m_nextSave) : 0;
 
     SaveRecallPosition();
 
@@ -14631,8 +14631,10 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
 
 void Player::SaveToDB(bool create /*=false*/)
 {
-    // delay auto save at any saves (manual, in code, or autosave)
-    m_nextSave = sWorld->getIntConfig(WorldIntConfigs::CONFIG_INTERVAL_SAVE);
+    // Reschedule only the next autosave; this save still happens immediately.
+    // Independent jitter keeps mass/manual saves from synchronizing every player.
+    uint32 const saveInterval = sWorld->getIntConfig(WorldIntConfigs::CONFIG_INTERVAL_SAVE);
+    m_nextSave = saveInterval ? urand(saveInterval - saveInterval / 5, saveInterval) : 0;
 
     //lets allow only players in world to be saved
     if (IsBeingTeleportedFar())

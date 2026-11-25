@@ -431,7 +431,9 @@ ChangeWeatherInterval = 600000
 
 #
 #    PlayerSaveInterval
-#        Description: Time (in milliseconds) for player save interval.
+#        Description: Maximum time (in milliseconds) between periodic player saves.
+#                     First save is staggered after login; later saves use 80%-100% of this interval.
+#                     Explicit saves on logout/shutdown are unaffected.
 #        Default:     900000 - (15 min)
 
 PlayerSaveInterval = 900000
