@@ -68,7 +68,10 @@ public:
 
     void Summon(Creature const* summon)
     {
-        storage_.push_back(summon->GetGUID());
+        // A creature can be registered twice (by the summon event and by its own script), and Despawn removes
+        // every entry of its guid, which leaves the iterators of DespawnEntry and similar loops dangling
+        if (std::find(storage_.begin(), storage_.end(), summon->GetGUID()) == storage_.end())
+            storage_.push_back(summon->GetGUID());
     }
     void Despawn(Creature const* summon)
     {
