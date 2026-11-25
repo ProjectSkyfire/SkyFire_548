@@ -392,6 +392,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
         auctionHouse->AddAuction(AH);
 
         _player->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
+        _player->ModifyMoney(-int64(deposit));
 
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
         item->DeleteFromInventoryDB(trans);
@@ -441,6 +442,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
         sAuctionMgr->AddAItem(newItem);
         auctionHouse->AddAuction(AH);
 
+        SQLTransaction trans = CharacterDatabase.BeginTransaction();
         for (uint32 j = 0; j < itemCount; ++j)
         {
             Item* item2 = items[j];
@@ -450,10 +452,8 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
             {
                 _player->MoveItemFromInventory(item2->GetBagSlot(), item2->GetSlot(), true);
 
-                SQLTransaction trans = CharacterDatabase.BeginTransaction();
                 item2->DeleteFromInventoryDB(trans);
                 item2->DeleteFromDB(trans);
-                CharacterDatabase.CommitTransaction(trans);
             }
             else // Item stack count is bigger than required count, update item stack count and save to database - cloned item will be used for auction
             {
@@ -462,13 +462,11 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
                 _player->ItemRemovedQuestCheck(item2->GetEntry(), count[j]);
                 item2->SendUpdateToPlayer(_player);
 
-                SQLTransaction trans = CharacterDatabase.BeginTransaction();
                 item2->SaveToDB(trans);
-                CharacterDatabase.CommitTransaction(trans);
             }
         }
 
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        _player->ModifyMoney(-int64(deposit));
         newItem->SaveToDB(trans);
         AH->SaveToDB(trans);
         _player->SaveInventoryAndGoldToDB(trans);
@@ -479,7 +477,6 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
         GetPlayer()->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CREATE_AUCTION, 1);
     }
 
-    _player->ModifyMoney(-int32(deposit));
 }
 
 // this function is called when client bids or buys out auction
