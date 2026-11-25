@@ -893,3 +893,9 @@ target_include_directories(game_domain_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE
 target_include_directories(battle_pet_packet_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE_DIRS})
 
 add_test(NAME game_domain_tests COMMAND game_domain_tests)
+
+add_executable(profession_skill_field_tests ProfessionSkillFieldTests.cpp)
+target_include_directories(profession_skill_field_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object/Updates
+)
+add_test(NAME profession_skill_field_tests COMMAND profession_skill_field_tests)
