@@ -57,10 +57,17 @@ public:
         {
             std::lock_guard<std::mutex> guard(m_SocketsLock);
             sockets.assign(m_Sockets.begin(), m_Sockets.end());
+            // Close callbacks can remove the reactor's last reference after
+            // this lock is released. Keep the snapshot alive until it is used.
+            for (WorldSocket* socket : sockets)
+                socket->AddReference();
         }
 
         for (WorldSocket* socket : sockets)
+        {
             socket->CloseSocket();
+            socket->RemoveReference();
+        }
 
         m_ThreadGroup.Drain();
     }
