@@ -30,6 +30,24 @@
 
 #include <vector>
 
+namespace
+{
+// Initial profession training has no prerequisite skill: inspect the skill it teaches.
+bool TrainerSpellMatchesSkill(TrainerSpell const& spell, uint32 skill)
+{
+    if (!skill)
+        return true;
+
+    for (uint32 learnedSpell : spell.learnedSpell)
+        if (SpellLearnSkillNode const* learnedSkill = sSpellMgr->GetSpellLearnSkill(learnedSpell))
+            if (learnedSkill->skill == skill)
+                return true;
+
+    // Gathering links teach the gathering skill, not production recipes such as smelting.
+    return spell.reqSkill == skill && skill != SKILL_HERBALISM && skill != SKILL_MINING && skill != SKILL_SKINNING;
+}
+}
+
 enum StableResultCode
 {
     STABLE_ERR_MONEY = 0x01,                         // "you don't have enough money"
@@ -92,16 +110,16 @@ void WorldSession::HandleTrainerListOpcode(WorldPacket& recvData)
     recvData.ReadGuidMask(guid, 0, 2, 7, 6, 1, 4, 5, 3);
     recvData.ReadGuidBytes(guid, 3, 6, 7, 5, 1, 0, 2, 4);
 
-    SendTrainerList(guid);
+    SendTrainerList(guid, _trainerGuid == uint64(guid) ? _trainerSkill : 0);
 }
 
-void WorldSession::SendTrainerList(uint64 guid)
+void WorldSession::SendTrainerList(uint64 guid, uint32 trainerSkill)
 {
     std::string str = GetSkyFireString(LANG_NPC_TAINER_HELLO);
-    SendTrainerList(guid, str);
+    SendTrainerList(guid, str, trainerSkill);
 }
 
-void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
+void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle, uint32 trainerSkill)
 {
     SF_LOG_DEBUG("network", "WORLD: SendTrainerList");
 
@@ -133,6 +151,8 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     }
 
     ObjectGuid oGuid = guid;
+    _trainerGuid = guid;
+    _trainerSkill = trainerSkill;
 
     WorldPacket data(SMSG_TRAINER_LIST, 1 + 8 + 4 + (trainer_spells->spellList.size() * 30) + 4 + 4 + strTitle.size());
     data.WriteGuidMask(oGuid, 4, 5);
@@ -153,6 +173,8 @@ void WorldSession::SendTrainerList(uint64 guid, const std::string& strTitle)
     for (TrainerSpellMap::const_iterator itr = trainer_spells->spellList.begin(); itr != trainer_spells->spellList.end(); ++itr)
     {
         TrainerSpell const* tSpell = &itr->second;
+        if (!TrainerSpellMatchesSkill(*tSpell, trainerSkill))
+            continue;
 
         bool valid = true;
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -246,7 +268,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
 
     // not found, cheat?
     TrainerSpell const* trainer_spell = trainer_spells->Find(spellId);
-    if (!trainer_spell)
+    if (!trainer_spell || _trainerGuid != uint64(guid) || !TrainerSpellMatchesSkill(*trainer_spell, _trainerSkill))
     {
         SendTrainerBuyFailed(guid, spellId, 0);
         return;

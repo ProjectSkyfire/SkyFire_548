@@ -8420,6 +8420,12 @@ void ObjectMgr::LoadGossipMenuItems()
         gMenuItem.BoxMoney = fields[10].GetUInt32();
         gMenuItem.BoxText = fields[11].GetString();
         gMenuItem.BoxBroadcastTextID = fields[12].GetUInt32();
+        gMenuItem.TrainerSkill = fields[13].GetUInt32();
+        if (gMenuItem.TrainerSkill && (gMenuItem.OptionType != GOSSIP_OPTION_TRAINER || !sSkillLineStore.LookupEntry(gMenuItem.TrainerSkill)))
+        {
+            SF_LOG_ERROR("sql.sql", "Invalid TrainerSkill %u for gossip menu %u, option %u; skipping option", gMenuItem.TrainerSkill, gMenuItem.MenuID, gMenuItem.OptionID);
+            continue;
+        }
 
         if (gMenuItem.OptionIcon >= GOSSIP_ICON_MAX)
         {

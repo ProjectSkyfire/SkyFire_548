@@ -40,6 +40,7 @@ int main()
     passed &= ExpectContains(query, "OptionBroadcastTextID");
     passed &= ExpectContains(query, "ActionMenuID");
     passed &= ExpectContains(query, "BoxBroadcastTextID");
+    passed &= ExpectContains(query, "BoxBroadcastTextID, TrainerSkill ");
     passed &= ExpectContains(query, "FROM gossip_menu_option");
     passed &= ExpectNotContains(query, "gossip_menu_option_action");
     passed &= ExpectNotContains(query, "gossip_menu_option_box");

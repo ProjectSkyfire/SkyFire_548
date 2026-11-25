@@ -550,6 +550,7 @@ struct GossipMenuItems
     uint32          BoxMoney;
     std::string     BoxText;
     uint32          BoxBroadcastTextID;
+    uint32          TrainerSkill = 0; // Optional skill-line filter for trainer options
     ConditionList   Conditions;
 };
 

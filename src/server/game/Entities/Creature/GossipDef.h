@@ -133,6 +133,7 @@ struct GossipMenuItemData
 {
     uint32 GossipActionMenuId;  // MenuId of the gossip triggered by this action
     uint32 GossipActionPoi;
+    uint32 TrainerSkill = 0;
 };
 
 // need an ordered container
@@ -161,7 +162,7 @@ public:
     void SetLocale(LocaleConstant locale) { _locale = locale; }
     LocaleConstant GetLocale() const { return _locale; }
 
-    void AddGossipMenuItemData(uint32 menuItemId, uint32 gossipActionMenuId, uint32 gossipActionPoi);
+    void AddGossipMenuItemData(uint32 menuItemId, uint32 gossipActionMenuId, uint32 gossipActionPoi, uint32 trainerSkill = 0);
 
     uint32 GetMenuItemCount() const
     {

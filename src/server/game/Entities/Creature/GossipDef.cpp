@@ -84,12 +84,13 @@ void GossipMenu::AddMenuItem(uint32 menuId, uint32 menuItemId, uint32 sender, ui
     }
 }
 
-void GossipMenu::AddGossipMenuItemData(uint32 menuItemId, uint32 gossipActionMenuId, uint32 gossipActionPoi)
+void GossipMenu::AddGossipMenuItemData(uint32 menuItemId, uint32 gossipActionMenuId, uint32 gossipActionPoi, uint32 trainerSkill)
 {
     GossipMenuItemData& itemData = _menuItemData[menuItemId];
 
     itemData.GossipActionMenuId = gossipActionMenuId;
     itemData.GossipActionPoi = gossipActionPoi;
+    itemData.TrainerSkill = trainerSkill;
 }
 
 uint32 GossipMenu::GetMenuItemSender(uint32 menuItemId) const

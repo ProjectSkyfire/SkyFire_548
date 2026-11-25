@@ -418,8 +418,8 @@ public:
 
     // TODO: trainer hello
     void HandleTrainerListOpcode(WorldPacket& recvPacket);
-    void SendTrainerList(uint64 guid);
-    void SendTrainerList(uint64 guid, std::string const& strTitle);
+    void SendTrainerList(uint64 guid, uint32 trainerSkill = 0);
+    void SendTrainerList(uint64 guid, std::string const& strTitle, uint32 trainerSkill = 0);
 
     // vendor hello
     void HandleListInventoryOpcode(WorldPacket& recvPacket);
@@ -1190,6 +1190,8 @@ public:                                                 // opcodes handlers
 
 private:
     void InitializeQueryCallbackParameters();
+    uint64 _trainerGuid = 0;
+    uint32 _trainerSkill = 0;
     void ProcessQueryCallbacks();
 
     PreparedQueryResultFuture _charEnumCallback;
