@@ -988,6 +988,8 @@ void OpcodeTable::InitializeServerTable()
     DEFINE_OPCODE_HANDLER(SMSG_RESUME_COMMS,                                   0x0969, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESURRECT_REQUEST,                              0x1062, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_RESYNC_RUNES,                                   0x15E3, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_SCENARIO_PROGRESS_UPDATE,                       0x02BA, STATUS_NEVER    ); // 5.4.8 18414
+    DEFINE_OPCODE_HANDLER(SMSG_SCENARIO_STATE,                                 0x088F, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SELL_RESPONSE,                                  0x048E, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SEND_KNOWN_SPELLS,                              0x045A, STATUS_NEVER    ); // 5.4.8 18414
     DEFINE_OPCODE_HANDLER(SMSG_SEND_MAIL_RESULT,                               0x1A9B, STATUS_NEVER    ); // 5.4.8 18414

@@ -656,6 +656,14 @@ add_executable(battle_pet_packet_tests
 
 add_test(NAME battle_pet_packet_tests COMMAND battle_pet_packet_tests)
 
+add_executable(scenario_packet_tests
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios/ScenarioPackets.cpp
+  GameDomainTestSupport.cpp
+  ScenarioPacketTests.cpp
+)
+
+add_test(NAME scenario_packet_tests COMMAND scenario_packet_tests)
+
 add_executable(gossip_schema_tests
   ${CMAKE_SOURCE_DIR}/src/server/game/Globals/GossipSchema.cpp
   GossipSchemaTests.cpp
@@ -877,6 +885,7 @@ set(SKYFIRE_GAME_TEST_INCLUDE_DIRS
   ${CMAKE_SOURCE_DIR}/src/server/game/Movement/Waypoints
   ${CMAKE_SOURCE_DIR}/src/server/game/Opcodes
   ${CMAKE_SOURCE_DIR}/src/server/game/Quests
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios
   ${CMAKE_SOURCE_DIR}/src/server/game/Scripting
   ${CMAKE_SOURCE_DIR}/src/server/game/Server
   ${CMAKE_SOURCE_DIR}/src/server/game/Server/Protocol
@@ -891,5 +900,19 @@ set(SKYFIRE_GAME_TEST_INCLUDE_DIRS
 
 target_include_directories(game_domain_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE_DIRS})
 target_include_directories(battle_pet_packet_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE_DIRS})
+target_include_directories(scenario_packet_tests PRIVATE ${SKYFIRE_GAME_TEST_INCLUDE_DIRS})
 
 add_test(NAME game_domain_tests COMMAND game_domain_tests)
+
+add_executable(scenario_progress_tests
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios/ScenarioProgress.cpp
+  ScenarioProgressTests.cpp
+)
+
+target_include_directories(scenario_progress_tests PRIVATE
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/src/server/shared
+  ${CMAKE_SOURCE_DIR}/src/server/game/Scenarios
+)
+
+add_test(NAME scenario_progress_tests COMMAND scenario_progress_tests)
