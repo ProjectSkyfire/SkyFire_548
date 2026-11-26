@@ -1,3 +1,8 @@
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
+
 #ifndef SKYFIRE_TRANSPORT_RECOVERY_H
 #define SKYFIRE_TRANSPORT_RECOVERY_H
 
