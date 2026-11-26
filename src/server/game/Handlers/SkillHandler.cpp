@@ -92,10 +92,8 @@ void WorldSession::HandleRespecWipeConfirmOpcode(WorldPacket& recvPacket)
             return;
         }
     }
-    else
-    {
-        _player->ResetTalents(Cost, false, true);
-    }
+    else if (!_player->ResetTalents(Cost, false, true))
+        return;
 
     _player->SendTalentsInfoData();
 

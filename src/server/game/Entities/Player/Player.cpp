@@ -3257,6 +3257,16 @@ void Player::GiveLevel(uint8 level)
 
     UpdateSkillsForLevel();
 
+    // Skill abilities learned with the character level (class passives on shared skill lines, such as Victorious
+    // State on Defense) come with the new level, not only at the next login; learning one can add a skill, so the
+    // skill ids are copied first
+    std::vector<uint32> skillIds;
+    for (SkillStatusMap::const_iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
+        if (itr->second.uState != SkillUpdateState::SKILL_DELETED)
+            skillIds.push_back(itr->first);
+    for (uint32 skillId : skillIds)
+        learnSkillRewardedSpells(skillId, GetPureSkillValue(skillId));
+
     // save base values (bonuses already included in stored stats
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
@@ -3961,6 +3971,11 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
             if (HasSkill(pSkill->id))
                 continue;
 
+            // Spells such as Player Damage Reduction are also listed under the pet families' skill lines. A player
+            // given such a line learns the pet passives of the whole line on login and runs them on itself.
+            if (IsPetFamilySkillLine(pSkill->id))
+                continue;
+
             if (_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
                 // runeforging special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 (pSkill->id == SKILL_RUNEFORGING && (_spell_idx->second->max_value == 0 || _spell_idx->second->max_value == 1)))
@@ -4650,7 +4665,7 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
 
     if (!noCost && !sWorld->GetBoolConfig(WorldBoolConfigs::CONFIG_NO_RESET_TALENT_COST))
     {
-        cost = GetNextResetTalentsCost();
+        cost = resetTalents ? GetNextResetTalentsCost() : GetNextResetSpecializationCost();
 
         if (!HasEnoughMoney(uint64(cost)))
         {
@@ -4718,8 +4733,16 @@ bool Player::ResetTalents(bool noCost, bool resetTalents, bool resetSpecializati
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS, cost);
         UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS, 1);
 
-        SetTalentResetCost(cost);
-        SetTalentResetTime(time(NULL));
+        if (resetTalents)
+        {
+            SetTalentResetCost(cost);
+            SetTalentResetTime(time(NULL));
+        }
+        else
+        {
+            SetSpecializationResetCost(cost);
+            SetSpecializationResetTime(time(NULL));
+        }
     }
 
     /* when prev line will dropped use next line
@@ -17404,7 +17427,7 @@ void Player::InitDisplayIds()
     }
 }
 
-inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int32 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore)
+inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot, int64 price, ItemTemplate const* pProto, Creature* pVendor, VendorItem const* crItem, bool bStore)
 {
     uint32 stacks = count / pProto->BuyCount;
     ItemPosCountVec vDest;
@@ -17467,7 +17490,7 @@ inline bool Player::_StoreOrEquipNewItem(uint32 vendorslot, uint32 item, uint8 c
         {
             it->SetFlag(ITEM_FIELD_DYNAMIC_FLAGS, ITEM_FLAG_REFUNDABLE);
             it->SetRefundRecipient(GetGUIDLow());
-            it->SetPaidMoney(price);
+            it->SetPaidMoney(uint32(price));
             it->SetPaidExtendedCost(crItem->ExtendedCost);
             it->SaveRefundDataToDB();
             AddRefundReference(it->GetGUIDLow());
@@ -17687,7 +17710,7 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
     // check current item amount if it limited
     if (crItem->maxcount != 0)
     {
-        if (creature->GetVendorItemCurrentCount(crItem) < pProto->BuyCount * count)
+        if (creature->GetVendorItemCurrentCount(crItem) < count)
         {
             SendEquipError(EQUIP_ERR_VENDOR_SOLD_OUT, NULL, NULL, 0);
             return false;
@@ -17784,22 +17807,31 @@ bool Player::BuyItemFromVendorSlot(uint64 vendorguid, uint32 vendorslot, uint32 
         }
     }
 
-    uint32 price = 0;
+    int64 price = 0;
     if (crItem->IsGoldRequired(pProto) && pProto->BuyPrice > 0) //Assume price cannot be negative (do not know why it is int32)
     {
-        uint32 maxCount = MAX_MONEY_AMOUNT / pProto->BuyPrice;
-        if ((uint32)count > maxCount)
+        uint64 totalPrice = uint64(pProto->BuyPrice) * count / pProto->BuyCount;
+        if (totalPrice > MAX_MONEY_AMOUNT)
         {
             SF_LOG_ERROR("entities.player", "Player %s tried to buy %u item id %u, causing overflow", GetName().c_str(), (uint32)count, pProto->ItemId);
-            count = (uint8)maxCount;
+            SendEquipError(EQUIP_ERR_NOT_ENOUGH_MONEY, NULL, NULL, 0);
+            return false;
         }
-        price = pProto->BuyPrice * count; //it should not exceed MAX_MONEY_AMOUNT
+        price = int64(totalPrice);
 
         // reputation discount
-        price = uint32(floor(price * GetReputationPriceDiscount(creature)));
+        price = int64(floor(price * GetReputationPriceDiscount(creature)));
 
         if (int32 priceMod = GetTotalAuraModifier(SPELL_AURA_MOD_VENDOR_ITEMS_PRICES))
             price -= CalculatePct(price, priceMod);
+
+        // Refund receipts store the amount in a 32-bit field.
+        if ((pProto->Flags & ITEM_PROTO_FLAG_REFUNDABLE) && crItem->ExtendedCost &&
+            pProto->GetMaxStackSize() == 1 && uint64(price) > 0xFFFFFFFFULL)
+        {
+            SendEquipError(EQUIP_ERR_CANT_BUY_QUANTITY, NULL, NULL);
+            return false;
+        }
 
         if (!HasEnoughMoney(uint64(price)))
         {
@@ -19714,12 +19746,29 @@ void Player::learnQuestRewardedSpells()
 
 void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
 {
+    // Older characters may already have a pet-family skill stored in the database.
+    // Do not teach its pet passives on login or level-up either.
+    if (IsPetFamilySkillLine(skill_id))
+        return;
+
+    // The abilities of a class skill line carry no class mask of their own: a character who somehow holds another
+    // class's line must not get its abilities
+    if (SkillLineEntry const* skillLine = sSkillLineStore.LookupEntry(skill_id))
+        if (skillLine->categoryId == SKILL_CATEGORY_CLASS)
+            if (uint32 skillClass = GetClassBySkillId(skill_id))
+                if (skillClass != getClass())
+                    return;
+
     uint32 raceMask = getRaceMask();
     uint32 classMask = getClassMask();
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
     {
         SkillLineAbilityEntry const* pAbility = sSkillLineAbilityStore.LookupEntry(j);
-        if (!pAbility || pAbility->skillId != skill_id || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
+        // Abilities learned with the skill's rank and those learned with the character's level both come with the
+        // skill; the second kind holds class passives on shared skill lines, such as Victorious State on Defense
+        if (!pAbility || pAbility->skillId != skill_id ||
+            (pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL &&
+             pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL))
             continue;
         // Check race if set
         if (pAbility->racemask && !(pAbility->racemask & raceMask))
@@ -19728,10 +19777,14 @@ void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value)
         if (pAbility->classmask && !(pAbility->classmask & classMask))
             continue;
 
-        if (sSpellMgr->GetSpellInfo(pAbility->spellId))
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(pAbility->spellId))
         {
+            // Check level, skip class spells if not high enough
+            if (std::max(spellInfo->SpellLevel, spellInfo->BaseLevel) > getLevel())
+                continue;
+
             // need unlearn spell
-            if (skill_value < pAbility->req_skill_value)
+            if (skill_value < pAbility->req_skill_value && pAbility->learnOnGetSkill == ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
                 removeSpell(pAbility->spellId);
             // need learn
             else if (!IsInWorld())

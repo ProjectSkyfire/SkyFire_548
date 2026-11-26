@@ -190,6 +190,16 @@ DBCStorage <SpellEffectScalingEntry> sSpellEffectScalingStore(SpellEffectScaling
 
 SpellCategoryStore sSpellsByCategoryStore;
 PetFamilySpellsStore sPetFamilySpellsStore;
+
+bool IsPetFamilySkillLine(uint32 skillId)
+{
+    for (uint32 i = 0; i < sCreatureFamilyStore.GetNumRows(); ++i)
+        if (CreatureFamilyEntry const* family = sCreatureFamilyStore.LookupEntry(i))
+            if (family->skillLine[0] == skillId || family->skillLine[1] == skillId)
+                return true;
+
+    return false;
+}
 SpellsPerClassStore sSpellsPerClassStore;
 ClassBySkillIdStore sClassBySkillIdStore;
 SpellEffectScallingByEffectId sSpellEffectScallingByEffectId;
