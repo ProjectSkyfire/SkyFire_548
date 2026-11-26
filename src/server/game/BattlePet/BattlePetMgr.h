@@ -111,6 +111,9 @@ namespace Skyfire::BattlePetPackets
     struct BattlePetRoundResult;
 }
 
+class Creature;
+bool BattlePetStartNpcBattle(Player& player, Creature& tamer, std::string& result);
+
 class BattlePetMgr
 {
 public:
@@ -184,6 +187,17 @@ public:
     bool IsPetBattlePvpQueued() const { return m_petBattlePvpQueued; }
     void SetPetBattlePvpQueued(bool queued) { m_petBattlePvpQueued = queued; }
     ActivePetBattle const& GetActivePetBattle() const { return m_activePetBattle; }
+    void SetActivePetBattleTamer(uint32 tamerEntry)
+    {
+        m_activePetBattle.TamerBattle = true;
+        m_activePetBattle.TamerEntry = tamerEntry;
+        m_activePetBattle.Source = BATTLE_PET_ACHIEVEMENT_SOURCE_TAMER;
+    }
+    bool AddActivePetBattleEnemyReservePet(uint64 petId, uint16 species, uint8 level, uint8 quality, uint8 breed,
+        uint32 maxHealth, uint32 health)
+    {
+        return m_activePetBattle.AddEnemyReservePet(petId, species, level, quality, breed, maxHealth, health);
+    }
     uint8 GetActivePetBattleTrapStatus() const;
     bool SetActivePetBattleAllyPet(uint8 petIndex, uint64 petId, uint32 maxHealth, uint32 health);
     bool SelectActivePetBattleFrontPet(uint8 frontPet);
@@ -208,8 +222,12 @@ public:
         uint32 allyIncomingDamageReduction, uint8 allyIncomingDamageReductionRounds,
         uint32 enemyIncomingDamageReduction, uint8 enemyIncomingDamageReductionRounds,
         Skyfire::BattlePetPackets::BattlePetRoundResult& round,
-        Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound = NULL);
+        Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound = NULL,
+        uint8 enemyAbilitySlot = BATTLE_PET_ABILITY_SLOT_INVALID, uint32 enemyAbilityId = 0,
+        uint32 enemyHeal = 0);
     bool ApplyBattlePetSwapInput(uint32 roundId, uint8 newFrontPet,
+        Skyfire::BattlePetPackets::BattlePetRoundResult& round);
+    bool ApplyBattlePetEnemyReplacementInput(uint32 roundId, uint8 allyFrontPet,
         Skyfire::BattlePetPackets::BattlePetRoundResult& round);
     bool ApplyBattlePetForfeitInput(uint32 roundId, Skyfire::BattlePetPackets::BattlePetFinalRound& finalRound);
     bool ApplyBattlePetTrapInput(uint32 roundId, uint32 trapAbilityEffectId,
@@ -238,6 +256,7 @@ private:
     void ClearActivePetBattleWorldObjectState();
     void ClearActivePetBattlePlayerState();
     void PersistActivePetBattleHealth();
+    uint16 RewardTamerBattlePet(BattlePet* battlePet, uint8 allyIndex, bool awardExperience);
     uint16 RewardActivePetBattlePet(BattlePet* battlePet, bool awardExperience);
     void RewardPlayerExperience(uint8 highestAllyLevel);
     uint32 GetUniqueBattlePetSpeciesCount() const;

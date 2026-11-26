@@ -62,10 +62,14 @@ struct ActivePetBattleTurn
     uint8 CasterPet = 0;
     uint8 TargetPet = 0;
     uint8 Winner = PET_BATTLE_WINNER_NONE;
+    uint8 EnemySwapFrom = 0xFF;
+    uint8 EnemySwapTo = 0xFF;
     uint32 RoundID = 0;
     uint32 RemainingHealth = 0;
     uint32 DamageDealt = 0;
     std::vector<ActivePetBattleCooldown> Cooldowns;
+
+    bool HasEnemySwap() const { return EnemySwapTo != 0xFF; }
 };
 
 struct ActivePetBattlePetState
@@ -73,6 +77,25 @@ struct ActivePetBattlePetState
     uint64 PetID = 0;
     uint32 MaxHealth = 0;
     uint32 Health = 0;
+};
+
+struct ActivePetBattleEnemyPet
+{
+    uint64 PetID = 0;
+    uint16 Species = 0;
+    uint8 Level = 0;
+    uint8 Quality = 0;
+    uint8 Breed = 0;
+    uint32 MaxHealth = 0;
+    uint32 Health = 0;
+};
+
+// What the enemy front pet could cast from one ability slot, for the tamer picker.
+struct ActivePetBattleEnemyOption
+{
+    uint32 AbilityId = 0;
+    uint32 Damage = 0;
+    uint32 Heal = 0;
 };
 
 struct ActivePetBattleAuraState
@@ -96,10 +119,16 @@ struct ActivePetBattleWeather
 struct ActivePetBattle
 {
     static constexpr uint8 BATTLE_PET_MAX_ACTIVE_TEAM_PETS = 3;
+    // Enemy pets are numbered after the ally pets in the client's battle pet ids.
+    static constexpr uint8 BATTLE_PET_ENEMY_PBOID_BASE = 3;
 
     bool IsActive() const { return EnemyGUID != 0; }
     bool IsFinished() const { return Finished; }
     bool IsPvP() const { return PvPBattle; }
+    bool IsTamer() const { return TamerBattle; }
+    // After an enemy front pet dies the client confirms its own front pet and waits for a round
+    // result; the enemy's next pet is announced in that round, not in the death round.
+    bool IsWaitingForFrontPetConfirm() const { return PendingEnemySwapTo != 0xFF; }
     bool IsMatchmaking() const { return Source == BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_MATCHMAKING; }
     BattlePetAchievementSource GetAchievementSource() const { return Source; }
     bool CanAcceptInput(uint32 roundId) const { return CanAcceptRound(roundId); }
@@ -137,6 +166,7 @@ struct ActivePetBattle
         EnemyQuality = enemyQuality;
         EnemyBreed = enemyBreed;
         AllyFrontPet = IsValidAllyPetIndex(allyFrontPet) ? allyFrontPet : 0;
+        StoreEnemyFrontPet();
         SetAllyPet(AllyFrontPet, allyPetId, allyMaxHealth, allyHealth);
     }
 
@@ -161,7 +191,69 @@ struct ActivePetBattle
         EnemyQuality = enemyQuality;
         AllyFrontPet = IsValidAllyPetIndex(allyFrontPet) ? allyFrontPet : 0;
         EnemyFrontPet = enemyFrontPet;
+        StoreEnemyFrontPet();
         SetAllyPet(AllyFrontPet, allyPetId, allyMaxHealth, allyHealth);
+    }
+
+    // Wild and PvP battles keep an enemy team of one. A team battle adds its reserve pets here
+    // after the first one; the scalar Enemy* fields always mirror the pet at the front.
+    bool AddEnemyReservePet(uint64 petId, uint16 species, uint8 level, uint8 quality, uint8 breed,
+        uint32 maxHealth, uint32 health)
+    {
+        if (!IsActive() || EnemyTeamSize >= BATTLE_PET_MAX_ACTIVE_TEAM_PETS)
+            return false;
+
+        ActivePetBattleEnemyPet& pet = EnemyTeam[EnemyTeamSize++];
+        pet.PetID = petId;
+        pet.Species = species;
+        pet.Level = level;
+        pet.Quality = quality;
+        pet.Breed = breed;
+        pet.MaxHealth = maxHealth;
+        pet.Health = NormalizeHealth(health, maxHealth);
+        return true;
+    }
+
+    // Tamer picker: a usable heal below 35% health, else the strongest usable damage ability,
+    // else slot 0. Wild and PvP enemies always cast slot 0. Slot 0 is the last resort even when it
+    // is on cooldown: a tamer must always act, and slot 0 is the basic attack.
+    uint8 ChooseEnemyAbilitySlot(ActivePetBattleEnemyOption const (&options)[BATTLE_PET_ABILITY_SLOT_COUNT]) const
+    {
+        if (!IsTamer())
+            return 0;
+
+        uint8 const front = GetEnemyFrontIndex();
+        if (EnemyHealth * 100 < EnemyMaxHealth * 35)
+            for (uint8 slot = 0; slot < BATTLE_PET_ABILITY_SLOT_COUNT; ++slot)
+                if (options[slot].AbilityId && options[slot].Heal && IsEnemyAbilityUsable(front, slot))
+                    return slot;
+
+        uint8 best = 0;
+        uint32 bestDamage = 0;
+        for (uint8 slot = 0; slot < BATTLE_PET_ABILITY_SLOT_COUNT; ++slot)
+            if (options[slot].AbilityId && options[slot].Damage > bestDamage && IsEnemyAbilityUsable(front, slot))
+            {
+                best = slot;
+                bestDamage = options[slot].Damage;
+            }
+
+        return best;
+    }
+
+    uint32 ApplyEnemyHeal(uint32 amount)
+    {
+        if (!IsActive() || Finished || !EnemyHealth)
+            return EnemyHealth;
+
+        EnemyHealth = std::min<uint32>(EnemyMaxHealth, EnemyHealth + amount);
+        EnemyTeam[GetEnemyFrontIndex()].Health = EnemyHealth;
+        return EnemyHealth;
+    }
+
+    uint8 GetEnemyFrontIndex() const
+    {
+        return EnemyTeamSize > 1 && EnemyFrontPet >= BATTLE_PET_ENEMY_PBOID_BASE
+            ? uint8(EnemyFrontPet - BATTLE_PET_ENEMY_PBOID_BASE) : 0;
     }
 
     uint32 ApplyAllyDamage(uint32 damage)
@@ -216,7 +308,20 @@ struct ActivePetBattle
             return EnemyHealth;
 
         damage = ApplyIncomingDamageReduction(EnemyAura, damage);
-        return ApplyDamage(EnemyHealth, damage, PET_BATTLE_WINNER_ALLY);
+        if (EnemyTeamSize <= 1)
+            return ApplyDamage(EnemyHealth, damage, PET_BATTLE_WINNER_ALLY);
+
+        // Team battle: a dead front pet only ends the battle when no other enemy pet lives.
+        // The next pet comes in when the round is finished.
+        if (!IsActive() || Finished)
+            return EnemyHealth;
+
+        EnemyHealth = damage >= EnemyHealth ? 0 : EnemyHealth - damage;
+        EnemyTeam[GetEnemyFrontIndex()].Health = EnemyHealth;
+        if (!EnemyHealth && !HasAliveEnemyPetOtherThan(GetEnemyFrontIndex()))
+            Finish(PET_BATTLE_WINNER_ALLY);
+
+        return EnemyHealth;
     }
 
     void ActivateAllyIncomingDamageReduction(uint32 amount, uint8 rounds)
@@ -372,7 +477,8 @@ struct ActivePetBattle
         return turn;
     }
 
-    ActivePetBattleTurn ApplyEnemyAbilityRound(uint32 roundId, uint32 damage)
+    ActivePetBattleTurn ApplyEnemyAbilityRound(uint32 roundId, uint32 damage,
+        uint8 abilitySlot = BATTLE_PET_ABILITY_SLOT_INVALID, uint32 abilityId = 0, uint16 abilityCooldown = 0)
     {
         ActivePetBattleTurn turn = CreateTurn(roundId);
         if (!CanAcceptRound(roundId))
@@ -392,6 +498,7 @@ struct ActivePetBattle
         turn.HasFinalRound = IsFinished();
         turn.Winner = Winner;
 
+        StartEnemyAbilityCooldown(GetEnemyFrontIndex(), abilitySlot, abilityId, abilityCooldown);
         FinishAcceptedRound(turn);
         return turn;
     }
@@ -416,13 +523,26 @@ struct ActivePetBattle
         uint16 allyAbilityLockdown, uint8 allyNextTurnIndex,
         ActivePetBattleTurn& allyTurn, ActivePetBattleTurn& enemyTurn)
     {
+        return ApplyAbilityExchange(roundId, allyDamage, enemyDamage, allyAbilitySlot, allyAbilityId,
+            allyAbilityCooldown, allyAbilityLockdown, allyNextTurnIndex, BATTLE_PET_ABILITY_SLOT_INVALID,
+            0, 0, allyTurn, enemyTurn);
+    }
+
+    // The enemy ability is recorded only when the enemy acts this round; an enemy ability that is
+    // still on cooldown is not refused here, the caller picks the slot (IsEnemyAbilityUsable).
+    bool ApplyAbilityExchange(uint32 roundId, uint32 allyDamage, uint32 enemyDamage,
+        uint8 allyAbilitySlot, uint32 allyAbilityId, uint16 allyAbilityCooldown,
+        uint16 allyAbilityLockdown, uint8 allyNextTurnIndex,
+        uint8 enemyAbilitySlot, uint32 enemyAbilityId, uint16 enemyAbilityCooldown,
+        ActivePetBattleTurn& allyTurn, ActivePetBattleTurn& enemyTurn)
+    {
         allyTurn = CreateTurn(roundId);
         enemyTurn = CreateTurn(roundId);
 
         if (!CanAcceptRound(roundId))
             return false;
 
-        if (WaitingForAllyFrontPet)
+        if (WaitingForAllyFrontPet || IsWaitingForFrontPetConfirm())
             return false;
 
         bool const continuingChannel = IsContinuingAllyAbilityChannel(AllyFrontPet, allyAbilitySlot, allyAbilityId);
@@ -440,7 +560,7 @@ struct ActivePetBattle
         allyTurn.HasFinalRound = IsFinished();
         allyTurn.Winner = Winner;
 
-        if (!IsFinished())
+        if (!IsFinished() && EnemyHealth != 0)
         {
             uint32 const appliedEnemyDamage = IsAllyUntargetable() ? 0 : enemyDamage;
             enemyTurn.Accepted = true;
@@ -454,6 +574,9 @@ struct ActivePetBattle
             enemyTurn.RequiresFrontPet = enemyTurn.TargetDied && WaitingForAllyFrontPet;
             enemyTurn.HasFinalRound = IsFinished();
             enemyTurn.Winner = Winner;
+
+            StartEnemyAbilityCooldown(GetEnemyFrontIndex(), enemyAbilitySlot, enemyAbilityId,
+                enemyAbilityCooldown);
         }
 
         StartAllyAbilityCooldown(AllyFrontPet, allyAbilitySlot, allyAbilityId, allyAbilityCooldown,
@@ -476,9 +599,46 @@ struct ActivePetBattle
         turn.EffectKind = ACTIVE_PET_BATTLE_TURN_EFFECT_SWAP;
         turn.CasterPet = AllyFrontPet;
         turn.TargetPet = newFrontPet;
+        // A held enemy swap goes out with this round too, so one confirmation answers both waits.
+        // Unreachable today (a dead enemy front pet does not act), kept so no wait is left open.
+        turn.EnemySwapFrom = PendingEnemySwapFrom;
+        turn.EnemySwapTo = PendingEnemySwapTo;
+        PendingEnemySwapFrom = 0xFF;
+        PendingEnemySwapTo = 0xFF;
 
         AllyFrontPet = newFrontPet;
         WaitingForAllyFrontPet = false;
+        SyncActiveAllyPet();
+        FinishAcceptedRound(turn);
+        return turn;
+    }
+
+    // Answers the client's front pet confirmation after an enemy death: the enemy's next pet comes
+    // in, and the ally front pet changes if the client picked another living one.
+    ActivePetBattleTurn ApplyEnemyReplacementRound(uint32 roundId, uint8 allyFrontPet)
+    {
+        ActivePetBattleTurn turn = CreateTurn(roundId);
+        if (!CanAcceptRound(roundId) || !IsWaitingForFrontPetConfirm() || !IsAllyPetAlive(allyFrontPet))
+            return turn;
+
+        turn.Accepted = true;
+        turn.HasRoundResult = true;
+        turn.EnemySwapFrom = PendingEnemySwapFrom;
+        turn.EnemySwapTo = PendingEnemySwapTo;
+        PendingEnemySwapFrom = 0xFF;
+        PendingEnemySwapTo = 0xFF;
+        // The picked pet lives, so an ally wait (not reachable together with this one today) ends too.
+        WaitingForAllyFrontPet = false;
+
+        if (allyFrontPet != AllyFrontPet)
+        {
+            turn.EffectKind = ACTIVE_PET_BATTLE_TURN_EFFECT_SWAP;
+            turn.CasterPet = AllyFrontPet;
+            turn.TargetPet = allyFrontPet;
+            AllyFrontPet = allyFrontPet;
+        }
+
+        // Only the pet the client confirmed faces the new enemy pet (XP split).
         SyncActiveAllyPet();
         FinishAcceptedRound(turn);
         return turn;
@@ -489,6 +649,20 @@ struct ActivePetBattle
         ActivePetBattleTurn turn = CreateTurn(roundId);
         if (!CanAcceptRound(roundId))
             return turn;
+
+        // Walking away from a wild or tamer battle costs every living pet 10% of its health, but never its last point.
+        if (!IsPvP())
+        {
+            for (uint8 i = 0; i < BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++i)
+            {
+                if (!IsAllyPetAlive(i))
+                    continue;
+
+                uint32 const penalty = std::max<uint32>(1, AllyTeam[i].MaxHealth / 10);
+                AllyTeam[i].Health = AllyTeam[i].Health > penalty ? AllyTeam[i].Health - penalty : 1;
+            }
+            SyncActiveAllyPet();
+        }
 
         Finish(PET_BATTLE_WINNER_ENEMY);
 
@@ -660,6 +834,20 @@ struct ActivePetBattle
         return AllyCooldowns[petIndex][abilitySlot].Cooldown;
     }
 
+    uint16 GetEnemyAbilityCooldown(uint8 petIndex, uint8 abilitySlot) const
+    {
+        if (!IsValidAllyPetIndex(petIndex) || !IsValidAbilitySlot(abilitySlot))
+            return 0;
+
+        return EnemyCooldowns[petIndex][abilitySlot].Cooldown;
+    }
+
+    bool IsEnemyAbilityUsable(uint8 petIndex, uint8 abilitySlot) const
+    {
+        return IsValidAllyPetIndex(petIndex) && IsValidAbilitySlot(abilitySlot)
+            && !IsAbilityOnCooldown(EnemyCooldowns[petIndex][abilitySlot]);
+    }
+
     uint64 EnemyGUID = 0;
     uint64 AllyPetID = 0;
     uint64 EnemyPetID = 0;
@@ -672,6 +860,8 @@ struct ActivePetBattle
     bool Finished = false;
     bool Captured = false;
     bool PvPBattle = false;
+    bool TamerBattle = false;
+    uint32 TamerEntry = 0;
     BattlePetAchievementSource Source = BATTLE_PET_ACHIEVEMENT_SOURCE_WILD;
     bool RewardsApplied = false;
     bool AchievementsApplied = false;
@@ -680,14 +870,23 @@ struct ActivePetBattle
     uint8 EnemyBreed = 0;
     uint8 Winner = PET_BATTLE_WINNER_NONE;
     uint8 AllyFrontPet = 0;
-    uint8 EnemyFrontPet = 3;
+    uint8 EnemyFrontPet = BATTLE_PET_ENEMY_PBOID_BASE;
+    uint8 EnemyTeamSize = 1;
+    ActivePetBattleEnemyPet EnemyTeam[BATTLE_PET_MAX_ACTIVE_TEAM_PETS];
+    // Per enemy team pet: bit n set when ally pet n was on the field while it was the front pet.
+    uint8 EnemyFoughtBy[BATTLE_PET_MAX_ACTIVE_TEAM_PETS] = { 0, 0, 0 };
     uint8 TrapFailedAttempts = 0;
     bool WaitingForAllyFrontPet = false;
+    uint8 PendingEnemySwapFrom = 0xFF;
+    uint8 PendingEnemySwapTo = 0xFF;
     ActivePetBattlePetState AllyTeam[BATTLE_PET_MAX_ACTIVE_TEAM_PETS];
     ActivePetBattleWeather Weather;
 
 private:
     ActivePetBattleCooldown AllyCooldowns[BATTLE_PET_MAX_ACTIVE_TEAM_PETS][BATTLE_PET_ABILITY_SLOT_COUNT];
+    // Per enemy team pet, indexed 0-2 (PBOID minus BATTLE_PET_ENEMY_PBOID_BASE). Server-side only,
+    // never sent to the client.
+    ActivePetBattleCooldown EnemyCooldowns[BATTLE_PET_MAX_ACTIVE_TEAM_PETS][BATTLE_PET_ABILITY_SLOT_COUNT];
     ActivePetBattleAuraState AllyAura;
     ActivePetBattleAuraState EnemyAura;
 
@@ -732,7 +931,11 @@ private:
         if (!IsValidAllyPetIndex(petIndex) || !IsValidAbilitySlot(abilitySlot))
             return false;
 
-        ActivePetBattleCooldown const& cooldownState = AllyCooldowns[petIndex][abilitySlot];
+        return IsAbilityOnCooldown(AllyCooldowns[petIndex][abilitySlot]);
+    }
+
+    static bool IsAbilityOnCooldown(ActivePetBattleCooldown const& cooldownState)
+    {
         return cooldownState.OnCooldown && cooldownState.Cooldown != 0 && cooldownState.Lockdown == 0;
     }
 
@@ -750,10 +953,24 @@ private:
     void StartAllyAbilityCooldown(uint8 petIndex, uint8 abilitySlot, uint32 abilityId, uint16 cooldown,
         uint16 lockdown = 0, uint8 nextTurnIndex = 0)
     {
+        StartAbilityCooldown(AllyCooldowns, petIndex, abilitySlot, abilityId, cooldown, lockdown, nextTurnIndex);
+    }
+
+    void StartEnemyAbilityCooldown(uint8 petIndex, uint8 abilitySlot, uint32 abilityId, uint16 cooldown,
+        uint16 lockdown = 0, uint8 nextTurnIndex = 0)
+    {
+        StartAbilityCooldown(EnemyCooldowns, petIndex, abilitySlot, abilityId, cooldown, lockdown, nextTurnIndex);
+    }
+
+    static void StartAbilityCooldown(
+        ActivePetBattleCooldown (&cooldowns)[BATTLE_PET_MAX_ACTIVE_TEAM_PETS][BATTLE_PET_ABILITY_SLOT_COUNT],
+        uint8 petIndex, uint8 abilitySlot, uint32 abilityId, uint16 cooldown, uint16 lockdown,
+        uint8 nextTurnIndex)
+    {
         if (!IsValidAllyPetIndex(petIndex) || !IsValidAbilitySlot(abilitySlot) || !abilityId)
             return;
 
-        ActivePetBattleCooldown& cooldownState = AllyCooldowns[petIndex][abilitySlot];
+        ActivePetBattleCooldown& cooldownState = cooldowns[petIndex][abilitySlot];
         bool const continuingChannel = cooldownState.OnCooldown
             && cooldownState.AbilityID == abilityId
             && (cooldownState.NextTurnIndex > 0 || nextTurnIndex > 0 || lockdown > 0);
@@ -785,13 +1002,14 @@ private:
         }
     }
 
-    void ClearExpiredAllyCooldowns()
+    static void ClearExpiredCooldowns(
+        ActivePetBattleCooldown (&cooldowns)[BATTLE_PET_MAX_ACTIVE_TEAM_PETS][BATTLE_PET_ABILITY_SLOT_COUNT])
     {
         for (uint8 petIndex = 0; petIndex < BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++petIndex)
         {
             for (uint8 abilitySlot = 0; abilitySlot < BATTLE_PET_ABILITY_SLOT_COUNT; ++abilitySlot)
             {
-                ActivePetBattleCooldown& cooldownState = AllyCooldowns[petIndex][abilitySlot];
+                ActivePetBattleCooldown& cooldownState = cooldowns[petIndex][abilitySlot];
                 if (cooldownState.OnCooldown && !cooldownState.Cooldown && !cooldownState.Lockdown
                     && !cooldownState.NextTurnIndex)
                     cooldownState = ActivePetBattleCooldown();
@@ -799,13 +1017,14 @@ private:
         }
     }
 
-    void DecrementAllyCooldowns()
+    static void DecrementCooldowns(
+        ActivePetBattleCooldown (&cooldowns)[BATTLE_PET_MAX_ACTIVE_TEAM_PETS][BATTLE_PET_ABILITY_SLOT_COUNT])
     {
         for (uint8 petIndex = 0; petIndex < BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++petIndex)
         {
             for (uint8 abilitySlot = 0; abilitySlot < BATTLE_PET_ABILITY_SLOT_COUNT; ++abilitySlot)
             {
-                ActivePetBattleCooldown& cooldownState = AllyCooldowns[petIndex][abilitySlot];
+                ActivePetBattleCooldown& cooldownState = cooldowns[petIndex][abilitySlot];
                 if (!cooldownState.OnCooldown)
                     continue;
 
@@ -899,10 +1118,75 @@ private:
     void FinishAcceptedRound(ActivePetBattleTurn& turn)
     {
         SnapshotAllyCooldowns(turn.Cooldowns);
-        ClearExpiredAllyCooldowns();
-        DecrementAllyCooldowns();
+        ClearExpiredCooldowns(AllyCooldowns);
+        DecrementCooldowns(AllyCooldowns);
+        ClearExpiredCooldowns(EnemyCooldowns);
+        DecrementCooldowns(EnemyCooldowns);
         DecrementAuras();
+        BringInNextEnemyPet();
         AdvanceRound();
+    }
+
+    bool HasAliveEnemyPetOtherThan(uint8 petIndex) const
+    {
+        for (uint8 i = 0; i < EnemyTeamSize; ++i)
+            if (i != petIndex && EnemyTeam[i].Health)
+                return true;
+
+        return false;
+    }
+
+    void StoreEnemyFrontPet()
+    {
+        ActivePetBattleEnemyPet& pet = EnemyTeam[0];
+        pet.PetID = EnemyPetID;
+        pet.Species = EnemySpecies;
+        pet.Level = EnemyLevel;
+        pet.Quality = EnemyQuality;
+        pet.Breed = EnemyBreed;
+        pet.MaxHealth = EnemyMaxHealth;
+        pet.Health = EnemyHealth;
+        EnemyTeamSize = 1;
+        MarkEnemyFought();
+    }
+
+    // Remembers which ally pets faced each enemy pet, for the tamer XP split.
+    void MarkEnemyFought()
+    {
+        if (IsValidAllyPetIndex(AllyFrontPet))
+            EnemyFoughtBy[GetEnemyFrontIndex()] |= uint8(1 << AllyFrontPet);
+    }
+
+    // End of round: a dead front pet is replaced by the next living one. The swap waits for the
+    // client's front pet confirmation (ApplyEnemyReplacementRound), whose round reports it; a swap
+    // inside the death round left the client waiting forever. The new pet starts
+    // without the old pet's auras.
+    void BringInNextEnemyPet()
+    {
+        if (Finished || EnemyTeamSize <= 1 || EnemyHealth != 0)
+            return;
+
+        uint8 const oldIndex = GetEnemyFrontIndex();
+        for (uint8 step = 1; step < EnemyTeamSize; ++step)
+        {
+            uint8 const index = uint8((oldIndex + step) % EnemyTeamSize);
+            ActivePetBattleEnemyPet const& next = EnemyTeam[index];
+            if (!next.Health)
+                continue;
+
+            EnemyFrontPet = uint8(BATTLE_PET_ENEMY_PBOID_BASE + index);
+            EnemyPetID = next.PetID;
+            EnemySpecies = next.Species;
+            EnemyLevel = next.Level;
+            EnemyQuality = next.Quality;
+            EnemyBreed = next.Breed;
+            EnemyMaxHealth = next.MaxHealth;
+            EnemyHealth = next.Health;
+            EnemyAura = ActivePetBattleAuraState();
+            PendingEnemySwapFrom = uint8(BATTLE_PET_ENEMY_PBOID_BASE + oldIndex);
+            PendingEnemySwapTo = EnemyFrontPet;
+            return;
+        }
     }
 
     bool HasAliveAllyPetOtherThan(uint8 petIndex) const
@@ -928,6 +1212,7 @@ private:
         AllyPetID = activePet.PetID;
         AllyMaxHealth = activePet.MaxHealth;
         AllyHealth = activePet.Health;
+        MarkEnemyFought();
     }
 
     uint32 ApplyDamage(uint32& health, uint32 damage, uint8 winner)

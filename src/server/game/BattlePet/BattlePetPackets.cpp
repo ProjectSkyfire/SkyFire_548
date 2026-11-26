@@ -310,6 +310,19 @@ namespace Skyfire::BattlePetPackets
         return effect;
     }
 
+    void FillEnemyInitialUpdateTeam(ActivePetBattle const& battle, InitialUpdateTeamData& team)
+    {
+        team.PetCount = battle.EnemyTeamSize;
+        team.FrontPet = battle.GetEnemyFrontIndex();
+        for (uint8 i = 0; i < battle.EnemyTeamSize; ++i)
+        {
+            ActivePetBattleEnemyPet const& pet = battle.EnemyTeam[i];
+            team.Pets[i] = BuildWildInitialUpdatePetData(pet.PetID, pet.Species, pet.Level, pet.Quality, pet.Breed);
+            team.Pets[i].MaxHealth = pet.MaxHealth;
+            team.Pets[i].CurrentHealth = pet.Health;
+        }
+    }
+
     BattlePetRoundEffect BuildDamageEffect(uint8 casterPet, uint8 targetPet, int32 remainingHealth,
         uint32 abilityEffectId, uint16 turnInstanceId)
     {
@@ -448,7 +461,23 @@ namespace Skyfire::BattlePetPackets
                 break;
         }
 
+        AppendEnemySwapEffect(round, turn);
+
         return round;
+    }
+
+    // The only place the enemy's next pet is announced; a round never carries the same swap twice.
+    void AppendEnemySwapEffect(BattlePetRoundResult& round, ActivePetBattleTurn const& turn)
+    {
+        if (!turn.HasEnemySwap())
+            return;
+
+        for (BattlePetRoundEffect const& effect : round.Effects)
+            if (effect.PetBattleEffectType == PetBattleEffectActivePet && effect.CasterPBOID == turn.EnemySwapFrom
+                && !effect.Targets.empty() && effect.Targets[0].PetX == int8(turn.EnemySwapTo))
+                return;
+
+        round.Effects.push_back(BuildPetSwapEffect(turn.EnemySwapFrom, turn.EnemySwapTo));
     }
 
     void AppendRoundCooldowns(BattlePetRoundResult& round, ActivePetBattleTurn const& turn)
@@ -503,15 +532,15 @@ namespace Skyfire::BattlePetPackets
     }
 
     WorldPacket BuildInitialUpdatePacket(ObjectGuid wildBattlePetGuid, InitialUpdateTeamData const* teams,
-        uint8 teamCount, bool isPvP)
+        uint8 teamCount, bool isPvP, uint32 npcCreatureId, uint32 npcDisplayId)
     {
         WorldPacket data(SMSG_PET_BATTLE_INITIAL_UPDATE, 1000);
 
         bool const hasWaitingForFrontPetsMaxSecs = true;
         bool const hasPvPMaxRoundTime = true;
         bool const hasForfeitPenalty = true;
-        bool const hasCreatureId = false;
-        bool const hasDisplayId = false;
+        bool const hasCreatureId = npcCreatureId != 0;
+        bool const hasDisplayId = npcDisplayId != 0;
         ObjectGuid battlePetGuid = isPvP ? ObjectGuid(0) : wildBattlePetGuid;
 
         for (uint8 i = 0; i < 3; i++)
@@ -670,7 +699,7 @@ namespace Skyfire::BattlePetPackets
         data.WriteGuidBytes(battlePetGuid, 5, 4, 3, 2, 7, 0, 1, 6);
 
         if (hasDisplayId)
-            data << uint32(0);
+            data << uint32(npcDisplayId);
 
         if (hasPvPMaxRoundTime)
             data << uint16(30);
@@ -681,7 +710,7 @@ namespace Skyfire::BattlePetPackets
             data << uint16(30);
 
         if (hasCreatureId)
-            data << uint32(0);
+            data << uint32(npcCreatureId);
 
         return data;
     }
@@ -797,7 +826,9 @@ namespace Skyfire::BattlePetPackets
             WriteRoundEffectBits(data, effect);
 
         data.WriteBit(!round.NextPetBattleState);
-        data.WriteBits(round.DeadPets.size(), 3);
+        // No pet index bytes follow the count, so a non-zero count left the client reading past the
+        // packet on every death round. Send none; the health effects carry the deaths.
+        data.WriteBits(0, 3);                     // PetX died count
         data.WriteBits(round.Cooldowns.size(), 20);
 
         for (BattlePetRoundCooldown const& cooldown : round.Cooldowns)

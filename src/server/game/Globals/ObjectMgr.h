@@ -79,6 +79,22 @@ private:
 #pragma pack(pop)
 #endif
 
+// A tamer's pet team from `battle_pet_npc_team`, front to back.
+struct BattlePetNpcTeamPet
+{
+    uint16 Species;
+    uint8 Level;
+    uint8 Quality;
+    uint8 Breed;
+};
+
+struct BattlePetNpcTeam
+{
+    BattlePetNpcTeam() : PetCount(0) { }
+    uint8 PetCount;
+    BattlePetNpcTeamPet Pets[3];
+};
+
 // DB scripting commands
 enum class ScriptCommands
 {
@@ -1112,6 +1128,8 @@ public:
     void LoadBattlePetBreedData();
     void LoadBattlePetQualityData();
     void LoadBattlePetItemToSpeciesData();
+    void LoadBattlePetNpcTeams();
+    BattlePetNpcTeam const* GetBattlePetNpcTeam(uint32 entry) const;
 
     uint64 BattlePetGetNewId();
     uint8 BattlePetGetRandomBreed(uint32 speciesId) const;
@@ -1553,6 +1571,9 @@ private:
 
     BattlePetBreedXSpeciesMap sBattlePetBreedXSpeciesStore;
     BattlePetQualityXSpeciesMap sBattlePetQualityXSpeciesStore;
+
+    typedef UNORDERED_MAP<uint32, BattlePetNpcTeam> BattlePetNpcTeamMap;
+    BattlePetNpcTeamMap _battlePetNpcTeamStore;
 
 private:
     void LoadScripts(ScriptsType type);

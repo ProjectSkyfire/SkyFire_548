@@ -418,6 +418,16 @@ uint32 BattlePetDamageFromStats(uint32 abilityId, uint16 power, uint8 level)
     return BattlePetScalePointsFromStats(BattlePetAbilityBasePoints(abilityId), power, level);
 }
 
+// Self-heal amount of an ability's first turn, 0 when it does not heal. A team heal counts once.
+uint32 BattlePetHealFromStats(uint32 abilityId, uint16 power, uint8 level)
+{
+    for (BattlePetAbilityEffectEntry const* effectEntry : BattlePetAbilityEffectsForTurn(abilityId, 1))
+        if (effectEntry && BattlePetAbilityEffectHeals(effectEntry->PropertiesId))
+            return BattlePetScalePointsFromStats(effectEntry->PropertyValues[0], power, level);
+
+    return 0;
+}
+
 uint32 BattlePetDamageFromStatsForTurn(uint32 abilityId, uint8 turnIndex, uint16 power, uint8 level)
 {
     if (!abilityId || !turnIndex)

@@ -9491,6 +9491,94 @@ void ObjectMgr::LoadBattlePetQualityData()
     SF_LOG_INFO("server.loading", ">> Loaded %u Battle Pet quality definitions in %u ms.", count, GetMSTimeDiffToNow(oldMSTime));
 }
 
+void ObjectMgr::LoadBattlePetNpcTeams()
+{
+    uint32 oldMSTime = getMSTime();
+
+    _battlePetNpcTeamStore.clear();
+
+    QueryResult result = WorldDatabase.Query("SELECT entry, slot, species, level, quality, breed FROM `battle_pet_npc_team` ORDER BY entry, slot");
+    if (!result)
+    {
+        SF_LOG_ERROR("server.loading", ">> Loaded 0 Battle Pet tamer teams. DB table `battle_pet_npc_team` is empty.");
+        return;
+    }
+
+    uint32 petCount = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint8 slot = fields[1].GetUInt8();
+        uint16 species = fields[2].GetUInt16();
+        uint8 level = fields[3].GetUInt8();
+        uint8 quality = fields[4].GetUInt8();
+        uint8 breed = fields[5].GetUInt8();
+
+        if (!GetCreatureTemplate(entry))
+        {
+            SF_LOG_ERROR("sql.sql", "`battle_pet_npc_team` tamer %u has no creature_template, skipped.", entry);
+            continue;
+        }
+
+        if (slot >= 3)
+        {
+            SF_LOG_ERROR("sql.sql", "`battle_pet_npc_team` tamer %u slot %u is out of range (0-2), skipped.", entry, slot);
+            continue;
+        }
+
+        if (!sBattlePetSpeciesStore.LookupEntry(species))
+        {
+            SF_LOG_ERROR("sql.sql", "`battle_pet_npc_team` tamer %u slot %u species %u does not exist, skipped.", entry, slot, species);
+            continue;
+        }
+
+        if (level < 1 || level > 25)
+        {
+            SF_LOG_ERROR("sql.sql", "`battle_pet_npc_team` tamer %u slot %u level %u is out of range (1-25), skipped.", entry, slot, level);
+            continue;
+        }
+
+        if (quality > ITEM_QUALITY_LEGENDARY)
+        {
+            SF_LOG_ERROR("sql.sql", "`battle_pet_npc_team` tamer %u slot %u quality %u is invalid, skipped.", entry, slot, quality);
+            continue;
+        }
+
+        BattlePetNpcTeam& team = _battlePetNpcTeamStore[entry];
+        if (slot != team.PetCount)
+        {
+            SF_LOG_ERROR("sql.sql", "`battle_pet_npc_team` tamer %u slot %u does not follow slot %u directly, skipped.", entry, slot, team.PetCount);
+            continue;
+        }
+
+        BattlePetNpcTeamPet& pet = team.Pets[team.PetCount++];
+        pet.Species = species;
+        pet.Level = level;
+        pet.Quality = quality;
+        pet.Breed = breed;
+        ++petCount;
+    } while (result->NextRow());
+
+    // A tamer whose first slot was rejected holds an empty team: drop it.
+    for (BattlePetNpcTeamMap::iterator itr = _battlePetNpcTeamStore.begin(); itr != _battlePetNpcTeamStore.end();)
+    {
+        if (!itr->second.PetCount)
+            itr = _battlePetNpcTeamStore.erase(itr);
+        else
+            ++itr;
+    }
+
+    SF_LOG_INFO("server.loading", ">> Loaded %u Battle Pet tamer teams with %u pets in %u ms.", uint32(_battlePetNpcTeamStore.size()), petCount, GetMSTimeDiffToNow(oldMSTime));
+}
+
+BattlePetNpcTeam const* ObjectMgr::GetBattlePetNpcTeam(uint32 entry) const
+{
+    BattlePetNpcTeamMap::const_iterator itr = _battlePetNpcTeamStore.find(entry);
+    return itr != _battlePetNpcTeamStore.end() ? &itr->second : NULL;
+}
+
 void ObjectMgr::LoadBattlePetItemToSpeciesData()
 {
     uint32 oldMSTime = getMSTime();

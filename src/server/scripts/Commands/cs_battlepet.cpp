@@ -6,6 +6,7 @@
 #include "BattlePet.h"
 #include "BattlePetMgr.h"
 #include "Chat.h"
+#include "Creature.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 
@@ -140,6 +141,7 @@ public:
             { "levelup", rbac::RBAC_PERM_COMMAND_BATTLEPET_LEVELUP, false, &HandleBattlePetLevelupCommand, "", },
             { "heal",    rbac::RBAC_PERM_COMMAND_BATTLEPET_HEAL,    false, &HandleBattlePetHealCommand,    "", },
             { "debug",   rbac::RBAC_PERM_COMMAND_BATTLEPET_DEBUG,   false, &HandleBattlePetDebugCommand,   "", },
+            { "npc",     rbac::RBAC_PERM_COMMAND_BATTLEPET_NPC,     false, &HandleBattlePetNpcCommand,     "", },
         };
 
         static std::vector<ChatCommand> commandTable =
@@ -206,6 +208,26 @@ public:
         handler->PSendSysMessage("Healed %s for %s.",
             GetBattlePetDisplayName(battlePetMgr, battlePet).c_str(), target->GetName().c_str());
         return true;
+    }
+
+    // .battlepet npc <entry>: fights the nearest living creature with that entry as a tamer.
+    static bool HandleBattlePetNpcCommand(ChatHandler* handler, char const* args)
+    {
+        Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : NULL;
+        uint32 const entry = (args && *args) ? uint32(atoi(args)) : 0;
+        Creature* tamer = (player && entry) ? player->FindNearestCreature(entry, 50.0f) : NULL;
+        if (!tamer)
+        {
+            handler->SendSysMessage("Usage: .battlepet npc <creature entry>, the creature must be within 50 yards.");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        std::string result;
+        bool const ok = BattlePetStartNpcBattle(*player, *tamer, result);
+        handler->PSendSysMessage("%s", result.c_str());
+        handler->SetSentErrorMessage(!ok);
+        return ok;
     }
 
     static bool HandleBattlePetDebugCommand(ChatHandler* handler, char const* args)

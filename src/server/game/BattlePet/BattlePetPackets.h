@@ -14,6 +14,7 @@
 #include <vector>
 
 class BattlePet;
+struct ActivePetBattle;
 struct ActivePetBattleTurn;
 
 namespace Skyfire::BattlePetPackets
@@ -193,6 +194,7 @@ namespace Skyfire::BattlePetPackets
 
     InitialUpdatePetData BuildInitialUpdatePetData(BattlePet const& battlePet);
     InitialUpdatePetData BuildWildInitialUpdatePetData(uint64 id, uint16 speciesId, uint8 level, uint8 quality, uint8 breed);
+    void FillEnemyInitialUpdateTeam(ActivePetBattle const& battle, InitialUpdateTeamData& team);
     BattlePetInput ReadBattlePetInput(WorldPacket& data);
     BattlePetInputCommand BuildBattlePetInputCommand(BattlePetInput const& input);
     BattlePetFirstPetSelection ReadBattlePetFirstPetSelection(WorldPacket& data);
@@ -213,6 +215,7 @@ namespace Skyfire::BattlePetPackets
         int32 remainingHealth, uint32 abilityEffectId, bool targetDied);
     BattlePetRoundResult BuildRoundResultFromTurn(ActivePetBattleTurn const& turn, uint32 abilityEffectId);
     void AppendRoundCooldowns(BattlePetRoundResult& round, ActivePetBattleTurn const& turn);
+    void AppendEnemySwapEffect(BattlePetRoundResult& round, ActivePetBattleTurn const& turn);
     void AppendChannelInputFlags(BattlePetRoundResult& round, uint8 abilitySlot);
     void MarkRoundResultAsCatchOrKill(BattlePetRoundResult& round);
     BattlePetFinalRound BuildFinalRoundState(bool allyWon, bool abandoned,
@@ -220,7 +223,7 @@ namespace Skyfire::BattlePetPackets
     BattlePetFinalRound BuildFinalRoundState(bool allyWon, bool abandoned,
         BattlePetFinalRoundPet const& allyPet, BattlePetFinalRoundPet const& enemyPet);
     WorldPacket BuildInitialUpdatePacket(ObjectGuid wildBattlePetGuid, InitialUpdateTeamData const* teams,
-        uint8 teamCount, bool isPvP = false);
+        uint8 teamCount, bool isPvP = false, uint32 npcCreatureId = 0, uint32 npcDisplayId = 0);
     WorldPacket BuildInitialUpdatePacket(ObjectGuid wildBattlePetGuid, InitialUpdatePetData const* teamPets,
         uint8 teamPetCount, bool isPvP = false);
     WorldPacket BuildInitialUpdatePacket(ObjectGuid wildBattlePetGuid, InitialUpdatePetData const& activePet,

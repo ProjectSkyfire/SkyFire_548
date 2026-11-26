@@ -3050,7 +3050,11 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
                     return false;
                 break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_PET_BATTLE_AGAINST_TAMER: // 81
-                return false;
+                // the update passes the tamer entry in the upper half of miscValue3; wild and PvP pass 0
+                static_assert(sizeof(miscValue3) == 8, "condition 81 reads the upper half of a 64-bit miscValue3");
+                if (uint32(miscValue3 >> 32) != reqValue)
+                    return false;
+                break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_BATTLE_PET_QUALITY: // 89
             {
                 uint32 quality = reqValue;
