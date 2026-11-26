@@ -899,3 +899,9 @@ target_include_directories(profession_skill_field_tests PRIVATE
   ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Object/Updates
 )
 add_test(NAME profession_skill_field_tests COMMAND profession_skill_field_tests)
+
+add_executable(object_entry_condition_tests ObjectEntryConditionTests.cpp)
+target_include_directories(object_entry_condition_tests PRIVATE
+  ${CMAKE_SOURCE_DIR}/src/server/game/Conditions
+)
+add_test(NAME object_entry_condition_tests COMMAND object_entry_condition_tests)
