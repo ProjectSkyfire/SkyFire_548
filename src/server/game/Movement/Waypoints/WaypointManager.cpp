@@ -60,7 +60,7 @@ void WaypointMgr::Load()
         wp->y = y;
         wp->z = z;
         wp->orientation = o;
-        wp->run = fields[6].GetBool();
+        wp->SetMoveFlags(fields[6].GetUInt8());
         wp->delay = fields[7].GetUInt32();
         wp->event_id = fields[8].GetUInt32();
         wp->event_chance = fields[9].GetInt16();
@@ -112,7 +112,7 @@ void WaypointMgr::ReloadPath(uint32 id)
         wp->y = y;
         wp->z = z;
         wp->orientation = o;
-        wp->run = fields[5].GetBool();
+        wp->SetMoveFlags(fields[5].GetUInt8());
         wp->delay = fields[6].GetUInt32();
         wp->event_id = fields[7].GetUInt32();
         wp->event_chance = fields[8].GetUInt8();

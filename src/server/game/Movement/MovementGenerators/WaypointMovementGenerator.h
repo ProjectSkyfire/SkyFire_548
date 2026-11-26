@@ -79,6 +79,7 @@ private:
 
     void OnArrived(Creature*);
     bool StartMove(Creature*);
+    bool StartSmoothFlight(Creature*);
 
     void StartMoveNow(Creature* creature)
     {
@@ -90,6 +91,9 @@ private:
     bool m_isArrivalDone;
     uint32 path_id;
     bool repeating;
+    bool m_smoothPath = false;
+    bool m_smoothActive = false;
+    uint32 m_smoothSplineId = 0;
 };
 
 /** FlightPathMovementGenerator generates movement of the player for the paths

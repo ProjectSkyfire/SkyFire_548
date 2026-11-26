@@ -48,6 +48,15 @@ private:
     uint32 m_groupID;
     bool m_Formed;
 
+    struct SmoothFlightMember
+    {
+        uint32 splineId = 0;
+        uint32 joinNode = 0;
+        bool joining = false;
+    };
+    uint32 m_smoothLeaderSplineId = 0;
+    std::map<Creature*, SmoothFlightMember> m_smoothFlightMembers;
+
 public:
     //Group cannot be created empty
     explicit CreatureGroup(uint32 id) : m_leader(NULL), m_groupID(id), m_Formed(false) { }
@@ -64,6 +73,7 @@ public:
     void FormationReset(bool dismiss);
 
     void LeaderMoveTo(float x, float y, float z);
+    void UpdateSmoothFlightFollowers();
     void MemberAttackStart(Creature* member, Unit* target);
 };
 

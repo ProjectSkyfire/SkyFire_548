@@ -19,6 +19,7 @@
 #include "Player.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
+#include <limits>
 
 void WaypointMovementGenerator<Creature>::LoadPath(Creature* creature)
 {
@@ -34,6 +35,7 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature* creature)
         return;
     }
 
+    m_smoothPath = repeating && creature->CanFly() && !creature->GetTransport() && IsSmoothCyclicWaypointPath(*i_path);
     StartMoveNow(creature);
 }
 
@@ -51,6 +53,7 @@ void WaypointMovementGenerator<Creature>::DoFinalize(Creature* creature)
 
 void WaypointMovementGenerator<Creature>::DoReset(Creature* creature)
 {
+    m_smoothActive = false;
     creature->AddUnitState(UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE);
     StartMoveNow(creature);
 }
@@ -77,10 +80,58 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature* creature)
     Stop(i_path->at(i_currentNode)->delay);
 }
 
+bool WaypointMovementGenerator<Creature>::StartSmoothFlight(Creature* creature)
+{
+    // Return to a real control point before starting the cyclic spline. Replacing
+    // a distant first vertex with the current position would deform every lap.
+    float nearest = std::numeric_limits<float>::max();
+    for (uint32 i = 0; i < i_path->size(); ++i)
+    {
+        WaypointData const* node = i_path->at(i);
+        float dist = creature->GetExactDistSq(node->x, node->y, node->z);
+        if (dist < nearest)
+        {
+            nearest = dist;
+            i_currentNode = i;
+        }
+    }
+    WaypointData const* start = i_path->at(i_currentNode);
+    Movement::MoveSplineInit init(creature);
+    if (nearest > 0.25f)
+    {
+        init.MoveTo(start->x, start->y, start->z, false);
+        m_smoothActive = false;
+    }
+    else
+    {
+        Movement::PointsArray points;
+        for (uint32 i = 0; i < i_path->size(); ++i)
+        {
+            WaypointData const* node = i_path->at((i_currentNode + i) % i_path->size());
+            points.push_back(G3D::Vector3(node->x, node->y, node->z));
+        }
+        init.MovebyPath(points);
+        init.SetCyclic();
+        m_smoothActive = true;
+    }
+    init.SetFly();
+    init.SetSmooth();
+    init.SetUncompressed();
+    init.SetWalk(!start->run);
+    creature->SetWalk(!start->run);
+    creature->AddUnitState(UNIT_STATE_ROAMING_MOVE);
+    init.Launch();
+    m_smoothSplineId = creature->movespline->GetId();
+    return true;
+}
+
 bool WaypointMovementGenerator<Creature>::StartMove(Creature* creature)
 {
     if (!i_path || i_path->empty())
         return false;
+
+    if (m_smoothPath)
+        return StartSmoothFlight(creature);
 
     if (Stopped())
         return true;
@@ -169,6 +220,21 @@ bool WaypointMovementGenerator<Creature>::DoUpdate(Creature* creature, uint32 di
     // prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
         return false;
+
+    if (m_smoothPath)
+    {
+        if (creature->movespline->Finalized() || creature->movespline->GetId() != m_smoothSplineId)
+            return StartSmoothFlight(creature);
+        if (m_smoothActive)
+        {
+            uint32 offset = uint32(creature->movespline->currentPathIdx()) % i_path->size();
+            creature->UpdateWaypointID((i_currentNode + offset) % i_path->size());
+            if (CreatureGroup* group = creature->GetFormation())
+                if (group->getLeader() == creature)
+                    group->UpdateSmoothFlightFollowers();
+        }
+        return true;
+    }
 
     if (Stopped())
     {

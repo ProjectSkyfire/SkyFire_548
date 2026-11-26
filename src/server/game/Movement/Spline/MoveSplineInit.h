@@ -131,6 +131,8 @@ namespace Movement
          * velocity shouldn't be negative
          */
         void SetVelocity(float velocity);
+        // Optional shared timing for smooth airborne formation splines.
+        void SetDuration(uint32 milliseconds) { args.durationOverride = milliseconds; }
 
         PointsArray& Path() { return args.path; }
 

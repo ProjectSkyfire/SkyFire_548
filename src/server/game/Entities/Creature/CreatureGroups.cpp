@@ -8,6 +8,9 @@
 #include "ObjectMgr.h"
 
 #include "CreatureAI.h"
+#include "MoveSpline.h"
+#include "MoveSplineInit.h"
+#include <limits>
 
 #define MAX_DESYNC 5.0f
 
@@ -143,6 +146,7 @@ void CreatureGroup::AddMember(Creature* member)
 
 void CreatureGroup::RemoveMember(Creature* member)
 {
+    m_smoothFlightMembers.erase(member);
     if (m_leader == member)
         m_leader = NULL;
 
@@ -183,6 +187,8 @@ void CreatureGroup::MemberAttackStart(Creature* member, Unit* target)
 
 void CreatureGroup::FormationReset(bool dismiss)
 {
+    m_smoothFlightMembers.clear();
+    m_smoothLeaderSplineId = 0;
     for (CreatureGroupMemberType::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
         if (itr->first != m_leader && itr->first->IsAlive())
@@ -195,6 +201,104 @@ void CreatureGroup::FormationReset(bool dismiss)
         }
     }
     m_Formed = !dismiss;
+}
+
+void CreatureGroup::UpdateSmoothFlightFollowers()
+{
+    if (!m_leader || !m_leader->movespline->isCyclic() || m_leader->movespline->Finalized())
+        return;
+    if (m_smoothLeaderSplineId != m_leader->movespline->GetId())
+    {
+        m_smoothFlightMembers.clear();
+        m_smoothLeaderSplineId = m_leader->movespline->GetId();
+    }
+    CreatureData const* leaderData = sObjectMgr->GetCreatureData(m_leader->GetDBTableGUIDLow());
+    if (!leaderData)
+        return;
+    auto const& spline = m_leader->movespline->_Spline();
+    uint32 const count = spline.last() - spline.first();
+    uint32 const duration = m_leader->movespline->Duration();
+    uint32 const elapsed = m_leader->movespline->TimePassed();
+    if (!count || !duration)
+        return;
+
+    for (auto const& entry : m_members)
+    {
+        Creature* member = entry.first;
+        if (member == m_leader || !member->IsAlive() || !member->CanFly() || member->IsInCombat() ||
+            member->HasUnitState(UNIT_STATE_NOT_MOVE))
+            continue;
+        CreatureData const* data = sObjectMgr->GetCreatureData(member->GetDBTableGUIDLow());
+        if (!data)
+            continue;
+        G3D::Vector3 offset(data->posX - leaderData->posX, data->posY - leaderData->posY, data->posZ - leaderData->posZ);
+        SmoothFlightMember& state = m_smoothFlightMembers[member];
+        if (state.splineId == member->movespline->GetId() && !member->movespline->Finalized())
+            continue;
+
+        uint32 start = 0;
+        bool launchCycle = false;
+        if (state.joining && state.splineId == member->movespline->GetId())
+        {
+            start = state.joinNode;
+            launchCycle = true;
+        }
+        else if (elapsed < 100 && member->GetExactDistSq(
+            spline.getPoint(spline.first()).x + offset.x, spline.getPoint(spline.first()).y + offset.y,
+            spline.getPoint(spline.first()).z + offset.z) < 1.0f)
+            launchCycle = true;
+
+        Movement::MoveSplineInit init(member);
+        if (launchCycle)
+        {
+            Movement::PointsArray points;
+            for (uint32 i = 0; i < count; ++i)
+                points.push_back(spline.getPoint(spline.first() + (start + i) % count) + offset);
+            init.MovebyPath(points);
+            init.SetCyclic();
+            init.SetDuration(duration);
+            state.joining = false;
+        }
+        else
+        {
+            // A late-loading or returning guard intercepts a future control point
+            // before joining the shared lap clock. No teleports or deformed loops.
+            uint32 bestTime = std::numeric_limits<uint32>::max();
+            float bestDistance = 0.0f;
+            G3D::Vector3 destination;
+            float const maxSpeed = std::max(1.0f, m_leader->GetSpeed(MOVE_RUN) * 2.0f);
+            for (uint32 i = 0; i < count; ++i)
+            {
+                G3D::Vector3 point = spline.getPoint(spline.first() + i) + offset;
+                float dist = member->GetExactDist(point.x, point.y, point.z);
+                if (dist < 0.25f)
+                    continue;
+                uint32 time = (uint32(spline.length(spline.first() + i)) + duration - elapsed) % duration;
+                while (time < 500 || float(time) * maxSpeed < dist * 1000.0f)
+                    time += duration;
+                if (time < bestTime)
+                {
+                    bestTime = time;
+                    bestDistance = dist;
+                    destination = point;
+                    state.joinNode = i;
+                }
+            }
+            if (bestTime == std::numeric_limits<uint32>::max())
+                continue;
+            init.MoveTo(destination.x, destination.y, destination.z, false);
+            init.SetVelocity(std::max(0.11f, bestDistance * 1000.0f / float(bestTime)));
+            init.SetDuration(bestTime);
+            state.joining = true;
+        }
+        init.SetFly();
+        init.SetSmooth();
+        init.SetUncompressed();
+        init.SetWalk(m_leader->IsWalking());
+        member->SetWalk(m_leader->IsWalking());
+        if (init.Launch())
+            state.splineId = member->movespline->GetId();
+    }
 }
 
 void CreatureGroup::LeaderMoveTo(float x, float y, float z)
@@ -230,7 +334,12 @@ void CreatureGroup::LeaderMoveTo(float x, float y, float z)
         Skyfire::NormalizeMapCoord(dx);
         Skyfire::NormalizeMapCoord(dy);
 
-        member->UpdateGroundPositionZ(dx, dy, dz);
+        // Airborne formations must retain the leader's flight altitude. Ground
+        // followers still need projection onto the terrain at their offset.
+        if (member->CanFly())
+            member->UpdateAllowedPositionZ(dx, dy, dz);
+        else
+            member->UpdateGroundPositionZ(dx, dy, dz);
 
         if (member->IsWithinDist(m_leader, dist + MAX_DESYNC))
             member->SetUnitMovementFlags(m_leader->GetUnitMovementFlags());

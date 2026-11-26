@@ -140,6 +140,22 @@ namespace Movement {
             SF_LOG_ERROR("misc", "MoveSpline::init_spline: zero length spline, wrong input data?");
             spline.set_length(spline.last(), spline.isCyclic() ? 1000 : 1);
         }
+        // Keep translated formation loops on the same lap clock. Default
+        // movement remains velocity-driven. Never compress segments to zero time.
+        int32 const segments = spline.last() - spline.first();
+        if (args.durationOverride && args.flags.flying && args.flags.isSmooth() &&
+            args.durationOverride >= uint32(segments) && args.durationOverride <= uint32(INT32_MAX))
+        {
+            int32 const original = spline.length();
+            int32 previous = 0;
+            for (int32 i = spline.first() + 1; i <= spline.last(); ++i)
+            {
+                int32 scaled = int32(int64(spline.length(i)) * args.durationOverride / original);
+                scaled = std::max(previous + 1, std::min(scaled, int32(args.durationOverride) - (spline.last() - i)));
+                spline.set_length(i, scaled);
+                previous = scaled;
+            }
+        }
         point_Idx = spline.first();
     }
 

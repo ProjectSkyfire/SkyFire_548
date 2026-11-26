@@ -71,6 +71,7 @@ namespace Movement
 
     public:
         int32 Duration() const { return spline.length(); }
+        int32 TimePassed() const { return time_passed; }
         MySpline const& _Spline() const { return spline; }
         int32 _currentSplineIdx() const { return point_Idx; }
         void _Finalize();

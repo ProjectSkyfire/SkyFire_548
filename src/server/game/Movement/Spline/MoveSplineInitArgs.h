@@ -30,7 +30,7 @@ namespace Movement
     {
         MoveSplineInitArgs(size_t path_capacity = 16) : path_Idx_offset(0), velocity(0.f),
             parabolic_amplitude(0.f), time_perc(0.f), splineId(0), initialOrientation(0.f),
-            HasVelocity(false), TransformForTransport(true), walk(false)
+            HasVelocity(false), TransformForTransport(true), walk(false), durationOverride(0)
         {
             path.reserve(path_capacity);
         }
@@ -47,6 +47,7 @@ namespace Movement
         bool HasVelocity;
         bool TransformForTransport;
         bool walk;
+        uint32 durationOverride;
 
         /** Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed. */
         bool Validate(Unit* unit) const;
