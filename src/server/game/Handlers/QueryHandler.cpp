@@ -26,6 +26,16 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 
     Player* player = ObjectAccessor::FindPlayer(guid);
     CharacterNameData const* nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
+    // a character created or renamed outside the session paths can be missing from the name cache although it is
+    // in the world; answer from the character itself instead of letting the client show it as Unknown
+    if (!nameData && player)
+    {
+        SF_LOG_ERROR("network", "Name query for online player %s (guid %u) without name cache entry, adding it",
+            player->GetName().c_str(), GUID_LOPART(guid));
+        sWorld->AddCharacterNameData(GUID_LOPART(guid), player->GetName(), player->getGender(), player->getRace(),
+            player->getClass(), player->getLevel(), realmID);
+        nameData = sWorld->GetCharacterNameData(GUID_LOPART(guid));
+    }
 
     WorldPacket data(SMSG_QUERY_PLAYER_NAME_RESPONSE, 500);
     data.WriteGuidMask(guid, 3, 6, 7, 2, 5, 4, 0, 1);

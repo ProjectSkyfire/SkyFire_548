@@ -16351,7 +16351,7 @@ void Player::PetSpellInitialize()
 
     uint32 spellCount = 0;
     uint32 spellHistoryCount = 0;
-    uint32 cooldownCount = pet->m_CreatureSpellCooldowns.size() + pet->m_CreatureCategoryCooldowns.size();
+    uint32 cooldownCount = 0;
 
     WorldPacket data(SMSG_PET_SPELLS_MESSAGE, 8 + 2 + 4 + 4 + 4 * MAX_UNIT_ACTION_BAR_INDEX + 1 + 1);
 
@@ -16382,13 +16382,7 @@ void Player::PetSpellInitialize()
         {
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
             if (!spellInfo)
-            {
-                data << uint32(0);
-                data << uint32(0);
-                data << uint16(0);
-                data << uint32(0);
                 continue;
-            }
 
             time_t cooldown = (itr->second > curTime) ? (itr->second - curTime) * IN_MILLISECONDS : 0;
 

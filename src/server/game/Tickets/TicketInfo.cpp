@@ -226,8 +226,8 @@ BugTicket::BugTicket(Player* player, WorldPacket& bugPacket) : TicketInfo(player
 {
     _ticketId = sTicketMgr->GenerateBugId();
 
-    bugPacket >> _pos.x;
     bugPacket >> _pos.y;
+    bugPacket >> _pos.x;
     bugPacket >> _pos.z;
     bugPacket >> _Orientation;
     bugPacket >> _mapId;

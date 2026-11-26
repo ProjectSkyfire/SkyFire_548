@@ -1166,11 +1166,19 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return -1;
     }
 
+    // Validate the client realm before using it during session initialization.
+    if (realmNameStore.find(VirtualRealmID) == realmNameStore.end())
+    {
+        SF_LOG_ERROR("network", "WorldSocket::HandleAuthSession: account %u sent unknown virtual realm id %u, using realm %u",
+            id, VirtualRealmID, realmID);
+        VirtualRealmID = realmID;
+    }
+
     // Checks gmlevel per Realm
     stmt = LoginDatabase.GetPreparedStatement(LOGIN_GET_GMLEVEL_BY_REALMID);
 
     stmt->setUInt32(0, id);
-    stmt->setInt32(1, int32(VirtualRealmID));
+    stmt->setInt32(1, int32(realmID));
 
     result = LoginDatabase.Query(stmt);
 
