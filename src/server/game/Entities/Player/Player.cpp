@@ -65,6 +65,7 @@
 #include "SpellChargePersistence.h"
 #include "SpellMgr.h"
 #include "Transport.h"
+#include "TransportRecovery.h"
 #include "UpdateData.h"
 #include "UpdateFieldFlags.h"
 #include "UpdateMask.h"
@@ -5266,6 +5267,10 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             trans->Append(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_DEATH_GATE_RETURN);
+            stmt->setUInt32(0, guid);
+            trans->Append(stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_TRANSPORT_RECOVERY);
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
 
@@ -12718,7 +12723,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
 
     std::string taxi_nodes = fields[38].GetString();
 
-#define RelocateToHomebind(){ mapId = m_homebindMapId; instanceId = 0; Relocate(m_homebindX, m_homebindY, m_homebindZ); }
+#define RelocateToHomebind(){ if (GetTransport()) GetTransport()->RemovePassenger(this); m_movementInfo.transport.Reset(); mapId = m_homebindMapId; instanceId = 0; Relocate(m_homebindX, m_homebindY, m_homebindZ); }
 
     _LoadGroup(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GROUP));
 
@@ -12739,7 +12744,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
 
     GetSession()->SetPlayer(this);
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-    if (!mapEntry || !IsPositionValid())
+    if ((!mapEntry || !IsPositionValid()) && !transGUID)
     {
         SF_LOG_ERROR("entities.player", "Player (guidlow %d) have invalid coordinates (MapId: %u X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.", guid, mapId, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
         RelocateToHomebind();
@@ -12794,36 +12799,55 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder* holder)
     // currently we do not support transport in bg
     else if (transGUID)
     {
+        uint32 savedEntry = 0;
+        WorldLocation arrival;
+        if (PreparedQueryResult recovery = holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TRANSPORT_RECOVERY))
+        {
+            Field* row = recovery->Fetch();
+            savedEntry = row[0].GetUInt32();
+            arrival = WorldLocation(row[1].GetUInt32(), row[2].GetFloat(), row[3].GetFloat(), row[4].GetFloat(), row[5].GetFloat());
+        }
         m_movementInfo.transport.guid = MAKE_NEW_GUID(transGUID, 0, HIGHGUID_MO_TRANSPORT);
         m_movementInfo.transport.pos.Relocate(fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat(), fields[30].GetFloat());
-
-        if (!Skyfire::IsValidMapCoord(
-            GetPositionX() + m_movementInfo.transport.pos.GetPositionX(), GetPositionY() + m_movementInfo.transport.pos.GetPositionY(),
-            GetPositionZ() + m_movementInfo.transport.pos.GetPositionZ(), GetOrientation() + m_movementInfo.transport.pos.GetOrientation()) ||
-            // transport size limited
-            m_movementInfo.transport.pos.m_positionX > 250 || m_movementInfo.transport.pos.m_positionY > 250 || m_movementInfo.transport.pos.m_positionZ > 250)
+        bool restored = false;
+        Position const& offset = m_movementInfo.transport.pos;
+        if (Skyfire::TransportRecovery::ValidOffset(offset.GetPositionX(), offset.GetPositionY(), offset.GetPositionZ(), offset.GetOrientation()))
         {
-            SF_LOG_ERROR("entities.player", "Player (guidlow %d) have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to bind location.",
-                guid, GetPositionX() + m_movementInfo.transport.pos.GetPositionX(), GetPositionY() + m_movementInfo.transport.pos.GetPositionY(),
-                GetPositionZ() + m_movementInfo.transport.pos.GetPositionZ(), GetOrientation() + m_movementInfo.transport.pos.GetOrientation());
-
-            RelocateToHomebind();
-        }
-        else
-        {
+            Transport* transport = NULL;
             if (GameObject* go = HashMapHolder<GameObject>::Find(m_movementInfo.transport.guid))
-                m_transport = go->ToTransport();
-
-            if (m_transport)
+                transport = go->ToTransport();
+            // Instance transports and local elevators cannot be recovered by a
+            // continent transport GUID. Check entry as well when it was saved.
+            if (transport && transport->IsInWorld() && transport->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT &&
+                !transport->GetTransportTemplate()->inInstance && (!savedEntry || savedEntry == transport->GetEntry()))
             {
-                m_transport->AddPassenger(this);
-                mapId = m_transport->GetMapId();
+                float x, y, z, o;
+                offset.GetPosition(x, y, z, o);
+                transport->CalculatePassengerPosition(x, y, z, &o);
+                if (MapManager::IsValidMapCoord(transport->GetMapId(), x, y, z, o))
+                {
+                    Relocate(x, y, z, o);
+                    mapId = transport->GetMapId();
+                    instanceId = 0;
+                    transport->AddPassenger(this);
+                    restored = GetTransport() == transport;
+                }
+            }
+        }
+        if (!restored)
+        {
+            m_movementInfo.transport.Reset();
+            MapEntry const* arrivalMap = sMapStore.LookupEntry(arrival.GetMapId());
+            if (savedEntry && arrivalMap && !arrivalMap->Instanceable() && MapManager::IsValidMapCoord(arrival))
+            {
+                mapId = arrival.GetMapId();
+                instanceId = 0;
+                Relocate(arrival);
+                SF_LOG_INFO("entities.player", "Player %u recovered from transport %u to saved arrival on map %u.", guid, transGUID, mapId);
             }
             else
             {
-                SF_LOG_ERROR("entities.player", "Player (guidlow %d) have problems with transport guid (%u). Teleport to bind location.",
-                    guid, transGUID);
-
+                SF_LOG_ERROR("entities.player", "Player %u could not restore transport %u and has no valid arrival dock; using homebind.", guid, transGUID);
                 RelocateToHomebind();
             }
         }
@@ -15010,6 +15034,44 @@ void Player::SaveToDB(bool create /*=false*/)
 
     if (m_mailsUpdated)                                     //save mails only when needed
         _SaveMail(trans);
+
+    // Save transport state atomically with the world position. Clear it after
+    // disembarking so a later login cannot attach the player to an old ship.
+    Transport* transport = GetTransport();
+    Position const& offset = m_movementInfo.transport.pos;
+    bool saveTransport = transport && transport->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT &&
+        !transport->GetTransportTemplate()->inInstance;
+    bool validOffset = Skyfire::TransportRecovery::ValidOffset(offset.GetPositionX(), offset.GetPositionY(), offset.GetPositionZ(), offset.GetOrientation());
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_TRANSPORT);
+    stmt->setUInt32(0, saveTransport ? transport->GetGUIDLow() : 0);
+    // An invalid offset must still preserve the intended arrival. Use a finite
+    // out-of-bounds sentinel so login takes the dock fallback, not the deck.
+    stmt->setFloat(1, saveTransport ? (validOffset ? offset.GetPositionX() : 251.0f) : 0.0f);
+    stmt->setFloat(2, saveTransport && validOffset ? offset.GetPositionY() : 0.0f);
+    stmt->setFloat(3, saveTransport && validOffset ? offset.GetPositionZ() : 0.0f);
+    stmt->setFloat(4, saveTransport && validOffset ? offset.GetOrientation() : 0.0f);
+    stmt->setUInt32(5, GetGUIDLow());
+    trans->Append(stmt);
+
+    if (saveTransport)
+    {
+        WorldLocation arrival;
+        transport->GetPassengerArrivalLocation(arrival);
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_REP_TRANSPORT_RECOVERY);
+        stmt->setUInt32(0, GetGUIDLow());
+        stmt->setUInt32(1, transport->GetEntry());
+        stmt->setUInt32(2, arrival.GetMapId());
+        stmt->setFloat(3, arrival.GetPositionX());
+        stmt->setFloat(4, arrival.GetPositionY());
+        stmt->setFloat(5, arrival.GetPositionZ());
+        stmt->setFloat(6, arrival.GetOrientation());
+    }
+    else
+    {
+        stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_TRANSPORT_RECOVERY);
+        stmt->setUInt32(0, GetGUIDLow());
+    }
+    trans->Append(stmt);
 
     _SaveBGData(trans);
     _SaveDeathGateReturn(trans);

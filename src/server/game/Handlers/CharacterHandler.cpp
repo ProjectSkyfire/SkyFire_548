@@ -178,6 +178,10 @@ bool LoginQueryHolder::Initialize()
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES, stmt);
 
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_TRANSPORT_RECOVERY);
+    stmt->setUInt32(0, lowGuid);
+    res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_TRANSPORT_RECOVERY, stmt);
+
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_DEATH_GATE_RETURN);
     stmt->setUInt32(0, lowGuid);
     res &= SetPreparedQuery(PLAYER_LOGIN_QUERY_LOAD_DEATH_GATE_RETURN, stmt);

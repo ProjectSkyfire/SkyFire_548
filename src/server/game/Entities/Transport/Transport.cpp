@@ -16,6 +16,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Transport.h"
+#include "TransportRecovery.h"
 #include "Vehicle.h"
 #include "World.h"
 #include "WorldPacket.h"
@@ -309,6 +310,17 @@ void Transport::Update(uint32 diff)
     }
 
     sScriptMgr->OnTransportUpdate(this, diff);
+}
+
+bool Transport::GetPassengerArrivalLocation(WorldLocation& location) const
+{
+    if (!_transportInfo || _transportInfo->inInstance || GetGoType() != GAMEOBJECT_TYPE_MO_TRANSPORT)
+        return false;
+
+    KeyFrame const* next = Skyfire::TransportRecovery::NextStop(_transportInfo->keyFrames,
+        std::size_t(_currentFrame - _transportInfo->keyFrames.begin()), !_isMoving);
+    uint32 node = next ? next->Node->index : Skyfire::TransportRecovery::NoStopArrivalNode;
+    return sTransportMgr->GetArrivalLocation(GetEntry(), node, location);
 }
 
 void Transport::AddPassenger(WorldObject* passenger)

@@ -3,6 +3,10 @@
 # See COPYRIGHT file for Copyright information
 #
 
+add_executable(transport_recovery_tests TransportRecoveryTests.cpp)
+target_include_directories(transport_recovery_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Transport)
+add_test(NAME transport_recovery_tests COMMAND transport_recovery_tests)
+
 add_executable(pvp_team_state_tests PvpTeamStateTests.cpp)
 target_include_directories(pvp_team_state_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/game/Battlefield)
 add_test(NAME pvp_team_state_tests COMMAND pvp_team_state_tests)

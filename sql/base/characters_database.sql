@@ -457,6 +457,18 @@ LOCK TABLES `character_currency` WRITE;
 /*!40000 ALTER TABLE `character_currency` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_currency` ENABLE KEYS */;
 UNLOCK TABLES;
+-- Safe arrival fallback and identity for saved continent transport passengers.
+CREATE TABLE IF NOT EXISTS `character_transport_recovery` (
+  `guid` int unsigned NOT NULL,
+  `entry` int unsigned NOT NULL,
+  `map` int unsigned NOT NULL COMMENT '4294967295 when no safe arrival is configured',
+  `position_x` float NOT NULL DEFAULT 0,
+  `position_y` float NOT NULL DEFAULT 0,
+  `position_z` float NOT NULL DEFAULT 0,
+  `orientation` float NOT NULL DEFAULT 0,
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `character_death_gate_return`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;

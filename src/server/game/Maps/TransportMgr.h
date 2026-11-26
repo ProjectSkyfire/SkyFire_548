@@ -7,6 +7,7 @@
 #define TRANSPORTMGR_H
 
 #include "DBCStores.h"
+#include "Object.h"
 #include "Platform/Singleton.h"
 #include "Spline.h"
 #include <G3D/Quat.h>
@@ -94,6 +95,7 @@ public:
     void Unload();
 
     void LoadTransportTemplates();
+    bool GetArrivalLocation(uint32 entry, uint32 node, WorldLocation& location) const;
 
     // Creates a transport using given GameObject template entry
     Transport* CreateTransport(uint32 entry, uint32 guid = 0, Map* map = NULL);
@@ -171,6 +173,8 @@ private:
 
     // Container storing transport templates
     TransportTemplates _transportTemplates;
+    // Safe shore locations, keyed by transport entry and DBC route node index.
+    std::map<std::pair<uint32, uint32>, WorldLocation> _arrivalLocations;
 
     // Container storing transport entries to create for instanced maps
     TransportInstanceMap _instanceTransports;

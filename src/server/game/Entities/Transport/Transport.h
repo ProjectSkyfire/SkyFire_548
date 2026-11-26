@@ -65,6 +65,8 @@ public:
 
     TransportTemplate const* GetTransportTemplate() const { return _transportInfo; }
 
+    bool GetPassengerArrivalLocation(WorldLocation& location) const;
+
 private:
     void MoveToNextWaypoint();
     float CalculateSegmentPos(float perc);

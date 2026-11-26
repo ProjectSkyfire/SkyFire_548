@@ -662,6 +662,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_ACCOUNT_BATTLE_PET_SLOTS, "DELETE FROM account_battle_pet_slots WHERE accountId = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_ACCOUNT_BATTLE_PET_SLOTS, "INSERT INTO account_battle_pet_slots (accountId, slot1, slot2, slot3, flags) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 
+    PrepareStatement(CHAR_SEL_TRANSPORT_RECOVERY, "SELECT entry, map, position_x, position_y, position_z, orientation FROM character_transport_recovery WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_TRANSPORT_RECOVERY, "REPLACE INTO character_transport_recovery (guid, entry, map, position_x, position_y, position_z, orientation) VALUES (?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_TRANSPORT_RECOVERY, "DELETE FROM character_transport_recovery WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_CHARACTER_TRANSPORT, "UPDATE characters SET transguid = ?, trans_x = ?, trans_y = ?, trans_z = ?, trans_o = ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_DEATH_GATE_RETURN, "SELECT map, posX, posY, posZ, o FROM character_death_gate_return WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_REP_DEATH_GATE_RETURN, "REPLACE INTO character_death_gate_return (guid, map, posX, posY, posZ, o) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_DEATH_GATE_RETURN, "DELETE FROM character_death_gate_return WHERE guid = ?", CONNECTION_ASYNC);

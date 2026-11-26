@@ -11,6 +11,7 @@
 #include "ScriptMgr.h"
 #include "Transport.h"
 #include "TransportMgr.h"
+#include "TransportRecovery.h"
 
 TransportTemplate::~TransportTemplate()
 {
@@ -29,7 +30,17 @@ TransportMgr::~TransportMgr() { }
 
 void TransportMgr::Unload()
 {
+    _arrivalLocations.clear();
     _transportTemplates.clear();
+}
+
+bool TransportMgr::GetArrivalLocation(uint32 entry, uint32 node, WorldLocation& location) const
+{
+    auto itr = _arrivalLocations.find(std::make_pair(entry, node));
+    if (itr == _arrivalLocations.end())
+        return false;
+    location = itr->second;
+    return true;
 }
 
 uint32 TransportMgr::GetLocalTransportEntry(uint32 entry) const
@@ -75,6 +86,40 @@ void TransportMgr::LoadTransportTemplates()
     } while (result->NextRow());
 
     SF_LOG_INFO("server.loading", ">> Loaded %u transport templates in %u ms", count, GetMSTimeDiffToNow(oldMSTime));
+
+    _arrivalLocations.clear();
+    if (QueryResult docks = WorldDatabase.Query("SELECT entry, stop_node, map, position_x, position_y, position_z, orientation FROM transport_arrival_dock"))
+    {
+        do
+        {
+            Field* row = docks->Fetch();
+            uint32 entry = row[0].GetUInt32();
+            uint32 node = row[1].GetUInt32();
+            WorldLocation location(row[2].GetUInt32(), row[3].GetFloat(), row[4].GetFloat(), row[5].GetFloat(), row[6].GetFloat());
+            auto transport = _transportTemplates.find(entry);
+            bool validStop = false;
+            if (transport != _transportTemplates.end() && !transport->second.inInstance)
+            {
+                bool hasStop = false;
+                for (KeyFrame const& frame : transport->second.keyFrames)
+                {
+                    hasStop = hasStop || frame.IsStopFrame();
+                    if (frame.Node->index == node && frame.IsStopFrame() && frame.Node->mapid == location.GetMapId())
+                        validStop = true;
+                }
+                if (node == Skyfire::TransportRecovery::NoStopArrivalNode && !hasStop &&
+                    transport->second.mapsUsed.count(location.GetMapId()))
+                    validStop = true;
+            }
+            MapEntry const* map = sMapStore.LookupEntry(location.GetMapId());
+            if (!validStop || !map || map->Instanceable() || !MapManager::IsValidMapCoord(location))
+            {
+                SF_LOG_ERROR("sql.sql", "Invalid transport arrival dock for entry %u, stop %u; ignored.", entry, node);
+                continue;
+            }
+            _arrivalLocations[std::make_pair(entry, node)] = location;
+        } while (docks->NextRow());
+    }
 }
 
 void TransportMgr::GeneratePath(GameObjectTemplate const* goInfo, TransportTemplate* transport)
