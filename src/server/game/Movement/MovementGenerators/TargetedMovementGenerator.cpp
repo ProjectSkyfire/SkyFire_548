@@ -28,8 +28,15 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     if (owner->HasUnitState(UNIT_STATE_NOT_MOVE))
         return;
 
+    Creature* chaser = owner->HasUnitState(UNIT_STATE_CHASE) ? owner->ToCreature() : NULL;
+
     if (owner->GetTypeId() == TypeID::TYPEID_UNIT && !i_target->isInAccessiblePlaceFor(owner->ToCreature()))
+    {
+        if (chaser)
+            chaser->SetCannotReachTarget(!chaser->IsWithinMeleeRange(i_target.getTarget()));
+        i_recalculateTravel = true;
         return;
+    }
 
     float x, y, z;
 
@@ -116,13 +123,19 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T* owner, bool up
     bool forceDest = (owner->GetTypeId() == TypeID::TYPEID_UNIT && owner->ToCreature()->IsPet()
         && owner->HasUnitState(UNIT_STATE_FOLLOW));
 
+    // a creature that keeps failing to find a path to its victim evades, see Creature::Update
     bool result = i_path->CalculatePath(x, y, z, forceDest);
     if (!result || (i_path->GetPathType() & PATHFIND_NOPATH))
     {
         // Cant reach target
+        if (chaser)
+            chaser->SetCannotReachTarget(!chaser->IsWithinMeleeRange(i_target.getTarget()));
         i_recalculateTravel = true;
         return;
     }
+
+    if (chaser)
+        chaser->SetCannotReachTarget(false);
 
     D::_addUnitStateMove(owner);
     i_targetReached = false;
@@ -232,6 +245,8 @@ template<class T>
 void ChaseMovementGenerator<T>::DoFinalize(T* owner)
 {
     owner->ClearUnitState(UNIT_STATE_CHASE | UNIT_STATE_CHASE_MOVE);
+    if (Creature* creature = owner->ToCreature())
+        creature->SetCannotReachTarget(false);
 }
 
 template<class T>
