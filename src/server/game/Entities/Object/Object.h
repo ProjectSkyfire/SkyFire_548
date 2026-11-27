@@ -652,7 +652,7 @@ public:
     std::set<uint32> const& GetWorldMapSwaps() const { return _worldMapSwaps; }
     void RebuildTerrainSwaps();
     void RebuildWorldMapAreaSwaps();
-    void UpdateAreaPhase();
+    bool UpdateAreaPhase(bool update = true);
 
     bool InSamePhase(WorldObject const* obj) const;
     bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask); }

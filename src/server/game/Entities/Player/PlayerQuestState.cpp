@@ -863,6 +863,10 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     sScriptMgr->OnPlayerQuestReward(this, quest, questGiver);
 
+    // Rewarded-quest conditions must see the final active/rewarded state.
+    UpdateForQuestWorldObjects();
+    UpdatePhasing();
+
     //lets remove flag for delayed teleports
     SetCanDelayTeleport(false);
 }

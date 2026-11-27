@@ -24968,9 +24968,14 @@ void Player::UpdatePhasing()
     if (!IsInWorld())
         return;
 
+    // Quest changes can change area conditions without an area transition.
+    bool const phaseChanged = UpdateAreaPhase(false);
     RebuildTerrainSwaps(); // to set default map swaps
 
     GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
+
+    if (phaseChanged)
+        UpdateObjectVisibility();
 }
 
 bool Player::IsShieldedByPetBattleFrom(Unit const* attacker) const

@@ -3492,7 +3492,7 @@ void WorldObject::RebuildWorldMapAreaSwaps()
                             _worldMapSwaps.insert(worldMapAreaId);
 }
 
-void WorldObject::UpdateAreaPhase()
+bool WorldObject::UpdateAreaPhase(bool update)
 {
     bool updateNeeded = false;
     PhaseInfo const& phases = sObjectMgr->GetAreaPhases();
@@ -3547,12 +3547,14 @@ void WorldObject::UpdateAreaPhase()
 
     // only update visibility and send packets if there was a change in the phase list
 
-    if (updateNeeded && GetTypeId() == TypeID::TYPEID_PLAYER && IsInWorld())
+    if (update && updateNeeded && GetTypeId() == TypeID::TYPEID_PLAYER && IsInWorld())
         ToPlayer()->GetSession()->SendSetPhaseShift(GetPhases(), GetTerrainSwaps(), GetWorldMapSwaps());
 
     // only update visibilty once, to prevent objects appearing for a moment while adding in multiple phases
-    if (updateNeeded && IsInWorld())
+    if (update && updateNeeded && IsInWorld())
         UpdateObjectVisibility();
+
+    return updateNeeded;
 }
 bool WorldObject::HasPhaseList(uint32 phase)
 {

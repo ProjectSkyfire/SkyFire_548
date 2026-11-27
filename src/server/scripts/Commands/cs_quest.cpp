@@ -135,6 +135,8 @@ public:
 
         player->RemoveActiveQuest(entry);
         player->RemoveRewardedQuest(entry);
+        player->UpdateForQuestWorldObjects();
+        player->UpdatePhasing();
 
         handler->SendSysMessage(LANG_COMMAND_QUEST_REMOVED);
         return true;

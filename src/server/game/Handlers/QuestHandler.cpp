@@ -593,7 +593,8 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
 
     if (slot < MAX_QUEST_LOG_SIZE)
     {
-        if (uint32 questId = _player->GetQuestSlotQuestId(slot))
+        uint32 const questId = _player->GetQuestSlotQuestId(slot);
+        if (questId)
         {
             if (!_player->TakeQuestSourceItem(questId, true))
                 return;                                     // can't un-equip some items, reject quest cancel
@@ -614,11 +615,6 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
                 CancelEyeOfAcherusQuest(_player);
 
             _player->RemoveActiveQuest(questId);
-            if (questId == QUEST_DEATH_COMES_FROM_ON_HIGH)
-            {
-                _player->UpdateForQuestWorldObjects();
-                _player->UpdatePhasing();
-            }
 
             _player->RemoveTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, questId);
 
@@ -626,6 +622,12 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recvData)
         }
 
         _player->SetQuestSlot(slot, 0);
+
+        if (questId)
+        {
+            _player->UpdateForQuestWorldObjects();
+            _player->UpdatePhasing();
+        }
 
         _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_QUEST_ABANDONED, 1);
     }
