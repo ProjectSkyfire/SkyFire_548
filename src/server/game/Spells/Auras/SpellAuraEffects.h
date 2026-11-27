@@ -221,6 +221,7 @@ public:
     void HandleModAttackSpeed(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModMeleeSpeedPct(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleAuraModRangedHaste(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleAuraModPetStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     //   combat rating
     void HandleModRating(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModRatingFromStat(AuraApplication const* aurApp, uint8 mode, bool apply) const;

@@ -992,6 +992,9 @@ void Creature::UpdateDamagePhysical(WeaponAttackType attType)
 #define ENTRY_GHOUL             26125
 #define ENTRY_BLOODWORM         28017
 
+// miscvalue of SPELL_AURA_MOD_PET_STAT
+#define PET_STAT_HEALTH         1
+
 bool Guardian::UpdateStats(Stats stat)
 {
     if (stat >= MAX_STATS)
@@ -1127,6 +1130,13 @@ void Guardian::UpdateMaxHealth()
     value *= GetModifierValue(unitMod, BASE_PCT);
     value += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * multiplicator;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
+
+    if (IsPet())
+    {
+        for (AuraEffect const* petStat : m_owner->GetAuraEffectsByType(SPELL_AURA_MOD_PET_STAT))
+            if (petStat->GetMiscValue() == PET_STAT_HEALTH && (!petStat->GetMiscValueB() || uint32(petStat->GetMiscValueB()) == GetEntry()))
+                AddPct(value, petStat->GetAmount());
+    }
 
     SetMaxHealth((uint32)value);
 }
