@@ -384,10 +384,10 @@ public:
 
                                 break;
                             }
-                            // Chain Lightning
+                            // Chain Lightning rolls for every target the chain hits, so each roll has a third of the chance
                             case 421:
                             {
-                                float Mastery = caster->GetFloatValue(PLAYER_FIELD_MASTERY) * 2.0f;
+                                float Mastery = caster->GetFloatValue(PLAYER_FIELD_MASTERY) * 2.0f / 3.0f;
 
                                 if (roll_chance_f(Mastery))
                                     caster->CastSpell(unitTarget, MASTERY_SPELL_CHAIN_LIGHTNING, true);
