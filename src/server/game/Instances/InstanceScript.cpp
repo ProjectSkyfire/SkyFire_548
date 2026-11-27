@@ -20,7 +20,7 @@
 void InstanceScript::SaveToDB()
 {
     std::string data = GetSaveData();
-    if (data.empty())
+    if (data.empty() && !completedEncounters)
         return;
 
     PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_INSTANCE_DATA);
@@ -466,6 +466,7 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
         return;
 
     uint32 dungeonId = 0;
+    uint32 oldMask = completedEncounters;
 
     for (DungeonEncounterList::const_iterator itr = encounters->begin(); itr != encounters->end(); ++itr)
     {
@@ -481,6 +482,10 @@ void InstanceScript::UpdateEncounterState(EncounterCreditType type, uint32 credi
             }
         }
     }
+
+    // Scripts without boss slots or with a late first boss state never reach SaveToDB after the kill
+    if (completedEncounters != oldMask)
+        SaveToDB();
 
     if (dungeonId)
     {

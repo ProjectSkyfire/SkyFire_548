@@ -5136,7 +5136,8 @@ void ObjectMgr::LoadInstanceEncounters()
                 continue;
         }
 
-        if (dungeonEncounter->difficulty == DIFFICULTY_NONE)
+        // The client lists the encounters of some 25 player only raids (Outland, Hyjal, Sunwell) under 10 player
+        if (dungeonEncounter->difficulty == DIFFICULTY_NONE || !GetMapDifficultyData(dungeonEncounter->mapId, DifficultyID(dungeonEncounter->difficulty)))
         {
             for (uint32 i = 0; i < 14; ++i)
             {
