@@ -92,6 +92,7 @@ DamageInfo::DamageInfo(Unit* _attacker, Unit* _victim, uint32 _damage, SpellInfo
     m_absorb = 0;
     m_resist = 0;
     m_block = 0;
+    m_unmitigated = m_damage;
 }
 DamageInfo::DamageInfo(CalcDamageInfo& dmgInfo)
     : m_attacker(dmgInfo.attacker), m_victim(dmgInfo.target), m_damage(dmgInfo.damage), m_spellInfo(NULL), m_schoolMask(SpellSchoolMask(dmgInfo.damageSchoolMask)),
@@ -100,6 +101,7 @@ DamageInfo::DamageInfo(CalcDamageInfo& dmgInfo)
     m_absorb = 0;
     m_resist = 0;
     m_block = 0;
+    m_unmitigated = m_damage;
 }
 
 void DamageInfo::ModifyDamage(int32 amount)

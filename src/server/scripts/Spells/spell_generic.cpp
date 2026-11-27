@@ -3654,6 +3654,121 @@ class spell_gen_vendor_bark_trigger : public SpellScriptLoader
         }
 };
 
+enum Vengeance
+{
+    SPELL_VENGEANCE_DRUID           = 84840,
+    SPELL_VENGEANCE_WARRIOR         = 93098,
+    SPELL_VENGEANCE_ATTACK_POWER    = 132365,
+
+    VENGEANCE_RECENT_ATTACKER_TIME  = 5 * IN_MILLISECONDS
+};
+
+// Value taken from Legends of Azeroth, not confirmed by retail data
+static float const VENGEANCE_SPELL_DAMAGE_FACTOR = 2.5f;
+
+// 84839 - Vengeance (Paladin)
+// 84840 - Vengeance (Druid)
+// 93098 - Vengeance (Warrior)
+// 93099 - Vengeance (Death Knight)
+// 120267 - Vengeance (Monk)
+class spell_gen_vengeance : public SpellScriptLoader
+{
+    public:
+        spell_gen_vengeance() : SpellScriptLoader("spell_gen_vengeance") { }
+
+        class spell_gen_vengeance_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_gen_vengeance_AuraScript);
+
+            struct AttackerHit
+            {
+                uint32 Damage;
+                uint32 Time;
+            };
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+            {
+                PreventDefaultAction();
+
+                Unit* owner = GetTarget();
+                Unit* attacker = eventInfo.GetActor();
+                DamageInfo* damageInfo = eventInfo.GetDamageInfo();
+                // Dodged and parried attacks still count, misses do not
+                if (!attacker || !damageInfo || !(eventInfo.GetHitMask() & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT | PROC_EX_DODGE | PROC_EX_PARRY)))
+                    return;
+
+                // Only damage from creatures that are not controlled by a player counts
+                if (attacker->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    return;
+
+                // Standing in persistent area effects does not feed Vengeance
+                if (eventInfo.GetTypeMask() & PROC_FLAG_TAKEN_PERIODIC)
+                    if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
+                        if (spellInfo->HasEffect(SPELL_EFFECT_PERSISTENT_AREA_AURA) || spellInfo->HasAreaAuraEffect())
+                            return;
+
+                if (GetId() == SPELL_VENGEANCE_DRUID && owner->GetShapeshiftForm() != FORM_BEAR)
+                    return;
+
+                if (GetId() == SPELL_VENGEANCE_WARRIOR && owner->GetShapeshiftForm() != FORM_DEFENSIVESTANCE)
+                    return;
+
+                // Taken before the critical bonus, so critical strikes grant half of what their extra damage would
+                uint32 damage = damageInfo->GetUnmitigatedDamage();
+                if (!damage)
+                    return;
+
+                // The Nth strongest attacker of the last seconds grants 1 / N of the value
+                uint32 now = getMSTime();
+                _attackers[attacker->GetGUID()] = { damage, now };
+                uint32 place = 1;
+                for (std::map<uint64, AttackerHit>::iterator itr = _attackers.begin(); itr != _attackers.end();)
+                {
+                    if (getMSTimeDiff(itr->second.Time, now) > VENGEANCE_RECENT_ATTACKER_TIME)
+                    {
+                        itr = _attackers.erase(itr);
+                        continue;
+                    }
+
+                    if (itr->first != attacker->GetGUID() && (itr->second.Damage > damage || (itr->second.Damage == damage && itr->first < attacker->GetGUID())))
+                        ++place;
+                    ++itr;
+                }
+
+                float gain = CalculatePct(float(damage), aurEff->GetAmount() / 100.0f) / place;
+                if (eventInfo.GetSpellInfo())
+                    gain *= VENGEANCE_SPELL_DAMAGE_FACTOR;
+
+                // The previous value has decayed in proportion to the time left on the aura
+                float amount = gain;
+                if (AuraEffect const* current = owner->GetAuraEffect(SPELL_VENGEANCE_ATTACK_POWER, EFFECT_0))
+                    amount += float(current->GetAmount()) * current->GetBase()->GetDuration() / current->GetBase()->GetMaxDuration();
+
+                amount = std::min(amount, float(owner->GetMaxHealth()));
+
+                owner->CastSpell(owner, SPELL_VENGEANCE_ATTACK_POWER, true);
+                if (Aura* vengeance = owner->GetAura(SPELL_VENGEANCE_ATTACK_POWER))
+                {
+                    vengeance->GetEffect(EFFECT_0)->ChangeAmount(int32(amount));
+                    vengeance->GetEffect(EFFECT_1)->ChangeAmount(int32(amount));
+                    vengeance->RefreshDuration();
+                }
+            }
+
+            void Register() OVERRIDE
+            {
+                OnEffectProc += AuraEffectProcFn(spell_gen_vengeance_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+            }
+
+            std::map<uint64, AttackerHit> _attackers;
+        };
+
+        AuraScript* GetAuraScript() const OVERRIDE
+        {
+            return new spell_gen_vengeance_AuraScript();
+        }
+};
+
 class spell_gen_wg_water : public SpellScriptLoader
 {
     public:
@@ -3844,6 +3959,7 @@ void AddSC_generic_spell_scripts()
     new spell_gen_upper_deck_create_foam_sword();
     new spell_gen_vehicle_scaling();
     new spell_gen_vendor_bark_trigger();
+    new spell_gen_vengeance();
     new spell_gen_wg_water();
     new spell_gen_whisper_gulch_yogg_saron_whisper();
     new spell_gen_override_display_power();

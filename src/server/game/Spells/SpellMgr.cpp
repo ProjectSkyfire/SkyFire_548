@@ -2992,6 +2992,11 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
                 break;
+            case 120267: // Vengeance (Monk), the client data uses an area aura effect this core does not implement
+                spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+                spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+                spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+                break;
             case 31344: // Howl of Azgalor
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS); // 100yards instead of 50000?!
                 break;

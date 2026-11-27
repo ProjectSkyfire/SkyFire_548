@@ -889,6 +889,7 @@ private:
     uint32 m_absorb;
     uint32 m_resist;
     uint32 m_block;
+    uint32 m_unmitigated;
 public:
     explicit DamageInfo(Unit* _attacker, Unit* _victim, uint32 _damage, SpellInfo const* _spellInfo, SpellSchoolMask _schoolMask, DamageEffectType _damageType);
     explicit DamageInfo(CalcDamageInfo& dmgInfo);
@@ -937,6 +938,15 @@ public:
     uint32 GetBlock() const
     {
         return m_block;
+    }
+    // Damage before armor, block, absorb and resist
+    uint32 GetUnmitigatedDamage() const
+    {
+        return m_unmitigated;
+    }
+    void SetUnmitigatedDamage(uint32 amount)
+    {
+        m_unmitigated = amount;
     }
 };
 
@@ -1013,7 +1023,7 @@ struct CalcDamageInfo
 {
     CalcDamageInfo() : attacker(NULL), target(NULL), damageSchoolMask(0), damage(0), absorb(0), resist(0), blocked_amount(0),
         HitInfo(0), TargetState(VictimState::VICTIMSTATE_MISS), attackType(WeaponAttackType::BASE_ATTACK), procAttacker(0),
-        procVictim(0), procEx(0), cleanDamage(0), hitOutCome(MeleeHitOutcome::MELEE_HIT_EVADE) { }
+        procVictim(0), procEx(0), cleanDamage(0), unmitigatedDamage(0), hitOutCome(MeleeHitOutcome::MELEE_HIT_EVADE) { }
 
     Unit* attacker;             // Attacker
     Unit* target;               // Target for damage
@@ -1030,6 +1040,7 @@ struct CalcDamageInfo
     uint32 procVictim;
     uint32 procEx;
     uint32 cleanDamage;          // Used only for rage calculation
+    uint32 unmitigatedDamage;    // Before armor, crit, block, absorb and resist
     MeleeHitOutcome hitOutCome;  /// @todo remove this field (need use TargetState)
 };
 
@@ -1038,7 +1049,7 @@ struct SpellNonMeleeDamage
 {
     SpellNonMeleeDamage(Unit* _attacker, Unit* _target, uint32 _SpellID, uint32 _schoolMask)
         : target(_target), attacker(_attacker), SpellID(_SpellID), damage(0), overkill(0), schoolMask(_schoolMask),
-        absorb(0), resist(0), physicalLog(false), unused(false), blocked(0), HitInfo(0), cleanDamage(0)
+        absorb(0), resist(0), physicalLog(false), unused(false), blocked(0), HitInfo(0), cleanDamage(0), unmitigated(0)
     { }
 
     Unit* target;
@@ -1055,6 +1066,7 @@ struct SpellNonMeleeDamage
     uint32 HitInfo;
     // Used for help
     uint32 cleanDamage;
+    uint32 unmitigated;     // Before armor, crit, block, absorb and resist
 };
 
 struct SpellPeriodicAuraLogInfo
@@ -1772,8 +1784,8 @@ public:
     void Kill(Unit* victim, bool durabilityLoss = true);
     int32 DealHeal(Unit* victim, uint32 addhealth);
 
-    void ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, WeaponAttackType attType = WeaponAttackType::BASE_ATTACK, SpellInfo const* procSpell = NULL, SpellInfo const* procAura = NULL, uint32 overheal = 0, Spell* spell = NULL, uint32 blocked = 0);
-    void ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, SpellInfo const* procAura = NULL, uint32 overheal = 0, Spell* spell = NULL, uint32 blocked = 0);
+    void ProcDamageAndSpell(Unit* victim, uint32 procAttacker, uint32 procVictim, uint32 procEx, uint32 amount, WeaponAttackType attType = WeaponAttackType::BASE_ATTACK, SpellInfo const* procSpell = NULL, SpellInfo const* procAura = NULL, uint32 overheal = 0, Spell* spell = NULL, uint32 blocked = 0, uint32 unmitigated = 0);
+    void ProcDamageAndSpellFor(bool isVictim, Unit* target, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, SpellInfo const* procSpell, uint32 damage, SpellInfo const* procAura = NULL, uint32 overheal = 0, Spell* spell = NULL, uint32 blocked = 0, uint32 unmitigated = 0);
 
     void GetProcAurasTriggeredOnEvent(AuraApplicationList& aurasTriggeringProc, AuraApplicationList* procAuras, ProcEventInfo eventInfo);
     void TriggerAurasProcOnEvent(CalcDamageInfo& damageInfo);

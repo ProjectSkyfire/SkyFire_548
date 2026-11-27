@@ -531,6 +531,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
     sScriptMgr->ModifyPeriodicDamageAurasTick(target, caster, damage);
 
+    uint32 unmitigated = 0;
     if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
     {
         damage = caster->SpellDamageBonusDone(target, GetSpellInfo(), damage, DOT, GetBase()->GetStackAmount());
@@ -567,11 +568,16 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
         }
     }
     else
+    {
         damage = uint32(target->CountPctFromMaxHealth(damage));
+    }
 
     int32 tickAmount = int32(damage);
     GetBase()->CallScriptEffectCalcTickAmountHandlers(this, GetBase()->GetApplicationOfTarget(target->GetGUID()), tickAmount);
     damage = uint32(std::max(tickAmount, 0));
+
+    // Vengeance counts the final tick before armor, crit and absorbs, after any tick scaling by scripts
+    unmitigated = damage + cleanDamage.mitigated_damage;
 
     bool crit = IsPeriodicTickCrit(target, caster);
     if (crit)
@@ -603,7 +609,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     SpellPeriodicAuraLogInfo pInfo(this, damage, overkill, absorb, resist, GetSpellInfo()->GetSchoolMask(), 0.0f, crit);
     target->SendPeriodicAuraLog(&pInfo);
 
-    caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, WeaponAttackType::BASE_ATTACK, GetSpellInfo());
+    caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, WeaponAttackType::BASE_ATTACK, GetSpellInfo(), NULL, 0, NULL, 0, unmitigated);
 
     caster->DealDamage(target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
 }

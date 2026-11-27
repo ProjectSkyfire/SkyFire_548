@@ -482,6 +482,8 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
 
     SpellSchoolMask damageSchoolMask = SpellSchoolMask(damageInfo->schoolMask);
 
+    damageInfo->unmitigated = damage;
+
     if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
         damage = CalcArmorReducedDamage(victim, damage, spellInfo, attackType);
 
@@ -658,6 +660,8 @@ void Unit::CalculateMeleeDamage(Unit* victim, uint32 damage, CalcDamageInfo* dam
 
     // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
     sScriptMgr->ModifyMeleeDamage(damageInfo->target, damageInfo->attacker, damage);
+
+    damageInfo->unmitigatedDamage = damage;
 
     // Calculate armor reduction
     if (IsDamageReducedByArmor((SpellSchoolMask)(damageInfo->damageSchoolMask)))
@@ -1441,7 +1445,7 @@ void Unit::AttackerStateUpdate(Unit* victim, WeaponAttackType attType, bool extr
         SendAttackStateUpdate(&damageInfo);
 
         //TriggerAurasProcOnEvent(damageInfo);
-        ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType, NULL, NULL, 0, NULL, damageInfo.blocked_amount);
+        ProcDamageAndSpell(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, damageInfo.procEx, damageInfo.damage, damageInfo.attackType, NULL, NULL, 0, NULL, damageInfo.blocked_amount, damageInfo.unmitigatedDamage);
 
         DealMeleeDamage(&damageInfo, true);
 

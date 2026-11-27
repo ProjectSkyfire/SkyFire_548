@@ -164,6 +164,7 @@ enum DruidSpells
     SPELL_DRUID_TOOTH_AND_CLAW_VISUAL       = 135601,
     SPELL_DRUID_THICK_HIDE                  = 16931,
     SPELL_DRUID_BEAR_FORM_PASSIVE           = 1178,
+    SPELL_DRUID_VENGEANCE                   = 132365,
     SPELL_DRUID_GLYPH_OF_FAE_SILENCE        = 114237,
     SPELL_DRUID_FAE_SILENCE                 = 114238,
     SPELL_DRUID_T15_GUARDIAN_4P_BONUS       = 138222,
@@ -1583,6 +1584,33 @@ public:
     AuraScript* GetAuraScript() const override
     {
         return new spell_dru_bear_form_AuraScript();
+    }
+};
+
+// 768 - Cat Form
+class spell_dru_cat_form_vengeance : public SpellScriptLoader
+{
+public:
+    spell_dru_cat_form_vengeance() : SpellScriptLoader("spell_dru_cat_form_vengeance") { }
+
+    class spell_dru_cat_form_vengeance_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_dru_cat_form_vengeance_AuraScript);
+
+        void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            GetTarget()->RemoveAurasDueToSpell(SPELL_DRUID_VENGEANCE);
+        }
+
+        void Register() OVERRIDE
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_dru_cat_form_vengeance_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_MOD_SHAPESHIFT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const OVERRIDE
+    {
+        return new spell_dru_cat_form_vengeance_AuraScript();
     }
 };
 
@@ -6988,6 +7016,7 @@ void AddSC_druid_spell_scripts()
     new spell_dru_tooth_and_claw_trigger();
     new spell_dru_berserk_bear();
     new spell_dru_bear_form();
+    new spell_dru_cat_form_vengeance();
     new spell_dru_bear_form_passive();
     new spell_dru_glyph_of_fae_silence_cooldown();
     new spell_dru_t15_guardian_4p_bonus();

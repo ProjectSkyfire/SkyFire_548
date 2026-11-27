@@ -679,6 +679,7 @@ protected:
         bool   crit : 1;
         bool   scaleAura : 1;
         int32  damage;
+        int32  unmitigated;                                 // Damage of a dodged or parried attack
     };
     std::list<TargetInfo> m_UniqueTargetInfo;
     uint8 m_channelTargetEffectMask;                        // Mask req. alive targets
