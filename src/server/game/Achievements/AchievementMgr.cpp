@@ -2900,6 +2900,10 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
     if (!list)
         return true;
 
+    // A tree lists several difficulties only as alternatives, so one of them has to match.
+    bool difficultyRequired = false;
+    bool difficultyMatched = false;
+
     for (ModifierTreeEntryList::const_iterator iter = list->begin(); iter != list->end(); ++iter)
     {
         ModifierTreeEntry const* tree = (*iter);
@@ -3041,6 +3045,11 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
                 if (!referencePlayer->GetGroup() || !referencePlayer->GetGroup()->IsGuildGroup(referencePlayer->GetGuildId(), referencePlayer))
                     return false;
                 break;
+            case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_DIFFICULTY_ID: // 68
+                difficultyRequired = true;
+                if (uint32(referencePlayer->GetMap()->GetDifficulty()) == reqValue)
+                    difficultyMatched = true;
+                break;
             case ACHIEVEMENT_CRITERIA_ADDITIONAL_CONDITION_BATTLE_PET_FAMILY: // 78
                 if (reqValue >= 32 || !(uint32(miscValue2) & (uint32(1) << reqValue)))
                     return false;
@@ -3073,7 +3082,7 @@ bool AchievementMgr<T>::AdditionalRequirementsSatisfied(CriteriaEntry const* cri
                 break;
         }
     }
-    return true;
+    return !difficultyRequired || difficultyMatched;
 }
 
 char const* AchievementGlobalMgr::GetCriteriaTypeString(uint32 type)
@@ -3331,6 +3340,21 @@ template class AchievementMgr<Guild>;
 template class AchievementMgr<Player>;
 
 //==========================================================
+// Criteria.dbc numbers the timer start events differently from AchievementCriteriaTimedTypes, which is what
+// the spell hooks and the scripts start timers with, so these timed criteria never found their timer.
+static AchievementCriteriaTimedTypes GetTimedType(uint32 startEvent)
+{
+    switch (startEvent)
+    {
+        case 8:
+            return ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET;
+        case 13:
+            return ACHIEVEMENT_TIMED_TYPE_EVENT;
+        default:
+            return AchievementCriteriaTimedTypes(startEvent);
+    }
+}
+
 void AchievementGlobalMgr::LoadAchievementCriteriaList()
 {
     uint32 oldMSTime = getMSTime();
@@ -3382,7 +3406,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
         m_AchievementCriteriasByType[criteria->type].push_back(criteria);
 
         if (criteria->timeLimit)
-            m_AchievementCriteriasByTimedType[criteria->timedCriteriaStartType].push_back(criteria);
+            m_AchievementCriteriasByTimedType[GetTimedType(criteria->timedCriteriaStartType)].push_back(criteria);
     }
 
     SF_LOG_INFO("server.loading", ">> Loaded %u achievement criteria in %u ms", ++criterias, GetMSTimeDiffToNow(oldMSTime));
