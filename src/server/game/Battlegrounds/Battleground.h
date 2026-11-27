@@ -416,6 +416,8 @@ public:
     virtual void FillInitialWorldStates(WorldStateBuilder& /*builder*/) { }
     void SendPacketToTeam(uint32 TeamID, WorldPacket* packet, Player* sender = NULL, bool self = true);
     void SendPacketToAll(WorldPacket* packet);
+    void BuildFlagsPositionsPacket(WorldPacket* data);
+    void SendFlagsPositions();
     void YellToAll(Creature* creature, const char* text, Language language);
 
     template<class Do>
@@ -536,6 +538,12 @@ public:
     bool CanAwardArenaPoints() const { return m_LevelMin >= BG_AWARD_ARENA_POINTS_MIN_LEVEL; }
 
     virtual uint64 GetFlagPickerGUID(int32 /*team*/ = -1) const { return 0; }
+    virtual void GetFlagCarriers(std::list<uint64>& carriers) const
+    {
+        for (int32 team = TEAM_ALLIANCE; team <= TEAM_HORDE; ++team)
+            if (uint64 guid = GetFlagPickerGUID(team))
+                carriers.push_back(guid);
+    }
     virtual void SetDroppedFlagGUID(uint64 /*guid*/, int32 /*team*/ = -1) { }
     virtual void HandleQuestComplete(uint32 /*questid*/, Player* /*player*/) { }
     virtual bool CanActivateGO(int32 /*entry*/, uint32 /*team*/) const { return true; }
@@ -604,6 +612,8 @@ private:
     uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
     int32  m_StartDelayTime;
     bool   m_IsRated;                                   // is this battle rated?
+    uint32 m_FlagsPositionsTimer = 0;
+    bool m_FlagsPositionsSent = false;
     bool   m_PrematureCountDown;
     uint32 m_PrematureCountDownTimer;
     char const* m_Name;

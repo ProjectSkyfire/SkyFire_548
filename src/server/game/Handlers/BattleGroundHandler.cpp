@@ -254,86 +254,8 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
     if (!bg)                                                 // can't be received if player not in battleground
         return;
 
-    uint32 acount = 0;
-    uint32 hcount = 0;
-    Player* aplr = NULL;
-    Player* hplr = NULL;
-
-    if (uint64 guid = bg->GetFlagPickerGUID(TEAM_ALLIANCE))
-    {
-        aplr = ObjectAccessor::FindPlayer(guid);
-        if (aplr)
-            ++acount;
-    }
-
-    if (uint64 guid = bg->GetFlagPickerGUID(TEAM_HORDE))
-    {
-        hplr = ObjectAccessor::FindPlayer(guid);
-        if (hplr)
-            ++hcount;
-    }
-
-    ObjectGuid aguid = aplr ? aplr->GetGUID() : 0;
-    ObjectGuid hguid = hplr ? hplr->GetGUID() : 0;
-
-    WorldPacket data(SMSG_BATTLEFIELD_PLAYER_POSITIONS);
-
-    data.WriteBits(acount, 22);
-    for (uint8 i = 0; i < acount; i++)
-    {
-        data.WriteBit(aguid[3]);
-        data.WriteBit(aguid[5]);
-        data.WriteBit(aguid[1]);
-        data.WriteBit(aguid[6]);
-        data.WriteBit(aguid[7]);
-        data.WriteBit(aguid[0]);
-        data.WriteBit(aguid[2]);
-        data.WriteBit(aguid[4]);
-    }
-
-    data.WriteBits(hcount, 22);
-    for (uint8 i = 0; i < hcount; i++)
-    {
-        data.WriteBit(hguid[6]);
-        data.WriteBit(hguid[5]);
-        data.WriteBit(hguid[4]);
-        data.WriteBit(hguid[7]);
-        data.WriteBit(hguid[2]);
-        data.WriteBit(hguid[1]);
-        data.WriteBit(hguid[0]);
-        data.WriteBit(hguid[3]);
-    }
-
-    data.FlushBits();
-
-    for (uint8 i = 0; i < hcount; i++)
-    {
-        data.WriteByteSeq(hguid[2]);
-        data.WriteByteSeq(hguid[1]);
-        data << float(hplr->GetPositionY());
-        data.WriteByteSeq(hguid[5]);
-        data.WriteByteSeq(hguid[4]);
-        data.WriteByteSeq(hguid[7]);
-        data.WriteByteSeq(hguid[0]);
-        data.WriteByteSeq(hguid[6]);
-        data.WriteByteSeq(hguid[3]);
-        data << float(hplr->GetPositionX());
-    }
-
-    for (uint8 i = 0; i < acount; i++)
-    {
-        data.WriteByteSeq(aguid[6]);
-        data << float(aplr->GetPositionX());
-        data.WriteByteSeq(aguid[5]);
-        data.WriteByteSeq(aguid[3]);
-        data << float(aplr->GetPositionY());
-        data.WriteByteSeq(aguid[1]);
-        data.WriteByteSeq(aguid[7]);
-        data.WriteByteSeq(aguid[0]);
-        data.WriteByteSeq(aguid[2]);
-        data.WriteByteSeq(aguid[4]);
-    }
-
+    WorldPacket data;
+    bg->BuildFlagsPositionsPacket(&data);
     SendPacket(&data);
 }
 

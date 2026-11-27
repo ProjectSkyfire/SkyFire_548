@@ -13,8 +13,9 @@ enum BG_WS_TimerOrScore
     BG_WS_MAX_TEAM_SCORE = 3,
     BG_WS_FLAG_RESPAWN_TIME = 23000,
     BG_WS_FLAG_DROP_TIME = 10000,
-    BG_WS_SPELL_FORCE_TIME = 600000,
-    BG_WS_SPELL_BRUTAL_TIME = 900000
+    BG_WS_SPELL_FORCE_TIME = 60000,
+    BG_WS_SPELL_BRUTAL_STACKS = 5,
+    BG_WS_SPELL_MAX_STACKS = 10
 };
 
 enum BG_WS_Sound
@@ -217,7 +218,7 @@ private:
     uint32 m_HonorEndKills;
     int32 _flagSpellForceTimer;
     bool _bothFlagsKept;
-    uint8 _flagDebuffState;                            // 0 - no debuffs, 1 - focused assault, 2 - brutal assault
+    uint8 _flagDebuffState;                            // carrier debuff stacks: 1 to 4 focused assault, 5 and more brutal assault
     uint8 _minutesElapsed;
 
     void PostUpdateImpl(uint32 diff) OVERRIDE;

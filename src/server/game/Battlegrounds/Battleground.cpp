@@ -227,6 +227,15 @@ void Battleground::Update(uint32 diff)
             }
             else
             {
+                // The client no longer asks for the positions of the carriers
+                if (m_FlagsPositionsTimer <= diff)
+                {
+                    SendFlagsPositions();
+                    m_FlagsPositionsTimer = uint32(PLAYER_POSITION_UPDATE_INTERVAL) * IN_MILLISECONDS;
+                }
+                else
+                    m_FlagsPositionsTimer -= diff;
+
                 _ProcessRessurect(diff);
                 if (!sBattlegroundMgr->isTesting() && sBattlegroundMgr->GetPrematureFinishTime() && (GetPlayersCountByTeam(ALLIANCE) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(HORDE) < GetMinPlayersPerTeam()))
                     _ProcessProgress(diff);
@@ -699,6 +708,67 @@ void Battleground::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
         for (BattlegroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             if (Player* player = _GetPlayerForTeam(TeamID, itr, "RewardReputationToTeam"))
                 player->GetReputationMgr().ModifyReputation(factionEntry, Reputation);
+}
+
+void Battleground::BuildFlagsPositionsPacket(WorldPacket* data)
+{
+    std::list<uint64> guids;
+    GetFlagCarriers(guids);
+
+    std::list<Player*> carriers;
+    for (std::list<uint64>::const_iterator itr = guids.begin(); itr != guids.end(); ++itr)
+        if (Player* player = ObjectAccessor::FindPlayer(*itr))
+            carriers.push_back(player);
+
+    ByteBuffer buffer;
+    data->Initialize(SMSG_BATTLEFIELD_PLAYER_POSITIONS);
+    data->WriteBits(carriers.size(), 20);
+
+    for (std::list<Player*>::const_iterator itr = carriers.begin(); itr != carriers.end(); ++itr)
+    {
+        Player* player = *itr;
+        ObjectGuid guid = player->GetGUID();
+        bool alliance = player->GetBGTeam() == ALLIANCE;
+
+        data->WriteBit(guid[1]);
+        data->WriteBit(guid[5]);
+        data->WriteBit(guid[0]);
+        data->WriteBit(guid[4]);
+        data->WriteBit(guid[6]);
+        data->WriteBit(guid[3]);
+        data->WriteBit(guid[7]);
+        data->WriteBit(guid[2]);
+
+        buffer.WriteByteSeq(guid[0]);
+        buffer.WriteByteSeq(guid[3]);
+        buffer.WriteByteSeq(guid[7]);
+        buffer << uint8(alliance ? 1 : 2);                  // team
+        buffer << float(player->GetPositionY());
+        buffer.WriteByteSeq(guid[4]);
+        buffer.WriteByteSeq(guid[2]);
+        buffer.WriteByteSeq(guid[1]);
+        buffer.WriteByteSeq(guid[5]);
+        buffer << float(player->GetPositionX());
+        buffer << uint8(alliance ? 3 : 2);                  // icon
+        buffer.WriteByteSeq(guid[6]);
+    }
+
+    data->FlushBits();
+    if (buffer.size())
+        data->append(buffer);
+}
+
+void Battleground::SendFlagsPositions()
+{
+    // An empty list is sent once when the last carrier is gone, to clear the map
+    WorldPacket data;
+    BuildFlagsPositionsPacket(&data);
+    bool any = data.size() > 3;
+    if (!any && !m_FlagsPositionsSent)
+        return;
+
+    m_FlagsPositionsSent = any;
+    SendPacketToAll(&data);
 }
 
 void Battleground::UpdateWorldState(uint32 Field, uint32 Value)
