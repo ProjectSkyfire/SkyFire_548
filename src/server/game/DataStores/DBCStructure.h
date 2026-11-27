@@ -2535,8 +2535,8 @@ struct SpellShapeshiftEntry
 struct SpellTargetRestrictionsEntry
 {
     //uint32    Id;                                           // 0        m_ID
-    //uint32  spellId;                                      // 1  - Pandaria
-    //uint32  unk0;                                         // 2  - Pandaria always after spellId
+    uint32    SpellId;                                      // 1  - Pandaria
+    uint32    Difficulty;                                   // 2  - Pandaria, 0 = all difficulties
     //float  unk0;                                          // 3
     //uint32  unk0;                                         // 4  - Pandaria always  after spellId
     uint32    MaxAffectedTargets;                           // 5        m_maxTargets
@@ -2610,6 +2610,7 @@ typedef UNORDERED_MAP<uint32, std::list<SkillLineAbilityEntry const*> > SpellsPe
 typedef UNORDERED_MAP<uint32, uint32> ClassBySkillIdStore;
 typedef UNORDERED_MAP<uint32, uint32> SpellEffectScallingByEffectId;
 
+// Row of the spelldifficulty_dbc table, the client has no SpellDifficulty.dbc since 4.x
 struct SpellDifficultyEntry
 {
     uint32     ID;                                          // 0

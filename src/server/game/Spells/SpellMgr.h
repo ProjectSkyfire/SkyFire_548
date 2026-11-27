@@ -546,7 +546,7 @@ typedef std::pair<SkillLineAbilityMap::const_iterator, SkillLineAbilityMap::cons
 typedef std::multimap<uint32, uint32> PetLevelupSpellSet;
 typedef std::map<uint32, PetLevelupSpellSet> PetLevelupSpellMap;
 
-typedef std::map<uint32, uint32> SpellDifficultySearcherMap;
+typedef std::map<uint32, SpellDifficultyEntry> SpellDifficultyMap;
 
 struct PetDefaultSpellsEntry
 {
@@ -560,6 +560,8 @@ typedef std::vector<uint32> SpellCustomAttribute;
 typedef std::vector<bool> EnchantCustomAttribute;
 
 typedef std::vector<SpellInfo*> SpellInfoMap;
+// Spell infos with effect rows of their own for a difficulty, by spell id and difficulty
+typedef std::map<std::pair<uint32, uint32>, SpellInfo const*> SpellInfoDifficultyMap;
 
 typedef std::map<int32, std::vector<int32> > SpellLinkedMap;
 
@@ -600,10 +602,9 @@ public:
     static bool IsSpellValid(SpellInfo const* spellInfo, Player* player = NULL, bool msg = true);
 
     // Spell difficulty
-    uint32 GetSpellDifficultyId(uint32 spellId) const;
-    void SetSpellDifficultyId(uint32 spellId, uint32 id);
     uint32 GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const;
     SpellInfo const* GetSpellForDifficultyFromSpell(SpellInfo const* spell, Unit const* caster) const;
+    SpellInfo const* GetSpellInfoWithEffect(uint32 spellId, uint8 effIndex) const;
 
     // Spell Ranks table
     SpellChainNode const* GetSpellChainNode(uint32 spell_id) const;
@@ -680,6 +681,9 @@ public:
 
 private:
     SpellInfo* _GetSpellInfo(uint32 spellId) { return spellId < GetSpellInfoStoreSize() ? mSpellInfoMap[spellId] : NULL; }
+    // Spell infos of the store followed by the ones of the difficulties, for the loaders that adjust all of them
+    uint32 _GetSpellInfoCount() const { return mSpellInfoMap.size() + mSpellInfoDifficulties.size(); }
+    SpellInfo* _GetSpellInfoAt(uint32 index) { return index < GetSpellInfoStoreSize() ? mSpellInfoMap[index] : mSpellInfoDifficulties[index - GetSpellInfoStoreSize()]; }
 
     // Modifiers
 public:
@@ -705,14 +709,16 @@ public:
     void LoadPetLevelupSpellMap();
     void LoadPetDefaultSpells();
     void LoadSpellAreas();
+    void LoadSpellDifficulties();
     void LoadSpellInfoStore();
     void UnloadSpellInfoStore();
     void UnloadSpellInfoImplicitTargetConditionLists();
+    void UpdateSpellInfoDifficultyConditions();
     void LoadSpellInfoCustomAttributes();
     void LoadSpellInfoCorrections();
 
 private:
-    SpellDifficultySearcherMap mSpellDifficultySearcherMap;
+    SpellDifficultyMap         mSpellDifficultyMap;
     SpellChainMap              mSpellChains;
     SpellsRequiringSpellMap    mSpellsReqSpell;
     SpellRequiredMap           mSpellReq;
@@ -739,6 +745,8 @@ private:
     PetLevelupSpellMap         mPetLevelupSpellMap;
     PetDefaultSpellsMap        mPetDefaultSpellsMap;           // only spells not listed in related mPetLevelupSpellMap entry
     SpellInfoMap               mSpellInfoMap;
+    SpellInfoMap               mSpellInfoDifficulties;
+    SpellInfoDifficultyMap     mSpellInfoDifficultyMap;
 };
 
 #define sSpellMgr Skyfire::Singleton<SpellMgr, Skyfire::NullMutex>::instance()

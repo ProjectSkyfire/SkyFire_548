@@ -278,7 +278,7 @@ public:
     SpellShapeshiftEntry const* GetSpellShapeshift() const;
     SpellTotemsEntry const* GetSpellTotems() const;
 
-    SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effects);
+    SpellInfo(SpellEntry const* spellEntry, SpellEffectEntry const** effects, uint32 targetRestrictionsId = 0);
     ~SpellInfo();
 
     uint32 GetCategory() const;
