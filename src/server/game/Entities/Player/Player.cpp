@@ -691,6 +691,9 @@ Player::Player(WorldSession* session) : Unit(true)
     for (uint8 i = 0; i < MAX_COMBAT_RATING; i++)
         m_baseRatingValue[i] = 0;
 
+    for (uint8 i = 0; i < 3; i++)
+        m_appliedHastePct[i] = 0.0f;
+
     m_baseSpellPower = 0;
     m_baseManaRegen = 0;
     m_baseHealthRegen = 0;
@@ -6181,34 +6184,46 @@ float Player::OCTRegenMPPerSpirit()
 void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
 {
     m_baseRatingValue[uint8(cr)] += (apply ? value : -value);
+    UpdateRating(cr);
+}
 
-    // explicit affected values
+float Player::GetRatingPctMultiplier(CombatRating cr) const
+{
+    return 1.0f + GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_RATING_PCT, 1 << uint8(cr)) / 100.0f;
+}
+
+// The attack and cast time mods are multiplicative, so the percent applied last is stored and removed again with
+// the same value before the new one is applied. Adding and removing the changes of the rating would not cancel.
+void Player::UpdateHasteFromRating(CombatRating cr, int32 rating)
+{
+    float& applied = m_appliedHastePct[uint8(cr) - uint8(CombatRating::CR_HASTE_MELEE)];
+    float const pct = rating * GetRatingMultiplier(cr);
+    if (pct == applied)
+        return;
+
     switch (cr)
     {
         case CombatRating::CR_HASTE_MELEE:
-        {
-            float RatingChange = value * GetRatingMultiplier(cr);
-            ApplyAttackTimePercentMod(WeaponAttackType::BASE_ATTACK, RatingChange, apply);
-            ApplyAttackTimePercentMod(WeaponAttackType::OFF_ATTACK, RatingChange, apply);
+            ApplyAttackTimePercentMod(WeaponAttackType::BASE_ATTACK, applied, false);
+            ApplyAttackTimePercentMod(WeaponAttackType::OFF_ATTACK, applied, false);
+            ApplyAttackTimePercentMod(WeaponAttackType::BASE_ATTACK, pct, true);
+            ApplyAttackTimePercentMod(WeaponAttackType::OFF_ATTACK, pct, true);
             if (getClass() == CLASS_DEATH_KNIGHT)
                 UpdateAllRunesRegen();
             break;
-        }
         case CombatRating::CR_HASTE_RANGED:
-        {
-            ApplyAttackTimePercentMod(WeaponAttackType::RANGED_ATTACK, value * GetRatingMultiplier(cr), apply);
+            ApplyAttackTimePercentMod(WeaponAttackType::RANGED_ATTACK, applied, false);
+            ApplyAttackTimePercentMod(WeaponAttackType::RANGED_ATTACK, pct, true);
             break;
-        }
         case CombatRating::CR_HASTE_SPELL:
-        {
-            ApplyCastTimePercentMod(value * GetRatingMultiplier(cr), apply);
+            ApplyCastTimePercentMod(applied, false);
+            ApplyCastTimePercentMod(pct, true);
             break;
-        }
         default:
-            break;
+            return;
     }
 
-    UpdateRating(cr);
+    applied = pct;
 }
 
 void Player::UpdateRating(CombatRating cr)
@@ -6222,6 +6237,7 @@ void Player::UpdateRating(CombatRating cr)
             amount += int32(CalculatePct(GetStat(Stats((*i)->GetMiscValueB())), (*i)->GetAmount()));
     if (amount < 0)
         amount = 0;
+    amount *= GetRatingPctMultiplier(cr);
     SetUInt32Value(PLAYER_FIELD_COMBAT_RATINGS + uint8(cr), uint32(amount));
 
     bool affectStats = CanModifyStats();
@@ -6271,9 +6287,10 @@ void Player::UpdateRating(CombatRating cr)
         case CombatRating::CR_RESILIENCE_CRIT_TAKEN:
         case CombatRating::CR_CRIT_TAKEN_SPELL:                           // Deprecated since Cataclysm
             break;
-        case CombatRating::CR_HASTE_MELEE:                                // Implemented in Player::ApplyRatingMod
+        case CombatRating::CR_HASTE_MELEE:
         case CombatRating::CR_HASTE_RANGED:
         case CombatRating::CR_HASTE_SPELL:
+            UpdateHasteFromRating(cr, amount);
             break;
         case CombatRating::CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
         case CombatRating::CR_WEAPON_SKILL_OFFHAND:

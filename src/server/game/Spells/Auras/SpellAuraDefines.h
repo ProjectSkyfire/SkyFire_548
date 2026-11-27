@@ -450,7 +450,7 @@ enum AuraType
     SPELL_AURA_402 = 402,
     SPELL_AURA_403 = 403,
     SPELL_AURA_OVERRIDE_AP_BY_SPELL_POWER_PCT = 404,  // Sets attack power equal to % of spellpower
-    SPELL_AURA_405 = 405,
+    SPELL_AURA_MOD_RATING_PCT = 405,                        // Percent of the combat rating the player has, misc is the rating mask
     SPELL_AURA_406 = 406,
     SPELL_AURA_MOD_FEAR_2 = 407,
     SPELL_AURA_408 = 408,
