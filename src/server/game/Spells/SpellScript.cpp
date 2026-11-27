@@ -211,9 +211,6 @@ bool SpellScript::TargetHook::CheckEffect(SpellInfo const* spellEntry, uint8 eff
         return false;
 
     SpellImplicitTargetInfo targetInfo(targetType);
-    if (dest)
-        return targetInfo.GetSelectionCategory() == TARGET_SELECT_CATEGORY_DEFAULT && targetInfo.GetObjectType() == TARGET_OBJECT_TYPE_DEST;
-
     switch (targetInfo.GetSelectionCategory())
     {
         case TARGET_SELECT_CATEGORY_CHANNEL: // SINGLE
@@ -227,8 +224,9 @@ bool SpellScript::TargetHook::CheckEffect(SpellInfo const* spellEntry, uint8 eff
             switch (targetInfo.GetObjectType())
             {
                 case TARGET_OBJECT_TYPE_SRC: // EMPTY
-                case TARGET_OBJECT_TYPE_DEST: // EMPTY
                     return false;
+                case TARGET_OBJECT_TYPE_DEST: // DEST
+                    return dest;
                 default:
                     switch (targetInfo.GetReferenceType())
                     {
