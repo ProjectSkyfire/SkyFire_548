@@ -87,7 +87,15 @@ void DB2Utilities::WriteItemSparseDbReply(DB2Storage<ItemSparseEntry> const& /*s
     buffer << float(proto->RangedModRange);
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-        buffer << int32(proto->Spells[x].SpellId);
+    {
+        // The native horn spell is area-restricted; its internal summon is hidden.
+        // Advertise the visible, self-targeted Dragon's Call for item activation.
+        // CastItemUseSpell retains 90079 and its active-quest/zone validation.
+        int32 spell = proto->Spells[x].SpellId;
+        if (id == 63681 && x == 0 && spell == 90079)
+            spell = 13049;
+        buffer << spell;
+    }
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
         buffer << uint32(proto->Spells[x].SpellTrigger);
@@ -96,7 +104,9 @@ void DB2Utilities::WriteItemSparseDbReply(DB2Storage<ItemSparseEntry> const& /*s
         buffer << int32(proto->Spells[x].SpellCharges);
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
-        buffer << int32(proto->Spells[x].SpellCooldown);
+        // Preserve the horn's native zero cooldown instead of the proxy's default.
+        buffer << int32(id == 63681 && x == 0 && proto->Spells[x].SpellId == 90079
+            ? 0 : proto->Spells[x].SpellCooldown);
 
     for (uint32 x = 0; x < MAX_ITEM_PROTO_SPELLS; ++x)
         buffer << uint32(proto->Spells[x].SpellCategory);

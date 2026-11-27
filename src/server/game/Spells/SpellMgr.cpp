@@ -2954,6 +2954,10 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         switch (spellInfo->Id)
         {
+            case 90079: // Call of the Red Dragonflight: also called by the camp quest giver.
+                // The quest script enforces Burning Steppes and an active assault quest.
+                spellInfo->AreaGroupId = 0;
+                break;
             case 105156: // See Quest Invis 13 // Red Flame
             case 105157: // See Quest Invis 14 // Blue Flame
             case 105158: // See Quest Invis 15 // Violet Flame
