@@ -364,7 +364,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION todo
     &AuraEffect::HandleNoImmediateEffect,                         //315 SPELL_AURA_UNDERWATER_WALKING todo
     &AuraEffect::HandleUnused,                                    //316 unused (4.3.4) old SPELL_AURA_PERIODIC_HASTE
-    &AuraEffect::HandleNULL,                                      //317 SPELL_AURA_MOD_SPELL_POWER_PCT
+    &AuraEffect::HandleModSpellDamagePercentFromStat,             //317 SPELL_AURA_MOD_SPELL_POWER_PCT implemented in Unit::SpellBaseDamageBonusDone, Unit::SpellBaseHealingBonusDone
     &AuraEffect::HandleAuraMastery,                               //318 SPELL_AURA_MASTERY
     &AuraEffect::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_HASTE_3
     &AuraEffect::HandleAuraModRangedHaste,                        //320 SPELL_AURA_MOD_RANGED_HASTE_2
@@ -428,7 +428,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNULL,                                      //376 SPELL_AURA_376
     &AuraEffect::HandleNULL,                                      //377 SPELL_AURA_377
     &AuraEffect::HandleUnused,                                    //378 unused (5.4.2)
-    &AuraEffect::HandleNULL,                                      //379 SPELL_AURA_379
+    &AuraEffect::HandleAuraModRegenInterrupt,                     //379 SPELL_AURA_MOD_MANA_REGEN_PERCENT implemented in Player::UpdateManaRegen
     &AuraEffect::HandleUnused,                                    //380 unused (5.4.2)
     &AuraEffect::HandleNULL,                                      //381 SPELL_AURA_381 (used in spell 21741) (5.4.2)
     &AuraEffect::HandleNULL,                                      //382 SPELL_AURA_382
@@ -461,7 +461,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleNULL,                                      //409 SPELL_AURA_409
     &AuraEffect::HandleNULL,                                      //410 SPELL_AURA_410 (used in spell 57902) (5.4.2)
     &AuraEffect::HandleNoImmediateEffect,                         //411 SPELL_AURA_MOD_CHARGES implemented in Player spell charges
-    &AuraEffect::HandleNULL,                                      //412 SPELL_AURA_412 (used in spell 111546 & 117957) (5.4.2)
+    &AuraEffect::HandleAuraModRegenInterrupt,                     //412 SPELL_AURA_MOD_MANA_REGEN_BY_HASTE (used in spell 111546 & 117957) implemented in Player::UpdateManaRegen
     &AuraEffect::HandleNULL,                                      //413 SPELL_AURA_413
     &AuraEffect::HandleNULL,                                      //414 SPELL_AURA_414
     &AuraEffect::HandleNULL,                                      //415 SPELL_AURA_415 (used in spell 123316) (5.4.2)

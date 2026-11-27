@@ -1691,7 +1691,7 @@ class spell_monk_diffuse_magic : public SpellScriptLoader
                                 // need to check auraEffect pointer here !!
                                 if (auraEffect->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE ||
                                     auraEffect->GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
-                                    damage = caster->SpellDamageBonusDone(_player, aura->GetSpellInfo(), damage, DOT, auraEffect->GetBase()->GetStackAmount());
+                                    damage = caster->SpellDamageBonusDone(_player, aura->GetSpellInfo(), i, damage, DOT, auraEffect->GetBase()->GetStackAmount());
 
                                 targetAura->GetEffect(i)->SetAmount(damage);
                             }

@@ -2779,7 +2779,7 @@ static void CastInstantDotTicks(Unit* caster, Unit* target, int32 damagePct)
         if (!spellId)
             continue;
 
-        int32 tick = int32(caster->SpellDamageBonusDone(target, dot->GetSpellInfo(), uint32(std::max(dot->GetAmount(), 0)), DOT, dot->GetBase()->GetStackAmount()));
+        int32 tick = int32(caster->SpellDamageBonusDone(target, dot->GetSpellInfo(), dot->GetEffIndex(), uint32(std::max(dot->GetAmount(), 0)), DOT, dot->GetBase()->GetStackAmount()));
         toCast.push_back(std::make_pair(spellId, tick));
     }
 

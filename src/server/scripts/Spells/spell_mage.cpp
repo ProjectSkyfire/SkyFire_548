@@ -2381,8 +2381,8 @@ public:
             if (caster->HasAura(SPELL_MAGE_GLYPH_OF_EVOCATION))
             {
                 uint32 healthGain = caster->CountPctFromMaxHealth(10);
-                healthGain = caster->SpellHealingBonusDone(caster, GetSpellInfo(), healthGain, HEAL);
-                healthGain = caster->SpellHealingBonusTaken(caster, GetSpellInfo(), healthGain, HEAL);
+                healthGain = caster->SpellHealingBonusDone(caster, GetSpellInfo(), EFFECT_0, healthGain, HEAL);
+                healthGain = caster->SpellHealingBonusTaken(caster, GetSpellInfo(), EFFECT_0, healthGain, HEAL);
                 caster->HealBySpell(caster, GetSpellInfo(), healthGain, false);
             }
         }
