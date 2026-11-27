@@ -915,30 +915,20 @@ public:
             return true;
         }
 
-        bool Load() override
+        // The aura is applied while the cast launches, before the ring is summoned, so the ring is looked up
+        // on every tick and never kept
+        TempSummon* GetRingOfFrost()
         {
-            ringOfFrost = NULL;
-            return true;
-        }
-
-        void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
-        {
-            if (ringOfFrost)
-                if (GetMaxDuration() - (int32)ringOfFrost->GetTimer() >= sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_DUMMY)->GetDuration())
-                    GetTarget()->CastSpell(ringOfFrost->GetPositionX(), ringOfFrost->GetPositionY(), ringOfFrost->GetPositionZ(), SPELL_MAGE_RING_OF_FROST_FREEZE, true);
-        }
-
-        void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-        {
-            std::list<Creature*> MinionList;
-            // MoP summon creature entry is on the cast spell (113724) EFFECT_0, not this aura.
             SpellInfo const* summonInfo = sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_SUMMON);
             if (!summonInfo)
-                return;
+                return NULL;
 
+            std::list<Creature*> MinionList;
+            // MoP summon creature entry is on the cast spell (113724) EFFECT_0, not this aura.
             GetTarget()->GetAllMinionsByEntry(MinionList, summonInfo->Effects[EFFECT_0].MiscValue);
 
-            // Get the last summoned RoF, save it and despawn older ones
+            // Get the last summoned RoF and despawn older ones
+            TempSummon* ringOfFrost = NULL;
             for (std::list<Creature*>::iterator itr = MinionList.begin(); itr != MinionList.end(); ++itr)
             {
                 TempSummon* summon = (*itr)->ToTempSummon();
@@ -956,14 +946,20 @@ public:
                 else if (summon)
                     ringOfFrost = summon;
             }
+
+            return ringOfFrost;
         }
 
-        TempSummon* ringOfFrost;
+        void HandleEffectPeriodic(AuraEffect const* /*aurEff*/)
+        {
+            if (TempSummon* ringOfFrost = GetRingOfFrost())
+                if (GetMaxDuration() - (int32)ringOfFrost->GetTimer() >= sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_DUMMY)->GetDuration())
+                    GetTarget()->CastSpell(ringOfFrost->GetPositionX(), ringOfFrost->GetPositionY(), ringOfFrost->GetPositionZ(), SPELL_MAGE_RING_OF_FROST_FREEZE, true);
+        }
 
         void Register() override
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_mage_ring_of_frost_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-            OnEffectApply += AuraEffectApplyFn(spell_mage_ring_of_frost_AuraScript::Apply, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
         }
     };
 
