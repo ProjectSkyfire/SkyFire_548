@@ -93,6 +93,13 @@ public:
 
         void IsSummonedBy(Unit* unit) OVERRIDE
         {
+            if (Player* player = unit->ToPlayer())
+            {
+                // StartFollow clears NPC flags, but she must still offer and reward quests.
+                uint32 npcFlags = me->GetUInt32Value(UNIT_FIELD_NPC_FLAGS);
+                StartFollow(player);
+                me->SetUInt32Value(UNIT_FIELD_NPC_FLAGS, npcFlags);
+            }
             me->MonsterSay(TARINDRELLA_TEXT_SPAWN, Language::LANG_UNIVERSAL, unit);
         }
 
@@ -107,6 +114,7 @@ public:
 
         void Reset() OVERRIDE
         {
+            events.Reset();
             events.ScheduleEvent(EVENT_ENTANGLING_ROOTS, 2000);
             events.ScheduleEvent(EVENT_SUMMON_NATURES_BITE, 6000);
             events.ScheduleEvent(EVENT_CLEANSE_SPIRIT, 10000);
@@ -131,14 +139,15 @@ public:
                     }
                     case EVENT_CLEANSE_SPIRIT:
                     {
+                        Unit* owner = me->GetOwner();
                         if (me->HasAura(6751) || me->HasAura(11918))
                         {
                             DoCast(me, SPELL_CLEANSE_SPIRIT);
                             events.ScheduleEvent(EVENT_CLEANSE_SPIRIT, 10000);
                         }
-                        else if (me->GetOwner()->HasAura(6751) || me->GetOwner()->HasAura(11918))
+                        else if (owner && (owner->HasAura(6751) || owner->HasAura(11918)))
                         {
-                            DoCast(me->GetOwner(), SPELL_CLEANSE_SPIRIT);
+                            DoCast(owner, SPELL_CLEANSE_SPIRIT);
                             events.ScheduleEvent(EVENT_CLEANSE_SPIRIT, 10000);
                         }
                         else
