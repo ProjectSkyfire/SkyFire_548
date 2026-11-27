@@ -3516,11 +3516,11 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
                 {
                     case SPELLFAMILY_WARRIOR:
                     {
-                        // bloodthirst double crit chance
+                        // Bloodthirst: double crit chance; the base chance is added once more after the switch
                         if (spellProto->SpellFamilyFlags[1] & 0x00000400
                             && spellProto->SpellIconID == 38)
                         {
-                            crit_chance += (GetUnitCriticalChance(attackType, victim) * 2.0f);
+                            crit_chance += GetUnitCriticalChance(attackType, victim);
                             break;
                         }
                         break;
@@ -3589,39 +3589,21 @@ bool Unit::isSpellCrit(Unit* victim, SpellInfo const* spellProto, SpellSchoolMas
 
 uint32 Unit::SpellCriticalDamageBonus(SpellInfo const* spellProto, uint32 damage, Unit* /*victim*/)
 {
-    // Calculate critical bonus
+    // Since 5.0 every spell and ability crits for double damage, magic included.
     int32 crit_bonus = damage;
-    float crit_mod = 0.0f;
 
-    switch (spellProto->DmgClass)
-    {
-        case SPELL_DAMAGE_CLASS_MELEE:                      // for melee based spells is 100%
-        case SPELL_DAMAGE_CLASS_RANGED:
-            /// @todo write here full calculation for melee/ranged spells
-            crit_bonus += damage;
-            break;
-        default:
-            crit_bonus += damage / 2;                       // for spells is 50%
-            break;
-    }
+    // Talent modifiers such as Elemental Fury scale only the bonus part.
+    if (Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
 
-    crit_mod += (GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, spellProto->GetSchoolMask()) - 1.0f) * 100;
+    crit_bonus += damage;
+
+    float crit_mod = (GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, spellProto->GetSchoolMask()) - 1.0f) * 100;
 
     if (crit_bonus != 0)
         AddPct(crit_bonus, crit_mod);
 
-    crit_bonus -= damage;
-
-    if (damage > uint32(crit_bonus))
-    {
-        // adds additional damage to critBonus (from talents)
-        if (Player* modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
-    }
-
-    crit_bonus += damage;
-
-    return crit_bonus;
+    return uint32(std::max(crit_bonus, 0));
 }
 
 uint32 Unit::SpellCriticalHealingBonus(SpellInfo const* /*spellProto*/, uint32 damage, Unit* /*victim*/)
