@@ -264,7 +264,6 @@ public:
                             if (target->HasAura(MASTERY_SPELL_IGNITE, caster->GetGUID()))
                             {
                                 bp += target->GetRemainingPeriodicAmount(caster->GetGUID(), MASTERY_SPELL_IGNITE, SPELL_AURA_PERIODIC_DAMAGE);
-                                bp = int32(bp * 0.66f);
                             }
 
                             caster->CastCustomSpell(target, MASTERY_SPELL_IGNITE, &bp, NULL, NULL, true);
