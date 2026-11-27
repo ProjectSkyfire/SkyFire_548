@@ -181,7 +181,7 @@ void Transport::Update(uint32 diff)
     {
         UpdateLegacyTransportPathProgress();
 
-        uint32 const period = GetPeriod();
+        uint32 const period = GetTransportPeriod();
         TransportAnimation const* animation = GetGOValue()->Transport.AnimationInfo;
         if (period && animation && !animation->Path.empty())
         {

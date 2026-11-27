@@ -545,6 +545,7 @@ union GameObjectValue
         uint32 HoldProgress;
         bool WaitingAtPathStart;
         bool HoldingAtProgress;
+        bool StopEventPending;
     } Transport;
     //25 GAMEOBJECT_TYPE_FISHINGHOLE
     struct
@@ -700,6 +701,8 @@ public:
     {
         m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
         m_respawnDelayTime = respawn > 0 ? respawn : 0;
+        if (respawn && !m_spawnedByDefault)
+            UpdateObjectVisibility(true);
     }
     void Respawn();
     /// Temporarily despawn; respawns after DB spawntimesecs (or 1s if none).
@@ -851,6 +854,7 @@ protected:
     void UpdateModel();                                 // updates model in case displayId were changed
     void InitializeLegacyTransport();
     void UpdateLegacyTransportPathProgress();
+    void UpdateLegacyTransportPathProgress(GOState state);
     void HandleLegacyTransportStateChange(GOState oldState, GOState newState);
     void SetLegacyTransportStopped(bool stopped);
     void MarkLegacyTransportPathProgressChanged();

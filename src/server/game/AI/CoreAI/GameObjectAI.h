@@ -34,6 +34,9 @@ public:
     static int Permissible(GameObject const* go);
 
     virtual bool GossipHello(Player* /*player*/) { return false; }
+
+    // Called when a player reports using a game object (sent with or after the use itself); GossipHello runs from the use.
+    virtual bool OnReportUse(Player* /*player*/) { return false; }
     virtual bool GossipSelect(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/) { return false; }
     virtual bool GossipSelectCode(Player* /*player*/, uint32 /*sender*/, uint32 /*action*/, char const* /*code*/) { return false; }
     virtual bool QuestAccept(Player* /*player*/, Quest const* /*quest*/) { return false; }
