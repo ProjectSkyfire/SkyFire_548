@@ -341,6 +341,16 @@ namespace VMAP
         if (result && fread(&chunkSize, sizeof(uint32), 1, rf) != 1) result = false;
         if (result && chunkSize > 0)
             result = WmoLiquid::readFromFile(rf, iLiquid);
+
+        // Unreachable and antiportal groups are large invisible planes that only cull rendering. Vmaps extracted
+        // with them would block line of sight and give false floors through whole buildings, so drop their geometry.
+        if (result && (iMogpFlags & (WMO_GROUP_FLAG_UNREACHABLE | WMO_GROUP_FLAG_ANTIPORTAL)))
+        {
+            triangles.clear();
+            vertices.clear();
+            delete iLiquid;
+            iLiquid = NULL;
+        }
         return result;
     }
 

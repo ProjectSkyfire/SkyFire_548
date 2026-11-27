@@ -66,6 +66,8 @@ struct map_liquidHeader
 #define MAP_LIQUID_TYPE_DARK_WATER  0x10
 #define MAP_LIQUID_TYPE_WMO_WATER   0x20
 
+uint32 GetLiquidFlags(uint32 liquidType);
+
 namespace MMAP
 {
 
@@ -694,19 +696,13 @@ namespace MMAP
                         uint8 type = NAV_EMPTY;
 
                         // convert liquid type to NavTerrain
-                        switch (liquid->GetType())
-                        {
-                        case 0:
-                        case 1:
+                        uint32 liquidFlags = GetLiquidFlags(liquid->GetType());
+                        if (liquidFlags & (MAP_LIQUID_TYPE_WATER | MAP_LIQUID_TYPE_OCEAN))
                             type = NAV_WATER;
-                            break;
-                        case 2:
+                        else if (liquidFlags & MAP_LIQUID_TYPE_MAGMA)
                             type = NAV_MAGMA;
-                            break;
-                        case 3:
+                        else if (liquidFlags & MAP_LIQUID_TYPE_SLIME)
                             type = NAV_SLIME;
-                            break;
-                        }
 
                         // indexing is weird...
                         // after a lot of trial and error, this is what works:

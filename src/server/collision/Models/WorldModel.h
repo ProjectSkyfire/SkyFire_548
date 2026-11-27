@@ -57,6 +57,13 @@ namespace VMAP
             void getPosInfo(uint32 &tilesX, uint32 &tilesY, G3D::Vector3 &corner) const;
     };
 
+    //! WMO group flags of groups that only cull rendering: no collision, as extractors that skip them
+    enum WmoGroupCullingFlags : uint32
+    {
+        WMO_GROUP_FLAG_UNREACHABLE = 0x80,
+        WMO_GROUP_FLAG_ANTIPORTAL  = 0x4000000
+    };
+
     /*! holding additional info for WMO group files */
     class GroupModel
     {

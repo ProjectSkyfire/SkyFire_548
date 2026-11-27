@@ -15,6 +15,7 @@
 
 namespace VMAP
 {
+    enum class ModelIgnoreFlags : uint32;
     class WorldModel;
     struct AreaInfo;
     struct LocationInfo;
@@ -53,7 +54,7 @@ namespace VMAP
             ModelInstance() : iInvScale(0.0f), iModel(0) { }
             ModelInstance(const ModelSpawn &spawn, WorldModel* model);
             void setUnloaded() { iModel = 0; }
-            bool intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const;
+            bool intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags) const;
             void intersectPoint(const G3D::Vector3& p, AreaInfo &info) const;
             bool GetLocationInfo(const G3D::Vector3& p, LocationInfo &info) const;
             bool GetLiquidLevel(const G3D::Vector3& p, LocationInfo &info, float &liqHeight) const;
