@@ -249,6 +249,10 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                     if (uint32 healthPct = Skyfire::Spells::GetTotemSummonHealthPct(m_spellInfo->Id))
                         damage = m_caster->CountPctFromMaxHealth(healthPct);
 
+                    // Glyph of Totemic Vigor
+                    if (m_caster->HasAura(63298))
+                        damage += m_caster->CountPctFromMaxHealth(5);
+
                     if (damage)                                            // if not spell info, DB values used
                     {
                         summon->SetMaxHealth(damage);
