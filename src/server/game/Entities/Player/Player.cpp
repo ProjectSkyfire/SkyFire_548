@@ -18154,6 +18154,24 @@ void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 ite
             }
         }
 
+        // Cooldowns that run on haste (Frost Bomb)
+        Unit::AuraEffectList const& hasteCooldown = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_COOLDOWN_BY_HASTE);
+        for (Unit::AuraEffectList::const_iterator itr = hasteCooldown.begin(); itr != hasteCooldown.end(); ++itr)
+        {
+            if (!(*itr)->IsAffectingSpell(spellInfo))
+                continue;
+
+            float const hasteMod = GetFloatValue(UNIT_FIELD_MOD_CASTING_SPEED);
+            if (rec > 0)
+                rec = int32(rec * hasteMod);
+
+            if (catrec > 0)
+                catrec = int32(catrec * hasteMod);
+
+            // one effect is enough, several must not compound
+            break;
+        }
+
         // replace negative cooldowns by 0
         if (rec < 0)
             rec = 0;
