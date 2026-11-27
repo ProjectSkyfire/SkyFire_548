@@ -3720,6 +3720,16 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
         return false;
     }
 
+    // Faction teleports, portals and mounts of the other faction are not learned, also not from the saved spells
+    if (GetSession()->GetSecurity() < AccountTypes::SEC_GAMEMASTER)
+    {
+        if ((spellInfo->AttributesEx7 & SPELL_ATTR7_HORDE_ONLY) && (getRaceMask() & RACEMASK_ALLIANCE))
+            return false;
+
+        if ((spellInfo->AttributesEx7 & SPELL_ATTR7_ALLIANCE_ONLY) && (getRaceMask() & RACEMASK_HORDE))
+            return false;
+    }
+
     PlayerSpellState state = learning ? PLAYERSPELL_NEW : PLAYERSPELL_UNCHANGED;
 
     bool dependent_set = false;
