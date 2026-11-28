@@ -3006,6 +3006,7 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 36350: // They Must Burn Bomb Aura (self)
                 spellInfo->Effects[EFFECT_0].TriggerSpell = 36325; // They Must Burn Bomb Drop (DND)
                 break;
+            case 127802: // Touch of the Grave: the proc must not start or refresh combat.
             case 49838: // Stop Time
                 spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
                 break;
