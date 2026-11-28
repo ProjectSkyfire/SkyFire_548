@@ -16,6 +16,70 @@
 #include "SpellAuraEffects.h"
 #include "SkillDiscovery.h"
 #include "Battleground.h"
+#include "DBCStores.h"
+#include "Item.h"
+#include <cmath>
+
+// 146346 - Juggernaut's Focusing Crystal: Life Steal
+class spell_item_juggernauts_focusing_crystal : public SpellScriptLoader
+{
+public:
+    spell_item_juggernauts_focusing_crystal() : SpellScriptLoader("spell_item_juggernauts_focusing_crystal") { }
+
+    class spell_item_juggernauts_focusing_crystal_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_item_juggernauts_focusing_crystal_AuraScript);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return sSpellMgr->GetSpellInfo(146347) != nullptr;
+        }
+
+        void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& canBeRecalculated)
+        {
+            amount = 0;
+            canBeRecalculated = false;
+            Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+            Item* item = player ? player->GetItemByGuid(GetAura()->GetCastItemGUID()) : nullptr;
+            if (!item)
+                return;
+
+            // This item effect scales with the epic item budget, not the wearer's level.
+            // The resulting amount is a percentage stored in hundredths (265 = 2.65%).
+            if (RandomPropertiesPointsEntry const* budget = sRandomPropertiesPointsStore.LookupEntry(item->GetTemplate()->ItemLevel))
+                amount = int32(std::round(budget->EpicPropertiesPoints[0] *
+                    GetSpellInfo()->Effects[aurEff->GetEffIndex()].ScalingMultiplier));
+        }
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            return eventInfo.GetActor() == GetTarget() && eventInfo.GetDamageInfo() &&
+                eventInfo.GetDamageInfo()->GetDamage() > 0 && GetTarget()->IsAlive();
+        }
+
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            // Use wide arithmetic: the effect amount is hundredths of a percent.
+            int32 heal = int32(uint64(eventInfo.GetDamageInfo()->GetDamage()) *
+                uint32(std::max(aurEff->GetAmount(), 0)) / 10000);
+            if (heal > 0)
+                GetTarget()->CastCustomSpell(GetTarget(), 146347, &heal, nullptr, nullptr, true, nullptr, aurEff);
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_item_juggernauts_focusing_crystal_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_DUMMY);
+            DoCheckProc += AuraCheckProcFn(spell_item_juggernauts_focusing_crystal_AuraScript::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_item_juggernauts_focusing_crystal_AuraScript::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_item_juggernauts_focusing_crystal_AuraScript();
+    }
+};
 
  // 72940 - Paxton's Torch
 class spell_item_paxtons_torch : public SpellScriptLoader
@@ -2528,6 +2592,7 @@ public:
 
 void AddSC_item_spell_scripts()
 {
+    new spell_item_juggernauts_focusing_crystal();
     //
     new spell_item_paxtons_torch();
     // 23074 Arcanite Dragonling

@@ -3822,8 +3822,39 @@ public:
     }
 };
 
+// 138333 - Ra-den: Murderous Strike
+class spell_gen_raden_murderous_strike : public SpellScriptLoader
+{
+public:
+    spell_gen_raden_murderous_strike() : SpellScriptLoader("spell_gen_raden_murderous_strike") { }
+
+    class spell_gen_raden_murderous_strike_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_raden_murderous_strike_AuraScript);
+
+        void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+        {
+            // Snapshot current health once; later healing must not increase the ticks.
+            amount = int32(GetUnitOwner()->GetHealth());
+            canBeRecalculated = false;
+        }
+
+        void Register() override
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_gen_raden_murderous_strike_AuraScript::CalculateAmount,
+                EFFECT_1, SPELL_AURA_PERIODIC_DAMAGE);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_gen_raden_murderous_strike_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
+    new spell_gen_raden_murderous_strike();
     new spell_gen_chillheart_wrack_soul();
     new spell_gen_burn_constriction_totem();
     new spell_gen_rice_pudding();
