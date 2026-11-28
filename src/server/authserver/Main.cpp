@@ -318,7 +318,7 @@ extern int main(int argc, char** argv)
         return 1;
     }
 
-    SF_LOG_INFO("server.authserver", "authserver-daemon. revision: % s", SKYFIRE_VER_PRODUCTVERSION_STR);
+    SF_LOG_INFO("server.authserver", "authserver-daemon. revision: %s", SKYFIRE_VER_PRODUCTVERSION_STR);
     SF_LOG_INFO("server.authserver", "<Ctrl-C> to stop.\n");
 
     SF_LOG_INFO("server.authserver", "   ______  __  __  __  __  ______ __  ______  ______ ");
@@ -566,7 +566,9 @@ bool StartDB(const char* host, const char* port, const char* user, const char* p
     {
         if (!LoginDatabase.Open(dbstring, uint8(worker_threads), uint8(synch_threads)))
         {
-            SF_LOG_ERROR("server.authserver", "Cannot connect to database");
+            SF_LOG_ERROR("server.authserver", "Cannot connect to login database %s@%s:%s/%s",
+                setupConnectionInfo._user.c_str(), setupConnectionInfo._host.c_str(),
+                setupConnectionInfo._port_or_socket.c_str(), setupConnectionInfo._database.c_str());
             return false;
         }
     }
@@ -574,7 +576,9 @@ bool StartDB(const char* host, const char* port, const char* user, const char* p
     {
         if (!LoginDatabase.Open(host, port, user, pass, database, uint8(worker_threads), uint8(synch_threads)))
         {
-            SF_LOG_ERROR("server.authserver", "Cannot connect to database");
+            SF_LOG_ERROR("server.authserver", "Cannot connect to login database %s@%s:%s/%s",
+                setupConnectionInfo._user.c_str(), setupConnectionInfo._host.c_str(),
+                setupConnectionInfo._port_or_socket.c_str(), setupConnectionInfo._database.c_str());
             return false;
         }
     }

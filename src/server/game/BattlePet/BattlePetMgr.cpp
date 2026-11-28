@@ -697,7 +697,7 @@ void BattlePetMgr::CageBattlePet(ObjectGuid guid)
     BattlePet* battlePet = GetBattlePet(guid);
     if (!battlePet)
     {
-        SF_LOG_DEBUG("network", "WorldSession::CageBattlePet - Player %u tryed to cage battle pet companion %u which it doesn't own!", m_owner->GetGUIDLow(), (uint64)guid);
+        SF_LOG_DEBUG("network", "BattlePetMgr::CageBattlePet - Player %u tried to cage battle pet companion " UI64FMTD " which it doesn't own!", m_owner->GetGUIDLow(), uint64(guid));
         return;
     }
 
