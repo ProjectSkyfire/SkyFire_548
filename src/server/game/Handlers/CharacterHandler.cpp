@@ -1866,6 +1866,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     m_playerLoading = false;
 
+    // Login-time achievement rules (known title, game event); needs the loaded player
+    pCurrChar->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_EARNED_PVP_TITLE, 1);
+
     if (pCurrChar->getClass() == CLASS_MONK)
         pCurrChar->CastSpell(pCurrChar, 103985, true); //Stance of White Tiger
 
