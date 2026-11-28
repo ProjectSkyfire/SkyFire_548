@@ -14,6 +14,7 @@
 #include "Battleground.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "Containers.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Group.h"
@@ -3765,8 +3766,65 @@ class spell_gen_override_display_power : public SpellScriptLoader
         }
 };
 
+// 111631 - Wrack Soul (Instructor Chillheart)
+class spell_gen_chillheart_wrack_soul : public SpellScriptLoader
+{
+public:
+    spell_gen_chillheart_wrack_soul() : SpellScriptLoader("spell_gen_chillheart_wrack_soul") { }
+
+    class spell_gen_chillheart_wrack_soul_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_gen_chillheart_wrack_soul_AuraScript);
+
+        void AfterRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+                return;
+
+            Unit* target = GetTarget();
+            Unit* caster = GetCaster();
+            if (!target->IsAlive() || target->GetTypeId() != TypeID::TYPEID_PLAYER || !caster)
+                return;
+
+            Creature* chillheart = caster->ToCreature();
+            if (!chillheart || chillheart->GetEntry() != 58633 || !chillheart->IsAlive() ||
+                !chillheart->IsInCombat() || chillheart->IsInEvadeMode())
+                return;
+
+            std::list<Player*> players;
+            target->GetPlayerListInGrid(players, 200.0f);
+            players.remove_if([target, caster, this](Player* player)
+            {
+                return player == target || !player->IsAlive() || player->IsGameMaster() ||
+                    !target->IsInPartyWith(player) || player->HasAura(GetId()) ||
+                    !caster->IsValidAttackTarget(player);
+            });
+
+            if (players.empty())
+                return;
+
+            Skyfire::Containers::RandomResizeList(players, 1);
+            // Player-to-player negative projectiles are rejected as friendly hits by the core.
+            // Recast from Chillheart to preserve hostile targeting and damage attribution.
+            chillheart->CastSpell(players.front(), GetId(), true, nullptr, aurEff);
+        }
+
+        void Register() override
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_gen_chillheart_wrack_soul_AuraScript::AfterRemove,
+                EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_gen_chillheart_wrack_soul_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
+    new spell_gen_chillheart_wrack_soul();
     new spell_gen_burn_constriction_totem();
     new spell_gen_rice_pudding();
     new spell_gen_rock_jump_a();
