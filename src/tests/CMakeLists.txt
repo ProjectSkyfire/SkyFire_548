@@ -3,6 +3,10 @@
 # See COPYRIGHT file for Copyright information
 #
 
+add_executable(cinematic_camera_model_tests CinematicCameraModelTests.cpp)
+target_include_directories(cinematic_camera_model_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/game/Cinematic)
+add_test(NAME cinematic_camera_model_tests COMMAND cinematic_camera_model_tests)
+
 add_executable(transport_recovery_tests TransportRecoveryTests.cpp)
 target_include_directories(transport_recovery_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/game/Entities/Transport)
 add_test(NAME transport_recovery_tests COMMAND transport_recovery_tests)

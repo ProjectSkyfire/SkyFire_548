@@ -1,4 +1,10 @@
+/*
+* This file is part of Project SkyFire https://www.projectskyfire.org.
+* See LICENSE.md file for Copyright information
+*/
+
 #include "CinematicPathMgr.h"
+#include "CinematicCameraModel.h"
 #include "DBCStores.h"
 #include "G3D/AABox.h"
 #include "G3D/Any.h"
@@ -19,152 +25,12 @@
 #include "World.h"
 #include <algorithm>
 #include <fstream>
+#include <memory>
+#include <new>
 #include <ObjectMgr.h>
 #include <stdint.h>
 
-enum
-{
-    INTERPOLATION_NONE,
-    INTERPOLATION_LINEAR,
-    INTERPOLATION_HERMITE,
-    INTERPOLATION_BEZIER,
-};
-
-#pragma pack(push, 1)
-
-struct Sphere
-{
-    /*0x00*/ float Min[3];
-    /*0x0C*/ float Max[3];
-    /*0x18*/ float Radius;
-};
-
-struct ModelHeader
-{
-    char id[4];
-    uint8 Version[4];
-    uint32 nameLength;
-    uint32 nameOfs;
-    uint32 GlobalModelFlags;      // 1: tilt x, 2: tilt y, 4:, 8: add another field in header, 16: ; (no other flags as of 3.1.1);
-
-    uint32 nGlobalSequences;      // AnimationRelated
-    uint32 ofsGlobalSequences;    // A list of timestamps.
-    uint32 nAnimations;           // AnimationRelated
-    uint32 ofsAnimations;         // Information about the animations in the model.
-    uint32 nAnimationLookup;      // AnimationRelated
-    uint32 ofsAnimationLookup;    // Mapping of global IDs to the entries in the Animation sequences block.
-    //uint32 nD;
-    //uint32 ofsD;
-    uint32 nBones;                // BonesAndLookups
-    uint32 ofsBones;              // Information about the bones in this model.
-    uint32 nKeyBoneLookup;        // BonesAndLookups
-    uint32 ofsKeyBoneLookup;      // Lookup table for key skeletal bones.
-
-    uint32 nVertices;             // GeometryAndRendering
-    uint32 ofsVertices;           // Vertices of the model.
-    uint32 nViews;                // GeometryAndRendering
-    //uint32 ofsViews;            // Views (LOD) are now in .skins.
-
-    uint32 nColors;               // ColorsAndTransparency
-    uint32 ofsColors;             // Color definitions.
-
-    uint32 nTextures;             // TextureAndTheifAnimation
-    uint32 ofsTextures;           // Textures of this model.
-
-    uint32 nTransparency;         // H,  ColorsAndTransparency
-    uint32 ofsTransparency;       // Transparency of textures.
-    //uint32 nI;                  // always unused ?
-    //uint32 ofsI;
-    uint32 nTexAnims;             // J, TextureAndTheifAnimation
-    uint32 ofsTexAnims;
-    uint32 nTexReplace;           // TextureAndTheifAnimation
-    uint32 ofsTexReplace;         // Replaceable Textures.
-
-    uint32 nTexFlags;             // Render Flags
-    uint32 ofsTexFlags;           // Blending modes / render flags.
-    uint32 nBoneLookup;           // BonesAndLookups
-    uint32 ofsBoneLookup;         // A bone lookup table.
-
-    uint32 nTexLookup;            // TextureAndTheifAnimation
-    uint32 ofsTexLookup;          // The same for textures.
-
-    uint32 nTexUnitLookup;        // L, TextureAndTheifAnimation, seems gone after Cataclysm
-    uint32 ofsTexUnitLookup;      // And texture units. Somewhere they have to be too.
-    uint32 nTransparencyLookup;   // M, ColorsAndTransparency
-    uint32 ofsTransparencyLookup; // Everything needs its lookup. Here are the transparencies.
-    uint32 nTexAnimLookup;        // TextureAndTheifAnimation
-    uint32 ofsTexAnimLookup;      // Wait. Do we have animated Textures? Wasn't ofsTexAnims deleted? oO
-
-    struct Sphere CollisionSphere;
-    struct Sphere BoundSphere;
-
-    uint32 nBoundingTriangles;    // Miscellaneous
-    uint32 ofsBoundingTriangles;
-    uint32 nBoundingVertices;     // Miscellaneous
-    uint32 ofsBoundingVertices;
-    uint32 nBoundingNormals;      // Miscellaneous
-    uint32 ofsBoundingNormals;
-
-    uint32 nAttachments;          // O, Miscellaneous
-    uint32 ofsAttachments;        // Attachments are for weapons etc.
-    uint32 nAttachLookup;         // P, Miscellaneous
-    uint32 ofsAttachLookup;       // Of course with a lookup.
-    uint32 nEvents;               //
-    uint32 ofsEvents;             // Used for playing sounds when dying and a lot else.
-    uint32 nLights;               // R
-    uint32 ofsLights;             // Lights are mainly used in loginscreens but in wands and some doodads too.
-    uint32 CameraCount;           // S, Miscellaneous
-    uint32 CameraOffset;          // The cameras are present in most models for having a model in the Character-Tab.
-    uint32 nCameraLookup;         // Miscellaneous
-    uint32 ofsCameraLookup;       // And lookup-time again, unit16
-    uint32 nRibbonEmitters;       // U, Effects
-    uint32 ofsRibbonEmitters;     // Things swirling around. See the CoT-entrance for light-trails.
-    uint32 nParticleEmitters;     // V, Effects
-    uint32 ofsParticleEmitters;   // Spells and weapons, doodads and loginscreens use them. Blood dripping of a blade? Particles.
-};
-
-struct Pair
-{
-    uint32_t Number;
-    uint32_t Offset;
-};
-
-struct AnimationBlock
-{
-    int16 interpolation_type;
-    int16 global_sequence_id;
-    uint32 FramePairsCount;
-    uint32 FramePairsOffset;
-    uint32 TransPairsCount;
-    uint32 TransPairsOffset;
-};
-
-struct Camera
-{
-    int32_t Type;
-    float   fov;
-    float   far_clipping;
-    float   near_clipping;
-    struct  AnimationBlock SourceTranslations;      // Vector
-    float   SourcePosition[3];
-    struct  AnimationBlock target_translations;     // Vector
-    float   target_position[3];
-    struct  AnimationBlock rotations;               // Quaternion
-};
-
-struct CameraV10
-{
-    int32 Type;
-    float   far_clipping;
-    float   near_clipping;
-    struct  AnimationBlock SourceTranslations;      // Vector
-    float   SourcePosition[3];
-    struct  AnimationBlock target_translations;     // Vector
-    float   target_position[3];
-    struct  AnimationBlock rotations;               // Quaternion
-    struct  AnimationBlock unknown_block_4;         // Float
-};
-#pragma pack(pop)
+using namespace Skyfire::Cinematics;
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -184,6 +50,8 @@ size_t CinematicSequenceMgr::Load()
 {
     uint32 oldMSTime = getMSTime();
     uint32 count = 0;
+    for (auto const& sequence : m_Sequences)
+        delete sequence.second;
     m_Sequences.clear();
 
     for (uint32 itr = 0; itr < sCinematicSequencesStore.GetNumRows(); itr++)
@@ -210,114 +78,84 @@ size_t CinematicSequenceMgr::Load()
             continue;
         }
 
-        size_t  fileSize = 0;
-        char* fileBuffer = 0;
-        char    magicHeader[4];
-
-        // Check magic
-        fread(magicHeader, 1, sizeof(magicHeader), modelFile);
-
-        if (0 != memcmp(magicHeader, "MD20", sizeof(magicHeader)))
+        std::unique_ptr<FILE, decltype(&fclose)> file(modelFile, fclose);
+        char magicHeader[4];
+        if (fread(magicHeader, 1, sizeof(magicHeader), file.get()) != sizeof(magicHeader) ||
+            memcmp(magicHeader, "MD20", sizeof(magicHeader)))
         {
             SF_LOG_INFO("server.loading", "Cinematic camera '%s': invalid magic header!", modelFileName.c_str());
             continue;
         }
 
-        // Get file size
-        fseek(modelFile, 0, SEEK_END);
-        fileSize = ftell(modelFile);
-        fseek(modelFile, 0, SEEK_SET);
-
-        // Map file into memory
-        fileBuffer = (char*)malloc(fileSize);
-        fread(fileBuffer, 1, fileSize, modelFile);
-        fclose(modelFile);
-
-        // Check number of cameras
-        ModelHeader* modelHeader = (ModelHeader*)fileBuffer;
-
-        if (!modelHeader->CameraCount || !modelHeader->CameraOffset)
+        if (fseek(file.get(), 0, SEEK_END) != 0)
         {
-            free(fileBuffer);
-
-            SF_LOG_INFO("server.loading", "Cinematic camera '%s': no cameras!", modelFileName.c_str());
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': cannot seek!", modelFileName.c_str());
+            continue;
+        }
+        long length = ftell(file.get());
+        if (length < 0 || static_cast<unsigned long>(length) < sizeof(ModelHeader) ||
+            fseek(file.get(), 0, SEEK_SET) != 0)
+        {
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': invalid file size!", modelFileName.c_str());
             continue;
         }
 
-        AnimationBlock* animationBlock;
-        float           sourcePosition[3];
-
-        if (modelHeader->Version[0] <= 9)
+        size_t fileSize = static_cast<size_t>(length);
+        std::unique_ptr<char, decltype(&free)> buffer(static_cast<char*>(malloc(fileSize)), free);
+        if (!buffer)
         {
-            Camera* camera = (Camera*)(fileBuffer + modelHeader->CameraOffset);
-            Camera* endCamera = camera + modelHeader->CameraCount;
-
-            for (; camera != endCamera; ++camera)
-            {
-                if (camera->Type != -1)
-                    continue;
-
-                animationBlock = &camera->SourceTranslations;
-                memcpy(sourcePosition, camera->SourcePosition, sizeof(sourcePosition));
-
-                break;
-            }
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': allocation failed!", modelFileName.c_str());
+            continue;
         }
-        else
+        size_t bytesRead = fread(buffer.get(), 1, fileSize, file.get());
+        bool readError = ferror(file.get()) != 0;
+        file.reset();
+        if (readError || bytesRead != fileSize)
         {
-            CameraV10* cameraV10 = (CameraV10*)(fileBuffer + modelHeader->CameraOffset);
-            CameraV10* endCameraV10 = cameraV10 + modelHeader->CameraCount;
-
-            for (; cameraV10 != endCameraV10; ++cameraV10)
-            {
-                if (cameraV10->Type != -1)
-                    continue;
-
-                animationBlock = &cameraV10->SourceTranslations;
-                memcpy(sourcePosition, cameraV10->SourcePosition, sizeof(sourcePosition));
-
-                break;
-            }
-        }
-
-        if (!animationBlock ||
-            !animationBlock->FramePairsOffset || !animationBlock->TransPairsOffset
-            || animationBlock->FramePairsCount != animationBlock->TransPairsCount)
-        {
-            SF_LOG_INFO("server.loading", "Cinematic camera '%s': no translations!", modelFileName.c_str());
-            free(fileBuffer);
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': incomplete read, skipped!", modelFileName.c_str());
             continue;
         }
 
-        CinematicSequence* cinematicSequence = new CinematicSequence();
-
-        cinematicSequence->Duration = 0;
-        cinematicSequence->KeyFramesCount = 0;
-
-        size_t blockSize = 3 * sizeof(float);
-
-        if (animationBlock->interpolation_type == INTERPOLATION_HERMITE || animationBlock->interpolation_type == INTERPOLATION_BEZIER)
-            blockSize *= 3;
+        char const* fileBuffer = buffer.get();
+        CameraModelView model;
+        if (!ValidateCameraModel(fileBuffer, fileSize, model))
+        {
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': invalid camera data, skipped!", modelFileName.c_str());
+            continue;
+        }
+        AnimationBlock const* animationBlock = model.Animation;
+        float const* sourcePosition = model.SourcePosition;
+        size_t blockSize = model.BlockSize;
+        std::unique_ptr<CinematicSequence> cinematicSequence(new (std::nothrow) CinematicSequence());
+        if (!cinematicSequence)
+        {
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': sequence allocation failed!", modelFileName.c_str());
+            continue;
+        }
+        cinematicSequence->KeyFramesCount = model.KeyFramesCount;
+        cinematicSequence->KeyFrames = new (std::nothrow) CinematicKeyFrame[model.KeyFramesCount]();
+        if (!cinematicSequence->KeyFrames)
+        {
+            SF_LOG_INFO("server.loading", "Cinematic camera '%s': keyframe allocation failed!", modelFileName.c_str());
+            continue;
+        }
 
         G3D::Matrix3 matrix = G3D::Matrix3::identity();
         matrix = matrix.fromAxisAngle(G3D::Vector3(0, 0, 1), cinematicCamera->GlobalRotation);
 
         if (animationBlock->FramePairsOffset)
         {
-            Pair* framePairs = (struct Pair*)(fileBuffer + animationBlock->FramePairsOffset);
-            Pair* transPairs = (struct Pair*)(fileBuffer + animationBlock->TransPairsOffset);
-
-            cinematicSequence->KeyFramesCount = framePairs->Number;
-            cinematicSequence->KeyFrames = new CinematicKeyFrame[cinematicSequence->KeyFramesCount];
+            Pair const* framePairs = reinterpret_cast<Pair const*>(fileBuffer + animationBlock->FramePairsOffset);
+            Pair const* transPairs = reinterpret_cast<Pair const*>(fileBuffer + animationBlock->TransPairsOffset);
 
             for (uint32 i = 0; i < animationBlock->FramePairsCount; i++)
             {
-                Pair* framePair = framePairs + i;
-                Pair* transPair = transPairs + i;
+                Pair const* framePair = framePairs + i;
+                Pair const* transPair = transPairs + i;
 
                 for (uint32 j = 0; j < framePair->Number; j++)
                 {
-                    cinematicSequence->KeyFrames[j].Frame = ((uint32*)(fileBuffer + framePair->Offset))[j];
+                    memcpy(&cinematicSequence->KeyFrames[j].Frame, fileBuffer + framePair->Offset + size_t(j) * sizeof(uint32), sizeof(uint32));
                     cinematicSequence->Duration = std::max(cinematicSequence->Duration, cinematicSequence->KeyFrames[j].Frame);
 
                     memcpy(cinematicSequence->KeyFrames[j].Position, (fileBuffer + transPair->Offset) + j * blockSize, sizeof(cinematicSequence->KeyFrames[j].Position));
@@ -335,9 +173,7 @@ size_t CinematicSequenceMgr::Load()
             }
         }
 
-        m_Sequences[itr] = cinematicSequence;
-
-        free(fileBuffer);
+        m_Sequences[itr] = cinematicSequence.release();
 
         count++;
     }
