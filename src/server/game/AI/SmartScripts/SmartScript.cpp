@@ -1811,7 +1811,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
 
             for (ObjectList::const_iterator itr = targets->begin(); itr != targets->end(); ++itr)
                 if (IsPlayer(*itr))
-                    (*itr)->ToPlayer()->ActivateTaxiPathTo(e.action.taxi.id);
+                    (*itr)->ToPlayer()->ActivateTaxiPathTo(e.action.taxi.id, 0, e.action.taxi.free != 0);
 
             delete targets;
             break;

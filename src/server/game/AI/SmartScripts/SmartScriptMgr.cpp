@@ -685,6 +685,11 @@ bool SmartAIMgr::IsEventValid(SmartScriptHolder& e)
             break;
         case SMART_ACTION_ACTIVATE_TAXI:
         {
+            if (e.action.taxi.free > 1)
+            {
+                SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses invalid free taxi flag %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.taxi.free);
+                return false;
+            }
             if (!sTaxiPathStore.LookupEntry(e.action.taxi.id))
             {
                 SF_LOG_ERROR("sql.sql", "SmartAIMgr: Entry %d SourceType %u Event %u Action %u uses invalid Taxi path ID %u, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.action.taxi.id);

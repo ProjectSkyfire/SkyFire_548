@@ -1370,8 +1370,8 @@ public:
     {
         m_taxi.InitTaxiNodes(getRace(), getClass(), getLevel());
     }
-    bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = NULL, uint32 spellid = 0);
-    bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0);
+    bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = NULL, uint32 spellid = 0, bool free = false);
+    bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0, bool free = false);
     void CleanupAfterTaxiFlight();
     void ContinueTaxiFlight();
     // mount_id can be used in scripting calls

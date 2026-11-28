@@ -17077,7 +17077,7 @@ void Player::SetRestBonus(float rest_bonus_new)
     SetUInt32Value(PLAYER_FIELD_REST_STATE_BONUS_POOL, uint32(m_rest_bonus));
 }
 
-bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc /*= NULL*/, uint32 spellid /*= 0*/)
+bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc /*= NULL*/, uint32 spellid /*= 0*/, bool free /*= false*/)
 {
     if (nodes.size() < 2)
         return false;
@@ -17226,7 +17226,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     uint64 money = GetMoney();
 
-    if (npc)
+    if (free)
+        totalcost = 0;
+    else if (npc)
         totalcost = (uint32)ceil(totalcost * GetReputationPriceDiscount(npc));
 
     if (money < totalcost)
@@ -17265,7 +17267,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     return true;
 }
 
-bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
+bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/, bool free /*= false*/)
 {
     TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(taxi_path_id);
     if (!entry)
@@ -17277,7 +17279,7 @@ bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
     nodes[0] = entry->from;
     nodes[1] = entry->to;
 
-    return ActivateTaxiPathTo(nodes, NULL, spellid);
+    return ActivateTaxiPathTo(nodes, NULL, spellid, free);
 }
 
 void Player::CleanupAfterTaxiFlight()
