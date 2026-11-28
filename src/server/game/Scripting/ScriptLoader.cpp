@@ -248,6 +248,7 @@ void AddSC_stranglethorn_vale();
 void AddSC_undercity();
 void AddSC_westfall();
 void AddSC_burning_steppes();
+void AddSC_twilight_highlands();
 
 //kalimdor
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -943,6 +944,7 @@ void AddEasternKingdomsScripts()
     AddSC_elwynn_forest();
     AddSC_westfall();
     AddSC_burning_steppes();
+    AddSC_twilight_highlands();
 #endif
 }
 

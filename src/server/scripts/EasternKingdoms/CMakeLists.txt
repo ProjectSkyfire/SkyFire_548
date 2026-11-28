@@ -177,6 +177,7 @@ set(scripts_STAT_SRCS
   EasternKingdoms/zone_arathi_highlands.cpp
   EasternKingdoms/zone_blasted_lands.cpp
   EasternKingdoms/zone_burning_steppes.cpp
+  EasternKingdoms/zone_twilight_highlands.cpp
   EasternKingdoms/zone_duskwood.cpp
   EasternKingdoms/zone_eastern_plaguelands.cpp
   EasternKingdoms/zone_elwynn_forest.cpp

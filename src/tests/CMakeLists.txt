@@ -4,6 +4,9 @@
 #
 
 add_executable(cinematic_camera_model_tests CinematicCameraModelTests.cpp)
+add_executable(draconic_mending_tests DraconicMendingTests.cpp)
+target_include_directories(draconic_mending_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/scripts/EasternKingdoms)
+add_test(NAME draconic_mending_tests COMMAND draconic_mending_tests)
 target_include_directories(cinematic_camera_model_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/server/game/Cinematic)
 add_test(NAME cinematic_camera_model_tests COMMAND cinematic_camera_model_tests)
 
