@@ -119,6 +119,59 @@ namespace
         return GetActiveBattlePet(*opponentBattlePetMgr);
     }
 
+    // What the enemy front pet does this round. Wild and PvP enemies cast slot 0 and leave the
+    // slot invalid, so no cooldown is tracked for them. A tamer picks a slot (ChooseEnemyAbilitySlot).
+    struct EnemyTurnPlan
+    {
+        uint8 Slot = BATTLE_PET_ABILITY_SLOT_INVALID;
+        uint32 AbilityId = 0;
+        uint32 Damage = 0;
+        uint32 Heal = 0;
+        uint32 EffectId = 0;
+        uint32 IncomingDamageReduction = 0;
+        uint8 IncomingDamageReductionRounds = 0;
+    };
+
+    EnemyTurnPlan PlanEnemyTurn(Player const& player, ActivePetBattle const& battle)
+    {
+        BattlePet const* pvpPet = GetPvpOpponentActiveBattlePet(player, battle);
+        uint16 const power = BattlePetPowerFromBattleState(battle.EnemySpecies, battle.EnemyLevel,
+            battle.EnemyQuality, battle.EnemyBreed);
+
+        EnemyTurnPlan plan;
+        uint8 slot = 0;
+        ActivePetBattleEnemyOption options[BATTLE_PET_ABILITY_SLOT_COUNT];
+        if (battle.IsTamer())
+        {
+            for (uint8 i = 0; i < BATTLE_PET_ABILITY_SLOT_COUNT; ++i)
+            {
+                options[i].AbilityId = BattlePetGetSpeciesAbility(battle.EnemySpecies, i, 0, battle.EnemyLevel);
+                options[i].Heal = BattlePetHealFromStats(options[i].AbilityId, power, battle.EnemyLevel);
+                options[i].Damage = options[i].Heal ? 0
+                    : BattlePetDamageFromStats(options[i].AbilityId, power, battle.EnemyLevel);
+            }
+
+            slot = battle.ChooseEnemyAbilitySlot(options);
+            plan.Slot = slot;
+            plan.Heal = options[slot].Heal;
+        }
+
+        plan.AbilityId = BattlePetGetSpeciesAbility(battle.EnemySpecies, slot, 0, battle.EnemyLevel);
+        plan.EffectId = BattlePetInputEffectForAbility(plan.AbilityId);
+        plan.IncomingDamageReductionRounds = BattlePetIncomingDamageReductionRounds(plan.AbilityId);
+        if (pvpPet)
+        {
+            plan.Damage = BattlePetInputDamageForAbility(plan.AbilityId, pvpPet);
+            plan.IncomingDamageReduction = BattlePetInputIncomingDamageReductionForAbility(plan.AbilityId, pvpPet);
+        }
+        else
+        {
+            plan.Damage = plan.Heal ? 0 : BattlePetInputDamageForEnemyAbility(plan.AbilityId, battle);
+            plan.IncomingDamageReduction = BattlePetInputIncomingDamageReductionForEnemyAbility(plan.AbilityId, battle);
+        }
+        return plan;
+    }
+
     uint8 BattlePetActiveAbilitySlot(BattlePet const* battlePet, uint32 abilityId)
     {
         if (!battlePet || !abilityId)
@@ -1452,13 +1505,8 @@ void WorldSession::HandleBattlePetInput(WorldPacket& recvData)
         {
             ActivePetBattle const& activeBattle = battlePetMgr->GetActivePetBattle();
             uint32 const roundId = activeBattle.RoundID;
-            uint32 const enemyAbilityId = BattlePetGetSpeciesAbility(
-                activeBattle.EnemySpecies, 0, 0, activeBattle.EnemyLevel);
+            EnemyTurnPlan const enemyTurn = PlanEnemyTurn(*player, activeBattle);
             BattlePet const* allyBattlePet = GetActiveBattlePet(*battlePetMgr);
-            BattlePet const* enemyBattlePet = GetPvpOpponentActiveBattlePet(*player, activeBattle);
-            uint32 const enemyDamage = enemyBattlePet
-                ? BattlePetInputDamageForAbility(enemyAbilityId, enemyBattlePet)
-                : BattlePetInputDamageForEnemyAbility(enemyAbilityId, activeBattle);
 
             uint8 allyAbilitySlot = BattlePetActiveAbilitySlot(allyBattlePet, command.AbilityID);
             uint32 allyAbilityId = command.AbilityID;
@@ -1486,15 +1534,13 @@ void WorldSession::HandleBattlePetInput(WorldPacket& recvData)
             handled = battlePetMgr->ApplyBattlePetAbilityTurnExchangeInput(roundId,
                 allyAbilitySlot, allyAbilityId, turnIndex,
                 allyPower, allyLevel,
-                enemyDamage,
-                BattlePetInputEffectForAbility(enemyAbilityId),
+                enemyTurn.Damage,
+                enemyTurn.EffectId,
                 BattlePetInputIncomingDamageReductionForAbility(allyAbilityId, allyBattlePet),
                 BattlePetIncomingDamageReductionRounds(allyAbilityId),
-                enemyBattlePet
-                    ? BattlePetInputIncomingDamageReductionForAbility(enemyAbilityId, enemyBattlePet)
-                    : BattlePetInputIncomingDamageReductionForEnemyAbility(enemyAbilityId, activeBattle),
-                BattlePetIncomingDamageReductionRounds(enemyAbilityId),
-                round, &finalRound);
+                enemyTurn.IncomingDamageReduction,
+                enemyTurn.IncomingDamageReductionRounds,
+                round, &finalRound, enemyTurn.Slot, enemyTurn.AbilityId, enemyTurn.Heal);
             sendRound = handled;
             sendFinal = !finalRound.Pets.empty();
             break;
@@ -1520,16 +1566,15 @@ void WorldSession::HandleBattlePetInput(WorldPacket& recvData)
         case Skyfire::BattlePetPackets::BATTLE_PET_INPUT_ACTION_TRAP:
         {
             ActivePetBattle const& activeBattle = battlePetMgr->GetActivePetBattle();
-            uint32 const enemyAbilityId = BattlePetGetSpeciesAbility(
-                activeBattle.EnemySpecies, 0, 0, activeBattle.EnemyLevel);
-            BattlePet const* enemyBattlePet = GetPvpOpponentActiveBattlePet(*player, activeBattle);
-            uint32 const enemyDamage = enemyBattlePet
-                ? BattlePetInputDamageForAbility(enemyAbilityId, enemyBattlePet)
-                : BattlePetInputDamageForEnemyAbility(enemyAbilityId, activeBattle);
+            // A tamer cannot be trapped, so the trap action never plays a tamer turn.
+            if (activeBattle.IsTamer())
+                break;
+
+            EnemyTurnPlan const enemyTurn = PlanEnemyTurn(*player, activeBattle);
 
             handled = battlePetMgr->ApplyBattlePetTrapInput(battlePetMgr->GetActivePetBattle().RoundID,
-                BattlePetInputEffectForAbility(battlePetMgr->GetTrapAbility()), enemyDamage,
-                BattlePetInputEffectForAbility(enemyAbilityId), round, finalRound);
+                BattlePetInputEffectForAbility(battlePetMgr->GetTrapAbility()), enemyTurn.Damage,
+                enemyTurn.EffectId, round, finalRound);
             sendRound = handled;
             sendFinal = handled && !finalRound.Pets.empty();
             break;
@@ -1560,13 +1605,8 @@ void WorldSession::HandleBattlePetInput(WorldPacket& recvData)
                     continueAbilityId, continueTurn))
                 break;
 
-            uint32 const continueEnemyAbilityId = BattlePetGetSpeciesAbility(
-                channelBattle.EnemySpecies, 0, 0, channelBattle.EnemyLevel);
+            EnemyTurnPlan const continueEnemy = PlanEnemyTurn(*player, channelBattle);
             BattlePet const* continueAllyPet = GetActiveBattlePet(*battlePetMgr);
-            BattlePet const* continueEnemyPet = GetPvpOpponentActiveBattlePet(*player, channelBattle);
-            uint32 const continueEnemyDamage = continueEnemyPet
-                ? BattlePetInputDamageForAbility(continueEnemyAbilityId, continueEnemyPet)
-                : BattlePetInputDamageForEnemyAbility(continueEnemyAbilityId, channelBattle);
 
             Skyfire::BattlePetPackets::BattlePetRoundResult continueRound;
             Skyfire::BattlePetPackets::BattlePetFinalRound continueFinal;
@@ -1574,15 +1614,14 @@ void WorldSession::HandleBattlePetInput(WorldPacket& recvData)
                     continueSlot, continueAbilityId, continueTurn,
                     continueAllyPet ? continueAllyPet->GetPower() : 0,
                     continueAllyPet ? continueAllyPet->GetLevel() : 1,
-                    continueEnemyDamage,
-                    BattlePetInputEffectForAbility(continueEnemyAbilityId),
+                    continueEnemy.Damage,
+                    continueEnemy.EffectId,
                     BattlePetInputIncomingDamageReductionForAbility(continueAbilityId, continueAllyPet),
                     BattlePetIncomingDamageReductionRounds(continueAbilityId),
-                    continueEnemyPet
-                        ? BattlePetInputIncomingDamageReductionForAbility(continueEnemyAbilityId, continueEnemyPet)
-                        : BattlePetInputIncomingDamageReductionForEnemyAbility(continueEnemyAbilityId, channelBattle),
-                    BattlePetIncomingDamageReductionRounds(continueEnemyAbilityId),
-                    continueRound, &continueFinal))
+                    continueEnemy.IncomingDamageReduction,
+                    continueEnemy.IncomingDamageReductionRounds,
+                    continueRound, &continueFinal,
+                    continueEnemy.Slot, continueEnemy.AbilityId, continueEnemy.Heal))
                 break;
 
             SendBattlePetRoundResult(*player, continueRound);
@@ -1627,6 +1666,17 @@ void WorldSession::HandleBattlePetInputFirstPet(WorldPacket& recvData)
     {
         Skyfire::BattlePetPackets::BattlePetRoundResult round;
         if (!battlePetMgr->ApplyBattlePetSwapInput(activeBattle.RoundID, selection.PetID, round))
+            return;
+
+        SendBattlePetRoundResult(*player, round);
+        return;
+    }
+
+    // Mid-battle, after an enemy pet died: the confirmation needs a round result, not the first round.
+    if (activeBattle.IsWaitingForFrontPetConfirm())
+    {
+        Skyfire::BattlePetPackets::BattlePetRoundResult round;
+        if (!battlePetMgr->ApplyBattlePetEnemyReplacementInput(activeBattle.RoundID, selection.PetID, round))
             return;
 
         SendBattlePetRoundResult(*player, round);
@@ -1857,9 +1907,23 @@ void WorldSession::HandleBattlePetWildRequest(WorldPacket& recvData)
     battlePetMgr->SelectActivePetBattleFrontPet(activeBattlePetIndex);
     teams[0].TrapStatus = battlePetMgr->GetActivePetBattleTrapStatus();
 
+    Skyfire::BattlePetPackets::FillEnemyInitialUpdateTeam(battlePetMgr->GetActivePetBattle(), teams[1]);
+
     WorldPacket data2 = Skyfire::BattlePetPackets::BuildInitialUpdatePacket(
         petBattleRequest.EnemyGUID, teams, 2, petBattleRequest.Type != PetBattleRequest::PET_BATTLE_TYPE_PVE);
     player->SendDirectMessage(&data2);
+
+    // The client confirms the front pet itself only when it is the first loadout pet; with a dead
+    // first pet it waits forever, so open the first round from here.
+    if (activeBattlePetIndex != 0)
+    {
+        ActivePetBattle const& startedBattle = battlePetMgr->GetActivePetBattle();
+        WorldPacket firstRound = Skyfire::BattlePetPackets::BuildFirstRoundPacket(
+            startedBattle.RoundID, startedBattle.AllyFrontPet, startedBattle.EnemyFrontPet,
+            battlePetMgr->GetActivePetBattleTrapStatus(), PET_BATTLE_TRAP_STATUS_UNAVAILABLE);
+        player->SendDirectMessage(&firstRound);
+    }
+
     battlePetMgr->HideActivePetBattleWorldObject(wildBattlePet);
 }
 
@@ -1870,4 +1934,119 @@ void WorldSession::HandleBattlePetCage(WorldPacket& recvData)
     recvData.ReadGuidBytes(petEntry, 5, 4, 2, 7, 1, 3, 6, 0);
 
     GetPlayer()->GetBattlePetMgr()->CageBattlePet(petEntry);
+}
+
+// `.battlepet npc <entry>`: starts a team battle against a tamer without gossip.
+bool BattlePetStartNpcBattle(Player& player, Creature& tamer, std::string& result)
+{
+    BattlePetNpcTeam const* team = sObjectMgr->GetBattlePetNpcTeam(tamer.GetEntry());
+    if (!team)
+    {
+        result = "no team in battle_pet_npc_team for this creature";
+        return false;
+    }
+
+    BattlePetMgr* battlePetMgr = player.GetBattlePetMgr();
+    if (battlePetMgr->HasActivePetBattle())
+    {
+        result = "already in a pet battle";
+        return false;
+    }
+
+    if (player.IsInCombat())
+    {
+        battlePetMgr->SendPetBattleRequestFailed(PET_BATTLE_REQUEST_FAILED_INVALID_TARGET);
+        result = "in combat";
+        return false;
+    }
+
+    if (!battlePetMgr->HasLoadoutBattlePet())
+    {
+        battlePetMgr->SendPetBattleRequestFailed(PET_BATTLE_REQUEST_FAILED_NO_PETS);
+        result = "no pets in the loadout";
+        return false;
+    }
+
+    Skyfire::BattlePetPackets::InitialUpdateTeamData teams[2];
+    if (!BuildPlayerPetBattleTeam(player, teams[0]))
+    {
+        battlePetMgr->SendPetBattleRequestFailed(PET_BATTLE_REQUEST_FAILED_ALL_PETS_DEAD);
+        result = "no living loadout pet";
+        return false;
+    }
+    teams[0].TrapAbility = battlePetMgr->GetTrapAbility();
+
+    uint8 enemyBreeds[3] = { 0, 0, 0 };
+    uint8 enemyCount = 0;
+    for (uint8 i = 0; i < team->PetCount; ++i)
+    {
+        BattlePetNpcTeamPet const& member = team->Pets[i];
+        uint64 const petId = (uint64(1) << 40) + uint64(tamer.GetGUIDLow()) * 4 + i;
+        enemyBreeds[enemyCount] = member.Breed;
+        teams[1].Pets[enemyCount++] = Skyfire::BattlePetPackets::BuildWildInitialUpdatePetData(
+            petId, member.Species, member.Level, member.Quality, member.Breed);
+    }
+    teams[1].PetCount = enemyCount;
+    teams[1].FrontPet = 0;
+    teams[1].TrapStatus = PET_BATTLE_TRAP_STATUS_UNAVAILABLE;
+    teams[1].OwnerGuid = tamer.GetGUID();
+
+    G3D::Vector3 const center((player.GetPositionX() + tamer.GetPositionX()) * 0.5f,
+        (player.GetPositionY() + tamer.GetPositionY()) * 0.5f,
+        (player.GetPositionZ() + tamer.GetPositionZ()) * 0.5f);
+    float dx = tamer.GetPositionX() - player.GetPositionX();
+    float dy = tamer.GetPositionY() - player.GetPositionY();
+    float length = std::sqrt(dx * dx + dy * dy);
+    if (length < 0.1f)
+    {
+        dx = std::cos(player.GetOrientation());
+        dy = std::sin(player.GetOrientation());
+        length = 1.0f;
+    }
+    dx /= length;
+    dy /= length;
+    G3D::Vector3 positions[2] = {
+        G3D::Vector3(center.x - dx * 3.0f, center.y - dy * 3.0f, center.z),
+        G3D::Vector3(center.x + dx * 3.0f, center.y + dy * 3.0f, center.z) };
+    float const orientation = Skyfire::BattlePetPackets::CalculateBattlePetFacing(center, positions);
+
+    PlacePlayerForPetBattle(player, positions[0], positions[1]);
+
+    WorldPacket finalizeLocation = Skyfire::BattlePetPackets::BuildFinalizeLocationPacket(
+        center, positions, true, orientation, false, 0);
+    player.SendDirectMessage(&finalizeLocation);
+
+    Skyfire::BattlePetPackets::InitialUpdatePetData const& allyFront = teams[0].Pets[teams[0].FrontPet];
+    Skyfire::BattlePetPackets::InitialUpdatePetData const& enemyFront = teams[1].Pets[0];
+    battlePetMgr->StartWildPetBattle(tamer.GetGUID(),
+        allyFront.Id, allyFront.MaxHealth, allyFront.CurrentHealth,
+        enemyFront.Id, enemyFront.MaxHealth, enemyFront.CurrentHealth,
+        uint16(enemyFront.Species), uint8(enemyFront.Level), uint8(enemyFront.Quality), enemyBreeds[0],
+        teams[0].FrontPet);
+    battlePetMgr->SetActivePetBattleTamer(tamer.GetEntry());
+    for (uint8 i = 1; i < enemyCount; ++i)
+        battlePetMgr->AddActivePetBattleEnemyReservePet(teams[1].Pets[i].Id, uint16(teams[1].Pets[i].Species),
+            uint8(teams[1].Pets[i].Level), uint8(teams[1].Pets[i].Quality), enemyBreeds[i],
+            teams[1].Pets[i].MaxHealth, teams[1].Pets[i].CurrentHealth);
+    SetActivePetBattleTeam(*battlePetMgr, teams[0]);
+    battlePetMgr->SelectActivePetBattleFrontPet(teams[0].FrontPet);
+    teams[0].TrapStatus = battlePetMgr->GetActivePetBattleTrapStatus();
+
+    WorldPacket initialUpdate = Skyfire::BattlePetPackets::BuildInitialUpdatePacket(
+        ObjectGuid(0), teams, 2, false, tamer.GetEntry(), tamer.GetDisplayId());
+    player.SendDirectMessage(&initialUpdate);
+
+    // Same as the wild start: the client confirms the front pet itself only when it is the first
+    // loadout pet; with a dead first pet it waits forever, so open the first round from here.
+    if (teams[0].FrontPet != 0)
+    {
+        ActivePetBattle const& startedBattle = battlePetMgr->GetActivePetBattle();
+        WorldPacket firstRound = Skyfire::BattlePetPackets::BuildFirstRoundPacket(
+            startedBattle.RoundID, startedBattle.AllyFrontPet, startedBattle.EnemyFrontPet,
+            battlePetMgr->GetActivePetBattleTrapStatus(), PET_BATTLE_TRAP_STATUS_UNAVAILABLE);
+        player.SendDirectMessage(&firstRound);
+    }
+
+    result = "tamer battle started";
+    return true;
 }

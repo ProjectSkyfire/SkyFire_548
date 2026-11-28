@@ -816,6 +816,10 @@ void BattlePetMgr::DespawnResolvedWildPetBattleWorldObject()
         || !m_activePetBattle.IsFinished() || m_activePetBattle.IsPvP())
         return;
 
+    // A tamer is a quest NPC: it stays alive and keeps its respawn timer after any result.
+    if (m_activePetBattle.IsTamer())
+        return;
+
     if (!m_activePetBattle.Captured && m_activePetBattle.Winner != PET_BATTLE_WINNER_ALLY)
         return;
 
@@ -883,6 +887,13 @@ uint8 BattlePetMgr::GetActivePetBattleTrapStatus() const
 {
     if (m_activePetBattle.IsPvP())
         return PET_BATTLE_TRAP_STATUS_UNAVAILABLE;
+
+    if (m_activePetBattle.IsTamer())
+        return PET_BATTLE_TRAP_STATUS_NPC_PET;
+
+    // Elite species (the Beasts of Fable) are fought wild but can't be trapped.
+    if (m_activePetBattle.EnemySpecies && BattlePetSpeciesHasFlag(m_activePetBattle.EnemySpecies, BATTLE_PET_FLAG_ELITE))
+        return PET_BATTLE_TRAP_STATUS_NPC_PET;
 
     if (!GetTrapAbility())
         return PET_BATTLE_TRAP_STATUS_UNAVAILABLE;
@@ -966,9 +977,15 @@ bool BattlePetMgr::ApplyBattlePetAbilityTurnExchangeInput(uint32 roundId,
     uint32 allyIncomingDamageReduction, uint8 allyIncomingDamageReductionRounds,
     uint32 enemyIncomingDamageReduction, uint8 enemyIncomingDamageReductionRounds,
     Skyfire::BattlePetPackets::BattlePetRoundResult& round,
-    Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound)
+    Skyfire::BattlePetPackets::BattlePetFinalRound* finalRound,
+    uint8 enemyAbilitySlot, uint32 enemyAbilityId, uint32 enemyHeal)
 {
     if (!allyAbilityId || !turnIndex || allyAbilitySlot >= BATTLE_PET_ABILITY_SLOT_COUNT)
+        return false;
+
+    // Refused before the effect loop: heals, weather and auras below change the battle state even
+    // though the exchange itself would refuse the input while a front pet choice is pending.
+    if (m_activePetBattle.WaitingForAllyFrontPet || m_activePetBattle.IsWaitingForFrontPetConfirm())
         return false;
 
     uint8 const turnCount = BattlePetAbilityTurnCount(allyAbilityId);
@@ -1139,6 +1156,7 @@ bool BattlePetMgr::ApplyBattlePetAbilityTurnExchangeInput(uint32 roundId,
     ActivePetBattleTurn enemyTurn;
     if (!m_activePetBattle.ApplyAbilityExchange(roundId, totalDamage, appliedEnemyDamage,
         allyAbilitySlot, allyAbilityId, cooldownToApply, remainingLockdown, nextTurnIndex,
+        enemyAbilitySlot, enemyAbilityId, BattlePetAbilityCooldown(enemyAbilityId),
         allyTurn, enemyTurn))
         return false;
 
@@ -1175,6 +1193,12 @@ bool BattlePetMgr::ApplyBattlePetAbilityTurnExchangeInput(uint32 roundId,
                 enemyTurn.CasterPet, enemyTurn.TargetPet, int32(enemyTurn.RemainingHealth),
                 enemyAbilityEffectId ? enemyAbilityEffectId : 0, uint16(round.Effects.size() + 1)));
         }
+        else if (enemyHeal)
+        {
+            round.Effects.push_back(Skyfire::BattlePetPackets::BuildDamageEffect(
+                enemyTurn.CasterPet, enemyTurn.CasterPet, int32(m_activePetBattle.ApplyEnemyHeal(enemyHeal)),
+                enemyAbilityEffectId, uint16(round.Effects.size() + 1)));
+        }
         else if (enemyAbilityEffectId)
         {
             round.Effects.push_back(Skyfire::BattlePetPackets::BuildMissEffect(
@@ -1207,6 +1231,18 @@ bool BattlePetMgr::ApplyBattlePetSwapInput(uint32 roundId, uint8 newFrontPet,
     Skyfire::BattlePetPackets::BattlePetRoundResult& round)
 {
     ActivePetBattleTurn const turn = m_activePetBattle.ApplySwapRound(roundId, newFrontPet);
+    if (!turn.Accepted || !turn.HasRoundResult)
+        return false;
+
+    round = Skyfire::BattlePetPackets::BuildRoundResultFromTurn(turn, 0);
+    ApplyActivePetBattleRoundState(round);
+    return true;
+}
+
+bool BattlePetMgr::ApplyBattlePetEnemyReplacementInput(uint32 roundId, uint8 allyFrontPet,
+    Skyfire::BattlePetPackets::BattlePetRoundResult& round)
+{
+    ActivePetBattleTurn const turn = m_activePetBattle.ApplyEnemyReplacementRound(roundId, allyFrontPet);
     if (!turn.Accepted || !turn.HasRoundResult)
         return false;
 
@@ -1293,6 +1329,15 @@ bool BattlePetMgr::ApplyBattlePetTrapInput(uint32 roundId, uint32 trapAbilityEff
 void BattlePetMgr::ApplyActivePetBattleRoundState(
     Skyfire::BattlePetPackets::BattlePetRoundResult& round) const
 {
+    // The client opens the pet selection exactly while the server waits for a new front pet, also
+    // with one pet left. A server-side swap-in of the last pet left the client waiting forever,
+    // so the pet always comes in through the client's swap input. After an enemy
+    // death the client waits for a front pet too (the free swap); without the flag it shows no picker.
+    if (m_activePetBattle.WaitingForAllyFrontPet || m_activePetBattle.IsWaitingForFrontPetConfirm())
+        round.InputFlags[0] |= Skyfire::BattlePetPackets::BATTLE_PET_ROUND_INPUT_FLAG_SELECT_NEW_FRONT_PET;
+    else
+        round.InputFlags[0] &= ~Skyfire::BattlePetPackets::BATTLE_PET_ROUND_INPUT_FLAG_SELECT_NEW_FRONT_PET;
+
     round.TrapStatus[0] = GetActivePetBattleTrapStatus();
     round.TrapStatus[1] = PET_BATTLE_TRAP_STATUS_UNAVAILABLE;
 }
@@ -1337,11 +1382,14 @@ uint16 BattlePetMgr::RewardActivePetBattlePet(BattlePet* battlePet, bool awardEx
     return battlePet->AddExperience(reward);
 }
 
-// A won wild pet battle pays the character the experience of one creature kill at its own level.
+// A won wild or tamer pet battle pays the character the experience of one creature kill at its own level.
 // The amount is not published for 5.4.8; players reported about one mob kill per win.
 void BattlePetMgr::RewardPlayerExperience(uint8 highestAllyLevel)
 {
-    uint8 const highestEnemyLevel = m_activePetBattle.EnemyLevel;
+    // A tamer's front pet at the end is not always its highest; wild battles store their one pet in the team too.
+    uint8 highestEnemyLevel = 0;
+    for (uint8 enemy = 0; enemy < m_activePetBattle.EnemyTeamSize; ++enemy)
+        highestEnemyLevel = std::max(highestEnemyLevel, m_activePetBattle.EnemyTeam[enemy].Level);
 
     if (!BattlePetBattlePaysPlayerExperience(highestAllyLevel, highestEnemyLevel))
         return;
@@ -1350,6 +1398,34 @@ void BattlePetMgr::RewardPlayerExperience(uint8 highestAllyLevel)
     uint32 const baseGain = Skyfire::XP::BaseGain(playerLevel, playerLevel,
         GetContentLevelsForMapAndZone(m_owner->GetMapId(), m_owner->GetZoneId()));
     m_owner->GiveXP(uint32(baseGain * sWorld->getRate(Rates::RATE_XP_PET_BATTLE_PLAYER)), NULL);
+}
+
+// Tamer battles pay once per defeated enemy pet, at that pet's level, split between the living
+// ally pets that faced it. 5.4.8's exact sharing rule is unverified; this is the retail-style split.
+uint16 BattlePetMgr::RewardTamerBattlePet(BattlePet* battlePet, uint8 allyIndex, bool awardExperience)
+{
+    if (!awardExperience || !battlePet || battlePet->GetLevel() >= BATTLE_PET_MAX_LEVEL
+        || !m_activePetBattle.IsAllyPetAlive(allyIndex))
+        return 0;
+
+    uint32 total = 0;
+    for (uint8 enemy = 0; enemy < m_activePetBattle.EnemyTeamSize; ++enemy)
+    {
+        uint8 const fought = m_activePetBattle.EnemyFoughtBy[enemy];
+        // only a defeated enemy pet pays; a win leaves none standing, the check keeps it true if the call site changes
+        if (!(fought & (1 << allyIndex)) || (enemy == m_activePetBattle.GetEnemyFrontIndex() ? m_activePetBattle.EnemyHealth : m_activePetBattle.EnemyTeam[enemy].Health) != 0)
+            continue;
+
+        uint8 sharers = 0;
+        for (uint8 ally = 0; ally < ActivePetBattle::BATTLE_PET_MAX_ACTIVE_TEAM_PETS; ++ally)
+            if ((fought & (1 << ally)) && m_activePetBattle.IsAllyPetAlive(ally))
+                ++sharers;
+
+        total += BattlePetExperienceReward(battlePet->GetLevel(), m_activePetBattle.EnemyTeam[enemy].Level, sharers);
+    }
+
+    float const scaled = total * sWorld->getRate(Rates::RATE_XP_PET_BATTLE_TAMER);
+    return battlePet->AddExperience(uint16(std::max(0.0f, std::min<float>(scaled, 65535.0f))));
 }
 
 uint32 BattlePetMgr::GetUniqueBattlePetSpeciesCount() const
@@ -1377,6 +1453,7 @@ BattlePetAchievementContext BattlePetMgr::BuildActivePetBattleAchievementContext
     context.Quality = quality;
     context.Source = m_activePetBattle.GetAchievementSource();
     context.HealthPercent = BattlePetHealthPercent(m_activePetBattle.EnemyHealth, m_activePetBattle.EnemyMaxHealth);
+    context.TamerEntry = m_activePetBattle.TamerEntry;
     context.Won = won;
     context.Captured = captured;
     return context;
@@ -1465,13 +1542,19 @@ void BattlePetMgr::UpdateFinishedPetBattleAchievements()
 
     m_owner->KilledMonsterCredit(BATTLE_PET_QUEST_CREDIT_WIN);
 
+    if (m_activePetBattle.IsTamer())
+        m_owner->QuestObjectiveSatisfy(m_activePetBattle.TamerEntry, 1, QUEST_OBJECTIVE_TYPE_PET_BATTLE_TAMER, m_activePetBattle.EnemyGUID);
+    else if (!m_activePetBattle.IsPvP() && m_activePetBattle.EnemySpecies
+        && BattlePetSpeciesHasFlag(m_activePetBattle.EnemySpecies, BATTLE_PET_FLAG_ELITE))
+        m_owner->QuestObjectiveSatisfy(m_activePetBattle.EnemySpecies, 1, QUEST_OBJECTIVE_TYPE_PET_BATTLE_ELITE, m_activePetBattle.EnemyGUID);
+
     BattlePetAchievementContext const context = BuildActivePetBattleAchievementContext(
         m_activePetBattle.EnemySpecies, m_activePetBattle.EnemyQuality, true, false);
     if (!context.IsValid())
         return;
 
     m_owner->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_PET_BATTLE,
-        context.Species, context.FamilyMask, context.Payload());
+        context.Species, context.FamilyMask, context.CriteriaMiscValue3());
 }
 
 bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
@@ -1496,8 +1579,9 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
         highestAllyLevel = std::max(highestAllyLevel, initialLevel);
         bool const petEarnedExperience = awardExperience && i == m_activePetBattle.AllyFrontPet
             && m_activePetBattle.AllyTeam[i].Health != 0;
-        uint16 const awardedXp = RewardActivePetBattlePet(
-            battlePet, petEarnedExperience);
+        uint16 const awardedXp = m_activePetBattle.IsTamer()
+            ? RewardTamerBattlePet(battlePet, i, awardExperience)
+            : RewardActivePetBattlePet(battlePet, petEarnedExperience);
         uint8 const finalLevel = battlePet ? battlePet->GetLevel() : initialLevel;
         uint16 const finalXp = battlePet ? battlePet->GetXp() : 0;
 
@@ -1529,14 +1613,19 @@ bool BattlePetMgr::BuildActivePetBattleFinalRound(bool abandoned,
 
     UpdateFinishedPetBattleAchievements();
 
-    Skyfire::BattlePetPackets::BattlePetFinalRoundPet enemyPet;
-    enemyPet.Pboid = m_activePetBattle.EnemyFrontPet;
-    enemyPet.RemainingHealth = m_activePetBattle.EnemyHealth;
-    enemyPet.MaxHealth = m_activePetBattle.EnemyMaxHealth;
-    enemyPet.SeenAction = true;
-    enemyPet.Captured = captured || m_activePetBattle.Captured;
-    enemyPet.Caged = enemyPet.Captured;
-    pets.push_back(enemyPet);
+    uint8 const enemyFrontIndex = m_activePetBattle.GetEnemyFrontIndex();
+    for (uint8 i = 0; i < m_activePetBattle.EnemyTeamSize; ++i)
+    {
+        bool const isFront = i == enemyFrontIndex;
+        Skyfire::BattlePetPackets::BattlePetFinalRoundPet enemyPet;
+        enemyPet.Pboid = isFront ? m_activePetBattle.EnemyFrontPet : uint8(ActivePetBattle::BATTLE_PET_ENEMY_PBOID_BASE + i);
+        enemyPet.RemainingHealth = isFront ? m_activePetBattle.EnemyHealth : m_activePetBattle.EnemyTeam[i].Health;
+        enemyPet.MaxHealth = isFront ? m_activePetBattle.EnemyMaxHealth : m_activePetBattle.EnemyTeam[i].MaxHealth;
+        enemyPet.SeenAction = true;
+        enemyPet.Captured = isFront && (captured || m_activePetBattle.Captured);
+        enemyPet.Caged = enemyPet.Captured;
+        pets.push_back(enemyPet);
+    }
 
     finalRound = Skyfire::BattlePetPackets::BuildFinalRoundState(
         m_activePetBattle.Winner == PET_BATTLE_WINNER_ALLY, abandoned, pets);

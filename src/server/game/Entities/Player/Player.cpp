@@ -12135,6 +12135,10 @@ void Player::PrepareGossipMenu(WorldObject* source, uint32 menuId /*= 0*/, bool 
                     if (getClass() != CLASS_HUNTER)
                         canTalk = false;
                     break;
+                case GOSSIP_OPTION_PET_BATTLE:
+                    if (!HasSpell(SPELL_BATTLE_PET_TRAINING_PASSIVE) || !sObjectMgr->GetBattlePetNpcTeam(creature->GetEntry()))
+                        canTalk = false;
+                    break;
                 case GOSSIP_OPTION_QUESTGIVER:
                     canTalk = false;
                     break;
@@ -12331,6 +12335,15 @@ void Player::OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 men
         case GOSSIP_OPTION_STABLEPET:
             GetSession()->SendStablePet(guid);
             break;
+        case GOSSIP_OPTION_PET_BATTLE:
+        {
+            PlayerTalkClass->SendCloseGossip();
+            Creature* tamer = source->ToCreature();
+            std::string result;
+            if (tamer && HasSpell(SPELL_BATTLE_PET_TRAINING_PASSIVE))
+                BattlePetStartNpcBattle(*this, *tamer, result);
+            break;
+        }
         case GOSSIP_OPTION_TRAINER:
             GetSession()->SendTrainerList(guid, menuItemData->TrainerSkill);
             break;

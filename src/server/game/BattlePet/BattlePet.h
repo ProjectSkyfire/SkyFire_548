@@ -21,7 +21,8 @@ enum BattlePetAchievementSource
 {
     BATTLE_PET_ACHIEVEMENT_SOURCE_WILD = 0,
     BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_DUEL = 1,
-    BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_MATCHMAKING = 2
+    BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_MATCHMAKING = 2,
+    BATTLE_PET_ACHIEVEMENT_SOURCE_TAMER = 3
 };
 
 inline char const* BattlePetAchievementSourceName(BattlePetAchievementSource source)
@@ -34,6 +35,8 @@ inline char const* BattlePetAchievementSourceName(BattlePetAchievementSource sou
             return "pvp-duel";
         case BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_MATCHMAKING:
             return "pvp-matchmaking";
+        case BATTLE_PET_ACHIEVEMENT_SOURCE_TAMER:
+            return "tamer";
         default:
             return "unknown";
     }
@@ -74,7 +77,8 @@ inline uint8 BattlePetAchievementCriteriaSource(uint32 payload)
 
 inline bool BattlePetAchievementCriteriaIsPvp(uint32 payload)
 {
-    return BattlePetAchievementCriteriaSource(payload) != BATTLE_PET_ACHIEVEMENT_SOURCE_WILD;
+    uint8 const source = BattlePetAchievementCriteriaSource(payload);
+    return source == BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_DUEL || source == BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_MATCHMAKING;
 }
 
 inline bool BattlePetAchievementCriteriaIsMatchmaking(uint32 payload)
@@ -94,13 +98,16 @@ struct BattlePetAchievementContext
     uint8 Quality = 0;
     BattlePetAchievementSource Source = BATTLE_PET_ACHIEVEMENT_SOURCE_WILD;
     uint8 HealthPercent = 0;
+    uint32 TamerEntry = 0;
     bool Won = false;
     bool Captured = false;
 
     bool IsValid() const { return Species != 0; }
-    bool IsPvp() const { return Source != BATTLE_PET_ACHIEVEMENT_SOURCE_WILD; }
+    bool IsPvp() const { return Source == BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_DUEL || Source == BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_MATCHMAKING; }
     bool IsMatchmaking() const { return Source == BATTLE_PET_ACHIEVEMENT_SOURCE_PVP_MATCHMAKING; }
     uint32 Payload() const { return BattlePetAchievementCriteriaPayload(Quality, Source, HealthPercent); }
+    // The payload helpers read the low 32 bits; the upper half names the tamer for condition 81.
+    uint64 CriteriaMiscValue3() const { return (uint64(TamerEntry) << 32) | Payload(); }
 };
 
 /*
@@ -314,6 +321,7 @@ uint32 BattlePetAbilityBasePoints(uint32 abilityId);
 uint32 BattlePetAbilityBasePointsForTurn(uint32 abilityId, uint8 turnIndex);
 uint32 BattlePetScalePointsFromStats(uint32 points, uint16 power, uint8 level);
 uint32 BattlePetDamageFromStats(uint32 abilityId, uint16 power, uint8 level);
+uint32 BattlePetHealFromStats(uint32 abilityId, uint16 power, uint8 level);
 uint32 BattlePetDamageFromStatsForTurn(uint32 abilityId, uint8 turnIndex, uint16 power, uint8 level);
 uint16 BattlePetPowerFromBattleState(uint16 species, uint8 level, uint8 quality, uint8 breed);
 uint32 BattlePetInputDamageForAbility(uint32 abilityId, BattlePet const* caster);

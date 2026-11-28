@@ -2027,12 +2027,19 @@ Rate.XP.Explore = 1
 
 #
 #    Rate.XP.PetBattlePlayer
-#        Description: Multiplier for the character experience a won wild pet battle pays.
+#        Description: Multiplier for the character experience a won wild or tamer pet battle pays.
 #                     1 pays the experience of one creature kill at the character's own level.
 #        Default:     1
 #
 
 Rate.XP.PetBattlePlayer = 1
+
+#    Rate.XP.PetBattleTamer
+#        Description: Multiplier for the experience battle pets earn from NPC tamer battles.
+#        Default:     1
+#
+
+Rate.XP.PetBattleTamer = 1
 
 #
 #    Rate.RepairCost

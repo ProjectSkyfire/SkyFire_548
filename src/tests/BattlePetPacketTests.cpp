@@ -1603,6 +1603,176 @@ namespace
         return passed;
     }
 
+    bool TestActivePetBattleEnemyTeamBringsInNextPetAndWinsWhenAllDead()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 500, 500, 0x300, 100, 100, 42, 5, ITEM_QUALITY_RARE, 8);
+        battle.AddEnemyReservePet(0x301, 43, 6, ITEM_QUALITY_UNCOMMON, 3, 120, 120);
+        battle.AddEnemyReservePet(0x302, 44, 7, ITEM_QUALITY_RARE, 4, 140, 140);
+
+        passed &= Expect(battle.EnemyTeamSize == 3 && battle.EnemyFrontPet == 3,
+            "Enemy team should hold three pets with the first one at the front");
+
+        ActivePetBattleTurn allyTurn;
+        ActivePetBattleTurn enemyTurn;
+        battle.ApplyAbilityExchange(battle.RoundID, 100, 10, allyTurn, enemyTurn);
+        passed &= Expect(!battle.IsFinished() && allyTurn.TargetDied,
+            "Killing the front enemy pet should not end the battle while others live");
+        passed &= Expect(!enemyTurn.Accepted,
+            "A dead enemy front pet should not act in the round it died");
+        passed &= Expect(battle.EnemyFrontPet == 4 && battle.EnemyPetID == 0x301 && battle.EnemySpecies == 43
+            && battle.EnemyHealth == 120 && battle.EnemyMaxHealth == 120 && battle.EnemyLevel == 6,
+            "The next living enemy pet should become the front pet and fill the scalar fields");
+        passed &= Expect(!allyTurn.HasEnemySwap() && battle.IsWaitingForFrontPetConfirm(),
+            "The death round should not report the enemy swap but wait for the front pet confirmation");
+        passed &= Expect(!battle.ApplyAbilityExchange(battle.RoundID, 100, 10, allyTurn, enemyTurn),
+            "No ability round should be played before the confirmation");
+
+        ActivePetBattleTurn replacement = battle.ApplyEnemyReplacementRound(battle.RoundID, battle.AllyFrontPet);
+        passed &= Expect(replacement.Accepted && replacement.EnemySwapFrom == 3 && replacement.EnemySwapTo == 4
+            && replacement.EffectKind != ACTIVE_PET_BATTLE_TURN_EFFECT_SWAP && !battle.IsWaitingForFrontPetConfirm(),
+            "The confirmation round should report the enemy swap and keep the ally front pet");
+
+        battle.ApplyAbilityExchange(battle.RoundID, 500, 0, allyTurn, enemyTurn);
+        battle.ApplyEnemyReplacementRound(battle.RoundID, battle.AllyFrontPet);
+        passed &= Expect(!battle.IsFinished() && battle.EnemyFrontPet == 5 && battle.EnemyPetID == 0x302,
+            "The third enemy pet should come in after the second dies");
+
+        battle.ApplyAbilityExchange(battle.RoundID, 500, 0, allyTurn, enemyTurn);
+        passed &= Expect(battle.IsFinished() && battle.Winner == PET_BATTLE_WINNER_ALLY && !allyTurn.HasEnemySwap(),
+            "The ally should win once every enemy pet is dead");
+
+        return passed;
+    }
+
+    bool TestActivePetBattleEnemyCooldownsTickPerPetAndSlot()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 5000, 5000, 0x300, 1000, 1000, 42, 5, ITEM_QUALITY_RARE, 8);
+        battle.AddEnemyReservePet(0x301, 43, 6, ITEM_QUALITY_UNCOMMON, 3, 120, 120);
+
+        ActivePetBattleTurn allyTurn;
+        ActivePetBattleTurn enemyTurn;
+        passed &= Expect(battle.IsEnemyAbilityUsable(0, 1) && battle.IsEnemyAbilityUsable(1, 1),
+            "Every enemy ability should start usable");
+
+        passed &= Expect(battle.ApplyAbilityExchange(battle.RoundID, 10, 10, 0xFF, 0, 0, 0, 0, 1, 777, 3,
+            allyTurn, enemyTurn) && enemyTurn.Accepted,
+            "The enemy should act in the round it casts a cooldown ability");
+        passed &= Expect(!battle.IsEnemyAbilityUsable(0, 1) && battle.GetEnemyAbilityCooldown(0, 1) == 2,
+            "A cooldown 3 cast should leave 2 rounds after the casting round ends");
+        passed &= Expect(battle.IsEnemyAbilityUsable(0, 0) && battle.IsEnemyAbilityUsable(0, 2),
+            "Other slots of the same pet should stay usable");
+        passed &= Expect(battle.IsEnemyAbilityUsable(1, 1),
+            "The same slot of another enemy pet should stay usable");
+        passed &= Expect(allyTurn.Cooldowns.empty() && enemyTurn.Cooldowns.empty(),
+            "Enemy cooldowns should not be reported to the client");
+
+        battle.ApplyAbilityExchange(battle.RoundID, 10, 10, allyTurn, enemyTurn);
+        passed &= Expect(!battle.IsEnemyAbilityUsable(0, 1) && battle.GetEnemyAbilityCooldown(0, 1) == 1,
+            "The cooldown should tick down once per round");
+
+        battle.ApplyAbilityExchange(battle.RoundID, 10, 10, allyTurn, enemyTurn);
+        passed &= Expect(battle.IsEnemyAbilityUsable(0, 1) && battle.GetEnemyAbilityCooldown(0, 1) == 0,
+            "The ability should be usable again after the cooldown ran out");
+
+        return passed;
+    }
+
+    bool TestActivePetBattleEnemyCooldownSkippedWhenEnemyDoesNotAct()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 500, 500, 0x300, 100, 100, 42, 5, ITEM_QUALITY_RARE, 8);
+
+        ActivePetBattleTurn allyTurn;
+        ActivePetBattleTurn enemyTurn;
+        battle.ApplyAbilityExchange(battle.RoundID, 100, 10, 0xFF, 0, 0, 0, 0, 0, 777, 3, allyTurn, enemyTurn);
+        passed &= Expect(!enemyTurn.Accepted && battle.IsEnemyAbilityUsable(0, 0),
+            "An enemy killed before it acts should not start a cooldown");
+
+        ActivePetBattle second;
+        second.StartWild(0x100, 0x200, 500, 450, 0x300, 700, 620);
+        ActivePetBattleTurn turn = second.ApplyEnemyAbilityRound(0, 10, 2, 888, 4);
+        passed &= Expect(turn.Accepted && second.GetEnemyAbilityCooldown(0, 2) == 3 && !second.IsEnemyAbilityUsable(0, 2),
+            "A standalone enemy ability round should start the enemy cooldown");
+
+        return passed;
+    }
+
+    bool TestActivePetBattleTamerPicksEnemyAbility()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 500, 500, 0x300, 100, 100, 42, 5, ITEM_QUALITY_RARE, 8);
+        ActivePetBattleEnemyOption options[3];
+        options[0].AbilityId = 10; options[0].Damage = 20;
+        options[1].AbilityId = 11; options[1].Damage = 40;
+        options[2].AbilityId = 12; options[2].Heal = 30;
+
+        passed &= Expect(battle.ChooseEnemyAbilitySlot(options) == 0,
+            "A wild enemy should keep slot 0");
+
+        battle.TamerBattle = true;
+        passed &= Expect(battle.ChooseEnemyAbilitySlot(options) == 1,
+            "A tamer should pick the strongest damage ability at full health");
+
+        battle.ApplyEnemyAbilityRound(battle.RoundID, 0, 1, 11, 5);
+        passed &= Expect(battle.ChooseEnemyAbilitySlot(options) == 0,
+            "A tamer should skip an ability on cooldown");
+
+        battle.EnemyHealth = 34;
+        passed &= Expect(battle.ChooseEnemyAbilitySlot(options) == 2,
+            "A tamer below 35 percent health should pick a usable heal");
+
+        battle.ApplyEnemyAbilityRound(battle.RoundID, 0, 2, 12, 5);
+        passed &= Expect(battle.ChooseEnemyAbilitySlot(options) == 0,
+            "A tamer with its heal on cooldown should fall back to damage");
+
+        battle.EnemyHealth = 35;
+        passed &= Expect(battle.ApplyEnemyHeal(100) == 100,
+            "An enemy heal should stop at max health");
+
+        battle.ApplyEnemyAbilityRound(battle.RoundID, 0, 0, 10, 5);
+        battle.ApplyEnemyAbilityRound(battle.RoundID, 0, 1, 11, 5);
+        passed &= Expect(!battle.IsEnemyAbilityUsable(0, 0) && battle.ChooseEnemyAbilitySlot(options) == 0,
+            "A tamer with every ability on cooldown should still act with slot 0");
+
+        ActivePetBattleEnemyOption none[3];
+        passed &= Expect(battle.ChooseEnemyAbilitySlot(none) == 0,
+            "A tamer with no abilities known should fall back to slot 0");
+
+        return passed;
+    }
+
+    bool TestActivePetBattleWildEnemyTeamStaysOnePet()
+    {
+        bool passed = true;
+
+        ActivePetBattle battle;
+        battle.StartWild(0x100, 0x200, 500, 500, 0x300, 100, 100, 42, 5, ITEM_QUALITY_RARE, 8);
+
+        ActivePetBattleTurn allyTurn;
+        ActivePetBattleTurn enemyTurn;
+        battle.ApplyAbilityExchange(battle.RoundID, 100, 10, allyTurn, enemyTurn);
+        passed &= Expect(battle.EnemyTeamSize == 1 && battle.IsFinished() && battle.Winner == PET_BATTLE_WINNER_ALLY
+            && !allyTurn.HasEnemySwap() && !enemyTurn.Accepted,
+            "A wild battle should end when its one enemy pet dies");
+
+        Skyfire::BattlePetPackets::InitialUpdateTeamData team;
+        Skyfire::BattlePetPackets::FillEnemyInitialUpdateTeam(battle, team);
+        passed &= Expect(team.PetCount == 1 && team.FrontPet == 0 && team.Pets[0].Species == 42,
+            "The enemy team packet data should hold the one wild pet");
+
+        return passed;
+    }
+
     bool TestActivePetBattleStartsWithHealthState()
     {
         bool passed = true;
@@ -2503,6 +2673,11 @@ int main()
     passed &= TestPetBattleFinalRoundHelperMarksWinnerAndAbandoned();
     passed &= TestPetBattleFinalRoundHelperPreservesMultiplePets();
     passed &= TestActivePetBattleStartsWithHealthState();
+    passed &= TestActivePetBattleEnemyTeamBringsInNextPetAndWinsWhenAllDead();
+    passed &= TestActivePetBattleWildEnemyTeamStaysOnePet();
+    passed &= TestActivePetBattleEnemyCooldownsTickPerPetAndSlot();
+    passed &= TestActivePetBattleEnemyCooldownSkippedWhenEnemyDoesNotAct();
+    passed &= TestActivePetBattleTamerPicksEnemyAbility();
     passed &= TestActivePetBattleSelectsInitialFrontPetWithoutAdvancingRound();
     passed &= TestActivePetBattleRejectsUnregisteredFrontPet();
     passed &= TestActivePetBattleRejectsDeadSwapPet();
